@@ -1,0 +1,119 @@
+#include "capability.h"
+
+#include "console.h"
+
+#define CAP_TABLE_SIZE 64u
+
+struct cap_entry {
+  bool active;
+  uint16_t generation;
+  struct cap_view view;
+};
+
+static struct cap_entry cap_table[CAP_TABLE_SIZE];
+
+static cap_handle_t make_handle(size_t slot, uint16_t generation) {
+  return ((uint32_t)generation << 16u) | (uint32_t)(slot + 1u);
+}
+
+static bool decode_handle(cap_handle_t handle, size_t *slot, uint16_t *generation) {
+  const uint32_t encoded_slot = handle & 0xffffu;
+  if (encoded_slot == 0u || encoded_slot > CAP_TABLE_SIZE) {
+    return false;
+  }
+  *slot = (size_t)(encoded_slot - 1u);
+  *generation = (uint16_t)(handle >> 16u);
+  return true;
+}
+
+void cap_init(void) {
+  for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {
+    cap_table[index].active = false;
+    cap_table[index].generation = 1u;
+  }
+}
+
+cap_handle_t cap_create(uint16_t owner_task, uint16_t object_type,
+                        uint32_t object_id, uint32_t rights) {
+  for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {
+    struct cap_entry *entry = &cap_table[index];
+    if (!entry->active) {
+      entry->active = true;
+      entry->view.owner_task = owner_task;
+      entry->view.object_type = object_type;
+      entry->view.object_id = object_id;
+      entry->view.rights = rights;
+      return make_handle(index, entry->generation);
+    }
+  }
+  return 0u;
+}
+
+bool cap_resolve(uint16_t owner_task, cap_handle_t handle,
+                 uint16_t required_type, uint32_t required_rights,
+                 struct cap_view *view) {
+  size_t slot;
+  uint16_t generation;
+  if (!decode_handle(handle, &slot, &generation)) {
+    return false;
+  }
+  const struct cap_entry *entry = &cap_table[slot];
+  if (!entry->active || entry->generation != generation ||
+      entry->view.owner_task != owner_task ||
+      entry->view.object_type != required_type ||
+      (entry->view.rights & required_rights) != required_rights) {
+    return false;
+  }
+  if (view != NULL) {
+    *view = entry->view;
+  }
+  return true;
+}
+
+bool cap_revoke(cap_handle_t handle) {
+  size_t slot;
+  uint16_t generation;
+  if (!decode_handle(handle, &slot, &generation)) {
+    return false;
+  }
+  struct cap_entry *entry = &cap_table[slot];
+  if (!entry->active || entry->generation != generation) {
+    return false;
+  }
+  entry->active = false;
+  ++entry->generation;
+  if (entry->generation == 0u) {
+    entry->generation = 1u;
+  }
+  return true;
+}
+
+size_t cap_active_count(void) {
+  size_t count = 0u;
+  for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {
+    if (cap_table[index].active) {
+      ++count;
+    }
+  }
+  return count;
+}
+
+void cap_dump(void) {
+  console_write("handle      owner type object rights\n");
+  for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {
+    const struct cap_entry *entry = &cap_table[index];
+    if (!entry->active) {
+      continue;
+    }
+    console_write_hex(make_handle(index, entry->generation));
+    console_write("  ");
+    console_write_dec(entry->view.owner_task);
+    console_write("     ");
+    console_write_dec(entry->view.object_type);
+    console_write("    ");
+    console_write_dec(entry->view.object_id);
+    console_write("      ");
+    console_write_hex(entry->view.rights);
+    console_write("\n");
+  }
+}
