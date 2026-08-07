@@ -10,12 +10,12 @@ S_SOURCES := $(wildcard src/*.S)
 OBJECTS := $(patsubst src/%.c,$(BUILD)/%.o,$(C_SOURCES)) \
            $(patsubst src/%.S,$(BUILD)/%.o,$(S_SOURCES))
 
-CFLAGS := -std=c11 -march=rv64imac -mabi=lp64 -mcmodel=medany \
+CFLAGS := -std=c11 -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany \
           -ffreestanding -fno-builtin -fno-stack-protector -fno-pic \
           -Wall -Wextra -Werror -Os -ffunction-sections -fdata-sections \
           -Iinclude
-ASFLAGS := -march=rv64imac -mabi=lp64 -mcmodel=medany -Iinclude
-LDFLAGS := -march=rv64imac -mabi=lp64 -mcmodel=medany -nostdlib -nostartfiles \
+ASFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -Iinclude
+LDFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -nostdlib -nostartfiles \
            -Wl,-T,link.ld -Wl,--gc-sections -Wl,--build-id=none
 
 .PHONY: all run smoke debug clean check-toolchain
