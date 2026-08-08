@@ -103,8 +103,18 @@ and stored at the registered remote logical path. An independent
 files; the completion marker readback matched. This completed preservation does
 not make the failed pilot a successful experiment.
 
-No successful pilot RUN-ID exists. An experiment run is incomplete until
-remote content/hash/size checks pass and the completion marker is present.
+Successful sampling pilot RUN-ID `20260808T113416Z-643414460-d6179399` is
+sealed with bundle SHA-256
+`231b83ef176a32e4e86811d756d8a0fe41b94a49a7baa2a955c6f3f09e05980b`.
+Its 2,010,279-byte local bundle was copied to the registered remote path;
+independent verification reported 0 differences and 100 matching files, with a
+completion marker present. An experiment run is incomplete until remote
+content/hash/size checks pass and the completion marker is present.
+
+To limit storage and future API-quota cost exposure, local analysis and sealing
+remain immediate but sync is milestone-driven. Successful pilot/full/rerun
+bundles and selected unique failures sync individually; redundant retries may
+queue locally for a later batch and remain incomplete until verified remotely.
 
 ## Results
 
@@ -139,23 +149,26 @@ candidate completed before the newly launched sampler emitted its first
 observation. These partial values diagnose sampler startup behavior only and
 must not be used for candidate or Gate performance claims.
 
+The corrected RUN-ID `20260808T113416Z-643414460-d6179399` completed all 90
+pilot records. All 90 semantic checksums and measurements were valid, all
+thermal observations were `Nominal`, all 90 raw files were non-empty and
+contained an explicit readiness/measurement boundary, and no record carried a
+failure. Measurement-window power sample counts ranged from 3 to 12 with a
+median of 5. Analysis correctly returned `not-applicable-pilot`, no claims, and
+a complete matrix; remote verification was the only unmet item before sync.
+
 ## Interpretation
 
-The minimum-window contract alone was insufficient because each candidate
-launched a new asynchronous powermetrics process without a readiness barrier.
-The sampler now waits for one valid CPU-power/thermal observation, excludes it
-from the aggregate, and only then begins the benchmark. The failed bundle is
-preserved as boundary evidence. The Gate remains open pending a new RUN-ID.
+The sampler-readiness correction resolved the observed startup failure and the
+pilot now supports proceeding to the full fixed-C data stage. This establishes
+measurement-contract behavior only; it does not establish latency or energy
+improvement, bounded-Experience quality, or Gate 1 success. The failed bundle
+remains preserved as boundary evidence and the Gate remains open.
 
 ## Limitations and next action
 
-Retry the pilot only after the machine returns to the pre-registered `Nominal`
-thermal state; do not silently admit `Moderate` measurements into the same
-experiment. The calibrated iteration counts derive from a short, unsealed host
-calibration and may still be insufficient under different candidate or thermal
-behavior.
 The policy-outcome production path, full retention comparison, calibration and
-coverage report, isolated TVM implementation, authorized powermetrics pilot,
-successful Google Drive-verified pilot, and independent rerun remain required.
-Apple powermetrics is estimated same-Mac evidence and cannot be
-extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another Mac.
+coverage report, full fixed-C dataset, isolated TVM implementation, and
+independent rerun remain required. Apple powermetrics is estimated same-Mac
+evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
+Mac.

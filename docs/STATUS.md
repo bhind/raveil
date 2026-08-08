@@ -89,13 +89,16 @@ Gate 1 measurement infrastructure is also implemented:
 - ignored local research bundles with SHA-256/size manifests, immutable sealing,
   rclone immutable copy/download verification, overwrite refusal, and a
   completion marker copied last;
+- a completed non-claim fixed-C sampler pilot with 90/90 valid semantic and
+  measurement records, all nominal thermal samples, minimum power-sample count
+  three, and a sealed Google Drive-verified bundle;
 - a TVM version-gating adapter boundary that intentionally does not execute
   MetaSchedule until the fixed-C pilot is stable.
 
 Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
-- a complete valid powermetrics fixed-C dataset or successful pilot run;
+- a complete Gate-evaluable powermetrics fixed-C dataset;
 - production of pre-registered cold/bounded/full-history PolicyOutcome records;
 - the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
