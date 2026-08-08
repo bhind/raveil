@@ -59,21 +59,10 @@ This is intentionally a simple baseline. It makes later coreset, ANN, learned en
 
 ## Next version gate
 
-There are now two independent next gates. Do not add an LLM or dedicated hardware next.
+This file defines the boundary of `v0.0000000000001`; it does not own future
+task or gate state. See [ROADMAP](ROADMAP.md) for exit conditions and
+[TODO](../TODO.md) for current actionable work.
 
-For Sonatine, move `init` into U-mode under Sv39 and make timer preemption switch between `init` and `idle`. Keep the current shell commands as acceptance probes.
-
-For Experience, replace ToyDaphnis with one real measurable backend while preserving the boundary:
-
-```python
-measure(context: Context, candidate: Candidate) -> Metrics
-```
-
-The smallest credible next experiment is a fixed set of CPU loop variants or a TVM MetaSchedule adapter across shape holdouts. Compare:
-
-1. cold prior;
-2. full-history nearest neighbor;
-3. bounded Experience;
-4. random or FIFO retention.
-
-Report HCR, measurement budget, negative-transfer rate, active-memory size, retrieval latency, and total cold-evidence size separately.
+The next implementation must preserve the existing trusted-baseline and
+`measure(context, candidate) -> Metrics` boundaries unless an accepted ADR
+supersedes them.
