@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import statistics
 
@@ -9,6 +10,7 @@ from .backend import ToyDaphnis
 from .experience import ExperienceStore
 from .model import Context, seed_candidates
 from .policy import NearestExperiencePolicy, Tuner, TuningResult
+from .experiment_runner import analyze_bundle, find_bundle, run_experiment, seal_bundle
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -100,6 +102,42 @@ def command_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_experiment_run(args: argparse.Namespace) -> int:
+    bundle, valid = run_experiment(Path(args.manifest), Path(args.artifact_root))
+    print(f"RUN-ID={bundle.run_id}")
+    print(f"local-bundle={bundle.path}")
+    if not valid:
+        print("run incomplete: fail-closed measurement failure")
+        return 2
+    print("run captured; analyze and seal before sync")
+    return 0
+
+
+def command_experiment_analyze(args: argparse.Namespace) -> int:
+    bundle = find_bundle(Path(args.artifact_root), args.run)
+    result = analyze_bundle(bundle)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+def command_experiment_seal(args: argparse.Namespace) -> int:
+    bundle = find_bundle(Path(args.artifact_root), args.run)
+    result = seal_bundle(bundle)
+    print(f"sealed RUN-ID={bundle.run_id} bundle-sha256={result['bundle_hash']}")
+    return 0
+
+
+def command_experiment_sync(args: argparse.Namespace) -> int:
+    bundle = find_bundle(Path(args.artifact_root), args.run)
+    remote = bundle.sync(
+        args.remote_root,
+        rclone=args.rclone,
+        config=Path(args.rclone_config) if args.rclone_config else None,
+    )
+    print(f"complete RUN-ID={bundle.run_id} remote={remote}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -123,6 +161,32 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("--experience", default="experience/local.jsonl")
     inspect.add_argument("--active-limit", type=int, default=64)
     inspect.set_defaults(handler=command_inspect)
+
+    experiment = subparsers.add_parser("experiment", help="run and preserve Gate experiments")
+    experiment_commands = experiment.add_subparsers(dest="experiment_command", required=True)
+
+    experiment_run = experiment_commands.add_parser("run", help="execute a versioned manifest")
+    experiment_run.add_argument("--manifest", required=True)
+    experiment_run.add_argument("--artifact-root", default="artifacts/research")
+    experiment_run.set_defaults(handler=command_experiment_run)
+
+    experiment_analyze = experiment_commands.add_parser("analyze", help="analyze a local run")
+    experiment_analyze.add_argument("--run", required=True)
+    experiment_analyze.add_argument("--artifact-root", default="artifacts/research")
+    experiment_analyze.set_defaults(handler=command_experiment_analyze)
+
+    experiment_seal = experiment_commands.add_parser("seal", help="seal an analyzed run")
+    experiment_seal.add_argument("--run", required=True)
+    experiment_seal.add_argument("--artifact-root", default="artifacts/research")
+    experiment_seal.set_defaults(handler=command_experiment_seal)
+
+    experiment_sync = experiment_commands.add_parser("sync", help="immutably copy and verify a sealed run")
+    experiment_sync.add_argument("--run", required=True)
+    experiment_sync.add_argument("--artifact-root", default="artifacts/research")
+    experiment_sync.add_argument("--remote-root", default="gdrive:Raveil/research-data")
+    experiment_sync.add_argument("--rclone", default="rclone")
+    experiment_sync.add_argument("--rclone-config")
+    experiment_sync.set_defaults(handler=command_experiment_sync)
     return parser
 
 

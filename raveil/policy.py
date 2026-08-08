@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 
-from .backend import ToyDaphnis
+from .backend import MeasurementBackend
 from .experience import ExperienceStore
 from .model import Candidate, Context, Metrics
 
@@ -66,7 +66,7 @@ class TuningResult:
 class Tuner:
     def __init__(
         self,
-        backend: ToyDaphnis,
+        backend: MeasurementBackend[Context, Candidate, Metrics],
         store: ExperienceStore,
         policy: NearestExperiencePolicy,
         candidates: tuple[Candidate, ...],

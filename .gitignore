@@ -3,6 +3,7 @@ __pycache__/
 .coverage
 .pytest_cache/
 experience/*.jsonl
+artifacts/
 dist/
 build/
 .codex/*

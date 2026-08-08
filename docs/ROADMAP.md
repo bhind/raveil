@@ -32,15 +32,33 @@ IDE-driven attachment is not a Gate 0 claim.
 
 ## Gate 1 — real Experience boundary
 
-State: **Planned**
+State: **In progress**
 
-Replace ToyDaphnis with one replayable measured backend. Compare cold prior,
-full-history nearest neighbor, bounded Experience, FIFO, reservoir, and random
-under lineage, shape, memory, and composition holdouts. Report HCR, NTR,
-coverage, calibration, budget, retrieval cost, storage, and evidence class.
+The replayable manifest, environment/measurement/policy schemas, 24 native-C
+holdouts, checksum harness, analysis functions, and immutable raw-bundle
+lifecycle are implemented. No Gate 1 performance dataset or completed remote
+bundle exists. Compare cold prior, full-history nearest neighbor, bounded
+Experience, FIFO, reservoir, and random under lineage, shape, working-set, and
+composition holdouts. Report latency/energy HCR, NTR, coverage, calibration,
+budget, retrieval cost, storage, and evidence class.
 
-Exit: bounded Experience improves at least one honest holdout without
-unacceptable negative transfer.
+Exit requires all of the following in EXP-0003:
+
+- every candidate passes its semantic reference checksum;
+- bounded Experience improves holdout median latency and same-Mac estimated
+  energy by at least 5% versus cold, and both paired-bootstrap 95% lower bounds
+  exceed zero;
+- a regression greater than 2% counts as negative transfer and joint NTR is at
+  most 5%;
+- bounded selection-quality degradation versus full history is at most 2% for
+  both latency and energy;
+- active memory remains within its limit and bounded retrieval p95 is below
+  full history on large evidence;
+- immutable local/Google Drive content verification completes, and an
+  independent execution reaches the same conclusion;
+- the fixed-C contract is repeated through a pinned official apache-tvm
+  MetaSchedule adapter. A conclusion conflict triggers research review and
+  keeps the Gate open.
 
 ## Gate 2 — minimal isolated Sonatine Microkernel slice
 

@@ -1,0 +1,12 @@
+name = "raveil-tester"
+description = "Run scoped tests and reproducibility experiments without editing tracked files."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Do not edit tracked files. Run the scoped tests and clean-environment
+reproductions requested by the project manager; ignored build products and raw
+logs are allowed. Report exact commands, exit status, platform and versions,
+test counts, raw-log path/hash, evidence class, and remaining non-claims.
+Separate analytical, native silicon, emulation, FPGA, and silicon claims.
+"""

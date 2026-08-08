@@ -7,11 +7,16 @@ Version: `0.0000000000001` (`10^-13`)
 
 ## Development workflow support
 
-Repository-scoped Codex explorer, reviewer, and verifier role definitions and
-two instruction-only skills are present. They govern development workflow only:
-they do not alter either executable seed, accepted architecture, or evidence
-class. Local IDEA/MCP endpoints and personal Codex runtime configuration remain
-ignored.
+Repository-scoped Project Manager, three Implementer, Tester, Performance
+Reviewer, Security Reviewer, Researcher, and Librarian role definitions are
+present. The read-only Librarian plus `raveil-context-librarian` skill rank a
+small task-specific reading packet instead of loading all project records.
+Task-governance, Gate 0 evidence, and remote-release skills remain available.
+These govern development workflow only; local IDEA/MCP endpoints and personal
+Codex runtime configuration remain ignored.
+
+Gate 0 is complete, so tracked work now uses a dedicated
+`<type>/<record-id>-<short-slug>` lowercase branch.
 
 ## Executable track A: Sonatine Microkernel RV64 seed
 
@@ -62,10 +67,34 @@ Python標準ライブラリだけで、次の閉ループがあります。
 - deterministic analytical ToyDaphnis backend;
 - cold/warm HCR benchmark。
 
-Not implemented:
+Gate 1 measurement infrastructure is also implemented:
+
+- versioned BenchmarkManifest, EnvironmentSignature, MeasurementRecord, and
+  PolicyOutcome Python contracts;
+- a common `MeasurementBackend.measure(context, candidate)` protocol;
+- a committed 24-holdout manifest separating lineage, shape, working set, and
+  operator composition;
+- a native C adapter for GEMM, GEMM+bias+ReLU, and two-stage MLP with
+  deterministic `int32` inputs, `int64` accumulation, and reference checksum;
+- baseline-first, seeded randomized candidate schedules with at least 15
+  repetitions;
+- fail-closed powermetrics CPU-power/thermal parsing and same-Mac relative
+  energy calculation;
+- paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
+  active-memory, equal-budget, and retrieval-p95 analysis functions;
+- `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
+- ignored local research bundles with SHA-256/size manifests, immutable sealing,
+  rclone immutable copy/download verification, overwrite refusal, and a
+  completion marker copied last;
+- a TVM version-gating adapter boundary that intentionally does not execute
+  MetaSchedule until the fixed-C pilot is stable.
+
+Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
-- real CPU/compiler/accelerator measurement;
+- an authorized powermetrics fixed-C dataset or sealed/remote-verified run;
+- production of pre-registered cold/bounded/full-history PolicyOutcome records;
+- the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
 - cross-hardware learned transfer;
 - multi-objective Pareto policy;
@@ -73,11 +102,20 @@ Not implemented:
 
 ## Verification status
 
-The current acceptance suite contains nine tests covering the Python loop,
-host-executable Sonatine Microkernel task/capability/IPC logic, and the isolated debug-build
-contract. On 2026-08-08 all nine
-passed on the user-operated macOS tree with Python 3.14.6 and Apple Clang
-21.0.0. Freestanding C sources were also syntax-checked by that suite.
+The original Gate 0 acceptance suite contains nine tests covering the Python
+loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
+isolated debug-build contract. The current host acceptance suite contains 26
+tests. On 2026-08-08 all 26 passed on macOS with Python 3.14.6; they include
+the Gate 1 manifest, native C checksums across all candidate families,
+baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
+parsing, statistics, run/analyze/seal lifecycle, bundle sync command boundaries,
+agent permissions,
+the existing Experience loop, and Sonatine host checks. This is implementation
+verification, not EXP-0003 performance evidence.
+
+On the same 2026-08-08 worktree, `scripts/ci-local.sh` passed: all 26 host
+tests, clean RV64 release/debug builds, DWARF checks, and QEMU smoke completed
+with exit status 0. The QEMU portion is emulation regression evidence only.
 
 The artifact-creating environment did not contain QEMU or a RISC-V cross
 compiler. On 2026-08-08, a user-operated Apple Silicon/Homebrew environment
@@ -117,3 +155,5 @@ IDE-driven attach is made.
   Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.
+- No Gate 1 latency or energy improvement is claimed. No real Google Drive
+  remote, independent repeat, or TVM comparison has been verified.

@@ -6,10 +6,16 @@ Last updated: 2026-08-08
 
 1. Read `AGENTS.md` and use `docs/README.md` to select relevant records.
 2. Inspect Git status and preserve unrelated user changes.
-3. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
+3. For tracked work, create a dedicated branch named
+   `<type>/<record-id>-<short-slug>` in lowercase kebab-case. Types are `feat`,
+   `fix`, `research`, `docs`, `test`, `build`, and `chore`; use the primary
+   lowercase `t-`, `exp-`, `adr-`, or `rfc-` ID. Example:
+   `research/exp-0003-gate1-measurement`. Read-only review does not require a
+   new branch.
+4. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
    architecture, roadmap, EXP, question, or log records selected by the
    document router for this task.
-4. Classify the proposed work as an implementation fact, decision, hypothesis,
+5. Classify the proposed work as an implementation fact, decision, hypothesis,
    experiment, or environment observation.
 
 ## During a change
@@ -24,21 +30,50 @@ Last updated: 2026-08-08
 ## Codex agents and skills
 
 The repository provides narrow Codex agents in `.codex/agents/` and reusable
-workflows in `.agents/skills/`. They support the existing evidence discipline;
-they do not make design or measurement decisions.
+workflows in `.agents/skills/`. Use `raveil-context-librarian` first for broad
+or unfamiliar tasks: it ranks a small reading packet from headings, search
+hits, code symbols, and tests without loading every record. The primary still
+reads the selected authoritative sections before editing.
 
-- The primary agent classifies work, owns tracked-file edits, integrates
-  results, and verifies the required records.
-- Use subagents only for independent exploration, verification, or review.
-  Keep them read-only unless a verifier needs ignored build/test artifacts.
-- Do not allow concurrent changes to a shared file set. The primary agent makes
-  the final documentation and evidence updates.
+- The Project Manager is primary and owns classification, assigned file
+  ranges, canonical records, functional requirements review, integration,
+  verification, and gate decisions.
+- Experience, Systems, and Measurement Implementers edit only explicitly
+  assigned, non-overlapping file ranges. They never edit canonical records.
+- The Tester edits no tracked file and records clean reproduction evidence.
+- Performance and Security Reviewers are read-only and may review their
+  separate risk surfaces in parallel after testing.
+- The Researcher writes only
+  `docs/research/reviews/<date>-<EXP>-<stage>.md`. Its memo is advice and never
+  changes STATUS, TODO, ROADMAP, OPEN_QUESTIONS, ADR, RFC, EXP, or logs.
+- The Librarian is read-only and owns context routing only. It does not decide
+  facts, identifiers, gates, or claims.
+- Do not allow concurrent changes to one coherent file set. The Project
+  Manager performs final integration and canonical record reconciliation.
 - `raveil-task-governance` applies the record and evidence checklist to any
   material Raveil change. `raveil-gate0-evidence` applies the specific
   Sonatine Microkernel Gate 0 collection procedure.
 - `raveil-remote-release` audits release readiness and permits remote tag and
   Release publication only after explicit owner approval. It never enables
   hosted CI/CD; current validation runs through `scripts/ci-local.sh`.
+
+### Research execution order
+
+1. Project Manager fixes Gate, T-IDs, acceptance criteria, and named file
+   ownership.
+2. Implementers work in parallel only when file ranges do not overlap.
+3. Tester reproduces in a clean environment.
+4. Performance and Security Reviewers inspect their risk surfaces in parallel.
+5. Researcher synthesizes evidence and findings into a non-authoritative memo.
+6. Project Manager reviews functional requirements, de-duplicates and assigns
+   issues, updates canonical records, and decides continue/pivot/pause/stop.
+
+Research review is milestone-driven, not scheduled automation. It is required
+at EXP planning, pilot completion, full-dataset completion, a native-C/TVM
+contradiction, a performance/security finding, and before a Gate decision. A
+memo contains the hypothesis, evidence inventory, data quality, problems,
+results, non-claims, implications, counterevidence, issue candidates, next
+goals, and a `continue`, `pivot`, `pause`, or `falsified` recommendation.
 
 ### Progress reviews
 
@@ -56,10 +91,10 @@ the user requests status or issue triage.
    design → OPEN_QUESTIONS/RFC; measurements → EXP; chronology → dated log.
 6. Run the governance record checker and relevant tests before closeout.
 
-The existing read-only reviewer can perform an independent audit. It returns
-paths, commands, evidence class, findings, and unresolved risks; the primary
-agent owns all edits, completion decisions, and identifiers. There is no
-always-running progress agent and no automatic external issue-tracker write.
+The read-only Performance and Security Reviewers return paths, commands,
+evidence class, findings, and unresolved risks; the Project Manager owns all
+completion decisions and identifiers. There is no always-running progress
+agent and no automatic external issue-tracker write.
 
 Project agent files are shared. Local `.codex/config.toml` remains ignored so
 IDE endpoints, personal approvals, and per-user concurrency limits never enter

@@ -21,8 +21,8 @@ description: Govern Raveil changes and progress reviews by mapping work to stabl
    dependencies, stale records, and missing evidence.
 3. Search TODO before proposing a task. Give a new issue an ID candidate only
    after the primary agent confirms it is actionable and not duplicated.
-4. Use a read-only reviewer subagent for an independent audit when the scope is
-   broad. Treat its output as a proposal, not authority.
+4. Use the read-only Performance and/or Security Reviewer for an independent
+   audit when those surfaces are broad. Treat output as a proposal, not authority.
 
 ## Record routing
 

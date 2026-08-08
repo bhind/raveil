@@ -1,8 +1,22 @@
 from __future__ import annotations
 
 import math
+from typing import Protocol, TypeVar
 
 from .model import Candidate, Context, Metrics
+
+
+ContextT = TypeVar("ContextT", contravariant=True)
+CandidateT = TypeVar("CandidateT", contravariant=True)
+MetricsT = TypeVar("MetricsT", covariant=True)
+
+
+class MeasurementBackend(Protocol[ContextT, CandidateT, MetricsT]):
+    """Raveil-owned measurement boundary shared by all backend adapters."""
+
+    def measure(self, context: ContextT, candidate: CandidateT) -> MetricsT:
+        """Measure one admitted candidate in the target context."""
+        ...
 
 
 class ToyDaphnis:

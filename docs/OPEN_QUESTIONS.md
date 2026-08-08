@@ -38,8 +38,10 @@ resolves it.
 
 ## Measurement
 
-- Is a fixed CPU-loop backend the smallest honest Gate 1 boundary, or does a
-  pinned TVM MetaSchedule path provide a better falsification test?
+- Will the pinned TVM MetaSchedule adapter reproduce the fixed-C Gate 1
+  conclusion, or expose a benchmark-specific transfer result?
+- Does powermetrics provide enough stable samples for the pre-registered small
+  workloads, or must inner iteration counts increase before the full dataset?
 - Which Transformer or other AI workload is small enough to reproduce yet
   repeated enough to demonstrate useful Experience transfer?
 - What threshold makes Negative Transfer Rate unacceptable?

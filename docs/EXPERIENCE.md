@@ -87,6 +87,20 @@ HCR must be accompanied by:
 - holdout type: lineage, shape, memory budget, operator composition, hardware;
 - exact environment and evidence class.
 
+Gate 1 instantiates these requirements through RFC-0002 and EXP-0003. Its
+bounded-versus-cold threshold is at least 5% median improvement for both
+latency and same-Mac estimated energy with paired-bootstrap 95% lower bounds
+above zero. A greater-than-2% regression is negative transfer; joint NTR must
+be at most 5%. Bounded latency and energy selection quality must remain within
+2% of full history while respecting active memory, and bounded retrieval p95
+must improve on large evidence. Offline oracle enumeration never enters online
+selection.
+
+`MeasurementRecord` evidence classes stay distinct. In particular, QEMU
+telemetry is `emulation`; Apple native measurements are `silicon` scoped to the
+recorded Mac; powermetrics energy is an estimate for within-Mac relative
+comparison and never a RISC-V/Daphnis extrapolation.
+
 ## Principal risks
 
 1. Contexts may be too unique for Experience to amortize.

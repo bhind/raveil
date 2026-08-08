@@ -7,3 +7,4 @@ accepted.
 | RFC | Status | Topic |
 |---|---|---|
 | [RFC-0001](RFC-0001-native-explicit-graph-machine.md) | Proposed | Native explicit dependency/effect graph machine |
+| [RFC-0002](RFC-0002-gate1-measurement-contracts.md) | Proposed | Gate 1 measurement and policy-outcome contracts |

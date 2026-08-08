@@ -61,7 +61,25 @@ class MinimumLoopTests(unittest.TestCase):
         self.assertTrue(result.best.metrics.valid)
         self.assertNotEqual(result.trials[1].candidate.candidate_id, "vector16")
 
+    def test_experience_load_rejects_missing_or_duplicate_sequence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "experience.jsonl"
+            store = ExperienceStore(path, active_limit=8)
+            tuner = make_tuner(store)
+            tuner.tune(Context("branching-mlp", 128, 32), budget=2)
+            records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+            records[1]["sequence"] = records[0]["sequence"]
+            path.write_text("\n".join(json.dumps(record) for record in records) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "expected sequence 2"):
+                ExperienceStore(path, active_limit=8)
+
+    def test_experience_load_rejects_corrupt_jsonl(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "experience.jsonl"
+            path.write_text("{broken\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "line 1"):
+                ExperienceStore(path, active_limit=8)
+
 
 if __name__ == "__main__":
     unittest.main()
-

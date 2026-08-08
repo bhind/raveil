@@ -71,10 +71,11 @@ The primary agent owns task classification, task-ID allocation, tracked-file
 edits, completion decisions, and final record consistency.
 
 Repository-scoped workflows live in [`.agents/skills/`](../.agents/skills/)
-and read-only explorer/reviewer roles in [`.codex/agents/`](../.codex/agents/).
-Use the reviewer for an independent progress or consistency audit when useful;
-its findings are proposals. A subagent never marks a task complete, changes a
-gate, accepts an ADR, or concludes an experiment.
+and task-specific roles in [`.codex/agents/`](../.codex/agents/). Use the
+read-only Librarian to select a minimal context packet and the Performance or
+Security Reviewer for an independent audit when useful; findings are proposals.
+A subagent never marks a task complete, changes a gate, accepts an ADR, or
+concludes an experiment.
 
 Run the governance workflow at task kickoff and closeout. The detailed process
 is in [WORKFLOW](WORKFLOW.md). Remote publication uses the repository-scoped
