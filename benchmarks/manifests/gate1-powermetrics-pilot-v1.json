@@ -1,0 +1,35 @@
+{
+  "schema": "raveil.benchmark-manifest/v1",
+  "experiment_id": "EXP-0003",
+  "backend": "native-c",
+  "evidence_class": "silicon",
+  "stage": "pilot",
+  "repetitions": 5,
+  "warmups": 3,
+  "random_seed": 20260809,
+  "timeout_seconds": 30.0,
+  "measurement_budget": 2,
+  "active_memory_limit": 64,
+  "source": "benchmarks/native/benchmark.c",
+  "compiler_flags": ["-O3", "-std=c11", "-Wall", "-Wextra", "-Werror", "-D_POSIX_C_SOURCE=200809L"],
+  "energy": {
+    "required": true,
+    "sampler": "powermetrics",
+    "sample_interval_ms": 100,
+    "minimum_samples": 3,
+    "stable_thermal_levels": ["Nominal"]
+  },
+  "workloads": [
+    {"workload_id":"pilot-gemm-s48","family":"gemm","m":48,"n":48,"k":48,"lineage":"pilot-a","shape_class":"square-small","working_set":"l1-fit","operator_composition":"gemm-only","inner_iterations":22223},
+    {"workload_id":"pilot-gemm-s96","family":"gemm","m":96,"n":96,"k":96,"lineage":"pilot-b","shape_class":"square-large","working_set":"l2-edge","operator_composition":"gemm-only","inner_iterations":2986},
+    {"workload_id":"pilot-relu-s48","family":"gemm_bias_relu","m":48,"n":48,"k":48,"lineage":"pilot-c","shape_class":"square-small","working_set":"l1-fit","operator_composition":"gemm-bias-relu","inner_iterations":21053},
+    {"workload_id":"pilot-relu-s96","family":"gemm_bias_relu","m":96,"n":96,"k":96,"lineage":"pilot-d","shape_class":"square-large","working_set":"l2-edge","operator_composition":"gemm-bias-relu","inner_iterations":2942},
+    {"workload_id":"pilot-mlp-s48","family":"mlp2","m":48,"n":48,"k":48,"lineage":"pilot-e","shape_class":"square-small","working_set":"l1-edge","operator_composition":"two-stage-mlp","inner_iterations":6061},
+    {"workload_id":"pilot-mlp-s96","family":"mlp2","m":96,"n":96,"k":96,"lineage":"pilot-f","shape_class":"square-large","working_set":"l2-spill","operator_composition":"two-stage-mlp","inner_iterations":822}
+  ],
+  "candidates": [
+    {"candidate_id":"scalar-ijk-materialized","loop_order":"ijk","tile":0,"materialization":"materialized","cold_priority":0,"trusted_baseline":true},
+    {"candidate_id":"loop-ikj-materialized","loop_order":"ikj","tile":0,"materialization":"materialized","cold_priority":1},
+    {"candidate_id":"tile64-fused","loop_order":"tiled","tile":64,"materialization":"fused","cold_priority":2}
+  ]
+}

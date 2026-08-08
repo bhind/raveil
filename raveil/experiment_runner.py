@@ -6,6 +6,7 @@ from pathlib import Path
 import platform
 import random
 import shutil
+import statistics
 import subprocess
 
 from .analysis import analyze_policy_outcomes
@@ -113,6 +114,7 @@ def run_experiment(
     sampler = PowermetricsSampler(
         interval_ms=manifest.energy.sample_interval_ms,
         stable_levels=manifest.energy.stable_thermal_levels,
+        minimum_samples=manifest.energy.minimum_samples,
     )
     if manifest.energy.required:
         preflight = sampler.preflight()
@@ -193,6 +195,7 @@ def run_experiment(
                 measurement_valid=measurement_valid,
                 failure=failure,
                 thermal_level=power.thermal_level,
+                power_sample_count=power.sample_count,
                 evidence_class=manifest.evidence_class,
             )
             bundle.append_jsonl("measurement.jsonl", record.to_dict())
@@ -262,7 +265,13 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
     expected_groups = len(manifest.workloads) * len(manifest.candidates)
     complete_matrix = len(grouped) == expected_groups
     policy_path = bundle.path / "policy-outcomes.jsonl"
-    if policy_path.exists():
+    if manifest.stage == "pilot":
+        policy = {
+            "gate_ready": False,
+            "unmet": [],
+            "note": "policy selection is intentionally not evaluated in a sampler pilot",
+        }
+    elif policy_path.exists():
         outcomes = _read_jsonl(policy_path, PolicyOutcome)
         policy = analyze_policy_outcomes(
             outcomes, manifest.active_memory_limit, bootstrap_samples=bootstrap_samples  # type: ignore[arg-type]
@@ -280,13 +289,17 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
     if not repetitions_ok or not complete_matrix:
         unmet.append("candidate measurement matrix is incomplete")
     unmet.extend(policy.get("unmet", []))  # type: ignore[arg-type]
-    unmet.extend(
-        [
-            "independent rerun comparison is not attached",
-            "fixed-C versus pinned TVM conclusion is not available",
-            "remote immutable bundle verification has not occurred",
-        ]
-    )
+    if manifest.stage == "full":
+        unmet.extend(
+            [
+                "independent rerun comparison is not attached",
+                "fixed-C versus pinned TVM conclusion is not available",
+                "remote immutable bundle verification has not occurred",
+            ]
+        )
+    else:
+        unmet.append("pilot remote immutable bundle verification has not occurred")
+    power_counts = [record.power_sample_count for record in records]  # type: ignore[attr-defined]
     result: dict[str, object] = {
         "schema": "raveil.experiment-analysis/v1",
         "run_id": bundle.run_id,
@@ -294,8 +307,14 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
         "semantic_checksums_pass": semantic_ok,
         "all_measurements_valid": measurements_ok,
         "complete_measurement_matrix": complete_matrix and repetitions_ok,
+        "manifest_stage": manifest.stage,
+        "power_samples": {
+            "required_per_measurement": manifest.energy.minimum_samples,
+            "minimum": min(power_counts) if power_counts else 0,
+            "median": statistics.median(power_counts) if power_counts else 0,
+        },
         "policy": policy,
-        "gate_conclusion": "incomplete",
+        "gate_conclusion": "not-applicable-pilot" if manifest.stage == "pilot" else "incomplete",
         "unmet": unmet,
         "claims": [],
         "non_claims": [

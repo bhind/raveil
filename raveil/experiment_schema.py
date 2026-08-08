@@ -47,6 +47,8 @@ class WorkloadSpec:
     def __post_init__(self) -> None:
         if min(self.m, self.n, self.k, self.inner_iterations) <= 0:
             raise ValueError(f"workload {self.workload_id} dimensions must be positive")
+        if max(self.m, self.n, self.k) > 512 or self.inner_iterations > 1_000_000:
+            raise ValueError(f"workload {self.workload_id} exceeds native safety bounds")
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "WorkloadSpec":
@@ -80,11 +82,14 @@ class EnergyContract:
     required: bool
     sampler: Literal["powermetrics"]
     sample_interval_ms: int
+    minimum_samples: int = 3
     stable_thermal_levels: tuple[str, ...] = ("Nominal",)
 
     def __post_init__(self) -> None:
         if self.sample_interval_ms < 20:
             raise ValueError("powermetrics sample interval must be at least 20 ms")
+        if self.minimum_samples < 1:
+            raise ValueError("powermetrics minimum sample count must be positive")
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "EnergyContract":
@@ -110,22 +115,29 @@ class BenchmarkManifest:
     workloads: tuple[WorkloadSpec, ...]
     candidates: tuple[BenchmarkCandidate, ...]
     tvm_version: str | None = None
+    stage: Literal["pilot", "full"] = "full"
     schema: str = MANIFEST_SCHEMA
 
     def __post_init__(self) -> None:
         if self.schema != MANIFEST_SCHEMA:
             raise ValueError(f"unsupported benchmark manifest schema: {self.schema}")
         validate_backend_evidence(self.backend, self.evidence_class)
-        if self.repetitions < 15:
-            raise ValueError("Gate 1 requires at least 15 repetitions")
+        minimum_repetitions = 15 if self.stage == "full" else 3
+        if self.repetitions < minimum_repetitions:
+            raise ValueError(
+                f"{self.stage} manifest requires at least {minimum_repetitions} repetitions"
+            )
         if self.warmups < 1:
             raise ValueError("Gate 1 requires at least one warm-up")
         if self.timeout_seconds <= 0 or self.measurement_budget < 1:
             raise ValueError("timeout and measurement budget must be positive")
         if self.active_memory_limit < 4:
             raise ValueError("active memory limit must be at least four")
-        if len(self.workloads) < 20:
-            raise ValueError("Gate 1 manifest must pre-register at least 20 holdouts")
+        minimum_workloads = 20 if self.stage == "full" else 3
+        if len(self.workloads) < minimum_workloads:
+            raise ValueError(
+                f"{self.stage} manifest must pre-register at least {minimum_workloads} workloads"
+            )
         if not self.candidates:
             raise ValueError("manifest must contain candidates")
         baselines = [candidate for candidate in self.candidates if candidate.trusted_baseline]
@@ -141,8 +153,10 @@ class BenchmarkManifest:
             "working-set": {w.working_set for w in self.workloads},
             "composition": {w.operator_composition for w in self.workloads},
         }
-        if any(len(values) < 2 for values in dimensions.values()):
+        if self.stage == "full" and any(len(values) < 2 for values in dimensions.values()):
             raise ValueError("holdouts must vary lineage, shape, working set, and composition")
+        if self.stage == "pilot" and len({w.family for w in self.workloads}) < 3:
+            raise ValueError("pilot manifest must cover all three native workload families")
         if self.backend == "tvm-meta-schedule" and not self.tvm_version:
             raise ValueError("TVM manifests must pin tvm_version")
 
@@ -219,6 +233,7 @@ class MeasurementRecord:
     failure: str
     thermal_level: str | None
     evidence_class: EvidenceClass
+    power_sample_count: int = 0
     schema: str = MEASUREMENT_SCHEMA
 
     def __post_init__(self) -> None:
@@ -230,6 +245,8 @@ class MeasurementRecord:
             raise ValueError("CPU power must not be negative")
         if self.energy_mj is not None and self.energy_mj < 0:
             raise ValueError("energy must not be negative")
+        if self.power_sample_count < 0:
+            raise ValueError("power sample count must not be negative")
         if self.semantic_valid and (
             self.checksum is None or self.checksum != self.reference_checksum
         ):

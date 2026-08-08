@@ -80,7 +80,8 @@ timer-driven switching without capability bypass.
 - [x] **T-0020** Define a replayable benchmark manifest and environment signature.
 - [x] **T-0021** Implement a fixed CPU-loop backend behind
   `measure(context, candidate) -> Metrics`, including fail-closed non-interactive
-  powermetrics privilege preflight, or document why TVM MetaSchedule is selected
+  powermetrics privilege preflight, calibrated pilot/full sampling windows, and
+  a minimum power-sample contract, or document why TVM MetaSchedule is selected
   instead.
 - [ ] **T-0022** Compare cold prior, full-history nearest neighbor, bounded
   Experience, FIFO, and reservoir retention.
