@@ -119,14 +119,23 @@ The clean-tree CLI preflight failed closed before bundle creation when sudo
 privilege was unavailable. This verifies a failure boundary only, not a
 measurement result.
 
+A subsequent user-operated pilot attempt on 2026-08-08 passed the privilege
+boundary but the powermetrics preflight reported thermal level `Moderate`.
+The runner rejected it before creating a RUN-ID directory. Repository-side
+inspection confirmed that no EXP-0003 run directory exists. This is a verified
+thermal failure-boundary observation, not latency or energy evidence.
+
 ## Interpretation
 
 None yet. The Gate remains open.
 
 ## Limitations and next action
 
-The calibrated iteration counts derive from a short, unsealed host calibration
-and may still be insufficient under different candidate or thermal behavior.
+Retry the pilot only after the machine returns to the pre-registered `Nominal`
+thermal state; do not silently admit `Moderate` measurements into the same
+experiment. The calibrated iteration counts derive from a short, unsealed host
+calibration and may still be insufficient under different candidate or thermal
+behavior.
 The policy-outcome production path, full retention comparison, calibration and
 coverage report, isolated TVM implementation, authorized powermetrics pilot,
 enabled Google Drive API plus verified sync, and independent rerun remain
