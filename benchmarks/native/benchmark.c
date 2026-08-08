@@ -208,11 +208,11 @@ static void execute(const options_t *options, const int32_t *a, const int32_t *b
     gemm_i64_i32(scratch, b2, output, options->m, options->k, options->n, options);
 }
 
-static int parse_size(const char *text, size_t *value) {
+static int parse_bounded_size(const char *text, size_t maximum, size_t *value) {
     char *end = NULL;
     errno = 0;
     unsigned long long parsed = strtoull(text, &end, 10);
-    if (errno != 0 || end == text || *end != '\0' || parsed == 0 || parsed > 512) {
+    if (errno != 0 || end == text || *end != '\0' || parsed == 0 || parsed > maximum) {
         return 0;
     }
     *value = (size_t)parsed;
@@ -226,14 +226,16 @@ static int parse_options(int argc, char **argv, options_t *options) {
     options->family = argv[1];
     options->loop_order = argv[5];
     options->materialization = argv[7];
-    if (!parse_size(argv[2], &options->m) || !parse_size(argv[3], &options->n) ||
-        !parse_size(argv[4], &options->k) || !parse_size(argv[8], &options->warmups) ||
-        !parse_size(argv[9], &options->iterations)) {
+    if (!parse_bounded_size(argv[2], 512, &options->m) ||
+        !parse_bounded_size(argv[3], 512, &options->n) ||
+        !parse_bounded_size(argv[4], 512, &options->k) ||
+        !parse_bounded_size(argv[8], 1000, &options->warmups) ||
+        !parse_bounded_size(argv[9], 1000000, &options->iterations)) {
         return 0;
     }
     if (strcmp(argv[6], "0") == 0) {
         options->tile = 0;
-    } else if (!parse_size(argv[6], &options->tile)) {
+    } else if (!parse_bounded_size(argv[6], 64, &options->tile)) {
         return 0;
     }
     int family_ok = strcmp(options->family, "gemm") == 0 ||

@@ -23,9 +23,12 @@ class PowerSample:
     thermal_level: str | None
     valid: bool
     failure: str = ""
+    sample_count: int = 0
 
 
-def parse_powermetrics(text: str, stable_levels: tuple[str, ...]) -> PowerSample:
+def parse_powermetrics(
+    text: str, stable_levels: tuple[str, ...], minimum_samples: int = 1
+) -> PowerSample:
     powers = []
     for number, unit in POWER_RE.findall(text):
         power = float(number)
@@ -33,13 +36,21 @@ def parse_powermetrics(text: str, stable_levels: tuple[str, ...]) -> PowerSample
     thermal = [value.strip() for value in THERMAL_RE.findall(text)]
     if not powers:
         return PowerSample(None, thermal[-1] if thermal else None, False, "powermetrics CPU power sample missing")
+    if len(powers) < minimum_samples:
+        return PowerSample(
+            None,
+            thermal[-1] if thermal else None,
+            False,
+            f"powermetrics samples missing: required {minimum_samples}, found {len(powers)}",
+            len(powers),
+        )
     if not thermal:
-        return PowerSample(None, None, False, "powermetrics thermal sample missing")
+        return PowerSample(None, None, False, "powermetrics thermal sample missing", len(powers))
     if len(set(thermal)) != 1:
-        return PowerSample(None, thermal[-1], False, "thermal level changed during measurement")
+        return PowerSample(None, thermal[-1], False, "thermal level changed during measurement", len(powers))
     if thermal[-1].casefold() not in {level.casefold() for level in stable_levels}:
-        return PowerSample(None, thermal[-1], False, f"unstable thermal level: {thermal[-1]}")
-    return PowerSample(sum(powers) / len(powers), thermal[-1], True)
+        return PowerSample(None, thermal[-1], False, f"unstable thermal level: {thermal[-1]}", len(powers))
+    return PowerSample(sum(powers) / len(powers), thermal[-1], True, sample_count=len(powers))
 
 
 class PowermetricsSampler:
@@ -47,6 +58,7 @@ class PowermetricsSampler:
         self,
         interval_ms: int,
         stable_levels: tuple[str, ...],
+        minimum_samples: int = 3,
         command_prefix: tuple[str, ...] = (
             "/usr/bin/sudo",
             "-n",
@@ -55,6 +67,7 @@ class PowermetricsSampler:
     ) -> None:
         self.interval_ms = interval_ms
         self.stable_levels = stable_levels
+        self.minimum_samples = minimum_samples
         if not command_prefix:
             raise ValueError("powermetrics command prefix must not be empty")
         self.command_prefix = command_prefix
@@ -92,7 +105,7 @@ class PowermetricsSampler:
             if "password is required" in detail.casefold():
                 detail = "powermetrics privilege unavailable; run sudo -v interactively"
             return PowerSample(None, None, False, detail)
-        return parse_powermetrics(completed.stdout, self.stable_levels)
+        return parse_powermetrics(completed.stdout, self.stable_levels, minimum_samples=1)
 
     def measure(self, operation: Callable[[], T], raw_output: Path) -> tuple[T | None, PowerSample]:
         command = self._command(-1)
@@ -130,4 +143,6 @@ class PowermetricsSampler:
         if process.returncode not in {0, -signal.SIGTERM} and not stdout:
             detail = stderr.strip() or f"powermetrics exited {process.returncode}"
             return result, PowerSample(None, None, False, detail)
-        return result, parse_powermetrics(stdout, self.stable_levels)
+        return result, parse_powermetrics(
+            stdout, self.stable_levels, minimum_samples=self.minimum_samples
+        )

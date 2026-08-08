@@ -13,15 +13,17 @@ estimated Apple energy with Daphnis performance.
 
 Four JSON contracts are versioned independently:
 
-- `raveil.benchmark-manifest/v1`: experiment/backend/evidence identity,
-  compiler source and flags, repetition/warm-up/randomization/timeout/budget,
-  energy contract, candidates, and pre-registered holdouts;
+- `raveil.benchmark-manifest/v1`: experiment/backend/evidence identity, explicit
+  `pilot` or `full` stage, compiler source and flags, repetition/warm-up/
+  randomization/timeout/budget, energy contract including minimum sample count,
+  candidates, and pre-registered holdouts;
 - `raveil.environment-signature/v1`: Git SHA, OS/machine/CPU, Python/compiler,
   tool versions, and evidence class without hostname, username, serial, or
   credentials;
 - `raveil.measurement-record/v1`: run/sequence/workload/candidate/repetition,
   baseline-first or randomized phase, latency, estimated CPU power and energy,
-  reference/candidate checksum, thermal state, validity, and failure;
+  reference/candidate checksum, power-sample count, thermal state, validity, and
+  failure;
 - `raveil.policy-outcome/v1`: pre-registered cold, bounded, and full-history
   selections, baseline/selected/offline-oracle latency and energy, equal
   measurement budget, retrieval latency, and memory/evidence sizes.
@@ -41,13 +43,16 @@ experiment sync --run RUN_ID
 
 Run requires a clean Git worktree, copies the benchmark source into the local
 bundle, measures each workload's trusted baseline first, then uses a seeded
-random order with at least 15 samples per candidate. Analysis consumes only
-pre-registered policy selections; exhaustive candidates are offline oracle
+random order. A pilot has at least three repetitions and three workloads and
+must cover all three workload families; it cannot produce a Gate conclusion. A
+full manifest has at least 15 repetitions and 20 holdouts. Analysis consumes
+only pre-registered policy selections; exhaustive candidates are offline oracle
 evidence and never online policy input.
 
 The user authenticates `sudo` interactively before a run. Raveil invokes
 `sudo -n /usr/bin/powermetrics` only, performs a one-sample CPU-power/thermal
-preflight before creating a bundle, and never runs the full experiment CLI as
+preflight before creating a bundle, requires the manifest's minimum sample
+count during each actual window, and never runs the full experiment CLI as
 root.
 
 Sealing creates per-file SHA-256 and size records plus a bundle hash. Sync
@@ -83,5 +88,5 @@ criteria. A native/TVM conclusion conflict requires research review.
   Apple Silicon environment?
 - How should pre-registered bounded/full-history selection plans be produced
   without incorporating target oracle results?
-- Is `powermetrics` sampling resolution sufficient for these small workloads,
-  or must inner iteration counts increase before the pilot?
+- Do the calibrated roughly 400 ms measurement windows produce at least three
+  stable samples for all pilot candidates before the full run?

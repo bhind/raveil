@@ -19,6 +19,7 @@ from raveil.experiment_runner import analyze_bundle, measurement_order, run_expe
 from raveil.experiment_schema import (
     BenchmarkCandidate,
     BenchmarkManifest,
+    MeasurementRecord,
     PolicyOutcome,
     WorkloadSpec,
     validate_backend_evidence,
@@ -30,6 +31,7 @@ from raveil.research_bundle import ResearchBundle, make_run_id, sha256_file
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "benchmarks/manifests/gate1-fixed-c-v1.json"
+PILOT_MANIFEST = ROOT / "benchmarks/manifests/gate1-powermetrics-pilot-v1.json"
 SOURCE = ROOT / "benchmarks/native/benchmark.c"
 
 
@@ -37,6 +39,7 @@ class ManifestTests(unittest.TestCase):
     def test_gate1_manifest_preregisters_holdout_dimensions(self) -> None:
         manifest = BenchmarkManifest.load(MANIFEST)
         self.assertEqual(manifest.experiment_id, "EXP-0003")
+        self.assertEqual(manifest.stage, "full")
         self.assertGreaterEqual(len(manifest.workloads), 20)
         self.assertEqual(manifest.repetitions, 15)
         self.assertTrue(manifest.energy.required)
@@ -48,6 +51,17 @@ class ManifestTests(unittest.TestCase):
             {w.operator_composition for w in manifest.workloads},
             {"gemm-only", "gemm-bias-relu", "two-stage-mlp"},
         )
+        self.assertEqual(manifest.energy.minimum_samples, 3)
+
+    def test_powermetrics_pilot_is_short_and_not_a_gate_manifest(self) -> None:
+        manifest = BenchmarkManifest.load(PILOT_MANIFEST)
+        self.assertEqual(manifest.stage, "pilot")
+        self.assertEqual(manifest.repetitions, 5)
+        self.assertEqual(len(manifest.workloads), 6)
+        self.assertEqual({workload.family for workload in manifest.workloads}, {
+            "gemm", "gemm_bias_relu", "mlp2"
+        })
+        self.assertTrue(all(workload.inner_iterations > 512 for workload in manifest.workloads))
 
     def test_measurement_order_is_baseline_first_randomized_and_equal(self) -> None:
         manifest = BenchmarkManifest.load(MANIFEST)
@@ -68,6 +82,29 @@ class ManifestTests(unittest.TestCase):
         validate_backend_evidence("qemu-telemetry", "emulation")
         with self.assertRaisesRegex(ValueError, "classified as emulation"):
             validate_backend_evidence("qemu-telemetry", "silicon")
+
+    def test_legacy_measurement_record_defaults_power_sample_count(self) -> None:
+        legacy = {
+            "schema": "raveil.measurement-record/v1",
+            "run_id": "legacy-run",
+            "sequence": 1,
+            "measured_at_utc": "2026-08-08T00:00:00Z",
+            "workload_id": "legacy-workload",
+            "candidate_id": "legacy-candidate",
+            "repetition": 0,
+            "phase": "trusted-baseline",
+            "latency_ns": 100,
+            "cpu_power_mw": None,
+            "energy_mj": None,
+            "checksum": "abc",
+            "reference_checksum": "abc",
+            "semantic_valid": True,
+            "measurement_valid": True,
+            "failure": "",
+            "thermal_level": None,
+            "evidence_class": "silicon",
+        }
+        self.assertEqual(MeasurementRecord.from_dict(legacy).power_sample_count, 0)
 
     def test_cli_reports_preflight_failure_without_traceback(self) -> None:
         error = io.StringIO()
@@ -126,10 +163,14 @@ class NativeBackendTests(unittest.TestCase):
                 warmups=1,
             )
             backend.compile()
-            too_large = WorkloadSpec("overflow", "gemm", 513, 8, 8, "t", "t", "t", "t")
-            result = backend.measure(too_large, candidate)
-            self.assertFalse(result.semantic_valid)
-            self.assertIn("invalid arguments", result.failure)
+            with self.assertRaisesRegex(ValueError, "exceeds native safety bounds"):
+                WorkloadSpec("overflow", "gemm", 513, 8, 8, "t", "t", "t", "t")
+
+            long_window = WorkloadSpec(
+                "long-window", "gemm", 8, 8, 8, "t", "t", "t", "t", 600
+            )
+            result = backend.measure(long_window, candidate)
+            self.assertTrue(result.semantic_valid, result.failure)
 
 
 class PowerTests(unittest.TestCase):
@@ -150,6 +191,15 @@ class PowerTests(unittest.TestCase):
         )
         self.assertFalse(changed.valid)
         self.assertIn("changed", changed.failure)
+        insufficient = parse_powermetrics(
+            "CPU Power: 700 mW\nCurrent pressure level: Nominal\n"
+            "CPU Power: 800 mW\nCurrent pressure level: Nominal\n",
+            ("Nominal",),
+            minimum_samples=3,
+        )
+        self.assertFalse(insufficient.valid)
+        self.assertEqual(insufficient.sample_count, 2)
+        self.assertIn("required 3", insufficient.failure)
 
     def test_powermetrics_preflight_requires_cached_noninteractive_privilege(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -161,7 +211,7 @@ class PowerTests(unittest.TestCase):
                 encoding="utf-8",
             )
             fake.chmod(0o755)
-            sampler = PowermetricsSampler(20, ("Nominal",), (str(fake),))
+            sampler = PowermetricsSampler(20, ("Nominal",), command_prefix=(str(fake),))
             result = sampler.preflight()
             self.assertFalse(result.valid)
             self.assertIn("sudo -v", result.failure)
@@ -176,7 +226,7 @@ class PowerTests(unittest.TestCase):
                 encoding="utf-8",
             )
             fake.chmod(0o755)
-            sampler = PowermetricsSampler(20, ("Nominal",), (str(fake),))
+            sampler = PowermetricsSampler(20, ("Nominal",), command_prefix=(str(fake),))
             result = sampler.preflight()
             self.assertTrue(result.valid, result.failure)
             self.assertEqual(result.cpu_power_mw, 800.0)
@@ -237,6 +287,25 @@ class AnalysisTests(unittest.TestCase):
 
 
 class BundleTests(unittest.TestCase):
+    def test_pilot_analysis_cannot_return_a_gate_conclusion(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            value = json.loads(PILOT_MANIFEST.read_text(encoding="utf-8"))
+            value["energy"]["required"] = False
+            value["workloads"] = [
+                {**workload, "m": 4, "n": 4, "k": 4, "inner_iterations": 1}
+                for workload in value["workloads"]
+            ]
+            manifest_path = root / "pilot.json"
+            manifest_path.write_text(json.dumps(value), encoding="utf-8")
+            with mock.patch("raveil.experiment_runner.require_clean_worktree"):
+                bundle, valid = run_experiment(manifest_path, root / "artifacts")
+            self.assertTrue(valid)
+            analysis = analyze_bundle(bundle, bootstrap_samples=100)
+            self.assertEqual(analysis["manifest_stage"], "pilot")
+            self.assertEqual(analysis["gate_conclusion"], "not-applicable-pilot")
+            self.assertFalse(analysis["policy"]["gate_ready"])
+
     def test_run_analyze_seal_lifecycle_without_energy_does_not_claim_gate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
