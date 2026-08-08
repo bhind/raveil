@@ -6,12 +6,15 @@ from pathlib import Path
 import re
 import select
 import signal
+import stat
 import subprocess
 import time
 from typing import Callable, TypeVar
 
 
 T = TypeVar("T")
+POWERMETRICS_HELPER = "/usr/local/libexec/raveil-powermetrics"
+DEFAULT_COMMAND_PREFIX = ("/usr/bin/sudo", "-n", POWERMETRICS_HELPER)
 POWER_RE = re.compile(r"CPU Power:\s*([0-9]+(?:\.[0-9]+)?)\s*(mW|W)", re.IGNORECASE)
 THERMAL_RE = re.compile(
     r"(?:Current pressure level|Thermal pressure):\s*([A-Za-z][A-Za-z -]*)",
@@ -61,37 +64,62 @@ class PowermetricsSampler:
         interval_ms: int,
         stable_levels: tuple[str, ...],
         minimum_samples: int = 3,
-        command_prefix: tuple[str, ...] = (
-            "/usr/bin/sudo",
-            "-n",
-            "/usr/bin/powermetrics",
-        ),
+        command_prefix: tuple[str, ...] | None = None,
     ) -> None:
         self.interval_ms = interval_ms
         self.stable_levels = stable_levels
         self.minimum_samples = minimum_samples
+        if command_prefix is None:
+            command_prefix = DEFAULT_COMMAND_PREFIX
+            self.helper_path: Path | None = Path(POWERMETRICS_HELPER)
+        else:
+            self.helper_path = None
         if not command_prefix:
             raise ValueError("powermetrics command prefix must not be empty")
         self.command_prefix = command_prefix
 
+    def _helper_installation_failure(self) -> str:
+        if self.helper_path is None:
+            return ""
+        try:
+            helper = self.helper_path.lstat()
+        except OSError:
+            return "powermetrics helper is not installed"
+        if stat.S_ISLNK(helper.st_mode) or not stat.S_ISREG(helper.st_mode):
+            return "powermetrics helper must be a regular non-symlink file"
+        checked = (("helper", helper),)
+        try:
+            directories = tuple(
+                (f"helper directory {directory}", directory.lstat())
+                for directory in self.helper_path.parents
+            )
+        except OSError:
+            return "powermetrics helper installation path is unavailable"
+        for label, metadata in (*checked, *directories):
+            if label != "helper" and (
+                stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode)
+            ):
+                return f"powermetrics {label} must be a non-symlink directory"
+            if metadata.st_uid != 0:
+                return f"powermetrics {label} must be owned by root"
+            if metadata.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+                return f"powermetrics {label} must not be group/other writable"
+        return ""
+
     def _command(self, sample_count: int) -> tuple[str, ...]:
         return (
             *self.command_prefix,
-            "--samplers",
-            "cpu_power,thermal",
             "--sample-rate",
             str(self.interval_ms),
             "--sample-count",
             str(sample_count),
-            "--format",
-            "text",
-            "--buffer-size",
-            "1",
-            "--handle-invalid-values",
         )
 
     def preflight(self) -> PowerSample:
         """Verify non-interactive privilege and sampler fields before a run exists."""
+        installation_failure = self._helper_installation_failure()
+        if installation_failure:
+            return PowerSample(None, None, False, installation_failure)
         try:
             completed = subprocess.run(
                 self._command(1),
@@ -105,7 +133,12 @@ class PowermetricsSampler:
         if completed.returncode != 0:
             detail = completed.stderr.strip() or f"powermetrics exited {completed.returncode}"
             if "password is required" in detail.casefold():
-                detail = "powermetrics privilege unavailable; run sudo -v interactively"
+                detail = "powermetrics helper is not authorized for passwordless sudo"
+            elif any(
+                phrase in detail.casefold()
+                for phrase in ("no such file", "command not found", "unable to execute")
+            ):
+                detail = "powermetrics helper is not installed"
             return PowerSample(None, None, False, detail)
         return parse_powermetrics(completed.stdout, self.stable_levels, minimum_samples=1)
 
@@ -136,6 +169,9 @@ class PowermetricsSampler:
         )
 
     def measure(self, operation: Callable[[], T], raw_output: Path) -> tuple[T | None, PowerSample]:
+        installation_failure = self._helper_installation_failure()
+        if installation_failure:
+            return None, PowerSample(None, None, False, installation_failure)
         command = self._command(-1)
         try:
             process = subprocess.Popen(

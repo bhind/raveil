@@ -43,21 +43,23 @@ CPU identity without user or serial identity, Python/compiler/tool versions,
 and evidence class. Official `apache-tvm` will be installed in an isolated,
 pinned environment only after the fixed-C pilot stabilizes the contract.
 
-Environment preflight on 2026-08-08 installed rclone 1.75.0. A repository-
-external `gdrive:` OAuth remote is configured, but Google Drive API access for
-its OAuth project returned HTTP 403 `SERVICE_DISABLED`; no remote listing or
-transfer succeeded. Powermetrics requires interactive sudo authentication, and
-the cache is terminal/session specific; the agent process cannot reuse a cache
-created in another terminal.
+Environment preflight on 2026-08-08 installed rclone 1.75.0. The repository-
+external `gdrive:` OAuth remote subsequently completed immutable upload and
+download-based verification of both the selected failed pilot and successful
+pilot. Direct powermetrics still requires superuser authority. ADR-0010 replaces
+the terminal-specific interactive sudo cache with a root-owned fixed-argument
+helper and helper-only `NOPASSWD` rule; its tracked implementation is verified,
+but the machine installation and post-`sudo -k` proof remain T-0068.
 
 ## Procedure
 
 1. Commit the pilot/full manifests and harness; require a clean worktree.
-2. Authenticate in the same user-operated terminal with `sudo -v`, then run
-   `python3 -m raveil experiment run --manifest
-   benchmarks/manifests/gate1-powermetrics-pilot-v1.json` with permission to execute
-   `/usr/bin/powermetrics`. The runner uses `sudo -n` only for powermetrics and
-   creates no RUN-ID directory if privilege/power/thermal preflight fails.
+2. Install the ADR-0010 helper and helper-only sudoers rule using
+   `docs/guides/POWERMETRICS_HELPER.md`. After `sudo -k`, run `python3 -m raveil
+   experiment preflight --manifest
+   benchmarks/manifests/gate1-powermetrics-pilot-v1.json`. The runner uses
+   `sudo -n` only for the fixed helper and creates no RUN-ID directory if the
+   installation, authority, power, or thermal preflight fails.
 3. Warm each pilot invocation, measure the trusted baseline first, execute the
    seeded randomized schedule with five repetitions/candidate, and require at
    least three CPU-power samples with stable nominal thermal state in every

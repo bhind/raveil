@@ -15,3 +15,4 @@ rewrite it.
 | [ADR-0007](ADR-0007-two-minimal-executable-seeds.md) | Accepted | Bootstrap Sonatine Microkernel and Experience separately |
 | [ADR-0008](ADR-0008-staged-adaptive-council.md) | Proposed | Staged multi-policy Adaptive Council |
 | [ADR-0009](ADR-0009-gate1-measurement-and-bundle-boundaries.md) | Accepted | Measured adapters and immutable research bundles |
+| [ADR-0010](ADR-0010-least-privilege-powermetrics-helper.md) | Accepted | Least-privilege passwordless powermetrics helper |

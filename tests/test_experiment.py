@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import stat
+import subprocess
 import tempfile
 import time
 import tomllib
@@ -20,13 +21,14 @@ from raveil.experiment_runner import analyze_bundle, measurement_order, run_expe
 from raveil.experiment_schema import (
     BenchmarkCandidate,
     BenchmarkManifest,
+    EnergyContract,
     MeasurementRecord,
     PolicyOutcome,
     WorkloadSpec,
     validate_backend_evidence,
 )
 from raveil.native_backend import NativeCBackend
-from raveil.power import PowermetricsSampler, parse_powermetrics
+from raveil.power import PowerSample, PowermetricsSampler, parse_powermetrics
 from raveil.research_bundle import ResearchBundle, make_run_id, sha256_file
 
 
@@ -34,6 +36,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "benchmarks/manifests/gate1-fixed-c-v1.json"
 PILOT_MANIFEST = ROOT / "benchmarks/manifests/gate1-powermetrics-pilot-v1.json"
 SOURCE = ROOT / "benchmarks/native/benchmark.c"
+HELPER_SOURCE = ROOT / "tools/powermetrics_helper.c"
 
 
 class ManifestTests(unittest.TestCase):
@@ -117,6 +120,18 @@ class ManifestTests(unittest.TestCase):
             )
         self.assertEqual(result, 2)
         self.assertEqual(error.getvalue(), "error: powermetrics unavailable\n")
+
+    def test_cli_exposes_standalone_preflight(self) -> None:
+        output = io.StringIO()
+        with mock.patch(
+            "raveil.cli.preflight_experiment",
+            return_value=PowerSample(850.0, "Nominal", True, sample_count=1),
+        ), contextlib.redirect_stdout(output):
+            result = cli_main(
+                ["experiment", "preflight", "--manifest", str(PILOT_MANIFEST)]
+            )
+        self.assertEqual(result, 0)
+        self.assertIn("thermal=Nominal", output.getvalue())
 
 
 class NativeBackendTests(unittest.TestCase):
@@ -215,13 +230,14 @@ class PowerTests(unittest.TestCase):
             sampler = PowermetricsSampler(20, ("Nominal",), command_prefix=(str(fake),))
             result = sampler.preflight()
             self.assertFalse(result.valid)
-            self.assertIn("sudo -v", result.failure)
+            self.assertIn("not authorized", result.failure)
 
     def test_powermetrics_preflight_accepts_required_fields(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             fake = Path(directory) / "fake-powermetrics"
             fake.write_text(
                 "#!/bin/sh\n"
+                "test \"$*\" = '--sample-rate 20 --sample-count 1' || exit 64\n"
                 "echo 'CPU Power: 800 mW'\n"
                 "echo 'Current pressure level: Nominal'\n",
                 encoding="utf-8",
@@ -260,6 +276,72 @@ class PowerTests(unittest.TestCase):
             self.assertGreaterEqual(power.sample_count, 3)
             self.assertEqual(power.cpu_power_mw, 900.0)
             self.assertIn("RAVEIL MEASUREMENT WINDOW", raw.read_text(encoding="utf-8"))
+
+    def test_default_helper_fails_closed_before_sudo_when_not_installed(self) -> None:
+        sampler = PowermetricsSampler(100, ("Nominal",))
+        with mock.patch.object(Path, "lstat", side_effect=FileNotFoundError):
+            result = sampler.preflight()
+        self.assertFalse(result.valid)
+        self.assertIn("not installed", result.failure)
+
+    def test_default_helper_rejects_untrusted_file_metadata_before_sudo(self) -> None:
+        sampler = PowermetricsSampler(100, ("Nominal",))
+        cases = (
+            (stat.S_IFLNK | 0o777, 0, "non-symlink"),
+            (stat.S_IFREG | 0o755, os.getuid(), "owned by root"),
+            (stat.S_IFREG | 0o775, 0, "group/other writable"),
+        )
+        for mode, owner, expected in cases:
+            with self.subTest(expected=expected), mock.patch.object(
+                Path,
+                "lstat",
+                return_value=os.stat_result((mode, 0, 0, 1, owner, 0, 0, 0, 0, 0)),
+            ), mock.patch("raveil.power.subprocess.run") as run:
+                result = sampler.preflight()
+            self.assertFalse(result.valid)
+            self.assertIn(expected, result.failure)
+            run.assert_not_called()
+
+
+class PowermetricsHelperTests(unittest.TestCase):
+    def test_manifest_interval_cannot_exceed_helper_boundary(self) -> None:
+        with self.assertRaisesRegex(ValueError, "between 20 and 1000"):
+            EnergyContract(True, "powermetrics", 1001)
+
+    def test_helper_is_compiled_and_rejects_privilege_expansion(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            helper = Path(directory) / "raveil-powermetrics"
+            subprocess.run(
+                (
+                    "cc", "-O2", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                    str(HELPER_SOURCE), "-o", str(helper),
+                ),
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            version = subprocess.run(
+                (str(helper), "--version"), check=True, capture_output=True, text=True
+            )
+            self.assertEqual(version.stdout.strip(), "raveil-powermetrics-helper/v1")
+            for arguments in (
+                (),
+                ("--sample-rate", "19", "--sample-count", "1"),
+                ("--sample-rate", "100", "--sample-count", "2"),
+                ("--samplers", "all", "--sample-count", "-1"),
+            ):
+                with self.subTest(arguments=arguments):
+                    rejected = subprocess.run(
+                        (str(helper), *arguments), capture_output=True, text=True
+                    )
+                    self.assertEqual(rejected.returncode, 64)
+            unprivileged = subprocess.run(
+                (str(helper), "--sample-rate", "100", "--sample-count", "1"),
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(unprivileged.returncode, 77)
+            self.assertIn("authorized sudo", unprivileged.stderr)
 
 
 class AnalysisTests(unittest.TestCase):

@@ -110,6 +110,7 @@ python -m raveil --version
 python -m raveil demo --reset --budget 2 --active-limit 64
 python -m raveil bench --budget 2 --active-limit 64
 python -m raveil inspect --experience experience/local.jsonl
+python -m raveil experiment preflight --manifest benchmarks/manifests/gate1-powermetrics-pilot-v1.json
 ```
 
 Gate 1 research runs use a committed manifest and an immutable lifecycle:
@@ -123,9 +124,10 @@ python -m raveil experiment sync --run RUN_ID
 
 The pilot validates power-sampling and thermal stability but cannot produce a
 Gate conclusion. Use `gate1-fixed-c-v1.json` only after the pilot is remotely
-verified. Run requires a clean Git worktree. Authenticate in the same terminal
-with `sudo -v` first; the runner invokes only `/usr/bin/powermetrics` through
-non-interactive `sudo -n`. Missing privilege, insufficient power samples, or
+verified. Run requires a clean Git worktree. After the one-time
+[least-privilege helper setup](docs/guides/POWERMETRICS_HELPER.md), the runner
+uses passwordless `sudo -n` only for the fixed root-owned powermetrics helper.
+Missing helper authority, insufficient power samples, or
 unstable thermal state fail closed. Raw bundles remain ignored under
 `artifacts/research/`; rclone configuration and Google credentials stay outside
 the repository. A run is incomplete until remote content verification passes
