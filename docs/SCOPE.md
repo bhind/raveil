@@ -4,9 +4,9 @@
 
 Experience is advice, never authority. A candidate must be measured in the target context before it can become the best result. The trusted baseline is always the first measurement and remains available when every proposed variant fails.
 
-Sonatine is the authority boundary. Even in this first RV64 seed, IPC resolves a generation-checked capability owned by the calling task before it touches an endpoint.
+Sonatine Microkernel (Sonatine) is the authority boundary. Even in this first RV64 seed, IPC resolves a generation-checked capability owned by the calling task before it touches an endpoint.
 
-## Included Sonatine boot slice
+## Included Sonatine Microkernel boot slice
 
 - RV64IMAC machine-mode entry on QEMU `virt`, one hart;
 - `.bss` initialization and a 16 KiB boot stack;
@@ -48,7 +48,7 @@ This is intentionally a simple baseline. It makes later coreset, ANN, learned en
 - task context switching, preemption, and blocking scheduler semantics;
 - capability derivation trees and inter-task delegation;
 - device-tree RAM discovery (the v0 machine contract fixes RAM at 128 MiB);
-- Miroirs/Pavane admission checks;
+- Miroirs Graph Compiler/Pavane Semantic Oracle admission checks;
 - real compiler transformations;
 - parallel execution;
 - neural latent representation;

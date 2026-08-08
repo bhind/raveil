@@ -94,7 +94,7 @@ HCR must be accompanied by:
 3. Dynamic uncertainty machinery may recreate a large OoO design.
 4. Candidate search may explode.
 5. Semantic or numerical equivalence may be too costly to establish.
-6. Flexible Daphnis routing/configuration may lose to fixed accelerators.
+6. Flexible Daphnis Execution Subsystem routing/configuration may lose to fixed accelerators.
 7. Evidence may age, and retrieval may stop scaling.
 8. Cold-start cost may overwhelm useful execution.
 

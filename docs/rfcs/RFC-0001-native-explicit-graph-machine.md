@@ -16,7 +16,7 @@ explicit graph/effect execution contract.
 
 ## Proposal
 
-Daphnis-native work is a sealed graph carrying:
+Work submitted to the Daphnis Execution Subsystem (Daphnis) is a sealed graph carrying:
 
 - explicit data and control dependencies;
 - object-scoped READ, WRITE, and external effects;
@@ -57,9 +57,9 @@ structured repeated computation, not to deny dynamic uncertainty.
 
 ## Authority and safety
 
-AI cannot emit installable state directly. Miroirs validates structure;
+AI cannot emit installable state directly. Miroirs Graph Compiler (Miroirs) validates structure;
 Program/Execution contracts validate effects; resource certificates bound
-usage; Pavane or another trusted path checks semantics; Sonatine installs,
+usage; Pavane Semantic Oracle (Pavane) or another trusted path checks semantics; Sonatine Microkernel (Sonatine) installs,
 measures, commits, or rolls back.
 
 ## Required experiments

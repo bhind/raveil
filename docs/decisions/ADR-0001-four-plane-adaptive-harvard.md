@@ -18,6 +18,6 @@ measurement and policy evidence. AI may propose but writes no plane directly.
 
 ## Consequences
 
-Sonatine must enforce distinct capabilities and installation paths. Contracts
+Sonatine Microkernel (Sonatine) must enforce distinct capabilities and installation paths. Contracts
 must identify all four planes. Four-plane hardware enforcement is intended
 architecture and is not present in the minimal seed.

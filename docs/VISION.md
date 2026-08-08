@@ -25,7 +25,7 @@ verification, and specialization over future executions.
    instruction stream on every execution.
 2. Keep RISC-V as the permanent boot, control, exception, admission, trusted
    baseline, and irregular-work fallback architecture.
-3. Explore a Daphnis execution plane that may use static, elastic dataflow,
+3. Explore a Daphnis Execution Subsystem (Daphnis) that may use static, elastic dataflow,
    stream, or hybrid organization according to measurements.
 4. Make optimization history a first-class plane: reusable, bounded online,
    append-only as cold evidence, auditable, and aware of failures.
@@ -80,4 +80,4 @@ These are research directions, not implemented features of
   readiness, backpressure, token movement, and variable latency.
 - ToyDaphnis output is analytical scaffolding, not measured hardware speed.
 - QEMU evidence is emulation evidence, not FPGA, ASIC, or silicon evidence.
-- The minimal Sonatine seed is not yet a secure multi-user operating system.
+- The minimal Sonatine Microkernel seed is not yet a secure multi-user operating system.

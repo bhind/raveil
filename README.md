@@ -2,19 +2,19 @@
 
 This is the smallest executable Raveil seed with two connected bootstrap tracks:
 
-1. a bootable Sonatine authority on QEMU/RISC-V `virt`;
+1. a bootable Sonatine Microkernel (Sonatine) authority on QEMU/RISC-V `virt`;
 2. a host-side bounded Experience experiment.
 
 It deliberately contains no LLM, neural network, RTL, TVM adapter, or real accelerator backend.
 
-## Sonatine boot target
+## Sonatine Microkernel boot target
 
 ```text
 QEMU / RISC-V virt
         ↓
 Raveil boot
         ↓
-Sonatine kernel
+Sonatine Microkernel
         ├─ physical memory
         ├─ capability
         ├─ task
@@ -118,7 +118,7 @@ raveil/backend.py     deterministic ToyDaphnis measurement model
 raveil/experience.py  append-only evidence and bounded consolidation
 raveil/policy.py      nearest-Experience ranking and tuning loop
 raveil/cli.py         demo, benchmark and inspection commands
-sonatine/             freestanding RV64 Sonatine kernel and shell
+sonatine/             freestanding RV64 Sonatine Microkernel and shell
 tests/                executable acceptance tests
 docs/SCOPE.md         explicit boundary and next experiment
 ```
@@ -145,7 +145,7 @@ the status and TODO documents in the same commit.
 
 ## Important limitation
 
-ToyDaphnis is deterministic analytical scaffolding. Its results prove the software loop and metrics, not an architecture speedup. The Sonatine kernel proves the boot/control skeleton, not isolation or scheduling completeness.
+ToyDaphnis is deterministic analytical scaffolding. Its results prove the software loop and metrics, not an architecture speedup. The Sonatine Microkernel proves the boot/control skeleton, not isolation or scheduling completeness.
 
 ## Versioning
 

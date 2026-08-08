@@ -11,7 +11,7 @@ Last updated: 2026-08-08
 | Program | immutable semantics, ExecutionContract, RISC-V fallback | trusted build and admission |
 | Graph | sealed GraphVariant, placement, route, MemoryPlan | privileged installer |
 | Data | versioned objects and streams | capability-authorized producers; never executable |
-| Experience | measurements, failures, lineage, policy state | restricted producers under Sonatine |
+| Experience | measurements, failures, lineage, policy state | restricted producers under Sonatine Microkernel |
 
 An AI advisor writes none of these planes directly. It emits a versioned,
 allow-listed OptimizationProposal.
@@ -21,11 +21,11 @@ allow-listed OptimizationProposal.
 ```text
 semantic program + ExecutionContract
               |
-              +------------------------> trusted RISC-V/Pavane baseline
+              +------------------------> trusted RISC-V/Pavane Semantic Oracle baseline
               |
         typed proposal
               |
-       Miroirs structural checks
+       Miroirs Graph Compiler structural checks
        contract/capability/resource checks
        semantic or numerical verification
               |
@@ -38,14 +38,14 @@ semantic program + ExecutionContract
        Experience evidence + lineage
 ```
 
-The trusted computing base includes Sonatine authority, capability checks,
+The trusted computing base includes Sonatine Microkernel authority, capability checks,
 Program Plane contracts, the structural verifier, the semantic oracle, the
-installer, and the Daphnis plane firewall. Learned models, LLMs, heuristic
+installer, and the Daphnis Execution Subsystem plane firewall. Learned models, LLMs, heuristic
 mappers, external solvers, and unadmitted candidate graphs are fallible.
 
 ## Native execution contract
 
-The leading Daphnis direction is a sealed explicit graph/effect contract, not a
+The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
 conventional sequential register instruction stream and not an exact-cycle VLIW
 schedule. A native job should carry:
 
@@ -63,7 +63,7 @@ preserving the *timing-dynamic* mechanisms required by physical uncertainty.
 The exact encoding remains Proposed in
 [`RFC-0001`](rfcs/RFC-0001-native-explicit-graph-machine.md).
 
-## RISC-V and Daphnis
+## RISC-V and Daphnis Execution Subsystem
 
 RISC-V is the permanent semantic/control/fallback architecture for boot,
 exceptions, cold or irregular code, capabilities, object management, admission,
@@ -77,16 +77,16 @@ interpreters, unpredictable traversal, and other graph-hostile regions.
 
 ## Named components
 
-| Component | Responsibility |
-|---|---|
-| Sonatine | RISC-V microkernel and execution authority |
-| Daphnis | adaptive implementation/execution plane |
-| Miroirs | graph IR, legal transforms, structural verification |
-| Pavane | deterministic reference execution and semantic oracle |
-| Ondine | object residency, spill, stream, and rematerialization |
-| La Valse | search, mapping, and proposal generation |
-| Boléro | persistent runtime, retrieval, and variant selection |
-| Scarbo | adversarial testing, fuzzing, and fault injection |
+| Formal component name | Short name | Responsibility |
+|---|---|---|
+| Sonatine Microkernel | Sonatine | RISC-V microkernel and execution authority |
+| Daphnis Execution Subsystem | Daphnis | adaptive implementation/execution plane |
+| Miroirs Graph Compiler | Miroirs | graph IR, legal transforms, structural verification |
+| Pavane Semantic Oracle | Pavane | deterministic reference execution and semantic oracle |
+| Ondine Object Memory Subsystem | Ondine | object residency, spill, stream, and rematerialization |
+| La Valse Optimization Subsystem | La Valse | search, mapping, and proposal generation |
+| Boléro Experience Runtime | Boléro | persistent runtime, retrieval, and variant selection |
+| Scarbo Verification Subsystem | Scarbo | adversarial testing, fuzzing, and fault injection |
 
 ## Variant and memory lineage
 

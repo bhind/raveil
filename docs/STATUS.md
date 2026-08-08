@@ -13,7 +13,7 @@ they do not alter either executable seed, accepted architecture, or evidence
 class. Local IDEA/MCP endpoints and personal Codex runtime configuration remain
 ignored.
 
-## Executable track A: Sonatine RV64 seed
+## Executable track A: Sonatine Microkernel RV64 seed
 
 QEMU RISC-V `virt`向けのfreestanding kernel seedがあります。
 
@@ -28,7 +28,14 @@ Implemented:
 - capability-checked four-message IPC endpoint;
 - CLINT 100 Hz machine timerとinteger register trap frame;
 - `raveil>` shell;
-- `info`, `mem`, `ps`, `caps`, `ticks`, `ipc`, `alloc`, `reboot` commands。
+- `info`, `mem`, `ps`, `caps`, `ticks`, `ipc`, `alloc`, `reboot` commands;
+- release `-Os` build and isolated `DEBUG=1` `-Og -g3` build;
+- `make debug` QEMU GDB server and `make gdb` command-line client entry
+  points;
+- Docker build context exclusion for host artifacts and a clean container
+  release build;
+- local Gate 0 CI script for host tests, release/debug RV64 builds, DWARF
+  inspection, and QEMU smoke. Hosted CI/CD is intentionally not configured。
 
 Not implemented:
 
@@ -39,7 +46,7 @@ Not implemented:
 - blocking scheduler semantics;
 - capability derivation/delegation;
 - device-tree memory discovery;
-- submission/completion ring and Daphnis device。
+- submission/completion ring and Daphnis Execution Subsystem device。
 
 ## Executable track B: bounded Experience seed
 
@@ -66,8 +73,9 @@ Not implemented:
 
 ## Verification status
 
-The current acceptance suite contains eight tests covering the Python loop and
-host-executable Sonatine task/capability/IPC logic. On 2026-08-08 all eight
+The current acceptance suite contains nine tests covering the Python loop,
+host-executable Sonatine Microkernel task/capability/IPC logic, and the isolated debug-build
+contract. On 2026-08-08 all nine
 passed on the user-operated macOS tree with Python 3.14.6 and Apple Clang
 21.0.0. Freestanding C sources were also syntax-checked by that suite.
 
@@ -77,21 +85,35 @@ successfully produced `sonatine/build/sonatine.elf` with the
 `riscv64-elf-` toolchain. `file` identified it as a 64-bit RISC-V ELF, and
 `riscv64-elf-nm` confirmed `_start`, `trap_entry`, and `kmain` symbols.
 
-That local ELF contained `.symtab` and `.strtab`, but no `.debug_info` or
-`.debug_line`; source-level debugging is therefore not yet configured.
+On 2026-08-08 the native Homebrew path performed a clean release build, a
+separate debug build, release QEMU smoke, and command-line GDB verification.
+The release ELF contains no DWARF debug sections. The debug ELF contains
+`.debug_info` and `.debug_line`; GDB 17.2 connected to QEMU 11.0.3,
+installed a `kmain` breakpoint, and stopped at `src/kernel.c:25` with source
+lines available.
 
-On 2026-08-08, the existing ELF passed the native Homebrew
-`make -C sonatine ... smoke` path under QEMU 11.0.3 with exit status 0.
-The complete console transcript, tool versions, Git code revision, and ignored
-smoke-log hash are recorded in `EXP-0002`. This session did not perform a
-clean rebuild, Docker reproduction, or GDB attachment, so Gate 0 remains in
-progress.
+Exact commands, tool versions, Git base revision, console output, and ignored
+raw-log hashes are recorded in `EXP-0002`. A clean no-cache Docker build and
+Docker-contained QEMU smoke also passed. Public commit `3347087` was then
+cloned into a fresh directory: all nine tests, release and debug builds, DWARF
+checks, and QEMU smoke passed. The same checks pass through
+`scripts/ci-local.sh`. A GitHub Actions workflow briefly ran once during Gate 0
+work before the local-only policy was clarified; it was then removed, and no
+hosted CI/CD remains configured. A public-tree scan found no generated
+evidence, build output, IDE state, credentials, or machine-local absolute
+paths. Gate 0 is complete.
+
+The installed IntelliJ 2026.2 C/C++ plugin exposes `Remote Debug`
+(`CLion_Remote`) for attaching to an existing QEMU GDB stub. The configuration
+type and required fields were inspected, but no claim of a completed
+IDE-driven attach is made.
 
 ## Non-claims
 
 - ToyDaphnis cycle values are analytical scaffolding, not accelerator performance.
 - QEMU correctness would not establish FPGA/ASIC timing or isolation security.
-- The Four-plane architecture, Rust/C++ split, Miroirs, Pavane, Boléro, Ondine,
-  La Valse, Scarbo, and native Daphnis are intended architecture, not all present
+- The Four-plane architecture, Rust/C++ split, Miroirs Graph Compiler, Pavane Semantic Oracle,
+  Boléro Experience Runtime, Ondine Object Memory Subsystem, La Valse Optimization Subsystem,
+  Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.

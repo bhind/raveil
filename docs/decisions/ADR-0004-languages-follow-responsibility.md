@@ -15,7 +15,7 @@ type and ownership guarantees unused in high-integrity policy code.
   ExecutionContract admission, and GraphVariant lifecycle.
 - C++20: host runtime, compiler/model orchestration, transforms, and adapters.
 - Python: optimization research, experiments, and analysis.
-- Chisel/Scala: generated Daphnis RTL.
+- Chisel/Scala: generated Daphnis Execution Subsystem RTL.
 - stable versioned C ABI: Rust/C++ boundary.
 
 The bootstrap C kernel and Python seed do not supersede this intended split.

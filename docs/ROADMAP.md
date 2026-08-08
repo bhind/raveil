@@ -8,16 +8,27 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Gate 0 — independently reproducible minimum seed
 
-State: **In progress**
+State: **Completed**
 
-- all eight host/Python acceptance tests pass from a clean clone;
-- release and explicit debug Sonatine builds are reproducible;
+- all nine host/Python acceptance tests pass from a clean clone;
+- release and explicit debug Sonatine Microkernel builds are reproducible;
 - debug ELF contains line and debug information;
 - native macOS or Docker QEMU smoke transcript is recorded in EXP-0002;
 - command-line GDB attaches and stops at `kmain`;
-- CI covers Python, host C, freestanding RV64 build, and QEMU smoke;
+- local CI covers Python, host C, freestanding RV64 build, and QEMU smoke;
 - no generated evidence, build output, IDE state, secrets, or local absolute
   paths are committed.
+
+Verified on 2026-08-08: clean native release/debug builds, separated release
+and debug flags, DWARF `.debug_info`/`.debug_line`, release QEMU smoke,
+command-line GDB stop at `kmain`, clean Docker build and Docker-contained QEMU
+smoke. A fresh clone of public commit `3347087` passed all nine tests and both
+build modes plus smoke. The same checks are available through
+`scripts/ci-local.sh`; hosted CI/CD is intentionally deferred until the project
+has multiple contributors and explicit cost approval. The public-tree hygiene
+scan found no generated evidence, build output, IDE state, credentials, or
+machine-local paths. The actual IntelliJ `Remote Debug` type was verified;
+IDE-driven attachment is not a Gate 0 claim.
 
 ## Gate 1 — real Experience boundary
 
@@ -31,7 +42,7 @@ coverage, calibration, budget, retrieval cost, storage, and evidence class.
 Exit: bounded Experience improves at least one honest holdout without
 unacceptable negative transfer.
 
-## Gate 2 — minimal isolated Sonatine slice
+## Gate 2 — minimal isolated Sonatine Microkernel slice
 
 State: **Planned**
 
@@ -62,7 +73,7 @@ State: **Planned**
 
 Import one pinned real workload behind an adapter; define Raveil-owned
 GraphVariant, MemoryPlan, OptimizationProposal, and ResourceCertificate; add
-Miroirs structural validation and Pavane differential checking; compare static,
+Miroirs Graph Compiler structural validation and Pavane Semantic Oracle differential checking; compare static,
 elastic, stream, and hybrid execution models.
 
 An AI-compute demonstration may then test a small Transformer, including

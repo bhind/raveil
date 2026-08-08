@@ -12,7 +12,7 @@ executable evidence.
 
 Reset to `v0.0000000000001` with two independent tracks:
 
-1. a freestanding RV64 Sonatine authority/shell seed;
+1. a freestanding RV64 Sonatine Microkernel authority/shell seed;
 2. a host Python bounded-Experience loop using analytical ToyDaphnis.
 
 Do not add LLMs, production RTL, broad framework integration, or accelerator

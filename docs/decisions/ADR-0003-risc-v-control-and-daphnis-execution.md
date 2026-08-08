@@ -1,4 +1,4 @@
-# ADR-0003: RISC-V control/fallback plus Daphnis execution
+# ADR-0003: RISC-V control/fallback plus Daphnis Execution Subsystem
 
 Status: Accepted
 Date: 2026-08-07
@@ -12,7 +12,7 @@ hardware to rediscover known dependencies in structured repeated work.
 ## Decision
 
 Retain RISC-V permanently for boot, control, admission, capabilities, recovery,
-trusted baseline, cold code, and irregular dynamic work. Connect Daphnis as an
+trusted baseline, cold code, and irregular dynamic work. Connect Daphnis Execution Subsystem (Daphnis) as an
 implementation plane through owned object/job/completion contracts.
 
 RISC-V does not define Daphnis-native machine code. Daphnis is not fixed to

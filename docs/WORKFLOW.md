@@ -35,7 +35,10 @@ they do not make design or measurement decisions.
   the final documentation and evidence updates.
 - `raveil-task-governance` applies the record and evidence checklist to any
   material Raveil change. `raveil-gate0-evidence` applies the specific
-  Sonatine Gate 0 collection procedure.
+  Sonatine Microkernel Gate 0 collection procedure.
+- `raveil-remote-release` audits release readiness and permits remote tag and
+  Release publication only after explicit owner approval. It never enables
+  hosted CI/CD; current validation runs through `scripts/ci-local.sh`.
 
 ### Progress reviews
 

@@ -13,7 +13,7 @@ resolves it.
 - Which dependencies and alias facts can admission prove without making compile
   or verification cost impractical?
 - Where is the measured boundary between static, elastic dataflow, stream, and
-  hybrid Daphnis organizations?
+  hybrid Daphnis Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?
 - Which regions remain on RISC-V or bounded dynamic tiles: pointer chasing,
   interpreters, JITs, branch-heavy control, exceptions, and unpredictable

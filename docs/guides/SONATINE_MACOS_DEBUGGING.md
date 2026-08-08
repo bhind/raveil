@@ -1,4 +1,4 @@
-# Sonatine debugging on macOS
+# Sonatine Microkernel debugging on macOS
 
 Classification: reusable development guide
 
@@ -43,23 +43,25 @@ The C entry point is `kmain`, not `kernel_main`.
 
 ## Checking debug symbols
 
-Check for source debug information:
+Build and check the isolated debug ELF:
 
 ```bash
-/opt/homebrew/bin/riscv64-elf-readelf -S sonatine/build/sonatine.elf \
+make -C sonatine \
+  CROSS_COMPILE=/opt/homebrew/bin/riscv64-elf- \
+  check-debug
+
+/opt/homebrew/bin/riscv64-elf-readelf -S sonatine/build/debug/sonatine.elf \
   | grep -E '\.debug_(info|line)'
 ```
 
 If the output is empty, the ELF cannot support verified source-line
-breakpoints. A debug mode should use `-Og -g3` for C and `-g3` for assembly
-without weakening the release `-Os` path. Consult [STATUS](../STATUS.md),
-[TODO](../../TODO.md), and
-[EXP-0002](../experiments/EXP-0002-sonatine-rv64-reproducibility.md) for the
-current implementation and verification state.
+breakpoints. The debug mode uses `-Og -g3` for C and `-g3` for assembly,
+builds under `sonatine/build/debug/`, and leaves the release `-Os` objects
+under `sonatine/build/`.
 
 ## Command-line GDB target
 
-When the current STATUS confirms debug symbols exist, start QEMU paused:
+Start QEMU paused in terminal 1:
 
 ```bash
 make -C sonatine \
@@ -68,20 +70,23 @@ make -C sonatine \
   debug
 ```
 
-Then connect:
+Connect in terminal 2:
 
 ```bash
-/opt/homebrew/bin/riscv64-elf-gdb sonatine/build/sonatine.elf
+make -C sonatine \
+  CROSS_COMPILE=/opt/homebrew/bin/riscv64-elf- \
+  gdb
 ```
 
+The `gdb` target loads `build/debug/sonatine.elf`, connects to
+`127.0.0.1:1234`, and creates a `kmain` breakpoint. At the GDB prompt:
+
 ```gdb
-target remote 127.0.0.1:1234
-break kmain
 continue
 ```
 
-Record the actual breakpoint and source-line result in EXP-0002. Do not claim
-IDE debugging from command-line GDB evidence alone.
+The verified result stops at `src/kernel.c:25`. This proves command-line
+source debugging only; do not infer IDE attachment from it.
 
 ## IntelliJ IDEA C/C++ plugin
 
@@ -119,3 +124,18 @@ Before documenting IDE attachment, inspect
 `Run -> Edit Configurations... -> +` in the installed plugin. Use a genuine
 C/C++ remote GDB configuration only if present. Do not use Remote JVM Debug or
 copy CLion-specific fields into this guide.
+
+The inspected IntelliJ 2026.2 plugins provide `Remote Debug` with type ID
+`CLion_Remote`. For Sonatine use:
+
+- target: `127.0.0.1:1234`;
+- symbol file: `sonatine/build/debug/sonatine.elf`;
+- debugger: the `Raveil RISC-V` custom GDB profile;
+- sysroot: empty;
+- path mappings: normally unnecessary for the current DWARF paths.
+
+Do not select `Remote GDB Server`; that configuration launches a remote
+`gdbserver` and does not attach to an already-running QEMU stub. Create the
+`Remote Debug` configuration once through the installed IDE UI and read back
+the generated XML before sharing it, because debugger-profile serialization is
+version-sensitive.

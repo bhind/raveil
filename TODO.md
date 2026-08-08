@@ -14,30 +14,36 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   docs routing, archive conversation provenance, extract reusable debugging and
   design-history records, and extend governance progress audits.
 
-- [ ] **T-0001** Run `make -C sonatine smoke` on macOS through Docker and record
+- [x] **T-0001** Run `make -C sonatine smoke` on macOS through Docker and record
   `EXP-0002` with exact Mac model, Docker/QEMU versions, console output, and result.
-- [ ] **T-0002** Run all eight tests from a clean GitHub clone and record commands
+- [x] **T-0002** Run all nine tests from a clean GitHub clone and record commands
   in `docs/STATUS.md`.
-- [ ] **T-0003** Add GitHub Actions for Python tests, freestanding C build, and QEMU
-  smoke test.
-- [ ] **T-0004** Reconcile the existing local `v0.0000000000001` tag (which
-  points at the initial commit), then publish/verify the GitHub Release only
-  after T-0001 to T-0003 pass.
-- [ ] **T-0005** Confirm that the public repository contains no generated
+- [x] **T-0003** Add a local CI entry point for Python tests, freestanding C
+  release/debug builds, DWARF inspection, and QEMU smoke. Do not use hosted CI.
+- [x] **T-0004** Reconcile the existing public `v0.0000000000001` tag and
+  Release as historical artifacts. Do not move the tag or publish a new
+  release while CI/CD is intentionally local-only.
+- [x] **T-0005** Confirm that the public repository contains no generated
   Experience log, credential, build output, or machine-local path.
-- [ ] **T-0006** Add a first-class debug build mode (`-Og -g3` for C and `-g3`
+- [x] **T-0006** Add a first-class debug build mode (`-Og -g3` for C and `-g3`
   for assembly) without weakening the release flags, then verify `.debug_info`
   and `.debug_line` in the ELF.
-- [ ] **T-0007** Verify the actual IntelliJ IDEA C/C++ plugin run-configuration
+- [x] **T-0007** Verify the actual IntelliJ IDEA C/C++ plugin run-configuration
   list before documenting IDE-driven GDB attachment. Do not substitute CLion
   menus or `Remote JVM Debug`.
 - [x] **T-0008** Record the native macOS/Homebrew build and QEMU smoke transcript
   in `EXP-0002`, including exact tool versions and Git commit SHA.
-- [ ] **T-0061** Verify command-line QEMU `-S -s` plus
+- [x] **T-0061** Verify command-line QEMU `-S -s` plus
   `riscv64-elf-gdb`, stop at `kmain`, and record commands and results in
   `EXP-0002`.
+- [x] **T-0062** Establish formal component names in the Glossary and apply
+  the display convention to active records without renaming code identifiers
+  or archived source text.
+- [ ] **T-0063** Reconsider GitHub-hosted CI/CD only when the project has
+  multiple contributors and its owner has explicitly approved the cost and
+  operating policy.
 
-## Next — turn Sonatine seed into a real minimal microkernel slice
+## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 
 - [ ] **T-0010** Parse or deliberately constrain the QEMU device tree instead of
   silently assuming all platform properties.
@@ -76,7 +82,7 @@ manifests.
 ## Later — connect the two tracks
 
 - [ ] **T-0030** Define shared `JobDescriptor` and `CompletionRecord` schemas.
-- [ ] **T-0031** Add Sonatine submission/completion rings and object table.
+- [ ] **T-0031** Add Sonatine Microkernel submission/completion rings and object table.
 - [ ] **T-0032** Send measured completion telemetry into append-only Experience.
 - [ ] **T-0033** Implement shadow execution, commit, cancellation, and rollback.
 - [ ] **T-0034** Enforce Program/Graph/Data/Experience write authorities.
@@ -87,9 +93,9 @@ manifests.
 - [ ] **T-0041** Define Raveil-owned `GraphVariant`, `MemoryPlan`, and
   `OptimizationProposal` schemas.
 - [ ] **T-0042** Bootstrap a mapper/simulator adapter without leaking upstream types.
-- [ ] **T-0043** Implement Miroirs structural validation and Pavane differential
+- [ ] **T-0043** Implement Miroirs Graph Compiler structural validation and Pavane Semantic Oracle differential
   semantic checking.
-- [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis organizations.
+- [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis Execution Subsystem organizations.
 
 ## Research backlog
 

@@ -77,4 +77,5 @@ its findings are proposals. A subagent never marks a task complete, changes a
 gate, accepts an ADR, or concludes an experiment.
 
 Run the governance workflow at task kickoff and closeout. The detailed process
-is in [WORKFLOW](WORKFLOW.md).
+is in [WORKFLOW](WORKFLOW.md). Remote publication uses the repository-scoped
+`raveil-remote-release` skill; hosted CI/CD remains disabled by policy.

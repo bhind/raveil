@@ -8,9 +8,9 @@ rewrite it.
 |---|---|---|
 | [ADR-0001](ADR-0001-four-plane-adaptive-harvard.md) | Accepted | Four-plane adaptive Harvard model |
 | [ADR-0002](ADR-0002-experience-advises-measurement-governs.md) | Accepted | Experience advises; measurement governs commit |
-| [ADR-0003](ADR-0003-risc-v-control-and-daphnis-execution.md) | Accepted | RISC-V control/fallback plus Daphnis execution |
+| [ADR-0003](ADR-0003-risc-v-control-and-daphnis-execution.md) | Accepted | RISC-V control/fallback plus Daphnis Execution Subsystem |
 | [ADR-0004](ADR-0004-languages-follow-responsibility.md) | Accepted | Languages follow responsibility |
 | [ADR-0005](ADR-0005-append-only-and-bounded-experience.md) | Accepted | Append-only evidence plus bounded online Experience |
 | [ADR-0006](ADR-0006-own-contracts-use-upstreams.md) | Accepted | Own contracts; use and progressively replace upstreams |
-| [ADR-0007](ADR-0007-two-minimal-executable-seeds.md) | Accepted | Bootstrap Sonatine and Experience separately |
+| [ADR-0007](ADR-0007-two-minimal-executable-seeds.md) | Accepted | Bootstrap Sonatine Microkernel and Experience separately |
 | [ADR-0008](ADR-0008-staged-adaptive-council.md) | Proposed | Staged multi-policy Adaptive Council |

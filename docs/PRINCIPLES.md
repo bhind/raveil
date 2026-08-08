@@ -10,7 +10,7 @@ Last updated: 2026-08-08
    grant rights, or declare their own result correct.
 3. **Measure before commit.** A target-context measurement or shadow execution
    is required before promotion, with a trusted baseline and rollback path.
-4. **Make dependencies and effects explicit.** Native Daphnis work should expose
+4. **Make dependencies and effects explicit.** Native Daphnis Execution Subsystem work should expose
    graph dependencies, object-bounded accesses, effects, resource requirements,
    and semantic constraints. It must not inherit a sequential register ISA as
    its native abstraction by accident.

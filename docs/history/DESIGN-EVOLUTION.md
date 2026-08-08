@@ -2,6 +2,9 @@
 
 Classification: historical synthesis; not implementation authority
 
+Historical wording below is preserved. For the current formal component names,
+see the [Glossary](../GLOSSARY.md).
+
 This document records how the Raveil direction changed. Current facts live in
 [STATUS](../STATUS.md), accepted decisions in
 [ADRs](../decisions/README.md), and unresolved proposals in
