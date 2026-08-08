@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime, timezone
+import contextlib
+import io
 import json
 import os
 from pathlib import Path
@@ -12,6 +14,7 @@ import unittest
 from unittest import mock
 
 from raveil.analysis import analyze_policy_outcomes, headroom_capture
+from raveil.cli import main as cli_main
 from raveil.experiment_runner import analyze_bundle, measurement_order, run_experiment, seal_bundle
 from raveil.experiment_schema import (
     BenchmarkCandidate,
@@ -65,6 +68,17 @@ class ManifestTests(unittest.TestCase):
         validate_backend_evidence("qemu-telemetry", "emulation")
         with self.assertRaisesRegex(ValueError, "classified as emulation"):
             validate_backend_evidence("qemu-telemetry", "silicon")
+
+    def test_cli_reports_preflight_failure_without_traceback(self) -> None:
+        error = io.StringIO()
+        with mock.patch(
+            "raveil.cli.run_experiment", side_effect=RuntimeError("powermetrics unavailable")
+        ), contextlib.redirect_stderr(error):
+            result = cli_main(
+                ["experiment", "run", "--manifest", "benchmarks/manifests/gate1-fixed-c-v1.json"]
+            )
+        self.assertEqual(result, 2)
+        self.assertEqual(error.getvalue(), "error: powermetrics unavailable\n")
 
 
 class NativeBackendTests(unittest.TestCase):

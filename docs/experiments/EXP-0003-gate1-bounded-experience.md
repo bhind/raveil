@@ -39,6 +39,10 @@ CPU identity without user or serial identity, Python/compiler/tool versions,
 and evidence class. Official `apache-tvm` will be installed in an isolated,
 pinned environment only after the fixed-C pilot stabilizes the contract.
 
+Environment preflight on 2026-08-08 installed rclone 1.75.0. No rclone remote or
+configuration exists yet. Powermetrics requires interactive sudo
+authentication; none was cached during preflight.
+
 ## Procedure
 
 1. Commit the manifest and harness; require a clean worktree.
@@ -80,7 +84,8 @@ Remote logical path:
 `Raveil/research-data/EXP-0003/<RUN-ID>/` through a repository-external rclone
 configuration.
 
-No RUN-ID, sealed bundle hash, or completed remote verification exists yet.
+No RUN-ID, sealed bundle hash, configured remote, or completed remote
+verification exists yet.
 An experiment run is incomplete until remote content/hash/size checks pass and
 the completion marker is present.
 
@@ -90,6 +95,10 @@ No performance or energy result has been collected. Host acceptance tests only
 verify schemas, schedule invariants, C reference checksums, statistical
 calculation, fail-closed power parsing, and bundle integrity behavior. These are
 implementation facts, not hypothesis evidence.
+
+The clean-tree CLI preflight failed closed before bundle creation when sudo
+privilege was unavailable. This verifies a failure boundary only, not a
+measurement result.
 
 ## Interpretation
 
