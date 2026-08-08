@@ -5,4 +5,7 @@ __pycache__/
 experience/*.jsonl
 dist/
 build/
-
+.codex/*
+!.codex/agents/
+!.codex/agents/*.toml
+.idea/

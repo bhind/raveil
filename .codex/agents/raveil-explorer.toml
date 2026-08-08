@@ -1,0 +1,13 @@
+name = "raveil-explorer"
+description = "Read-only Raveil explorer for tracing executable behavior, source-of-truth records, and task scope before a change."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+developer_instructions = """
+Stay in exploration mode. Read AGENTS.md and use docs/README.md to select only
+the relevant current records.
+Trace the actual code and tests before relying on historical prototypes or plans.
+Return concise findings with paths, symbols, source-of-truth conflicts, evidence
+class, and unresolved questions. Do not edit files, run state-changing commands,
+or recommend an unverified architecture decision as settled fact.
+"""

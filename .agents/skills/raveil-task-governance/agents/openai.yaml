@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raveil Task Governance"
+  short_description: "Review progress and govern Raveil record updates"
+  default_prompt: "Use $raveil-task-governance to audit progress and close out this Raveil task."

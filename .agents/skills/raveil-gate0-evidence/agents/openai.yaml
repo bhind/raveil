@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raveil Gate 0 Evidence"
+  short_description: "Record Sonatine Gate 0 verification evidence"
+  default_prompt: "Use $raveil-gate0-evidence to collect and record Gate 0 evidence."

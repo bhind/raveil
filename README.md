@@ -123,6 +123,26 @@ tests/                executable acceptance tests
 docs/SCOPE.md         explicit boundary and next experiment
 ```
 
+## Project knowledge base
+
+Raveil is treated as a research program, not only as a source tree. The
+repository records the concept, current implementation, open work, experiments,
+and architectural decisions in Markdown.
+
+- [`docs/README.md`](docs/README.md) — documentation index and recording rules
+- [`docs/VISION.md`](docs/VISION.md) — research thesis and intended end state
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Four-plane architecture and component boundaries
+- [`docs/EXPERIENCE.md`](docs/EXPERIENCE.md) — persistent Experience model and evaluation metrics
+- [`docs/STATUS.md`](docs/STATUS.md) — what is actually implemented now
+- [`TODO.md`](TODO.md) — actionable work queue
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — gated long-term roadmap
+- [`docs/decisions/`](docs/decisions/README.md) — Architecture Decision Records
+- [`docs/experiments/`](docs/experiments/README.md) — experiment plans and results
+
+The repository rule is simple: architectural changes require a decision record;
+performance claims require an experiment record; implementation changes update
+the status and TODO documents in the same commit.
+
 ## Important limitation
 
 ToyDaphnis is deterministic analytical scaffolding. Its results prove the software loop and metrics, not an architecture speedup. The Sonatine kernel proves the boot/control skeleton, not isolation or scheduling completeness.
