@@ -14,3 +14,4 @@ rewrite it.
 | [ADR-0006](ADR-0006-own-contracts-use-upstreams.md) | Accepted | Own contracts; use and progressively replace upstreams |
 | [ADR-0007](ADR-0007-two-minimal-executable-seeds.md) | Accepted | Bootstrap Sonatine Microkernel and Experience separately |
 | [ADR-0008](ADR-0008-staged-adaptive-council.md) | Proposed | Staged multi-policy Adaptive Council |
+| [ADR-0009](ADR-0009-gate1-measurement-and-bundle-boundaries.md) | Accepted | Measured adapters and immutable research bundles |

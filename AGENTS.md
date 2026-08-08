@@ -78,6 +78,17 @@ context or state explicitly that none applies. At closeout, reconcile STATUS,
 TODO, ROADMAP, OPEN_QUESTIONS, relevant ADR/EXP, and the dated log. Do not mark
 work complete from conversation or subagent output alone.
 
+## Branch workflow
+
+Gate 0 is complete. Make every tracked implementation or record change on a
+dedicated branch after inspecting `git status`; read-only review may remain on
+the current branch. Name branches `<type>/<record-id>-<short-slug>` using
+lowercase kebab-case. Allowed types are `feat`, `fix`, `research`, `docs`,
+`test`, `build`, and `chore`; use the primary lowercase `t-`, `exp-`, `adr-`, or
+`rfc-` identifier (for example,
+`research/exp-0003-gate1-measurement`). Keep one coherent change per branch and
+do not discard unrelated uncommitted work when creating or switching branches.
+
 ## Agent orchestration
 
 The primary agent owns task classification, tracked-file integration, final

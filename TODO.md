@@ -42,6 +42,19 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 - [ ] **T-0063** Reconsider GitHub-hosted CI/CD only when the project has
   multiple contributors and its owner has explicitly approved the cost and
   operating policy.
+- [x] **T-0064** Replace the three generic Codex roles with Project Manager,
+  Experience/Systems/Measurement Implementers, Tester, Performance/Security
+  Reviewers, and Researcher; enforce canonical-record and research-memo write
+  boundaries.
+- [x] **T-0065** Implement ignored local research bundles plus immutable rclone
+  copy, download-based content verification, overwrite refusal, external
+  credential boundary, and completion-marker-last behavior. A real Drive sync
+  remains EXP-0003 evidence, not an implementation acceptance claim.
+- [x] **T-0066** Add the read-only Raveil Librarian agent and context-routing
+  skill that returns a minimal authoritative reading packet without deciding
+  tasks, gates, or claims.
+- [x] **T-0067** Require post-Gate-0 work branches and document the lowercase
+  `<type>/<record-id>-<short-slug>` naming convention.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 
@@ -64,20 +77,21 @@ timer-driven switching without capability bypass.
 
 ## Next — replace ToyDaphnis with one real measurement boundary
 
-- [ ] **T-0020** Define a replayable benchmark manifest and environment signature.
-- [ ] **T-0021** Implement a fixed CPU-loop backend behind
+- [x] **T-0020** Define a replayable benchmark manifest and environment signature.
+- [x] **T-0021** Implement a fixed CPU-loop backend behind
   `measure(context, candidate) -> Metrics`, or document why TVM MetaSchedule is
   selected instead.
 - [ ] **T-0022** Compare cold prior, full-history nearest neighbor, bounded
   Experience, FIFO, and reservoir retention.
-- [ ] **T-0023** Add lineage, shape, memory-budget, and operator-composition holdouts.
+- [x] **T-0023** Add lineage, shape, working-set/memory, and
+  operator-composition holdouts.
 - [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,
   retrieval latency, active-memory size, and cold-evidence size separately.
 - [ ] **T-0025** Preserve and analyze failed and boundary variants, not only winners.
 
-Experience gate: bounded Experience improves at least one honest holdout without
-an unacceptable NTR increase, and the result is reproducible from committed
-manifests.
+Experience gate: the EXP-0003 fixed-C and pinned-TVM criteria in ROADMAP all
+pass, immutable remote bundles verify, and an independent run reaches the same
+conclusion. A fixed-C/TVM contradiction keeps the Gate open.
 
 ## Later — connect the two tracks
 

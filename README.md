@@ -5,7 +5,9 @@ This is the smallest executable Raveil seed with two connected bootstrap tracks:
 1. a bootable Sonatine Microkernel (Sonatine) authority on QEMU/RISC-V `virt`;
 2. a host-side bounded Experience experiment.
 
-It deliberately contains no LLM, neural network, RTL, TVM adapter, or real accelerator backend.
+It deliberately contains no LLM, neural network, RTL, completed TVM
+MetaSchedule implementation, or real accelerator backend. Gate 1 now includes a
+fixed native C measurement harness, but no performance result is claimed.
 
 ## Sonatine Microkernel boot target
 
@@ -110,6 +112,21 @@ python -m raveil bench --budget 2 --active-limit 64
 python -m raveil inspect --experience experience/local.jsonl
 ```
 
+Gate 1 research runs use a committed manifest and an immutable lifecycle:
+
+```bash
+python -m raveil experiment run --manifest benchmarks/manifests/gate1-fixed-c-v1.json
+python -m raveil experiment analyze --run RUN_ID
+python -m raveil experiment seal --run RUN_ID
+python -m raveil experiment sync --run RUN_ID
+```
+
+Run requires a clean Git worktree and Apple `powermetrics` permission. Missing
+energy/thermal samples fail closed. Raw bundles remain ignored under
+`artifacts/research/`; rclone configuration and Google credentials stay outside
+the repository. A run is incomplete until remote content verification passes
+and the completion marker is copied last.
+
 ## Repository map
 
 ```text
@@ -118,6 +135,7 @@ raveil/backend.py     deterministic ToyDaphnis measurement model
 raveil/experience.py  append-only evidence and bounded consolidation
 raveil/policy.py      nearest-Experience ranking and tuning loop
 raveil/cli.py         demo, benchmark and inspection commands
+benchmarks/            Gate 1 native C source and committed manifests
 sonatine/             freestanding RV64 Sonatine Microkernel and shell
 tests/                executable acceptance tests
 docs/SCOPE.md         explicit boundary and next experiment
@@ -145,7 +163,11 @@ the status and TODO documents in the same commit.
 
 ## Important limitation
 
-ToyDaphnis is deterministic analytical scaffolding. Its results prove the software loop and metrics, not an architecture speedup. The Sonatine Microkernel proves the boot/control skeleton, not isolation or scheduling completeness.
+ToyDaphnis is deterministic analytical scaffolding. Its results prove the
+software loop and metrics, not an architecture speedup. Native C checksum and
+unit-test results prove harness behavior, not a Gate 1 latency/energy outcome.
+The Sonatine Microkernel proves the boot/control skeleton, not isolation or
+scheduling completeness.
 
 ## Versioning
 

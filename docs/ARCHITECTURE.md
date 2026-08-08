@@ -124,3 +124,17 @@ may be used behind adapters. Raveil owns ProgramIdentity, ExecutionContract,
 GraphVariant, ObjectManifest, MemoryPlan, OptimizationProposal,
 ResourceCertificate, ExperienceRecord, JobDescriptor, and CompletionRecord.
 Upstream types do not become Raveil's public contract.
+
+## Measurement and research-data boundary
+
+Raveil owns versioned BenchmarkManifest, EnvironmentSignature,
+MeasurementRecord, and PolicyOutcome schemas. ToyDaphnis, native C, pinned TVM,
+and future QEMU telemetry remain adapters behind
+`MeasurementBackend.measure(context, candidate)`. The baseline-first,
+semantic-check, target-measurement, and rollback boundaries apply before an
+Experience proposal can become evidence.
+
+Ignored immutable research bundles preserve raw measurements locally and on a
+verified Google Drive durability copy. Neither Drive nor an upstream tuning
+database is Program/Graph/Data/Experience authority or an online Experience
+retrieval service. See ADR-0009 and RFC-0002.

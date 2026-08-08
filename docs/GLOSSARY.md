@@ -21,6 +21,11 @@ Last updated: 2026-08-08
 | Adaptive Council | — | staged collection of cheap and expensive proposers/reviewers |
 | HCR | — | Headroom Capture Rate against a trusted baseline and offline oracle |
 | NTR | — | Negative Transfer Rate |
+| BenchmarkManifest | — | versioned preregistration of workloads, candidates, budgets, ordering, tools, and measurement controls |
+| EnvironmentSignature | — | privacy-scrubbed target, Git, OS, compiler, tool, and evidence identity for one run |
+| MeasurementRecord | — | one sequenced candidate sample with semantic, latency, energy, thermal, validity, and failure evidence |
+| PolicyOutcome | — | paired policy selection result with baseline, selected, offline-oracle, budget, retrieval, and memory fields |
+| RUN-ID | — | UTC time, Git SHA prefix, and manifest-hash prefix identifying one immutable experiment run |
 | dynamic island | — | bounded execution region for irregular or data-dependent work |
 | evidence class | — | analytical, simulated, emulated, FPGA, or silicon result category |
 

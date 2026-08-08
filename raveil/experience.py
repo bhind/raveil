@@ -140,6 +140,7 @@ class ExperienceStore:
 
     def _load(self) -> None:
         assert self.path is not None
+        expected_sequence = 1
         with self.path.open("r", encoding="utf-8") as source:
             for line_number, line in enumerate(source, start=1):
                 if not line.strip():
@@ -148,6 +149,12 @@ class ExperienceStore:
                     record = ExperienceRecord.from_dict(json.loads(line))
                 except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
                     raise ValueError(f"invalid Experience record at line {line_number}: {error}") from error
+                if record.sequence != expected_sequence:
+                    raise ValueError(
+                        f"invalid Experience record at line {line_number}: "
+                        f"expected sequence {expected_sequence}, found {record.sequence}"
+                    )
+                expected_sequence += 1
                 self._cold_count += record.samples
                 self._next_sequence = max(self._next_sequence, record.sequence + 1)
                 self._active.append(record)
