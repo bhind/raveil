@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate-0:
+    name: Gate 0 reproducibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install host and RV64 dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            gcc \
+            gcc-riscv64-unknown-elf \
+            make \
+            qemu-system-misc
+
+      - name: Record tool versions
+        run: |
+          python3 --version
+          cc --version
+          riscv64-unknown-elf-gcc --version
+          riscv64-unknown-elf-readelf --version
+          qemu-system-riscv64 --version
+
+      - name: Run Python and host C tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Build freestanding RV64 release image
+        run: make -C sonatine clean all
+
+      - name: Build and inspect freestanding RV64 debug image
+        run: make -C sonatine check-debug
+
+      - name: Run RV64 QEMU smoke test
+        run: make -C sonatine smoke
+
+      - name: Upload QEMU smoke transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonatine-qemu-smoke-${{ github.run_id }}
+          path: sonatine/build/smoke.log
+          if-no-files-found: warn
+          retention-days: 14

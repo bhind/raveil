@@ -27,8 +27,14 @@ class SonatineSourceTests(unittest.TestCase):
             "link.ld",
             "Makefile",
             "Dockerfile",
+            ".dockerignore",
         }
         self.assertEqual([], sorted(str(path) for path in required if not (SONATINE / path).is_file()))
+
+        dockerignore = (SONATINE / ".dockerignore").read_text(encoding="utf-8")
+        self.assertIn("build/", dockerignore.splitlines())
+        dockerfile = (SONATINE / "Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("RUN make clean && make", dockerfile)
 
     def test_shell_exposes_each_minimum_subsystem(self) -> None:
         shell = (SONATINE / "src/shell.c").read_text(encoding="utf-8")
@@ -37,6 +43,21 @@ class SonatineSourceTests(unittest.TestCase):
         kernel = (SONATINE / "src/kernel.c").read_text(encoding="utf-8")
         for subsystem in ("physical memory", "capability", "task", "IPC", "timer"):
             self.assertIn(subsystem, kernel)
+
+    def test_makefile_has_isolated_debug_build(self) -> None:
+        makefile = (SONATINE / "Makefile").read_text(encoding="utf-8")
+        for expected in (
+            "DEBUG ?= 0",
+            "BUILD := $(BUILD_ROOT)/debug",
+            "COPT := -Og -g3",
+            "ASDEBUG := -g3",
+            "$(MAKE) DEBUG=1 debug-server",
+            "$(MAKE) DEBUG=1 gdb-client",
+            "-ex 'break kmain'",
+            "$(READELF) -S $(BUILD_ROOT)/debug/sonatine.elf",
+            "command -v $(GDB)",
+        ):
+            self.assertIn(expected, makefile)
 
     def test_capability_task_and_ipc_host_model(self) -> None:
         compiler = shutil.which("cc")

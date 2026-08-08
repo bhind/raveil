@@ -9,6 +9,6 @@ RUN apt-get update \
 
 WORKDIR /raveil/sonatine
 COPY . .
-RUN make
+RUN make clean && make
 
 CMD ["make", "run"]

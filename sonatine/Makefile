@@ -1,9 +1,22 @@
 CROSS_COMPILE ?= riscv64-unknown-elf-
 CC := $(CROSS_COMPILE)gcc
 OBJCOPY := $(CROSS_COMPILE)objcopy
+READELF := $(CROSS_COMPILE)readelf
+GDB := $(CROSS_COMPILE)gdb
 QEMU ?= qemu-system-riscv64
+DEBUG ?= 0
 
-BUILD := build
+BUILD_ROOT := build
+ifeq ($(DEBUG),1)
+BUILD := $(BUILD_ROOT)/debug
+COPT := -Og -g3
+ASDEBUG := -g3
+else
+BUILD := $(BUILD_ROOT)
+COPT := -Os
+ASDEBUG :=
+endif
+
 TARGET := $(BUILD)/sonatine.elf
 C_SOURCES := $(wildcard src/*.c)
 S_SOURCES := $(wildcard src/*.S)
@@ -12,13 +25,13 @@ OBJECTS := $(patsubst src/%.c,$(BUILD)/%.o,$(C_SOURCES)) \
 
 CFLAGS := -std=c11 -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany \
           -ffreestanding -fno-builtin -fno-stack-protector -fno-pic \
-          -Wall -Wextra -Werror -Os -ffunction-sections -fdata-sections \
+          -Wall -Wextra -Werror $(COPT) -ffunction-sections -fdata-sections \
           -Iinclude
-ASFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -Iinclude
+ASFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany $(ASDEBUG) -Iinclude
 LDFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -nostdlib -nostartfiles \
            -Wl,-T,link.ld -Wl,--gc-sections -Wl,--build-id=none
 
-.PHONY: all run smoke debug clean check-toolchain
+.PHONY: all run smoke debug debug-server gdb gdb-client check-debug clean check-toolchain
 
 all: $(TARGET)
 
@@ -44,12 +57,28 @@ smoke: $(TARGET)
 	grep -q 'raveil>' $(BUILD)/smoke.log
 	grep -q 'ipc: received' $(BUILD)/smoke.log
 
-debug: $(TARGET)
+debug:
+	$(MAKE) DEBUG=1 debug-server
+
+debug-server: $(TARGET)
 	$(QEMU) -machine virt -m 128M -smp 1 -bios none -nographic -kernel $(TARGET) -S -s
+
+gdb:
+	$(MAKE) DEBUG=1 gdb-client
+
+gdb-client: $(TARGET)
+	$(GDB) $(TARGET) -ex 'target remote 127.0.0.1:1234' -ex 'break kmain'
+
+check-debug:
+	$(MAKE) DEBUG=1 all
+	$(READELF) -S $(BUILD_ROOT)/debug/sonatine.elf | grep -q '\.debug_info'
+	$(READELF) -S $(BUILD_ROOT)/debug/sonatine.elf | grep -q '\.debug_line'
 
 check-toolchain:
 	@command -v $(CC)
+	@command -v $(READELF)
+	@command -v $(GDB)
 	@command -v $(QEMU)
 
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(BUILD_ROOT)
