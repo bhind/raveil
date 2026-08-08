@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import stat
 import tempfile
+import time
 import tomllib
 import unittest
 from unittest import mock
@@ -230,6 +231,35 @@ class PowerTests(unittest.TestCase):
             result = sampler.preflight()
             self.assertTrue(result.valid, result.failure)
             self.assertEqual(result.cpu_power_mw, 800.0)
+
+    def test_measure_waits_for_and_excludes_sampler_readiness_sample(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fake = root / "fake-powermetrics"
+            fake.write_text(
+                "#!/bin/sh\n"
+                "trap ':' INFO\n"
+                "trap 'exit 0' TERM\n"
+                "echo 'CPU Power: 100 mW'\n"
+                "echo 'Current pressure level: Nominal'\n"
+                "while true; do\n"
+                "  sleep 0.02\n"
+                "  echo 'CPU Power: 900 mW'\n"
+                "  echo 'Current pressure level: Nominal'\n"
+                "done\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o755)
+            raw = root / "raw.txt"
+            sampler = PowermetricsSampler(
+                20, ("Nominal",), minimum_samples=3, command_prefix=(str(fake),)
+            )
+            result, power = sampler.measure(lambda: time.sleep(0.08), raw)
+            self.assertIsNone(result)
+            self.assertTrue(power.valid, power.failure)
+            self.assertGreaterEqual(power.sample_count, 3)
+            self.assertEqual(power.cpu_power_mw, 900.0)
+            self.assertIn("RAVEIL MEASUREMENT WINDOW", raw.read_text(encoding="utf-8"))
 
 
 class AnalysisTests(unittest.TestCase):

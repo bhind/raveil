@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import re
+import select
 import signal
 import subprocess
 import time
@@ -107,6 +109,32 @@ class PowermetricsSampler:
             return PowerSample(None, None, False, detail)
         return parse_powermetrics(completed.stdout, self.stable_levels, minimum_samples=1)
 
+    def _wait_for_ready(
+        self, process: subprocess.Popen[bytes]
+    ) -> tuple[bytes, PowerSample]:
+        """Consume and exclude one complete sampler observation before work starts."""
+        if process.stdout is None:
+            return b"", PowerSample(None, None, False, "powermetrics stdout unavailable")
+        deadline = time.monotonic() + max(5.0, self.interval_ms / 1000.0 + 2.0)
+        prelude = bytearray()
+        while time.monotonic() < deadline:
+            remaining = deadline - time.monotonic()
+            readable, _, _ = select.select([process.stdout.fileno()], [], [], remaining)
+            if not readable:
+                break
+            chunk = os.read(process.stdout.fileno(), 4096)
+            if not chunk:
+                break
+            prelude.extend(chunk)
+            text = prelude.decode("utf-8", errors="replace")
+            if POWER_RE.search(text) and THERMAL_RE.search(text):
+                return bytes(prelude), parse_powermetrics(
+                    text, self.stable_levels, minimum_samples=1
+                )
+        return bytes(prelude), PowerSample(
+            None, None, False, "powermetrics sampler readiness sample missing"
+        )
+
     def measure(self, operation: Callable[[], T], raw_output: Path) -> tuple[T | None, PowerSample]:
         command = self._command(-1)
         try:
@@ -114,16 +142,24 @@ class PowermetricsSampler:
                 command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True,
             )
         except OSError as error:
             return None, PowerSample(None, None, False, f"powermetrics unavailable: {error}")
         if process.poll() is not None:
             stdout, stderr = process.communicate()
             raw_output.parent.mkdir(parents=True, exist_ok=True)
-            raw_output.write_text(stdout + stderr, encoding="utf-8")
-            detail = stderr.strip() or "powermetrics exited before measurement"
+            raw_output.write_bytes(stdout + stderr)
+            detail = stderr.decode("utf-8", errors="replace").strip()
+            detail = detail or "powermetrics exited before measurement"
             return None, PowerSample(None, None, False, detail)
+        prelude, readiness = self._wait_for_ready(process)
+        if not readiness.valid:
+            if process.poll() is None:
+                process.terminate()
+            stdout, stderr = process.communicate()
+            raw_output.parent.mkdir(parents=True, exist_ok=True)
+            raw_output.write_bytes(prelude + stdout + stderr)
+            return None, readiness
         result: T | None = None
         try:
             result = operation()
@@ -139,10 +175,18 @@ class PowermetricsSampler:
                 process.kill()
                 stdout, stderr = process.communicate()
         raw_output.parent.mkdir(parents=True, exist_ok=True)
-        raw_output.write_text(stdout + stderr, encoding="utf-8")
+        measurement_text = stdout.decode("utf-8", errors="replace")
+        stderr_text = stderr.decode("utf-8", errors="replace")
+        raw_output.write_text(
+            prelude.decode("utf-8", errors="replace")
+            + "\n*** RAVEIL MEASUREMENT WINDOW ***\n"
+            + measurement_text
+            + stderr_text,
+            encoding="utf-8",
+        )
         if process.returncode not in {0, -signal.SIGTERM} and not stdout:
-            detail = stderr.strip() or f"powermetrics exited {process.returncode}"
+            detail = stderr_text.strip() or f"powermetrics exited {process.returncode}"
             return result, PowerSample(None, None, False, detail)
         return result, parse_powermetrics(
-            stdout, self.stable_levels, minimum_samples=self.minimum_samples
+            measurement_text, self.stable_levels, minimum_samples=self.minimum_samples
         )

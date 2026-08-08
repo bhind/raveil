@@ -89,7 +89,9 @@ timer-driven switching without capability bypass.
   operator-composition holdouts.
 - [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,
   retrieval latency, active-memory size, and cold-evidence size separately.
-- [ ] **T-0025** Preserve and analyze failed and boundary variants, not only winners.
+- [ ] **T-0025** Preserve and analyze failed and boundary variants, not only
+  winners. The sealed and remotely verified sampler-startup failure RUN-ID is
+  the first preserved boundary variant; broader failed-variant coverage remains.
 
 Experience gate: the EXP-0003 fixed-C and pinned-TVM criteria in ROADMAP all
 pass, immutable remote bundles verify, and an independent run reaches the same

@@ -80,8 +80,9 @@ Gate 1 measurement infrastructure is also implemented:
 - baseline-first, seeded randomized candidate schedules with five repetitions
   for the non-claim pilot and at least 15 for the full experiment;
 - fail-closed non-interactive sudo/powermetrics privilege preflight, a minimum
-  three CPU-power samples per measured window, thermal-stability checks, and
-  same-Mac relative energy calculation;
+  three CPU-power samples per measured window, a sampler-readiness barrier that
+  excludes its startup observation, thermal-stability checks, and same-Mac
+  relative energy calculation;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
@@ -94,7 +95,7 @@ Gate 1 measurement infrastructure is also implemented:
 Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
-- an authorized powermetrics fixed-C dataset or sealed/remote-verified run;
+- a complete valid powermetrics fixed-C dataset or successful pilot run;
 - production of pre-registered cold/bounded/full-history PolicyOutcome records;
 - the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
@@ -106,8 +107,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 32
-tests. On 2026-08-08 all 32 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 33
+tests. On 2026-08-08 all 33 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, concise CLI failure reporting, statistics, run/analyze/seal lifecycle,
@@ -115,10 +116,10 @@ bundle sync command boundaries, agent permissions,
 the existing Experience loop, and Sonatine host checks. This is implementation
 verification, not EXP-0003 performance evidence.
 
-On the calibrated 2026-08-08 Gate 1 pilot worktree, `scripts/ci-local.sh`
-passed: all 32 host tests, clean RV64 release/debug builds, DWARF checks, and
-QEMU smoke completed with exit status 0. The QEMU portion is emulation
-regression evidence only.
+On the sampler-readiness-corrected 2026-08-08 Gate 1 pilot worktree,
+`scripts/ci-local.sh` passed: all 33 host tests, clean RV64 release/debug builds,
+DWARF checks, and QEMU smoke completed with exit status 0. The QEMU portion is
+emulation regression evidence only.
 
 The artifact-creating environment did not contain QEMU or a RISC-V cross
 compiler. On 2026-08-08, a user-operated Apple Silicon/Homebrew environment
