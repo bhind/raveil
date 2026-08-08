@@ -36,6 +36,11 @@ class SonatineSourceTests(unittest.TestCase):
         dockerfile = (SONATINE / "Dockerfile").read_text(encoding="utf-8")
         self.assertIn("RUN make clean && make", dockerfile)
 
+        local_ci = (ROOT / "scripts/ci-local.sh").read_text(encoding="utf-8")
+        self.assertIn("python3 -m unittest discover -s tests -v", local_ci)
+        self.assertIn("make -C sonatine smoke", local_ci)
+        self.assertFalse((ROOT / ".github/workflows/ci.yml").exists())
+
     def test_shell_exposes_each_minimum_subsystem(self) -> None:
         shell = (SONATINE / "src/shell.c").read_text(encoding="utf-8")
         for command in ("help", "info", "mem", "ps", "caps", "ticks", "ipc", "alloc"):

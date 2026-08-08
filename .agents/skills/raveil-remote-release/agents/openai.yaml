@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raveil Remote Release"
+  short_description: "Safely prepare and publish an approved Raveil release"
+  default_prompt: "Use $raveil-remote-release to audit and, only with explicit approval, publish a Raveil remote release."
