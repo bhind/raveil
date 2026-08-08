@@ -115,16 +115,18 @@ python -m raveil inspect --experience experience/local.jsonl
 Gate 1 research runs use a committed manifest and an immutable lifecycle:
 
 ```bash
-python -m raveil experiment run --manifest benchmarks/manifests/gate1-fixed-c-v1.json
+python -m raveil experiment run --manifest benchmarks/manifests/gate1-powermetrics-pilot-v1.json
 python -m raveil experiment analyze --run RUN_ID
 python -m raveil experiment seal --run RUN_ID
 python -m raveil experiment sync --run RUN_ID
 ```
 
-Run requires a clean Git worktree. Authenticate interactively with `sudo -v`
-first; the runner invokes only `/usr/bin/powermetrics` through non-interactive
-`sudo -n`. Missing privilege or energy/thermal samples fail closed before a
-run bundle is created. Raw bundles remain ignored under
+The pilot validates power-sampling and thermal stability but cannot produce a
+Gate conclusion. Use `gate1-fixed-c-v1.json` only after the pilot is remotely
+verified. Run requires a clean Git worktree. Authenticate in the same terminal
+with `sudo -v` first; the runner invokes only `/usr/bin/powermetrics` through
+non-interactive `sudo -n`. Missing privilege, insufficient power samples, or
+unstable thermal state fail closed. Raw bundles remain ignored under
 `artifacts/research/`; rclone configuration and Google credentials stay outside
 the repository. A run is incomplete until remote content verification passes
 and the completion marker is copied last.
