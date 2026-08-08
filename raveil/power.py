@@ -47,27 +47,55 @@ class PowermetricsSampler:
         self,
         interval_ms: int,
         stable_levels: tuple[str, ...],
-        executable: str = "/usr/bin/powermetrics",
+        command_prefix: tuple[str, ...] = (
+            "/usr/bin/sudo",
+            "-n",
+            "/usr/bin/powermetrics",
+        ),
     ) -> None:
         self.interval_ms = interval_ms
         self.stable_levels = stable_levels
-        self.executable = executable
+        if not command_prefix:
+            raise ValueError("powermetrics command prefix must not be empty")
+        self.command_prefix = command_prefix
 
-    def measure(self, operation: Callable[[], T], raw_output: Path) -> tuple[T | None, PowerSample]:
-        command = (
-            self.executable,
+    def _command(self, sample_count: int) -> tuple[str, ...]:
+        return (
+            *self.command_prefix,
             "--samplers",
             "cpu_power,thermal",
             "--sample-rate",
             str(self.interval_ms),
             "--sample-count",
-            "-1",
+            str(sample_count),
             "--format",
             "text",
             "--buffer-size",
             "1",
             "--handle-invalid-values",
         )
+
+    def preflight(self) -> PowerSample:
+        """Verify non-interactive privilege and sampler fields before a run exists."""
+        try:
+            completed = subprocess.run(
+                self._command(1),
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=max(5.0, self.interval_ms / 1000.0 + 2.0),
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            return PowerSample(None, None, False, f"powermetrics preflight failed: {error}")
+        if completed.returncode != 0:
+            detail = completed.stderr.strip() or f"powermetrics exited {completed.returncode}"
+            if "password is required" in detail.casefold():
+                detail = "powermetrics privilege unavailable; run sudo -v interactively"
+            return PowerSample(None, None, False, detail)
+        return parse_powermetrics(completed.stdout, self.stable_levels)
+
+    def measure(self, operation: Callable[[], T], raw_output: Path) -> tuple[T | None, PowerSample]:
+        command = self._command(-1)
         try:
             process = subprocess.Popen(
                 command,

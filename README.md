@@ -121,8 +121,10 @@ python -m raveil experiment seal --run RUN_ID
 python -m raveil experiment sync --run RUN_ID
 ```
 
-Run requires a clean Git worktree and Apple `powermetrics` permission. Missing
-energy/thermal samples fail closed. Raw bundles remain ignored under
+Run requires a clean Git worktree. Authenticate interactively with `sudo -v`
+first; the runner invokes only `/usr/bin/powermetrics` through non-interactive
+`sudo -n`. Missing privilege or energy/thermal samples fail closed before a
+run bundle is created. Raw bundles remain ignored under
 `artifacts/research/`; rclone configuration and Google credentials stay outside
 the repository. A run is incomplete until remote content verification passes
 and the completion marker is copied last.
