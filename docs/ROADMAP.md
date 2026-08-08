@@ -38,7 +38,8 @@ The replayable pilot/full manifests, environment/measurement/policy schemas, 24
 native-C holdouts, checksum harness, analysis functions, and immutable
 raw-bundle lifecycle are implemented. A non-claim powermetrics pilot must
 validate sampling and thermal stability before the full run. No Gate 1
-performance dataset or completed remote bundle exists. Compare cold prior,
+performance dataset or successful pilot exists; one sampler-startup failure
+bundle is sealed and remotely verified. Compare cold prior,
 full-history nearest neighbor, bounded
 Experience, FIFO, reservoir, and random under lineage, shape, working-set, and
 composition holdouts. Report latency/energy HCR, NTR, coverage, calibration,

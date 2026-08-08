@@ -96,10 +96,15 @@ Remote logical path:
 `Raveil/research-data/EXP-0003/<RUN-ID>/` through a repository-external rclone
 configuration.
 
-No RUN-ID, sealed bundle hash, successful remote connection, or completed
-remote verification exists yet.
-An experiment run is incomplete until remote content/hash/size checks pass and
-the completion marker is present.
+Failed pilot RUN-ID `20260808T112420Z-af35dd5c0-d6179399` is sealed with bundle
+SHA-256 `5c4db3f8b6fadb65cc63a7835bd81d7fde59a55ff6bec20ecd7f8a3d66a4d0c8`
+and stored at the registered remote logical path. An independent
+`rclone check --download --one-way` reported 0 differences and 12 matching
+files; the completion marker readback matched. This completed preservation does
+not make the failed pilot a successful experiment.
+
+No successful pilot RUN-ID exists. An experiment run is incomplete until
+remote content/hash/size checks pass and the completion marker is present.
 
 ## Results
 
@@ -125,9 +130,22 @@ The runner rejected it before creating a RUN-ID directory. Repository-side
 inspection confirmed that no EXP-0003 run directory exists. This is a verified
 thermal failure-boundary observation, not latency or energy evidence.
 
+After the machine returned to `Nominal`, RUN-ID
+`20260808T112420Z-af35dd5c0-d6179399` entered the measurement loop. Sequence 1
+passed its semantic checksum and captured nine nominal CPU-power samples.
+Sequence 2 also passed its semantic checksum but its powermetrics raw file was
+zero bytes, so the run failed closed with no energy value. The faster second
+candidate completed before the newly launched sampler emitted its first
+observation. These partial values diagnose sampler startup behavior only and
+must not be used for candidate or Gate performance claims.
+
 ## Interpretation
 
-None yet. The Gate remains open.
+The minimum-window contract alone was insufficient because each candidate
+launched a new asynchronous powermetrics process without a readiness barrier.
+The sampler now waits for one valid CPU-power/thermal observation, excludes it
+from the aggregate, and only then begins the benchmark. The failed bundle is
+preserved as boundary evidence. The Gate remains open pending a new RUN-ID.
 
 ## Limitations and next action
 
@@ -138,6 +156,6 @@ calibration and may still be insufficient under different candidate or thermal
 behavior.
 The policy-outcome production path, full retention comparison, calibration and
 coverage report, isolated TVM implementation, authorized powermetrics pilot,
-enabled Google Drive API plus verified sync, and independent rerun remain
-required. Apple powermetrics is estimated same-Mac evidence and cannot be
+successful Google Drive-verified pilot, and independent rerun remain required.
+Apple powermetrics is estimated same-Mac evidence and cannot be
 extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another Mac.

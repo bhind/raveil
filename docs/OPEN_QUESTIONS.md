@@ -40,9 +40,9 @@ resolves it.
 
 - Will the pinned TVM MetaSchedule adapter reproduce the fixed-C Gate 1
   conclusion, or expose a benchmark-specific transfer result?
-- Do the calibrated roughly 400 ms native-C windows consistently yield at least
-  three stable powermetrics CPU-power samples across every pilot candidate, or
-  must the windows increase again before the full dataset?
+- Does the sampler-readiness barrier let the calibrated roughly 400 ms native-C
+  windows consistently yield at least three stable CPU-power samples across
+  every pilot candidate, or must the windows increase before the full dataset?
 - Which Transformer or other AI workload is small enough to reproduce yet
   repeated enough to demonstrate useful Experience transfer?
 - What threshold makes Negative Transfer Rate unacceptable?

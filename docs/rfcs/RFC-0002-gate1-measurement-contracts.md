@@ -53,7 +53,9 @@ The user authenticates `sudo` interactively before a run. Raveil invokes
 `sudo -n /usr/bin/powermetrics` only, performs a one-sample CPU-power/thermal
 preflight before creating a bundle, requires the manifest's minimum sample
 count during each actual window, and never runs the full experiment CLI as
-root.
+root. Each sampler process must emit a valid readiness observation before the
+benchmark starts; that startup observation is preserved in raw telemetry but
+excluded from the measurement-window power aggregate.
 
 Sealing creates per-file SHA-256 and size records plus a bundle hash. Sync
 refuses an already completed remote bundle, but may resume an incomplete copy
