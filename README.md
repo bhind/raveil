@@ -129,7 +129,9 @@ non-interactive `sudo -n`. Missing privilege, insufficient power samples, or
 unstable thermal state fail closed. Raw bundles remain ignored under
 `artifacts/research/`; rclone configuration and Google credentials stay outside
 the repository. A run is incomplete until remote content verification passes
-and the completion marker is copied last.
+and the completion marker is copied last. Seal immediately, but sync successful
+stage milestones and selected unique failures rather than every redundant
+retry; queued local bundles remain incomplete until later batch verification.
 
 ## Repository map
 

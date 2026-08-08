@@ -62,6 +62,18 @@ refuses an already completed remote bundle, but may resume an incomplete copy
 without overwriting existing files. It copies immutably, verifies downloaded
 content and size, uploads the completion marker last, and reads it back.
 
+Seal runs locally as soon as analysis finishes. Remote sync is manual and
+milestone-driven: successful pilot, accepted full dataset, independent rerun,
+and selected non-duplicate failure evidence. Redundant retries may remain in a
+local sealed queue and be transferred in a batch before stage closeout; they
+remain incomplete until their remote checks pass. As verified on 2026-08-08,
+standard Drive API use has no additional API charge, but files consume account
+storage and Google has announced possible quota-overage charging later in 2026.
+Review the current official
+[Drive API usage limits](https://developers.google.com/workspace/drive/api/guides/limits)
+and [Google storage rules](https://support.google.com/drive/answer/9312312)
+before any large-data stage.
+
 ## Alternatives
 
 - TVM first: rejected for the first boundary because compiler/search/runtime

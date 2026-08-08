@@ -48,8 +48,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   boundaries.
 - [x] **T-0065** Implement ignored local research bundles plus immutable rclone
   copy, download-based content verification, overwrite refusal, external
-  credential boundary, and completion-marker-last behavior. A real Drive sync
-  remains EXP-0003 evidence, not an implementation acceptance claim.
+  credential boundary, and completion-marker-last behavior. Real Drive sync is
+  verified by EXP-0003. Seal every bundle immediately, but sync at experiment
+  milestones or for selected unique failures; batch redundant retries and keep
+  them incomplete until remote verification.
 - [x] **T-0066** Add the read-only Raveil Librarian agent and context-routing
   skill that returns a minimal authoritative reading packet without deciding
   tasks, gates, or claims.
