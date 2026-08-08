@@ -45,6 +45,11 @@ random order with at least 15 samples per candidate. Analysis consumes only
 pre-registered policy selections; exhaustive candidates are offline oracle
 evidence and never online policy input.
 
+The user authenticates `sudo` interactively before a run. Raveil invokes
+`sudo -n /usr/bin/powermetrics` only, performs a one-sample CPU-power/thermal
+preflight before creating a bundle, and never runs the full experiment CLI as
+root.
+
 Sealing creates per-file SHA-256 and size records plus a bundle hash. Sync
 refuses an already completed remote bundle, but may resume an incomplete copy
 without overwriting existing files. It copies immutably, verifies downloaded

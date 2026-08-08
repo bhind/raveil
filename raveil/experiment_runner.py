@@ -110,6 +110,14 @@ def run_experiment(
     digest = manifest_hash(manifest.to_dict())
     sha = git_sha()
     run_id = make_run_id(sha, digest)
+    sampler = PowermetricsSampler(
+        interval_ms=manifest.energy.sample_interval_ms,
+        stable_levels=manifest.energy.stable_thermal_levels,
+    )
+    if manifest.energy.required:
+        preflight = sampler.preflight()
+        if not preflight.valid:
+            raise RuntimeError(f"powermetrics preflight failed closed: {preflight.failure}")
     bundle = ResearchBundle(artifact_root, manifest.experiment_id, run_id)
     bundle.create()
     signature = environment_signature(run_id, manifest.evidence_class, compiler)
@@ -139,10 +147,6 @@ def run_experiment(
             "compile": [compiler, *manifest.compiler_flags, manifest.source, "-o", "tools/native-benchmark"],
             "run": ["python", "-m", "raveil", "experiment", "run", "--manifest", "<manifest>"],
         },
-    )
-    sampler = PowermetricsSampler(
-        interval_ms=manifest.energy.sample_interval_ms,
-        stable_levels=manifest.energy.stable_thermal_levels,
     )
     sequence = 0
     all_valid = True

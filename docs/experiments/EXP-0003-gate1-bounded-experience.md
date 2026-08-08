@@ -42,9 +42,11 @@ pinned environment only after the fixed-C pilot stabilizes the contract.
 ## Procedure
 
 1. Commit the manifest and harness; require a clean worktree.
-2. Run `python3 -m raveil experiment run --manifest
+2. Authenticate in a user-operated terminal with `sudo -v`, then run
+   `python3 -m raveil experiment run --manifest
    benchmarks/manifests/gate1-fixed-c-v1.json` with permission to execute
-   `/usr/bin/powermetrics`.
+   `/usr/bin/powermetrics`. The runner uses `sudo -n` only for powermetrics and
+   creates no RUN-ID directory if privilege/power/thermal preflight fails.
 3. Warm each invocation, measure the trusted baseline first per holdout, then
    execute the seeded randomized schedule with at least 15 samples/candidate.
 4. Fail closed on timeout, invalid candidate, checksum mismatch, missing power

@@ -78,8 +78,8 @@ Gate 1 measurement infrastructure is also implemented:
   deterministic `int32` inputs, `int64` accumulation, and reference checksum;
 - baseline-first, seeded randomized candidate schedules with at least 15
   repetitions;
-- fail-closed powermetrics CPU-power/thermal parsing and same-Mac relative
-  energy calculation;
+- fail-closed non-interactive sudo/powermetrics privilege preflight,
+  CPU-power/thermal parsing, and same-Mac relative energy calculation;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
@@ -104,8 +104,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 26
-tests. On 2026-08-08 all 26 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 28
+tests. On 2026-08-08 all 28 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, statistics, run/analyze/seal lifecycle, bundle sync command boundaries,
@@ -113,9 +113,10 @@ agent permissions,
 the existing Experience loop, and Sonatine host checks. This is implementation
 verification, not EXP-0003 performance evidence.
 
-On the same 2026-08-08 worktree, `scripts/ci-local.sh` passed: all 26 host
-tests, clean RV64 release/debug builds, DWARF checks, and QEMU smoke completed
-with exit status 0. The QEMU portion is emulation regression evidence only.
+On the corrected 2026-08-08 Gate 1 worktree, `scripts/ci-local.sh` passed: all 28
+host tests, clean RV64 release/debug builds, DWARF checks, and QEMU smoke
+completed with exit status 0. The QEMU portion is emulation regression evidence
+only.
 
 The artifact-creating environment did not contain QEMU or a RISC-V cross
 compiler. On 2026-08-08, a user-operated Apple Silicon/Homebrew environment

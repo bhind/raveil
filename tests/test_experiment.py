@@ -21,7 +21,7 @@ from raveil.experiment_schema import (
     validate_backend_evidence,
 )
 from raveil.native_backend import NativeCBackend
-from raveil.power import parse_powermetrics
+from raveil.power import PowermetricsSampler, parse_powermetrics
 from raveil.research_bundle import ResearchBundle, make_run_id, sha256_file
 
 
@@ -136,6 +136,36 @@ class PowerTests(unittest.TestCase):
         )
         self.assertFalse(changed.valid)
         self.assertIn("changed", changed.failure)
+
+    def test_powermetrics_preflight_requires_cached_noninteractive_privilege(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fake = Path(directory) / "fake-sudo"
+            fake.write_text(
+                "#!/bin/sh\n"
+                "echo 'sudo: a password is required' >&2\n"
+                "exit 1\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o755)
+            sampler = PowermetricsSampler(20, ("Nominal",), (str(fake),))
+            result = sampler.preflight()
+            self.assertFalse(result.valid)
+            self.assertIn("sudo -v", result.failure)
+
+    def test_powermetrics_preflight_accepts_required_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fake = Path(directory) / "fake-powermetrics"
+            fake.write_text(
+                "#!/bin/sh\n"
+                "echo 'CPU Power: 800 mW'\n"
+                "echo 'Current pressure level: Nominal'\n",
+                encoding="utf-8",
+            )
+            fake.chmod(0o755)
+            sampler = PowermetricsSampler(20, ("Nominal",), (str(fake),))
+            result = sampler.preflight()
+            self.assertTrue(result.valid, result.failure)
+            self.assertEqual(result.cpu_power_mw, 800.0)
 
 
 class AnalysisTests(unittest.TestCase):
