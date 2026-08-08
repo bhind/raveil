@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import statistics
+import sys
 
 from . import __version__
 from .backend import ToyDaphnis
@@ -192,4 +193,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    return args.handler(args)
+    try:
+        return args.handler(args)
+    except (FileExistsError, FileNotFoundError, RuntimeError, ValueError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2

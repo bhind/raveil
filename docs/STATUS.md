@@ -104,12 +104,12 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 28
-tests. On 2026-08-08 all 28 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 29
+tests. On 2026-08-08 all 29 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
-parsing, statistics, run/analyze/seal lifecycle, bundle sync command boundaries,
-agent permissions,
+parsing, concise CLI failure reporting, statistics, run/analyze/seal lifecycle,
+bundle sync command boundaries, agent permissions,
 the existing Experience loop, and Sonatine host checks. This is implementation
 verification, not EXP-0003 performance evidence.
 
