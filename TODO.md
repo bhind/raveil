@@ -57,6 +57,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   tasks, gates, or claims.
 - [x] **T-0067** Require post-Gate-0 work branches and document the lowercase
   `<type>/<record-id>-<short-slug>` naming convention.
+- [ ] **T-0068** Install and verify the ADR-0010 root-owned powermetrics helper
+  and helper-only `NOPASSWD` sudoers entry after the tracked implementation and
+  tests pass. Prove operation after `sudo -k`; never run Raveil itself as root.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 

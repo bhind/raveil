@@ -11,7 +11,13 @@ from .backend import ToyDaphnis
 from .experience import ExperienceStore
 from .model import Context, seed_candidates
 from .policy import NearestExperiencePolicy, Tuner, TuningResult
-from .experiment_runner import analyze_bundle, find_bundle, run_experiment, seal_bundle
+from .experiment_runner import (
+    analyze_bundle,
+    find_bundle,
+    preflight_experiment,
+    run_experiment,
+    seal_bundle,
+)
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -114,6 +120,18 @@ def command_experiment_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_experiment_preflight(args: argparse.Namespace) -> int:
+    result = preflight_experiment(Path(args.manifest))
+    if result.cpu_power_mw is None:
+        print("preflight ready; energy sampling is not required by this manifest")
+    else:
+        print(
+            f"preflight ready; thermal={result.thermal_level} "
+            f"cpu-power-mw={result.cpu_power_mw:.3f}"
+        )
+    return 0
+
+
 def command_experiment_analyze(args: argparse.Namespace) -> int:
     bundle = find_bundle(Path(args.artifact_root), args.run)
     result = analyze_bundle(bundle)
@@ -165,6 +183,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     experiment = subparsers.add_parser("experiment", help="run and preserve Gate experiments")
     experiment_commands = experiment.add_subparsers(dest="experiment_command", required=True)
+
+    experiment_preflight = experiment_commands.add_parser(
+        "preflight", help="verify the least-privilege measurement helper"
+    )
+    experiment_preflight.add_argument("--manifest", required=True)
+    experiment_preflight.set_defaults(handler=command_experiment_preflight)
 
     experiment_run = experiment_commands.add_parser("run", help="execute a versioned manifest")
     experiment_run.add_argument("--manifest", required=True)

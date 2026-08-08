@@ -86,8 +86,8 @@ class EnergyContract:
     stable_thermal_levels: tuple[str, ...] = ("Nominal",)
 
     def __post_init__(self) -> None:
-        if self.sample_interval_ms < 20:
-            raise ValueError("powermetrics sample interval must be at least 20 ms")
+        if not 20 <= self.sample_interval_ms <= 1000:
+            raise ValueError("powermetrics sample interval must be between 20 and 1000 ms")
         if self.minimum_samples < 1:
             raise ValueError("powermetrics minimum sample count must be positive")
 

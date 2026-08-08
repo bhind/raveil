@@ -18,8 +18,8 @@ from .experiment_schema import (
     PolicyOutcome,
 )
 from .native_backend import NativeCBackend, NativeMeasurement
-from .power import PowerSample, PowermetricsSampler
-from .research_bundle import ResearchBundle, make_run_id, manifest_hash
+from .power import POWERMETRICS_HELPER, PowerSample, PowermetricsSampler
+from .research_bundle import ResearchBundle, make_run_id, manifest_hash, sha256_file
 
 
 def _command_output(command: tuple[str, ...], default: str = "unknown") -> str:
@@ -63,6 +63,8 @@ def environment_signature(
     os_version = _command_output(("sw_vers", "-productVersion"), platform.version())
     cpu_model = _command_output(("sysctl", "-n", "machdep.cpu.brand_string"), platform.machine())
     compiler_version = _command_output((compiler, "--version"))
+    helper_path = Path(POWERMETRICS_HELPER)
+    helper_hash = sha256_file(helper_path) if helper_path.is_file() else "not-installed"
     return EnvironmentSignature(
         run_id=run_id,
         git_sha=git_sha(),
@@ -76,6 +78,10 @@ def environment_signature(
         tool_versions={
             "rclone": _command_output(("rclone", "version"), "not-invoked"),
             "powermetrics": _command_output(("/usr/bin/powermetrics", "--help")),
+            "powermetrics_helper": _command_output(
+                (POWERMETRICS_HELPER, "--version"), "not-installed"
+            ),
+            "powermetrics_helper_sha256": helper_hash,
         },
         evidence_class=evidence_class,  # type: ignore[arg-type]
     )
@@ -95,6 +101,34 @@ def measurement_order(
     return [(baseline, 0, "trusted-baseline"), *scheduled]
 
 
+def _validate_measurement_target(manifest: BenchmarkManifest) -> None:
+    if manifest.backend != "native-c":
+        raise RuntimeError("TVM execution is deferred until the fixed-C pilot is stable")
+    if manifest.energy.required and (
+        platform.system() != "Darwin" or platform.machine() != "arm64"
+    ):
+        raise RuntimeError("the Gate 1 powermetrics contract requires Apple Silicon macOS")
+
+
+def _sampler_for(manifest: BenchmarkManifest) -> PowermetricsSampler:
+    return PowermetricsSampler(
+        interval_ms=manifest.energy.sample_interval_ms,
+        stable_levels=manifest.energy.stable_thermal_levels,
+        minimum_samples=manifest.energy.minimum_samples,
+    )
+
+
+def preflight_experiment(manifest_path: Path) -> PowerSample:
+    manifest = BenchmarkManifest.load(manifest_path)
+    _validate_measurement_target(manifest)
+    if not manifest.energy.required:
+        return PowerSample(None, None, True)
+    result = _sampler_for(manifest).preflight()
+    if not result.valid:
+        raise RuntimeError(f"powermetrics preflight failed closed: {result.failure}")
+    return result
+
+
 def run_experiment(
     manifest_path: Path,
     artifact_root: Path,
@@ -102,20 +136,11 @@ def run_experiment(
 ) -> tuple[ResearchBundle, bool]:
     require_clean_worktree()
     manifest = BenchmarkManifest.load(manifest_path)
-    if manifest.backend != "native-c":
-        raise RuntimeError("TVM execution is deferred until the fixed-C pilot is stable")
-    if manifest.energy.required and (
-        platform.system() != "Darwin" or platform.machine() != "arm64"
-    ):
-        raise RuntimeError("the Gate 1 powermetrics contract requires Apple Silicon macOS")
+    _validate_measurement_target(manifest)
     digest = manifest_hash(manifest.to_dict())
     sha = git_sha()
     run_id = make_run_id(sha, digest)
-    sampler = PowermetricsSampler(
-        interval_ms=manifest.energy.sample_interval_ms,
-        stable_levels=manifest.energy.stable_thermal_levels,
-        minimum_samples=manifest.energy.minimum_samples,
-    )
+    sampler = _sampler_for(manifest)
     if manifest.energy.required:
         preflight = sampler.preflight()
         if not preflight.valid:
@@ -134,6 +159,11 @@ def run_experiment(
     bundled_source = bundle.path / "sources" / "benchmark.c"
     bundled_source.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, bundled_source)
+    if manifest.energy.required:
+        helper_source = git_root() / "tools" / "powermetrics_helper.c"
+        if not helper_source.is_file():
+            raise FileNotFoundError("powermetrics helper source is missing")
+        shutil.copyfile(helper_source, bundle.path / "sources" / helper_source.name)
     backend = NativeCBackend(
         source=bundled_source,
         binary=bundle.path / "tools" / "native-benchmark",

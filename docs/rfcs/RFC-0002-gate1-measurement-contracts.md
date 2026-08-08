@@ -49,13 +49,15 @@ full manifest has at least 15 repetitions and 20 holdouts. Analysis consumes
 only pre-registered policy selections; exhaustive candidates are offline oracle
 evidence and never online policy input.
 
-The user authenticates `sudo` interactively before a run. Raveil invokes
-`sudo -n /usr/bin/powermetrics` only, performs a one-sample CPU-power/thermal
-preflight before creating a bundle, requires the manifest's minimum sample
-count during each actual window, and never runs the full experiment CLI as
-root. Each sampler process must emit a valid readiness observation before the
-benchmark starts; that startup observation is preserved in raw telemetry but
-excluded from the measurement-window power aggregate.
+After the one-time ADR-0010 setup, Raveil invokes only
+`sudo -n /usr/local/libexec/raveil-powermetrics`; no interactive ticket is
+required. The root-owned helper constrains sample rate/count and fixes the
+sampler/output arguments. `experiment preflight --manifest PATH` performs a
+one-sample CPU-power/thermal check without creating a bundle. Each actual
+window requires the manifest's minimum sample count, and the full experiment
+CLI never runs as root. Each sampler process must emit a valid readiness
+observation before the benchmark starts; that startup observation is preserved
+in raw telemetry but excluded from the measurement-window power aggregate.
 
 Sealing creates per-file SHA-256 and size records plus a bundle hash. Sync
 refuses an already completed remote bundle, but may resume an incomplete copy
