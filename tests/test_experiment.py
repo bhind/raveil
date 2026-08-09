@@ -80,6 +80,9 @@ class ManifestTests(unittest.TestCase):
             {(workload.m, workload.n, workload.k) for workload in history.workloads},
             {(workload.m, workload.n, workload.k) for workload in target.workloads},
         )
+        history_summary_records = len(history.workloads) * len(history.candidates)
+        self.assertLess(target.active_memory_limit, history_summary_records)
+        self.assertEqual(target.active_memory_limit, 64)
 
     def test_powermetrics_pilot_is_short_and_not_a_gate_manifest(self) -> None:
         manifest = BenchmarkManifest.load(PILOT_MANIFEST)
@@ -695,7 +698,11 @@ class BundleTests(unittest.TestCase):
                                 "bounded": 100,
                                 "full-history": 1000,
                             }[policy],
-                            active_memory_records=128,
+                            active_memory_records={
+                                "cold": 0,
+                                "bounded": manifest.active_memory_limit,
+                                "full-history": 128,
+                            }[policy],
                             cold_evidence_records=1000,
                             predicted_latency_ratio=1.0 if policy == "cold" else 0.8,
                             predicted_energy_ratio=1.0 if policy == "cold" else 0.8,
@@ -721,7 +728,11 @@ class BundleTests(unittest.TestCase):
                                 "bounded": 100,
                                 "full-history": 1000,
                             }[policy],
-                            active_memory_records=128,
+                            active_memory_records={
+                                "cold": 0,
+                                "bounded": manifest.active_memory_limit,
+                                "full-history": 128,
+                            }[policy],
                             cold_evidence_records=1000,
                             predicted_latency_ratio=1.0 if policy == "cold" else 0.8,
                             predicted_energy_ratio=1.0 if policy == "cold" else 0.8,

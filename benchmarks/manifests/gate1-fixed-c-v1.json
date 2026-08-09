@@ -9,7 +9,7 @@
   "random_seed": 20260808,
   "timeout_seconds": 30.0,
   "measurement_budget": 3,
-  "active_memory_limit": 256,
+  "active_memory_limit": 64,
   "source": "benchmarks/native/benchmark.c",
   "compiler_flags": ["-O3", "-std=c11", "-Wall", "-Wextra", "-Werror", "-D_POSIX_C_SOURCE=200809L"],
   "energy": {

@@ -107,9 +107,10 @@ timer-driven switching without capability bypass.
   policy analysis rejects
   incomplete, duplicate, unknown, late, or provenance/measurement-mismatched
   selection/outcome evidence under ADR-0012 and ADR-0013. The sealed and
-  remotely verified 24-workload source history now exists; producing the
-  preregistered target fixed-C evidence and reporting the actual comparison
-  remain open.
+  remotely verified 24-workload source history now exists. Source-only
+  simulation exposed and corrected a non-binding 256-record memory limit; the
+  target now pre-registers 64 versus 240 full-history summaries. Producing the
+  target fixed-C evidence and reporting the actual comparison remain open.
 - [x] **T-0023** Add lineage, shape, working-set/memory, and
   operator-composition holdouts.
 - [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,

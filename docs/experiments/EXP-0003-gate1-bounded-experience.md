@@ -81,6 +81,10 @@ but the machine installation and post-`sudo -k` proof remain T-0068.
    derives offline-oracle values from the exhaustive raw matrix, then reports
    latency, energy, HCR, energy-HCR, NTR, coverage, calibration, budget,
    retrieval p95, active memory, and cold evidence.
+   Before target measurement, fix the bounded/FIFO/reservoir/random active
+   memory at 64 summary records versus 240 for full history. The original limit
+   of 256 retained all source summaries and therefore could not test bounded
+   retention.
 7. Seal and sync the run; verify remote content before uploading the completion
    marker. Repeat independently with a new RUN-ID.
 8. Repeat through the pinned TVM MetaSchedule adapter. Send a contradictory
@@ -187,6 +191,16 @@ incomplete`, correctly requiring pre-registered target PolicySelection and
 PolicyOutcome evidence, an independent rerun, and the pinned TVM comparison.
 No candidate-ranking, latency-improvement, or energy-improvement claim is made
 from this source dataset alone.
+
+A target-plan dry run performed before any target measurement found that the
+original `active_memory_limit: 256` retained all 240 source summary records;
+bounded, FIFO, reservoir, and random therefore collapsed to full-history
+candidate slates. Source-only simulation pre-registered a limit of 64: a 4x
+memory reduction, with bounded differing from full history on 5/24 target
+slates, FIFO on 2/24, reservoir on 12/24, and random on 24/24. Limits 24 and 32
+caused much larger slate divergence, while 96 and above made bounded nearly
+identical to full history. This selection used no target measurements and makes
+no target performance claim.
 
 ## Interpretation
 

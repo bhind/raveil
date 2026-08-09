@@ -100,6 +100,8 @@ Gate 1 measurement infrastructure is also implemented:
   analysis automatically emits slate-bound outcomes;
 - a committed 24-workload fixed-C history manifest with distinct IDs, lineage,
   and shapes but the same ten-candidate contract as the target holdouts;
+- a target active-memory limit of 64 summary records versus 240 full-history
+  records, fixed from source-only simulation before any target measurement;
 - per-policy HCR, energy-HCR, coverage, calibration error, NTR, retrieval p95,
   measurement budget, active-memory maximum, and cold-evidence counts;
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
