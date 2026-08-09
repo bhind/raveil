@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 import platform
 import random
@@ -16,6 +17,7 @@ from .experiment_schema import (
     EnvironmentSignature,
     MeasurementRecord,
     PolicyOutcome,
+    PolicySelection,
 )
 from .native_backend import NativeCBackend, NativeMeasurement
 from .power import POWERMETRICS_HELPER, PowerSample, PowermetricsSampler
@@ -269,6 +271,139 @@ def _read_jsonl(path: Path, factory: object) -> list[object]:
     return values
 
 
+def _utc_datetime(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("timestamp must include timezone")
+    return parsed
+
+
+def _policy_evidence_unmet(
+    manifest: BenchmarkManifest,
+    expected_run_id: str,
+    records: list[MeasurementRecord],
+    outcomes: list[PolicyOutcome],
+    selections: list[PolicySelection],
+) -> list[str]:
+    required_policies = {"cold", "bounded", "full-history"}
+    workload_ids = {workload.workload_id for workload in manifest.workloads}
+    candidate_ids = {candidate.candidate_id for candidate in manifest.candidates}
+    expected_pairs = {
+        (policy, workload_id)
+        for policy in required_policies
+        for workload_id in workload_ids
+    }
+    digest = manifest_hash(manifest.to_dict())
+    unmet: list[str] = []
+    selection_by_pair: dict[tuple[str, str], PolicySelection] = {}
+    if not records:
+        return ["PolicyOutcome evidence has no measurements"]
+    if any(record.run_id != expected_run_id for record in records):
+        unmet.append("measurement RUN-ID does not match the analyzed bundle")
+    earliest_measurement = min(_utc_datetime(record.measured_at_utc) for record in records)
+    for selection in selections:
+        key = (selection.policy, selection.workload_id)
+        if key in selection_by_pair:
+            unmet.append(
+                f"duplicate PolicySelection for {selection.policy}/{selection.workload_id}"
+            )
+        selection_by_pair[key] = selection
+        if selection.experiment_id != manifest.experiment_id:
+            unmet.append(
+                f"PolicySelection experiment mismatch for {selection.policy}/{selection.workload_id}"
+            )
+        if selection.manifest_sha256 != digest:
+            unmet.append(
+                f"PolicySelection manifest hash mismatch for {selection.policy}/{selection.workload_id}"
+            )
+        if selection.selected_candidate_id not in candidate_ids:
+            unmet.append(
+                f"PolicySelection candidate is not registered: {selection.selected_candidate_id}"
+            )
+        if selection.measurement_budget != manifest.measurement_budget:
+            unmet.append(
+                f"PolicySelection budget mismatch for {selection.policy}/{selection.workload_id}"
+            )
+        if _utc_datetime(selection.registered_at_utc) >= earliest_measurement:
+            unmet.append(
+                "PolicySelection was not registered before measurement: "
+                f"{selection.policy}/{selection.workload_id}"
+            )
+    selection_pairs = set(selection_by_pair)
+    missing_selections = expected_pairs - selection_pairs
+    unexpected_selections = selection_pairs - expected_pairs
+    if missing_selections:
+        unmet.append(
+            f"PolicySelection coverage is incomplete: {len(missing_selections)} pairs missing"
+        )
+    if unexpected_selections:
+        unmet.append(
+            f"PolicySelection coverage has {len(unexpected_selections)} unexpected pairs"
+        )
+
+    outcome_by_pair = {(outcome.policy, outcome.workload_id): outcome for outcome in outcomes}
+    for pair in expected_pairs & selection_pairs & set(outcome_by_pair):
+        if outcome_by_pair[pair].selected_candidate_id != selection_by_pair[pair].selected_candidate_id:
+            unmet.append(
+                f"PolicyOutcome selection differs from pre-registration: {pair[0]}/{pair[1]}"
+            )
+
+    valid_records = [record for record in records if record.measurement_valid]
+    medians: dict[tuple[str, str], tuple[float, float]] = {}
+    for workload_id in workload_ids:
+        for candidate_id in candidate_ids:
+            matching = [
+                record
+                for record in valid_records
+                if record.workload_id == workload_id and record.candidate_id == candidate_id
+            ]
+            latencies = [float(record.latency_ns) for record in matching if record.latency_ns]
+            energies = [float(record.energy_mj) for record in matching if record.energy_mj is not None]
+            if latencies and energies:
+                medians[(workload_id, candidate_id)] = (
+                    statistics.median(latencies),
+                    statistics.median(energies),
+                )
+    baseline_id = manifest.candidates[0].candidate_id
+    for outcome in outcomes:
+        baseline = medians.get((outcome.workload_id, baseline_id))
+        selected = medians.get((outcome.workload_id, outcome.selected_candidate_id))
+        workload_medians = [
+            value for (workload_id, _), value in medians.items() if workload_id == outcome.workload_id
+        ]
+        if baseline is None or selected is None or len(workload_medians) != len(candidate_ids):
+            unmet.append(
+                "PolicyOutcome lacks complete measured candidate evidence: "
+                f"{outcome.policy}/{outcome.workload_id}"
+            )
+            continue
+        expected_values = (
+            baseline[0],
+            selected[0],
+            min(value[0] for value in workload_medians),
+            baseline[1],
+            selected[1],
+            min(value[1] for value in workload_medians),
+        )
+        actual_values = (
+            outcome.baseline_latency_ns,
+            outcome.selected_latency_ns,
+            outcome.oracle_latency_ns,
+            outcome.baseline_energy_mj,
+            outcome.selected_energy_mj,
+            outcome.oracle_energy_mj,
+        )
+        if any(
+            not math.isclose(actual, expected, rel_tol=1e-9, abs_tol=1e-9)
+            for actual, expected in zip(actual_values, expected_values, strict=True)
+        ):
+            unmet.append(
+                f"PolicyOutcome metrics do not match measurements: "
+                f"{outcome.policy}/{outcome.workload_id}"
+            )
+    return unmet
+
+
 def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> dict[str, object]:
     bundle.require_mutable()
     manifest = BenchmarkManifest.from_dict(
@@ -291,32 +426,66 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
         and (not manifest.energy.required or record.energy_mj is not None)
         for record in records  # type: ignore[attr-defined]
     )
-    repetitions_ok = all(len(values) >= manifest.repetitions for values in grouped.values())
-    expected_groups = len(manifest.workloads) * len(manifest.candidates)
-    complete_matrix = len(grouped) == expected_groups
+    repetitions_ok = all(
+        len(values) == manifest.repetitions
+        and {record.repetition for record in values} == set(range(manifest.repetitions))
+        for values in grouped.values()
+    )
+    sequences = [record.sequence for record in records]  # type: ignore[attr-defined]
+    sequence_ok = len(set(sequences)) == len(sequences) and set(sequences) == set(
+        range(1, len(sequences) + 1)
+    )
+    measurement_run_ok = all(
+        record.run_id == bundle.run_id for record in records  # type: ignore[attr-defined]
+    )
+    expected_group_keys = {
+        (workload.workload_id, candidate.candidate_id)
+        for workload in manifest.workloads
+        for candidate in manifest.candidates
+    }
+    complete_matrix = set(grouped) == expected_group_keys
     policy_path = bundle.path / "policy-outcomes.jsonl"
+    selection_path = bundle.path / "policy-selections.jsonl"
     if manifest.stage == "pilot":
         policy = {
             "gate_ready": False,
             "unmet": [],
             "note": "policy selection is intentionally not evaluated in a sampler pilot",
         }
-    elif policy_path.exists():
+    elif policy_path.exists() and selection_path.exists():
         outcomes = _read_jsonl(policy_path, PolicyOutcome)
-        policy = analyze_policy_outcomes(
-            outcomes, manifest.active_memory_limit, bootstrap_samples=bootstrap_samples  # type: ignore[arg-type]
+        selections = _read_jsonl(selection_path, PolicySelection)
+        policy_integrity = _policy_evidence_unmet(
+            manifest,
+            bundle.run_id,
+            records,  # type: ignore[arg-type]
+            outcomes,  # type: ignore[arg-type]
+            selections,  # type: ignore[arg-type]
         )
+        if policy_integrity:
+            policy = {"gate_ready": False, "unmet": policy_integrity}
+        else:
+            policy = analyze_policy_outcomes(
+                outcomes,  # type: ignore[arg-type]
+                manifest.active_memory_limit,
+                (workload.workload_id for workload in manifest.workloads),
+                bundle.run_id,
+                manifest.measurement_budget,
+                bootstrap_samples=bootstrap_samples,
+            )
     else:
         policy = {
             "gate_ready": False,
-            "unmet": ["pre-registered cold/bounded/full-history PolicyOutcome evidence is absent"],
+            "unmet": [
+                "pre-registered PolicySelection and measured PolicyOutcome evidence are both required"
+            ],
         }
     unmet = []
     if not semantic_ok:
         unmet.append("one or more semantic checksums failed")
     if not measurements_ok:
         unmet.append("one or more latency/energy measurements failed closed")
-    if not repetitions_ok or not complete_matrix:
+    if not repetitions_ok or not complete_matrix or not sequence_ok or not measurement_run_ok:
         unmet.append("candidate measurement matrix is incomplete")
     unmet.extend(policy.get("unmet", []))  # type: ignore[arg-type]
     if manifest.stage == "full":
@@ -336,7 +505,9 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
         "evidence_class": manifest.evidence_class,
         "semantic_checksums_pass": semantic_ok,
         "all_measurements_valid": measurements_ok,
-        "complete_measurement_matrix": complete_matrix and repetitions_ok,
+        "complete_measurement_matrix": (
+            complete_matrix and repetitions_ok and sequence_ok and measurement_run_ok
+        ),
         "manifest_stage": manifest.stage,
         "power_samples": {
             "required_per_measurement": manifest.energy.minimum_samples,

@@ -42,20 +42,57 @@ def headroom_capture(baseline: float, selected: float, oracle: float) -> float:
 
 
 def analyze_policy_outcomes(
-    outcomes: Iterable[PolicyOutcome], active_limit: int, bootstrap_samples: int = 10_000
+    outcomes: Iterable[PolicyOutcome],
+    active_limit: int,
+    expected_workloads: Iterable[str],
+    expected_run_id: str,
+    expected_measurement_budget: int,
+    bootstrap_samples: int = 10_000,
 ) -> dict[str, object]:
-    by_policy: dict[str, dict[str, PolicyOutcome]] = {}
-    for outcome in outcomes:
-        by_policy.setdefault(outcome.policy, {})[outcome.workload_id] = outcome
+    outcome_list = list(outcomes)
     required = {"cold", "bounded", "full-history"}
-    if not required.issubset(by_policy):
-        return {
-            "gate_ready": False,
-            "unmet": ["cold, bounded, and full-history outcomes are required"],
-        }
+    expected = set(expected_workloads)
+    integrity_unmet: list[str] = []
+    if not expected:
+        return {"gate_ready": False, "unmet": ["registered policy holdouts are required"]}
+    seen: set[tuple[str, str]] = set()
+    for outcome in outcome_list:
+        key = (outcome.policy, outcome.workload_id)
+        if key in seen:
+            integrity_unmet.append(
+                f"duplicate PolicyOutcome for {outcome.policy}/{outcome.workload_id}"
+            )
+        seen.add(key)
+        if outcome.policy not in required:
+            integrity_unmet.append(f"unknown policy in PolicyOutcome: {outcome.policy}")
+        if outcome.workload_id not in expected:
+            integrity_unmet.append(
+                f"unknown workload in PolicyOutcome: {outcome.workload_id}"
+            )
+        if outcome.run_id != expected_run_id:
+            integrity_unmet.append(
+                f"PolicyOutcome RUN-ID mismatch for {outcome.policy}/{outcome.workload_id}"
+            )
+        if outcome.measurement_budget != expected_measurement_budget:
+            integrity_unmet.append(
+                f"PolicyOutcome budget mismatch for {outcome.policy}/{outcome.workload_id}"
+            )
+    expected_pairs = {(policy, workload) for policy in required for workload in expected}
+    missing = sorted(expected_pairs - seen)
+    if missing:
+        integrity_unmet.append(
+            f"PolicyOutcome coverage is incomplete: {len(missing)} pairs missing"
+        )
+    extra = sorted(seen - expected_pairs)
+    if extra:
+        integrity_unmet.append(f"PolicyOutcome coverage has {len(extra)} unexpected pairs")
+    if integrity_unmet:
+        return {"gate_ready": False, "unmet": integrity_unmet}
+
+    by_policy: dict[str, dict[str, PolicyOutcome]] = {}
+    for outcome in outcome_list:
+        by_policy.setdefault(outcome.policy, {})[outcome.workload_id] = outcome
     common = set.intersection(*(set(by_policy[name]) for name in required))
-    if not common:
-        return {"gate_ready": False, "unmet": ["no paired policy holdouts"]}
 
     latency_improvements: list[float] = []
     energy_improvements: list[float] = []

@@ -24,12 +24,13 @@ from raveil.experiment_schema import (
     EnergyContract,
     MeasurementRecord,
     PolicyOutcome,
+    PolicySelection,
     WorkloadSpec,
     validate_backend_evidence,
 )
 from raveil.native_backend import NativeCBackend
 from raveil.power import PowerSample, PowermetricsSampler, parse_powermetrics
-from raveil.research_bundle import ResearchBundle, make_run_id, sha256_file
+from raveil.research_bundle import ResearchBundle, make_run_id, manifest_hash, sha256_file
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -345,13 +346,15 @@ class PowermetricsHelperTests(unittest.TestCase):
 
 
 class AnalysisTests(unittest.TestCase):
+    RUN_ID = "20260808T000000Z-abcdef123-12345678"
+
     @staticmethod
     def outcome(workload: str, policy: str) -> PolicyOutcome:
         selected_latency = {"cold": 100.0, "bounded": 90.0, "full-history": 89.0}[policy]
         selected_energy = {"cold": 10.0, "bounded": 9.0, "full-history": 8.9}[policy]
         retrieval = {"cold": 10, "bounded": 100, "full-history": 1000}[policy]
         return PolicyOutcome(
-            run_id="20260808T000000Z-abcdef123-12345678",
+            run_id=AnalysisTests.RUN_ID,
             workload_id=workload,
             policy=policy,
             selected_candidate_id=f"selected-{policy}",
@@ -373,7 +376,14 @@ class AnalysisTests(unittest.TestCase):
             for index in range(20)
             for policy in ("cold", "bounded", "full-history")
         ]
-        result = analyze_policy_outcomes(outcomes, active_limit=256, bootstrap_samples=500)
+        result = analyze_policy_outcomes(
+            outcomes,
+            active_limit=256,
+            expected_workloads=(f"holdout-{index}" for index in range(20)),
+            expected_run_id=self.RUN_ID,
+            expected_measurement_budget=3,
+            bootstrap_samples=500,
+        )
         self.assertTrue(result["gate_ready"], result["unmet"])
         metrics = result["metrics"]
         self.assertAlmostEqual(metrics["latency_median_improvement"], 0.1)
@@ -393,12 +403,194 @@ class AnalysisTests(unittest.TestCase):
         for workload in ("holdout-0", "holdout-1"):
             bad = self.outcome(workload, "bounded")
             outcomes[outcomes.index(bad)] = replace(bad, selected_energy_mj=10.3)
-        result = analyze_policy_outcomes(outcomes, active_limit=256, bootstrap_samples=200)
+        result = analyze_policy_outcomes(
+            outcomes,
+            active_limit=256,
+            expected_workloads=(f"holdout-{index}" for index in range(20)),
+            expected_run_id=self.RUN_ID,
+            expected_measurement_budget=3,
+            bootstrap_samples=200,
+        )
         self.assertFalse(result["gate_ready"])
         self.assertIn("joint NTR exceeds 5%", result["unmet"])
 
+    def test_policy_outcomes_require_complete_unique_registered_matrix(self) -> None:
+        expected = [f"holdout-{index}" for index in range(20)]
+        complete = [
+            self.outcome(workload, policy)
+            for workload in expected
+            for policy in ("cold", "bounded", "full-history")
+        ]
+        cases = {
+            "missing": complete[:-1],
+            "duplicate": [*complete, complete[0]],
+            "unknown-workload": [
+                *complete,
+                replace(complete[0], workload_id="not-registered"),
+            ],
+            "wrong-run": [replace(complete[0], run_id="wrong"), *complete[1:]],
+            "wrong-budget": [replace(complete[0], measurement_budget=4), *complete[1:]],
+        }
+        for name, outcomes in cases.items():
+            with self.subTest(name=name):
+                result = analyze_policy_outcomes(
+                    outcomes,
+                    active_limit=256,
+                    expected_workloads=expected,
+                    expected_run_id=self.RUN_ID,
+                    expected_measurement_budget=3,
+                    bootstrap_samples=20,
+                )
+                self.assertFalse(result["gate_ready"])
+                self.assertTrue(result["unmet"])
+
 
 class BundleTests(unittest.TestCase):
+    def test_policy_evidence_is_bound_to_preregistration_and_measurements(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            value = json.loads(MANIFEST.read_text(encoding="utf-8"))
+            value["candidates"] = value["candidates"][:2]
+            manifest = BenchmarkManifest.from_dict(value)
+            run_id = make_run_id(
+                "abcdef1234567",
+                manifest_hash(manifest.to_dict()),
+                datetime(2026, 8, 8, tzinfo=timezone.utc),
+            )
+            bundle = ResearchBundle(root, manifest.experiment_id, run_id)
+            bundle.create()
+            bundle.write_json("manifest.json", manifest.to_dict())
+            baseline_id = manifest.candidates[0].candidate_id
+            selected_id = manifest.candidates[1].candidate_id
+            sequence = 0
+            for workload in manifest.workloads:
+                for candidate_id, latency, energy in (
+                    (baseline_id, 100, 10.0),
+                    (selected_id, 80, 8.0),
+                ):
+                    for repetition in range(manifest.repetitions):
+                        sequence += 1
+                        bundle.append_jsonl(
+                            "measurement.jsonl",
+                            MeasurementRecord(
+                                run_id=run_id,
+                                sequence=sequence,
+                                measured_at_utc="2026-08-08T00:01:00+00:00",
+                                workload_id=workload.workload_id,
+                                candidate_id=candidate_id,
+                                repetition=repetition,
+                                phase=(
+                                    "trusted-baseline"
+                                    if candidate_id == baseline_id and repetition == 0
+                                    else "randomized"
+                                ),
+                                latency_ns=latency,
+                                cpu_power_mw=100.0,
+                                energy_mj=energy,
+                                checksum="ok",
+                                reference_checksum="ok",
+                                semantic_valid=True,
+                                measurement_valid=True,
+                                failure="",
+                                thermal_level="Nominal",
+                                power_sample_count=3,
+                                evidence_class="silicon",
+                            ).to_dict(),
+                        )
+                for policy in ("cold", "bounded", "full-history"):
+                    candidate_id = baseline_id if policy == "cold" else selected_id
+                    bundle.append_jsonl(
+                        "policy-selections.jsonl",
+                        PolicySelection(
+                            experiment_id=manifest.experiment_id,
+                            manifest_sha256=manifest_hash(manifest.to_dict()),
+                            registered_at_utc="2026-08-08T00:00:00+00:00",
+                            workload_id=workload.workload_id,
+                            policy=policy,
+                            selected_candidate_id=candidate_id,
+                            measurement_budget=manifest.measurement_budget,
+                            source_evidence_max_sequence=0,
+                        ).to_dict(),
+                    )
+                    bundle.append_jsonl(
+                        "policy-outcomes.jsonl",
+                        PolicyOutcome(
+                            run_id=run_id,
+                            workload_id=workload.workload_id,
+                            policy=policy,
+                            selected_candidate_id=candidate_id,
+                            baseline_latency_ns=100.0,
+                            selected_latency_ns=100.0 if policy == "cold" else 80.0,
+                            oracle_latency_ns=80.0,
+                            baseline_energy_mj=10.0,
+                            selected_energy_mj=10.0 if policy == "cold" else 8.0,
+                            oracle_energy_mj=8.0,
+                            measurement_budget=manifest.measurement_budget,
+                            retrieval_latency_ns={
+                                "cold": 10,
+                                "bounded": 100,
+                                "full-history": 1000,
+                            }[policy],
+                            active_memory_records=128,
+                            cold_evidence_records=1000,
+                        ).to_dict(),
+                    )
+
+            analysis = analyze_bundle(bundle, bootstrap_samples=100)
+            self.assertTrue(analysis["policy"]["gate_ready"], analysis["policy"])
+
+            policy_path = bundle.path / "policy-outcomes.jsonl"
+            original_policy_text = policy_path.read_text(encoding="utf-8")
+            lines = original_policy_text.splitlines()
+            tampered = json.loads(lines[0])
+            tampered["selected_latency_ns"] = 79.0
+            lines[0] = json.dumps(tampered, sort_keys=True)
+            policy_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            analysis = analyze_bundle(bundle, bootstrap_samples=20)
+            self.assertFalse(analysis["policy"]["gate_ready"])
+            self.assertTrue(
+                any("do not match measurements" in item for item in analysis["policy"]["unmet"])
+            )
+
+            policy_path.write_text(original_policy_text, encoding="utf-8")
+            selection_path = bundle.path / "policy-selections.jsonl"
+            original_selection_text = selection_path.read_text(encoding="utf-8")
+            first_selection = original_selection_text.splitlines()[0]
+            with selection_path.open("a", encoding="utf-8") as target:
+                target.write(first_selection + "\n")
+            analysis = analyze_bundle(bundle, bootstrap_samples=20)
+            self.assertFalse(analysis["policy"]["gate_ready"])
+            self.assertTrue(
+                any("duplicate PolicySelection" in item for item in analysis["policy"]["unmet"])
+            )
+
+            selection_lines = original_selection_text.splitlines()
+            late = json.loads(selection_lines[0])
+            late["registered_at_utc"] = "2026-08-08T00:01:00+00:00"
+            selection_lines[0] = json.dumps(late, sort_keys=True)
+            selection_path.write_text("\n".join(selection_lines) + "\n", encoding="utf-8")
+            analysis = analyze_bundle(bundle, bootstrap_samples=20)
+            self.assertFalse(analysis["policy"]["gate_ready"])
+            self.assertTrue(
+                any("not registered before measurement" in item for item in analysis["policy"]["unmet"])
+            )
+
+            selection_path.write_text(original_selection_text, encoding="utf-8")
+            measurement_path = bundle.path / "measurement.jsonl"
+            measurement_lines = measurement_path.read_text(encoding="utf-8").splitlines()
+            wrong_run = json.loads(measurement_lines[0])
+            wrong_run["run_id"] = "different-run"
+            measurement_lines[0] = json.dumps(wrong_run, sort_keys=True)
+            measurement_path.write_text(
+                "\n".join(measurement_lines) + "\n", encoding="utf-8"
+            )
+            analysis = analyze_bundle(bundle, bootstrap_samples=20)
+            self.assertFalse(analysis["policy"]["gate_ready"])
+            self.assertIn(
+                "measurement RUN-ID does not match the analyzed bundle",
+                analysis["policy"]["unmet"],
+            )
+
     def test_pilot_analysis_cannot_return_a_gate_conclusion(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from datetime import datetime
 import json
 from pathlib import Path
 from typing import Any, Literal
@@ -10,6 +11,7 @@ MANIFEST_SCHEMA = "raveil.benchmark-manifest/v1"
 ENVIRONMENT_SCHEMA = "raveil.environment-signature/v1"
 MEASUREMENT_SCHEMA = "raveil.measurement-record/v1"
 POLICY_OUTCOME_SCHEMA = "raveil.policy-outcome/v1"
+POLICY_SELECTION_SCHEMA = "raveil.policy-selection/v1"
 BUNDLE_SCHEMA = "raveil.research-bundle/v1"
 
 EvidenceClass = Literal["analytical", "simulation", "emulation", "fpga", "silicon"]
@@ -302,6 +304,46 @@ class PolicyOutcome:
     def from_dict(cls, value: dict[str, Any]) -> "PolicyOutcome":
         if value.get("schema") != POLICY_OUTCOME_SCHEMA:
             raise ValueError(f"unsupported PolicyOutcome schema: {value.get('schema')}")
+        return cls(**value)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class PolicySelection:
+    experiment_id: str
+    manifest_sha256: str
+    registered_at_utc: str
+    workload_id: str
+    policy: Literal["cold", "bounded", "full-history"]
+    selected_candidate_id: str
+    measurement_budget: int
+    source_evidence_max_sequence: int
+    schema: str = POLICY_SELECTION_SCHEMA
+
+    def __post_init__(self) -> None:
+        if self.schema != POLICY_SELECTION_SCHEMA:
+            raise ValueError(f"unsupported PolicySelection schema: {self.schema}")
+        if self.policy not in {"cold", "bounded", "full-history"}:
+            raise ValueError(f"unsupported PolicySelection policy: {self.policy}")
+        if len(self.manifest_sha256) != 64 or any(
+            character not in "0123456789abcdef" for character in self.manifest_sha256
+        ):
+            raise ValueError("PolicySelection manifest_sha256 must be lowercase SHA-256")
+        try:
+            registered = datetime.fromisoformat(self.registered_at_utc.replace("Z", "+00:00"))
+        except ValueError as error:
+            raise ValueError("PolicySelection registered_at_utc is invalid") from error
+        if registered.tzinfo is None:
+            raise ValueError("PolicySelection registered_at_utc must include timezone")
+        if self.measurement_budget < 1 or self.source_evidence_max_sequence < 0:
+            raise ValueError("PolicySelection budget/evidence sequence is invalid")
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> "PolicySelection":
+        if value.get("schema") != POLICY_SELECTION_SCHEMA:
+            raise ValueError(f"unsupported PolicySelection schema: {value.get('schema')}")
         return cls(**value)
 
     def to_dict(self) -> dict[str, Any]:

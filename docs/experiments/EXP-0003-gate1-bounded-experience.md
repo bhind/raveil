@@ -69,9 +69,12 @@ but the machine installation and post-`sudo -k` proof remain T-0068.
 5. Run the 24-holdout full manifest with at least 15 repetitions/candidate.
    Fail closed on timeout, invalid candidate, checksum mismatch, insufficient
    power samples, permission denial, or thermal-state change.
-6. Pre-register policy selections without target-oracle input; analyze latency,
-   energy, HCR, energy-HCR, NTR, coverage, calibration, budget, retrieval p95,
-   active memory, and cold evidence.
+6. Pre-register an oracle-free `PolicySelection` for every manifest workload
+   and required policy before target measurement. Analysis requires a complete,
+   unique matrix, binds it to manifest/candidate/budget/run provenance, derives
+   baseline/selected/offline-oracle values from raw measurements, then reports
+   latency, energy, HCR, energy-HCR, NTR, coverage, calibration, budget,
+   retrieval p95, active memory, and cold evidence.
 7. Seal and sync the run; verify remote content before uploading the completion
    marker. Repeat independently with a new RUN-ID.
 8. Repeat through the pinned TVM MetaSchedule adapter. Send a contradictory

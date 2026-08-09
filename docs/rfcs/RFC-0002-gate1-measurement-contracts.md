@@ -11,7 +11,7 @@ estimated Apple energy with Daphnis performance.
 
 ## Proposed design
 
-Four JSON contracts are versioned independently:
+Five JSON contracts are versioned independently:
 
 - `raveil.benchmark-manifest/v1`: experiment/backend/evidence identity, explicit
   `pilot` or `full` stage, compiler source and flags, repetition/warm-up/
@@ -24,9 +24,12 @@ Four JSON contracts are versioned independently:
   baseline-first or randomized phase, latency, estimated CPU power and energy,
   reference/candidate checksum, power-sample count, thermal state, validity, and
   failure;
-- `raveil.policy-outcome/v1`: pre-registered cold, bounded, and full-history
-  selections, baseline/selected/offline-oracle latency and energy, equal
-  measurement budget, retrieval latency, and memory/evidence sizes.
+- `raveil.policy-selection/v1`: oracle-free, pre-measurement policy/workload/
+  candidate selection bound to experiment, manifest SHA-256, registration time,
+  measurement budget, and source-evidence cutoff;
+- `raveil.policy-outcome/v1`: run-bound baseline/selected/offline-oracle latency
+  and energy, equal measurement budget, retrieval latency, and memory/evidence
+  sizes.
 
 `MeasurementBackend.measure(context, candidate)` is the owned interface.
 ToyDaphnis remains analytical. Native C and pinned TVM adapters return measured
@@ -47,7 +50,10 @@ random order. A pilot has at least three repetitions and three workloads and
 must cover all three workload families; it cannot produce a Gate conclusion. A
 full manifest has at least 15 repetitions and 20 holdouts. Analysis consumes
 only pre-registered policy selections; exhaustive candidates are offline oracle
-evidence and never online policy input.
+evidence and never online policy input. Gate analysis requires exactly one
+selection and outcome for every manifest workload under each required policy,
+rejects late or mismatched provenance, and recomputes all outcome metrics from
+the raw measurement matrix.
 
 After the one-time ADR-0010 setup, Raveil invokes only
 `sudo -n /usr/local/libexec/raveil-powermetrics`; no interactive ticket is
@@ -90,7 +96,9 @@ before any large-data stage.
 
 Baseline-first, checksum equality, equal budget, no oracle leakage, bounded
 memory, thermal stability, immutable remote copy, and credential/path scans
-fail closed. Experience remains advice. Sealed data is never repaired in place.
+fail closed. Missing, duplicate, unknown, or mismatched selection/outcome rows
+also fail closed. Experience remains advice. Sealed data is never repaired in
+place. See ADR-0012.
 
 ## Experiments required
 

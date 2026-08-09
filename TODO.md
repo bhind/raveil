@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -89,7 +89,10 @@ timer-driven switching without capability bypass.
   a minimum power-sample contract, or document why TVM MetaSchedule is selected
   instead.
 - [ ] **T-0022** Compare cold prior, full-history nearest neighbor, bounded
-  Experience, FIFO, and reservoir retention.
+  Experience, FIFO, and reservoir retention. Policy analysis now rejects
+  incomplete, duplicate, unknown, late, or provenance/measurement-mismatched
+  selection/outcome evidence under ADR-0012; production of the preregistered
+  policy matrix and the actual comparison remain open.
 - [x] **T-0023** Add lineage, shape, working-set/memory, and
   operator-composition holdouts.
 - [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,

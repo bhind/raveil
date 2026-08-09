@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 Version: `0.0000000000001` (`10^-13`)
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
@@ -69,8 +69,8 @@ Python標準ライブラリだけで、次の閉ループがあります。
 
 Gate 1 measurement infrastructure is also implemented:
 
-- versioned BenchmarkManifest, EnvironmentSignature, MeasurementRecord, and
-  PolicyOutcome Python contracts;
+- versioned BenchmarkManifest, EnvironmentSignature, MeasurementRecord,
+  PolicySelection, and PolicyOutcome Python contracts;
 - a common `MeasurementBackend.measure(context, candidate)` protocol;
 - a committed six-workload powermetrics pilot manifest plus a separate
   24-holdout full manifest separating lineage, shape, working set, and operator
@@ -87,6 +87,10 @@ Gate 1 measurement infrastructure is also implemented:
   relative energy calculation;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
+- fail-closed policy evidence analysis requiring an exact manifest-wide
+  cold/bounded/full-history matrix, unique rows, matching run/manifest/budget/
+  candidate provenance, preregistration before measurement, and summary values
+  recomputed from raw measurements;
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
 - ignored local research bundles with SHA-256/size manifests, immutable sealing,
   rclone immutable copy/download verification, overwrite refusal, and a
@@ -103,7 +107,8 @@ Not implemented or not yet evidenced:
 - a complete Gate-evaluable powermetrics fixed-C dataset;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
-- production of pre-registered cold/bounded/full-history PolicyOutcome records;
+- production of pre-registered cold/bounded/full-history PolicySelection and
+  PolicyOutcome records;
 - the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
 - cross-hardware learned transfer;
@@ -114,15 +119,21 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 38
-tests. On 2026-08-08 all 38 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 40
+tests. On 2026-08-09 all 40 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,
 standalone preflight, concise CLI failure reporting, statistics,
 run/analyze/seal lifecycle, bundle sync command boundaries, agent permissions,
-the existing Experience loop, and Sonatine host checks. This is implementation
-verification, not EXP-0003 performance evidence.
+the existing Experience loop, Sonatine host checks, exact policy-matrix
+integrity, preregistration binding, and raw-measurement summary verification.
+This is implementation verification, not EXP-0003 performance evidence.
+
+On the T-0022 policy-integrity worktree, `scripts/ci-local.sh` passed with exit
+status 0: all 40 host tests, clean RV64 release/debug builds, DWARF checks, and
+QEMU smoke. The ignored emulation smoke-log SHA-256 was
+`314c185549dfd5e11e48f467320ac871e3862960bdb4d02d40ba86c909c0475f`.
 
 On the sampler-readiness-corrected 2026-08-08 Gate 1 pilot worktree,
 `scripts/ci-local.sh` passed: all 33 host tests, clean RV64 release/debug builds,
