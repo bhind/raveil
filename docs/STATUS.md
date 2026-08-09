@@ -90,6 +90,10 @@ Gate 1 measurement infrastructure is also implemented:
   already buffered in the same read; an explicitly synchronized fake-sampler
   regression that does not infer sample count from elapsed sleep time;
   thermal-stability checks; and same-Mac relative energy calculation;
+- an optional, command-recorded between-workload cooldown that idles for a
+  configured minimum and requires two consecutive valid thermal preflights;
+  measurement-window thermal changes still fail closed and cooldown evidence is
+  appended to the run bundle;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - repetition-aware hierarchical-bootstrap sensitivity intervals, per-candidate

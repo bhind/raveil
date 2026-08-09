@@ -11,6 +11,8 @@ import shutil
 import statistics
 import subprocess
 import sys
+import time
+from typing import Callable
 
 from .analysis import analyze_policy_outcomes, percentile
 from .experiment_schema import (
@@ -148,11 +150,49 @@ def preflight_experiment(manifest_path: Path) -> PowerSample:
     return result
 
 
+def wait_for_thermal_recovery(
+    sampler: PowermetricsSampler,
+    minimum_seconds: float,
+    maximum_seconds: float,
+    check_interval_seconds: float = 30.0,
+    sleep: Callable[[float], None] = time.sleep,
+) -> list[dict[str, object]]:
+    """Wait outside measurement windows for two consecutive stable preflights."""
+    if minimum_seconds < 0 or maximum_seconds < minimum_seconds:
+        raise ValueError("thermal cooldown bounds are invalid")
+    started = time.monotonic()
+    if minimum_seconds:
+        sleep(minimum_seconds)
+    observations: list[dict[str, object]] = []
+    stable = 0
+    while stable < 2:
+        sample = sampler.preflight()
+        observations.append(
+            {
+                "checked_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                "thermal_level": sample.thermal_level,
+                "cpu_power_mw": sample.cpu_power_mw,
+                "valid": sample.valid,
+                "failure": sample.failure,
+            }
+        )
+        stable = stable + 1 if sample.valid else 0
+        elapsed = time.monotonic() - started
+        if stable >= 2:
+            break
+        if elapsed + check_interval_seconds > maximum_seconds:
+            raise RuntimeError("thermal cooldown did not reach two stable preflights")
+        sleep(check_interval_seconds)
+    return observations
+
+
 def run_experiment(
     manifest_path: Path,
     artifact_root: Path,
     compiler: str = "cc",
     policy_selections_path: Path | None = None,
+    cooldown_seconds: float = 0,
+    cooldown_max_seconds: float = 1800,
 ) -> tuple[ResearchBundle, bool]:
     require_clean_worktree()
     manifest = BenchmarkManifest.load(manifest_path)
@@ -235,8 +275,12 @@ def run_experiment(
                     if policy_selections_path is not None
                     else ()
                 ),
+                *(("--cooldown-seconds", str(cooldown_seconds)) if cooldown_seconds else ()),
+                *(("--cooldown-max-seconds", str(cooldown_max_seconds)) if cooldown_seconds else ()),
             ],
             "policy_selection_sha256": policy_selection_sha256,
+            "cooldown_seconds_between_workloads": cooldown_seconds,
+            "cooldown_max_seconds": cooldown_max_seconds,
         },
     )
     sequence = 0
@@ -297,6 +341,21 @@ def run_experiment(
                 measurement_context["end"] = measurement_context_snapshot()
                 bundle.write_json("measurement-context.json", measurement_context)
                 return bundle, False
+        if (
+            manifest.energy.required
+            and cooldown_seconds > 0
+            and workload_index + 1 < len(manifest.workloads)
+        ):
+            observations = wait_for_thermal_recovery(
+                sampler,
+                minimum_seconds=cooldown_seconds,
+                maximum_seconds=cooldown_max_seconds,
+            )
+            for observation in observations:
+                bundle.append_jsonl(
+                    "cooldown-observations.jsonl",
+                    {"after_workload_id": workload.workload_id, **observation},
+                )
     bundle.write_json(
         "run-summary.json",
         {

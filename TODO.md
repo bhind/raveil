@@ -110,6 +110,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   target; compare conclusions, obtain performance/security reviews, and record
   the final `pass`, `pause`, or `falsified` Gate decision without changing the
   preregistered thresholds.
+- [x] **T-0081** Add an explicit between-workload thermal recovery protocol for
+  fanless Apple Silicon after consecutive full-run attempts failed closed at
+  `Moderate`. Keep every measurement window fail-closed, require a configured
+  minimum idle period plus two consecutive valid powermetrics preflights before
+  the next workload, bound the maximum wait, and record every observation and
+  command parameter in the mutable run bundle.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 

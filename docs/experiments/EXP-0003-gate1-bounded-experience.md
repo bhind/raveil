@@ -278,3 +278,14 @@ and does not modify the sealed source or target bundles. Apple powermetrics is
 estimated same-Mac
 evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
 Mac.
+
+Two attempted independent fixed-C reruns on 2026-08-10 remained incomplete.
+RUN-ID `20260809T164807Z-fdd49b2e4-ddb463a8` was externally interrupted after
+608 records and has neither a run failure nor summary. RUN-ID
+`20260809T171547Z-fdd49b2e4-ddb463a8` correctly failed closed at sequence 441
+when thermal pressure changed from `Nominal` to `Moderate`; the preceding 440
+records were valid but cannot form Gate evidence. T-0081 therefore introduced
+a preregistered command-level cooldown for the next new RUN-ID: idle only
+between workloads, then require two consecutive valid preflights. It does not
+accept or continue a window observed at `Moderate`, alter candidate order or
+budget, or repair either incomplete bundle.

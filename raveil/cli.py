@@ -122,6 +122,8 @@ def command_experiment_run(args: argparse.Namespace) -> int:
         policy_selections_path=(
             Path(args.policy_selections) if args.policy_selections else None
         ),
+        cooldown_seconds=args.cooldown_seconds,
+        cooldown_max_seconds=args.cooldown_max_seconds,
     )
     print(f"RUN-ID={bundle.run_id}")
     print(f"local-bundle={bundle.path}")
@@ -225,6 +227,8 @@ def build_parser() -> argparse.ArgumentParser:
     experiment_run.add_argument("--manifest", required=True)
     experiment_run.add_argument("--artifact-root", default="artifacts/research")
     experiment_run.add_argument("--policy-selections")
+    experiment_run.add_argument("--cooldown-seconds", type=float, default=0)
+    experiment_run.add_argument("--cooldown-max-seconds", type=float, default=1800)
     experiment_run.set_defaults(handler=command_experiment_run)
 
     experiment_plan = experiment_commands.add_parser(

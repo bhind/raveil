@@ -22,7 +22,13 @@ from raveil.analysis import (
     hierarchical_bootstrap_median_improvement_ci,
 )
 from raveil.cli import build_parser, main as cli_main
-from raveil.experiment_runner import analyze_bundle, measurement_order, run_experiment, seal_bundle
+from raveil.experiment_runner import (
+    analyze_bundle,
+    measurement_order,
+    run_experiment,
+    seal_bundle,
+    wait_for_thermal_recovery,
+)
 from raveil.experiment_schema import (
     BenchmarkCandidate,
     BenchmarkManifest,
@@ -265,6 +271,24 @@ class NativeBackendTests(unittest.TestCase):
 
 
 class PowerTests(unittest.TestCase):
+    def test_cooldown_requires_two_consecutive_stable_preflights(self) -> None:
+        sampler = mock.Mock()
+        sampler.preflight.side_effect = [
+            PowerSample(None, "Moderate", False, "unstable thermal level: Moderate"),
+            PowerSample(500.0, "Nominal", True),
+            PowerSample(450.0, "Nominal", True),
+        ]
+        sleeper = mock.Mock()
+        observations = wait_for_thermal_recovery(
+            sampler,
+            minimum_seconds=120,
+            maximum_seconds=600,
+            check_interval_seconds=30,
+            sleep=sleeper,
+        )
+        self.assertEqual([item["valid"] for item in observations], [False, True, True])
+        self.assertEqual(sleeper.call_args_list, [mock.call(120), mock.call(30), mock.call(30)])
+
     def test_powermetrics_energy_and_thermal_contract(self) -> None:
         valid = parse_powermetrics(
             "CPU Power: 750 mW\nCurrent pressure level: Nominal\n"
