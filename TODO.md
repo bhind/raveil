@@ -91,8 +91,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 - [x] **T-0075** Remove timing flakiness from the powermetrics readiness test
   without weakening the production minimum-sample fail-closed contract. The
   sampler now excludes exactly one readiness observation and carries any
-  already-read later observations into the measurement window; a deterministic
-  same-burst regression test and repeated suite runs verify the boundary.
+  already-read later observations into the measurement window. After the first
+  timing-based regression recurred, it was replaced by an explicit
+  operation/fake-sampler handshake; that test and the deterministic same-burst
+  regression verify the boundary without relying on scheduler timing.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 

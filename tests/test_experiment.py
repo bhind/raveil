@@ -7,6 +7,7 @@ import io
 import json
 import os
 from pathlib import Path
+import shlex
 import stat
 import subprocess
 import tempfile
@@ -306,17 +307,23 @@ class PowerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fake = root / "fake-powermetrics"
+            started = root / "measurement-started"
+            emitted = root / "measurement-samples"
             fake.write_text(
                 "#!/bin/sh\n"
+                f"started={shlex.quote(str(started))}\n"
+                f"emitted={shlex.quote(str(emitted))}\n"
                 "trap ':' INFO\n"
                 "trap 'exit 0' TERM\n"
                 "echo 'CPU Power: 100 mW'\n"
                 "echo 'Current pressure level: Nominal'\n"
-                "while true; do\n"
-                "  sleep 0.02\n"
-                "  echo 'CPU Power: 900 mW'\n"
+                "while test ! -f \"$started\"; do sleep 0.01; done\n"
+                "for power in 900 900 900; do\n"
+                "  echo \"CPU Power: $power mW\"\n"
                 "  echo 'Current pressure level: Nominal'\n"
-                "done\n",
+                "  echo emitted >> \"$emitted\"\n"
+                "done\n"
+                "while true; do :; done\n",
                 encoding="utf-8",
             )
             fake.chmod(0o755)
@@ -324,7 +331,16 @@ class PowerTests(unittest.TestCase):
             sampler = PowermetricsSampler(
                 20, ("Nominal",), minimum_samples=3, command_prefix=(str(fake),)
             )
-            result, power = sampler.measure(lambda: time.sleep(0.08), raw)
+            def wait_for_emitted_samples() -> None:
+                started.touch()
+                deadline = time.monotonic() + 5.0
+                while time.monotonic() < deadline:
+                    if emitted.exists() and len(emitted.read_text().splitlines()) >= 3:
+                        return
+                    time.sleep(0.001)
+                self.fail("fake sampler did not emit three measurement samples")
+
+            result, power = sampler.measure(wait_for_emitted_samples, raw)
             self.assertIsNone(result)
             self.assertTrue(power.valid, power.failure)
             self.assertGreaterEqual(power.sample_count, 3)

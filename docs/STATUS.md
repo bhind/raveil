@@ -87,8 +87,9 @@ Gate 1 measurement infrastructure is also implemented:
   non-writable-path checks; standalone manifest-aware preflight; a minimum three
   CPU-power samples per measured window; a sampler-readiness barrier that
   excludes exactly its startup observation while preserving later samples
-  already buffered in the same read; thermal-stability checks; and same-Mac
-  relative energy calculation;
+  already buffered in the same read; an explicitly synchronized fake-sampler
+  regression that does not infer sample count from elapsed sleep time;
+  thermal-stability checks; and same-Mac relative energy calculation;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - fail-closed policy evidence analysis requiring an exact manifest-wide

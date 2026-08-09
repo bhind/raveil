@@ -257,7 +257,12 @@ suites each passed 43/44, and a targeted repeat failed with `required 3, found
 2`. T-0075 corrected the buffered-read boundary without weakening the
 minimum-three-sample contract and added a deterministic same-burst regression
 test. This was a test/sampler-accounting defect, not a failure in the sealed
-3,600-record target run. T-0072 subsequently constrained mutable bundle writes
+3,600-record target run. A later full-suite execution reproduced the original
+timing test's `required 3, found 2` failure even with the buffered-read fix; the
+test had still assumed that an 80 ms sleep must yield three 20 ms observations.
+T-0075 replaced that assumption with an explicit operation/fake-sampler
+handshake and passed 50 consecutive targeted executions without changing the
+production minimum-three-sample contract. T-0072 subsequently constrained mutable bundle writes
 to descriptor-relative, non-symlink EXP/RUN directories and single-link regular
 files, with cross-run traversal and link tests; this hardens future collection
 and does not modify the sealed source or target bundles. Apple powermetrics is
