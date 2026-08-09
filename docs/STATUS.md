@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 Version: `0.0000000000001` (`10^-13`)
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
@@ -172,5 +172,8 @@ IDE-driven attach is made.
   Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.
-- No Gate 1 latency or energy improvement is claimed. No real Google Drive
-  remote, independent repeat, or TVM comparison has been verified.
+- No Gate 1 latency or energy improvement is claimed. The failed and successful
+  non-claim pilot bundles were immutably copied to the configured Google Drive
+  remote and passed download-based content verification, but no full Gate 1
+  dataset remote verification, independent full rerun, or TVM comparison has
+  been completed.
