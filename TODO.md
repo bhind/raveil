@@ -67,6 +67,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   workflow or ADR. Keep non-paper prior-art notes separate from paper abstracts.
   Vreji owns the read-only similarity/IP inventory and escalation under
   ADR-0014; the Project Manager owns canonical integration.
+- [ ] **T-0071** Reduce immutable research-bundle remote object count and sync
+  latency without weakening per-file SHA-256/size attestation, overwrite
+  refusal, downloadable verification, credential isolation, or
+  completion-marker-last semantics. The 3,600-record EXP-0003 history bundle
+  exposed the cost of transferring and checking thousands of individual raw
+  powermetrics files; preserve the existing verified bundle unchanged.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 
@@ -100,9 +106,10 @@ timer-driven switching without capability bypass.
   generator and target outcome path now implement equal-budget comparison;
   policy analysis rejects
   incomplete, duplicate, unknown, late, or provenance/measurement-mismatched
-  selection/outcome evidence under ADR-0012 and ADR-0013. Producing the
-  preregistered source/target fixed-C evidence and reporting the actual
-  comparison remain open.
+  selection/outcome evidence under ADR-0012 and ADR-0013. The sealed and
+  remotely verified 24-workload source history now exists; producing the
+  preregistered target fixed-C evidence and reporting the actual comparison
+  remain open.
 - [x] **T-0023** Add lineage, shape, working-set/memory, and
   operator-composition holdouts.
 - [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,

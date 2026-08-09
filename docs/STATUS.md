@@ -109,13 +109,17 @@ Gate 1 measurement infrastructure is also implemented:
 - a completed non-claim fixed-C sampler pilot with 90/90 valid semantic and
   measurement records, all nominal thermal samples, minimum power-sample count
   three, and a sealed Google Drive-verified bundle;
+- a completed 24-workload fixed-C history-source run with 3,600/3,600 valid
+  silicon measurement records, zero checksum mismatches, all nominal thermal
+  observations, three-to-fourteen CPU-power samples per window, and a sealed,
+  Google Drive-verified bundle;
 - a TVM version-gating adapter boundary that intentionally does not execute
   MetaSchedule until the fixed-C pilot is stable.
 
 Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
-- a complete Gate-evaluable powermetrics fixed-C dataset;
+- a complete Gate-evaluable target powermetrics fixed-C policy dataset;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
 - an actual pre-registered fixed-C PolicySelection/PolicyOutcome dataset;
@@ -194,6 +198,6 @@ IDE-driven attach is made.
   Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.
-- No Gate 1 latency or energy improvement is claimed. The pilot bundles have
-  real Google Drive verification, but no full Gate 1 bundle, independent
-  repeat, or TVM comparison has been verified.
+- No Gate 1 latency or energy improvement is claimed. The pilot and full
+  history-source bundles have real Google Drive verification, but no target
+  policy bundle, independent repeat, or TVM comparison has been verified.

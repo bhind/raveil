@@ -122,6 +122,15 @@ independent verification reported 0 differences and 100 matching files, with a
 completion marker present. An experiment run is incomplete until remote
 content/hash/size checks pass and the completion marker is present.
 
+Full fixed-C history-source RUN-ID
+`20260809T090521Z-51ef48c69-0e3d9b20` is sealed with bundle SHA-256
+`9c6d92af382e8e561442316919a2520dc8bcb4366c82d2e9a1a502aeca870889`
+and stored at the registered remote logical path. The immutable sync completed
+with remote download verification and copied completion marker data hash
+`523e4d19e073e0d8778d8bab5609af8e9e7588f98ded112ae4f112ebdf33a41f`
+last. This is Apple M2 silicon source evidence generated from Git SHA
+`51ef48c69ae8153b121a686995c0a0c1f0d3f8cb`; it is not a target policy result.
+
 To limit storage and future API-quota cost exposure, local analysis and sealing
 remain immediate but sync is milestone-driven. Successful pilot/full/rerun
 bundles and selected unique failures sync individually; redundant retries may
@@ -168,6 +177,17 @@ failure. Measurement-window power sample counts ranged from 3 to 12 with a
 median of 5. Analysis correctly returned `not-applicable-pilot`, no claims, and
 a complete matrix; remote verification was the only unmet item before sync.
 
+The history-source RUN-ID `20260809T090521Z-51ef48c69-0e3d9b20` completed all
+3,600 registered records across 24 workloads, ten candidates, and 15
+repetitions. All measurements and semantic checksums were valid, checksum
+mismatches and recorded failures were zero, every thermal observation was
+`Nominal`, and CPU-power sample counts ranged from 3 to 14 with a median of 5.
+Analysis returned a complete measurement matrix and `gate_conclusion:
+incomplete`, correctly requiring pre-registered target PolicySelection and
+PolicyOutcome evidence, an independent rerun, and the pinned TVM comparison.
+No candidate-ranking, latency-improvement, or energy-improvement claim is made
+from this source dataset alone.
+
 ## Interpretation
 
 The sampler-readiness correction resolved the observed startup failure and the
@@ -178,9 +198,9 @@ remains preserved as boundary evidence and the Gate remains open.
 
 ## Limitations and next action
 
-The policy plan/outcome path and per-policy aggregation are implemented, but no
-source/target policy dataset or report exists. The full retention comparison,
-full fixed-C dataset, isolated TVM implementation, and independent rerun remain
-required. Apple powermetrics is estimated same-Mac
-evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
-Mac.
+The policy plan/outcome path and per-policy aggregation are implemented, and a
+sealed source history exists, but no target policy dataset or report exists.
+The full retention comparison, target fixed-C dataset, isolated TVM
+implementation, and independent rerun remain required. Apple powermetrics is
+estimated same-Mac evidence and cannot be extrapolated to RISC-V, QEMU,
+Daphnis, FPGA, or another Mac.
