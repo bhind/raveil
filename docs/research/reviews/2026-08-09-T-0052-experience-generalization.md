@@ -132,10 +132,14 @@ break-even—not prediction error alone.
 
 ## Primary sources checked
 
-- [Performance Embeddings](https://arxiv.org/abs/2303.08142)
-- [PerfVec](https://arxiv.org/abs/2310.16792)
-- [ProGraML](https://proceedings.mlr.press/v139/cummins21a.html)
-- [PERFOGRAPH](https://proceedings.neurips.cc/paper_files/paper/2023/hash/b41907dd4df5c60f86216b73fe0c7465-Abstract-Conference.html)
+- `performance-embeddings-arxiv-2303-08142` — [Performance Embeddings](https://arxiv.org/abs/2303.08142)
+- `perfvec-arxiv-2310-16792` — [PerfVec](https://arxiv.org/abs/2310.16792)
+- `programl-mlr-v139-cummins21a` — [ProGraML](https://proceedings.mlr.press/v139/cummins21a.html)
+- `perfograph-neurips-2023-b41907dd` — [PERFOGRAPH](https://proceedings.neurips.cc/paper_files/paper/2023/hash/b41907dd4df5c60f86216b73fe0c7465-Abstract-Conference.html)
+
+The keys above are registered as draft metadata in
+[`docs/references/catalog.json`](../../references/catalog.json). Their exact
+source versions, rights, and paper-level claim locators remain unverified.
 
 ## Recommendation
 

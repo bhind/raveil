@@ -101,11 +101,15 @@ and lifetime optimization cost.
 
 ## Primary sources checked
 
-- [Intel Itanium Architecture Software Developer's Manual, Volume 1](https://www.intel.com/content/dam/www/public/us/en/documents/manuals/itanium-architecture-software-developer-rev-2-3-vol-1-manual.pdf)
-- [Intel Lion Cove Architecture](https://cdrdv2-public.intel.com/824430/2024_Intel_Tech%20Tour%20TW_Next%20Gen%20P-core%20The%20Lion%20Cove%20Architecture-4.pdf)
-- [Intel Hardware-based Profile Guided Optimization](https://www.intel.com/content/www/us/en/developer/articles/technical/hwpgo.html)
-- [AMD XDNA Architecture](https://www.amd.com/en/technologies/xdna.html)
-- [Apple WWDC20: Explore the new system architecture of Apple silicon Macs](https://developer.apple.com/videos/play/wwdc2020/10686/)
+- `intel-itanium-sdm-v1` — [Intel Itanium Architecture Software Developer's Manual, Volume 1](https://www.intel.com/content/dam/www/public/us/en/documents/manuals/itanium-architecture-software-developer-rev-2-3-vol-1-manual.pdf)
+- `intel-lion-cove-architecture` — [Intel Lion Cove Architecture](https://cdrdv2-public.intel.com/824430/2024_Intel_Tech%20Tour%20TW_Next%20Gen%20P-core%20The%20Lion%20Cove%20Architecture-4.pdf)
+- `intel-hwpgo` — [Intel Hardware-based Profile Guided Optimization](https://www.intel.com/content/www/us/en/developer/articles/technical/hwpgo.html)
+- `amd-xdna-architecture` — [AMD XDNA Architecture](https://www.amd.com/en/technologies/xdna.html)
+- `apple-wwdc20-10686` — [Apple WWDC20: Explore the new system architecture of Apple silicon Macs](https://developer.apple.com/videos/play/wwdc2020/10686/)
+
+The keys above are registered as draft metadata in
+[`docs/references/catalog.json`](../../references/catalog.json). Their exact
+source revisions, rights, and page or timestamp locators remain unverified.
 
 ## Recommendation
 

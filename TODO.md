@@ -60,6 +60,13 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 - [ ] **T-0068** Install and verify the ADR-0010 root-owned powermetrics helper
   and helper-only `NOPASSWD` sudoers entry after the tracked implementation and
   tests pass. Prove operation after `sudo -k`; never run Raveil itself as root.
+- [ ] **T-0069** Pilot RFC-0003 reference management with the nine existing
+  research sources: verify exact versions, authorship, rights/access status,
+  correction or retraction state, source type, patent-review status, and source
+  locators; add claim cards and offline validation before proposing a permanent
+  workflow or ADR. Keep non-paper prior-art notes separate from paper abstracts.
+  Vreji owns the read-only similarity/IP inventory and escalation under
+  ADR-0014; the Project Manager owns canonical integration.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 

@@ -18,3 +18,4 @@ rewrite it.
 | [ADR-0010](ADR-0010-least-privilege-powermetrics-helper.md) | Accepted | Least-privilege passwordless powermetrics helper |
 | [ADR-0012](ADR-0012-policy-selection-is-pre-registered-evidence.md) | Accepted | Policy selection is pre-registered evidence |
 | [ADR-0013](ADR-0013-policy-selection-registers-a-candidate-slate.md) | Accepted | Policy selection registers an equal-budget candidate slate |
+| [ADR-0014](ADR-0014-vreji-triages-prior-art-and-ip-risk.md) | Accepted | Vreji triages prior-art similarity and IP risk without legal authority |

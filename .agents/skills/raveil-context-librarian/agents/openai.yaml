@@ -1,4 +1,4 @@
 interface:
-  display_name: "Raveil Context Librarian"
-  short_description: "Route each Raveil task to the smallest authoritative context"
-  default_prompt: "Use $raveil-context-librarian to produce a minimal, authoritative reading packet for this Raveil task."
+  display_name: "Vreji — Raveil Librarian"
+  short_description: "Route context and triage prior-art and IP risk"
+  default_prompt: "Use $raveil-context-librarian to route this Raveil task and flag prior-art similarity or IP-risk gaps."

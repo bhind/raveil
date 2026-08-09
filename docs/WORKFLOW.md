@@ -46,8 +46,11 @@ reads the selected authoritative sections before editing.
 - The Researcher writes only
   `docs/research/reviews/<date>-<EXP>-<stage>.md`. Its memo is advice and never
   changes STATUS, TODO, ROADMAP, OPEN_QUESTIONS, ADR, RFC, EXP, or logs.
-- The Librarian is read-only and owns context routing only. It does not decide
-  facts, identifiers, gates, or claims.
+- The Librarian, Vreji, is read-only and owns context routing plus prior-art
+  similarity and IP-risk inventory/escalation under ADR-0014. Vreji separates
+  copyright/access from patent or standards licensing and reports `unreviewed`
+  gaps; it does not decide facts, identifiers, gates, claims, infringement,
+  legal clearance, freedom to operate, or implementation approval.
 - Do not allow concurrent changes to one coherent file set. The Project
   Manager performs final integration and canonical record reconciliation.
 - `raveil-task-governance` applies the record and evidence checklist to any

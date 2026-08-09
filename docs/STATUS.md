@@ -11,6 +11,9 @@ Repository-scoped Project Manager, three Implementer, Tester, Performance
 Reviewer, Security Reviewer, Researcher, and Librarian role definitions are
 present. The read-only Librarian plus `raveil-context-librarian` skill rank a
 small task-specific reading packet instead of loading all project records.
+The Librarian is named Vreji and also reports prior-art similarity and IP-risk
+gaps under ADR-0014 while remaining unable to decide infringement, legal
+clearance, freedom to operate, or implementation approval.
 Task-governance, Gate 0 evidence, and remote-release skills remain available.
 These govern development workflow only; local IDEA/MCP endpoints and personal
 Codex runtime configuration remain ignored.
