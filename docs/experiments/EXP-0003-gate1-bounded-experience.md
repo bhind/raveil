@@ -257,6 +257,10 @@ suites each passed 43/44, and a targeted repeat failed with `required 3, found
 2`. T-0075 corrected the buffered-read boundary without weakening the
 minimum-three-sample contract and added a deterministic same-burst regression
 test. This was a test/sampler-accounting defect, not a failure in the sealed
-3,600-record target run. Apple powermetrics is estimated same-Mac
+3,600-record target run. T-0072 subsequently constrained mutable bundle writes
+to descriptor-relative, non-symlink EXP/RUN directories and single-link regular
+files, with cross-run traversal and link tests; this hardens future collection
+and does not modify the sealed source or target bundles. Apple powermetrics is
+estimated same-Mac
 evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
 Mac.

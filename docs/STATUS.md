@@ -108,7 +108,8 @@ Gate 1 measurement infrastructure is also implemented:
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
 - ignored local research bundles with SHA-256/size manifests, immutable sealing,
   rclone immutable copy/download verification, overwrite refusal, and a
-  completion marker copied last;
+  completion marker copied last; mutable writes resolve and remain inside their
+  own RUN-ID directory rather than merely the shared artifact root;
 - a completed non-claim fixed-C sampler pilot with 90/90 valid semantic and
   measurement records, all nominal thermal samples, minimum power-sample count
   three, and a sealed Google Drive-verified bundle;
@@ -140,8 +141,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 45
-tests. On 2026-08-10 all 45 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 46
+tests. On 2026-08-10 all 46 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,
@@ -149,7 +150,8 @@ standalone preflight, concise CLI failure reporting, statistics,
 run/analyze/seal lifecycle, bundle sync command boundaries, agent permissions,
 the existing Experience loop, Sonatine host checks, exact six-policy matrix
 integrity, preregistration planning and binding, raw-measurement summary
-verification, and the same-read sampler readiness/measurement boundary.
+verification, the same-read sampler readiness/measurement boundary, and
+cross-RUN mutable path isolation.
 This is implementation verification, not EXP-0003 performance evidence.
 
 On the T-0022 policy-integrity worktree, `scripts/ci-local.sh` passed with exit

@@ -73,13 +73,17 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   completion-marker-last semantics. The 3,600-record EXP-0003 history bundle
   exposed the cost of transferring and checking thousands of individual raw
   powermetrics files; preserve the existing verified bundle unchanged.
-- [ ] **T-0072** Constrain every mutable `ResearchBundle` write to its own
+- [x] **T-0072** Constrain every mutable `ResearchBundle` write to its own
   RUN-ID directory, not merely the shared artifact root, and add traversal tests
-  proving one mutable run cannot write into another.
+  proving `..`, absolute, and symlink-resolved paths cannot write into another
+  run or outside the artifact root.
 - [ ] **T-0073** Extend pre-seal sensitive-data inspection beyond selected text
   suffixes, reject broader credential-key forms, validate external rclone config
   ownership/permissions, constrain the declared remote root, and persist a
-  durable post-sync receipt without mutating sealed evidence.
+  durable post-sync receipt without mutating sealed evidence. Bind uploaded and
+  remotely checked bytes to a fixed verified snapshot so a local mutation
+  between pre-sync verification, copy, check, and marker transfer cannot be
+  certified by the original seal.
 - [ ] **T-0074** Add repetition-aware hierarchical or cluster bootstrap and
   preregistered drift diagnostics for Gate energy claims. Report sensitivity to
   the current workload-level paired bootstrap and capture power/battery,

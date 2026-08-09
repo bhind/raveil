@@ -59,13 +59,31 @@ class ResearchBundle:
         self.experiment_id = experiment_id
         self.run_id = run_id
         self.path = self.artifact_root / experiment_id / run_id
+        self._artifact_root_identity: tuple[int, int] | None = None
         self._assert_inside_root(self.path)
+        if self.path.resolve() != self.path:
+            raise ValueError("bundle RUN-ID path must not contain symbolic links")
+        if self.artifact_root.exists():
+            self._capture_artifact_root_identity()
+
+    def _capture_artifact_root_identity(self) -> None:
+        metadata = self.artifact_root.stat(follow_symlinks=False)
+        if not stat.S_ISDIR(metadata.st_mode):
+            raise ValueError("artifact root must be a non-symlink directory")
+        self._artifact_root_identity = (metadata.st_dev, metadata.st_ino)
 
     def _assert_inside_root(self, path: Path) -> None:
         try:
             path.resolve().relative_to(self.artifact_root)
         except ValueError as error:
             raise ValueError("bundle path escapes artifact root") from error
+
+    def _assert_inside_bundle(self, path: Path) -> None:
+        self._assert_inside_root(path)
+        try:
+            path.resolve().relative_to(self.path.resolve())
+        except ValueError as error:
+            raise ValueError("bundle path escapes RUN-ID directory") from error
 
     @property
     def sealed(self) -> bool:
@@ -75,25 +93,86 @@ class ResearchBundle:
         if self.path.exists():
             raise FileExistsError(f"run bundle already exists: {self.run_id}")
         self.path.mkdir(parents=True)
+        self._capture_artifact_root_identity()
 
     def require_mutable(self) -> None:
         if self.sealed:
             raise RuntimeError("sealed bundle cannot be changed; create a new RUN-ID")
 
+    @staticmethod
+    def _write_leaf(relative: str) -> str:
+        path = Path(relative)
+        if path.is_absolute() or len(path.parts) != 1 or path.name in {"", ".", ".."}:
+            raise ValueError("mutable bundle writes require one RUN-ID-local filename")
+        return path.name
+
+    def _open_bundle_directory(self) -> int:
+        if not hasattr(os, "O_DIRECTORY") or not hasattr(os, "O_NOFOLLOW"):
+            raise RuntimeError("secure bundle directory writes are unavailable")
+        if self._artifact_root_identity is None:
+            raise RuntimeError("artifact root identity is unavailable")
+        flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        root_fd: int | None = None
+        experiment_fd: int | None = None
+        try:
+            root_fd = os.open(self.artifact_root, flags)
+            root_metadata = os.fstat(root_fd)
+            if (root_metadata.st_dev, root_metadata.st_ino) != self._artifact_root_identity:
+                raise ValueError("artifact root identity changed")
+            experiment_fd = os.open(self.experiment_id, flags, dir_fd=root_fd)
+            return os.open(self.run_id, flags, dir_fd=experiment_fd)
+        except OSError as error:
+            raise ValueError(
+                "bundle directory chain is unavailable or symbolic link"
+            ) from error
+        finally:
+            if experiment_fd is not None:
+                os.close(experiment_fd)
+            if root_fd is not None:
+                os.close(root_fd)
+
     def write_json(self, relative: str, value: object) -> None:
         self.require_mutable()
-        target = self.path / relative
-        self._assert_inside_root(target)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(canonical_json(value) + "\n", encoding="utf-8")
+        leaf = self._write_leaf(relative)
+        directory_fd = self._open_bundle_directory()
+        flags = os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW
+        try:
+            target_fd = os.open(leaf, flags, 0o600, dir_fd=directory_fd)
+            try:
+                metadata = os.fstat(target_fd)
+                if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+                    raise ValueError(
+                        "mutable bundle target must be a single-link regular file"
+                    )
+                os.ftruncate(target_fd, 0)
+            except BaseException:
+                os.close(target_fd)
+                raise
+            with os.fdopen(target_fd, "w", encoding="utf-8") as output:
+                output.write(canonical_json(value) + "\n")
+        finally:
+            os.close(directory_fd)
 
     def append_jsonl(self, relative: str, value: object) -> None:
         self.require_mutable()
-        target = self.path / relative
-        self._assert_inside_root(target)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with target.open("a", encoding="utf-8") as output:
-            output.write(canonical_json(value) + "\n")
+        leaf = self._write_leaf(relative)
+        directory_fd = self._open_bundle_directory()
+        flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND | os.O_NOFOLLOW
+        try:
+            target_fd = os.open(leaf, flags, 0o600, dir_fd=directory_fd)
+            try:
+                metadata = os.fstat(target_fd)
+                if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+                    raise ValueError(
+                        "mutable bundle target must be a single-link regular file"
+                    )
+            except BaseException:
+                os.close(target_fd)
+                raise
+            with os.fdopen(target_fd, "a", encoding="utf-8") as output:
+                output.write(canonical_json(value) + "\n")
+        finally:
+            os.close(directory_fd)
 
     def _files(self, exclude: set[str] | None = None) -> list[BundleFile]:
         excluded = exclude or set()
@@ -187,7 +266,7 @@ class ResearchBundle:
             )
         for entry in value["files"]:
             path = self.path / entry["path"]
-            self._assert_inside_root(path)
+            self._assert_inside_bundle(path)
             if not path.is_file() or path.stat().st_size != entry["size"]:
                 raise RuntimeError(f"bundle file missing or wrong size: {entry['path']}")
             if sha256_file(path) != entry["sha256"]:

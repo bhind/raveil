@@ -647,6 +647,82 @@ class AnalysisTests(unittest.TestCase):
 
 
 class BundleTests(unittest.TestCase):
+    def test_mutable_bundle_writes_cannot_escape_run_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            run_id = "20260810T000000Z-abcdef123-12345678"
+            sibling_run_id = "20260810T000001Z-abcdef123-12345678"
+            linked_run_id = "20260810T000002Z-abcdef123-12345678"
+            bundle = ResearchBundle(root, "EXP-0003", run_id)
+            bundle.create()
+            sibling = root / "EXP-0003" / sibling_run_id
+            sibling.mkdir()
+            outside = root.parent / f"{root.name}-outside.json"
+            (bundle.path / "sibling-link").symlink_to(sibling, target_is_directory=True)
+
+            with self.assertRaisesRegex(ValueError, "RUN-ID-local filename"):
+                bundle.write_json(f"../{sibling_run_id}/probe.json", {})
+            with self.assertRaisesRegex(ValueError, "RUN-ID-local filename"):
+                bundle.append_jsonl(f"../{sibling_run_id}/probe.jsonl", {})
+            with self.assertRaisesRegex(ValueError, "RUN-ID-local filename"):
+                bundle.write_json("sibling-link/probe-via-link.json", {})
+            with self.assertRaisesRegex(ValueError, "RUN-ID-local filename"):
+                bundle.write_json(str(outside), {})
+
+            self.assertFalse((sibling / "probe.json").exists())
+            self.assertFalse((sibling / "probe.jsonl").exists())
+            self.assertFalse((sibling / "probe-via-link.json").exists())
+            self.assertFalse(outside.exists())
+
+            sibling_target = sibling / "target.json"
+            sibling_target.write_text("unchanged\n", encoding="utf-8")
+            (bundle.path / "target-link.json").symlink_to(sibling_target)
+            with self.assertRaises(OSError):
+                bundle.write_json("target-link.json", {})
+            self.assertEqual(
+                sibling_target.read_text(encoding="utf-8"), "unchanged\n"
+            )
+
+            hard_link = bundle.path / "target-hard-link.json"
+            os.link(sibling_target, hard_link)
+            with self.assertRaisesRegex(ValueError, "single-link regular file"):
+                bundle.write_json(hard_link.name, {})
+            with self.assertRaisesRegex(ValueError, "single-link regular file"):
+                bundle.append_jsonl(hard_link.name, {})
+            self.assertEqual(
+                sibling_target.read_text(encoding="utf-8"), "unchanged\n"
+            )
+
+            (root / "EXP-0003" / linked_run_id).symlink_to(
+                sibling, target_is_directory=True
+            )
+            with self.assertRaisesRegex(ValueError, "must not contain symbolic links"):
+                ResearchBundle(root, "EXP-0003", linked_run_id)
+
+            swapped_run_id = "20260810T000003Z-abcdef123-12345678"
+            swapped = ResearchBundle(root, "EXP-0003", swapped_run_id)
+            swapped.create()
+            swapped.path.rmdir()
+            swapped.path.symlink_to(sibling, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symbolic link"):
+                swapped.write_json("probe-after-swap.json", {})
+            self.assertFalse((sibling / "probe-after-swap.json").exists())
+
+            chain_root = root / "chain-artifacts"
+            chain = ResearchBundle(chain_root, "EXP-0003", run_id)
+            chain.create()
+            experiment_path = chain_root / "EXP-0003"
+            saved_experiment = chain_root / "saved-experiment"
+            experiment_path.rename(saved_experiment)
+            redirected = chain_root / "redirected"
+            (redirected / run_id).mkdir(parents=True)
+            experiment_path.symlink_to(redirected, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symbolic link"):
+                chain.write_json("probe-after-parent-swap.json", {})
+            self.assertFalse(
+                (redirected / run_id / "probe-after-parent-swap.json").exists()
+            )
+
     def test_policy_evidence_is_bound_to_preregistration_and_measurements(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
