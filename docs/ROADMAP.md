@@ -40,8 +40,10 @@ raw-bundle lifecycle are implemented. A non-claim powermetrics pilot must
 validate sampling and thermal stability before the full run. That pilot now
 passes with a sealed and remotely verified bundle; a preceding sampler-startup
 failure is also preserved. A sealed and remotely verified 24-workload history
-source dataset exists, but no target policy comparison dataset or Gate 1
-performance conclusion exists. Compare cold prior, full-history nearest
+source dataset and a first target policy comparison exist. The first target
+run failed the 5% latency/energy improvement and positive bootstrap-lower-bound
+criteria, so Gate 1 remains open pending independent confirmation and the TVM
+comparison. Compare cold prior, full-history nearest
 neighbor, bounded Experience, FIFO, reservoir, and random under lineage, shape,
 working-set, and composition holdouts. Report latency/energy HCR, NTR, coverage,
 calibration, budget, retrieval cost, storage, and evidence class.

@@ -135,6 +135,16 @@ with remote download verification and copied completion marker data hash
 last. This is Apple M2 silicon source evidence generated from Git SHA
 `51ef48c69ae8153b121a686995c0a0c1f0d3f8cb`; it is not a target policy result.
 
+First fixed-C target RUN-ID `20260809T113515Z-874c84ae2-ddb463a8` is sealed
+with bundle SHA-256
+`971ee9fa08d9f1c4f718a0a26c33530ee9ef99c3b674df6de4f6d60963d73156`
+and stored at the registered remote logical path. Immutable copy, remote
+download verification, and completion-marker-last transfer completed; marker
+data hash is
+`73a06fb1b1e82d2f32b3e2a5a94f0f27fb909dedf3144bbee43b7fdfeb961cb6`.
+The run used Git SHA `874c84ae2` and pre-registered plan SHA-256
+`c76fd9e7e2c96800ac9a2784fd51ec342379c9361c21fde679d408b318f147bf`.
+
 To limit storage and future API-quota cost exposure, local analysis and sealing
 remain immediate but sync is milestone-driven. Successful pilot/full/rerun
 bundles and selected unique failures sync individually; redundant retries may
@@ -202,19 +212,49 @@ caused much larger slate divergence, while 96 and above made bounded nearly
 identical to full history. This selection used no target measurements and makes
 no target performance claim.
 
+The first target RUN-ID `20260809T113515Z-874c84ae2-ddb463a8` completed all
+3,600 measurements and all 144 PolicySelection/PolicyOutcome pairs across six
+policies and 24 holdouts. Every measurement and semantic checksum was valid,
+all thermal observations were `Nominal`, power-sample counts ranged from 3 to
+14 with median 5, and no failure was recorded.
+
+Bounded versus cold produced zero median latency improvement and zero median
+estimated-energy improvement. The paired-bootstrap 95% intervals were
+`[0.0, 0.0]` for latency and `[0.0, 0.0198917]` for energy, so neither 5%
+threshold nor either positive lower-bound condition passed. Cold selected
+`loop-ikj-materialized` on all 24 holdouts; bounded selected it on 15 and
+`tile64-materialized` on nine. The latter generally changed energy more than
+latency, leaving the median improvement at zero. One holdout,
+`mlp-l6-s96`, regressed latency by 4.72% while improving estimated energy,
+yielding joint NTR `1/24 = 4.17%`.
+
+Bounded did meet the non-improvement constraints: active memory was 64 versus
+240 full-history summaries, retrieval p95 was 83,383 ns versus 241,533.8 ns,
+latency and energy full-history quality gaps were both zero, HCR medians were
+both 1.0, coverage was 1.0, and equal measurement budget was maintained. This
+is a negative result for the preregistered 5% improvement hypothesis on the
+first fixed-C target run, not a claim that Experience is universally
+ineffective.
+
 ## Interpretation
 
-The sampler-readiness correction resolved the observed startup failure and the
-pilot now supports proceeding to the full fixed-C data stage. This establishes
-measurement-contract behavior only; it does not establish latency or energy
-improvement, bounded-Experience quality, or Gate 1 success. The failed bundle
-remains preserved as boundary evidence and the Gate remains open.
+The measurement contract remained stable through source and target full runs.
+Bounded retention preserved full-history selection quality with one quarter of
+the active summaries and lower retrieval latency, but it did not improve the
+already-strong cold slate by the preregistered amount. Gate 1 remains open; the
+current fixed-C result must not be reported as a performance success.
 
 ## Limitations and next action
 
-The policy plan/outcome path and per-policy aggregation are implemented, and a
-sealed source history exists, but no target policy dataset or report exists.
-The full retention comparison, target fixed-C dataset, isolated TVM
-implementation, and independent rerun remain required. Apple powermetrics is
-estimated same-Mac evidence and cannot be extrapolated to RISC-V, QEMU,
-Daphnis, FPGA, or another Mac.
+The policy plan/outcome path, source history, first target dataset, and
+per-policy report now exist. An independent rerun, repetition-aware energy
+uncertainty analysis, and isolated TVM implementation remain required. The
+shared exhaustive target matrix evaluates equal logical candidate budgets
+offline; it does not demonstrate policy-specific online measurement-time or
+energy savings. Independent verification reproduced all sealed target metrics,
+but also found the fake-sampler readiness unit test timing-dependent: two clean
+suites each passed 43/44, and a targeted repeat failed with `required 3, found
+2`. This is a test-isolation defect tracked by T-0075, not a failure in the
+sealed 3,600-record target run. Apple powermetrics is estimated same-Mac
+evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
+Mac.

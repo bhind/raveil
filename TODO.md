@@ -73,6 +73,21 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   completion-marker-last semantics. The 3,600-record EXP-0003 history bundle
   exposed the cost of transferring and checking thousands of individual raw
   powermetrics files; preserve the existing verified bundle unchanged.
+- [ ] **T-0072** Constrain every mutable `ResearchBundle` write to its own
+  RUN-ID directory, not merely the shared artifact root, and add traversal tests
+  proving one mutable run cannot write into another.
+- [ ] **T-0073** Extend pre-seal sensitive-data inspection beyond selected text
+  suffixes, reject broader credential-key forms, validate external rclone config
+  ownership/permissions, constrain the declared remote root, and persist a
+  durable post-sync receipt without mutating sealed evidence.
+- [ ] **T-0074** Add repetition-aware hierarchical or cluster bootstrap and
+  preregistered drift diagnostics for Gate energy claims. Report sensitivity to
+  the current workload-level paired bootstrap and capture power/battery,
+  frequency, time-block, and background-load evidence where available.
+- [ ] **T-0075** Remove timing flakiness from the powermetrics readiness test
+  without weakening the production minimum-sample fail-closed contract. The
+  target evidence audit reproduced `required 3, found 2`; isolate scheduler
+  timing in the fake sampler and require repeated clean-suite stability.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 
@@ -101,7 +116,7 @@ timer-driven switching without capability bypass.
   powermetrics privilege preflight, calibrated pilot/full sampling windows, and
   a minimum power-sample contract, or document why TVM MetaSchedule is selected
   instead.
-- [ ] **T-0022** Compare cold prior, full-history nearest neighbor, bounded
+- [x] **T-0022** Compare cold prior, full-history nearest neighbor, bounded
   Experience, FIFO, reservoir, and random retention. The sealed-source plan
   generator and target outcome path now implement equal-budget comparison;
   policy analysis rejects
@@ -109,13 +124,14 @@ timer-driven switching without capability bypass.
   selection/outcome evidence under ADR-0012 and ADR-0013. The sealed and
   remotely verified 24-workload source history now exists. Source-only
   simulation exposed and corrected a non-binding 256-record memory limit; the
-  target now pre-registers 64 versus 240 full-history summaries. Producing the
-  target fixed-C evidence and reporting the actual comparison remain open.
+  target pre-registered 64 versus 240 full-history summaries. The first target
+  comparison is complete and negative: bounded matched cold at zero median
+  latency/energy improvement, so the Gate hypothesis did not pass this run.
 - [x] **T-0023** Add lineage, shape, working-set/memory, and
   operator-composition holdouts.
-- [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,
+- [x] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,
   retrieval latency, active-memory size, and cold-evidence size separately. The
-  per-policy aggregation is implemented; an EXP-0003 data report remains open.
+  per-policy aggregation and the first EXP-0003 target report are complete.
 - [ ] **T-0025** Preserve and analyze failed and boundary variants, not only
   winners. The sealed and remotely verified sampler-startup failure RUN-ID is
   the first preserved boundary variant; broader failed-variant coverage remains.

@@ -115,16 +115,20 @@ Gate 1 measurement infrastructure is also implemented:
   silicon measurement records, zero checksum mismatches, all nominal thermal
   observations, three-to-fourteen CPU-power samples per window, and a sealed,
   Google Drive-verified bundle;
+- a completed first fixed-C target policy run with 3,600/3,600 valid silicon
+  measurements and a complete 144-row pre-registered policy matrix; bounded
+  retained 64 versus 240 full-history summaries and reduced retrieval p95, but
+  its cold-relative median latency and energy improvements were both zero, so
+  the Gate improvement and bootstrap criteria did not pass;
 - a TVM version-gating adapter boundary that intentionally does not execute
   MetaSchedule until the fixed-C pilot is stable.
 
 Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
-- a complete Gate-evaluable target powermetrics fixed-C policy dataset;
+- an independent target rerun and a Gate-passing fixed-C policy result;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
-- an actual pre-registered fixed-C PolicySelection/PolicyOutcome dataset;
 - the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
 - cross-hardware learned transfer;
@@ -200,6 +204,7 @@ IDE-driven attach is made.
   Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.
-- No Gate 1 latency or energy improvement is claimed. The pilot and full
-  history-source bundles have real Google Drive verification, but no target
-  policy bundle, independent repeat, or TVM comparison has been verified.
+- No Gate 1 latency or energy improvement is claimed. The pilot, full
+  history-source, and first target policy bundles have real Google Drive
+  verification, but the target failed the improvement thresholds and no
+  independent repeat or TVM comparison has been verified.
