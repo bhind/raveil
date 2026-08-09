@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import random
 import statistics
-from typing import Iterable, Sequence
+from typing import Iterable, Mapping, Sequence
 
 from .experiment_schema import PolicyOutcome
 
@@ -34,6 +34,35 @@ def paired_bootstrap_median_ci(
     return percentile(medians, 0.025), percentile(medians, 0.975)
 
 
+def hierarchical_bootstrap_median_improvement_ci(
+    samples_by_workload: Mapping[str, tuple[Sequence[float], Sequence[float]]],
+    samples: int = 10_000,
+    seed: int = 0,
+) -> tuple[float, float]:
+    """Resample holdouts, then repetitions within each compared candidate."""
+    if not samples_by_workload:
+        raise ValueError("hierarchical bootstrap requires workload samples")
+    workloads = sorted(samples_by_workload)
+    if any(not cold or not selected for cold, selected in samples_by_workload.values()):
+        raise ValueError("hierarchical bootstrap requires both repetition samples")
+    randomizer = random.Random(seed)
+    estimates: list[float] = []
+    for _ in range(samples):
+        workload_improvements: list[float] = []
+        for _ in workloads:
+            workload = workloads[randomizer.randrange(len(workloads))]
+            cold, selected = samples_by_workload[workload]
+            cold_median = statistics.median(
+                cold[randomizer.randrange(len(cold))] for _ in cold
+            )
+            selected_median = statistics.median(
+                selected[randomizer.randrange(len(selected))] for _ in selected
+            )
+            workload_improvements.append((cold_median - selected_median) / cold_median)
+        estimates.append(statistics.median(workload_improvements))
+    return percentile(estimates, 0.025), percentile(estimates, 0.975)
+
+
 def headroom_capture(baseline: float, selected: float, oracle: float) -> float:
     denominator = baseline - oracle
     if denominator <= 0:
@@ -48,6 +77,11 @@ def analyze_policy_outcomes(
     expected_run_id: str,
     expected_measurement_budget: int,
     bootstrap_samples: int = 10_000,
+    repetition_samples: Mapping[
+        str,
+        tuple[Sequence[float], Sequence[float], Sequence[float], Sequence[float]],
+    ]
+    | None = None,
 ) -> dict[str, object]:
     outcome_list = list(outcomes)
     required = {"cold", "bounded", "full-history"}
@@ -153,12 +187,36 @@ def analyze_policy_outcomes(
     energy_ci = paired_bootstrap_median_ci(
         energy_improvements, samples=bootstrap_samples, seed=29
     )
+    hierarchical_latency_ci: tuple[float, float] | None = None
+    hierarchical_energy_ci: tuple[float, float] | None = None
+    if repetition_samples is not None:
+        if set(repetition_samples) != common:
+            return {
+                "gate_ready": False,
+                "unmet": ["hierarchical bootstrap repetition coverage is incomplete"],
+            }
+        hierarchical_latency_ci = hierarchical_bootstrap_median_improvement_ci(
+            {key: (value[0], value[1]) for key, value in repetition_samples.items()},
+            samples=bootstrap_samples,
+            seed=41,
+        )
+        hierarchical_energy_ci = hierarchical_bootstrap_median_improvement_ci(
+            {key: (value[2], value[3]) for key, value in repetition_samples.items()},
+            samples=bootstrap_samples,
+            seed=43,
+        )
     metrics = {
         "paired_holdouts": len(common),
         "latency_median_improvement": statistics.median(latency_improvements),
         "energy_median_improvement": statistics.median(energy_improvements),
         "latency_improvement_bootstrap_95": list(latency_ci),
         "energy_improvement_bootstrap_95": list(energy_ci),
+        "latency_improvement_hierarchical_bootstrap_95": (
+            list(hierarchical_latency_ci) if hierarchical_latency_ci else None
+        ),
+        "energy_improvement_hierarchical_bootstrap_95": (
+            list(hierarchical_energy_ci) if hierarchical_energy_ci else None
+        ),
         "joint_negative_transfer_rate": joint_negative / len(common),
         "latency_full_history_quality_gap": statistics.median(latency_quality_gap),
         "energy_full_history_quality_gap": statistics.median(energy_quality_gap),

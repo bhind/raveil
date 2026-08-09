@@ -16,7 +16,11 @@ import tomllib
 import unittest
 from unittest import mock
 
-from raveil.analysis import analyze_policy_outcomes, headroom_capture
+from raveil.analysis import (
+    analyze_policy_outcomes,
+    headroom_capture,
+    hierarchical_bootstrap_median_improvement_ci,
+)
 from raveil.cli import build_parser, main as cli_main
 from raveil.experiment_runner import analyze_bundle, measurement_order, run_experiment, seal_bundle
 from raveil.experiment_schema import (
@@ -598,6 +602,15 @@ class AnalysisTests(unittest.TestCase):
             expected_run_id=self.RUN_ID,
             expected_measurement_budget=3,
             bootstrap_samples=500,
+            repetition_samples={
+                f"holdout-{index}": (
+                    [110.0] * 15,
+                    [99.0] * 15,
+                    [11.0] * 15,
+                    [9.9] * 15,
+                )
+                for index in range(20)
+            },
         )
         self.assertTrue(result["gate_ready"], result["unmet"])
         metrics = result["metrics"]
@@ -610,6 +623,21 @@ class AnalysisTests(unittest.TestCase):
         self.assertGreater(headroom_capture(100, 90, 80), 0)
         self.assertEqual(set(metrics["policy_metrics"]), set(COMPARISON_POLICIES))
         self.assertEqual(metrics["policy_metrics"]["cold"]["coverage"], 1.0)
+        self.assertGreater(
+            metrics["latency_improvement_hierarchical_bootstrap_95"][0], 0
+        )
+
+    def test_hierarchical_bootstrap_resamples_holdouts_and_repetitions(self) -> None:
+        interval = hierarchical_bootstrap_median_improvement_ci(
+            {
+                f"holdout-{index}": ([100.0] * 15, [90.0] * 15)
+                for index in range(20)
+            },
+            samples=200,
+            seed=7,
+        )
+        self.assertAlmostEqual(interval[0], 0.1)
+        self.assertAlmostEqual(interval[1], 0.1)
 
     def test_joint_negative_transfer_is_fail_closed(self) -> None:
         outcomes = [

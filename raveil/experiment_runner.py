@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 import math
+import os
 from pathlib import Path
 import platform
 import random
@@ -10,7 +11,7 @@ import shutil
 import statistics
 import subprocess
 
-from .analysis import analyze_policy_outcomes
+from .analysis import analyze_policy_outcomes, percentile
 from .experiment_schema import (
     BenchmarkCandidate,
     BenchmarkManifest,
@@ -89,6 +90,17 @@ def environment_signature(
     )
 
 
+def measurement_context_snapshot() -> dict[str, object]:
+    return {
+        "captured_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "load_average_1m_5m_15m": list(os.getloadavg()),
+        "battery": _command_output(("pmset", "-g", "batt"), "unavailable"),
+        "cpu_frequency_hz": _command_output(
+            ("sysctl", "-n", "hw.cpufrequency"), "unavailable"
+        ),
+    }
+
+
 def measurement_order(
     candidates: tuple[BenchmarkCandidate, ...], repetitions: int, seed: int
 ) -> list[tuple[BenchmarkCandidate, int, str]]:
@@ -163,6 +175,8 @@ def run_experiment(
     for selection in policy_selections:
         bundle.append_jsonl("policy-selections.jsonl", selection.to_dict())
     bundle.write_json("environment.json", signature.to_dict())
+    measurement_context = {"start": measurement_context_snapshot()}
+    bundle.write_json("measurement-context.json", measurement_context)
     source = Path(manifest.source)
     if source.is_absolute():
         raise ValueError("manifest source must be a repository-relative path")
@@ -256,6 +270,8 @@ def run_experiment(
                     "run-failure.json",
                     {"sequence": sequence, "failure": failure, "fail_closed": True},
                 )
+                measurement_context["end"] = measurement_context_snapshot()
+                bundle.write_json("measurement-context.json", measurement_context)
                 return bundle, False
     bundle.write_json(
         "run-summary.json",
@@ -266,6 +282,8 @@ def run_experiment(
             "compile_command_recorded": bool(compile_command),
         },
     )
+    measurement_context["end"] = measurement_context_snapshot()
+    bundle.write_json("measurement-context.json", measurement_context)
     return bundle, all_valid
 
 
@@ -452,6 +470,49 @@ def _policy_evidence_unmet(
     return unmet
 
 
+def _measurement_drift_diagnostics(
+    records: list[MeasurementRecord],
+    grouped: dict[tuple[str, str], list[MeasurementRecord]],
+) -> dict[str, object]:
+    energy_cvs = []
+    group_medians: dict[tuple[str, str], tuple[float, float]] = {}
+    for key, values in grouped.items():
+        latencies = [float(record.latency_ns) for record in values if record.latency_ns]
+        energies = [float(record.energy_mj) for record in values if record.energy_mj is not None]
+        if latencies and energies:
+            group_medians[key] = (statistics.median(latencies), statistics.median(energies))
+        if len(energies) > 1 and statistics.mean(energies) > 0:
+            energy_cvs.append(statistics.stdev(energies) / statistics.mean(energies))
+    ordered = sorted(records, key=lambda record: record.sequence)
+    blocks: list[dict[str, float | int]] = []
+    for block_index in range(4):
+        start = len(ordered) * block_index // 4
+        end = len(ordered) * (block_index + 1) // 4
+        latency_ratios = []
+        energy_ratios = []
+        for record in ordered[start:end]:
+            medians = group_medians.get((record.workload_id, record.candidate_id))
+            if medians and record.latency_ns and record.energy_mj is not None:
+                latency_ratios.append(float(record.latency_ns) / medians[0])
+                energy_ratios.append(float(record.energy_mj) / medians[1])
+        blocks.append(
+            {
+                "block": block_index + 1,
+                "records": end - start,
+                "latency_ratio_median": statistics.median(latency_ratios) if latency_ratios else 0,
+                "energy_ratio_median": statistics.median(energy_ratios) if energy_ratios else 0,
+            }
+        )
+    return {
+        "energy_cv_group_median": statistics.median(energy_cvs) if energy_cvs else None,
+        "energy_cv_group_p95": percentile(energy_cvs, 0.95) if energy_cvs else None,
+        "normalized_sequence_quartiles": blocks,
+        "thermal_levels": sorted(
+            {record.thermal_level for record in records if record.thermal_level is not None}
+        ),
+    }
+
+
 def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> dict[str, object]:
     bundle.require_mutable()
     manifest = BenchmarkManifest.from_dict(
@@ -524,6 +585,25 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
         if policy_integrity:
             policy = {"gate_ready": False, "unmet": policy_integrity}
         else:
+            outcome_by_pair = {
+                (outcome.policy, outcome.workload_id): outcome for outcome in outcomes
+            }
+            repetition_samples = {}
+            for workload in manifest.workloads:
+                cold_id = outcome_by_pair[("cold", workload.workload_id)].selected_candidate_id
+                bounded_id = outcome_by_pair[("bounded", workload.workload_id)].selected_candidate_id
+                cold_records = sorted(
+                    grouped[(workload.workload_id, cold_id)], key=lambda record: record.repetition
+                )
+                bounded_records = sorted(
+                    grouped[(workload.workload_id, bounded_id)], key=lambda record: record.repetition
+                )
+                repetition_samples[workload.workload_id] = (
+                    [float(record.latency_ns) for record in cold_records if record.latency_ns],
+                    [float(record.latency_ns) for record in bounded_records if record.latency_ns],
+                    [float(record.energy_mj) for record in cold_records if record.energy_mj is not None],
+                    [float(record.energy_mj) for record in bounded_records if record.energy_mj is not None],
+                )
             policy = analyze_policy_outcomes(
                 outcomes,  # type: ignore[arg-type]
                 manifest.active_memory_limit,
@@ -531,6 +611,7 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
                 bundle.run_id,
                 manifest.measurement_budget,
                 bootstrap_samples=bootstrap_samples,
+                repetition_samples=repetition_samples,
             )
     else:
         policy = {
@@ -573,6 +654,9 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
             "minimum": min(power_counts) if power_counts else 0,
             "median": statistics.median(power_counts) if power_counts else 0,
         },
+        "drift_diagnostics": _measurement_drift_diagnostics(
+            records, grouped  # type: ignore[arg-type]
+        ),
         "policy": policy,
         "gate_conclusion": "not-applicable-pilot" if manifest.stage == "pilot" else "incomplete",
         "unmet": unmet,

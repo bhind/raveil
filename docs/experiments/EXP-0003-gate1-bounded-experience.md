@@ -247,8 +247,12 @@ current fixed-C result must not be reported as a performance success.
 ## Limitations and next action
 
 The policy plan/outcome path, source history, first target dataset, and
-per-policy report now exist. An independent rerun, repetition-aware energy
-uncertainty analysis, and isolated TVM implementation remain required. The
+per-policy report now exist. T-0074 added repetition-aware hierarchical
+bootstrap sensitivity, energy-CV and normalized sequence-quartile diagnostics,
+and start/end system context capture for subsequent runs; it does not retrofit
+unrecorded context into sealed bundles or change the preregistered paired
+bootstrap threshold. An independent rerun and isolated TVM implementation
+remain required. The
 shared exhaustive target matrix evaluates equal logical candidate budgets
 offline; it does not demonstrate policy-specific online measurement-time or
 energy savings. Independent verification reproduced all sealed target metrics,

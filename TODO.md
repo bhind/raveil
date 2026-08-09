@@ -84,10 +84,14 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   remotely checked bytes to a fixed verified snapshot so a local mutation
   between pre-sync verification, copy, check, and marker transfer cannot be
   certified by the original seal.
-- [ ] **T-0074** Add repetition-aware hierarchical or cluster bootstrap and
+- [x] **T-0074** Add repetition-aware hierarchical or cluster bootstrap and
   preregistered drift diagnostics for Gate energy claims. Report sensitivity to
   the current workload-level paired bootstrap and capture power/battery,
-  frequency, time-block, and background-load evidence where available.
+  frequency, time-block, and background-load evidence where available. Analysis
+  now reports a workload/repetition hierarchical sensitivity interval, per-group
+  energy CV, normalized sequence quartiles, thermal levels, and start/end
+  battery, frequency, and load snapshots without changing the preregistered
+  paired-bootstrap Gate threshold.
 - [x] **T-0075** Remove timing flakiness from the powermetrics readiness test
   without weakening the production minimum-sample fail-closed contract. The
   sampler now excludes exactly one readiness observation and carries any

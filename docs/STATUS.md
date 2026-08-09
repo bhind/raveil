@@ -92,6 +92,9 @@ Gate 1 measurement infrastructure is also implemented:
   thermal-stability checks; and same-Mac relative energy calculation;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
+- repetition-aware hierarchical-bootstrap sensitivity intervals, per-candidate
+  energy-variation and normalized time-block drift diagnostics, plus start/end
+  battery, available CPU-frequency, and system-load measurement context;
 - fail-closed policy evidence analysis requiring an exact manifest-wide
   cold/bounded/full-history/FIFO/reservoir/random matrix, unique rows, matching
   run/manifest/budget/candidate provenance, preregistration before measurement,
@@ -142,8 +145,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 46
-tests. On 2026-08-10 all 46 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 47
+tests. On 2026-08-10 all 47 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,
@@ -151,8 +154,8 @@ standalone preflight, concise CLI failure reporting, statistics,
 run/analyze/seal lifecycle, bundle sync command boundaries, agent permissions,
 the existing Experience loop, Sonatine host checks, exact six-policy matrix
 integrity, preregistration planning and binding, raw-measurement summary
-verification, the same-read sampler readiness/measurement boundary, and
-cross-RUN mutable path isolation.
+verification, workload/repetition hierarchical bootstrap, the same-read sampler
+readiness/measurement boundary, and cross-RUN mutable path isolation.
 This is implementation verification, not EXP-0003 performance evidence.
 
 On the T-0022 policy-integrity worktree, `scripts/ci-local.sh` passed with exit
