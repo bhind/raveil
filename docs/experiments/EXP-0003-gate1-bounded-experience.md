@@ -48,8 +48,9 @@ external `gdrive:` OAuth remote subsequently completed immutable upload and
 download-based verification of both the selected failed pilot and successful
 pilot. Direct powermetrics still requires superuser authority. ADR-0010 replaces
 the terminal-specific interactive sudo cache with a root-owned fixed-argument
-helper and helper-only `NOPASSWD` rule; its tracked implementation is verified,
-but the machine installation and post-`sudo -k` proof remain T-0068.
+helper and helper-only `NOPASSWD` rule. On 2026-08-09 the local installation and
+post-`sudo -k` passwordless preflight completed as T-0068; this is environment
+and measurement-contract evidence, not latency or energy performance evidence.
 
 ## Procedure
 
@@ -135,6 +136,15 @@ integrity behavior. These are implementation facts, not hypothesis evidence.
 The clean-tree CLI preflight failed closed before bundle creation when sudo
 privilege was unavailable. This verifies a failure boundary only, not a
 measurement result.
+
+On 2026-08-09 the installed helper and sudoers boundary passed its post-install
+proof. `/usr/local/libexec/raveil-powermetrics` was `root:wheel` mode `0755`,
+the sudoers fragment was `root:wheel` mode `0440`, and the installed helper
+SHA-256 matched the reviewed temporary build:
+`e5c1ad6e5b9f416a759fdc195ba81ad065422ef7ddb356734659da0b59844bc5`.
+After `sudo -k`, standalone preflight completed without a password prompt and
+reported `thermal=Nominal cpu-power-mw=1640.000`. It created no RUN-ID and is
+measurement-contract evidence only.
 
 A subsequent user-operated pilot attempt on 2026-08-08 passed the privilege
 boundary but the powermetrics preflight reported thermal level `Moderate`.

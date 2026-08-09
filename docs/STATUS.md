@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 Version: `0.0000000000001` (`10^-13`)
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
@@ -85,6 +85,9 @@ Gate 1 measurement infrastructure is also implemented:
   CPU-power samples per measured window; a sampler-readiness barrier that
   excludes its startup observation; thermal-stability checks; and same-Mac
   relative energy calculation;
+- a root-owned installed helper and helper-only `NOPASSWD` sudoers rule verified
+  after `sudo -k`; the installed v1 binary matched the reviewed temporary build
+  SHA-256 and a passwordless pilot preflight returned nominal thermal state;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
@@ -101,8 +104,6 @@ Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
 - a complete Gate-evaluable powermetrics fixed-C dataset;
-- system installation and post-`sudo -k` verification of the root-owned
-  powermetrics helper and helper-only sudoers rule;
 - production of pre-registered cold/bounded/full-history PolicyOutcome records;
 - the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
@@ -133,6 +134,16 @@ On the T-0068 least-privilege-helper worktree, `scripts/ci-local.sh` passed with
 exit status 0: all 38 host tests, clean RV64 release/debug builds, DWARF checks,
 and QEMU smoke. The ignored emulation smoke-log SHA-256 was
 `c222caea0fdc41b0b3992a7772ddde6db99e2a693d915afff36283ffa73e018b`.
+
+On 2026-08-09 the v1 helper was installed as `root:wheel` mode `0755` at
+`/usr/local/libexec/raveil-powermetrics`; its SHA-256
+`e5c1ad6e5b9f416a759fdc195ba81ad065422ef7ddb356734659da0b59844bc5`
+matched the reviewed temporary build. The helper-only sudoers fragment was
+`root:wheel` mode `0440`. After `sudo -k`, `python3 -m raveil experiment
+preflight --manifest benchmarks/manifests/gate1-powermetrics-pilot-v1.json`
+completed without a password prompt and reported `thermal=Nominal` and one
+CPU-power sample. This verifies the local privilege and sampling preflight
+boundary only; it is not Gate 1 performance evidence.
 
 The artifact-creating environment did not contain QEMU or a RISC-V cross
 compiler. On 2026-08-08, a user-operated Apple Silicon/Homebrew environment
