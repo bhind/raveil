@@ -16,7 +16,7 @@ import unittest
 from unittest import mock
 
 from raveil.analysis import analyze_policy_outcomes, headroom_capture
-from raveil.cli import main as cli_main
+from raveil.cli import build_parser, main as cli_main
 from raveil.experiment_runner import analyze_bundle, measurement_order, run_experiment, seal_bundle
 from raveil.experiment_schema import (
     BenchmarkCandidate,
@@ -30,11 +30,17 @@ from raveil.experiment_schema import (
 )
 from raveil.native_backend import NativeCBackend
 from raveil.power import PowerSample, PowermetricsSampler, parse_powermetrics
+from raveil.policy_comparison import (
+    COMPARISON_POLICIES,
+    generate_policy_outcomes,
+    generate_policy_selections,
+)
 from raveil.research_bundle import ResearchBundle, make_run_id, manifest_hash, sha256_file
 
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "benchmarks/manifests/gate1-fixed-c-v1.json"
+HISTORY_MANIFEST = ROOT / "benchmarks/manifests/gate1-fixed-c-history-v1.json"
 PILOT_MANIFEST = ROOT / "benchmarks/manifests/gate1-powermetrics-pilot-v1.json"
 SOURCE = ROOT / "benchmarks/native/benchmark.c"
 HELPER_SOURCE = ROOT / "tools/powermetrics_helper.c"
@@ -57,6 +63,23 @@ class ManifestTests(unittest.TestCase):
             {"gemm-only", "gemm-bias-relu", "two-stage-mlp"},
         )
         self.assertEqual(manifest.energy.minimum_samples, 3)
+
+    def test_gate1_history_manifest_is_disjoint_with_matching_candidates(self) -> None:
+        target = BenchmarkManifest.load(MANIFEST)
+        history = BenchmarkManifest.load(HISTORY_MANIFEST)
+        self.assertEqual(len(history.workloads), len(target.workloads))
+        self.assertFalse(
+            {workload.workload_id for workload in history.workloads}
+            & {workload.workload_id for workload in target.workloads}
+        )
+        self.assertEqual(
+            [candidate.candidate_id for candidate in history.candidates],
+            [candidate.candidate_id for candidate in target.candidates],
+        )
+        self.assertNotEqual(
+            {(workload.m, workload.n, workload.k) for workload in history.workloads},
+            {(workload.m, workload.n, workload.k) for workload in target.workloads},
+        )
 
     def test_powermetrics_pilot_is_short_and_not_a_gate_manifest(self) -> None:
         manifest = BenchmarkManifest.load(PILOT_MANIFEST)
@@ -133,6 +156,33 @@ class ManifestTests(unittest.TestCase):
             )
         self.assertEqual(result, 0)
         self.assertIn("thermal=Nominal", output.getvalue())
+
+    def test_cli_exposes_policy_plan_and_run_selection(self) -> None:
+        parser = build_parser()
+        plan = parser.parse_args(
+            [
+                "experiment",
+                "plan",
+                "--manifest",
+                "target.json",
+                "--source-run",
+                "run-id",
+                "--output",
+                "plan.jsonl",
+            ]
+        )
+        self.assertEqual(plan.source_run, "run-id")
+        run = parser.parse_args(
+            [
+                "experiment",
+                "run",
+                "--manifest",
+                "target.json",
+                "--policy-selections",
+                "plan.jsonl",
+            ]
+        )
+        self.assertEqual(run.policy_selections, "plan.jsonl")
 
 
 class NativeBackendTests(unittest.TestCase):
@@ -345,14 +395,132 @@ class PowermetricsHelperTests(unittest.TestCase):
             self.assertIn("authorized sudo", unprivileged.stderr)
 
 
+class PolicyComparisonTests(unittest.TestCase):
+    @staticmethod
+    def manifests() -> tuple[BenchmarkManifest, BenchmarkManifest]:
+        base = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        base["workloads"] = base["workloads"][:20]
+        base["candidates"] = base["candidates"][:3]
+        base["measurement_budget"] = 2
+        base["active_memory_limit"] = 8
+        source = json.loads(json.dumps(base))
+        target = json.loads(json.dumps(base))
+        for workload in source["workloads"]:
+            workload["workload_id"] = "source-" + workload["workload_id"]
+        for workload in target["workloads"]:
+            workload["workload_id"] = "target-" + workload["workload_id"]
+        return BenchmarkManifest.from_dict(source), BenchmarkManifest.from_dict(target)
+
+    @staticmethod
+    def records(manifest: BenchmarkManifest, run_id: str) -> list[MeasurementRecord]:
+        records: list[MeasurementRecord] = []
+        sequence = 0
+        for workload_index, workload in enumerate(manifest.workloads):
+            values = ((100, 10.0), (92 + workload_index % 2, 9.2), (80, 8.0))
+            for candidate, (latency, energy) in zip(
+                manifest.candidates, values, strict=True
+            ):
+                for repetition in range(manifest.repetitions):
+                    sequence += 1
+                    records.append(
+                        MeasurementRecord(
+                            run_id=run_id,
+                            sequence=sequence,
+                            measured_at_utc="2026-08-08T00:01:00+00:00",
+                            workload_id=workload.workload_id,
+                            candidate_id=candidate.candidate_id,
+                            repetition=repetition,
+                            phase=(
+                                "trusted-baseline"
+                                if candidate.trusted_baseline and repetition == 0
+                                else "randomized"
+                            ),
+                            latency_ns=latency,
+                            cpu_power_mw=100.0,
+                            energy_mj=energy,
+                            checksum="ok",
+                            reference_checksum="ok",
+                            semantic_valid=True,
+                            measurement_valid=True,
+                            failure="",
+                            thermal_level="Nominal",
+                            power_sample_count=3,
+                            evidence_class="silicon",
+                        )
+                    )
+        return records
+
+    def test_generates_equal_budget_six_policy_slates_and_outcomes(self) -> None:
+        source, target = self.manifests()
+        source_records = self.records(source, "source-run")
+        selections = generate_policy_selections(
+            target,
+            source,
+            source_records,
+            "0" * 64,
+            registered_at=datetime(2026, 8, 8, tzinfo=timezone.utc),
+        )
+        self.assertEqual(len(selections), len(target.workloads) * len(COMPARISON_POLICIES))
+        self.assertEqual({selection.policy for selection in selections}, set(COMPARISON_POLICIES))
+        self.assertTrue(
+            all(len(selection.candidate_ids) == target.measurement_budget for selection in selections)
+        )
+        active_sizes = {
+            policy: {selection.active_memory_records for selection in selections if selection.policy == policy}
+            for policy in COMPARISON_POLICIES
+        }
+        self.assertEqual(active_sizes["cold"], {0})
+        self.assertEqual(active_sizes["full-history"], {len(source.workloads) * len(source.candidates)})
+        self.assertEqual(active_sizes["bounded"], {target.active_memory_limit})
+        self.assertEqual(active_sizes["fifo"], {target.active_memory_limit})
+        self.assertEqual(active_sizes["reservoir"], {target.active_memory_limit})
+        self.assertEqual(active_sizes["random"], {target.active_memory_limit})
+
+        target_records = self.records(target, "target-run")
+        outcomes = generate_policy_outcomes(target, "target-run", target_records, selections)
+        self.assertEqual(len(outcomes), len(selections))
+        for outcome, selection in zip(outcomes, selections, strict=True):
+            self.assertIn(outcome.selected_candidate_id, selection.candidate_ids)
+            self.assertEqual(outcome.measurement_budget, target.measurement_budget)
+            self.assertEqual(outcome.retrieval_latency_ns, selection.retrieval_latency_ns)
+
+    def test_source_and_target_workloads_must_be_disjoint(self) -> None:
+        source, _ = self.manifests()
+        with self.assertRaisesRegex(ValueError, "must be disjoint"):
+            generate_policy_selections(
+                source, source, self.records(source, "source-run"), "0" * 64
+            )
+
+
 class AnalysisTests(unittest.TestCase):
     RUN_ID = "20260808T000000Z-abcdef123-12345678"
 
     @staticmethod
     def outcome(workload: str, policy: str) -> PolicyOutcome:
-        selected_latency = {"cold": 100.0, "bounded": 90.0, "full-history": 89.0}[policy]
-        selected_energy = {"cold": 10.0, "bounded": 9.0, "full-history": 8.9}[policy]
-        retrieval = {"cold": 10, "bounded": 100, "full-history": 1000}[policy]
+        selected_latency = {
+            "cold": 100.0,
+            "bounded": 90.0,
+            "full-history": 89.0,
+            "fifo": 93.0,
+            "reservoir": 92.0,
+            "random": 94.0,
+        }[policy]
+        selected_energy = {
+            "cold": 10.0,
+            "bounded": 9.0,
+            "full-history": 8.9,
+            "fifo": 9.3,
+            "reservoir": 9.2,
+            "random": 9.4,
+        }[policy]
+        retrieval = {
+            "cold": 10,
+            "bounded": 100,
+            "full-history": 1000,
+            "fifo": 80,
+            "reservoir": 90,
+            "random": 85,
+        }[policy]
         return PolicyOutcome(
             run_id=AnalysisTests.RUN_ID,
             workload_id=workload,
@@ -374,7 +542,7 @@ class AnalysisTests(unittest.TestCase):
         outcomes = [
             self.outcome(f"holdout-{index}", policy)
             for index in range(20)
-            for policy in ("cold", "bounded", "full-history")
+            for policy in COMPARISON_POLICIES
         ]
         result = analyze_policy_outcomes(
             outcomes,
@@ -393,6 +561,8 @@ class AnalysisTests(unittest.TestCase):
             metrics["bounded_retrieval_p95_ns"], metrics["full_history_retrieval_p95_ns"]
         )
         self.assertGreater(headroom_capture(100, 90, 80), 0)
+        self.assertEqual(set(metrics["policy_metrics"]), set(COMPARISON_POLICIES))
+        self.assertEqual(metrics["policy_metrics"]["cold"]["coverage"], 1.0)
 
     def test_joint_negative_transfer_is_fail_closed(self) -> None:
         outcomes = [
@@ -450,7 +620,8 @@ class BundleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             value = json.loads(MANIFEST.read_text(encoding="utf-8"))
-            value["candidates"] = value["candidates"][:2]
+            value["candidates"] = value["candidates"][:3]
+            value["measurement_budget"] = 2
             manifest = BenchmarkManifest.from_dict(value)
             run_id = make_run_id(
                 "abcdef1234567",
@@ -461,11 +632,13 @@ class BundleTests(unittest.TestCase):
             bundle.create()
             bundle.write_json("manifest.json", manifest.to_dict())
             baseline_id = manifest.candidates[0].candidate_id
-            selected_id = manifest.candidates[1].candidate_id
+            cold_id = manifest.candidates[1].candidate_id
+            selected_id = manifest.candidates[2].candidate_id
             sequence = 0
             for workload in manifest.workloads:
                 for candidate_id, latency, energy in (
                     (baseline_id, 100, 10.0),
+                    (cold_id, 105, 10.5),
                     (selected_id, 80, 8.0),
                 ):
                     for repetition in range(manifest.repetitions):
@@ -499,6 +672,11 @@ class BundleTests(unittest.TestCase):
                         )
                 for policy in ("cold", "bounded", "full-history"):
                     candidate_id = baseline_id if policy == "cold" else selected_id
+                    slate = (
+                        (baseline_id, cold_id)
+                        if policy == "cold"
+                        else (baseline_id, selected_id)
+                    )
                     bundle.append_jsonl(
                         "policy-selections.jsonl",
                         PolicySelection(
@@ -507,9 +685,21 @@ class BundleTests(unittest.TestCase):
                             registered_at_utc="2026-08-08T00:00:00+00:00",
                             workload_id=workload.workload_id,
                             policy=policy,
-                            selected_candidate_id=candidate_id,
+                            candidate_ids=slate,
                             measurement_budget=manifest.measurement_budget,
+                            source_run_id="source-run",
+                            source_bundle_sha256="0" * 64,
                             source_evidence_max_sequence=0,
+                            retrieval_latency_ns={
+                                "cold": 10,
+                                "bounded": 100,
+                                "full-history": 1000,
+                            }[policy],
+                            active_memory_records=128,
+                            cold_evidence_records=1000,
+                            predicted_latency_ratio=1.0 if policy == "cold" else 0.8,
+                            predicted_energy_ratio=1.0 if policy == "cold" else 0.8,
+                            abstained=policy == "cold",
                         ).to_dict(),
                     )
                     bundle.append_jsonl(
@@ -533,6 +723,9 @@ class BundleTests(unittest.TestCase):
                             }[policy],
                             active_memory_records=128,
                             cold_evidence_records=1000,
+                            predicted_latency_ratio=1.0 if policy == "cold" else 0.8,
+                            predicted_energy_ratio=1.0 if policy == "cold" else 0.8,
+                            abstained=policy == "cold",
                         ).to_dict(),
                     )
 

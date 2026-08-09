@@ -89,14 +89,18 @@ timer-driven switching without capability bypass.
   a minimum power-sample contract, or document why TVM MetaSchedule is selected
   instead.
 - [ ] **T-0022** Compare cold prior, full-history nearest neighbor, bounded
-  Experience, FIFO, and reservoir retention. Policy analysis now rejects
+  Experience, FIFO, reservoir, and random retention. The sealed-source plan
+  generator and target outcome path now implement equal-budget comparison;
+  policy analysis rejects
   incomplete, duplicate, unknown, late, or provenance/measurement-mismatched
-  selection/outcome evidence under ADR-0012; production of the preregistered
-  policy matrix and the actual comparison remain open.
+  selection/outcome evidence under ADR-0012 and ADR-0013. Producing the
+  preregistered source/target fixed-C evidence and reporting the actual
+  comparison remain open.
 - [x] **T-0023** Add lineage, shape, working-set/memory, and
   operator-composition holdouts.
 - [ ] **T-0024** Report HCR, NTR, Coverage, calibration, measurement budget,
-  retrieval latency, active-memory size, and cold-evidence size separately.
+  retrieval latency, active-memory size, and cold-evidence size separately. The
+  per-policy aggregation is implemented; an EXP-0003 data report remains open.
 - [ ] **T-0025** Preserve and analyze failed and boundary variants, not only
   winners. The sealed and remotely verified sampler-startup failure RUN-ID is
   the first preserved boundary variant; broader failed-variant coverage remains.

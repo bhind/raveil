@@ -51,6 +51,7 @@ def analyze_policy_outcomes(
 ) -> dict[str, object]:
     outcome_list = list(outcomes)
     required = {"cold", "bounded", "full-history"}
+    allowed = required | {"fifo", "reservoir", "random"}
     expected = set(expected_workloads)
     integrity_unmet: list[str] = []
     if not expected:
@@ -63,7 +64,7 @@ def analyze_policy_outcomes(
                 f"duplicate PolicyOutcome for {outcome.policy}/{outcome.workload_id}"
             )
         seen.add(key)
-        if outcome.policy not in required:
+        if outcome.policy not in allowed:
             integrity_unmet.append(f"unknown policy in PolicyOutcome: {outcome.policy}")
         if outcome.workload_id not in expected:
             integrity_unmet.append(
@@ -77,7 +78,10 @@ def analyze_policy_outcomes(
             integrity_unmet.append(
                 f"PolicyOutcome budget mismatch for {outcome.policy}/{outcome.workload_id}"
             )
-    expected_pairs = {(policy, workload) for policy in required for workload in expected}
+    present = {outcome.policy for outcome in outcome_list if outcome.policy in allowed}
+    expected_pairs = {
+        (policy, workload) for policy in (required | present) for workload in expected
+    }
     missing = sorted(expected_pairs - seen)
     if missing:
         integrity_unmet.append(
@@ -165,6 +169,61 @@ def analyze_policy_outcomes(
         "active_memory_within_limit": memory_ok,
         "equal_measurement_budget": budgets_ok,
     }
+    policy_metrics: dict[str, dict[str, float | int]] = {}
+    for policy_name in sorted(present):
+        policy_outcomes = [by_policy[policy_name][workload_id] for workload_id in sorted(common)]
+        latency_ratios = [
+            outcome.selected_latency_ns / outcome.baseline_latency_ns
+            for outcome in policy_outcomes
+        ]
+        energy_ratios = [
+            outcome.selected_energy_mj / outcome.baseline_energy_mj
+            for outcome in policy_outcomes
+        ]
+        policy_metrics[policy_name] = {
+            "coverage": sum(not outcome.abstained for outcome in policy_outcomes)
+            / len(policy_outcomes),
+            "latency_hcr_median": statistics.median(
+                headroom_capture(
+                    outcome.baseline_latency_ns,
+                    outcome.selected_latency_ns,
+                    outcome.oracle_latency_ns,
+                )
+                for outcome in policy_outcomes
+            ),
+            "energy_hcr_median": statistics.median(
+                headroom_capture(
+                    outcome.baseline_energy_mj,
+                    outcome.selected_energy_mj,
+                    outcome.oracle_energy_mj,
+                )
+                for outcome in policy_outcomes
+            ),
+            "latency_calibration_median_absolute_error": statistics.median(
+                abs(outcome.predicted_latency_ratio - observed)
+                for outcome, observed in zip(policy_outcomes, latency_ratios, strict=True)
+            ),
+            "energy_calibration_median_absolute_error": statistics.median(
+                abs(outcome.predicted_energy_ratio - observed)
+                for outcome, observed in zip(policy_outcomes, energy_ratios, strict=True)
+            ),
+            "negative_transfer_rate": sum(
+                latency > 1.02 or energy > 1.02
+                for latency, energy in zip(latency_ratios, energy_ratios, strict=True)
+            )
+            / len(policy_outcomes),
+            "retrieval_p95_ns": percentile(
+                [float(outcome.retrieval_latency_ns) for outcome in policy_outcomes], 0.95
+            ),
+            "measurement_budget": policy_outcomes[0].measurement_budget,
+            "active_memory_records_max": max(
+                outcome.active_memory_records for outcome in policy_outcomes
+            ),
+            "cold_evidence_records_max": max(
+                outcome.cold_evidence_records for outcome in policy_outcomes
+            ),
+        }
+    metrics["policy_metrics"] = policy_metrics
     unmet = []
     if metrics["latency_median_improvement"] < 0.05:
         unmet.append("latency median improvement is below 5%")

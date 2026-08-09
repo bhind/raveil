@@ -11,6 +11,12 @@ from .backend import ToyDaphnis
 from .experience import ExperienceStore
 from .model import Context, seed_candidates
 from .policy import NearestExperiencePolicy, Tuner, TuningResult
+from .experiment_schema import BenchmarkManifest
+from .policy_comparison import (
+    generate_policy_selections,
+    load_measurements,
+    write_policy_selections,
+)
 from .experiment_runner import (
     analyze_bundle,
     find_bundle,
@@ -110,13 +116,38 @@ def command_inspect(args: argparse.Namespace) -> int:
 
 
 def command_experiment_run(args: argparse.Namespace) -> int:
-    bundle, valid = run_experiment(Path(args.manifest), Path(args.artifact_root))
+    bundle, valid = run_experiment(
+        Path(args.manifest),
+        Path(args.artifact_root),
+        policy_selections_path=(
+            Path(args.policy_selections) if args.policy_selections else None
+        ),
+    )
     print(f"RUN-ID={bundle.run_id}")
     print(f"local-bundle={bundle.path}")
     if not valid:
         print("run incomplete: fail-closed measurement failure")
         return 2
     print("run captured; analyze and seal before sync")
+    return 0
+
+
+def command_experiment_plan(args: argparse.Namespace) -> int:
+    source = find_bundle(Path(args.artifact_root), args.source_run)
+    source_verification = source.verify()
+    source_manifest = BenchmarkManifest.from_dict(
+        json.loads((source.path / "manifest.json").read_text(encoding="utf-8"))
+    )
+    target_manifest = BenchmarkManifest.load(Path(args.manifest))
+    selections = generate_policy_selections(
+        target_manifest,
+        source_manifest,
+        load_measurements(source.path / "measurement.jsonl"),
+        source_verification["bundle_hash"],
+    )
+    output = Path(args.output)
+    write_policy_selections(output, selections)
+    print(f"policy selections={len(selections)} output={output}")
     return 0
 
 
@@ -193,7 +224,17 @@ def build_parser() -> argparse.ArgumentParser:
     experiment_run = experiment_commands.add_parser("run", help="execute a versioned manifest")
     experiment_run.add_argument("--manifest", required=True)
     experiment_run.add_argument("--artifact-root", default="artifacts/research")
+    experiment_run.add_argument("--policy-selections")
     experiment_run.set_defaults(handler=command_experiment_run)
+
+    experiment_plan = experiment_commands.add_parser(
+        "plan", help="pre-register policy candidate slates from a sealed source run"
+    )
+    experiment_plan.add_argument("--manifest", required=True)
+    experiment_plan.add_argument("--source-run", required=True)
+    experiment_plan.add_argument("--output", required=True)
+    experiment_plan.add_argument("--artifact-root", default="artifacts/research")
+    experiment_plan.set_defaults(handler=command_experiment_plan)
 
     experiment_analyze = experiment_commands.add_parser("analyze", help="analyze a local run")
     experiment_analyze.add_argument("--run", required=True)

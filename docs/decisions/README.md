@@ -17,3 +17,4 @@ rewrite it.
 | [ADR-0009](ADR-0009-gate1-measurement-and-bundle-boundaries.md) | Accepted | Measured adapters and immutable research bundles |
 | [ADR-0010](ADR-0010-least-privilege-powermetrics-helper.md) | Accepted | Least-privilege passwordless powermetrics helper |
 | [ADR-0012](ADR-0012-policy-selection-is-pre-registered-evidence.md) | Accepted | Policy selection is pre-registered evidence |
+| [ADR-0013](ADR-0013-policy-selection-registers-a-candidate-slate.md) | Accepted | Policy selection registers an equal-budget candidate slate |

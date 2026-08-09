@@ -69,10 +69,16 @@ but the machine installation and post-`sudo -k` proof remain T-0068.
 5. Run the 24-holdout full manifest with at least 15 repetitions/candidate.
    Fail closed on timeout, invalid candidate, checksum mismatch, insufficient
    power samples, permission denial, or thermal-state change.
-6. Pre-register an oracle-free `PolicySelection` for every manifest workload
-   and required policy before target measurement. Analysis requires a complete,
-   unique matrix, binds it to manifest/candidate/budget/run provenance, derives
-   baseline/selected/offline-oracle values from raw measurements, then reports
+6. Run and seal `gate1-fixed-c-history-v1.json`, whose 24 source workloads have
+   IDs, lineage, and shapes disjoint from `gate1-fixed-c-v1.json` while sharing
+   its candidate contract. Generate an oracle-free
+   `PolicySelection` v2 slate for every target workload under cold,
+   full-history, bounded, FIFO, reservoir, and random policies. Each slate
+   includes the baseline and has exactly the registered measurement budget.
+   Copy the plan into the target bundle before measurement. Analysis requires a
+   complete, unique matrix, binds it to manifest/candidate/budget/run
+   provenance, selects the joint latency/energy winner only within each slate,
+   derives offline-oracle values from the exhaustive raw matrix, then reports
    latency, energy, HCR, energy-HCR, NTR, coverage, calibration, budget,
    retrieval p95, active memory, and cold evidence.
 7. Seal and sync the run; verify remote content before uploading the completion
@@ -172,8 +178,9 @@ remains preserved as boundary evidence and the Gate remains open.
 
 ## Limitations and next action
 
-The policy-outcome production path, full retention comparison, calibration and
-coverage report, full fixed-C dataset, isolated TVM implementation, and
-independent rerun remain required. Apple powermetrics is estimated same-Mac
+The policy plan/outcome path and per-policy aggregation are implemented, but no
+source/target policy dataset or report exists. The full retention comparison,
+full fixed-C dataset, isolated TVM implementation, and independent rerun remain
+required. Apple powermetrics is estimated same-Mac
 evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
 Mac.

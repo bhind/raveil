@@ -122,6 +122,33 @@ python -m raveil experiment seal --run RUN_ID
 python -m raveil experiment sync --run RUN_ID
 ```
 
+First collect, analyze, and seal the registered disjoint-workload history run.
+It is source evidence and cannot produce a Gate conclusion by itself:
+
+```bash
+python -m raveil experiment run \
+  --manifest benchmarks/manifests/gate1-fixed-c-history-v1.json
+python -m raveil experiment analyze --run SOURCE_RUN_ID
+python -m raveil experiment seal --run SOURCE_RUN_ID
+```
+
+Then pre-register the six equal-budget policy slates before starting the target
+run:
+
+```bash
+python -m raveil experiment plan \
+  --manifest benchmarks/manifests/gate1-fixed-c-v1.json \
+  --source-run SOURCE_RUN_ID \
+  --output /tmp/gate1-policy-selections.jsonl
+
+python -m raveil experiment run \
+  --manifest benchmarks/manifests/gate1-fixed-c-v1.json \
+  --policy-selections /tmp/gate1-policy-selections.jsonl
+```
+
+`experiment analyze` derives outcomes only from each pre-registered candidate
+slate and keeps the exhaustive target matrix as offline oracle evidence.
+
 The pilot validates power-sampling and thermal stability but cannot produce a
 Gate conclusion. Use `gate1-fixed-c-v1.json` only after the pilot is remotely
 verified. Run requires a clean Git worktree. After the one-time

@@ -24,9 +24,10 @@ Five JSON contracts are versioned independently:
   baseline-first or randomized phase, latency, estimated CPU power and energy,
   reference/candidate checksum, power-sample count, thermal state, validity, and
   failure;
-- `raveil.policy-selection/v1`: oracle-free, pre-measurement policy/workload/
-  candidate selection bound to experiment, manifest SHA-256, registration time,
-  measurement budget, and source-evidence cutoff;
+- `raveil.policy-selection/v2`: oracle-free, pre-measurement policy/workload/
+  candidate slate bound to experiment, manifest SHA-256, registration time,
+  measurement budget, source RUN-ID and sealed-bundle SHA-256, source-evidence
+  cutoff, retrieval cost, evidence size, prediction, and abstention;
 - `raveil.policy-outcome/v1`: run-bound baseline/selected/offline-oracle latency
   and energy, equal measurement budget, retrieval latency, and memory/evidence
   sizes.
@@ -39,6 +40,8 @@ The CLI lifecycle is:
 
 ```text
 experiment run --manifest PATH
+experiment plan --manifest TARGET --source-run RUN_ID --output PLAN.jsonl
+experiment run --manifest TARGET --policy-selections PLAN.jsonl
 experiment analyze --run RUN_ID
 experiment seal --run RUN_ID
 experiment sync --run RUN_ID
@@ -54,6 +57,14 @@ evidence and never online policy input. Gate analysis requires exactly one
 selection and outcome for every manifest workload under each required policy,
 rejects late or mismatched provenance, and recomputes all outcome metrics from
 the raw measurement matrix.
+
+The source run used by `experiment plan` must be sealed, use the same backend,
+evidence class, and candidate set, and have workload IDs disjoint from the
+target. Each policy plan contains the trusted baseline plus a fixed proposal
+slate equal to the manifest budget. Analysis chooses the joint latency/energy
+winner only inside that slate; exhaustive results remain offline oracle data.
+Cold, full-history, bounded tail retention, FIFO, reservoir, and random
+retention use the same budget.
 
 After the one-time ADR-0010 setup, Raveil invokes only
 `sudo -n /usr/local/libexec/raveil-powermetrics`; no interactive ticket is

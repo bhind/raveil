@@ -135,10 +135,19 @@ def run_experiment(
     manifest_path: Path,
     artifact_root: Path,
     compiler: str = "cc",
+    policy_selections_path: Path | None = None,
 ) -> tuple[ResearchBundle, bool]:
     require_clean_worktree()
     manifest = BenchmarkManifest.load(manifest_path)
     _validate_measurement_target(manifest)
+    policy_selections: list[PolicySelection] = []
+    policy_selection_sha256: str | None = None
+    if policy_selections_path is not None:
+        from .policy_comparison import load_selections, validate_policy_selections
+
+        policy_selections = load_selections(policy_selections_path)
+        validate_policy_selections(manifest, policy_selections)
+        policy_selection_sha256 = sha256_file(policy_selections_path)
     digest = manifest_hash(manifest.to_dict())
     sha = git_sha()
     run_id = make_run_id(sha, digest)
@@ -151,6 +160,8 @@ def run_experiment(
     bundle.create()
     signature = environment_signature(run_id, manifest.evidence_class, compiler)
     bundle.write_json("manifest.json", manifest.to_dict())
+    for selection in policy_selections:
+        bundle.append_jsonl("policy-selections.jsonl", selection.to_dict())
     bundle.write_json("environment.json", signature.to_dict())
     source = Path(manifest.source)
     if source.is_absolute():
@@ -179,7 +190,15 @@ def run_experiment(
         "commands.json",
         {
             "compile": [compiler, *manifest.compiler_flags, manifest.source, "-o", "tools/native-benchmark"],
-            "run": ["python", "-m", "raveil", "experiment", "run", "--manifest", "<manifest>"],
+            "run": [
+                "python", "-m", "raveil", "experiment", "run", "--manifest", "<manifest>",
+                *(
+                    ("--policy-selections", "<pre-registered-plan>")
+                    if policy_selections_path is not None
+                    else ()
+                ),
+            ],
+            "policy_selection_sha256": policy_selection_sha256,
         },
     )
     sequence = 0
@@ -286,13 +305,9 @@ def _policy_evidence_unmet(
     selections: list[PolicySelection],
 ) -> list[str]:
     required_policies = {"cold", "bounded", "full-history"}
+    allowed_policies = required_policies | {"fifo", "reservoir", "random"}
     workload_ids = {workload.workload_id for workload in manifest.workloads}
     candidate_ids = {candidate.candidate_id for candidate in manifest.candidates}
-    expected_pairs = {
-        (policy, workload_id)
-        for policy in required_policies
-        for workload_id in workload_ids
-    }
     digest = manifest_hash(manifest.to_dict())
     unmet: list[str] = []
     selection_by_pair: dict[tuple[str, str], PolicySelection] = {}
@@ -316,9 +331,10 @@ def _policy_evidence_unmet(
             unmet.append(
                 f"PolicySelection manifest hash mismatch for {selection.policy}/{selection.workload_id}"
             )
-        if selection.selected_candidate_id not in candidate_ids:
+        if any(candidate_id not in candidate_ids for candidate_id in selection.candidate_ids):
             unmet.append(
-                f"PolicySelection candidate is not registered: {selection.selected_candidate_id}"
+                f"PolicySelection candidate slate is not registered: "
+                f"{selection.policy}/{selection.workload_id}"
             )
         if selection.measurement_budget != manifest.measurement_budget:
             unmet.append(
@@ -330,6 +346,15 @@ def _policy_evidence_unmet(
                 f"{selection.policy}/{selection.workload_id}"
             )
     selection_pairs = set(selection_by_pair)
+    present_policies = {policy for policy, _ in selection_pairs}
+    unknown_policies = present_policies - allowed_policies
+    expected_pairs = {
+        (policy, workload_id)
+        for policy in (required_policies | (present_policies & allowed_policies))
+        for workload_id in workload_ids
+    }
+    if unknown_policies:
+        unmet.append(f"PolicySelection has unknown policies: {', '.join(sorted(unknown_policies))}")
     missing_selections = expected_pairs - selection_pairs
     unexpected_selections = selection_pairs - expected_pairs
     if missing_selections:
@@ -342,10 +367,33 @@ def _policy_evidence_unmet(
         )
 
     outcome_by_pair = {(outcome.policy, outcome.workload_id): outcome for outcome in outcomes}
+    outcome_pairs = {(outcome.policy, outcome.workload_id) for outcome in outcomes}
+    if len(outcome_pairs) != len(outcomes):
+        unmet.append("PolicyOutcome matrix contains duplicate rows")
+    missing_outcomes = expected_pairs - outcome_pairs
+    unexpected_outcomes = outcome_pairs - expected_pairs
+    if missing_outcomes:
+        unmet.append(f"PolicyOutcome coverage is incomplete: {len(missing_outcomes)} pairs missing")
+    if unexpected_outcomes:
+        unmet.append(f"PolicyOutcome coverage has {len(unexpected_outcomes)} unexpected pairs")
     for pair in expected_pairs & selection_pairs & set(outcome_by_pair):
-        if outcome_by_pair[pair].selected_candidate_id != selection_by_pair[pair].selected_candidate_id:
+        selection = selection_by_pair[pair]
+        outcome = outcome_by_pair[pair]
+        if outcome.selected_candidate_id not in selection.candidate_ids:
             unmet.append(
-                f"PolicyOutcome selection differs from pre-registration: {pair[0]}/{pair[1]}"
+                f"PolicyOutcome winner is outside pre-registered slate: {pair[0]}/{pair[1]}"
+            )
+        if (
+            outcome.measurement_budget != selection.measurement_budget
+            or outcome.retrieval_latency_ns != selection.retrieval_latency_ns
+            or outcome.active_memory_records != selection.active_memory_records
+            or outcome.cold_evidence_records != selection.cold_evidence_records
+            or outcome.predicted_latency_ratio != selection.predicted_latency_ratio
+            or outcome.predicted_energy_ratio != selection.predicted_energy_ratio
+            or outcome.abstained != selection.abstained
+        ):
+            unmet.append(
+                f"PolicyOutcome provenance differs from selection: {pair[0]}/{pair[1]}"
             )
 
     valid_records = [record for record in records if record.measurement_valid]
@@ -446,6 +494,17 @@ def analyze_bundle(bundle: ResearchBundle, bootstrap_samples: int = 10_000) -> d
     complete_matrix = set(grouped) == expected_group_keys
     policy_path = bundle.path / "policy-outcomes.jsonl"
     selection_path = bundle.path / "policy-selections.jsonl"
+    if manifest.stage == "full" and selection_path.exists() and not policy_path.exists():
+        from .policy_comparison import generate_policy_outcomes, load_selections
+
+        generated = generate_policy_outcomes(
+            manifest,
+            bundle.run_id,
+            records,  # type: ignore[arg-type]
+            load_selections(selection_path),
+        )
+        for outcome in generated:
+            bundle.append_jsonl("policy-outcomes.jsonl", outcome.to_dict())
     if manifest.stage == "pilot":
         policy = {
             "gate_ready": False,

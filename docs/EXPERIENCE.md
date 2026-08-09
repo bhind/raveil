@@ -81,6 +81,8 @@ HCR must be accompanied by:
 - Negative Transfer Rate (NTR);
 - coverage and calibrated abstention;
 - measurement budget and optimizer compute cost;
+- per-policy retrieval p95, active and cold evidence size;
+- median absolute calibration error for predicted latency and energy ratios;
 - retrieval latency and active-memory size;
 - total cold-evidence size;
 - latency/energy/memory/tail objectives;

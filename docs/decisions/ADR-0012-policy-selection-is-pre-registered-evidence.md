@@ -60,4 +60,3 @@ Tests cover complete matrices, missing/duplicate/unknown outcomes, RUN-ID and
 budget mismatch, valid preregistration, duplicate selections, and measured
 metric tampering. A later selection protocol must preserve oracle isolation or
 explicitly supersede this ADR.
-

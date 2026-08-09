@@ -1,6 +1,6 @@
 # EXP-0002: Sonatine Microkernel RV64 reproducibility
 
-Status: In progress
+Status: Completed
 Evidence class: QEMU emulation and host-tool inspection
 Last updated: 2026-08-08
 

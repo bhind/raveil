@@ -11,7 +11,7 @@ MANIFEST_SCHEMA = "raveil.benchmark-manifest/v1"
 ENVIRONMENT_SCHEMA = "raveil.environment-signature/v1"
 MEASUREMENT_SCHEMA = "raveil.measurement-record/v1"
 POLICY_OUTCOME_SCHEMA = "raveil.policy-outcome/v1"
-POLICY_SELECTION_SCHEMA = "raveil.policy-selection/v1"
+POLICY_SELECTION_SCHEMA = "raveil.policy-selection/v2"
 BUNDLE_SCHEMA = "raveil.research-bundle/v1"
 
 EvidenceClass = Literal["analytical", "simulation", "emulation", "fpga", "silicon"]
@@ -282,6 +282,9 @@ class PolicyOutcome:
     retrieval_latency_ns: int
     active_memory_records: int
     cold_evidence_records: int
+    predicted_latency_ratio: float = 1.0
+    predicted_energy_ratio: float = 1.0
+    abstained: bool = False
     schema: str = POLICY_OUTCOME_SCHEMA
 
     def __post_init__(self) -> None:
@@ -299,6 +302,8 @@ class PolicyOutcome:
             raise ValueError("PolicyOutcome budget/retrieval values are invalid")
         if self.active_memory_records < 0 or self.cold_evidence_records < 0:
             raise ValueError("PolicyOutcome evidence sizes must not be negative")
+        if self.predicted_latency_ratio <= 0 or self.predicted_energy_ratio <= 0:
+            raise ValueError("PolicyOutcome predicted ratios must be positive")
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "PolicyOutcome":
@@ -316,16 +321,28 @@ class PolicySelection:
     manifest_sha256: str
     registered_at_utc: str
     workload_id: str
-    policy: Literal["cold", "bounded", "full-history"]
-    selected_candidate_id: str
+    policy: Literal[
+        "cold", "bounded", "full-history", "fifo", "reservoir", "random"
+    ]
+    candidate_ids: tuple[str, ...]
     measurement_budget: int
+    source_run_id: str
+    source_bundle_sha256: str
     source_evidence_max_sequence: int
+    retrieval_latency_ns: int
+    active_memory_records: int
+    cold_evidence_records: int
+    predicted_latency_ratio: float
+    predicted_energy_ratio: float
+    abstained: bool
     schema: str = POLICY_SELECTION_SCHEMA
 
     def __post_init__(self) -> None:
         if self.schema != POLICY_SELECTION_SCHEMA:
             raise ValueError(f"unsupported PolicySelection schema: {self.schema}")
-        if self.policy not in {"cold", "bounded", "full-history"}:
+        if self.policy not in {
+            "cold", "bounded", "full-history", "fifo", "reservoir", "random"
+        }:
             raise ValueError(f"unsupported PolicySelection policy: {self.policy}")
         if len(self.manifest_sha256) != 64 or any(
             character not in "0123456789abcdef" for character in self.manifest_sha256
@@ -339,12 +356,31 @@ class PolicySelection:
             raise ValueError("PolicySelection registered_at_utc must include timezone")
         if self.measurement_budget < 1 or self.source_evidence_max_sequence < 0:
             raise ValueError("PolicySelection budget/evidence sequence is invalid")
+        if not self.source_run_id:
+            raise ValueError("PolicySelection source RUN-ID is required")
+        if len(self.source_bundle_sha256) != 64 or any(
+            character not in "0123456789abcdef"
+            for character in self.source_bundle_sha256
+        ):
+            raise ValueError("PolicySelection source bundle hash must be lowercase SHA-256")
+        if len(self.candidate_ids) != self.measurement_budget:
+            raise ValueError("PolicySelection candidate slate must equal measurement budget")
+        if len(set(self.candidate_ids)) != len(self.candidate_ids):
+            raise ValueError("PolicySelection candidate slate must be unique")
+        if self.retrieval_latency_ns < 0:
+            raise ValueError("PolicySelection retrieval latency must not be negative")
+        if self.active_memory_records < 0 or self.cold_evidence_records < 0:
+            raise ValueError("PolicySelection evidence sizes must not be negative")
+        if self.predicted_latency_ratio <= 0 or self.predicted_energy_ratio <= 0:
+            raise ValueError("PolicySelection predicted ratios must be positive")
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "PolicySelection":
         if value.get("schema") != POLICY_SELECTION_SCHEMA:
             raise ValueError(f"unsupported PolicySelection schema: {value.get('schema')}")
-        return cls(**value)
+        copied = dict(value)
+        copied["candidate_ids"] = tuple(copied["candidate_ids"])
+        return cls(**copied)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

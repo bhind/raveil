@@ -88,9 +88,17 @@ Gate 1 measurement infrastructure is also implemented:
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - fail-closed policy evidence analysis requiring an exact manifest-wide
-  cold/bounded/full-history matrix, unique rows, matching run/manifest/budget/
-  candidate provenance, preregistration before measurement, and summary values
-  recomputed from raw measurements;
+  cold/bounded/full-history/FIFO/reservoir/random matrix, unique rows, matching
+  run/manifest/budget/candidate provenance, preregistration before measurement,
+  and summary values recomputed from raw measurements;
+- a production policy-plan path that reads a sealed, disjoint-workload source
+  run and generates equal-budget cold, full-history, bounded, FIFO, reservoir,
+  and random candidate slates; target runs copy the plan before measurement and
+  analysis automatically emits slate-bound outcomes;
+- a committed 24-workload fixed-C history manifest with distinct IDs, lineage,
+  and shapes but the same ten-candidate contract as the target holdouts;
+- per-policy HCR, energy-HCR, coverage, calibration error, NTR, retrieval p95,
+  measurement budget, active-memory maximum, and cold-evidence counts;
 - `experiment run`, `analyze`, `seal`, and `sync` CLI lifecycle;
 - ignored local research bundles with SHA-256/size manifests, immutable sealing,
   rclone immutable copy/download verification, overwrite refusal, and a
@@ -107,8 +115,7 @@ Not implemented or not yet evidenced:
 - a complete Gate-evaluable powermetrics fixed-C dataset;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
-- production of pre-registered cold/bounded/full-history PolicySelection and
-  PolicyOutcome records;
+- an actual pre-registered fixed-C PolicySelection/PolicyOutcome dataset;
 - the pinned official apache-tvm MetaSchedule measurement implementation;
 - neural representation、GAN/AAE、ANN;
 - cross-hardware learned transfer;
@@ -119,15 +126,16 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 40
-tests. On 2026-08-09 all 40 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 44
+tests. On 2026-08-09 all 44 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,
 standalone preflight, concise CLI failure reporting, statistics,
 run/analyze/seal lifecycle, bundle sync command boundaries, agent permissions,
-the existing Experience loop, Sonatine host checks, exact policy-matrix
-integrity, preregistration binding, and raw-measurement summary verification.
+the existing Experience loop, Sonatine host checks, exact six-policy matrix
+integrity, preregistration planning and binding, and raw-measurement summary
+verification.
 This is implementation verification, not EXP-0003 performance evidence.
 
 On the T-0022 policy-integrity worktree, `scripts/ci-local.sh` passed with exit
@@ -183,5 +191,6 @@ IDE-driven attach is made.
   Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.
-- No Gate 1 latency or energy improvement is claimed. No real Google Drive
-  remote, independent repeat, or TVM comparison has been verified.
+- No Gate 1 latency or energy improvement is claimed. The pilot bundles have
+  real Google Drive verification, but no full Gate 1 bundle, independent
+  repeat, or TVM comparison has been verified.
