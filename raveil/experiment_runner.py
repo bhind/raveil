@@ -10,6 +10,7 @@ import random
 import shutil
 import statistics
 import subprocess
+import sys
 
 from .analysis import analyze_policy_outcomes, percentile
 from .experiment_schema import (
@@ -85,6 +86,10 @@ def environment_signature(
                 (POWERMETRICS_HELPER, "--version"), "not-installed"
             ),
             "powermetrics_helper_sha256": helper_hash,
+            "apache_tvm": _command_output(
+                (sys.executable, "-c", "import tvm; print(tvm.__version__)"),
+                "not-installed",
+            ),
         },
         evidence_class=evidence_class,  # type: ignore[arg-type]
     )
@@ -116,8 +121,8 @@ def measurement_order(
 
 
 def _validate_measurement_target(manifest: BenchmarkManifest) -> None:
-    if manifest.backend != "native-c":
-        raise RuntimeError("TVM execution is deferred until the fixed-C pilot is stable")
+    if manifest.backend not in {"native-c", "tvm-meta-schedule"}:
+        raise RuntimeError(f"unsupported measurement backend: {manifest.backend}")
     if manifest.energy.required and (
         platform.system() != "Darwin" or platform.machine() != "arm64"
     ):
@@ -183,7 +188,7 @@ def run_experiment(
     source = git_root() / source
     if not source.is_file():
         raise FileNotFoundError(f"manifest source does not exist: {manifest.source}")
-    bundled_source = bundle.path / "sources" / "benchmark.c"
+    bundled_source = bundle.path / "sources" / source.name
     bundled_source.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, bundled_source)
     if manifest.energy.required:
@@ -191,19 +196,38 @@ def run_experiment(
         if not helper_source.is_file():
             raise FileNotFoundError("powermetrics helper source is missing")
         shutil.copyfile(helper_source, bundle.path / "sources" / helper_source.name)
-    backend = NativeCBackend(
-        source=bundled_source,
-        binary=bundle.path / "tools" / "native-benchmark",
-        compiler=compiler,
-        compiler_flags=manifest.compiler_flags,
-        timeout_seconds=manifest.timeout_seconds,
-        warmups=manifest.warmups,
-    )
-    compile_command = backend.compile()
+    if manifest.backend == "native-c":
+        backend = NativeCBackend(
+            source=bundled_source,
+            binary=bundle.path / "tools" / "native-benchmark",
+            compiler=compiler,
+            compiler_flags=manifest.compiler_flags,
+            timeout_seconds=manifest.timeout_seconds,
+            warmups=manifest.warmups,
+        )
+        compile_command = backend.compile()
+    else:
+        from .tvm_backend import TVMMetaScheduleBackend
+
+        backend = TVMMetaScheduleBackend(
+            manifest.tvm_version or "",
+            bundle.path / "tvm-database",
+            warmups=manifest.warmups,
+        )
+        backend.prepare(manifest)
+        compile_command = (
+            sys.executable,
+            "-m",
+            "raveil",
+            "experiment",
+            "run",
+            "--manifest",
+            "<tvm-manifest>",
+        )
     bundle.write_json(
         "commands.json",
         {
-            "compile": [compiler, *manifest.compiler_flags, manifest.source, "-o", "tools/native-benchmark"],
+            "compile_or_prepare": list(compile_command),
             "run": [
                 "python", "-m", "raveil", "experiment", "run", "--manifest", "<manifest>",
                 *(

@@ -99,6 +99,17 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   timing-based regression recurred, it was replaced by an explicit
   operation/fake-sampler handshake; that test and the deterministic same-burst
   regression verify the boundary without relying on scheduler timing.
+- [x] **T-0079** Implement the pinned official Apache TVM MetaSchedule adapter
+  after the fixed-C contract stabilized. Pin the Apple Silicon environment,
+  preserve the same source/target holdouts and candidate identities, store each
+  constrained candidate schedule in the MetaSchedule JSON database, query it
+  back before execution, and verify all three workload families and ten
+  candidates against the int64 semantic checksum.
+- [ ] **T-0080** Complete Gate 1 evidence collection: run and remotely verify an
+  independent fixed-C target, a TVM history source, and a pre-registered TVM
+  target; compare conclusions, obtain performance/security reviews, and record
+  the final `pass`, `pause`, or `falsified` Gate decision without changing the
+  preregistered thresholds.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 

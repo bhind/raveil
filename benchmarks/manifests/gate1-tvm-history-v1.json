@@ -1,0 +1,7 @@
+{
+  "extends": "gate1-fixed-c-history-v1.json",
+  "backend": "tvm-meta-schedule",
+  "source": "benchmarks/tvm/requirements.lock",
+  "compiler_flags": [],
+  "tvm_version": "0.25.0.post1"
+}

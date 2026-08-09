@@ -89,6 +89,22 @@ class ManifestTests(unittest.TestCase):
         self.assertLess(target.active_memory_limit, history_summary_records)
         self.assertEqual(target.active_memory_limit, 64)
 
+    def test_tvm_manifests_pin_official_adapter_and_reuse_fixed_contract(self) -> None:
+        fixed_target = BenchmarkManifest.load(MANIFEST)
+        fixed_history = BenchmarkManifest.load(HISTORY_MANIFEST)
+        tvm_target = BenchmarkManifest.load(
+            ROOT / "benchmarks/manifests/gate1-tvm-v1.json"
+        )
+        tvm_history = BenchmarkManifest.load(
+            ROOT / "benchmarks/manifests/gate1-tvm-history-v1.json"
+        )
+        self.assertEqual(tvm_target.backend, "tvm-meta-schedule")
+        self.assertEqual(tvm_target.tvm_version, "0.25.0.post1")
+        self.assertEqual(tvm_target.workloads, fixed_target.workloads)
+        self.assertEqual(tvm_target.candidates, fixed_target.candidates)
+        self.assertEqual(tvm_history.workloads, fixed_history.workloads)
+        self.assertEqual(tvm_history.candidates, fixed_history.candidates)
+
     def test_powermetrics_pilot_is_short_and_not_a_gate_manifest(self) -> None:
         manifest = BenchmarkManifest.load(PILOT_MANIFEST)
         self.assertEqual(manifest.stage, "pilot")

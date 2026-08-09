@@ -191,6 +191,15 @@ class BenchmarkManifest:
             raise ValueError(f"invalid benchmark manifest JSON: {error}") from error
         if not isinstance(value, dict):
             raise ValueError("benchmark manifest must be a JSON object")
+        if "extends" in value:
+            extends = Path(str(value.pop("extends")))
+            if extends.is_absolute() or len(extends.parts) != 1:
+                raise ValueError("manifest extends must name one sibling manifest")
+            parent = json.loads((path.parent / extends).read_text(encoding="utf-8"))
+            if "extends" in parent:
+                raise ValueError("nested manifest extends is not supported")
+            parent.update(value)
+            value = parent
         return cls.from_dict(value)
 
     def to_dict(self) -> dict[str, Any]:

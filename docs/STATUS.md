@@ -126,8 +126,10 @@ Gate 1 measurement infrastructure is also implemented:
   retained 64 versus 240 full-history summaries and reduced retrieval p95, but
   its cold-relative median latency and energy improvements were both zero, so
   the Gate improvement and bootstrap criteria did not pass;
-- a TVM version-gating adapter boundary that intentionally does not execute
-  MetaSchedule until the fixed-C pilot is stable.
+- a pinned official Apache TVM 0.25.0.post1 / TVM FFI 0.1.12 Apple Silicon
+  adapter that lowers the same int32/int64 workload and candidate contracts,
+  commits constrained schedules to a MetaSchedule JSON database, queries them
+  back before compilation, and passes a 60-kernel semantic/database-reuse smoke;
 
 Not implemented or not yet evidenced:
 
@@ -135,7 +137,7 @@ Not implemented or not yet evidenced:
 - an independent target rerun and a Gate-passing fixed-C policy result;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
-- the pinned official apache-tvm MetaSchedule measurement implementation;
+- completed powermetrics datasets for the pinned TVM adapter;
 - neural representation、GAN/AAE、ANN;
 - cross-hardware learned transfer;
 - multi-objective Pareto policy;
@@ -145,8 +147,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 47
-tests. On 2026-08-10 all 47 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 48
+tests. On 2026-08-10 all 48 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,
@@ -154,7 +156,8 @@ standalone preflight, concise CLI failure reporting, statistics,
 run/analyze/seal lifecycle, bundle sync command boundaries, agent permissions,
 the existing Experience loop, Sonatine host checks, exact six-policy matrix
 integrity, preregistration planning and binding, raw-measurement summary
-verification, workload/repetition hierarchical bootstrap, the same-read sampler
+verification, fixed-C/TVM manifest-contract identity,
+workload/repetition hierarchical bootstrap, the same-read sampler
 readiness/measurement boundary, and cross-RUN mutable path isolation.
 This is implementation verification, not EXP-0003 performance evidence.
 

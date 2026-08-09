@@ -251,8 +251,13 @@ per-policy report now exist. T-0074 added repetition-aware hierarchical
 bootstrap sensitivity, energy-CV and normalized sequence-quartile diagnostics,
 and start/end system context capture for subsequent runs; it does not retrofit
 unrecorded context into sealed bundles or change the preregistered paired
-bootstrap threshold. An independent rerun and isolated TVM implementation
-remain required. The
+bootstrap threshold. An independent rerun and TVM datasets remain required.
+T-0079 implemented the isolated official Apache
+TVM 0.25.0.post1 adapter with TVM FFI 0.1.12. An implementation smoke compiled
+and checksum-validated all 60 combinations of the three workload families and
+ten registered candidates, then reopened and reused all 60 MetaSchedule JSON
+records. This is adapter/semantic evidence only: no TVM powermetrics dataset or
+performance conclusion exists yet. The
 shared exhaustive target matrix evaluates equal logical candidate budgets
 offline; it does not demonstrate policy-specific online measurement-time or
 energy savings. Independent verification reproduced all sealed target metrics,
