@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -60,6 +60,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 - [ ] **T-0068** Install and verify the ADR-0010 root-owned powermetrics helper
   and helper-only `NOPASSWD` sudoers entry after the tracked implementation and
   tests pass. Prove operation after `sudo -k`; never run Raveil itself as root.
+- [x] **T-0069** Reconcile Frontispice sequence 6 with current architecture,
+  accept the x86-as-frontend boundary in ADR-0011, and preserve staged scope,
+  evidence, safety, and falsification requirements in RFC-0003.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 
@@ -119,6 +122,9 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
 - [ ] **T-0043** Implement Miroirs Graph Compiler structural validation and Pavane Semantic Oracle differential
   semantic checking.
 - [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis Execution Subsystem organizations.
+- [ ] **T-0070** After RFC-0001 contracts stabilize, implement and
+  differentially test RFC-0003 phase X0's tiny x86-64 frontend without claiming
+  ABI, Linux userspace, or broad binary compatibility.
 
 ## Research backlog
 

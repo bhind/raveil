@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 ## Four-plane adaptive Harvard model
 
@@ -74,6 +74,22 @@ Daphnis is connected through owned job/object/completion contracts. Static,
 elastic dataflow, stream, and hybrid organizations remain comparison
 candidates. Dynamic islands or RISC-V fallback handle pointer chasing,
 interpreters, unpredictable traversal, and other graph-hostile regions.
+
+## Legacy compatibility frontends
+
+x86-64 is a possible compatibility input format, not a native Raveil ISA.
+Future supported binary regions may be decoded and lifted into Raveil-owned
+semantic/effect representations, validated, and then enter the existing graph,
+fallback, measurement, and Experience boundaries. The frontend is untrusted
+and cannot install executable state directly.
+
+Legacy memory and ABI requirements remain explicit compatibility-contract
+properties. In particular, x86 TSO does not become the global native memory
+model. RISC-V remains the trusted baseline and fallback, and cold or irregular
+regions may stay on a generic path. Linux x86-64 userspace is the first
+candidate environment; Windows and arbitrary-binary compatibility are not
+initial promises. No x86 frontend is implemented in the current tree. See
+ADR-0011 and RFC-0003.
 
 ## Named components
 

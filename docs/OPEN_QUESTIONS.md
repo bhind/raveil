@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -61,3 +61,17 @@ resolves it.
   replaced, or rejected?
 - What measured threshold—performance, memory, energy, variance, security, or
   adaptability—justifies replacing a mature upstream implementation?
+
+## x86-64 compatibility
+
+- What minimal semantic IR and effect schema is sufficient for the RFC-0003 X0
+  instruction subset?
+- Which binary, library, runtime, contract, and context identities permit safe
+  Experience reuse without destroying hit rate?
+- How are self-modifying code, JITs, shared libraries, and runtime updates
+  invalidated?
+- Which x86 TSO constraints remain after guarded graph transformation?
+- When is conventional RISC-V or generic translation cheaper than graph
+  construction and Experience-aware promotion?
+- Which Linux syscall subset and differential test corpus bound an honest first
+  userspace claim?

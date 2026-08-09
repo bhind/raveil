@@ -16,3 +16,4 @@ rewrite it.
 | [ADR-0008](ADR-0008-staged-adaptive-council.md) | Proposed | Staged multi-policy Adaptive Council |
 | [ADR-0009](ADR-0009-gate1-measurement-and-bundle-boundaries.md) | Accepted | Measured adapters and immutable research bundles |
 | [ADR-0010](ADR-0010-least-privilege-powermetrics-helper.md) | Accepted | Least-privilege passwordless powermetrics helper |
+| [ADR-0011](ADR-0011-x86-is-a-compatibility-frontend.md) | Accepted | x86-64 is a compatibility frontend, not a native ISA |

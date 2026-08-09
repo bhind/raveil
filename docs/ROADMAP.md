@@ -1,7 +1,7 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
@@ -99,6 +99,17 @@ elastic, stream, and hybrid execution models.
 
 An AI-compute demonstration may then test a small Transformer, including
 prefill/decode and memory-regime variants, if Gate 1 results justify it.
+
+## Post-Gate-4 compatibility track — bounded x86-64 frontend
+
+State: **Planned; blocked on owned semantic and graph contracts**
+
+After RFC-0001's semantic IR, effect/object rules, `ExecutionContract`, and
+fallback boundary are stable, validate RFC-0003 incrementally: a tiny x86-64
+instruction subset, region cache, Experience-aware promotion, a bounded Linux
+userspace subset, then x86 memory-order differential tests. Windows and broad
+desktop compatibility remain out of scope. This track does not change Gate 1
+or claim current x86 execution support.
 
 ## Gate 5 — hardware exploration
 
