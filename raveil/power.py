@@ -144,10 +144,12 @@ class PowermetricsSampler:
 
     def _wait_for_ready(
         self, process: subprocess.Popen[bytes]
-    ) -> tuple[bytes, PowerSample]:
+    ) -> tuple[bytes, bytes, PowerSample]:
         """Consume and exclude one complete sampler observation before work starts."""
         if process.stdout is None:
-            return b"", PowerSample(None, None, False, "powermetrics stdout unavailable")
+            return b"", b"", PowerSample(
+                None, None, False, "powermetrics stdout unavailable"
+            )
         deadline = time.monotonic() + max(5.0, self.interval_ms / 1000.0 + 2.0)
         prelude = bytearray()
         while time.monotonic() < deadline:
@@ -159,12 +161,20 @@ class PowermetricsSampler:
             if not chunk:
                 break
             prelude.extend(chunk)
-            text = prelude.decode("utf-8", errors="replace")
-            if POWER_RE.search(text) and THERMAL_RE.search(text):
-                return bytes(prelude), parse_powermetrics(
-                    text, self.stable_levels, minimum_samples=1
-                )
-        return bytes(prelude), PowerSample(
+            prefix = bytearray()
+            for line in prelude.splitlines(keepends=True):
+                prefix.extend(line)
+                text = prefix.decode("utf-8", errors="replace")
+                if POWER_RE.search(text) and THERMAL_RE.search(text):
+                    boundary = len(prefix)
+                    return (
+                        bytes(prelude[:boundary]),
+                        bytes(prelude[boundary:]),
+                        parse_powermetrics(
+                            text, self.stable_levels, minimum_samples=1
+                        ),
+                    )
+        return bytes(prelude), b"", PowerSample(
             None, None, False, "powermetrics sampler readiness sample missing"
         )
 
@@ -188,13 +198,13 @@ class PowermetricsSampler:
             detail = stderr.decode("utf-8", errors="replace").strip()
             detail = detail or "powermetrics exited before measurement"
             return None, PowerSample(None, None, False, detail)
-        prelude, readiness = self._wait_for_ready(process)
+        prelude, buffered_measurement, readiness = self._wait_for_ready(process)
         if not readiness.valid:
             if process.poll() is None:
                 process.terminate()
             stdout, stderr = process.communicate()
             raw_output.parent.mkdir(parents=True, exist_ok=True)
-            raw_output.write_bytes(prelude + stdout + stderr)
+            raw_output.write_bytes(prelude + buffered_measurement + stdout + stderr)
             return None, readiness
         result: T | None = None
         try:
@@ -211,7 +221,9 @@ class PowermetricsSampler:
                 process.kill()
                 stdout, stderr = process.communicate()
         raw_output.parent.mkdir(parents=True, exist_ok=True)
-        measurement_text = stdout.decode("utf-8", errors="replace")
+        measurement_text = (buffered_measurement + stdout).decode(
+            "utf-8", errors="replace"
+        )
         stderr_text = stderr.decode("utf-8", errors="replace")
         raw_output.write_text(
             prelude.decode("utf-8", errors="replace")

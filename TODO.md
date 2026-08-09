@@ -84,10 +84,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   preregistered drift diagnostics for Gate energy claims. Report sensitivity to
   the current workload-level paired bootstrap and capture power/battery,
   frequency, time-block, and background-load evidence where available.
-- [ ] **T-0075** Remove timing flakiness from the powermetrics readiness test
+- [x] **T-0075** Remove timing flakiness from the powermetrics readiness test
   without weakening the production minimum-sample fail-closed contract. The
-  target evidence audit reproduced `required 3, found 2`; isolate scheduler
-  timing in the fake sampler and require repeated clean-suite stability.
+  sampler now excludes exactly one readiness observation and carries any
+  already-read later observations into the measurement window; a deterministic
+  same-burst regression test and repeated suite runs verify the boundary.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 

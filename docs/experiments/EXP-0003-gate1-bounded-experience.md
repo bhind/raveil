@@ -254,7 +254,9 @@ offline; it does not demonstrate policy-specific online measurement-time or
 energy savings. Independent verification reproduced all sealed target metrics,
 but also found the fake-sampler readiness unit test timing-dependent: two clean
 suites each passed 43/44, and a targeted repeat failed with `required 3, found
-2`. This is a test-isolation defect tracked by T-0075, not a failure in the
-sealed 3,600-record target run. Apple powermetrics is estimated same-Mac
+2`. T-0075 corrected the buffered-read boundary without weakening the
+minimum-three-sample contract and added a deterministic same-burst regression
+test. This was a test/sampler-accounting defect, not a failure in the sealed
+3,600-record target run. Apple powermetrics is estimated same-Mac
 evidence and cannot be extrapolated to RISC-V, QEMU, Daphnis, FPGA, or another
 Mac.
