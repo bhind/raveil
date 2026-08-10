@@ -142,6 +142,14 @@ only after a short pilot demonstrates candidate separation.
 - [x] **T-0015** Add blocking IPC semantics and capability delegation tests.
 - [x] **T-0016** Add fault tests for stale capability generation, rights escalation,
   invalid endpoint, user fault, and timer re-entry.
+- [ ] **T-0083** Complete the Gate 2 persistent U-mode shell/task slice before
+  filesystem work. Bind syscall identity to the current scheduled task rather
+  than a user-supplied task ID; preserve a full trusted kernel context across
+  U-mode traps; resume the user task after real CLINT preemption; expose only
+  capability-mediated kernel operations. QEMU acceptance must show a prompt
+  and command before and after preemption plus denied forged, wrong-owner, and
+  rights-escalation attempts. Define the syscall ABI, task lifecycle, trap
+  ownership, and scheduler boundary in ADR-0017 before implementation closure.
 - [ ] **T-0017** Add a minimal VFS plus RamFS/initramfs after the isolation and
   scheduling base is credible.
 - [ ] **T-0018** Add VirtIO block and evaluate a simple persistent filesystem
