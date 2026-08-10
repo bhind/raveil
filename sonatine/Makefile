@@ -6,6 +6,16 @@ GDB := $(CROSS_COMPILE)gdb
 QEMU ?= qemu-system-riscv64
 DEBUG ?= 0
 
+# T-0010 deliberately constrains the supported machine instead of accepting an
+# arbitrary QEMU virt DTB. Keep these values synchronized with platform.h and
+# link.ld; tests enforce the contract until a real DTB parser replaces it.
+QEMU_MACHINE := virt
+QEMU_CPU := rv64
+QEMU_MEMORY := 128M
+QEMU_HARTS := 1
+QEMU_PLATFORM_ARGS := -machine $(QEMU_MACHINE) -cpu $(QEMU_CPU) \
+                      -m $(QEMU_MEMORY) -smp $(QEMU_HARTS) -bios none
+
 BUILD_ROOT := build
 ifeq ($(DEBUG),1)
 BUILD := $(BUILD_ROOT)/debug
@@ -48,11 +58,11 @@ $(BUILD):
 	mkdir -p $@
 
 run: $(TARGET)
-	$(QEMU) -machine virt -m 128M -smp 1 -bios none -nographic -kernel $(TARGET)
+	$(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET)
 
 smoke: $(TARGET)
 	printf 'info\rmem\rps\rcaps\rticks\ripc\ralloc\rreboot\r' | \
-	  $(QEMU) -machine virt -m 128M -smp 1 -bios none -nographic -kernel $(TARGET) | \
+	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
 	  tee $(BUILD)/smoke.log
 	grep -q 'raveil>' $(BUILD)/smoke.log
 	grep -q 'ipc: received' $(BUILD)/smoke.log
@@ -61,7 +71,7 @@ debug:
 	$(MAKE) DEBUG=1 debug-server
 
 debug-server: $(TARGET)
-	$(QEMU) -machine virt -m 128M -smp 1 -bios none -nographic -kernel $(TARGET) -S -s
+	$(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) -S -s
 
 gdb:
 	$(MAKE) DEBUG=1 gdb-client

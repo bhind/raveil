@@ -28,6 +28,9 @@ QEMU RISC-V `virt`向けのfreestanding kernel seedがあります。
 Implemented:
 
 - RV64 machine-mode entry、one hart、fixed 128 MiB memory contract;
+- versioned `qemu-virt-rv64-v1` platform contract with pinned QEMU `virt`,
+  `rv64` CPU, 128 MiB RAM, one hart, no firmware, and compile/test assertions
+  tying the fixed MMIO/RAM assumptions to the launch configuration;
 - `.bss` initializationと16 KiB boot stack;
 - NS16550A polled console;
 - 4 KiB bitmap physical-page allocator;

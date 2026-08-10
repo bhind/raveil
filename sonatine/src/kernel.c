@@ -26,6 +26,7 @@ void kmain(void) {
   console_init();
   console_write("\nRaveil boot v" RAVEIL_VERSION "\n");
   console_write("Sonatine kernel (RV64 QEMU virt)\n");
+  console_write("platform contract: " SONATINE_PLATFORM_NAME "\n");
   boot_ok("console / ns16550a polled UART");
 
   phys_init();

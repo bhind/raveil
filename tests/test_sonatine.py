@@ -64,6 +64,25 @@ class SonatineSourceTests(unittest.TestCase):
         ):
             self.assertIn(expected, makefile)
 
+    def test_qemu_platform_contract_is_explicit_and_shared(self) -> None:
+        makefile = (SONATINE / "Makefile").read_text(encoding="utf-8")
+        platform = (SONATINE / "include/platform.h").read_text(encoding="utf-8")
+        linker = (SONATINE / "link.ld").read_text(encoding="utf-8")
+        for expected in (
+            "QEMU_MACHINE := virt",
+            "QEMU_CPU := rv64",
+            "QEMU_MEMORY := 128M",
+            "QEMU_HARTS := 1",
+            "QEMU_PLATFORM_ARGS :=",
+        ):
+            self.assertIn(expected, makefile)
+        self.assertEqual(3, makefile.count("$(QEMU) $(QEMU_PLATFORM_ARGS)"))
+        self.assertIn('SONATINE_PLATFORM_NAME "qemu-virt-rv64-v1"', platform)
+        self.assertIn("SONATINE_HART_COUNT 1u", platform)
+        self.assertIn("QEMU_RAM_BASE 0x80000000UL", platform)
+        self.assertIn("QEMU_RAM_SIZE (128UL * 1024UL * 1024UL)", platform)
+        self.assertIn("ORIGIN = 0x80000000, LENGTH = 128M", linker)
+
     def test_capability_task_and_ipc_host_model(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:

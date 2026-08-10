@@ -5,6 +5,9 @@
 
 #define RAVEIL_VERSION "0.0000000000001"
 
+#define SONATINE_PLATFORM_NAME "qemu-virt-rv64-v1"
+#define SONATINE_HART_COUNT 1u
+
 #define QEMU_RAM_BASE 0x80000000UL
 #define QEMU_RAM_SIZE (128UL * 1024UL * 1024UL)
 #define QEMU_UART0_BASE 0x10000000UL
@@ -12,6 +15,12 @@
 #define QEMU_CLINT_MTIMECMP 0x02004000UL
 #define QEMU_CLINT_MTIME 0x0200BFF8UL
 #define QEMU_TIMEBASE_HZ 10000000UL
+
+_Static_assert(QEMU_RAM_BASE == 0x80000000UL, "linker RAM origin contract");
+_Static_assert(QEMU_RAM_SIZE == 128UL * 1024UL * 1024UL,
+               "QEMU_MEMORY contract");
+_Static_assert(SONATINE_HART_COUNT == 1u, "single-hart kernel contract");
+_Static_assert((QEMU_RAM_BASE & 0xfffUL) == 0u, "RAM must be page aligned");
 
 static inline void csr_write_mtvec(uint64_t value) {
   __asm__ volatile("csrw mtvec, %0" : : "r"(value));

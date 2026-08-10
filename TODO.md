@@ -131,7 +131,7 @@ remains a maintenance-mode verification facility. Resume a full campaign only
 for a bounded, preregistered hypothesis tied to a concrete build decision and
 only after a short pilot demonstrates candidate separation.
 
-- [ ] **T-0010** Parse or deliberately constrain the QEMU device tree instead of
+- [x] **T-0010** Parse or deliberately constrain the QEMU device tree instead of
   silently assuming all platform properties.
 - [ ] **T-0011** Implement Sv39 address spaces and explicit kernel/user mappings.
 - [ ] **T-0012** Move `init` to U-mode.
