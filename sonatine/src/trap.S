@@ -36,8 +36,12 @@ trap_entry:
 
   csrr a0, mcause
   csrr a1, mepc
+  mv a2, sp
+  addi a3, sp, 240
   call trap_dispatch
-  csrw mepc, a0
+  ld t0, 240(sp)
+  mv sp, a0
+  csrw mepc, t0
 
   ld ra,   0(sp)
   ld gp,   8(sp)

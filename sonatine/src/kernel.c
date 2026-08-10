@@ -81,6 +81,14 @@ void kmain(void) {
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");
+  context_preemption_enable();
+  while (context_preemption_count() < 2u) {
+    cpu_relax();
+  }
+  console_write("timer preemption: init -> idle -> init count=");
+  console_write_dec(context_preemption_count());
+  console_write("\n");
+  boot_ok("preemption / CLINT-driven context switch");
 
   console_write("starting init task id=");
   console_write_dec(init_task);

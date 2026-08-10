@@ -1,6 +1,7 @@
 #include "timer.h"
 
 #include "console.h"
+#include "context.h"
 #include "platform.h"
 
 #define MIE_MTIE (1UL << 7u)
@@ -42,11 +43,12 @@ uint64_t timer_ticks(void) {
   return tick_count;
 }
 
-uint64_t trap_dispatch(uint64_t cause, uint64_t exception_pc) {
+uintptr_t trap_dispatch(uint64_t cause, uint64_t exception_pc,
+                        uintptr_t frame, uintptr_t *resume_pc) {
   if ((cause & INTERRUPT_BIT) != 0u &&
       (cause & ~INTERRUPT_BIT) == MACHINE_TIMER_INTERRUPT) {
     timer_on_interrupt();
-    return exception_pc;
+    return context_trap_select(frame, exception_pc, resume_pc);
   }
   console_write("\nFATAL: machine trap cause=");
   console_write_hex(cause);

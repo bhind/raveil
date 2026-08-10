@@ -45,6 +45,8 @@ Implemented:
 - `init`と`idle`のfixed kernel task records;
 - an RV64 callee-saved context frame and independent 4 KiB idle stack, with a
   verified cooperative `init -> idle -> init` round trip;
+- CLINT 100 Hz timer-driven preemption that switches `init -> idle -> init`
+  from interrupt context and preserves the subsequent diagnostic shell;
 - capability-checked four-message IPC endpoint;
 - CLINT 100 Hz machine timerとinteger register trap frame;
 - `raveil>` shell;
@@ -61,7 +63,7 @@ Not implemented:
 
 - persistent U-mode shell/task execution and S-mode kernel execution;
 - PMP policy;
-- timer-driven preemption of task contexts;
+- persistent scheduling of multiple user contexts;
 - blocking scheduler semantics;
 - capability derivation/delegation;
 - device-tree memory discovery;

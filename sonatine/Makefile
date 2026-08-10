@@ -67,6 +67,7 @@ smoke: $(TARGET)
 	grep -q 'raveil>' $(BUILD)/smoke.log
 	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
 	grep -q 'context switch: init -> idle -> init' $(BUILD)/smoke.log
+	grep -q 'timer preemption: init -> idle -> init count=2' $(BUILD)/smoke.log
 	grep -q 'ipc: received' $(BUILD)/smoke.log
 
 debug:
