@@ -46,11 +46,11 @@ static void ipc_loopback(uint16_t task, cap_handle_t endpoint) {
       .words = {0x52415645494cUL, timer_ticks(), 0u, 0u},
   };
   struct ipc_message inbound;
-  if (!ipc_send(task, endpoint, &outbound)) {
+  if (ipc_send(task, endpoint, &outbound) != IPC_OK) {
     console_write("ipc: send denied or queue full\n");
     return;
   }
-  if (!ipc_receive(task, endpoint, &inbound)) {
+  if (ipc_receive(task, endpoint, &inbound) != IPC_OK) {
     console_write("ipc: receive denied or queue empty\n");
     return;
   }

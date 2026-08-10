@@ -49,6 +49,26 @@ cap_handle_t cap_create(uint16_t owner_task, uint16_t object_type,
   return 0u;
 }
 
+cap_handle_t cap_delegate(uint16_t source_owner, cap_handle_t source,
+                          uint16_t target_owner, uint32_t rights) {
+  size_t slot;
+  uint16_t generation;
+  if (target_owner == 0u || rights == 0u ||
+      (rights & CAP_RIGHT_CONTROL) != 0u ||
+      !decode_handle(source, &slot, &generation)) {
+    return 0u;
+  }
+  const struct cap_entry *entry = &cap_table[slot];
+  if (!entry->active || entry->generation != generation ||
+      entry->view.owner_task != source_owner ||
+      (entry->view.rights & CAP_RIGHT_CONTROL) == 0u ||
+      (entry->view.rights & rights) != rights) {
+    return 0u;
+  }
+  return cap_create(target_owner, entry->view.object_type,
+                    entry->view.object_id, rights);
+}
+
 bool cap_resolve(uint16_t owner_task, cap_handle_t handle,
                  uint16_t required_type, uint32_t required_rights,
                  struct cap_view *view) {

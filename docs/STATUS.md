@@ -48,6 +48,10 @@ Implemented:
 - CLINT 100 Hz timer-driven preemption that switches `init -> idle -> init`
   from interrupt context and preserves the subsequent diagnostic shell;
 - capability-checked four-message IPC endpoint;
+- queued IPC blocking/retry state transitions with operation-specific wake-up,
+  distinct denied/invalid results, and ready-only task selection;
+- `CONTROL`-authorized capability delegation to non-recursive leaf grants with
+  nonempty attenuated rights and independent generation-checked revocation;
 - CLINT 100 Hz machine timerとinteger register trap frame;
 - `raveil>` shell;
 - `info`, `mem`, `ps`, `caps`, `ticks`, `ipc`, `alloc`, `reboot` commands;
@@ -64,8 +68,9 @@ Not implemented:
 - persistent U-mode shell/task execution and S-mode kernel execution;
 - PMP policy;
 - persistent scheduling of multiple user contexts;
-- blocking scheduler semantics;
-- capability derivation/delegation;
+- persistent multi-user blocking scheduler execution, cancellation, and
+  fairness;
+- capability derivation trees and cascading revocation;
 - device-tree memory discovery;
 - submission/completion ring and Daphnis Execution Subsystem device。
 
@@ -170,8 +175,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 49
-tests. On 2026-08-10 all 49 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 51
+tests. On 2026-08-10 all 51 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

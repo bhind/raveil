@@ -1,6 +1,7 @@
 #include "ipc.h"
 
 #include <stddef.h>
+#include "task.h"
 
 #define ENDPOINT_TABLE_SIZE 8u
 #define ENDPOINT_QUEUE_DEPTH 4u
@@ -37,39 +38,66 @@ uint32_t ipc_endpoint_create(uint16_t owner_task) {
   return 0u;
 }
 
-static struct endpoint *resolve_endpoint(uint16_t task, cap_handle_t handle,
-                                         uint32_t right) {
+static enum ipc_result resolve_endpoint(uint16_t task, cap_handle_t handle,
+                                        uint32_t right,
+                                        struct endpoint **resolved,
+                                        uint32_t *object_id) {
   struct cap_view view;
-  if (!cap_resolve(task, handle, CAP_OBJECT_ENDPOINT, right, &view) ||
-      view.object_id == 0u || view.object_id > ENDPOINT_TABLE_SIZE) {
-    return NULL;
+  if (!cap_resolve(task, handle, CAP_OBJECT_ENDPOINT, right, &view)) {
+    return IPC_DENIED;
   }
-  struct endpoint *endpoint = &endpoints[view.object_id - 1u];
-  return endpoint->active ? endpoint : NULL;
+  if (view.object_id == 0u || view.object_id > ENDPOINT_TABLE_SIZE ||
+      !endpoints[view.object_id - 1u].active) {
+    return IPC_INVALID;
+  }
+  *resolved = &endpoints[view.object_id - 1u];
+  *object_id = view.object_id;
+  return IPC_OK;
 }
 
-bool ipc_send(uint16_t sender_task, cap_handle_t endpoint_cap,
-              const struct ipc_message *message) {
-  struct endpoint *endpoint = resolve_endpoint(sender_task, endpoint_cap, CAP_RIGHT_SEND);
-  if (endpoint == NULL || message == NULL || endpoint->count == ENDPOINT_QUEUE_DEPTH) {
-    return false;
+enum ipc_result ipc_send(uint16_t sender_task, cap_handle_t endpoint_cap,
+                         const struct ipc_message *message) {
+  struct endpoint *endpoint;
+  uint32_t object_id;
+  if (message == NULL) {
+    return IPC_INVALID;
+  }
+  const enum ipc_result resolution = resolve_endpoint(
+      sender_task, endpoint_cap, CAP_RIGHT_SEND, &endpoint, &object_id);
+  if (resolution != IPC_OK) {
+    return resolution;
+  }
+  if (endpoint->count == ENDPOINT_QUEUE_DEPTH) {
+    return task_block(sender_task, TASK_WAIT_IPC_SEND, object_id)
+               ? IPC_BLOCKED : IPC_INVALID;
   }
   endpoint->queue[endpoint->write_index] = *message;
   endpoint->queue[endpoint->write_index].sender = sender_task;
   endpoint->write_index = (uint8_t)((endpoint->write_index + 1u) % ENDPOINT_QUEUE_DEPTH);
   ++endpoint->count;
-  return true;
+  (void)task_wake_one(TASK_WAIT_IPC_RECEIVE, object_id, NULL);
+  return IPC_OK;
 }
 
-bool ipc_receive(uint16_t receiver_task, cap_handle_t endpoint_cap,
-                 struct ipc_message *message) {
-  struct endpoint *endpoint = resolve_endpoint(receiver_task, endpoint_cap, CAP_RIGHT_RECEIVE);
-  if (endpoint == NULL || message == NULL || endpoint->count == 0u ||
-      endpoint->owner_task != receiver_task) {
-    return false;
+enum ipc_result ipc_receive(uint16_t receiver_task, cap_handle_t endpoint_cap,
+                            struct ipc_message *message) {
+  struct endpoint *endpoint;
+  uint32_t object_id;
+  if (message == NULL) {
+    return IPC_INVALID;
+  }
+  const enum ipc_result resolution = resolve_endpoint(
+      receiver_task, endpoint_cap, CAP_RIGHT_RECEIVE, &endpoint, &object_id);
+  if (resolution != IPC_OK) {
+    return resolution;
+  }
+  if (endpoint->count == 0u) {
+    return task_block(receiver_task, TASK_WAIT_IPC_RECEIVE, object_id)
+               ? IPC_BLOCKED : IPC_INVALID;
   }
   *message = endpoint->queue[endpoint->read_index];
   endpoint->read_index = (uint8_t)((endpoint->read_index + 1u) % ENDPOINT_QUEUE_DEPTH);
   --endpoint->count;
-  return true;
+  (void)task_wake_one(TASK_WAIT_IPC_SEND, object_id, NULL);
+  return IPC_OK;
 }

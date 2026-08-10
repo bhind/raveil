@@ -51,8 +51,10 @@ resolves it.
 
 - Parse the QEMU device tree or retain an explicit fixed-machine contract?
 - Which minimal VFS/RamFS/initramfs interface should precede VirtIO/FAT32?
-- Which capability derivation and revocation semantics are needed before
-  Daphnis rings are exposed to U-mode?
+- ADR-0015 fixes Gate 2 delegation as attenuated, non-recursive leaf grants.
+  Which derivation-tree, cascading-revocation, generation-wrap, and endpoint
+  object-lifetime semantics are needed before Daphnis rings are exposed to
+  U-mode?
 - Does the installed IntelliJ C/C++ plugin expose a genuine remote GDB run
   configuration? The observed UI has not established this.
 

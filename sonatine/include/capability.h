@@ -32,6 +32,8 @@ struct cap_view {
 void cap_init(void);
 cap_handle_t cap_create(uint16_t owner_task, uint16_t object_type,
                         uint32_t object_id, uint32_t rights);
+cap_handle_t cap_delegate(uint16_t source_owner, cap_handle_t source,
+                          uint16_t target_owner, uint32_t rights);
 bool cap_resolve(uint16_t owner_task, cap_handle_t handle,
                  uint16_t required_type, uint32_t required_rights,
                  struct cap_view *view);

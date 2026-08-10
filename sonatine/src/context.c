@@ -53,10 +53,18 @@ uintptr_t context_trap_select(uintptr_t frame,uintptr_t pc,uintptr_t *resume_pc)
   if(!preemption_enabled) { *resume_pc=pc; return frame; }
   ++preemption_count;
   if(task_current()==init_id) {
+    struct task_view idle;
+    if(!task_get(idle_id, &idle) || idle.state != TASK_READY) {
+      *resume_pc=pc; return frame;
+    }
     preempt_init_frame=frame; preempt_init_pc=pc;
     if(!task_set_current(idle_id)) for(;;) {}
     *resume_pc=preempt_idle_pc; return preempt_idle_frame;
   } else if(task_current()==idle_id) {
+    struct task_view init;
+    if(!task_get(init_id, &init) || init.state != TASK_READY) {
+      *resume_pc=pc; return frame;
+    }
     preempt_idle_frame=frame; preempt_idle_pc=pc;
     if(!task_set_current(init_id)) for(;;) {}
     *resume_pc=preempt_init_pc; return preempt_init_frame;
