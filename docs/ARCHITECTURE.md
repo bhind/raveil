@@ -80,6 +80,13 @@ ADR-0019. Linux adapters may exercise Raveil-owned versioned contracts, but do
 not own admission, capabilities, Experience writes, commit, or rollback and do
 not replace the permanent RISC-V/Sonatine control path.
 
+ADR-0020 defines the first shared JobDescriptor/CompletionRecord byte contract.
+Descriptors carry bounded object/version/range/effect and resource requests;
+completions carry claimed epoch, sequence, and cookie fields. T-0031 must
+enforce Sonatine issuance, equality, replay, and one-shot consumption.
+Structural validity is neither admission nor commit, and `EXECUTED` never
+grants Experience or object-visibility authority by itself.
+
 ## Named components
 
 | Formal component name | Short name | Responsibility |

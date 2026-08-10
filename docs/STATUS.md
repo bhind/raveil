@@ -117,6 +117,22 @@ container correctness, not a kernel driver, real Daphnis device, JobDescriptor,
 DMA/MMIO/IRQ path, performance result, Experience writer, or Sonatine
 replacement.
 
+## Shared job/completion contracts
+
+ADR-0020 is implemented as a platform-neutral strict-C11 contract and
+validator. JobDescriptor v1 is a fixed 320-byte, four-object envelope with
+opaque identities, nonzero resource ceilings, generation/version/range/effect
+references, and fail-closed reserved/unused slots. CompletionRecord v1 is a
+fixed 176-byte observation carrying job ID plus execution epoch, sequence, and
+cookie claims; T-0031 must enforce their trusted issuance, equality, and
+one-shot consumption. Executed outputs must exactly match WRITE objects and
+advance versions.
+
+These validators establish structural correctness only. No executable path yet
+admits a job, resolves descriptor IDs as capabilities, creates ObjectManifest,
+submits through a Sonatine/Daphnis ring, commits output, or writes telemetry to
+Experience. Linux PING/NOP remains a separate transport envelope.
+
 ## Executable track B: bounded Experience seed
 
 Python標準ライブラリだけで、次の閉ループがあります。
@@ -218,8 +234,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 54
-tests. On 2026-08-11 all 54 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 55
+tests. On 2026-08-11 all 55 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

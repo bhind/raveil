@@ -25,7 +25,8 @@ The harness deliberately has no network listener, root requirement, kernel
 module, `ioctl`, `mmap`, DMA, MMIO, interrupt, or filesystem-data operation.
 
 From the repository root, `docker build -f linux/Dockerfile -t
-raveil-linux-driver linux` builds the Linux-only sources. A non-root smoke is:
+raveil-linux-driver .` builds the Linux-only sources and shared job contract.
+A non-root smoke is:
 
 ```sh
 docker run --rm --user 65534:65534 \
@@ -34,3 +35,6 @@ docker run --rm --user 65534:65534 \
 ```
 
 The Dockerfile is verification scaffolding, not a deployment image.
+`BASE_IMAGE` may be overridden with an already-audited local Debian-derived
+image when registry metadata is temporarily unavailable; the default remains
+the public `debian:bookworm-slim` base.

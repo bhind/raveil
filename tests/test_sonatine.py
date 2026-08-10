@@ -189,6 +189,21 @@ class SonatineSourceTests(unittest.TestCase):
         for forbidden in ("void *", "uintptr_t", "pid_t", "dma", "ioctl"):
             self.assertNotIn(forbidden, uapi.lower())
 
+    def test_job_completion_contract_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        contracts = ROOT / "contracts"
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "raveil-job-contract-test"
+            subprocess.run([
+                compiler, "-std=c11", "-pedantic-errors", "-Wall", "-Wextra",
+                "-Werror", f"-I{contracts / 'include'}",
+                str(ROOT / "tests/job_contract_host_test.c"),
+                str(contracts / "src/job_contract.c"), "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+
     def test_freestanding_c_sources_are_syntax_clean(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:

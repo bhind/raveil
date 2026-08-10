@@ -8,8 +8,9 @@ resolves it.
 
 ## Native execution
 
-- What is the versioned encoding of the explicit dependency/effect/object
-  contract proposed in RFC-0001?
+- ADR-0020 fixes only the bounded job/completion envelope and embedded object
+  references proposed in RFC-0001. Graph encoding, ObjectManifest lifecycle,
+  memory consistency, exception semantics, and device transport remain open.
 - Which dependencies and alias facts can admission prove without making compile
   or verification cost impractical?
 - Where is the measured boundary between static, elastic dataflow, stream, and

@@ -196,8 +196,9 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
   versioned pointer-free PING/NOP ABI, same-UID private local transport, and a
   one-inflight contract core. This validates transport only; it does not admit
   Daphnis work or replace Sonatine authority.
-- [ ] **T-0030** Define shared `JobDescriptor` and `CompletionRecord` schemas.
-- [ ] **T-0031** Add Sonatine Microkernel submission/completion rings and object table.
+- [x] **T-0030** Define shared `JobDescriptor` and `CompletionRecord` schemas.
+- [ ] **T-0031** Define standalone `ObjectManifest` and add Sonatine
+  submission/completion rings plus the object table.
 - [ ] **T-0032** Send measured completion telemetry into append-only Experience.
 - [ ] **T-0033** Implement shadow execution, commit, cancellation, and rollback.
 - [ ] **T-0034** Enforce Program/Graph/Data/Experience write authorities.
