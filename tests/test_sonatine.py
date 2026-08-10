@@ -166,6 +166,29 @@ class SonatineSourceTests(unittest.TestCase):
             ], check=True)
             subprocess.run([str(executable)], check=True)
 
+    def test_linux_driver_contract_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        linux = ROOT / "linux"
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "raveil-driver-core-test"
+            subprocess.run([
+                compiler, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                f"-I{linux / 'include'}",
+                str(ROOT / "tests/linux_driver_core_host_test.c"),
+                str(linux / "src/raveil_driver_core.c"),
+                "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+        daemon = (linux / "src/raveil-linuxd.c").read_text(encoding="utf-8")
+        uapi = (linux / "include/uapi/raveil_driver.h").read_text(encoding="utf-8")
+        for boundary in ("SOCK_SEQPACKET", "SO_PEERCRED", "peer.uid!=getuid()",
+                         "MSG_TRUNC", "umask(0077)"):
+            self.assertIn(boundary, daemon)
+        for forbidden in ("void *", "uintptr_t", "pid_t", "dma", "ioctl"):
+            self.assertNotIn(forbidden, uapi.lower())
+
     def test_freestanding_c_sources_are_syntax_clean(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:

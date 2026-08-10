@@ -57,6 +57,9 @@ resolves it.
   ADR-0016 retires a flat capability slot before its generation can wrap.
   Which derivation-tree, cascading-revocation, and endpoint object-lifetime
   semantics are needed before Daphnis rings are exposed to U-mode?
+- After T-0030 fixes JobDescriptor and CompletionRecord, which Linux transport
+  should follow the ADR-0019 userspace harness: a kernel adapter, vhost-user,
+  VirtIO, PCI, or another owned boundary? DMA/IOMMU/IRQ/reset remain undecided.
 - Does the installed IntelliJ C/C++ plugin expose a genuine remote GDB run
   configuration? The observed UI has not established this.
 

@@ -75,6 +75,11 @@ elastic dataflow, stream, and hybrid organizations remain comparison
 candidates. Dynamic islands or RISC-V fallback handle pointer chasing,
 interpreters, unpredictable traversal, and other graph-hostile regions.
 
+Linux is a non-authoritative development and driver-validation host under
+ADR-0019. Linux adapters may exercise Raveil-owned versioned contracts, but do
+not own admission, capabilities, Experience writes, commit, or rollback and do
+not replace the permanent RISC-V/Sonatine control path.
+
 ## Named components
 
 | Formal component name | Short name | Responsibility |

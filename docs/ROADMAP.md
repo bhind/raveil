@@ -100,6 +100,10 @@ VirtIO and persistent storage remain T-0018.
 
 State: **Planned**
 
+The T-0084 Linux harness is pre-Gate transport scaffolding only. It validates
+the owned ABI envelope without claiming a JobDescriptor, device, or authority
+path and therefore does not advance Gate 3 state.
+
 Define JobDescriptor, ObjectManifest, and CompletionRecord; add
 submission/completion rings; append measured telemetry to Experience; implement
 shadow execution, cancellation, commit, and rollback; enforce Four-plane write

@@ -23,3 +23,4 @@ rewrite it.
 | [ADR-0016](ADR-0016-contain-user-faults-and-reject-timer-reentry.md) | Accepted | Contain U-mode faults and reject nested timer dispatch |
 | [ADR-0017](ADR-0017-current-task-bound-user-syscalls.md) | Accepted | Persistent U-mode syscalls derive authority from the current task |
 | [ADR-0018](ADR-0018-pointer-free-bounded-vfs-seed.md) | Accepted | Bounded pointer-free VFS seed |
+| [ADR-0019](ADR-0019-linux-is-a-non-authoritative-driver-host.md) | Accepted | Linux is a non-authoritative driver-development host |

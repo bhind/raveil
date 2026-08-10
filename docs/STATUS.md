@@ -99,6 +99,24 @@ Not implemented:
 - device-tree memory discovery;
 - submission/completion ring and Daphnis Execution Subsystem device。
 
+## Linux driver-development harness
+
+Linux is implemented as a non-authoritative development/transport-validation
+host under ADR-0019. The tree contains a Raveil-owned fixed-width v1 PING/NOP
+ABI, a pure-C one-inflight contract core, and Linux-only unprivileged
+`SOCK_SEQPACKET` daemon/client sources. The daemon uses a mode-0600 socket under
+`XDG_RUNTIME_DIR`, accepts one client, verifies `SO_PEERCRED` against its own
+UID, rejects partial/version/size/flags/opcode-invalid messages, and copies no
+user pointer into the contract.
+
+The protocol core is host-tested. A Debian bookworm arm64 Docker build compiled
+the Linux-only daemon/client with GCC 12.2.0 and `-Werror`; a UID/GID 65534
+container smoke used a private mode-0700 runtime tmpfs, verified socket mode
+0600, completed PING, and verified normal socket cleanup. This is Linux
+container correctness, not a kernel driver, real Daphnis device, JobDescriptor,
+DMA/MMIO/IRQ path, performance result, Experience writer, or Sonatine
+replacement.
+
 ## Executable track B: bounded Experience seed
 
 Python標準ライブラリだけで、次の閉ループがあります。
@@ -200,8 +218,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 53
-tests. On 2026-08-10 all 53 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 54
+tests. On 2026-08-11 all 54 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

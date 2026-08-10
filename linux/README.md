@@ -1,0 +1,36 @@
+# Linux driver-development harness
+
+This directory is a non-authoritative Linux transport harness for Raveil-owned
+contracts. It does not replace Sonatine, admit real Daphnis jobs, expose DMA or
+MMIO, or write Experience.
+
+Build on Linux with `make -C linux`. Run `raveil-linuxd` and `raveilctl` as the
+same unprivileged user with `XDG_RUNTIME_DIR` set. The daemon creates a mode
+`0600` `SOCK_SEQPACKET` endpoint, verifies `SO_PEERCRED`, accepts one client and
+one fixed-size request at a time, and removes the socket on normal shutdown.
+
+The v1 ABI supports only `PING` and transport-test `NOP`. It contains no
+pointers, paths, file descriptors, credentials, capability handles, physical
+addresses, or Linux-private structures. A real job schema remains T-0030.
+
+Run the non-root end-to-end check with:
+
+```sh
+runtime_dir="$(mktemp -d)"
+XDG_RUNTIME_DIR="$runtime_dir" make -C linux smoke
+rmdir "$runtime_dir"
+```
+
+The harness deliberately has no network listener, root requirement, kernel
+module, `ioctl`, `mmap`, DMA, MMIO, interrupt, or filesystem-data operation.
+
+From the repository root, `docker build -f linux/Dockerfile -t
+raveil-linux-driver linux` builds the Linux-only sources. A non-root smoke is:
+
+```sh
+docker run --rm --user 65534:65534 \
+  --tmpfs /runtime:uid=65534,gid=65534,mode=700 \
+  -e XDG_RUNTIME_DIR=/runtime raveil-linux-driver
+```
+
+The Dockerfile is verification scaffolding, not a deployment image.

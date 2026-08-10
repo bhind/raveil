@@ -192,6 +192,10 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
 
 ## Later — connect the two tracks
 
+- [x] **T-0084** Add a non-root Linux driver-development harness with a
+  versioned pointer-free PING/NOP ABI, same-UID private local transport, and a
+  one-inflight contract core. This validates transport only; it does not admit
+  Daphnis work or replace Sonatine authority.
 - [ ] **T-0030** Define shared `JobDescriptor` and `CompletionRecord` schemas.
 - [ ] **T-0031** Add Sonatine Microkernel submission/completion rings and object table.
 - [ ] **T-0032** Send measured completion telemetry into append-only Experience.
