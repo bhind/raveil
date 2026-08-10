@@ -32,7 +32,7 @@ IDE-driven attachment is not a Gate 0 claim.
 
 ## Gate 1 — real Experience boundary
 
-State: **In progress**
+State: **Falsified (closed negative)**
 
 The replayable pilot/full manifests, environment/measurement/policy schemas, 24
 native-C holdouts, checksum harness, analysis functions, and immutable
@@ -42,10 +42,13 @@ passes with a sealed and remotely verified bundle; a preceding sampler-startup
 failure is also preserved. A sealed and remotely verified 24-workload history
 source dataset and a first target policy comparison exist. The first target
 run failed the 5% latency/energy improvement and positive bootstrap-lower-bound
-criteria, so Gate 1 remains open pending independent confirmation and the TVM
-comparison. The independent fixed-C rerun confirmed zero median latency/energy
+criteria. The independent fixed-C rerun confirmed zero median latency/energy
 improvement and additionally exceeded the NTR limit, so fixed-C now provides a
-reproduced negative conclusion rather than a passing result. Compare cold prior, full-history nearest
+reproduced negative conclusion rather than a passing result. The pinned TVM
+history/target execution reproduced zero median improvement and exceeded the
+joint NTR limit, with immutable remote verification. The preregistered 5%
+hypothesis is therefore falsified; this is not a claim that Experience is
+universally ineffective. Compare cold prior, full-history nearest
 neighbor, bounded Experience, FIFO, reservoir, and random under lineage, shape,
 working-set, and composition holdouts. Report latency/energy HCR, NTR, coverage,
 calibration, budget, retrieval cost, storage, and evidence class.
@@ -70,7 +73,7 @@ Exit requires all of the following in EXP-0003:
 
 ## Gate 2 — minimal isolated Sonatine Microkernel slice
 
-State: **Planned**
+State: **Active build focus**
 
 Make the platform contract explicit or parse the device tree; add Sv39, U-mode
 `init`, context switching, timer preemption, blocking capability IPC, and

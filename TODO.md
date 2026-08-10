@@ -105,7 +105,7 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   constrained candidate schedule in the MetaSchedule JSON database, query it
   back before execution, and verify all three workload families and ten
   candidates against the int64 semantic checksum.
-- [ ] **T-0080** Complete Gate 1 evidence collection: run and remotely verify an
+- [x] **T-0080** Complete Gate 1 evidence collection: run and remotely verify an
   independent fixed-C target, a TVM history source, and a pre-registered TVM
   target; compare conclusions, obtain performance/security reviews, and record
   the final `pass`, `pause`, or `falsified` Gate decision without changing the
@@ -124,7 +124,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   source and bundle-relative output paths while retaining the actual tool and
   flags, and normalize only the still-mutable command record before sealing.
 
-## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
+## Now — turn Sonatine Microkernel seed into a real minimal microkernel slice
+
+Gate 1 is closed negative. Full measurement campaigns are paused; the harness
+remains a maintenance-mode verification facility. Resume a full campaign only
+for a bounded, preregistered hypothesis tied to a concrete build decision and
+only after a short pilot demonstrates candidate separation.
 
 - [ ] **T-0010** Parse or deliberately constrain the QEMU device tree instead of
   silently assuming all platform properties.

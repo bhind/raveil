@@ -224,7 +224,9 @@ IDE-driven attach is made.
   Scarbo Verification Subsystem, and native Daphnis Execution Subsystem are intended architecture, not all present
   in this minimal tree.
 - No claim of removing general-purpose OoO hardware has been demonstrated.
-- No Gate 1 latency or energy improvement is claimed. The pilot, full
-  history-source, and first target policy bundles have real Google Drive
-  verification, but the target failed the improvement thresholds and no
-  independent repeat or TVM comparison has been verified.
+- No Gate 1 latency or energy improvement is claimed. Independent fixed-C and
+  pinned TVM target executions both produced zero median latency and energy
+  improvement and exceeded the joint NTR limit. Their sealed bundles were
+  immutably copied to Google Drive and download-verified. Gate 1 is closed as a
+  falsified preregistered 5% hypothesis; the measurement system remains a
+  maintenance-mode verification facility while Sonatine Gate 2 is active.

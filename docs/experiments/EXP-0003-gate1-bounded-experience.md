@@ -308,3 +308,30 @@ The bundle was sealed as
 `ea97cedd20de73d0fc4fd96221df1569fb65706cb5ef53b172a4051e45517f10`
 and immutably verified at logical remote path
 `Raveil/research-data/EXP-0003/20260809T173110Z-24c6f4edc-ddb463a8`.
+
+## Final pinned TVM result and disposition
+
+Pinned TVM history RUN-ID `20260810T011337Z-387c1970c-9ff16b6d` completed
+3,600 valid silicon records and was sealed as
+`6dc30f082db1e237d6b1193e6ebfec0624effd01cbe764ec88d1b47cfe1ffb4f`.
+Its immutable remote copy was download-verified at
+`Raveil/research-data/EXP-0003/20260810T011337Z-387c1970c-9ff16b6d`.
+
+The preregistered target RUN-ID
+`20260810T053527Z-387c1970c-4ad15dbe` completed 3,600/3,600 unique, valid
+records. All semantic checksums matched, all measurement windows were
+`Nominal`, and the minimum power-sample count was three. Bounded versus cold
+produced zero median latency improvement and zero median estimated-energy
+improvement. Both workload bootstrap intervals were `[0.0, 0.0]`; hierarchical
+intervals were `[-0.0017178, 0.0002434]` and
+`[-0.0060455, 0.0107530]`. Joint NTR was `4/24 = 16.67%`. Memory, retrieval,
+and full-history quality constraints passed. The bundle was sealed as
+`09c2ca0b1e1ced6edea435a9e788401963ec4fbc036c560a8892e272eeda25cd`
+and download-verified at
+`Raveil/research-data/EXP-0003/20260810T053527Z-387c1970c-4ad15dbe`.
+
+The independent fixed-C and pinned TVM conclusions agree. EXP-0003 therefore
+falsifies the preregistered claim that bounded Experience improves both median
+latency and energy by at least 5% under this workload, candidate, and cold-prior
+contract. It does not falsify Experience generally. Gate 1 is closed negative;
+routine full campaigns stop and the measurement stack enters maintenance mode.

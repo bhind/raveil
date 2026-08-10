@@ -38,8 +38,9 @@ resolves it.
 
 ## Measurement
 
-- Will the pinned TVM MetaSchedule adapter reproduce the fixed-C Gate 1
-  conclusion, or expose a benchmark-specific transfer result?
+- Under what new workload and candidate-separation pilot should Experience
+  research resume after fixed-C and pinned TVM both falsified the Gate 1 5%
+  transfer hypothesis?
 - Which Transformer or other AI workload is small enough to reproduce yet
   repeated enough to demonstrate useful Experience transfer?
 - What threshold makes Negative Transfer Rate unacceptable?
