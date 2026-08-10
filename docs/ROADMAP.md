@@ -1,10 +1,24 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-08
+Last updated: 2026-08-11
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
+
+## Current delivery focus
+
+State: **Paused after T-0087 reconciliation**
+
+On explicit restart, T-0086 is the sole P0. It ports the preserved userspace
+graph prototype onto current main and demonstrates one owned graph through
+baseline, proposal or abstention, structural/semantic checks, commit or
+rollback, and evidence output on GNU/Linux. It must preserve every existing
+Sonatine Microkernel, Linux harness, contract, telemetry, Experience, and
+experiment artifact.
+
+This is an allowed narrow Gate 4 vertical slice under ADR-0024. It does not
+claim Gate 3 completion, custom-hardware performance, or a Gate 1 reversal.
 
 ## Gate 0 — independently reproducible minimum seed
 
@@ -100,6 +114,10 @@ VirtIO and persistent storage remain T-0018.
 
 State: **Planned**
 
+Remaining specialized-authority work is preserved but paused until the
+userspace MVP exposes a concrete requirement. Existing T-0030 through T-0033
+artifacts remain valid.
+
 The T-0084 Linux harness is pre-Gate transport scaffolding only. It validates
 the owned ABI envelope without claiming a JobDescriptor, device, or authority
 path and therefore does not advance Gate 3 state.
@@ -119,7 +137,7 @@ authority.
 
 ## Gate 4 — one owned adaptive graph path
 
-State: **Planned**
+State: **Next narrow vertical slice; manufacturing paused**
 
 Import one pinned real workload behind an adapter; define Raveil-owned
 GraphVariant, MemoryPlan, OptimizationProposal, and ResourceCertificate; add
@@ -128,6 +146,10 @@ elastic, stream, and hybrid execution models.
 
 An AI-compute demonstration may then test a small Transformer, including
 prefill/decode and memory-regime variants, if Gate 1 results justify it.
+
+T-0086 intentionally precedes the full exit: it proves the product control
+loop on an existing OS/ISA and replaceable native backend. It does not require
+a new kernel, ISA, driver, FPGA, or complete graph compiler.
 
 ## Gate 5 — hardware exploration
 

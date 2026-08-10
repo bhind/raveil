@@ -65,20 +65,22 @@ The exact encoding remains Proposed in
 
 ## RISC-V and Daphnis Execution Subsystem
 
-RISC-V is the permanent semantic/control/fallback architecture for boot,
-exceptions, cold or irregular code, capabilities, object management, admission,
-recovery, and trusted baseline execution. It is not the native Daphnis machine
-code and not merely a temporary boot loader.
+RISC-V/Sonatine is a preserved semantic/control/fallback and specialized
+authority architecture for boot, exceptions, irregular code, capabilities,
+object management, admission, and recovery. Under ADR-0024 it is not an MVP
+prerequisite and must earn primary-path status through a bounded comparison.
+It is not the native Daphnis machine code.
 
 Daphnis is connected through owned job/object/completion contracts. Static,
 elastic dataflow, stream, and hybrid organizations remain comparison
 candidates. Dynamic islands or RISC-V fallback handle pointer chasing,
 interpreters, unpredictable traversal, and other graph-hostile regions.
 
-Linux is a non-authoritative development and driver-validation host under
-ADR-0019. Linux adapters may exercise Raveil-owned versioned contracts, but do
-not own admission, capabilities, Experience writes, commit, or rollback and do
-not replace the permanent RISC-V/Sonatine control path.
+Linux retains the non-authoritative transport harness implemented under
+ADR-0019. ADR-0024 additionally permits the first complete product loop in
+GNU/Linux userspace, provided Raveil-owned admission, semantic, evidence, and
+rollback contracts remain authoritative. Host mechanisms implement those
+contracts; they do not redefine them.
 
 ADR-0020 defines the first shared JobDescriptor/CompletionRecord byte contract.
 Descriptors carry bounded object/version/range/effect and resource requests;

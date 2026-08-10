@@ -23,8 +23,10 @@ verification, and specialization over future executions.
 1. Preserve explicit dependency, effect, object, resource, and numerical
    information instead of forcing hardware to rediscover it from a sequential
    instruction stream on every execution.
-2. Keep RISC-V as the permanent boot, control, exception, admission, trusted
-   baseline, and irregular-work fallback architecture.
+2. Keep authority contracts independent of OS and ISA. Start with GNU/Linux
+   userspace and existing CPUs; retain RISC-V/Sonatine as a measured
+   specialized authority and irregular-work option rather than an MVP
+   prerequisite.
 3. Explore a Daphnis Execution Subsystem (Daphnis) that may use static, elastic dataflow,
    stream, or hybrid organization according to measurements.
 4. Make optimization history a first-class plane: reusable, bounded online,

@@ -1,7 +1,8 @@
 # Current status
 
-Last updated: 2026-08-10
-Version: `0.0000000000001` (`10^-13`)
+Last updated: 2026-08-11
+Development state: `unreleased`
+Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
@@ -20,6 +21,20 @@ Codex runtime configuration remain ignored.
 
 Gate 0 is complete, so tracked work now uses a dedicated
 `<type>/<record-id>-<short-slug>` lowercase branch.
+
+## Delivery-line state
+
+The manufacturing line is paused after T-0087 reconciliation. ADR-0024 makes a
+GNU/Linux userspace graph vertical slice the next delivery line without
+discarding any current artifact. Sonatine Microkernel (Sonatine), the Linux harness,
+shared job/object/completion contracts, job rings, completion telemetry,
+Experience infrastructure, EXP-0003 evidence, and metadata-shadow finalization
+remain implemented and preserved.
+
+No implementation work is active during the pause. On explicit restart,
+T-0086 is the sole P0: review and port the preserved
+`feat/t-0086-linux-graph-mvp` implementation onto current main. That branch is
+not merge-safe because it predates and deletes later main work.
 
 ## Executable track A: Sonatine Microkernel RV64 seed
 
@@ -266,7 +281,6 @@ Not implemented or not yet evidenced:
 - a Gate-passing fixed-C policy result;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
-- completed powermetrics datasets for the pinned TVM adapter;
 - neural representation、GAN/AAE、ANN;
 - cross-hardware learned transfer;
 - multi-objective Pareto policy;

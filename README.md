@@ -1,13 +1,19 @@
 # Raveil v0.0000000000001
 
+> This heading names the latest immutable feature release. Current development
+> is unreleased. The manufacturing line is paused after ADR-0024/T-0087
+> reconciliation; on explicit restart, the sole P0 is to port the preserved
+> GNU/Linux userspace graph MVP onto current main without removing any existing
+> artifact. See `docs/STATUS.md` and `docs/ROADMAP.md` for current state.
+
 This is the smallest executable Raveil seed with two connected bootstrap tracks:
 
 1. a bootable Sonatine Microkernel (Sonatine) authority on QEMU/RISC-V `virt`;
 2. a host-side bounded Experience experiment.
 
-It deliberately contains no LLM, neural network, RTL, completed TVM
-MetaSchedule implementation, or real accelerator backend. Gate 1 now includes a
-fixed native C measurement harness, but no performance result is claimed.
+It deliberately contains no production LLM, neural network, RTL, or real
+accelerator backend. A pinned TVM MetaSchedule adapter and completed negative
+Gate 1 evidence now exist; no latency or energy improvement is claimed.
 
 ## Sonatine Microkernel boot target
 
@@ -71,10 +77,11 @@ raveil>
 Available commands are `help`, `info`, `mem`, `ps`, `caps`, `ticks`, `ipc`,
 `alloc`, and `reboot`.
 
-This version runs directly in machine mode with one hart and no paging. Tasks
-are fixed kernel task records; there is not yet a preemptive context switch or
-U-mode address-space isolation. That distinction is intentional and visible in
-the `info` command.
+The published tag began as a one-hart machine-mode seed. Current unreleased
+development adds Sv39 construction, a persistent U-mode task, timer-driven
+preemption, capability IPC, a bounded VFS/RamFS, job authority, telemetry, and
+metadata-shadow finalization. These are QEMU correctness results, not physical
+hardware or production-isolation claims.
 
 ## Experience experiment
 

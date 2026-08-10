@@ -1,8 +1,24 @@
 # Raveil TODO
 
-Last updated: 2026-08-09
+Last updated: 2026-08-11
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
+
+## Delivery line — paused after reconciliation
+
+- [x] **T-0087** Reconcile the commodity-host/GNU/Linux/OSS-first pivot with
+  current main without deleting Sonatine Microkernel, Linux harness, contract,
+  telemetry, Experience, experiment, or metadata-shadow artifacts; reserve existing
+  side-branch identifiers, adopt ADR-0024, and prepare a restart handoff.
+- [ ] **T-0086** Port the preserved `feat/t-0086-linux-graph-mvp` prototype onto
+  current main without merging its deletions. Make one owned graph run in
+  GNU/Linux userspace through baseline, proposal or abstention,
+  structural/semantic checks, commit or rollback, and evidence output. This is
+  the sole implementation P0 after the owner explicitly restarts the line.
+
+No implementation task is active while the manufacturing line is paused.
+T-0034, T-0085, T-0018, compiler expansion, and hardware work remain preserved
+but must not start ahead of T-0086 without a new owner decision.
 
 ## Now — make v0.0000000000001 independently reproducible
 
@@ -186,11 +202,12 @@ timer-driven switching without capability bypass.
   winners. The sealed and remotely verified sampler-startup failure RUN-ID is
   the first preserved boundary variant; broader failed-variant coverage remains.
 
-Experience gate: the EXP-0003 fixed-C and pinned-TVM criteria in ROADMAP all
-pass, immutable remote bundles verify, and an independent run reaches the same
-conclusion. A fixed-C/TVM contradiction keeps the Gate open.
+Experience gate: EXP-0003 completed fixed-C independent and pinned-TVM
+executions with immutable remote verification. Both produced zero median
+latency/energy improvement and exceeded the joint NTR limit, so the
+preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 
-## Later — connect the two tracks
+## Preserved — specialized authority integration
 
 - [x] **T-0084** Add a non-root Linux driver-development harness with a
   versioned pointer-free PING/NOP ABI, same-UID private local transport, and a
@@ -206,7 +223,7 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
 - [ ] **T-0085** Add bounded object-byte backing and byte-shadow publication;
   metadata rollback does not restore or publish data bytes.
 
-## Later — compiler and adaptive execution
+## After the userspace MVP — compiler and adaptive execution
 
 - [ ] **T-0040** Import one real tensor workload through a pinned IREE/MLIR path.
 - [ ] **T-0041** Define Raveil-owned `GraphVariant`, `MemoryPlan`, and

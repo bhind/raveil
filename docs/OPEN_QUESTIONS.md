@@ -57,6 +57,10 @@ resolves it.
 
 ## Kernel and platform
 
+- After the ADR-0024 GNU/Linux userspace MVP, which measured property, if any,
+  justifies promoting Sonatine, a Linux kernel adapter, RISC-V, or another
+  specialized authority path to a release prerequisite?
+
 - Parse the QEMU device tree or retain an explicit fixed-machine contract?
 - ADR-0018 fixes the pre-VirtIO seed as two bounded root nodes, pointer-free
   scalar I/O, immutable initramfs, and volatile RamFS. Arbitrary paths,

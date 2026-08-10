@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-08
+Last updated: 2026-08-11
 
 ## Before a change
 
@@ -153,3 +153,20 @@ Allowed `type` values are `feat`, `fix`, `docs`, `test`, `build`, `chore`, and
 English imperative form without a trailing period. `Records` and `Evidence`
 are required trailers so history preserves the relevant project memory and the
 strength of the claim.
+
+## Feature releases and milestone tags
+
+- A feature release is an immutable, owner-approved integration point with a
+  defined scope, acceptance evidence, reconciled records, and a `v...` tag.
+  The current decimal version sequence increments its final unit; an existing
+  release tag is never moved or reused.
+- Completed delivery milestones also receive an immutable annotated Git tag,
+  even when they are not feature releases. Use
+  `milestone/<record-id>-<short-slug>`, for example
+  `milestone/t-0087-delivery-line-reconciled`.
+- A milestone tag identifies the verified closeout commit. It does not imply a
+  public release, performance result, Gate passage, or remote publication.
+- Create a tag only after relevant tests, the governance record checker, and
+  record reconciliation pass. Record the tag in the dated log.
+- Remote tag or GitHub Release publication still requires the
+  `raveil-remote-release` workflow and explicit owner approval.

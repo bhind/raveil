@@ -1,5 +1,10 @@
 # Scope of v0.0000000000001
 
+This is the immutable scope of the published historical tag, not the current
+development-tree scope. Post-tag features recorded in STATUS are `unreleased`
+until the next feature release. Each completed feature release receives a new
+immutable version/tag; existing tags are never moved or redefined.
+
 ## Included invariant
 
 Experience is advice, never authority. A candidate must be measured in the target context before it can become the best result. The trusted baseline is always the first measurement and remains available when every proposed variant fails.
