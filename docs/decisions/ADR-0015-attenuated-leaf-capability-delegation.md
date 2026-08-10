@@ -53,8 +53,9 @@ scheduling behavior.
 - Parent revocation is deliberately non-cascading. Callers must revoke leaf
   grants individually.
 - Derivation trees, cascading revocation, cancellation, interruption, fairness,
-  and generation-wrap policy remain unresolved before Daphnis rings are
-  exposed to U-mode.
+  and endpoint object-lifetime policy remain unresolved before Daphnis rings
+  are exposed to U-mode. ADR-0016 later resolves flat capability-slot
+  generation wrap by retiring exhausted slots.
 - Blocking is a state transition plus retry contract. End-to-end blocking
   between persistent U-mode tasks still depends on the later user-task slice.
 - A future change that adds recursive delegation or changes revocation and

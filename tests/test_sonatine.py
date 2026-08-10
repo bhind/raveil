@@ -119,6 +119,23 @@ class SonatineSourceTests(unittest.TestCase):
             subprocess.run(command, check=True)
             subprocess.run([str(executable)], check=True)
 
+    def test_user_fault_and_timer_reentry_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "sonatine-fault-host-test"
+            subprocess.run([
+                compiler, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                f"-I{SONATINE / 'include'}",
+                str(ROOT / "tests/sonatine_fault_host_test.c"),
+                str(SONATINE / "src/user_trap.c"),
+                str(SONATINE / "src/timer_guard.c"),
+                str(SONATINE / "src/timer_dispatch.c"),
+                "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+
     def test_freestanding_c_sources_are_syntax_clean(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:

@@ -42,6 +42,8 @@ int main(void) {
   const cap_handle_t control = cap_create(
       init, CAP_OBJECT_ENDPOINT, endpoint,
       CAP_RIGHT_SEND | CAP_RIGHT_RECEIVE | CAP_RIGHT_CONTROL);
+  assert(control != cap);
+  assert(ipc_send(init, cap, &sent) == IPC_DENIED);
   const cap_handle_t peer_send = cap_delegate(init, control, peer, CAP_RIGHT_SEND);
   const cap_handle_t peer_receive = cap_delegate(
       init, control, peer, CAP_RIGHT_RECEIVE);
@@ -84,11 +86,31 @@ int main(void) {
   const cap_handle_t invalid_endpoint = cap_create(
       init, CAP_OBJECT_ENDPOINT, 9u, CAP_RIGHT_SEND);
   assert(ipc_send(init, invalid_endpoint, &sent) == IPC_INVALID);
+  assert(!cap_resolve(init, 0u, CAP_OBJECT_ENDPOINT, CAP_RIGHT_SEND, NULL));
+  assert(!cap_resolve(init, 65u, CAP_OBJECT_ENDPOINT, CAP_RIGHT_SEND, NULL));
   assert(task_get(init, &view));
   assert(view.state == TASK_READY);
   assert(cap_revoke(peer_send));
   assert(ipc_send(peer, peer_send, &sent) == IPC_DENIED);
   assert(cap_revoke(control));
   assert(ipc_receive(peer, peer_receive, &received) == IPC_OK);
+
+  cap_init();
+  assert(cap_create(init, CAP_OBJECT_ENDPOINT, endpoint, 1u << 31u) == 0u);
+  cap_handle_t cycling = cap_create(
+      init, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
+  const cap_handle_t oldest = cycling;
+  for (uint32_t generation = 0u; generation < UINT16_MAX; ++generation) {
+    assert(cap_revoke(cycling));
+    if (generation + 1u < UINT16_MAX) {
+      cycling = cap_create(
+          init, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
+      assert((cycling & 0xffffu) == 1u);
+    }
+  }
+  const cap_handle_t after_retirement = cap_create(
+      init, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
+  assert((after_retirement & 0xffffu) == 2u);
+  assert(!cap_resolve(init, oldest, CAP_OBJECT_ENDPOINT, CAP_RIGHT_SEND, NULL));
   return 0;
 }

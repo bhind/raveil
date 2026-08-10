@@ -66,6 +66,8 @@ smoke: $(TARGET)
 	  tee $(BUILD)/smoke.log
 	grep -q 'raveil>' $(BUILD)/smoke.log
 	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
+	grep -q 'U-mode fault contained cause=0x2' $(BUILD)/smoke.log
+	grep -q '\[ok\] U-mode fault / contained return to kernel' $(BUILD)/smoke.log
 	grep -q 'context switch: init -> idle -> init' $(BUILD)/smoke.log
 	grep -q 'timer preemption: init -> idle -> init count=2' $(BUILD)/smoke.log
 	grep -q 'ipc: received' $(BUILD)/smoke.log

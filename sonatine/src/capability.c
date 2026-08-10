@@ -6,6 +6,7 @@
 
 struct cap_entry {
   bool active;
+  bool retired;
   uint16_t generation;
   struct cap_view view;
 };
@@ -29,15 +30,24 @@ static bool decode_handle(cap_handle_t handle, size_t *slot, uint16_t *generatio
 void cap_init(void) {
   for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {
     cap_table[index].active = false;
+    cap_table[index].retired = false;
     cap_table[index].generation = 1u;
   }
 }
 
 cap_handle_t cap_create(uint16_t owner_task, uint16_t object_type,
                         uint32_t object_id, uint32_t rights) {
+  const uint32_t all_rights = CAP_RIGHT_READ | CAP_RIGHT_WRITE |
+                              CAP_RIGHT_SEND | CAP_RIGHT_RECEIVE |
+                              CAP_RIGHT_CONTROL;
+  if (owner_task == 0u || object_type == CAP_OBJECT_NONE ||
+      object_type > CAP_OBJECT_FRAME || object_id == 0u || rights == 0u ||
+      (rights & ~all_rights) != 0u) {
+    return 0u;
+  }
   for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {
     struct cap_entry *entry = &cap_table[index];
-    if (!entry->active) {
+    if (!entry->active && !entry->retired) {
       entry->active = true;
       entry->view.owner_task = owner_task;
       entry->view.object_type = object_type;
@@ -101,9 +111,10 @@ bool cap_revoke(cap_handle_t handle) {
     return false;
   }
   entry->active = false;
-  ++entry->generation;
-  if (entry->generation == 0u) {
-    entry->generation = 1u;
+  if (entry->generation == UINT16_MAX) {
+    entry->retired = true;
+  } else {
+    ++entry->generation;
   }
   return true;
 }

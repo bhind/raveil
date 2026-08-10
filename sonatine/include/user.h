@@ -4,6 +4,7 @@
 #include <stdint.h>
 bool user_init_prepare(uintptr_t code_page);
 void user_init_enter(void);
+void user_fault_probe_enter(void);
 uint64_t user_trap_dispatch(uint64_t cause, uint64_t pc, uint64_t argument,
                             uint64_t syscall);
 #endif

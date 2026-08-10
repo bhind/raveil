@@ -51,6 +51,8 @@ void kmain(void) {
   console_write("starting U-mode init: ");
   user_init_enter();
   boot_ok("U-mode init / ecall boundary");
+  user_fault_probe_enter();
+  boot_ok("U-mode fault / contained return to kernel");
 
   cap_init();
   boot_ok("capability / generation-checked fixed table");

@@ -2,6 +2,22 @@
 .align 2
 .global user_enter
 user_enter:
+  addi sp, sp, -128
+  sd ra, 0(sp)
+  sd s0, 8(sp)
+  sd s1, 16(sp)
+  sd s2, 24(sp)
+  sd s3, 32(sp)
+  sd s4, 40(sp)
+  sd s5, 48(sp)
+  sd s6, 56(sp)
+  sd s7, 64(sp)
+  sd s8, 72(sp)
+  sd s9, 80(sp)
+  sd s10, 88(sp)
+  sd s11, 96(sp)
+  sd gp, 104(sp)
+  sd tp, 112(sp)
   csrw mscratch, sp
   csrw mepc, a0
   csrr t0, mstatus
@@ -12,6 +28,22 @@ user_enter:
   mret
 .global user_kernel_return
 user_kernel_return:
+  ld ra, 0(sp)
+  ld s0, 8(sp)
+  ld s1, 16(sp)
+  ld s2, 24(sp)
+  ld s3, 32(sp)
+  ld s4, 40(sp)
+  ld s5, 48(sp)
+  ld s6, 56(sp)
+  ld s7, 64(sp)
+  ld s8, 72(sp)
+  ld s9, 80(sp)
+  ld s10, 88(sp)
+  ld s11, 96(sp)
+  ld gp, 104(sp)
+  ld tp, 112(sp)
+  addi sp, sp, 128
   ret
 
 .align 2
@@ -29,7 +61,6 @@ user_trap_entry:
   call user_trap_dispatch
   li t0, 1
   beq a0, t0, 1f
-  beqz a0, 2f
   csrw mepc, a0
   ld ra, 0(sp)
   ld a0, 8(sp)
@@ -44,11 +75,8 @@ user_trap_entry:
   li t1, (3 << 11)
   or t0, t0, t1
   csrw mstatus, t0
-  ld ra, 0(sp)
   addi sp, sp, 32
   mret
-2:
-  j 2b
 
 .section .rodata.user,"a"
 .align 2
@@ -71,6 +99,25 @@ user_payload_start:
   ecall
   li a7, 2
   ecall
+  j .
+.global user_fault_payload_start
+user_fault_payload_start:
+  li ra, -1
+  li s0, -1
+  li s1, -1
+  li s2, -1
+  li s3, -1
+  li s4, -1
+  li s5, -1
+  li s6, -1
+  li s7, -1
+  li s8, -1
+  li s9, -1
+  li s10, -1
+  li s11, -1
+  li gp, -1
+  li tp, -1
+  unimp
   j .
 .global user_payload_end
 user_payload_end:

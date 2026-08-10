@@ -140,7 +140,7 @@ only after a short pilot demonstrates candidate separation.
 - [x] **T-0013** Implement context switch between `init` and `idle`.
 - [x] **T-0014** Make the CLINT timer drive preemption.
 - [x] **T-0015** Add blocking IPC semantics and capability delegation tests.
-- [ ] **T-0016** Add fault tests for stale capability generation, rights escalation,
+- [x] **T-0016** Add fault tests for stale capability generation, rights escalation,
   invalid endpoint, user fault, and timer re-entry.
 - [ ] **T-0017** Add a minimal VFS plus RamFS/initramfs after the isolation and
   scheduling base is credible.
