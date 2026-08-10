@@ -99,6 +99,12 @@ the evidence class to emulation and host provenance surrounds, rather than
 trusts, guest fields. This journal is outside active Experience retrieval and
 does not establish semantics, commit, energy, or hardware performance.
 
+ADR-0023 adds a kernel-owned finalization ledger after completion observation.
+Only an explicit full-binding approval plus optimistic revalidation of every
+READ/WRITE version can publish exact-successor WRITE versions. Cancellation is
+sticky and multi-output metadata publication is all-or-nothing. This is not a
+semantic oracle or data-byte shadow: T-0085 and T-0043 retain those boundaries.
+
 ## Named components
 
 | Formal component name | Short name | Responsibility |

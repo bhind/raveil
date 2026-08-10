@@ -160,6 +160,21 @@ validity, commit evidence, silicon performance, energy evidence, or active
 retrieval input. Serial authenticity, crash-spanning exactly-once delivery,
 cross-boot uniqueness, and real Daphnis telemetry remain unimplemented.
 
+ADR-0023 implements the T-0033 kernel-owned metadata-shadow lifecycle.
+Completion consumption retains the exact binding and descriptor until an
+explicit one-shot commit or rollback. `EXECUTED` alone cannot commit; the seed
+requires a separate injected kernel approval and revalidates every READ/WRITE
+object generation, visible version, and range. All outputs must be exact
+successor versions and multi-output publication prevalidates every target
+before changing any visible version. Conflicting writers, cancellation, stale
+bindings, missing approval, and replay fail closed.
+
+This is version-metadata shadowing only. It contains no object bytes, byte-copy
+rollback, semantic oracle, real Daphnis execution, DMA/cache ordering,
+capability-authorized submitter/verifier, persistence, or hardware evidence.
+Queued cancellation discards undispatched state; dispatched cancellation is
+sticky and a late `EXECUTED` observation cannot commit.
+
 ## Executable track B: bounded Experience seed
 
 Python標準ライブラリだけで、次の閉ループがあります。

@@ -108,8 +108,9 @@ T-0030 provides the bounded shared JobDescriptor/CompletionRecord schema, and
 T-0031 provides a kernel-internal ObjectManifest/object-table/ring seed with
 boot-scoped replay protection. T-0032 adds segregated append-only QEMU
 completion telemetry without promoting it to active Experience. Gate 3 remains
-Planned until shadow
-execution, cancellation, commit/rollback, and write authorities are executable.
+Planned until byte-shadow execution, semantic verification, and Four-plane
+write authorities are executable. T-0033 now supplies only the kernel-owned
+metadata-shadow finalization and cancellation seed.
 
 Define JobDescriptor, ObjectManifest, and CompletionRecord; add
 submission/completion rings; append measured telemetry to Experience; implement

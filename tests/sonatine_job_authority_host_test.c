@@ -43,6 +43,12 @@ static void predictable_cookie(uint8_t cookie[16],uint64_t epoch,
     cookie[index+8u]=(uint8_t)(second>>(index*8u));
   }
 }
+static struct sonatine_job_binding binding(const struct sonatine_submission *submission) {
+  struct sonatine_job_binding value={0}; value.job_id=submission->job.job_id;
+  value.execution_epoch=submission->execution_epoch;
+  value.execution_sequence=submission->execution_sequence;
+  memcpy(value.completion_cookie,submission->completion_cookie,16u); return value;
+}
 int main(void) {
   struct raveil_object_manifest_v1 input=manifest(
       1u,2u,3u,16u,RAVEIL_OBJECT_READ,RAVEIL_OBJECT_BACKING_IMMUTABLE);
@@ -87,6 +93,9 @@ int main(void) {
   struct raveil_completion_record_v1 done=completion(&issued),wrong,taken;
   done.output_count=0u; memset(done.outputs,0,sizeof(done.outputs));
   assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  struct sonatine_job_binding bound=binding(&issued);
+  assert(job_shadow_approve(&bound));
+  assert(job_shadow_finalize(&bound,false)==SONATINE_FINALIZE_ROLLED_BACK);
   for(uint64_t id=3u;id<=7u;++id) {
     copy=manifest(id,1u,1u,1u,RAVEIL_OBJECT_READ,RAVEIL_OBJECT_BACKING_IMMUTABLE);
     assert(job_object_register(&copy));
@@ -120,7 +129,12 @@ int main(void) {
   assert(job_completion_count()==0u && job_inflight_count()==1u);
   assert(job_completion_post(&done)); assert(!job_completion_post(&done));
   assert(job_completion_take(&taken)); assert(!job_completion_take(&taken));
-  assert(memcmp(&taken,&done,sizeof(done))==0 && job_inflight_count()==0u);
+  bound=binding(&issued);
+  assert(memcmp(&taken,&done,sizeof(done))==0 && job_inflight_count()==0u &&
+         job_shadow_count()==1u);
+  assert(job_shadow_approve(&bound));
+  assert(job_shadow_finalize(&bound,false)==SONATINE_FINALIZE_ROLLED_BACK);
+  assert(job_shadow_finalize(&bound,false)==SONATINE_FINALIZE_INVALID);
   assert(!job_completion_post(&done));
   assert(job_object_lookup(2u,&observed) && observed.version==5u);
   /* FIFO, bounded backpressure, and wrap/reuse. */
@@ -138,10 +152,140 @@ int main(void) {
   assert(job_completion_count()==4u); assert(!job_completion_post(&done));
   for(uint64_t id=200u;id<204u;++id) {
     assert(job_completion_take(&taken)); assert(taken.job_id==id);
+    /* Recover the binding from the completion for explicit rollback. */
+    bound=(struct sonatine_job_binding){0}; bound.job_id=taken.job_id;
+    bound.execution_epoch=taken.execution_epoch;
+    bound.execution_sequence=taken.execution_sequence;
+    memcpy(bound.completion_cookie,taken.completion_cookie,16u);
+    assert(job_shadow_finalize(&bound,false)==SONATINE_FINALIZE_ROLLED_BACK);
   }
   valid=job(300u); assert(job_submit(&valid)); assert(job_submission_take(&issued));
   assert(issued.execution_sequence==7u);
   done=completion(&issued); assert(job_completion_post(&done));
-  assert(job_completion_take(&taken)); assert(job_inflight_count()==0u);
+  assert(job_completion_take(&taken)); bound=binding(&issued);
+  assert(job_shadow_finalize(&bound,false)==SONATINE_FINALIZE_ROLLED_BACK);
+  assert(job_inflight_count()==0u && job_shadow_count()==0u);
+
+  /* T-0033 explicit approval, publish, conflict, and cancellation. */
+  job_authority_init(77u);
+  input=manifest(1u,1u,1u,16u,RAVEIL_OBJECT_READ,RAVEIL_OBJECT_BACKING_IMMUTABLE);
+  output=manifest(2u,1u,1u,16u,RAVEIL_OBJECT_READ|RAVEIL_OBJECT_WRITE,
+                  RAVEIL_OBJECT_BACKING_VOLATILE);
+  struct raveil_object_manifest_v1 output_two=manifest(
+      3u,1u,1u,16u,RAVEIL_OBJECT_READ|RAVEIL_OBJECT_WRITE,
+      RAVEIL_OBJECT_BACKING_VOLATILE);
+  assert(job_object_register(&input)); assert(job_object_register(&output));
+  assert(job_object_register(&output_two));
+  valid=job(400u); valid.objects[0].generation=1u; valid.objects[0].expected_version=1u;
+  valid.objects[1].generation=1u; valid.objects[1].expected_version=1u;
+  valid.objects[1].offset=0u;
+  assert(job_submit_bound(&valid,&bound)); assert(job_submission_take(&issued));
+  done=completion(&issued); done.outputs[0].generation=1u; done.outputs[0].version=2u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_object_lookup(2u,&observed) && observed.version==1u);
+  assert(job_shadow_finalize(&bound,true)==SONATINE_FINALIZE_ROLLED_BACK);
+  assert(job_object_lookup(2u,&observed) && observed.version==1u);
+
+  valid.job_id=401u; assert(job_submit_bound(&valid,&bound));
+  assert(job_submission_take(&issued)); done=completion(&issued);
+  done.outputs[0].generation=1u; done.outputs[0].version=2u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_shadow_approve(&bound));
+  assert(job_shadow_finalize(&bound,true)==SONATINE_FINALIZE_COMMITTED);
+  assert(job_object_lookup(2u,&observed) && observed.version==2u);
+  assert(job_shadow_finalize(&bound,true)==SONATINE_FINALIZE_INVALID);
+
+  valid.job_id=402u; valid.objects[1].expected_version=2u;
+  struct sonatine_job_binding cancelled_binding;
+  assert(job_submit_bound(&valid,&cancelled_binding));
+  assert(job_cancel(&cancelled_binding));
+  assert(job_submission_count()==0u && job_inflight_count()==0u);
+  assert(!job_cancel(&cancelled_binding));
+  /* A cancelled queued entry cannot dispatch through a reused job ID. */
+  assert(job_submit_bound(&valid,&bound));
+  assert(job_submission_take(&issued));
+  assert(issued.job.job_id==bound.job_id);
+  assert(issued.execution_epoch==bound.execution_epoch);
+  assert(issued.execution_sequence==bound.execution_sequence);
+  assert(memcmp(issued.completion_cookie,bound.completion_cookie,16u)==0);
+  assert(!job_cancel(&cancelled_binding));
+  done=completion(&issued); done.outputs[0].generation=1u;
+  done.outputs[0].version=3u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_shadow_finalize(&cancelled_binding,false)==SONATINE_FINALIZE_INVALID);
+  assert(job_shadow_finalize(&bound,false)==SONATINE_FINALIZE_ROLLED_BACK);
+
+  /* Two shadows may race; only the first exact-version commit wins. */
+  valid.objects[1].expected_version=2u;
+  struct raveil_job_descriptor_v1 contender=valid;
+  valid.job_id=403u; contender.job_id=404u;
+  struct sonatine_job_binding first_binding,second_binding;
+  assert(job_submit_bound(&valid,&first_binding));
+  assert(job_submit_bound(&contender,&second_binding));
+  assert(job_submission_take(&issued)); done=completion(&issued);
+  done.outputs[0].generation=1u; done.outputs[0].version=3u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_shadow_approve(&first_binding));
+  assert(job_submission_take(&issued)); done=completion(&issued);
+  done.outputs[0].generation=1u; done.outputs[0].version=3u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_shadow_approve(&second_binding));
+  assert(job_shadow_finalize(&first_binding,true)==SONATINE_FINALIZE_COMMITTED);
+  assert(job_shadow_finalize(&second_binding,true)==SONATINE_FINALIZE_CONFLICT);
+  assert(job_object_lookup(2u,&observed) && observed.version==3u);
+
+  /* Structurally valid version jumps and stale bindings fail closed. */
+  valid.job_id=408u; valid.objects[1].expected_version=3u;
+  assert(job_submit_bound(&valid,&bound)); assert(job_submission_take(&issued));
+  done=completion(&issued); done.outputs[0].generation=1u;
+  done.outputs[0].version=5u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  struct sonatine_job_binding stale=bound; stale.execution_epoch^=1u;
+  assert(!job_shadow_approve(&stale));
+  assert(job_shadow_finalize(&stale,true)==SONATINE_FINALIZE_INVALID);
+  assert(job_shadow_count()==1u && job_shadow_approve(&bound));
+  assert(job_shadow_finalize(&bound,true)==SONATINE_FINALIZE_CONFLICT);
+  assert(job_object_lookup(2u,&observed) && observed.version==3u);
+
+  /* A dispatched cancellation wins over a late EXECUTED observation. */
+  valid.job_id=405u; valid.objects[1].expected_version=3u;
+  assert(job_submit_bound(&valid,&bound)); assert(job_submission_take(&issued));
+  assert(job_cancel(&bound)); done=completion(&issued);
+  done.outputs[0].generation=1u; done.outputs[0].version=4u;
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(!job_shadow_approve(&bound));
+  assert(job_shadow_finalize(&bound,true)==SONATINE_FINALIZE_ROLLED_BACK);
+  assert(job_object_lookup(2u,&observed) && observed.version==3u);
+
+  /* A conflict in the second output publishes neither output. */
+  struct raveil_job_descriptor_v1 multi=valid;
+  multi.job_id=406u; multi.object_count=3u;
+  multi.objects[1].expected_version=3u;
+  multi.objects[2]=(struct raveil_object_ref_v1){3u,1u,1u,0u,8u,
+                                                 RAVEIL_OBJECT_WRITE,0u};
+  multi.resources.max_output_bytes=16u;
+  struct raveil_job_descriptor_v1 other=valid;
+  other.job_id=407u; other.object_count=1u;
+  other.objects[0]=(struct raveil_object_ref_v1){3u,1u,1u,0u,8u,
+                                                 RAVEIL_OBJECT_WRITE,0u};
+  memset(&other.objects[1],0,3u*sizeof(other.objects[0]));
+  struct sonatine_job_binding multi_binding,other_binding;
+  assert(job_submit_bound(&multi,&multi_binding));
+  assert(job_submit_bound(&other,&other_binding));
+  assert(job_submission_take(&issued)); done=completion(&issued);
+  done.output_count=2u;
+  done.outputs[0]=(struct raveil_object_version_v1){2u,1u,4u};
+  done.outputs[1]=(struct raveil_object_version_v1){3u,1u,2u};
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_shadow_approve(&multi_binding));
+  assert(job_submission_take(&issued)); done=completion(&issued);
+  done.output_count=1u;
+  done.outputs[0]=(struct raveil_object_version_v1){3u,1u,2u};
+  assert(job_completion_post(&done)); assert(job_completion_take(&taken));
+  assert(job_shadow_approve(&other_binding));
+  assert(job_shadow_finalize(&other_binding,true)==SONATINE_FINALIZE_COMMITTED);
+  assert(job_shadow_finalize(&multi_binding,true)==SONATINE_FINALIZE_CONFLICT);
+  assert(job_object_lookup(2u,&observed) && observed.version==3u);
+  assert(job_object_lookup(3u,&observed) && observed.version==2u);
   return 0;
 }

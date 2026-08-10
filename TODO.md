@@ -200,8 +200,11 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
 - [x] **T-0031** Define standalone `ObjectManifest` and add Sonatine
   submission/completion rings plus the object table.
 - [x] **T-0032** Send measured completion telemetry into append-only Experience.
-- [ ] **T-0033** Implement shadow execution, commit, cancellation, and rollback.
+- [x] **T-0033** Implement the kernel-owned metadata-shadow lifecycle, explicit
+  approval, atomic visible-version commit, cancellation, and rollback.
 - [ ] **T-0034** Enforce Program/Graph/Data/Experience write authorities.
+- [ ] **T-0085** Add bounded object-byte backing and byte-shadow publication;
+  metadata rollback does not restore or publish data bytes.
 
 ## Later — compiler and adaptive execution
 

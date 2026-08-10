@@ -27,3 +27,4 @@ rewrite it.
 | [ADR-0020](ADR-0020-jobs-are-bounded-non-authoritative-envelopes.md) | Accepted | Jobs and completions are bounded non-authoritative envelopes |
 | [ADR-0021](ADR-0021-sonatine-owns-boot-scoped-job-rings.md) | Accepted | Sonatine owns boot-scoped bounded job rings |
 | [ADR-0022](ADR-0022-completion-telemetry-is-segregated-cold-evidence.md) | Accepted | Completion telemetry is segregated cold evidence |
+| [ADR-0023](ADR-0023-shadow-finalization-publishes-versions-only-after-approval.md) | Accepted | Shadow finalization publishes versions only after approval |

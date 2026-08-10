@@ -15,6 +15,9 @@ resolves it.
 - ADR-0022 fixes QEMU completion ingestion as segregated cold evidence. What
   acknowledgement/retry and durable boot identity are required for
   crash-spanning exactly-once real-device telemetry remain open.
+- ADR-0023 fixes single-hart metadata-version finalization and cancel-wins
+  behavior. How should byte-shadow storage, cache/DMA ordering, verifier
+  identity, reset recovery, and persistent multi-object atomicity work?
 - Which dependencies and alias facts can admission prove without making compile
   or verification cost impractical?
 - Where is the measured boundary between static, elastic dataflow, stream, and

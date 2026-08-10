@@ -81,6 +81,7 @@ smoke: $(TARGET)
 	grep -q 'u-shell resumed task=1' $(BUILD)/smoke.log
 	grep -q '\[ok\] VFS / immutable initramfs + bounded RamFS' $(BUILD)/smoke.log
 	grep -q '\[ok\] Daphnis contract / object table + bounded rings + replay guard' $(BUILD)/smoke.log
+	grep -q '\[ok\] Daphnis metadata shadow / injected approval + commit + cancel + rollback' $(BUILD)/smoke.log
 	test "$$(grep -c '^RAVEIL-COMPLETION-V1 ' $(BUILD)/smoke.log)" -eq 1
 	test "$$(grep -c 'u-vfs read=hello write-readback=OK' $(BUILD)/smoke.log)" -eq 2
 	grep -q 'kernel-file initramfs=DENIED' $(BUILD)/smoke.log
