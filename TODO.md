@@ -199,7 +199,7 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
 - [x] **T-0030** Define shared `JobDescriptor` and `CompletionRecord` schemas.
 - [x] **T-0031** Define standalone `ObjectManifest` and add Sonatine
   submission/completion rings plus the object table.
-- [ ] **T-0032** Send measured completion telemetry into append-only Experience.
+- [x] **T-0032** Send measured completion telemetry into append-only Experience.
 - [ ] **T-0033** Implement shadow execution, commit, cancellation, and rollback.
 - [ ] **T-0034** Enforce Program/Graph/Data/Experience write authorities.
 

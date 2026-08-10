@@ -106,7 +106,9 @@ path and therefore does not advance Gate 3 state.
 
 T-0030 provides the bounded shared JobDescriptor/CompletionRecord schema, and
 T-0031 provides a kernel-internal ObjectManifest/object-table/ring seed with
-boot-scoped replay protection. Gate 3 remains Planned until telemetry, shadow
+boot-scoped replay protection. T-0032 adds segregated append-only QEMU
+completion telemetry without promoting it to active Experience. Gate 3 remains
+Planned until shadow
 execution, cancellation, commit/rollback, and write authorities are executable.
 
 Define JobDescriptor, ObjectManifest, and CompletionRecord; add

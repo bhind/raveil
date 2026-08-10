@@ -144,6 +144,22 @@ single-hart and kernel-owned; they are not Linux, U-mode, shared-memory, DMA,
 MMIO, IRQ, hardware, or performance evidence. `EXECUTED` does not change the
 visible object version or commit data.
 
+ADR-0022 implements the T-0032 emulation telemetry seed. After successful
+one-shot completion consumption, Sonatine emits one bounded versioned UART
+frame with binding, observed status/detail/output versions, and QEMU machine
+timer ticks spanning the kernel smoke path from manifest construction through
+completion consumption. This is not execution latency. The host CLI ingests
+only this frame into a separate mode-0600,
+single-writer, hash-chained append-only cold journal with raw-log provenance and
+full-history duplicate detection. Source/backend/evidence/platform are fixed to
+Sonatine/QEMU/emulation and cannot be overridden by guest data. Re-ingesting the
+same source is idempotent.
+
+Completion telemetry is not `ExperienceRecord`, `MeasurementRecord`, semantic
+validity, commit evidence, silicon performance, energy evidence, or active
+retrieval input. Serial authenticity, crash-spanning exactly-once delivery,
+cross-boot uniqueness, and real Daphnis telemetry remain unimplemented.
+
 ## Executable track B: bounded Experience seed
 
 Python標準ライブラリだけで、次の閉ループがあります。
@@ -245,8 +261,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 56
-tests. On 2026-08-11 all 56 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 61
+tests. On 2026-08-11 all 61 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

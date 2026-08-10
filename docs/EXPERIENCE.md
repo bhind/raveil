@@ -1,7 +1,7 @@
 # Experience model
 
 Status: architecture plus a minimal implemented subset
-Last updated: 2026-08-08
+Last updated: 2026-08-11
 
 ## Purpose
 
@@ -28,6 +28,12 @@ exact reuse
 
 The current Python seed implements only append-only JSONL cold evidence and a
 fixed-size in-memory episodic set.
+
+ADR-0022 adds a second, deliberately segregated cold journal for consumed
+completion telemetry. It is hash chained and auditable but is not loaded by
+`ExperienceStore`, consolidated, retrieved, or treated as Context/Candidate
+measurement evidence. Promotion requires later semantic, measurement, commit,
+and provenance gates.
 
 Consolidation should preserve candidate ranking, ranking reversal, failure
 boundaries, negative transfer conditions, uncertainty, lineage, and Pareto

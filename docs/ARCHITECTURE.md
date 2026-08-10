@@ -93,6 +93,12 @@ ledger that issues and checks epoch/sequence/cookie bindings once. It is
 single-hart kernel memory, not a U-mode or Linux interface and not a Daphnis
 device. Object version publication still belongs to the later commit boundary.
 
+ADR-0022 routes consumed completion observations through a bounded UART adapter
+into a segregated append-only cold telemetry journal. The QEMU adapter fixes
+the evidence class to emulation and host provenance surrounds, rather than
+trusts, guest fields. This journal is outside active Experience retrieval and
+does not establish semantics, commit, energy, or hardware performance.
+
 ## Named components
 
 | Formal component name | Short name | Responsibility |

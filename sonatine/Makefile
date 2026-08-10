@@ -81,6 +81,7 @@ smoke: $(TARGET)
 	grep -q 'u-shell resumed task=1' $(BUILD)/smoke.log
 	grep -q '\[ok\] VFS / immutable initramfs + bounded RamFS' $(BUILD)/smoke.log
 	grep -q '\[ok\] Daphnis contract / object table + bounded rings + replay guard' $(BUILD)/smoke.log
+	test "$$(grep -c '^RAVEIL-COMPLETION-V1 ' $(BUILD)/smoke.log)" -eq 1
 	test "$$(grep -c 'u-vfs read=hello write-readback=OK' $(BUILD)/smoke.log)" -eq 2
 	grep -q 'kernel-file initramfs=DENIED' $(BUILD)/smoke.log
 	grep -q 'kernel-file rights=DENIED' $(BUILD)/smoke.log
@@ -90,6 +91,14 @@ smoke: $(TARGET)
 	grep -q 'u-ipc send=OK receive=OK' $(BUILD)/smoke.log
 	grep -q 'u-cmd ticks=ok' $(BUILD)/smoke.log
 	grep -q 'u-shell exit task=1' $(BUILD)/smoke.log
+	rm -f $(BUILD)/completion-telemetry.jsonl
+	cd .. && python3 -m raveil experience ingest-completions \
+	  --input sonatine/$(BUILD)/smoke.log \
+	  --store sonatine/$(BUILD)/completion-telemetry.jsonl --run-id qemu-smoke
+	cd .. && python3 -m raveil experience ingest-completions \
+	  --input sonatine/$(BUILD)/smoke.log \
+	  --store sonatine/$(BUILD)/completion-telemetry.jsonl --run-id qemu-smoke | \
+	  grep -q 'appended=0'
 
 debug:
 	$(MAKE) DEBUG=1 debug-server

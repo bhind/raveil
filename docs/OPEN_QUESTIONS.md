@@ -12,6 +12,9 @@ resolves it.
   boot-scoped, kernel-owned ObjectManifest table and ring seed. Persistent
   object lifecycle, graph encoding, memory consistency, exception semantics,
   reset uniqueness, and device transport remain open.
+- ADR-0022 fixes QEMU completion ingestion as segregated cold evidence. What
+  acknowledgement/retry and durable boot identity are required for
+  crash-spanning exactly-once real-device telemetry remain open.
 - Which dependencies and alias facts can admission prove without making compile
   or verification cost impractical?
 - Where is the measured boundary between static, elastic dataflow, stream, and

@@ -9,6 +9,7 @@ import sys
 from . import __version__
 from .backend import ToyDaphnis
 from .experience import ExperienceStore
+from .completion_telemetry import CompletionTelemetryStore
 from .model import Context, seed_candidates
 from .policy import NearestExperiencePolicy, Tuner, TuningResult
 from .experiment_schema import BenchmarkManifest
@@ -115,6 +116,25 @@ def command_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_completion_ingest(args: argparse.Namespace) -> int:
+    store = CompletionTelemetryStore(Path(args.store))
+    appended = store.ingest_qemu_log(Path(args.input), args.run_id)
+    print(f"completion-telemetry appended={appended} total={len(store.load())}")
+    return 0
+
+
+def command_completion_inspect(args: argparse.Namespace) -> int:
+    records = CompletionTelemetryStore(Path(args.store)).load()
+    print(f"completion-telemetry total={len(records)}")
+    for record in records:
+        print(
+            f"seq={record.sequence} run={record.run_id} job={record.job_id} "
+            f"execution={record.execution_epoch}:{record.execution_sequence} "
+            f"status={record.observed_status} evidence={record.evidence_class}"
+        )
+    return 0
+
+
 def command_experiment_run(args: argparse.Namespace) -> int:
     bundle, valid = run_experiment(
         Path(args.manifest),
@@ -214,6 +234,25 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("--active-limit", type=int, default=64)
     inspect.set_defaults(handler=command_inspect)
 
+    experience = subparsers.add_parser(
+        "experience", help="manage segregated append-only Experience evidence"
+    )
+    experience_commands = experience.add_subparsers(
+        dest="experience_command", required=True
+    )
+    completion_ingest = experience_commands.add_parser(
+        "ingest-completions", help="ingest Sonatine QEMU completion telemetry"
+    )
+    completion_ingest.add_argument("--input", required=True)
+    completion_ingest.add_argument("--store", required=True)
+    completion_ingest.add_argument("--run-id", required=True)
+    completion_ingest.set_defaults(handler=command_completion_ingest)
+    completion_inspect = experience_commands.add_parser(
+        "inspect-completions", help="inspect completion cold evidence"
+    )
+    completion_inspect.add_argument("--store", required=True)
+    completion_inspect.set_defaults(handler=command_completion_inspect)
+
     experiment = subparsers.add_parser("experiment", help="run and preserve Gate experiments")
     experiment_commands = experiment.add_subparsers(dest="experiment_command", required=True)
 
@@ -264,6 +303,6 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return args.handler(args)
-    except (FileExistsError, FileNotFoundError, RuntimeError, ValueError) as error:
+    except (FileExistsError, FileNotFoundError, OSError, RuntimeError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

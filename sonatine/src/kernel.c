@@ -1,5 +1,6 @@
 #include "capability.h"
 #include "console.h"
+#include "completion_telemetry.h"
 #include "context.h"
 #include "ipc.h"
 #include "job_authority.h"
@@ -28,6 +29,7 @@ static void boot_fail(const char *subsystem) {
 }
 
 static bool job_contract_smoke(void) {
+  const uint64_t started=*(volatile uint64_t *)QEMU_CLINT_MTIME;
   struct raveil_object_manifest_v1 object={0};
   object.magic=RAVEIL_OBJECT_MANIFEST_MAGIC;
   object.schema_version=RAVEIL_OBJECT_MANIFEST_V1;
@@ -53,9 +55,13 @@ static bool job_contract_smoke(void) {
   completion.execution_sequence=issued.execution_sequence;
   for(size_t index=0;index<16u;++index)
     completion.completion_cookie[index]=issued.completion_cookie[index];
-  return job_completion_post(&completion) && !job_completion_post(&completion) &&
-         job_completion_take(&taken) && !job_completion_take(&taken) &&
-         job_inflight_count()==0u;
+  if(!job_completion_post(&completion) || job_completion_post(&completion) ||
+     !job_completion_take(&taken) || job_completion_take(&taken) ||
+     job_inflight_count()!=0u) return false;
+  const uint64_t finished=*(volatile uint64_t *)QEMU_CLINT_MTIME;
+  if(finished<=started) return false;
+  completion_telemetry_emit(&taken,finished-started);
+  return true;
 }
 
 void kmain(void) {

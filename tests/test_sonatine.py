@@ -22,6 +22,7 @@ class SonatineSourceTests(unittest.TestCase):
             "src/capability.c",
             "src/task.c",
             "src/ipc.c",
+            "src/completion_telemetry.c",
             "src/timer.c",
             "src/shell.c",
             "link.ld",
@@ -52,6 +53,8 @@ class SonatineSourceTests(unittest.TestCase):
         self.assertIn("context_switch_smoke", kernel)
         self.assertIn("context_preemption_configure", kernel)
         self.assertIn("context_start_user", kernel)
+        self.assertLess(kernel.index("job_completion_take(&taken)"),
+                        kernel.index("completion_telemetry_emit(&taken"))
         user_entry = (SONATINE / "src/user_entry.S").read_text(encoding="utf-8")
         for boundary in ("mret", "mscratch", "user_trap_entry", "user_payload_start"):
             self.assertIn(boundary, user_entry)
