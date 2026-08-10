@@ -53,7 +53,9 @@ bool context_preemption_configure(uint16_t init_task, uint16_t idle_task,
                                   cap_handle_t clock_cap,
                                   cap_handle_t endpoint_cap,
                                   cap_handle_t wrong_owner_cap,
-                                  cap_handle_t send_only_cap) {
+                                  cap_handle_t send_only_cap,
+                                  cap_handle_t filesystem_cap,
+                                  cap_handle_t filesystem_read_cap) {
   init_id=init_task; idle_id=idle_task;
   user_frame=frame_at_top(user_kernel_stack);
   preempt_idle_frame=frame_at_top(preempt_idle_stack);
@@ -66,6 +68,8 @@ bool context_preemption_configure(uint16_t init_task, uint16_t idle_task,
   trap_set_gpr(user_frame,18u,endpoint_cap);
   trap_set_gpr(user_frame,19u,wrong_owner_cap);
   trap_set_gpr(user_frame,20u,send_only_cap);
+  trap_set_gpr(user_frame,21u,filesystem_cap);
+  trap_set_gpr(user_frame,22u,filesystem_read_cap);
   preempt_idle_frame->mepc=(uintptr_t)&preempt_idle_entry;
   preempt_idle_frame->mstatus=TRAP_MSTATUS_MPP_M|TRAP_MSTATUS_MPIE;
   trap_set_gpr(preempt_idle_frame,2u,

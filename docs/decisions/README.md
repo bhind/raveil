@@ -22,3 +22,4 @@ rewrite it.
 | [ADR-0015](ADR-0015-attenuated-leaf-capability-delegation.md) | Accepted | Gate 2 delegates only attenuated, non-recursive leaf capabilities |
 | [ADR-0016](ADR-0016-contain-user-faults-and-reject-timer-reentry.md) | Accepted | Contain U-mode faults and reject nested timer dispatch |
 | [ADR-0017](ADR-0017-current-task-bound-user-syscalls.md) | Accepted | Persistent U-mode syscalls derive authority from the current task |
+| [ADR-0018](ADR-0018-pointer-free-bounded-vfs-seed.md) | Accepted | Bounded pointer-free VFS seed |

@@ -93,6 +93,9 @@ RamFS/initramfs, then—after the isolation/scheduling base is credible—VirtIO
 block and a simple persistent filesystem such as FAT32. This is a staged
 direction, not an implemented feature or production-OS compatibility promise.
 
+T-0017 supplies the first step as a bounded two-node, pointer-free VFS seed.
+VirtIO and persistent storage remain T-0018.
+
 ## Gate 3 — connect authority and evidence
 
 State: **Planned**

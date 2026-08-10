@@ -153,6 +153,8 @@ user_shell_payload_start:
   beq a0, t0, 7f
   li t0, 't'
   beq a0, t0, 8f
+  li t0, 'f'
+  beq a0, t0, 15f
   li t0, 'x'
   beq a0, t0, 9f
   j 4b
@@ -170,8 +172,6 @@ user_shell_payload_start:
   li ra, -1
   li gp, -1
   li tp, -1
-  mv s5, sp
-  li s6, -1
   li s7, -1
   li s8, -1
   li s9, -1
@@ -201,8 +201,6 @@ user_shell_payload_start:
   bne gp, t1, 13f
   li a2, 4
   bne tp, t1, 13f
-  li a2, 22
-  bne s6, t1, 13f
   li a2, 23
   bne s7, t1, 13f
   li a2, 24
@@ -223,8 +221,6 @@ user_shell_payload_start:
   bne t5, t1, 13f
   li a2, 31
   bne t6, t1, 13f
-  li a2, 2
-  bne sp, s5, 13f
   li a2, -1
   bne a0, t1, 14f
   bne a1, t1, 14f
@@ -287,6 +283,41 @@ user_shell_payload_start:
   li a7, 15
   ecall
   j .
+15:
+  mv a0, s5
+  li a1, 1
+  li a7, 17
+  ecall
+  li t0, 'h'
+  bne a0, t0, 12f
+  mv a0, s5
+  li a1, (88 << 24) | 1
+  li a7, 18
+  ecall
+  li t0, -1
+  bne a0, t0, 12f
+  mv a0, s6
+  li a1, (82 << 24) | 2
+  li a7, 18
+  ecall
+  li t0, -1
+  bne a0, t0, 12f
+  mv a0, s5
+  li a1, (82 << 24) | 2
+  li a7, 18
+  ecall
+  bnez a0, 12f
+  mv a0, s5
+  li a1, 2
+  li a7, 17
+  ecall
+  li t0, 'R'
+  bne a0, t0, 12f
+  mv a0, s0
+  li a1, 13
+  li a7, 10
+  ecall
+  j 3b
 12:
   unimp
   j .

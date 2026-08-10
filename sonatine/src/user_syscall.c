@@ -7,6 +7,7 @@
 #include "platform.h"
 #include "task.h"
 #include "timer.h"
+#include "vfs.h"
 
 #define SYS_LOG 10u
 #define SYS_GETC 11u
@@ -15,6 +16,8 @@
 #define SYS_IPC_RECEIVE 14u
 #define SYS_EXIT 15u
 #define SYS_CAP_PROBE 16u
+#define SYS_FS_READ 17u
+#define SYS_FS_WRITE 18u
 
 #define SYS_OK 0u
 #define SYS_DENIED ((uint64_t)-1)
@@ -48,6 +51,7 @@ static void log_event(uint64_t event,uint64_t detail,uint64_t value) {
       console_write_dec(detail); console_write(" value=");
       console_write_hex(value); console_write("\n"); break;
     case 12u: console_write("u-context mismatch=argument-register\n"); break;
+    case 13u: console_write("u-vfs read=hello write-readback=OK\n"); break;
     default: console_write("u-log invalid\n"); break;
   }
 }
@@ -91,6 +95,28 @@ uintptr_t user_syscall_dispatch(struct trap_frame *frame) {
                              "kernel-cap escalation=DENIED\n");
       result=SYS_OK;
     } else result=SYS_INVALID;
+  } else if(number==SYS_FS_READ) {
+    struct cap_view root;
+    if(!cap_resolve(current,(cap_handle_t)arg0,CAP_OBJECT_FILESYSTEM,
+                    CAP_RIGHT_READ,&root) || root.object_id!=VFS_ROOT_OBJECT) {
+      result=SYS_DENIED;
+    } else {
+      uint8_t value;
+      enum vfs_result read=vfs_read((uint32_t)(arg1&0xffu),
+                                    (size_t)((arg1>>8u)&0xffffu),&value);
+      result=read==VFS_OK?value:SYS_INVALID;
+    }
+  } else if(number==SYS_FS_WRITE) {
+    struct cap_view root;
+    if(!cap_resolve(current,(cap_handle_t)arg0,CAP_OBJECT_FILESYSTEM,
+                    CAP_RIGHT_WRITE,&root) || root.object_id!=VFS_ROOT_OBJECT) {
+      console_write("kernel-file rights=DENIED\n"); result=SYS_DENIED;
+    } else {
+      enum vfs_result wrote=vfs_write((uint32_t)(arg1&0xffu),
+          (size_t)((arg1>>8u)&0xffffu),(uint8_t)(arg1>>24u));
+      if(wrote==VFS_DENIED) console_write("kernel-file initramfs=DENIED\n");
+      result=wrote==VFS_OK?SYS_OK:wrote==VFS_DENIED?SYS_DENIED:SYS_INVALID;
+    }
   } else if(number==SYS_EXIT && current==context_user_task()) {
     (void)task_stop(current);
     console_write("u-shell exit task=1\n");

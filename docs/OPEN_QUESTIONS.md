@@ -50,7 +50,9 @@ resolves it.
 ## Kernel and platform
 
 - Parse the QEMU device tree or retain an explicit fixed-machine contract?
-- Which minimal VFS/RamFS/initramfs interface should precede VirtIO/FAT32?
+- ADR-0018 fixes the pre-VirtIO seed as two bounded root nodes, pointer-free
+  scalar I/O, immutable initramfs, and volatile RamFS. Arbitrary paths,
+  copyin/copyout, and per-node authority remain future design.
 - ADR-0015 fixes Gate 2 delegation as attenuated, non-recursive leaf grants.
   ADR-0016 retires a flat capability slot before its generation can wrap.
   Which derivation-tree, cascading-revocation, and endpoint object-lifetime

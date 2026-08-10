@@ -41,8 +41,12 @@ cap_handle_t cap_create(uint16_t owner_task, uint16_t object_type,
                               CAP_RIGHT_SEND | CAP_RIGHT_RECEIVE |
                               CAP_RIGHT_CONTROL;
   if (owner_task == 0u || object_type == CAP_OBJECT_NONE ||
-      object_type > CAP_OBJECT_CLOCK || object_id == 0u || rights == 0u ||
+      object_type > CAP_OBJECT_FILESYSTEM || object_id == 0u || rights == 0u ||
       (rights & ~all_rights) != 0u) {
+    return 0u;
+  }
+  if (object_type == CAP_OBJECT_FILESYSTEM &&
+      (rights & ~(CAP_RIGHT_READ | CAP_RIGHT_WRITE)) != 0u) {
     return 0u;
   }
   for (size_t index = 0; index < CAP_TABLE_SIZE; ++index) {

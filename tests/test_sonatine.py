@@ -152,6 +152,20 @@ class SonatineSourceTests(unittest.TestCase):
             ], check=True)
             subprocess.run([str(executable)], check=True)
 
+    def test_vfs_ramfs_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "sonatine-vfs-host-test"
+            subprocess.run([
+                compiler, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                f"-I{SONATINE / 'include'}",
+                str(ROOT / "tests/sonatine_vfs_host_test.c"),
+                str(SONATINE / "src/vfs.c"), "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+
     def test_freestanding_c_sources_are_syntax_clean(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:

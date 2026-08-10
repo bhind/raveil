@@ -9,6 +9,7 @@
 #include "timer.h"
 #include "vm.h"
 #include "user.h"
+#include "vfs.h"
 
 static void boot_ok(const char *subsystem) {
   console_write("  [ok] ");
@@ -70,6 +71,7 @@ void kmain(void) {
   boot_ok("context switch / independent idle stack");
 
   ipc_init();
+  vfs_init();
   const uint32_t endpoint = ipc_endpoint_create(init_task);
   const cap_handle_t endpoint_cap = cap_create(
       init_task, CAP_OBJECT_ENDPOINT, endpoint,
@@ -84,19 +86,27 @@ void kmain(void) {
       idle_task, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
   const cap_handle_t send_only_cap = cap_create(
       init_task, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
+  const cap_handle_t filesystem_cap = cap_create(
+      init_task, CAP_OBJECT_FILESYSTEM, VFS_ROOT_OBJECT,
+      CAP_RIGHT_READ | CAP_RIGHT_WRITE);
+  const cap_handle_t filesystem_read_cap = cap_create(
+      init_task, CAP_OBJECT_FILESYSTEM, VFS_ROOT_OBJECT, CAP_RIGHT_READ);
   if (endpoint == 0u || endpoint_cap == 0u || task_cap == 0u ||
       console_cap == 0u || clock_cap == 0u || wrong_owner_cap == 0u ||
-      send_only_cap == 0u) {
+      send_only_cap == 0u || filesystem_cap == 0u ||
+      filesystem_read_cap == 0u) {
     boot_fail("IPC");
   }
   boot_ok("IPC / bounded mailbox protected by capabilities");
+  boot_ok("VFS / immutable initramfs + bounded RamFS");
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");
   if (!context_preemption_configure(
           init_task,idle_task,SONATINE_USER_BASE+user_shell_offset(),
           SONATINE_USER_BASE+2u*SONATINE_PAGE_SIZE,console_cap,clock_cap,
-          endpoint_cap,wrong_owner_cap,send_only_cap)) {
+          endpoint_cap,wrong_owner_cap,send_only_cap,filesystem_cap,
+          filesystem_read_cap)) {
     boot_fail("persistent U-mode context");
   }
   boot_ok("persistent U-mode shell / current-task syscall identity");

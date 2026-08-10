@@ -11,7 +11,9 @@ bool context_preemption_configure(uint16_t init_task, uint16_t idle_task,
                                   cap_handle_t clock_cap,
                                   cap_handle_t endpoint_cap,
                                   cap_handle_t wrong_owner_cap,
-                                  cap_handle_t send_only_cap);
+                                  cap_handle_t send_only_cap,
+                                  cap_handle_t filesystem_cap,
+                                  cap_handle_t filesystem_read_cap);
 void context_start_user(void) __attribute__((noreturn));
 uint64_t context_preemption_count(void);
 uint16_t context_user_task(void);

@@ -71,6 +71,9 @@ Implemented:
   nonempty attenuated rights and independent generation-checked revocation;
 - kernel-derived smoke evidence for forged, wrong-owner, and send-only receive
   capability rejection, followed by a valid endpoint round trip;
+- a two-node VFS with immutable initramfs `/hello`, volatile bounded RamFS
+  `/scratch`, filesystem root capabilities, and pointer-free byte I/O from the
+  persistent U-mode shell before and after CLINT preemption;
 - fail-closed capability generation exhaustion that retires a slot instead of
   wrapping an old handle back into validity;
 - CLINT 100 Hz machine timerとinteger register trap frame;
@@ -197,8 +200,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 52
-tests. On 2026-08-10 all 52 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 53
+tests. On 2026-08-10 all 53 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

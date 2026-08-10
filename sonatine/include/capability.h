@@ -13,7 +13,8 @@ enum cap_object_type {
   CAP_OBJECT_ENDPOINT = 2,
   CAP_OBJECT_FRAME = 3,
   CAP_OBJECT_CONSOLE = 4,
-  CAP_OBJECT_CLOCK = 5
+  CAP_OBJECT_CLOCK = 5,
+  CAP_OBJECT_FILESYSTEM = 6
 };
 
 enum cap_rights {

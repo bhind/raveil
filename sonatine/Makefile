@@ -61,7 +61,7 @@ run: $(TARGET)
 	$(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET)
 
 smoke: $(TARGET)
-	printf 'i\rs\rc\rt\rx\r' | \
+	printf 'i\rf\rs\rf\rc\rt\rx\r' | \
 	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
 	  tee $(BUILD)/smoke.log
 	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
@@ -74,6 +74,10 @@ smoke: $(TARGET)
 	grep -q 'clint-preempt from=2 to=1' $(BUILD)/smoke.log
 	grep -q 'u-context register-frame=ok task=1' $(BUILD)/smoke.log
 	grep -q 'u-shell resumed task=1' $(BUILD)/smoke.log
+	grep -q '\[ok\] VFS / immutable initramfs + bounded RamFS' $(BUILD)/smoke.log
+	test "$$(grep -c 'u-vfs read=hello write-readback=OK' $(BUILD)/smoke.log)" -eq 2
+	grep -q 'kernel-file initramfs=DENIED' $(BUILD)/smoke.log
+	grep -q 'kernel-file rights=DENIED' $(BUILD)/smoke.log
 	grep -q 'kernel-cap forged=DENIED' $(BUILD)/smoke.log
 	grep -q 'kernel-cap wrong-owner=DENIED' $(BUILD)/smoke.log
 	grep -q 'kernel-cap escalation=DENIED' $(BUILD)/smoke.log

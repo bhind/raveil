@@ -97,6 +97,7 @@ int main(void) {
 
   cap_init();
   assert(cap_create(init, CAP_OBJECT_ENDPOINT, endpoint, 1u << 31u) == 0u);
+  assert(cap_create(init, CAP_OBJECT_FILESYSTEM, 1u, CAP_RIGHT_SEND) == 0u);
   cap_handle_t cycling = cap_create(
       init, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
   const cap_handle_t oldest = cycling;

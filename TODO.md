@@ -150,7 +150,7 @@ only after a short pilot demonstrates candidate separation.
   and command before and after preemption plus denied forged, wrong-owner, and
   rights-escalation attempts. Define the syscall ABI, task lifecycle, trap
   ownership, and scheduler boundary in ADR-0017 before implementation closure.
-- [ ] **T-0017** Add a minimal VFS plus RamFS/initramfs after the isolation and
+- [x] **T-0017** Add a minimal VFS plus RamFS/initramfs after the isolation and
   scheduling base is credible.
 - [ ] **T-0018** Add VirtIO block and evaluate a simple persistent filesystem
   such as FAT32; keep production-OS compatibility out of this gate.
