@@ -48,6 +48,10 @@ class SonatineSourceTests(unittest.TestCase):
         kernel = (SONATINE / "src/kernel.c").read_text(encoding="utf-8")
         for subsystem in ("physical memory", "capability", "task", "IPC", "timer"):
             self.assertIn(subsystem, kernel)
+        self.assertIn("starting U-mode init", kernel)
+        user_entry = (SONATINE / "src/user_entry.S").read_text(encoding="utf-8")
+        for boundary in ("mret", "mscratch", "user_trap_entry", "user_payload_start"):
+            self.assertIn(boundary, user_entry)
 
     def test_makefile_has_isolated_debug_build(self) -> None:
         makefile = (SONATINE / "Makefile").read_text(encoding="utf-8")

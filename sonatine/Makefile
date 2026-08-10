@@ -65,6 +65,7 @@ smoke: $(TARGET)
 	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
 	  tee $(BUILD)/smoke.log
 	grep -q 'raveil>' $(BUILD)/smoke.log
+	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
 	grep -q 'ipc: received' $(BUILD)/smoke.log
 
 debug:

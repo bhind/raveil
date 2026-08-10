@@ -134,7 +134,9 @@ only after a short pilot demonstrates candidate separation.
 - [x] **T-0010** Parse or deliberately constrain the QEMU device tree instead of
   silently assuming all platform properties.
 - [x] **T-0011** Implement Sv39 address spaces and explicit kernel/user mappings.
-- [ ] **T-0012** Move `init` to U-mode.
+- [x] **T-0012** Move the minimal `init` bootstrap to U-mode behind an `ecall`
+  boundary. The interactive diagnostic shell remains in M-mode until the
+  scheduling/fault slices can keep it observable as a user task.
 - [ ] **T-0013** Implement context switch between `init` and `idle`.
 - [ ] **T-0014** Make the CLINT timer drive preemption.
 - [ ] **T-0015** Add blocking IPC semantics and capability delegation tests.

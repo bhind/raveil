@@ -7,6 +7,7 @@
 #include "task.h"
 #include "timer.h"
 #include "vm.h"
+#include "user.h"
 
 static void boot_ok(const char *subsystem) {
   console_write("  [ok] ");
@@ -36,12 +37,19 @@ void kmain(void) {
   }
   boot_ok("physical memory / 4 KiB bitmap allocator");
 
-  void *user_page = phys_alloc_page();
-  if (user_page == NULL || !vm_init((uintptr_t)user_page)) {
+  void *user_code = phys_alloc_page();
+  void *user_stack = phys_alloc_page();
+  if (user_code == NULL || user_stack == NULL ||
+      !vm_init((uintptr_t)user_code, (uintptr_t)user_stack) ||
+      !user_init_prepare((uintptr_t)user_code)) {
     boot_fail("Sv39 address space");
   }
   vm_activate();
   boot_ok("Sv39 / supervisor kernel map + user window");
+
+  console_write("starting U-mode init: ");
+  user_init_enter();
+  boot_ok("U-mode init / ecall boundary");
 
   cap_init();
   boot_ok("capability / generation-checked fixed table");

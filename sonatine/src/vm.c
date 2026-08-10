@@ -19,9 +19,10 @@ static uint64_t user_l0[PTE_COUNT] __attribute__((aligned(SONATINE_PAGE_SIZE)));
 static uint64_t table_pte(const uint64_t *table) { return (((uintptr_t)table>>12)<<10)|PTE_V; }
 static uint64_t leaf_pte(uintptr_t pa,uint64_t flags) { return ((pa>>12)<<10)|flags|PTE_V|PTE_A|PTE_D; }
 static void clear(uint64_t *table) { for(size_t i=0;i<PTE_COUNT;++i)table[i]=0u; }
-bool vm_init(uintptr_t user_page) {
-  if ((user_page&(SONATINE_PAGE_SIZE-1u))!=0u || user_page<QEMU_RAM_BASE ||
-      user_page>=QEMU_RAM_BASE+QEMU_RAM_SIZE) return false;
+bool vm_init(uintptr_t code_page, uintptr_t stack_page) {
+  if ((code_page&(SONATINE_PAGE_SIZE-1u))!=0u || (stack_page&(SONATINE_PAGE_SIZE-1u))!=0u ||
+      code_page<QEMU_RAM_BASE || code_page>=QEMU_RAM_BASE+QEMU_RAM_SIZE ||
+      stack_page<QEMU_RAM_BASE || stack_page>=QEMU_RAM_BASE+QEMU_RAM_SIZE || code_page==stack_page) return false;
   clear(root); clear(kernel_l1); clear(user_l1); clear(user_l0);
   root[(QEMU_RAM_BASE>>30)&0x1ffu]=table_pte(kernel_l1);
   for(size_t i=0;i<QEMU_RAM_SIZE/(2u*1024u*1024u);++i) {
@@ -32,7 +33,8 @@ bool vm_init(uintptr_t user_page) {
   size_t v1=(SONATINE_USER_BASE>>21)&0x1ffu;
   size_t v0=(SONATINE_USER_BASE>>12)&0x1ffu;
   root[v2]=table_pte(user_l1); user_l1[v1]=table_pte(user_l0);
-  user_l0[v0]=leaf_pte(user_page,PTE_R|PTE_W|PTE_U);
+  user_l0[v0]=leaf_pte(code_page,PTE_R|PTE_X|PTE_U);
+  user_l0[v0+1u]=leaf_pte(stack_page,PTE_R|PTE_W|PTE_U);
   return true;
 }
 void vm_activate(void) {

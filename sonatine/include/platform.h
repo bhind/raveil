@@ -34,6 +34,14 @@ static inline void csr_set_mstatus(uint64_t bits) {
   __asm__ volatile("csrs mstatus, %0" : : "r"(bits));
 }
 
+static inline void pmp_allow_user_ram(void) {
+  /* 128 MiB naturally aligned NAPOT region at 0x80000000, R/W/X. Sv39 PTEs
+     remain the finer-grained authority and do not expose MMIO to U-mode. */
+  const uint64_t address = (QEMU_RAM_BASE >> 2) | (QEMU_RAM_SIZE / 2u - 1u);
+  const uint64_t config = 0x1fu;
+  __asm__ volatile("csrw pmpaddr0, %0\ncsrw pmpcfg0, %1" : : "r"(address), "r"(config));
+}
+
 static inline void cpu_relax(void) {
   __asm__ volatile("nop");
 }

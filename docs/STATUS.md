@@ -34,6 +34,10 @@ Implemented:
 - Sv39 page-table construction with a supervisor-only 128 MiB kernel identity
   map, an explicit non-executable user window, page-walk validation, and an
   aligned `satp` root; current M-mode execution does not yet enforce the maps;
+- a minimal U-mode `init` bootstrap copied into separate U/R/X code and U/R/W
+  stack pages, RAM-only PMP admission, kernel-stack trap entry through
+  `mscratch`, and character/exit `ecall` handling; the diagnostic shell still
+  runs in M-mode after the bootstrap returns;
 - `.bss` initializationと16 KiB boot stack;
 - NS16550A polled console;
 - 4 KiB bitmap physical-page allocator;
@@ -53,8 +57,7 @@ Implemented:
 
 Not implemented:
 
-- S/U privilege transition and enforcement of the constructed Sv39 maps;
-- U-mode isolation;
+- persistent U-mode shell/task execution and S-mode kernel execution;
 - PMP policy;
 - real task context switching and preemption;
 - blocking scheduler semantics;
