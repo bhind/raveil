@@ -127,6 +127,20 @@ class SonatineSourceTests(unittest.TestCase):
             check=True,
         )
 
+    def test_sv39_mapping_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "sonatine-vm-host-test"
+            subprocess.run([
+                compiler, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                f"-I{SONATINE / 'include'}",
+                str(ROOT / "tests/sonatine_vm_host_test.c"),
+                str(SONATINE / "src/vm.c"), "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+
 
 if __name__ == "__main__":
     unittest.main()

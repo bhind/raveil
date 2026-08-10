@@ -6,6 +6,7 @@
 #include "shell.h"
 #include "task.h"
 #include "timer.h"
+#include "vm.h"
 
 static void boot_ok(const char *subsystem) {
   console_write("  [ok] ");
@@ -34,6 +35,13 @@ void kmain(void) {
     boot_fail("physical memory");
   }
   boot_ok("physical memory / 4 KiB bitmap allocator");
+
+  void *user_page = phys_alloc_page();
+  if (user_page == NULL || !vm_init((uintptr_t)user_page)) {
+    boot_fail("Sv39 address space");
+  }
+  vm_activate();
+  boot_ok("Sv39 / supervisor kernel map + user window");
 
   cap_init();
   boot_ok("capability / generation-checked fixed table");

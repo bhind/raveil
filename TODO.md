@@ -133,7 +133,7 @@ only after a short pilot demonstrates candidate separation.
 
 - [x] **T-0010** Parse or deliberately constrain the QEMU device tree instead of
   silently assuming all platform properties.
-- [ ] **T-0011** Implement Sv39 address spaces and explicit kernel/user mappings.
+- [x] **T-0011** Implement Sv39 address spaces and explicit kernel/user mappings.
 - [ ] **T-0012** Move `init` to U-mode.
 - [ ] **T-0013** Implement context switch between `init` and `idle`.
 - [ ] **T-0014** Make the CLINT timer drive preemption.

@@ -31,6 +31,9 @@ Implemented:
 - versioned `qemu-virt-rv64-v1` platform contract with pinned QEMU `virt`,
   `rv64` CPU, 128 MiB RAM, one hart, no firmware, and compile/test assertions
   tying the fixed MMIO/RAM assumptions to the launch configuration;
+- Sv39 page-table construction with a supervisor-only 128 MiB kernel identity
+  map, an explicit non-executable user window, page-walk validation, and an
+  aligned `satp` root; current M-mode execution does not yet enforce the maps;
 - `.bss` initializationと16 KiB boot stack;
 - NS16550A polled console;
 - 4 KiB bitmap physical-page allocator;
@@ -50,7 +53,7 @@ Implemented:
 
 Not implemented:
 
-- Sv39 page tables;
+- S/U privilege transition and enforcement of the constructed Sv39 maps;
 - U-mode isolation;
 - PMP policy;
 - real task context switching and preemption;
