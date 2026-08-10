@@ -93,7 +93,8 @@ Gate 1 measurement infrastructure is also implemented:
 - an optional, command-recorded between-workload cooldown that idles for a
   configured minimum and requires two consecutive valid thermal preflights;
   measurement-window thermal changes still fail closed and cooldown evidence is
-  appended to the run bundle;
+  appended to the run bundle; the same recovery boundary follows backend
+  preparation before the first measurement;
 - paired-bootstrap, latency/energy HCR, joint NTR, full-history quality-gap,
   active-memory, equal-budget, and retrieval-p95 analysis functions;
 - repetition-aware hierarchical-bootstrap sensitivity intervals, per-candidate

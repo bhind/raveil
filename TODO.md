@@ -116,6 +116,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   minimum idle period plus two consecutive valid powermetrics preflights before
   the next workload, bound the maximum wait, and record every observation and
   command parameter in the mutable run bundle.
+  Apply the same boundary after backend compilation/database preparation and
+  before the first measurement so TVM setup heat cannot enter its first window.
 - [x] **T-0082** Keep recorded compile/prepare commands logical and portable.
   A completed independent run initially failed sealing because the native
   compile tuple contained absolute bundle paths; record repository-relative

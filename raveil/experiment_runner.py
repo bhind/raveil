@@ -291,6 +291,17 @@ def run_experiment(
             "cooldown_max_seconds": cooldown_max_seconds,
         },
     )
+    if manifest.energy.required and cooldown_seconds > 0:
+        observations = wait_for_thermal_recovery(
+            sampler,
+            minimum_seconds=cooldown_seconds,
+            maximum_seconds=cooldown_max_seconds,
+        )
+        for observation in observations:
+            bundle.append_jsonl(
+                "cooldown-observations.jsonl",
+                {"after_workload_id": "__backend_preparation__", **observation},
+            )
     sequence = 0
     all_valid = True
     for workload_index, workload in enumerate(manifest.workloads):
