@@ -43,7 +43,9 @@ failure is also preserved. A sealed and remotely verified 24-workload history
 source dataset and a first target policy comparison exist. The first target
 run failed the 5% latency/energy improvement and positive bootstrap-lower-bound
 criteria, so Gate 1 remains open pending independent confirmation and the TVM
-comparison. Compare cold prior, full-history nearest
+comparison. The independent fixed-C rerun confirmed zero median latency/energy
+improvement and additionally exceeded the NTR limit, so fixed-C now provides a
+reproduced negative conclusion rather than a passing result. Compare cold prior, full-history nearest
 neighbor, bounded Experience, FIFO, reservoir, and random under lineage, shape,
 working-set, and composition holdouts. Report latency/energy HCR, NTR, coverage,
 calibration, budget, retrieval cost, storage, and evidence class.

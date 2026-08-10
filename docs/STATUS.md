@@ -130,6 +130,11 @@ Gate 1 measurement infrastructure is also implemented:
   retained 64 versus 240 full-history summaries and reduced retrieval p95, but
   its cold-relative median latency and energy improvements were both zero, so
   the Gate improvement and bootstrap criteria did not pass;
+- a completed independent fixed-C target rerun with cooldown boundaries,
+  3,600/3,600 valid semantic and silicon measurements, all measurement windows
+  `Nominal`, a sealed and Google Drive-verified bundle, and the same zero median
+  latency/energy improvement conclusion; its joint NTR was 12.5%, so the fixed-C
+  Gate hypothesis failed independently;
 - a pinned official Apache TVM 0.25.0.post1 / TVM FFI 0.1.12 Apple Silicon
   adapter that lowers the same int32/int64 workload and candidate contracts,
   commits constrained schedules to a MetaSchedule JSON database, queries them
@@ -138,7 +143,7 @@ Gate 1 measurement infrastructure is also implemented:
 Not implemented or not yet evidenced:
 
 - real graph IR and equivalence proof;
-- an independent target rerun and a Gate-passing fixed-C policy result;
+- a Gate-passing fixed-C policy result;
 - system installation and post-`sudo -k` verification of the root-owned
   powermetrics helper and helper-only sudoers rule;
 - completed powermetrics datasets for the pinned TVM adapter;
@@ -151,8 +156,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 48
-tests. On 2026-08-10 all 48 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 49
+tests. On 2026-08-10 all 49 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

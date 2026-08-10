@@ -246,6 +246,13 @@ def run_experiment(
             warmups=manifest.warmups,
         )
         compile_command = backend.compile()
+        compile_record = [
+            compiler,
+            *manifest.compiler_flags,
+            manifest.source,
+            "-o",
+            "tools/native-benchmark",
+        ]
     else:
         from .tvm_backend import TVMMetaScheduleBackend
 
@@ -264,10 +271,11 @@ def run_experiment(
             "--manifest",
             "<tvm-manifest>",
         )
+        compile_record = list(compile_command)
     bundle.write_json(
         "commands.json",
         {
-            "compile_or_prepare": list(compile_command),
+            "compile_or_prepare": compile_record,
             "run": [
                 "python", "-m", "raveil", "experiment", "run", "--manifest", "<manifest>",
                 *(

@@ -289,3 +289,22 @@ a preregistered command-level cooldown for the next new RUN-ID: idle only
 between workloads, then require two consecutive valid preflights. It does not
 accept or continue a window observed at `Moderate`, alter candidate order or
 budget, or repair either incomplete bundle.
+
+The cooldown run `20260809T173110Z-24c6f4edc-ddb463a8` completed all 3,600
+records. All semantic checksums and measurements were valid, every measurement
+window was `Nominal`, and the minimum power-sample count was three. The 23
+between-workload boundaries each recorded two consecutive valid preflights.
+Bounded versus cold again produced zero median latency improvement and zero
+median estimated-energy improvement. Workload-level 95% intervals were
+`[0.0, 0.0]` and `[0.0, 0.0183270]`; hierarchical repetition sensitivity
+intervals were `[-0.0017599, 0.0010970]` and
+`[-0.0019059, 0.0246063]`. Joint NTR was `3/24 = 12.5%`, exceeding the 5%
+limit, while memory, retrieval, and full-history quality constraints remained
+satisfied. Energy CV was 20.1% median and 33.2% p95 across candidate/workload
+groups. This independently reproduces the fixed-C non-improvement conclusion
+and adds an NTR failure; it does not support the Gate performance hypothesis.
+
+The bundle was sealed as
+`ea97cedd20de73d0fc4fd96221df1569fb65706cb5ef53b172a4051e45517f10`
+and immutably verified at logical remote path
+`Raveil/research-data/EXP-0003/20260809T173110Z-24c6f4edc-ddb463a8`.

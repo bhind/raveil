@@ -116,6 +116,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   minimum idle period plus two consecutive valid powermetrics preflights before
   the next workload, bound the maximum wait, and record every observation and
   command parameter in the mutable run bundle.
+- [x] **T-0082** Keep recorded compile/prepare commands logical and portable.
+  A completed independent run initially failed sealing because the native
+  compile tuple contained absolute bundle paths; record repository-relative
+  source and bundle-relative output paths while retaining the actual tool and
+  flags, and normalize only the still-mutable command record before sealing.
 
 ## Next — turn Sonatine Microkernel seed into a real minimal microkernel slice
 
