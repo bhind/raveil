@@ -1,5 +1,6 @@
 #include "capability.h"
 #include "console.h"
+#include "context.h"
 #include "ipc.h"
 #include "memory.h"
 #include "platform.h"
@@ -61,6 +62,10 @@ void kmain(void) {
     boot_fail("task");
   }
   boot_ok("task / init + idle kernel tasks");
+  if (!context_switch_smoke(init_task, idle_task)) {
+    boot_fail("context switch");
+  }
+  boot_ok("context switch / independent idle stack");
 
   ipc_init();
   const uint32_t endpoint = ipc_endpoint_create(init_task);

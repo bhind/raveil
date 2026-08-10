@@ -43,6 +43,8 @@ Implemented:
 - 4 KiB bitmap physical-page allocator;
 - owner、type、rights、generationを持つ64-entry capability table;
 - `init`と`idle`のfixed kernel task records;
+- an RV64 callee-saved context frame and independent 4 KiB idle stack, with a
+  verified cooperative `init -> idle -> init` round trip;
 - capability-checked four-message IPC endpoint;
 - CLINT 100 Hz machine timerとinteger register trap frame;
 - `raveil>` shell;
@@ -59,7 +61,7 @@ Not implemented:
 
 - persistent U-mode shell/task execution and S-mode kernel execution;
 - PMP policy;
-- real task context switching and preemption;
+- timer-driven preemption of task contexts;
 - blocking scheduler semantics;
 - capability derivation/delegation;
 - device-tree memory discovery;
