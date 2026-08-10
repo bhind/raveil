@@ -23,6 +23,21 @@ void console_putc(char value) {
   uart[UART_THR] = (uint8_t)value;
 }
 
+char console_getc(void) {
+  while ((uart[UART_LSR] & UART_LSR_DATA_READY) == 0u) {
+    cpu_relax();
+  }
+  return (char)uart[UART_RHR];
+}
+
+bool console_try_getc(char *value) {
+  if ((uart[UART_LSR] & UART_LSR_DATA_READY) == 0u) {
+    return false;
+  }
+  *value = (char)uart[UART_RHR];
+  return true;
+}
+
 void console_write(const char *text) {
   while (*text != '\0') {
     if (*text == '\n') {

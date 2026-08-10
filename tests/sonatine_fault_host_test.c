@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include "timer_guard.h"
 #include "timer_dispatch.h"
@@ -23,6 +24,16 @@ static uintptr_t fake_select(uintptr_t frame, uintptr_t pc,
 }
 
 int main(void) {
+  assert(sizeof(struct trap_frame) == 272u);
+  assert(offsetof(struct trap_frame, mepc) == 248u);
+  assert(offsetof(struct trap_frame, mstatus) == 256u);
+  struct trap_frame full = {0};
+  for (unsigned reg = 1u; reg <= 31u; ++reg) {
+    trap_set_gpr(&full, reg, 0x8300u + reg);
+  }
+  for (unsigned reg = 1u; reg <= 31u; ++reg) {
+    assert(trap_get_gpr(&full, reg) == 0x8300u + reg);
+  }
   const uint64_t pc = 0x1000u;
   assert(user_trap_dispatch(8u, pc, 'x', 1u) == pc + 4u);
   assert(user_trap_dispatch(8u, pc, 0u, 2u) == 1u);

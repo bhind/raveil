@@ -115,9 +115,193 @@ user_fault_payload_start:
   li s9, -1
   li s10, -1
   li s11, -1
+  li t2, -1
+  li t3, -1
+  li t4, -1
+  li t5, -1
+  li t6, -1
+  li a0, -1
+  li a1, -1
+  li a2, -1
+  li a3, -1
+  li a4, -1
+  li a5, -1
+  li a6, -1
+  li a7, -1
   li gp, -1
   li tp, -1
   unimp
   j .
+.global user_shell_payload_start
+user_shell_payload_start:
+3:
+  mv a0, s0
+  li a1, 1
+  li a7, 10
+  ecall
+4:
+  mv a0, s0
+  li a7, 11
+  ecall
+  li t0, -3
+  beq a0, t0, 4b
+  li t0, 'i'
+  beq a0, t0, 5f
+  li t0, 's'
+  beq a0, t0, 6f
+  li t0, 'c'
+  beq a0, t0, 7f
+  li t0, 't'
+  beq a0, t0, 8f
+  li t0, 'x'
+  beq a0, t0, 9f
+  j 4b
+5:
+  mv a0, s0
+  li a1, 2
+  li a7, 10
+  ecall
+  j 3b
+6:
+  mv a0, s0
+  li a1, 3
+  li a7, 10
+  ecall
+  li ra, -1
+  li gp, -1
+  li tp, -1
+  mv s5, sp
+  li s6, -1
+  li s7, -1
+  li s8, -1
+  li s9, -1
+  li s10, -1
+  li s11, -1
+  li t2, -1
+  li t3, -1
+  li t4, -1
+  li t5, -1
+  li t6, -1
+  li a0, -1
+  li a1, -1
+  li a2, -1
+  li a3, -1
+  li a4, -1
+  li a5, -1
+  li a6, -1
+  li a7, -1
+  li t0, 100000000
+10:
+  addi t0, t0, -1
+  bnez t0, 10b
+  li t1, -1
+  li a2, 1
+  bne ra, t1, 13f
+  li a2, 3
+  bne gp, t1, 13f
+  li a2, 4
+  bne tp, t1, 13f
+  li a2, 22
+  bne s6, t1, 13f
+  li a2, 23
+  bne s7, t1, 13f
+  li a2, 24
+  bne s8, t1, 13f
+  li a2, 25
+  bne s9, t1, 13f
+  li a2, 26
+  bne s10, t1, 13f
+  li a2, 27
+  bne s11, t1, 13f
+  li a2, 7
+  bne t2, t1, 13f
+  li a2, 28
+  bne t3, t1, 13f
+  li a2, 29
+  bne t4, t1, 13f
+  li a2, 30
+  bne t5, t1, 13f
+  li a2, 31
+  bne t6, t1, 13f
+  li a2, 2
+  bne sp, s5, 13f
+  li a2, -1
+  bne a0, t1, 14f
+  bne a1, t1, 14f
+  bne a2, t1, 14f
+  bne a3, t1, 14f
+  bne a4, t1, 14f
+  bne a5, t1, 14f
+  bne a6, t1, 14f
+  bne a7, t1, 14f
+  mv a0, s0
+  li a1, 10
+  li a7, 10
+  ecall
+  mv a0, s0
+  li a1, 4
+  li a7, 10
+  ecall
+  j 3b
+7:
+  li a0, 0xdead
+  li a1, 1
+  li a7, 16
+  ecall
+  bnez a0, 12f
+  mv a0, s3
+  li a1, 2
+  li a7, 16
+  ecall
+  bnez a0, 12f
+  mv a0, s4
+  li a1, 3
+  li a7, 16
+  ecall
+  bnez a0, 12f
+  mv a0, s2
+  li a1, 83
+  li a7, 13
+  ecall
+  bnez a0, 12f
+  mv a0, s2
+  li a7, 14
+  ecall
+  li t0, 83
+  bne a0, t0, 12f
+  mv a0, s0
+  li a1, 8
+  li a7, 10
+  ecall
+  j 3b
+8:
+  mv a0, s1
+  li a7, 12
+  ecall
+  mv a0, s0
+  li a1, 9
+  li a7, 10
+  ecall
+  j 3b
+9:
+  li a7, 15
+  ecall
+  j .
+12:
+  unimp
+  j .
+13:
+  mv a3, t2
+  mv a0, s0
+  li a1, 11
+  li a7, 10
+  ecall
+  j 12b
+14:
+  mv a0, s0
+  li a1, 12
+  li a7, 10
+  ecall
+  j 12b
 .global user_payload_end
 user_payload_end:

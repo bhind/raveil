@@ -142,7 +142,7 @@ only after a short pilot demonstrates candidate separation.
 - [x] **T-0015** Add blocking IPC semantics and capability delegation tests.
 - [x] **T-0016** Add fault tests for stale capability generation, rights escalation,
   invalid endpoint, user fault, and timer re-entry.
-- [ ] **T-0083** Complete the Gate 2 persistent U-mode shell/task slice before
+- [x] **T-0083** Complete the Gate 2 persistent U-mode shell/task slice before
   filesystem work. Bind syscall identity to the current scheduled task rather
   than a user-supplied task ID; preserve a full trusted kernel context across
   U-mode traps; resume the user task after real CLINT preemption; expose only

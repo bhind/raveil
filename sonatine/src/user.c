@@ -6,6 +6,7 @@
 #include "vm.h"
 extern const unsigned char user_payload_start[], user_payload_end[];
 extern const unsigned char user_fault_payload_start[];
+extern const unsigned char user_shell_payload_start[];
 extern void user_trap_entry(void);
 extern void user_enter(uintptr_t entry, uintptr_t stack);
 static bool returned;
@@ -29,4 +30,7 @@ void user_fault_probe_enter(void) {
   csr_write_mtvec((uint64_t)(uintptr_t)&user_trap_entry);
   user_enter(SONATINE_USER_BASE + offset,
              SONATINE_USER_BASE + 2u * SONATINE_PAGE_SIZE);
+}
+uintptr_t user_shell_offset(void) {
+  return (uintptr_t)(user_shell_payload_start-user_payload_start);
 }

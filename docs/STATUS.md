@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 Version: `0.0000000000001` (`10^-13`)
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
@@ -34,13 +34,24 @@ Implemented:
 - Sv39 page-table construction with a supervisor-only 128 MiB kernel identity
   map, an explicit non-executable user window, page-walk validation, and an
   aligned `satp` root; current M-mode execution does not yet enforce the maps;
-- a minimal U-mode `init` bootstrap copied into separate U/R/X code and U/R/W
-  stack pages, RAM-only PMP admission, kernel-stack trap entry through
-  `mscratch`, and character/exit `ecall` handling; the diagnostic shell still
-  runs in M-mode after the bootstrap returns;
+- transient U-mode init/fault probes followed by a persistent scripted U-mode
+  shell copied into separate U/R/X code and U/R/W stack pages, with RAM-only
+  PMP admission and trusted kernel-stack trap entry through `mscratch`; the
+  retained M-mode diagnostic shell is not entered by the normal boot path;
 - fail-closed U-mode trap disposition: an illegal-instruction probe and unknown
   syscalls return through trusted kernel-stack control and ABI state to the
   diagnostic kernel instead of resuming or hanging;
+- a persistent scripted U-mode shell task with current-task-bound console,
+  clock, and scalar endpoint syscalls; no user-provided task/owner identity,
+  `CONTROL` operation, kernel pointer, or arbitrary user pointer crosses the
+  syscall veneer;
+- non-blocking U-mode console reads that return `WOULD_BLOCK` instead of
+  polling in M-mode with interrupts masked; M-origin faults take a distinct
+  fail-stop path, and seed shutdown is restricted to the scheduler-registered
+  U-mode init task;
+- one shared 272-byte M/U trap frame preserving x1-x31, interrupted `sp`,
+  `mepc`, and `mstatus`, with `mscratch` bound to the running context's trusted
+  kernel-stack top;
 - `.bss` initializationと16 KiB boot stack;
 - NS16550A polled console;
 - 4 KiB bitmap physical-page allocator;
@@ -49,7 +60,7 @@ Implemented:
 - an RV64 callee-saved context frame and independent 4 KiB idle stack, with a
   verified cooperative `init -> idle -> init` round trip;
 - CLINT 100 Hz timer-driven preemption that switches `init -> idle -> init`
-  from interrupt context and preserves the subsequent diagnostic shell;
+  from a live U-mode shell to M-mode idle and back to the same user frame;
 - a non-reentrant timer-dispatch guard that rejects nested scheduling without
   changing the incoming frame/PC, incrementing the tick, or performing another
   context selection;
@@ -58,10 +69,13 @@ Implemented:
   distinct denied/invalid results, and ready-only task selection;
 - `CONTROL`-authorized capability delegation to non-recursive leaf grants with
   nonempty attenuated rights and independent generation-checked revocation;
+- kernel-derived smoke evidence for forged, wrong-owner, and send-only receive
+  capability rejection, followed by a valid endpoint round trip;
 - fail-closed capability generation exhaustion that retires a slot instead of
   wrapping an old handle back into validity;
 - CLINT 100 Hz machine timerとinteger register trap frame;
-- `raveil>` shell;
+- a retained legacy `raveil>` M-mode diagnostic shell implementation that is
+  no longer entered by the normal smoke boot path;
 - `info`, `mem`, `ps`, `caps`, `ticks`, `ipc`, `alloc`, `reboot` commands;
 - release `-Os` build and isolated `DEBUG=1` `-Og -g3` build;
 - `make debug` QEMU GDB server and `make gdb` command-line client entry
@@ -73,7 +87,7 @@ Implemented:
 
 Not implemented:
 
-- persistent U-mode shell/task execution and S-mode kernel execution;
+- S-mode kernel execution;
 - PMP policy;
 - persistent scheduling of multiple user contexts;
 - persistent multi-user blocking scheduler execution, cancellation, and
@@ -255,4 +269,5 @@ IDE-driven attach is made.
   improvement and exceeded the joint NTR limit. Their sealed bundles were
   immutably copied to Google Drive and download-verified. Gate 1 is closed as a
   falsified preregistered 5% hypothesis; the measurement system remains a
-  maintenance-mode verification facility while Sonatine Gate 2 is active.
+  maintenance-mode verification facility. Sonatine Gate 2 is complete on QEMU
+  emulation evidence; this is not physical-hardware isolation evidence.

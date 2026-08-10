@@ -31,6 +31,7 @@ void task_init(void);
 uint16_t task_create(const char *name, enum task_state state);
 bool task_set_current(uint16_t task_id);
 bool task_block(uint16_t task_id, enum task_wait_kind kind, uint32_t object_id);
+bool task_stop(uint16_t task_id);
 bool task_wake_one(enum task_wait_kind kind, uint32_t object_id,
                    uint16_t *task_id);
 uint16_t task_current(void);

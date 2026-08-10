@@ -73,7 +73,7 @@ Exit requires all of the following in EXP-0003:
 
 ## Gate 2 — minimal isolated Sonatine Microkernel slice
 
-State: **Active build focus**
+State: **Complete (QEMU emulation correctness)**
 
 Make the platform contract explicit or parse the device tree; add Sv39, U-mode
 `init`, context switching, timer preemption, blocking capability IPC, and
@@ -81,6 +81,12 @@ fault tests.
 
 Exit: the current shell remains observable from U-mode and survives preemption
 without a capability bypass.
+
+T-0083 met this exit with a persistent scripted U-mode shell, real CLINT
+`U -> idle -> U` resumption, current-task-derived syscall identity, and
+kernel-derived rejection evidence for forged, wrong-owner, and insufficient
+rights capabilities. This does not claim physical RISC-V isolation, S-mode,
+multi-user fairness, or performance.
 
 Filesystem and command-prompt growth follows this kernel line: a minimal VFS,
 RamFS/initramfs, then—after the isolation/scheduling base is credible—VirtIO

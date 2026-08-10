@@ -61,16 +61,25 @@ run: $(TARGET)
 	$(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET)
 
 smoke: $(TARGET)
-	printf 'info\rmem\rps\rcaps\rticks\ripc\ralloc\rreboot\r' | \
+	printf 'i\rs\rc\rt\rx\r' | \
 	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
 	  tee $(BUILD)/smoke.log
-	grep -q 'raveil>' $(BUILD)/smoke.log
 	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
 	grep -q 'U-mode fault contained cause=0x2' $(BUILD)/smoke.log
 	grep -q '\[ok\] U-mode fault / contained return to kernel' $(BUILD)/smoke.log
 	grep -q 'context switch: init -> idle -> init' $(BUILD)/smoke.log
-	grep -q 'timer preemption: init -> idle -> init count=2' $(BUILD)/smoke.log
-	grep -q 'ipc: received' $(BUILD)/smoke.log
+	grep -q '\[ok\] persistent U-mode shell / current-task syscall identity' $(BUILD)/smoke.log
+	grep -q 'u-cmd info=ok' $(BUILD)/smoke.log
+	grep -q 'clint-preempt from=1 to=2' $(BUILD)/smoke.log
+	grep -q 'clint-preempt from=2 to=1' $(BUILD)/smoke.log
+	grep -q 'u-context register-frame=ok task=1' $(BUILD)/smoke.log
+	grep -q 'u-shell resumed task=1' $(BUILD)/smoke.log
+	grep -q 'kernel-cap forged=DENIED' $(BUILD)/smoke.log
+	grep -q 'kernel-cap wrong-owner=DENIED' $(BUILD)/smoke.log
+	grep -q 'kernel-cap escalation=DENIED' $(BUILD)/smoke.log
+	grep -q 'u-ipc send=OK receive=OK' $(BUILD)/smoke.log
+	grep -q 'u-cmd ticks=ok' $(BUILD)/smoke.log
+	grep -q 'u-shell exit task=1' $(BUILD)/smoke.log
 
 debug:
 	$(MAKE) DEBUG=1 debug-server

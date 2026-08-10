@@ -76,25 +76,29 @@ void kmain(void) {
       CAP_RIGHT_SEND | CAP_RIGHT_RECEIVE | CAP_RIGHT_CONTROL);
   const cap_handle_t task_cap = cap_create(
       init_task, CAP_OBJECT_TASK, init_task, CAP_RIGHT_READ | CAP_RIGHT_CONTROL);
-  if (endpoint == 0u || endpoint_cap == 0u || task_cap == 0u) {
+  const cap_handle_t console_cap = cap_create(
+      init_task, CAP_OBJECT_CONSOLE, 1u, CAP_RIGHT_READ | CAP_RIGHT_WRITE);
+  const cap_handle_t clock_cap = cap_create(
+      init_task, CAP_OBJECT_CLOCK, 1u, CAP_RIGHT_READ);
+  const cap_handle_t wrong_owner_cap = cap_create(
+      idle_task, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
+  const cap_handle_t send_only_cap = cap_create(
+      init_task, CAP_OBJECT_ENDPOINT, endpoint, CAP_RIGHT_SEND);
+  if (endpoint == 0u || endpoint_cap == 0u || task_cap == 0u ||
+      console_cap == 0u || clock_cap == 0u || wrong_owner_cap == 0u ||
+      send_only_cap == 0u) {
     boot_fail("IPC");
   }
   boot_ok("IPC / bounded mailbox protected by capabilities");
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");
-  context_preemption_enable();
-  while (context_preemption_count() < 2u) {
-    cpu_relax();
+  if (!context_preemption_configure(
+          init_task,idle_task,SONATINE_USER_BASE+user_shell_offset(),
+          SONATINE_USER_BASE+2u*SONATINE_PAGE_SIZE,console_cap,clock_cap,
+          endpoint_cap,wrong_owner_cap,send_only_cap)) {
+    boot_fail("persistent U-mode context");
   }
-  console_write("timer preemption: init -> idle -> init count=");
-  console_write_dec(context_preemption_count());
-  console_write("\n");
-  boot_ok("preemption / CLINT-driven context switch");
-
-  console_write("starting init task id=");
-  console_write_dec(init_task);
-  console_write("\n");
-  shell_run(init_task, endpoint_cap);
-  boot_fail("init returned");
+  boot_ok("persistent U-mode shell / current-task syscall identity");
+  context_start_user();
 }

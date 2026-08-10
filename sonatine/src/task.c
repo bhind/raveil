@@ -70,6 +70,18 @@ bool task_block(uint16_t task_id, enum task_wait_kind kind, uint32_t object_id) 
   return true;
 }
 
+bool task_stop(uint16_t task_id) {
+  if (task_id == 0u || task_id > TASK_TABLE_SIZE ||
+      !task_table[task_id - 1u].active) {
+    return false;
+  }
+  struct task_entry *entry = &task_table[task_id - 1u];
+  entry->state = TASK_STOPPED;
+  entry->wait_kind = TASK_WAIT_NONE;
+  entry->wait_object = 0u;
+  return true;
+}
+
 bool task_wake_one(enum task_wait_kind kind, uint32_t object_id,
                    uint16_t *task_id) {
   for (size_t index = 0; index < TASK_TABLE_SIZE; ++index) {

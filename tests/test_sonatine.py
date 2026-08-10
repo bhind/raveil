@@ -50,7 +50,8 @@ class SonatineSourceTests(unittest.TestCase):
             self.assertIn(subsystem, kernel)
         self.assertIn("starting U-mode init", kernel)
         self.assertIn("context_switch_smoke", kernel)
-        self.assertIn("context_preemption_enable", kernel)
+        self.assertIn("context_preemption_configure", kernel)
+        self.assertIn("context_start_user", kernel)
         user_entry = (SONATINE / "src/user_entry.S").read_text(encoding="utf-8")
         for boundary in ("mret", "mscratch", "user_trap_entry", "user_payload_start"):
             self.assertIn(boundary, user_entry)
@@ -60,6 +61,21 @@ class SonatineSourceTests(unittest.TestCase):
             self.assertIn(f"ld {register}", context)
         timer = (SONATINE / "src/timer.c").read_text(encoding="utf-8")
         self.assertIn("context_trap_select", timer)
+        syscall = (SONATINE / "src/user_syscall.c").read_text(encoding="utf-8")
+        self.assertIn("task_current()", syscall)
+        self.assertNotIn("sender_task", syscall)
+        self.assertIn("console_try_getc", syscall)
+        self.assertNotIn("result=(uint8_t)console_getc()", syscall)
+        self.assertIn("current==context_user_task()", syscall)
+        for marker in ("kernel-cap forged=DENIED", "kernel-cap wrong-owner=DENIED",
+                       "kernel-cap escalation=DENIED"):
+            self.assertIn(marker, syscall)
+        self.assertIn("TRAP_MSTATUS_MPP_MASK", timer)
+        self.assertIn("machine_fault_dispatch", timer)
+        trap = (SONATINE / "src/trap.S").read_text(encoding="utf-8")
+        for register in ("ra", "gp", "tp", "t6", "s11", "a7"):
+            self.assertIn(f"sd {register}", trap)
+            self.assertIn(f"ld {register}", trap)
 
     def test_makefile_has_isolated_debug_build(self) -> None:
         makefile = (SONATINE / "Makefile").read_text(encoding="utf-8")

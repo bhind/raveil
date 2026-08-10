@@ -21,3 +21,4 @@ rewrite it.
 | [ADR-0014](ADR-0014-vreji-triages-prior-art-and-ip-risk.md) | Accepted | Vreji triages prior-art similarity and IP risk without legal authority |
 | [ADR-0015](ADR-0015-attenuated-leaf-capability-delegation.md) | Accepted | Gate 2 delegates only attenuated, non-recursive leaf capabilities |
 | [ADR-0016](ADR-0016-contain-user-faults-and-reject-timer-reentry.md) | Accepted | Contain U-mode faults and reject nested timer dispatch |
+| [ADR-0017](ADR-0017-current-task-bound-user-syscalls.md) | Accepted | Persistent U-mode syscalls derive authority from the current task |
