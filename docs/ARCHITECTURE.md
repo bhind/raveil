@@ -87,6 +87,12 @@ enforce Sonatine issuance, equality, replay, and one-shot consumption.
 Structural validity is neither admission nor commit, and `EXECUTED` never
 grants Experience or object-visibility authority by itself.
 
+ADR-0021 adds the first Sonatine-owned execution-state seed: a boot-scoped
+ObjectManifest table, bounded submission/completion rings, and an inflight
+ledger that issues and checks epoch/sequence/cookie bindings once. It is
+single-hart kernel memory, not a U-mode or Linux interface and not a Daphnis
+device. Object version publication still belongs to the later commit boundary.
+
 ## Named components
 
 | Formal component name | Short name | Responsibility |

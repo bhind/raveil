@@ -2,6 +2,7 @@
 #include "console.h"
 #include "context.h"
 #include "ipc.h"
+#include "job_authority.h"
 #include "memory.h"
 #include "platform.h"
 #include "shell.h"
@@ -24,6 +25,37 @@ static void boot_fail(const char *subsystem) {
   for (;;) {
     cpu_wait();
   }
+}
+
+static bool job_contract_smoke(void) {
+  struct raveil_object_manifest_v1 object={0};
+  object.magic=RAVEIL_OBJECT_MANIFEST_MAGIC;
+  object.schema_version=RAVEIL_OBJECT_MANIFEST_V1;
+  object.struct_size=sizeof(object); object.permitted_access=RAVEIL_OBJECT_READ;
+  object.object_id=1u; object.generation=1u; object.version=1u;
+  object.byte_length=8u; object.backing=RAVEIL_OBJECT_BACKING_IMMUTABLE;
+  struct raveil_job_descriptor_v1 job={0};
+  job.magic=RAVEIL_JOB_MAGIC; job.schema_version=RAVEIL_JOB_SCHEMA_V1;
+  job.struct_size=sizeof(job); job.object_count=1u; job.job_id=1u;
+  job.program_identity[0]=1u; job.graph_variant_identity[0]=1u;
+  job.execution_contract_identity[0]=1u; job.target_signature[0]=1u;
+  job.resources=(struct raveil_resource_bounds_v1){1u,8u,1u,1u};
+  job.objects[0]=(struct raveil_object_ref_v1){1u,1u,1u,0u,8u,RAVEIL_OBJECT_READ,0u};
+  job_authority_init(1u);
+  if(!job_object_register(&object) || !job_submit(&job)) return false;
+  struct sonatine_submission issued;
+  if(!job_submission_take(&issued)) return false;
+  struct raveil_completion_record_v1 completion={0},taken;
+  completion.magic=RAVEIL_COMPLETION_MAGIC;
+  completion.schema_version=RAVEIL_JOB_SCHEMA_V1;
+  completion.struct_size=sizeof(completion); completion.status=RAVEIL_COMPLETION_EXECUTED;
+  completion.job_id=job.job_id; completion.execution_epoch=issued.execution_epoch;
+  completion.execution_sequence=issued.execution_sequence;
+  for(size_t index=0;index<16u;++index)
+    completion.completion_cookie[index]=issued.completion_cookie[index];
+  return job_completion_post(&completion) && !job_completion_post(&completion) &&
+         job_completion_take(&taken) && !job_completion_take(&taken) &&
+         job_inflight_count()==0u;
 }
 
 void kmain(void) {
@@ -99,6 +131,8 @@ void kmain(void) {
   }
   boot_ok("IPC / bounded mailbox protected by capabilities");
   boot_ok("VFS / immutable initramfs + bounded RamFS");
+  if(!job_contract_smoke()) boot_fail("Daphnis contract");
+  boot_ok("Daphnis contract / object table + bounded rings + replay guard");
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");

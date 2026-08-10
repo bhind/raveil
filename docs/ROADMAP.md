@@ -104,8 +104,9 @@ The T-0084 Linux harness is pre-Gate transport scaffolding only. It validates
 the owned ABI envelope without claiming a JobDescriptor, device, or authority
 path and therefore does not advance Gate 3 state.
 
-T-0030 now provides the bounded shared JobDescriptor/CompletionRecord schema.
-Gate 3 remains Planned until ObjectManifest, Sonatine rings, telemetry, shadow
+T-0030 provides the bounded shared JobDescriptor/CompletionRecord schema, and
+T-0031 provides a kernel-internal ObjectManifest/object-table/ring seed with
+boot-scoped replay protection. Gate 3 remains Planned until telemetry, shadow
 execution, cancellation, commit/rollback, and write authorities are executable.
 
 Define JobDescriptor, ObjectManifest, and CompletionRecord; add

@@ -197,7 +197,7 @@ conclusion. A fixed-C/TVM contradiction keeps the Gate open.
   one-inflight contract core. This validates transport only; it does not admit
   Daphnis work or replace Sonatine authority.
 - [x] **T-0030** Define shared `JobDescriptor` and `CompletionRecord` schemas.
-- [ ] **T-0031** Define standalone `ObjectManifest` and add Sonatine
+- [x] **T-0031** Define standalone `ObjectManifest` and add Sonatine
   submission/completion rings plus the object table.
 - [ ] **T-0032** Send measured completion telemetry into append-only Experience.
 - [ ] **T-0033** Implement shadow execution, commit, cancellation, and rollback.

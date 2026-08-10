@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-08
+Last updated: 2026-08-11
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -8,9 +8,10 @@ resolves it.
 
 ## Native execution
 
-- ADR-0020 fixes only the bounded job/completion envelope and embedded object
-  references proposed in RFC-0001. Graph encoding, ObjectManifest lifecycle,
-  memory consistency, exception semantics, and device transport remain open.
+- ADR-0020 fixes the bounded job/completion envelope. ADR-0021 fixes only a
+  boot-scoped, kernel-owned ObjectManifest table and ring seed. Persistent
+  object lifecycle, graph encoding, memory consistency, exception semantics,
+  reset uniqueness, and device transport remain open.
 - Which dependencies and alias facts can admission prove without making compile
   or verification cost impractical?
 - Where is the measured boundary between static, elastic dataflow, stream, and

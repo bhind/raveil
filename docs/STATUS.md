@@ -97,7 +97,8 @@ Not implemented:
   fairness;
 - capability derivation trees and cascading revocation;
 - device-tree memory discovery;
-- submission/completion ring and Daphnis Execution Subsystem device。
+- real Daphnis Execution Subsystem device, MMIO/DMA/IRQ transport, and
+  U-mode-facing submission path.
 
 ## Linux driver-development harness
 
@@ -129,9 +130,19 @@ one-shot consumption. Executed outputs must exactly match WRITE objects and
 advance versions.
 
 These validators establish structural correctness only. No executable path yet
-admits a job, resolves descriptor IDs as capabilities, creates ObjectManifest,
-submits through a Sonatine/Daphnis ring, commits output, or writes telemetry to
-Experience. Linux PING/NOP remains a separate transport envelope.
+resolves descriptor IDs as caller capabilities, commits output, or writes
+telemetry to Experience. Linux PING/NOP remains a separate transport envelope.
+
+ADR-0021 implements the kernel-internal T-0031 seed: an exact 64-byte
+ObjectManifest v1 validator, fixed eight-entry boot-scoped object table,
+four-entry submission and completion rings, and four-entry inflight ledger.
+Admission checks ID, generation, visible version, bounds, and permitted effect.
+Sonatine issues boot-scoped epoch/sequence/cookie bindings; wrong, stale, or
+duplicate completions fail closed and valid completions are consumed once.
+Host tests and a QEMU kernel smoke cover the state machine. The rings are
+single-hart and kernel-owned; they are not Linux, U-mode, shared-memory, DMA,
+MMIO, IRQ, hardware, or performance evidence. `EXECUTED` does not change the
+visible object version or commit data.
 
 ## Executable track B: bounded Experience seed
 
@@ -234,8 +245,8 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 55
-tests. On 2026-08-11 all 55 passed on macOS with Python 3.14.6; they include
+isolated debug-build contract. The current host acceptance suite contains 56
+tests. On 2026-08-11 all 56 passed on macOS with Python 3.14.6; they include
 the Gate 1 manifest, native C checksums across all candidate families,
 baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
 parsing, the compiled helper allowlist and installation-integrity boundary,

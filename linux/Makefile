@@ -13,6 +13,8 @@ $(BUILD)/raveilctl: src/raveilctl.c | $(BUILD)
 contracts-check: | $(BUILD)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c ../contracts/src/job_contract.c \
 	  -o $(BUILD)/job_contract.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c ../contracts/src/object_manifest.c \
+	  -o $(BUILD)/object_manifest.o
 smoke: all
 	test -n "$$XDG_RUNTIME_DIR"
 	$(BUILD)/raveil-linuxd & daemon=$$!; \

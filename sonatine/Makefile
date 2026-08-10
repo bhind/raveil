@@ -29,14 +29,16 @@ endif
 
 TARGET := $(BUILD)/sonatine.elf
 C_SOURCES := $(wildcard src/*.c)
+CONTRACT_SOURCES := ../contracts/src/job_contract.c ../contracts/src/object_manifest.c
 S_SOURCES := $(wildcard src/*.S)
 OBJECTS := $(patsubst src/%.c,$(BUILD)/%.o,$(C_SOURCES)) \
+           $(patsubst ../contracts/src/%.c,$(BUILD)/contract_%.o,$(CONTRACT_SOURCES)) \
            $(patsubst src/%.S,$(BUILD)/%.o,$(S_SOURCES))
 
 CFLAGS := -std=c11 -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany \
           -ffreestanding -fno-builtin -fno-stack-protector -fno-pic \
           -Wall -Wextra -Werror $(COPT) -ffunction-sections -fdata-sections \
-          -Iinclude
+          -Iinclude -I../contracts/include
 ASFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany $(ASDEBUG) -Iinclude
 LDFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -nostdlib -nostartfiles \
            -Wl,-T,link.ld -Wl,--gc-sections -Wl,--build-id=none
@@ -49,6 +51,9 @@ $(TARGET): $(OBJECTS) link.ld
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 $(BUILD)/%.o: src/%.c | $(BUILD)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/contract_%.o: ../contracts/src/%.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/%.o: src/%.S | $(BUILD)
@@ -75,6 +80,7 @@ smoke: $(TARGET)
 	grep -q 'u-context register-frame=ok task=1' $(BUILD)/smoke.log
 	grep -q 'u-shell resumed task=1' $(BUILD)/smoke.log
 	grep -q '\[ok\] VFS / immutable initramfs + bounded RamFS' $(BUILD)/smoke.log
+	grep -q '\[ok\] Daphnis contract / object table + bounded rings + replay guard' $(BUILD)/smoke.log
 	test "$$(grep -c 'u-vfs read=hello write-readback=OK' $(BUILD)/smoke.log)" -eq 2
 	grep -q 'kernel-file initramfs=DENIED' $(BUILD)/smoke.log
 	grep -q 'kernel-file rights=DENIED' $(BUILD)/smoke.log

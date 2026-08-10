@@ -1,0 +1,30 @@
+#ifndef SONATINE_JOB_AUTHORITY_H
+#define SONATINE_JOB_AUTHORITY_H
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include "raveil/job_contract.h"
+#include "raveil/object_manifest.h"
+
+#define SONATINE_OBJECT_TABLE_SIZE 8u
+#define SONATINE_JOB_RING_DEPTH 4u
+
+struct sonatine_submission {
+  struct raveil_job_descriptor_v1 job;
+  uint64_t execution_epoch;
+  uint64_t execution_sequence;
+  uint8_t completion_cookie[16];
+};
+
+void job_authority_init(uint64_t execution_epoch);
+bool job_object_register(const struct raveil_object_manifest_v1 *manifest);
+bool job_object_lookup(uint64_t object_id,
+                       struct raveil_object_manifest_v1 *manifest);
+bool job_submit(const struct raveil_job_descriptor_v1 *job);
+bool job_submission_take(struct sonatine_submission *submission);
+bool job_completion_post(const struct raveil_completion_record_v1 *completion);
+bool job_completion_take(struct raveil_completion_record_v1 *completion);
+size_t job_submission_count(void);
+size_t job_completion_count(void);
+size_t job_inflight_count(void);
+#endif
