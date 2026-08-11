@@ -47,6 +47,7 @@ When records disagree, fix the weaker record using this order:
 | [experiments](experiments/README.md) | reproducible evidence and claims | measuring or making a performance claim |
 | [research references](references/README.md) | draft external-source identity, provenance, and project-authored synopses | citing papers, manuals, talks, or whitepapers |
 | [guides](guides/SONATINE_MACOS_DEBUGGING.md) | reusable development procedures | performing a documented setup or debug workflow |
+| [release notes](releases/v0.0000000000002.md) | hands-on scope, commands, and non-claims for the demo release | evaluating the published source demo |
 | [history](history/DESIGN-EVOLUTION.md) | non-normative design evolution | investigating why the direction changed |
 | [archive](archive/README.md) | frozen provenance material | investigating original discussion context only |
 

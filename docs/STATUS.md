@@ -1,8 +1,8 @@
 # Current status
 
 Last updated: 2026-08-11
-Development state: `unreleased`
-Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
+Development state: `v0.0000000000002` release candidate
+Latest published feature release: `v0.0000000000001`, immutable historical seed
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
@@ -94,6 +94,11 @@ The native result adapter and Sonatine serial adapter now also reject
 non-canonical scalar encodings, wrong JSON types, missing fields, negative
 latency, zero cookies, and invalid binding ranges. These checks are correctness
 boundaries only and create no performance or hardware claim.
+
+The `v0.0000000000002` source-demo candidate packages this verified graph MVP,
+the interactive U-mode shell, and the explicit native/Sonatine backend choices
+with hands-on instructions. Publication and the remote Release URL remain
+unverified until T-0092 completes.
 
 The completed tree passed 91 local tests plus RV64 release/debug, DWARF, U-mode
 shell, telemetry replay, and graph differential checks. A Linux arm64 container

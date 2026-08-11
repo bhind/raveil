@@ -1,10 +1,8 @@
-# Raveil v0.0000000000001
+# Raveil v0.0000000000002
 
-> This heading names the latest immutable feature release. Current development
-> is unreleased. The manufacturing line is active after the GNU/Linux graph MVP
-> and failure-governance milestones. Current work preserves those artifacts
-> while growing the Sonatine U-mode shell and backend integration. See
-> `docs/STATUS.md` and `docs/ROADMAP.md` for current state.
+This feature release is a source demo of the owned graph control loop on native
+POSIX C and Sonatine/QEMU. It is intended for hands-on correctness evaluation,
+not as a latency, energy, FPGA, ASIC, or silicon-performance release.
 
 This is the smallest executable Raveil seed with two connected bootstrap tracks:
 
@@ -139,6 +137,41 @@ python3 -m raveil graph-mvp --backend sonatine-qemu \
 The latter is QEMU emulation correctness only. It deliberately reports no
 latency or energy and cannot establish a hardware-performance result.
 
+### Hands-on graph demo
+
+Clone the release and run the native path first:
+
+```bash
+git clone https://github.com/bhind/raveil.git
+cd raveil
+git checkout v0.0000000000002
+python3 -m raveil graph-mvp --backend native \
+  --family gemm_bias_relu --m 128 --n 128 --k 128 \
+  --inner-iterations 20 --warmups 3 \
+  --output /tmp/raveil-native-demo.json
+python3 -m json.tool /tmp/raveil-native-demo.json
+```
+
+The JSON shows the canonical variants, advisory proposal or abstention,
+baseline-first observations, semantic checks, selected variant, and explicit
+commit or rollback. Timing fields are local development observations only.
+
+For the Sonatine/QEMU correctness path, install a freestanding RISC-V compiler,
+GNU Make, and `qemu-system-riscv64`, then run:
+
+```bash
+make -C sonatine CROSS_COMPILE=riscv64-elf-
+python3 -m raveil graph-mvp --backend sonatine-qemu \
+  --family gemm --m 8 --n 8 --k 8 \
+  --sonatine-kernel sonatine/build/sonatine.elf \
+  --output /tmp/raveil-sonatine-demo.json
+python3 -m json.tool /tmp/raveil-sonatine-demo.json
+```
+
+If the installed toolchain prefix is `riscv64-unknown-elf-`, substitute that
+value for `CROSS_COMPILE`. The QEMU result deliberately contains no execution
+latency and is classified as emulation correctness evidence.
+
 The persistent log defaults to `experience/local.jsonl`.
 
 ## Commands
@@ -244,7 +277,10 @@ scheduling completeness.
 
 ## Versioning
 
-The runtime and Experience schema use the exact version requested: `0.0000000000001` (`10^-13`). This intentionally predates semantic release numbering.
+The runtime release is `0.0000000000002`. The append-only Experience schema
+retains its original `raveil.experience/v0.0000000000001` identifier for
+backward compatibility; a feature release does not silently rewrite persisted
+evidence.
 
 ## License
 

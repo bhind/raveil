@@ -6,6 +6,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [ ] **T-0092** Publish the owner-approved `v0.0000000000002` source demo from
+  the exact audited release commit, verify the immutable remote tag and GitHub
+  Release, and record the public URL without enabling hosted CI/CD.
+
 - [x] **T-0088** Establish lightweight failure-knowledge and GitHub Issue
   governance: preserve experiments and raw evidence, maintain a reusable lesson
   index, provide a safe bug template, escalate only durable/actionable defects,
