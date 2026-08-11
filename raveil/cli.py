@@ -30,6 +30,7 @@ from .experiment_runner import (
 from .graph_mvp import GraphProgram, run_graph_mvp
 from .native_backend import NativeCBackend
 from .sonatine_backend import SonatineQEMUBackend
+from .sonatine_demo import MAX_TIMEOUT_SECONDS, run_sonatine_demo
 from .iree_import import PinnedIreeImporter
 
 
@@ -285,6 +286,18 @@ def command_graph_mvp(args: argparse.Namespace) -> int:
     return 2 if result["outcome"] == "failed-closed" else 0
 
 
+def command_sonatine_demo(args: argparse.Namespace) -> int:
+    result = run_sonatine_demo(
+        Path(args.sonatine_kernel), Path(args.output), qemu=args.qemu,
+        timeout_seconds=args.timeout_seconds,
+    )
+    print(
+        f"sonatine demo evidence={result.evidence_class} "
+        f"output={args.output} final-state={result.final_job_state}"
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -353,6 +366,18 @@ def build_parser() -> argparse.ArgumentParser:
     graph_mvp.add_argument("--iree-compile", default="iree-compile")
     graph_mvp.add_argument("--output")
     graph_mvp.set_defaults(handler=command_graph_mvp)
+
+    sonatine_demo = subparsers.add_parser(
+        "sonatine-demo", help="run the fixed Sonatine operator demo under QEMU"
+    )
+    sonatine_demo.add_argument("--sonatine-kernel", default="sonatine/build/sonatine.elf")
+    sonatine_demo.add_argument("--qemu", default="qemu-system-riscv64")
+    sonatine_demo.add_argument(
+        "--timeout-seconds", type=float, default=30.0,
+        help=f"finite QEMU timeout in seconds (maximum {MAX_TIMEOUT_SECONDS:g})",
+    )
+    sonatine_demo.add_argument("--output", required=True)
+    sonatine_demo.set_defaults(handler=command_sonatine_demo)
 
     experiment = subparsers.add_parser("experiment", help="run and preserve Gate experiments")
     experiment_commands = experiment.add_subparsers(dest="experiment_command", required=True)
