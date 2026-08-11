@@ -26,7 +26,7 @@ class MinimumLoopTests(unittest.TestCase):
         self.assertIn("AgentNames.md", ignored)
 
     def test_exact_version(self) -> None:
-        self.assertEqual(raveil.__version__, "0.0000000000005")
+        self.assertEqual(raveil.__version__, "0.0000000000006")
 
     def test_experience_is_append_only_and_active_memory_is_bounded(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

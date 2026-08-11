@@ -11,6 +11,8 @@ Current Native Pre-release: `v0.0000000000004`, T-0099 Native CLI workspace,
 published from `3cfb13c762b51291d08d519126286aad078df7a1`
 Current Command Graph Pre-release: `v0.0000000000005`, T-0101 Native Command
 Graph, published from `8ba6c17794d27913b6c8f2b5318be6f6296488ac`.
+Next Native CLI Pre-release candidate: `v0.0000000000006`, T-0102 bounded Tab
+completion; publication pending exact-candidate audit and owner approval.
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
