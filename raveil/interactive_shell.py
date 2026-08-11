@@ -18,11 +18,26 @@ from .graph_mvp import (
     OptimizationProposal,
 )
 from .native_backend import NativeCBackend
+from .workspace import NativeWorkspace, WorkspaceError
 
 
 HELP = """Available commands:
   help
       Show this command reference.
+  pwd
+      Show the current virtual workspace directory.
+  cd [PATH]
+      Change directory; no path means the virtual root.
+  ls [PATH]
+      List a workspace directory in lexical order.
+  cat PATH
+      Print one bounded UTF-8 regular file.
+  stat PATH
+      Show bounded virtual file metadata.
+  mkdir PATH
+      Create one directory without recursive parent creation.
+  write PATH TEXT...
+      Create one bounded UTF-8 file without overwriting.
   graph create gemm --m M --n N --k K
       Create a bounded GEMM graph with positive integer dimensions.
   graph show
@@ -46,6 +61,7 @@ HELP = """Available commands:
 @dataclass
 class NativeInteractiveSession:
     source: Path = Path("benchmarks/native/benchmark.c")
+    workspace: NativeWorkspace = field(default_factory=lambda: NativeWorkspace(Path.cwd()))
     compiler: str = "cc"
     timeout_seconds: float = 30.0
     warmups: int = 1
@@ -122,15 +138,13 @@ class NativeInteractiveSession:
         self.events.append(f"execute {self.execution_result.outcome}")
         return f"outcome={self.execution_result.outcome} selected={self.execution_result.selected_variant}"
 
-    def result(self, output: Path | None = None) -> str:
+    def result(self, output: str | None = None) -> str:
         if self.execution_result is None:
             raise ValueError("no result; run 'execute' first")
         encoded = json.dumps(self.execution_result.to_dict(), indent=2, sort_keys=True) + "\n"
         if output is not None:
-            output.parent.mkdir(parents=True, exist_ok=True)
-            with output.open("x", encoding="utf-8") as stream:
-                stream.write(encoded)
-            self.events.append(f"result-saved {output.name}")
+            virtual_path = self.workspace.write_text(output, encoded)
+            self.events.append(f"result-saved {virtual_path}")
             return f"saved {output}"
         return encoded.rstrip()
 
@@ -165,6 +179,28 @@ def dispatch(session: NativeInteractiveSession, line: str) -> tuple[bool, str]:
         return True, HELP
     if tokens == ["exit"]:
         return False, "bye"
+    if tokens == ["pwd"]:
+        return True, session.workspace.pwd()
+    if tokens and tokens[0] == "cd" and len(tokens) <= 2:
+        return True, session.workspace.cd(tokens[1] if len(tokens) == 2 else None)
+    if tokens and tokens[0] == "ls" and len(tokens) <= 2:
+        return True, "\n".join(session.workspace.ls(tokens[1] if len(tokens) == 2 else None))
+    if tokens and tokens[0] == "cat" and len(tokens) == 2:
+        return True, session.workspace.read_text(tokens[1])
+    if tokens and tokens[0] == "stat" and len(tokens) == 2:
+        metadata = session.workspace.stat(tokens[1])
+        return True, "\n".join((
+            f"path: {metadata.path}",
+            f"type: {metadata.kind}",
+            f"size: {metadata.size}",
+            f"readable: {str(metadata.readable).lower()}",
+            f"writable: {str(metadata.writable).lower()}",
+        ))
+    if tokens and tokens[0] == "mkdir" and len(tokens) == 2:
+        return True, f"directory created: {session.workspace.mkdir(tokens[1])}"
+    if tokens and tokens[0] == "write" and len(tokens) >= 3:
+        virtual_path = session.workspace.write_text(tokens[1], " ".join(tokens[2:]))
+        return True, f"file written: {virtual_path}"
     if tokens[:3] == ["graph", "create", "gemm"]:
         allowed = {"graph", "create", "gemm", "--m", "--n", "--k"}
         if len(tokens) != 9 or any(token.startswith("--") and token not in allowed for token in tokens):
@@ -179,7 +215,7 @@ def dispatch(session: NativeInteractiveSession, line: str) -> tuple[bool, str]:
     if tokens == ["execute"]:
         return True, session.execute()
     if tokens and tokens[0] == "result" and len(tokens) <= 2:
-        return True, session.result(Path(tokens[1]) if len(tokens) == 2 else None)
+        return True, session.result(tokens[1] if len(tokens) == 2 else None)
     if tokens == ["history"]:
         return True, session.history()
     if tokens == ["reset"]:
@@ -209,5 +245,5 @@ def run_interactive_shell(
         except (EOFError, KeyboardInterrupt):
             output_fn("bye")
             return 0
-        except (FileExistsError, FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
+        except (FileExistsError, FileNotFoundError, OSError, RuntimeError, ValueError, WorkspaceError) as exc:
             output_fn(f"error: {exc}")

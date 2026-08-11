@@ -46,7 +46,7 @@ When records disagree, fix the weaker record using this order:
 | [RFCs](rfcs/README.md) | substantial proposals without authority | developing an unresolved architecture proposal |
 | [experiments](experiments/README.md) | reproducible evidence and claims | measuring or making a performance claim |
 | [research references](references/README.md) | draft external-source identity, provenance, and project-authored synopses | citing papers, manuals, talks, or whitepapers |
-| [guides](guides/SONATINE_MACOS_DEBUGGING.md) | reusable development procedures | performing a documented setup or debug workflow |
+| [guides](guides/NATIVE_CLI_WORKSPACE.md) | Native workspace operation and other reusable development procedures | running the Native CLI or performing a documented setup/debug workflow |
 | [history](history/DESIGN-EVOLUTION.md) | non-normative design evolution | investigating why the direction changed |
 | [archive](archive/README.md) | frozen provenance material | investigating original discussion context only |
 

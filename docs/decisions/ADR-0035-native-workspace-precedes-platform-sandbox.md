@@ -21,8 +21,15 @@ The selected host directory appears to the CLI as virtual `/`. All user paths
 remain beneath it and fail closed on escaping traversal, link escape, special
 files, excessive size, or overwrite. The existing guarded
 graph compiler, adviser, executor, validation, and result schemas remain the
-only graph authority. This layer may be described as chroot-like workspace
-containment, never as an OS security boundary.
+only graph authority. This layer is described precisely as application-level
+workspace containment, never as an OS security boundary or secure `chroot`.
+
+The portable implementation fixes the root once, represents the current
+directory as virtual path components, rejects every `..` component and every
+symlink component, and bounds paths, UTF-8 file operations, and directory
+enumeration. Result publication uses the same exclusive workspace write path.
+These checks are deterministic CLI policy; they do not eliminate every host
+filesystem race.
 
 T-0100 separately evaluates and implements platform-enforced isolation behind
 the same workspace interface. Linux candidates include descriptor-relative

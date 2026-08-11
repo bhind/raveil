@@ -52,6 +52,13 @@ MiroirsStructuralValidator, PavaneSemanticOracle, GraphExecutor, and
 NativeCBackend retain those responsibilities. Host terminal types do not enter
 an owned graph or result schema.
 
+ADR-0035 places a `NativeWorkspace` below the Session. One existing real host
+directory is fixed at startup and appears as virtual `/`. Bounded file commands
+and result publication use virtual paths, reject parent traversal, symlink
+components, special files, excessive sizes, and overwrite, and reveal no host
+absolute path. This is portable application-level containment only; T-0100
+retains descriptor-relative and platform-enforced isolation work.
+
 ### GNU/Linux userspace vertical slice
 
 ADR-0025 instantiates the smallest complete control loop as owned Python

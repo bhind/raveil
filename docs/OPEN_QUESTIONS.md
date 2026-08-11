@@ -89,7 +89,8 @@ resolves it.
 
 ## Ecosystem
 
-- After T-0099 proves the bounded workspace CLI useful, which T-0100 strong
+- After human evaluation of T-0099's executable bounded workspace CLI, which
+  T-0100 strong
   isolation backend should become required for release: Linux Landlock plus
   descriptor-relative resolution, a mount-namespace sandbox, an OCI/VM worker,
   or a packaged macOS App Sandbox helper? Application-level containment alone

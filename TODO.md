@@ -6,7 +6,7 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
-- [ ] **T-0099** Extend the T-0098 Native Interactive CLI with one explicitly
+- [x] **T-0099** Extend the T-0098 Native Interactive CLI with one explicitly
   selected workspace root and the minimum file-oriented operator commands:
   `pwd`, `cd`, `ls`, `cat`, `stat`, `mkdir`, and bounded exclusive `write`.
   Present that host directory as virtual `/`, resolve every CLI path beneath
@@ -16,8 +16,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   and `result` authority unchanged. Use the workspace for result publication
   and human inspection; do not add arbitrary shell execution, pipes,
   redirection, deletion, PATH lookup, GNU-tool emulation, or a performance
-  claim. This first slice is chroot-like containment and must not be described
-  as an OS security boundary.
+  claim. This first slice is application-level workspace containment and must
+  not be described as an OS security boundary.
 
 - [ ] **T-0100** Replace or reinforce T-0099's application-level workspace
   containment with a modern enforceable sandbox after the minimum Native CLI

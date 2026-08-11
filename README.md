@@ -20,14 +20,20 @@ Gate 1 evidence now exist; no latency or energy improvement is claimed.
 From the repository root on macOS or GNU/Linux:
 
 ```sh
-python3 -m raveil shell
+mkdir -p /tmp/raveil-demo
+python3 -m raveil shell --workspace /tmp/raveil-demo
 ```
 
 Then run `help`, `graph create gemm --m 128 --n 128 --k 128`, `graph show`,
 `variants`, `propose`, `execute`, `result`, `history`, `reset`, and `exit`.
 The host Python line editor supplies ordinary Backspace, cursor-key, and input
-history behavior. `result PATH` exclusively creates the existing strict JSON
-result and never overwrites an existing path.
+history behavior. The selected host directory appears as virtual `/`; `pwd`,
+`cd`, `ls`, `cat`, `stat`, `mkdir`, and bounded exclusive `write` operate only
+there. `result PATH` exclusively creates the existing strict JSON result inside
+that workspace and never overwrites an existing path. See
+[`docs/guides/NATIVE_CLI_WORKSPACE.md`](docs/guides/NATIVE_CLI_WORKSPACE.md)
+for the full walkthrough and limits. This is application-level workspace
+containment, not an OS security boundary.
 
 ## Sonatine Microkernel boot target
 

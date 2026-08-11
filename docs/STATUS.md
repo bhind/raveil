@@ -60,6 +60,19 @@ malformed arguments, duplicate execution, and overwrite fail without a
 traceback. Results retain `raveil.graph-mvp-result/v1` and remain host-
 correctness development evidence only.
 
+T-0099 adds `--workspace PATH` and fixes one existing real directory as the
+session's virtual `/`. Bounded `pwd`, `cd`, `ls`, `cat`, `stat`, `mkdir`, and
+exclusive `write` commands share one `NativeWorkspace`; graph result files use
+the same virtual path boundary. Parent traversal, symlink components, broken
+links, special files, excessive paths/files/listings, root replacement, and
+overwrite fail closed without exposing host absolute paths. The existing
+GraphCompiler, adviser, Miroirs/Pavane-backed GraphExecutor, NativeCBackend,
+baseline-first rule, commit/rollback, and result v1 remain unchanged.
+
+This is application-level workspace containment and host-correctness evidence,
+not hostile-code isolation. T-0100 remains open for descriptor-relative and
+platform-enforced worker isolation. Sonatine and its shell are unchanged.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

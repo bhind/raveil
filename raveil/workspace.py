@@ -1,0 +1,259 @@
+"""Bounded application-level workspace containment for the Native CLI."""
+
+from __future__ import annotations
+
+import os
+import stat as stat_module
+from dataclasses import dataclass
+from pathlib import Path, PurePosixPath
+
+
+MAX_PATH_BYTES = 4096
+MAX_FILE_BYTES = 64 * 1024
+MAX_DIRECTORY_ENTRIES = 256
+
+
+class WorkspaceError(ValueError):
+    """A bounded, user-facing workspace operation failure."""
+
+
+@dataclass(frozen=True)
+class WorkspaceStat:
+    path: str
+    kind: str
+    size: int
+    readable: bool
+    writable: bool
+
+
+class NativeWorkspace:
+    """Map virtual POSIX paths into one fixed host directory.
+
+    This is application-level containment, not an OS security boundary. T-0100
+    owns descriptor-relative hardening and platform-enforced isolation.
+    """
+
+    def __init__(self, root: Path | str) -> None:
+        candidate = Path(root).expanduser()
+        try:
+            root_lstat = candidate.lstat()
+        except OSError as exc:
+            raise WorkspaceError(f"workspace is unavailable: {exc.strerror}") from exc
+        if stat_module.S_ISLNK(root_lstat.st_mode):
+            raise WorkspaceError("workspace root must not be a symlink")
+        if not stat_module.S_ISDIR(root_lstat.st_mode):
+            raise WorkspaceError("workspace root must be an existing directory")
+        try:
+            self._root = candidate.resolve(strict=True)
+            root_stat = self._root.stat()
+        except OSError as exc:
+            raise WorkspaceError(f"workspace is unavailable: {exc.strerror}") from exc
+        self._root_identity = (root_stat.st_dev, root_stat.st_ino)
+        self._cwd_parts: tuple[str, ...] = ()
+
+    @property
+    def root(self) -> Path:
+        return self._root
+
+    def _check_root(self) -> None:
+        try:
+            current = self._root.lstat()
+        except OSError as exc:
+            raise WorkspaceError("workspace root is no longer available") from exc
+        if (
+            stat_module.S_ISLNK(current.st_mode)
+            or not stat_module.S_ISDIR(current.st_mode)
+            or (current.st_dev, current.st_ino) != self._root_identity
+        ):
+            raise WorkspaceError("workspace root was replaced")
+
+    @staticmethod
+    def _check_text_path(path: str) -> None:
+        if not isinstance(path, str) or not path:
+            raise WorkspaceError("path must not be empty")
+        if "\x00" in path:
+            raise WorkspaceError("path contains NUL")
+        if len(path.encode("utf-8")) > MAX_PATH_BYTES:
+            raise WorkspaceError(f"path exceeds {MAX_PATH_BYTES} bytes")
+
+    def _parts(self, path: str) -> tuple[str, ...]:
+        self._check_text_path(path)
+        parsed = PurePosixPath(path)
+        raw_parts = parsed.parts[1:] if parsed.is_absolute() else parsed.parts
+        base = () if parsed.is_absolute() else self._cwd_parts
+        parts = list(base)
+        for component in raw_parts:
+            if component in ("", "."):
+                continue
+            if component == "..":
+                raise WorkspaceError("parent traversal '..' is not allowed")
+            if "/" in component:
+                raise WorkspaceError("invalid path component")
+            parts.append(component)
+        return tuple(parts)
+
+    @staticmethod
+    def _virtual(parts: tuple[str, ...]) -> str:
+        return "/" if not parts else "/" + "/".join(parts)
+
+    def _walk_existing(self, parts: tuple[str, ...]) -> Path:
+        self._check_root()
+        current = self._root
+        for index, component in enumerate(parts):
+            current = current / component
+            try:
+                item = current.lstat()
+            except FileNotFoundError as exc:
+                raise WorkspaceError(f"path does not exist: {self._virtual(parts)}") from exc
+            except OSError as exc:
+                raise WorkspaceError(f"path is unavailable: {exc.strerror}") from exc
+            if stat_module.S_ISLNK(item.st_mode):
+                raise WorkspaceError("symlinks are not allowed in workspace paths")
+            if index < len(parts) - 1 and not stat_module.S_ISDIR(item.st_mode):
+                raise WorkspaceError("path component is not a directory")
+        return current
+
+    def _new_leaf(self, path: str) -> tuple[tuple[str, ...], Path]:
+        parts = self._parts(path)
+        if not parts:
+            raise WorkspaceError("workspace root cannot be created or replaced")
+        parent = self._walk_existing(parts[:-1])
+        parent_stat = parent.lstat()
+        if not stat_module.S_ISDIR(parent_stat.st_mode):
+            raise WorkspaceError("parent is not a directory")
+        target = parent / parts[-1]
+        if os.path.lexists(target):
+            raise WorkspaceError(f"path already exists: {self._virtual(parts)}")
+        return parts, target
+
+    def pwd(self) -> str:
+        self._check_root()
+        return self._virtual(self._cwd_parts)
+
+    def cd(self, path: str | None = None) -> str:
+        parts = self._parts(path or "/")
+        target = self._walk_existing(parts)
+        if not stat_module.S_ISDIR(target.lstat().st_mode):
+            raise WorkspaceError("cd target is not a directory")
+        self._cwd_parts = parts
+        return self.pwd()
+
+    def ls(self, path: str | None = None) -> list[str]:
+        parts = self._parts(path or ".")
+        target = self._walk_existing(parts)
+        if not stat_module.S_ISDIR(target.lstat().st_mode):
+            raise WorkspaceError("ls target is not a directory")
+        names: list[str] = []
+        try:
+            with os.scandir(target) as entries:
+                for entry in entries:
+                    names.append(entry.name)
+                    if len(names) > MAX_DIRECTORY_ENTRIES:
+                        raise WorkspaceError(
+                            f"directory exceeds {MAX_DIRECTORY_ENTRIES} entries"
+                        )
+        except WorkspaceError:
+            raise
+        except OSError as exc:
+            raise WorkspaceError(f"directory is unavailable: {exc.strerror}") from exc
+        return sorted(names)
+
+    def read_text(self, path: str) -> str:
+        parts = self._parts(path)
+        target = self._walk_existing(parts)
+        if not stat_module.S_ISREG(target.lstat().st_mode):
+            raise WorkspaceError("cat accepts regular files only")
+        flags = os.O_RDONLY
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            descriptor = os.open(target, flags)
+            try:
+                metadata = os.fstat(descriptor)
+                if not stat_module.S_ISREG(metadata.st_mode):
+                    raise WorkspaceError("cat accepts regular files only")
+                if metadata.st_size > MAX_FILE_BYTES:
+                    raise WorkspaceError(f"file exceeds {MAX_FILE_BYTES} bytes")
+                chunks: list[bytes] = []
+                remaining = MAX_FILE_BYTES + 1
+                while remaining:
+                    chunk = os.read(descriptor, remaining)
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    remaining -= len(chunk)
+                data = b"".join(chunks)
+            finally:
+                os.close(descriptor)
+        except WorkspaceError:
+            raise
+        except OSError as exc:
+            raise WorkspaceError(f"file is unavailable: {exc.strerror}") from exc
+        if len(data) > MAX_FILE_BYTES:
+            raise WorkspaceError(f"file exceeds {MAX_FILE_BYTES} bytes")
+        try:
+            text = data.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise WorkspaceError("file is not valid UTF-8 text") from exc
+        if "\x00" in text:
+            raise WorkspaceError("file appears to be binary")
+        return text
+
+    def stat(self, path: str) -> WorkspaceStat:
+        parts = self._parts(path)
+        target = self._walk_existing(parts)
+        metadata = target.lstat()
+        if stat_module.S_ISREG(metadata.st_mode):
+            kind = "file"
+            size = metadata.st_size
+        elif stat_module.S_ISDIR(metadata.st_mode):
+            kind = "directory"
+            size = 0
+        else:
+            raise WorkspaceError("stat accepts regular files and directories only")
+        return WorkspaceStat(
+            path=self._virtual(parts),
+            kind=kind,
+            size=size,
+            readable=os.access(target, os.R_OK),
+            writable=os.access(target, os.W_OK),
+        )
+
+    def mkdir(self, path: str) -> str:
+        parts, target = self._new_leaf(path)
+        try:
+            os.mkdir(target)
+        except OSError as exc:
+            raise WorkspaceError(f"mkdir failed: {exc.strerror}") from exc
+        return self._virtual(parts)
+
+    def write_text(self, path: str, text: str) -> str:
+        if not isinstance(text, str):
+            raise WorkspaceError("write content must be text")
+        data = text.encode("utf-8")
+        if len(data) > MAX_FILE_BYTES:
+            raise WorkspaceError(f"content exceeds {MAX_FILE_BYTES} bytes")
+        parts, target = self._new_leaf(path)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            descriptor = os.open(target, flags, 0o600)
+            try:
+                view = memoryview(data)
+                while view:
+                    written = os.write(descriptor, view)
+                    if written <= 0:
+                        raise WorkspaceError("write made no progress")
+                    view = view[written:]
+            finally:
+                os.close(descriptor)
+        except WorkspaceError:
+            try:
+                target.unlink()
+            except OSError:
+                pass
+            raise
+        except OSError as exc:
+            raise WorkspaceError(f"write failed: {exc.strerror}") from exc
+        return self._virtual(parts)
