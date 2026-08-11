@@ -9,7 +9,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 - [ ] **T-0099** Extend the T-0098 Native Interactive CLI with one explicitly
   selected workspace root and the minimum file-oriented operator commands:
   `pwd`, `cd`, `ls`, `cat`, `stat`, `mkdir`, and bounded exclusive `write`.
-  Resolve every CLI path beneath that root, reject absolute paths, `..`,
+  Present that host directory as virtual `/`, resolve every CLI path beneath
+  it, and reject host-absolute escape, escaping `..`,
   symlink escape, special files, oversized reads/writes, and overwrite, and
   keep existing `graph create`, `graph show`, `variants`, `propose`, `execute`,
   and `result` authority unchanged. Use the workspace for result publication

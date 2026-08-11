@@ -17,8 +17,9 @@ also delay the current delivery objective.
 
 T-0099 first adds one explicit capability-style workspace root and bounded
 `pwd`, `cd`, `ls`, `cat`, `stat`, `mkdir`, and exclusive `write` operations.
-All user paths remain beneath the selected root and fail closed on traversal,
-link escape, special files, excessive size, or overwrite. The existing guarded
+The selected host directory appears to the CLI as virtual `/`. All user paths
+remain beneath it and fail closed on escaping traversal, link escape, special
+files, excessive size, or overwrite. The existing guarded
 graph compiler, adviser, executor, validation, and result schemas remain the
 only graph authority. This layer may be described as chroot-like workspace
 containment, never as an OS security boundary.
