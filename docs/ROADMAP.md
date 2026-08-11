@@ -206,6 +206,14 @@ T-0041 additionally makes `GraphVariant`, `MemoryPlan`, and
 contract, or candidate-set lineage before backend execution. This closes the
 owned schema slice only; the Gate state and remaining exit scope are unchanged.
 
+T-0043 supplies executable Miroirs structural admission and an independent
+Pavane deterministic integer reference for the two bounded MVP graph families.
+Native and Sonatine observations must match the owned expected checksum;
+semantic approval is not inferred from backend self-report or timing. This
+closes the current semantic-oracle slice, while full Gate 4 remains planned for
+the pinned real-workload import, mapper/resource boundary, and broader compiler
+scope.
+
 ## Gate 5 — hardware exploration
 
 State: **Blocked by evidence, not implementation difficulty**

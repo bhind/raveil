@@ -71,6 +71,15 @@ The adapter carries no selection timing and is always labelled
 `qemu-emulation-correctness`. Native and QEMU baseline checksums are compared,
 but this does not establish physical RISC-V behavior or performance.
 
+T-0043 instantiates the frontend's named verification stages. Miroirs compares
+the admitted artifacts with the canonical `GraphCompiler` output and exact
+program, contract, candidate-set, and proposal bindings before execution.
+Pavane is a separate deterministic owned reference executor: it regenerates
+the fixed integer inputs and expected checksum without trusting a backend's
+reference field. Pavane decides semantic equivalence only; proposal advice,
+timing-based selection, Sonatine finalization, and evidence classification stay
+outside the oracle.
+
 The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
 conventional sequential register instruction stream and not an exact-cycle VLIW
 schedule. A native job should carry:

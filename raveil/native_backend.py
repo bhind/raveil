@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import re
 import subprocess
 
 from .experiment_schema import BenchmarkCandidate, WorkloadSpec
@@ -73,18 +74,33 @@ class NativeCBackend:
         except json.JSONDecodeError:
             detail = completed.stderr.strip() or "invalid native benchmark output"
             return NativeMeasurement(None, None, None, False, detail)
-        semantic_valid = bool(value.get("semantic_valid", False))
-        failure = str(value.get("failure", ""))
+        expected = {
+            "latency_ns", "checksum", "reference_checksum", "semantic_valid", "failure"
+        }
+        if type(value) is not dict or set(value) != expected:
+            return NativeMeasurement(None, None, None, False, "invalid native benchmark schema")
+        latency = value["latency_ns"]
+        checksum = value["checksum"]
+        reference = value["reference_checksum"]
+        semantic_valid = value["semantic_valid"]
+        failure = value["failure"]
+        if (
+            type(latency) is not int
+            or latency < 0
+            or type(checksum) is not str
+            or re.fullmatch(r"[0-9a-f]{16}", checksum) is None
+            or type(reference) is not str
+            or re.fullmatch(r"[0-9a-f]{16}", reference) is None
+            or type(semantic_valid) is not bool
+            or type(failure) is not str
+        ):
+            return NativeMeasurement(None, None, None, False, "invalid native benchmark field")
         if completed.returncode != 0 and not failure:
             failure = f"native benchmark exited {completed.returncode}"
         return NativeMeasurement(
-            latency_ns=int(value["latency_ns"]) if value.get("latency_ns") is not None else None,
-            checksum=str(value["checksum"]) if value.get("checksum") is not None else None,
-            reference_checksum=(
-                str(value["reference_checksum"])
-                if value.get("reference_checksum") is not None
-                else None
-            ),
+            latency_ns=latency,
+            checksum=checksum,
+            reference_checksum=reference,
             semantic_valid=semantic_valid,
             failure=failure,
         )

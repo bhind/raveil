@@ -50,12 +50,19 @@ class GraphProgram:
     schema: str = GRAPH_SCHEMA
 
     def __post_init__(self) -> None:
+        if not self.program_id:
+            raise ValueError("graph program identity is required")
         if self.schema != GRAPH_SCHEMA:
             raise ValueError(f"unsupported graph schema: {self.schema}")
         if self.family not in {"gemm", "gemm_bias_relu"}:
             raise ValueError(f"unsupported MVP graph family: {self.family}")
-        if min(self.m, self.n, self.k) <= 0 or max(self.m, self.n, self.k) > 512:
+        if any(type(value) is not int for value in (self.m, self.n, self.k)) or (
+            min(self.m, self.n, self.k) <= 0 or max(self.m, self.n, self.k) > 512
+        ):
             raise ValueError("graph dimensions must be between 1 and 512")
+        node_ids = [node.node_id for node in self.nodes]
+        if len(set(node_ids)) != len(node_ids):
+            raise ValueError("graph node identifiers must be unique")
         expected_ops = (
             ("matmul",)
             if self.family == "gemm"
@@ -389,6 +396,141 @@ class ExecutionBackend(Protocol):
         ...
 
 
+class MiroirsStructuralValidator:
+    """Admit only the exact owned program, contract, slate, and proposal."""
+
+    def validate(
+        self,
+        program: GraphProgram,
+        contract: ExecutionContract,
+        variants: tuple[GraphVariant, ...],
+        proposal: OptimizationProposal,
+    ) -> None:
+        contract.validate(program)
+        if not variants or not variants[0].candidate.trusted_baseline:
+            raise ValueError("variant slate must start with the trusted baseline")
+        if sum(item.candidate.trusted_baseline for item in variants) != 1:
+            raise ValueError("variant slate must contain exactly one trusted baseline")
+        if len({item.variant_id for item in variants}) != len(variants):
+            raise ValueError("variant identifiers must be unique")
+        if any(
+            item.program_sha256 != program.identity
+            or item.contract_sha256 != contract.identity
+            for item in variants
+        ):
+            raise ValueError("variant lineage does not match program and contract")
+        if (
+            proposal.program_sha256 != program.identity
+            or proposal.contract_sha256 != contract.identity
+            or proposal.candidate_set_sha256 != variant_set_identity(variants)
+        ):
+            raise ValueError("proposal lineage does not match admitted variants")
+        admitted = {variant.variant_id for variant in variants}
+        ranked = {item.variant_id for item in proposal.ranking}
+        if ranked != admitted:
+            raise ValueError("proposal ranking does not match admitted variants")
+        if proposal.variant_id is not None and proposal.variant_id not in admitted:
+            raise ValueError("proposal must name a variant in the admitted slate")
+        if variants != GraphCompiler(contract).compile(program):
+            raise ValueError("variant slate does not match the canonical compiler output")
+
+
+@dataclass(frozen=True)
+class SemanticVerdict:
+    approved: bool
+    baseline_valid: bool
+    candidate_valid: bool
+    equivalent: bool
+    reason: str
+
+
+class PavaneSemanticOracle:
+    """Exact differential oracle for the bounded integer MVP graph families."""
+
+    @staticmethod
+    def _fill(count: int, salt: int) -> list[int]:
+        state = 0x9E3779B9 ^ salt
+        values: list[int] = []
+        for _ in range(count):
+            state = (state * 1664525 + 1013904223) & 0xFFFFFFFF
+            values.append(((state >> 16) % 7) - 3)
+        return values
+
+    @staticmethod
+    def _checksum(values: list[int]) -> str:
+        value = 1469598103934665603
+        for item in values:
+            word = item & 0xFFFFFFFFFFFFFFFF
+            for shift in range(0, 64, 8):
+                value ^= (word >> shift) & 0xFF
+                value = (value * 1099511628211) & 0xFFFFFFFFFFFFFFFF
+        return f"{value:016x}"
+
+    def expected_checksum(self, program: GraphProgram) -> str:
+        a = self._fill(program.m * program.k, 1)
+        b = self._fill(program.k * program.n, 2)
+        output: list[int] = []
+        for i in range(program.m):
+            for j in range(program.n):
+                value = sum(
+                    a[i * program.k + p] * b[p * program.n + j]
+                    for p in range(program.k)
+                )
+                if program.family == "gemm_bias_relu":
+                    value = max(0, value + (j % 11) - 5)
+                output.append(value)
+        return self._checksum(output)
+
+    @staticmethod
+    def _valid(measurement: NativeMeasurement) -> bool:
+        return (
+            measurement.semantic_valid
+            and measurement.checksum is not None
+            and measurement.reference_checksum is not None
+            and measurement.checksum == measurement.reference_checksum
+        )
+
+    def baseline(
+        self, program: GraphProgram, measurement: NativeMeasurement
+    ) -> SemanticVerdict:
+        expected = self.expected_checksum(program)
+        valid = self._valid(measurement) and measurement.checksum == expected
+        return SemanticVerdict(
+            valid,
+            valid,
+            False,
+            valid,
+            "trusted baseline matched its exact integer reference"
+            if valid
+            else "trusted baseline failed exact integer reference validation",
+        )
+
+    def compare(
+        self,
+        program: GraphProgram,
+        baseline: NativeMeasurement,
+        candidate: NativeMeasurement,
+    ) -> SemanticVerdict:
+        expected = self.expected_checksum(program)
+        baseline_valid = self._valid(baseline) and baseline.checksum == expected
+        candidate_valid = self._valid(candidate) and candidate.checksum == expected
+        equivalent = bool(
+            baseline_valid
+            and candidate_valid
+            and candidate.checksum == baseline.checksum
+            and candidate.reference_checksum == baseline.reference_checksum
+        )
+        return SemanticVerdict(
+            equivalent,
+            baseline_valid,
+            candidate_valid,
+            equivalent,
+            "candidate matched baseline and exact integer reference"
+            if equivalent
+            else "candidate failed reference validation or disagreed with baseline",
+        )
+
+
 @dataclass(frozen=True)
 class VariantObservation:
     variant_id: str
@@ -435,18 +577,14 @@ class GraphExecutor:
     """Run baseline-first, validate proposals, and fail closed to the baseline."""
 
     def __init__(
-        self, backend: ExecutionBackend, contract: ExecutionContract | None = None
+        self,
+        backend: ExecutionBackend,
+        contract: ExecutionContract | None = None,
     ) -> None:
         self.backend = backend
         self.contract = contract or ExecutionContract()
-
-    @staticmethod
-    def _valid(measurement: NativeMeasurement) -> bool:
-        return (
-            measurement.semantic_valid
-            and measurement.checksum is not None
-            and measurement.checksum == measurement.reference_checksum
-        )
+        self.structural_validator = MiroirsStructuralValidator()
+        self.semantic_oracle = PavaneSemanticOracle()
 
     def execute(
         self,
@@ -456,25 +594,7 @@ class GraphExecutor:
         *,
         inner_iterations: int = 1,
     ) -> GraphMVPResult:
-        self.contract.validate(program)
-        if not variants or not variants[0].candidate.trusted_baseline:
-            raise ValueError("variant slate must start with the trusted baseline")
-        if sum(item.candidate.trusted_baseline for item in variants) != 1:
-            raise ValueError("variant slate must contain exactly one trusted baseline")
-        if len({item.variant_id for item in variants}) != len(variants):
-            raise ValueError("variant identifiers must be unique")
-        if any(
-            item.program_sha256 != program.identity
-            or item.contract_sha256 != self.contract.identity
-            for item in variants
-        ):
-            raise ValueError("variant lineage does not match program and contract")
-        if (
-            proposal.program_sha256 != program.identity
-            or proposal.contract_sha256 != self.contract.identity
-            or proposal.candidate_set_sha256 != variant_set_identity(variants)
-        ):
-            raise ValueError("proposal lineage does not match admitted variants")
+        self.structural_validator.validate(program, self.contract, variants, proposal)
         by_id = {variant.variant_id: variant for variant in variants}
         baseline = variants[0]
         workload = program.workload(inner_iterations)
@@ -488,7 +608,8 @@ class GraphExecutor:
             "variants": variant_records,
             "proposal": proposal,
         }
-        if not self._valid(baseline_measurement):
+        baseline_verdict = self.semantic_oracle.baseline(program, baseline_measurement)
+        if not baseline_verdict.approved:
             return GraphMVPResult(
                 **common,
                 observations=tuple(observations),
@@ -511,7 +632,10 @@ class GraphExecutor:
         observations.append(
             VariantObservation.from_measurement(proposed.variant_id, proposed_measurement)
         )
-        if not self._valid(proposed_measurement):
+        semantic_verdict = self.semantic_oracle.compare(
+            program, baseline_measurement, proposed_measurement
+        )
+        if not semantic_verdict.candidate_valid:
             return GraphMVPResult(
                 **common,
                 observations=tuple(observations),
@@ -519,11 +643,7 @@ class GraphExecutor:
                 outcome="rolled-back",
                 rollback_reason="proposal failed semantic or execution validation",
             )
-        if (
-            proposed_measurement.checksum != baseline_measurement.checksum
-            or proposed_measurement.reference_checksum
-            != baseline_measurement.reference_checksum
-        ):
+        if not semantic_verdict.approved:
             return GraphMVPResult(
                 **common,
                 observations=tuple(observations),

@@ -13,7 +13,7 @@ COPY sonatine /raveil/sonatine
 COPY tests /raveil/tests
 
 RUN make -C sonatine clean all \
-    && python3 -m unittest tests.test_graph_mvp tests.test_sonatine_backend -v \
+    && python3 -m unittest tests.test_graph_mvp tests.test_sonatine_backend tests.test_native_backend -v \
     && make -C sonatine graph-smoke
 
 CMD ["python3", "-m", "raveil", "graph-mvp", "--backend", "sonatine-qemu", "--family", "gemm", "--m", "8", "--n", "8", "--k", "8", "--sonatine-kernel", "sonatine/build/sonatine.elf", "--output", "/tmp/raveil-sonatine-result.json"]

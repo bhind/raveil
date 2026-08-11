@@ -32,6 +32,10 @@ class SonatineBackendTests(unittest.TestCase):
             result_line(8),
             result_line(7, status="99"),
             result_line(7, approved="0"),
+            result_line(7, epoch="-1"),
+            result_line(7, sequence="+1"),
+            result_line(7, job="007"),
+            result_line(7, cookie="0" * 32),
             result_line(7).replace(" approved=1", " extra=1 approved=1"),
         ):
             self.assertFalse(SonatineQEMUBackend.parse_result(output, 7).semantic_valid)

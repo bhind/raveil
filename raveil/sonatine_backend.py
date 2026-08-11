@@ -96,13 +96,16 @@ class SonatineQEMUBackend:
             r"[0-9a-f]{16}", fields["checksum"]
         ) or not re.fullmatch(r"[0-9a-f]{16}", fields["reference"]):
             return NativeMeasurement(None, None, None, False, "malformed graph result identity")
-        try:
-            status, detail, job, epoch, sequence, approved = (
-                int(fields[name])
-                for name in ("status", "detail", "job", "epoch", "sequence", "approved")
-            )
-        except ValueError:
+        decimal_names = ("status", "detail", "job", "epoch", "sequence", "approved")
+        if any(not re.fullmatch(r"(?:0|[1-9][0-9]*)", fields[name]) for name in decimal_names):
             return NativeMeasurement(None, None, None, False, "non-integer graph result field")
+        status, detail, job, epoch, sequence, approved = (
+            int(fields[name]) for name in decimal_names
+        )
+        if any(value > 0xFFFFFFFFFFFFFFFF for value in (job, epoch, sequence)) or any(
+            value > 0xFFFFFFFF for value in (status, detail, approved)
+        ) or int(fields["cookie"], 16) == 0:
+            return NativeMeasurement(None, None, None, False, "graph result field out of range")
         if status not in {1, 2, 3, 4} or approved not in {0, 1}:
             return NativeMeasurement(None, None, None, False, "unknown graph result state")
         if status != 1 or detail != 0 or job != request_id or epoch == 0 or sequence == 0:

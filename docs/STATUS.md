@@ -79,6 +79,27 @@ complete ordered candidate set. The executor rejects stale or malformed
 lineage before invoking a backend. The bounded host-memory plan remains
 descriptive and is not resource-enforcement or performance evidence.
 
+T-0043 makes the named Miroirs and Pavane boundaries executable in the same
+OS/ISA-neutral frontend. Miroirs rejects any graph, contract, variant slate, or
+proposal that differs from the canonical owned compiler output before a backend
+call. Pavane independently regenerates the deterministic `int32` inputs,
+executes the bounded `int64` GEMM or GEMM+bias+ReLU reference, computes the
+owned FNV-1a checksum, and compares both baseline and candidate observations to
+that expected value. Backend-supplied `semantic_valid` and reference checksums
+cannot approve a self-consistent wrong result. Semantic approval remains
+independent of selection timing, so the timing-free Sonatine/QEMU baseline
+continues to support explicit abstention.
+
+The native result adapter and Sonatine serial adapter now also reject
+non-canonical scalar encodings, wrong JSON types, missing fields, negative
+latency, zero cookies, and invalid binding ranges. These checks are correctness
+boundaries only and create no performance or hardware claim.
+
+The completed tree passed 91 local tests plus RV64 release/debug, DWARF, U-mode
+shell, telemetry replay, and graph differential checks. A Linux arm64 container
+also passed the 29 focused graph/backend tests and actual QEMU/native
+differential. These are host and emulation correctness results only.
+
 Sixteen focused tests pass on native macOS and in a Debian 12 arm64 GNU/Linux
 container. The real Linux smoke ran baseline then candidate and chose rollback
 because the candidate did not improve that development run. This is functional

@@ -262,8 +262,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.
 - [ ] **T-0042** Bootstrap a mapper/simulator adapter without leaking upstream types.
-- [ ] **T-0043** Implement Miroirs Graph Compiler structural validation and Pavane Semantic Oracle differential
-  semantic checking.
+- [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
+  Pavane Semantic Oracle differential semantic checking. Miroirs now admits
+  only the canonical owned compiler slate and fully bound proposal before any
+  backend call; Pavane independently executes the bounded deterministic integer
+  reference and requires exact baseline/candidate agreement without using
+  latency or Experience as semantic authority.
 - [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis Execution Subsystem organizations.
 
 ## Research backlog
