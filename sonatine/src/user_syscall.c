@@ -3,6 +3,7 @@
 #include "capability.h"
 #include "console.h"
 #include "context.h"
+#include "demo_shell.h"
 #include "ipc.h"
 #include "platform.h"
 #include "task.h"
@@ -19,11 +20,22 @@
 #define SYS_FS_READ 17u
 #define SYS_FS_WRITE 18u
 #define SYS_PUTC 19u
+#define SYS_DEMO 20u
 
 #define SYS_OK 0u
 #define SYS_DENIED ((uint64_t)-1)
 #define SYS_INVALID ((uint64_t)-2)
 #define SYS_WOULD_BLOCK ((uint64_t)-3)
+
+static bool user_prose_byte_allowed(uint8_t value) {
+  static const char protected_prefix[]=SONATINE_DEMO_FRAME_PREFIX;
+  static size_t matched;
+  if(value==(uint8_t)protected_prefix[matched]) {
+    ++matched;
+    if(protected_prefix[matched]=='\0') { matched=0u; return false; }
+  } else matched=value==(uint8_t)protected_prefix[0]?1u:0u;
+  return true;
+}
 
 static bool current_user(uint16_t *task_id) {
   const uint16_t current=task_current();
@@ -41,7 +53,7 @@ static bool resolve_current(cap_handle_t handle,uint16_t type,uint32_t rights) {
 static void log_event(uint64_t event,uint64_t detail,uint64_t value) {
   switch(event) {
     case 1u: console_write("raveil-u> "); break;
-    case 2u: console_write("help info ticks ipc fs exit\n"); break;
+    case 2u: console_write("help info ticks ipc fs ls cat echo write stat jobs run cancel result exit\n"); break;
     case 3u: console_write("u-cmd info=ok\n"); break;
     case 4u: console_write("u-shell resumed task=1\n"); break;
     case 5u: console_write("error: command too long\n"); break;
@@ -78,7 +90,7 @@ uintptr_t user_syscall_dispatch(struct trap_frame *frame) {
     } else result=SYS_DENIED;
   } else if(number==SYS_PUTC) {
     if(resolve_current((cap_handle_t)arg0,CAP_OBJECT_CONSOLE,CAP_RIGHT_WRITE) &&
-       arg1<=0x7fu) {
+       arg1<=0x7fu && user_prose_byte_allowed((uint8_t)arg1)) {
       console_putc((char)arg1); result=SYS_OK;
     } else result=SYS_DENIED;
   } else if(number==SYS_CLOCK) {
@@ -125,6 +137,10 @@ uintptr_t user_syscall_dispatch(struct trap_frame *frame) {
       if(wrote==VFS_DENIED) console_write("kernel-file initramfs=DENIED\n");
       result=wrote==VFS_OK?SYS_OK:wrote==VFS_DENIED?SYS_DENIED:SYS_INVALID;
     }
+  } else if(number==SYS_DEMO) {
+    result=sonatine_demo_command_run(current,(cap_handle_t)arg0,
+                                     (cap_handle_t)trap_get_gpr(frame,12u),
+                                     (enum sonatine_demo_command)arg1);
   } else if(number==SYS_EXIT && current==context_user_task()) {
     (void)task_stop(current);
     console_write("u-shell exit task=1\n");

@@ -231,11 +231,7 @@ bool job_completion_post(const struct raveil_completion_record_v1 *completion) {
   }
   return false;
 }
-bool job_completion_take(struct raveil_completion_record_v1 *completion) {
-  if(completion==NULL || completion_used==0u) return false;
-  *completion=completions[completion_read];
-  bytes_zero(&completions[completion_read],sizeof(completions[completion_read]));
-  completion_read=(completion_read+1u)%SONATINE_JOB_RING_DEPTH; --completion_used;
+static bool completion_move_to_shadow(const struct raveil_completion_record_v1 *completion) {
   for(size_t index=0;index<SONATINE_JOB_RING_DEPTH;++index)
     if(inflight[index].active && inflight[index].completion_posted &&
        completion->job_id==inflight[index].submission.job.job_id &&
@@ -251,6 +247,51 @@ bool job_completion_take(struct raveil_completion_record_v1 *completion) {
       bytes_zero(&inflight[index],sizeof(inflight[index])); break;
     }
   return true;
+}
+static bool completion_take_offset(size_t offset,
+                                   struct raveil_completion_record_v1 *completion) {
+  if(completion==NULL || offset>=completion_used) return false;
+  const size_t position=(completion_read+offset)%SONATINE_JOB_RING_DEPTH;
+  *completion=completions[position];
+  for(size_t index=offset;index+1u<completion_used;++index) {
+    const size_t from=(completion_read+index)%SONATINE_JOB_RING_DEPTH;
+    const size_t next=(completion_read+index+1u)%SONATINE_JOB_RING_DEPTH;
+    completions[from]=completions[next];
+  }
+  const size_t last=(completion_read+completion_used-1u)%SONATINE_JOB_RING_DEPTH;
+  bytes_zero(&completions[last],sizeof(completions[last]));
+  --completion_used;
+  completion_write=(completion_read+completion_used)%SONATINE_JOB_RING_DEPTH;
+  return completion_move_to_shadow(completion);
+}
+bool job_completion_take(struct raveil_completion_record_v1 *completion) {
+  return completion_take_offset(0u,completion);
+}
+bool job_completion_pending(const struct sonatine_job_binding *binding) {
+  if(binding==NULL) return false;
+  for(size_t index=0u;index<completion_used;++index) {
+    const struct raveil_completion_record_v1 *completion=
+        &completions[(completion_read+index)%SONATINE_JOB_RING_DEPTH];
+    if(completion->job_id==binding->job_id &&
+       completion->execution_epoch==binding->execution_epoch &&
+       completion->execution_sequence==binding->execution_sequence &&
+       bytes_equal(completion->completion_cookie,binding->completion_cookie,16u)) return true;
+  }
+  return false;
+}
+bool job_completion_take_bound(const struct sonatine_job_binding *binding,
+                               struct raveil_completion_record_v1 *completion) {
+  if(binding==NULL) return false;
+  for(size_t index=0u;index<completion_used;++index) {
+    const struct raveil_completion_record_v1 *pending=
+        &completions[(completion_read+index)%SONATINE_JOB_RING_DEPTH];
+    if(pending->job_id==binding->job_id &&
+       pending->execution_epoch==binding->execution_epoch &&
+       pending->execution_sequence==binding->execution_sequence &&
+       bytes_equal(pending->completion_cookie,binding->completion_cookie,16u))
+      return completion_take_offset(index,completion);
+  }
+  return false;
 }
 static struct shadow_slot *find_shadow(const struct sonatine_job_binding *binding) {
   for(size_t index=0;index<SONATINE_JOB_RING_DEPTH;++index)

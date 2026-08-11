@@ -68,7 +68,7 @@ run: $(TARGET)
 
 smoke: $(TARGET)
 	{ printf 'hel'; sleep 1; \
-	  printf 'p\r\n\rinfX\177o\rfs\rselftest\rticks\nipc\rfs\r123456789\runknown\rexit\r'; } | \
+	  printf 'p\r\n\rinfX\177o\rfs\rselftest\rticks\nipc\rfs\rls\rcat\recho\rwrite\rstat\rjobs\rresult\rrun\rrun\rjobs\rresult\rcancel\rresult\rrun\rcancel\rjobs\rresult\rcancel\r123456789\runknown\rexit\r'; } | \
 	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
 	  tee $(BUILD)/smoke.log
 	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
@@ -77,7 +77,7 @@ smoke: $(TARGET)
 	grep -q 'context switch: init -> idle -> init' $(BUILD)/smoke.log
 	grep -q '\[ok\] persistent U-mode shell / current-task syscall identity' $(BUILD)/smoke.log
 	grep -q 'raveil-u> hel' $(BUILD)/smoke.log
-	grep -q 'help info ticks ipc fs exit' $(BUILD)/smoke.log
+	grep -q 'help info ticks ipc fs ls cat echo write stat jobs run cancel result exit' $(BUILD)/smoke.log
 	grep -q 'u-cmd info=ok' $(BUILD)/smoke.log
 	grep -q 'clint-preempt from=1 to=2' $(BUILD)/smoke.log
 	grep -q 'clint-preempt from=2 to=1' $(BUILD)/smoke.log
@@ -97,6 +97,18 @@ smoke: $(TARGET)
 	grep -q 'kernel-cap escalation=DENIED' $(BUILD)/smoke.log
 	grep -q 'u-ipc send=OK receive=OK' $(BUILD)/smoke.log
 	grep -q 'u-cmd ticks=ok' $(BUILD)/smoke.log
+	grep -q '\[ok\] native operator demo / bounded VFS + job state' $(BUILD)/smoke.log
+	grep -q '/hello size=21 writable=0' $(BUILD)/smoke.log
+	grep -q '/scratch size=6 writable=1' $(BUILD)/smoke.log
+	grep -q 'sonatine fixed echo' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=echo seq=1 status=DENIED job=0 state=EMPTY semantic=0 checksum=0000000000000000' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=jobs seq=7 status=EMPTY job=0 state=EMPTY semantic=0 checksum=0000000000000000' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=run seq=10 status=BUSY' $(BUILD)/smoke.log
+	grep -q 'u-demo stale-completion=DENIED' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=result seq=12 status=COMPLETED' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=result seq=14 status=COMPLETED' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=cancel seq=13 status=TOO_LATE' $(BUILD)/smoke.log
+	grep -q 'RAVEIL-SONATINE-DEMO-V1 command=result seq=18 status=CANCELLED' $(BUILD)/smoke.log
 	grep -q 'error: command too long' $(BUILD)/smoke.log
 	grep -q 'error: unknown command' $(BUILD)/smoke.log
 	grep -q 'u-shell exit task=1' $(BUILD)/smoke.log

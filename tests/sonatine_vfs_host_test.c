@@ -6,6 +6,8 @@ int main(void) {
   vfs_init();
   assert(vfs_lookup("/hello")==VFS_NODE_HELLO);
   assert(vfs_lookup("/scratch")==VFS_NODE_SCRATCH);
+  assert(vfs_path(VFS_NODE_HELLO)!=NULL && vfs_path(VFS_NODE_HELLO)[1]=='h');
+  assert(vfs_path(99u)==NULL);
   assert(vfs_lookup("hello")==0u && vfs_lookup("/../hello")==0u);
   assert(vfs_lookup("/hell")==0u && vfs_lookup("/hello/x")==0u);
   assert(vfs_stat(VFS_NODE_HELLO,&size,&writable)==VFS_OK && size==21u && !writable);

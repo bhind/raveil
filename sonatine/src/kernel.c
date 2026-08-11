@@ -2,6 +2,7 @@
 #include "console.h"
 #include "completion_telemetry.h"
 #include "context.h"
+#include "demo_shell.h"
 #include "ipc.h"
 #include "graph_backend.h"
 #include "job_authority.h"
@@ -198,12 +199,15 @@ void kmain(void) {
   const cap_handle_t experience_authority_cap = cap_create(
       init_task,CAP_OBJECT_EXPERIENCE_AUTHORITY,SONATINE_PLANE_AUTHORITY_OBJECT,
       CAP_RIGHT_WRITE|CAP_RIGHT_CONTROL);
+  const cap_handle_t demo_broker_cap = cap_create(
+      init_task,CAP_OBJECT_DEMO_AUTHORITY,SONATINE_DEMO_AUTHORITY_OBJECT,
+      CAP_RIGHT_CONTROL);
   if (endpoint == 0u || endpoint_cap == 0u || task_cap == 0u ||
       console_cap == 0u || clock_cap == 0u || wrong_owner_cap == 0u ||
       send_only_cap == 0u || filesystem_cap == 0u ||
       filesystem_read_cap == 0u || program_authority_cap == 0u ||
       graph_authority_cap == 0u || data_authority_cap == 0u ||
-      experience_authority_cap == 0u) {
+      experience_authority_cap == 0u || demo_broker_cap == 0u) {
     boot_fail("IPC");
   }
   boot_ok("IPC / bounded mailbox protected by capabilities");
@@ -221,6 +225,11 @@ void kmain(void) {
                                   graph_authority_cap,data_authority_cap,
                                   experience_authority_cap))
     boot_fail("graph backend returned");
+  if(!sonatine_demo_init(init_task,demo_broker_cap,program_authority_cap,graph_authority_cap,
+                         data_authority_cap,experience_authority_cap,
+                         filesystem_cap))
+    boot_fail("native operator demo");
+  boot_ok("native operator demo / bounded VFS + job state");
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");
@@ -228,7 +237,7 @@ void kmain(void) {
           init_task,idle_task,SONATINE_USER_BASE+user_shell_offset(),
           SONATINE_USER_BASE+2u*SONATINE_PAGE_SIZE,console_cap,clock_cap,
           endpoint_cap,wrong_owner_cap,send_only_cap,filesystem_cap,
-          filesystem_read_cap)) {
+          filesystem_read_cap,demo_broker_cap)) {
     boot_fail("persistent U-mode context");
   }
   boot_ok("persistent U-mode shell / current-task syscall identity");

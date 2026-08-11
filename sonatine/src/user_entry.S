@@ -223,6 +223,24 @@ user_shell_payload_start:
   beq s7, t0, 34f
   li t0, 0x7366
   beq s7, t0, 35f
+  li t0, 0x736c
+  beq s7, t0, 42f
+  li t0, 0x746163
+  beq s7, t0, 43f
+  li t0, 0x6f686365
+  beq s7, t0, 44f
+  li t0, 0x6574697277
+  beq s7, t0, 45f
+  li t0, 0x74617473
+  beq s7, t0, 46f
+  li t0, 0x73626f6a
+  beq s7, t0, 47f
+  li t0, 0x6e7572
+  beq s7, t0, 48f
+  li t0, 0x6c65636e6163
+  beq s7, t0, 49f
+  li t0, 0x746c75736572
+  beq s7, t0, 50f
   li t0, 0x74697865
   beq s7, t0, 36f
   li t0, 0x74736574666c6573
@@ -390,6 +408,14 @@ user_shell_payload_start:
   li a7, 16
   ecall
   bnez a0, 38f
+  # A console grant alone cannot invoke the demo broker.
+  mv a0, s0
+  li a1, 3
+  li a2, 0
+  li a7, 20
+  ecall
+  li t0, 1
+  bne a0, t0, 38f
   j 39f
 38:
   unimp
@@ -412,5 +438,68 @@ user_shell_payload_start:
   li a7, 10
   ecall
   j 38b
+42:
+  mv a0, s0
+  li a1, 1
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+43:
+  mv a0, s0
+  li a1, 2
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+44:
+  mv a0, s0
+  li a1, 3
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+45:
+  mv a0, s0
+  li a1, 4
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+46:
+  mv a0, s0
+  li a1, 5
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+47:
+  mv a0, s0
+  li a1, 6
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+48:
+  mv a0, s0
+  li a1, 7
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+49:
+  mv a0, s0
+  li a1, 8
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
+50:
+  mv a0, s0
+  li a1, 9
+  mv a2, s11
+  li a7, 20
+  ecall
+  j 39b
 .global user_payload_end
 user_payload_end:

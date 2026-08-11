@@ -19,6 +19,10 @@ uint32_t vfs_lookup(const char *path) {
   return 0u;
 }
 static struct vfs_node *get_node(uint32_t node) { return node>=1u&&node<=2u?&nodes[node-1u]:NULL; }
+const char *vfs_path(uint32_t node) {
+  struct vfs_node *entry=get_node(node);
+  return entry==NULL?NULL:entry->path;
+}
 enum vfs_result vfs_stat(uint32_t node,size_t *size,bool *writable) {
   struct vfs_node *entry=get_node(node); if(entry==NULL||size==NULL||writable==NULL) return VFS_INVALID;
   *size=entry->size; *writable=entry->writable; return VFS_OK;

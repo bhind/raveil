@@ -275,6 +275,28 @@ class SonatineSourceTests(unittest.TestCase):
         ):
             self.assertNotIn(bypass, public)
 
+    def test_sonatine_demo_shell_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        contracts = ROOT / "contracts"
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "sonatine-demo-shell-test"
+            subprocess.run([
+                compiler, "-std=c11", "-pedantic-errors", "-Wall", "-Wextra",
+                "-Werror", "-DSONATINE_DEMO_SHELL_TESTING",
+                f"-I{SONATINE / 'include'}", f"-I{contracts / 'include'}",
+                str(ROOT / "tests/sonatine_demo_shell_host_test.c"),
+                str(SONATINE / "src/capability.c"),
+                str(SONATINE / "src/vfs.c"),
+                str(SONATINE / "src/job_authority.c"),
+                str(SONATINE / "src/demo_shell.c"),
+                str(contracts / "src/job_contract.c"),
+                str(contracts / "src/object_manifest.c"),
+                "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+
     def test_freestanding_c_sources_are_syntax_clean(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:

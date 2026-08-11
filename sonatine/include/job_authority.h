@@ -42,6 +42,9 @@ bool job_submission_read(const struct sonatine_submission *submission,
 bool job_submission_take(struct sonatine_submission *submission);
 bool job_completion_post(const struct raveil_completion_record_v1 *completion);
 bool job_completion_take(struct raveil_completion_record_v1 *completion);
+bool job_completion_pending(const struct sonatine_job_binding *binding);
+bool job_completion_take_bound(const struct sonatine_job_binding *binding,
+                               struct raveil_completion_record_v1 *completion);
 bool job_cancel(const struct sonatine_job_binding *binding);
 size_t job_shadow_count(void);
 size_t job_submission_count(void);
