@@ -71,6 +71,15 @@ The adapter carries no selection timing and is always labelled
 `qemu-emulation-correctness`. Native and QEMU baseline checksums are compared,
 but this does not establish physical RISC-V behavior or performance.
 
+T-0092 adds a separate interactive demonstrability boundary under ADR-0033.
+The persistent U-mode shell sends only a fixed scalar command plus a distinct
+demo-broker capability. Kernel code derives the current task, performs real
+VFS or bounded job-state transitions, independently checks the fixed GEMM
+result, and emits a fixed-order `RAVEIL-SONATINE-DEMO-V1` frame. A bounded host
+runner validates the exact 18-frame transcript and publishes a strict
+`raveil.sonatine-demo-result/v1` record. Human console prose, Experience,
+completion telemetry, and the record itself grant no authority.
+
 T-0043 instantiates the frontend's named verification stages. Miroirs compares
 the admitted artifacts with the canonical `GraphCompiler` output and exact
 program, contract, candidate-set, and proposal bindings before execution.

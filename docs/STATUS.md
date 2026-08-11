@@ -112,8 +112,8 @@ non-canonical scalar encodings, wrong JSON types, missing fields, negative
 latency, zero cookies, and invalid binding ranges. These checks are correctness
 boundaries only and create no performance or hardware claim.
 
-The completed tree passed 99 local tests plus RV64 release/debug, DWARF, U-mode
-shell, telemetry replay, and graph differential checks. A Linux arm64 container
+The completed tree passed the full local test suite plus RV64 release/debug,
+DWARF, U-mode shell, telemetry replay, and graph differential checks. A Linux arm64 container
 also passed the 29 focused graph/backend tests and actual QEMU/native
 differential. These are host and emulation correctness results only.
 
@@ -166,6 +166,17 @@ Implemented:
   task-owned scalar buffer, CR/LF/CRLF handling, empty-line suppression,
   backspace/delete editing, fail-closed overflow recovery, explicit unknown
   command errors, and `help`, `info`, `ticks`, `ipc`, `fs`, and `exit`;
+- a T-0092 native operator demo adding `ls`, `cat`, `echo`, `write`, `stat`,
+  `jobs`, `run`, `cancel`, and `result`; VFS commands use the real bounded
+  nodes, while graph commands require a distinct non-delegable demo capability
+  and reuse the bound job/completion, Experience-observation, byte-shadow,
+  independent fixed-GEMM semantic comparison, approval, commit, cancellation,
+  and rollback seams;
+- an exact bounded `RAVEIL-SONATINE-DEMO-V1` frame with monotonic sequence and
+  a strict host `sonatine-demo` runner. The runner binds repository revision,
+  kernel and input SHA-256, fixed transcript, QEMU/Python versions, every frame,
+  final state, semantic result, checksum, and exit status into one exclusively
+  published `raveil.sonatine-demo-result/v1` JSON record;
 - command state that remains intact across real CLINT preemption without
   passing a line pointer to the kernel; the only added console operation emits
   one seven-bit scalar byte after current-task and capability validation;

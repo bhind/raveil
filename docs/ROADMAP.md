@@ -22,7 +22,7 @@ claim Gate 3 completion, custom-hardware performance, or a Gate 1 reversal.
 
 ## High-priority demo extension — Sonatine native operator shell
 
-State: **T-0092 planned; next demo P0 after in-flight work**
+State: **T-0092 complete (QEMU emulation correctness)**
 
 T-0092 turns the existing U-mode command prompt, two-node capability VFS, and
 bounded Sonatine graph lifecycle into one visible operator demo. The target
@@ -44,6 +44,14 @@ fork/exec, pipe, signal, tty, general argv/environment, POSIX compatibility,
 arbitrary user pointer, new Gate claim, or RK3588 replacement enters T-0092.
 The exact ownership, acceptance transcript, and sequential handoff prompts are
 in [`guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md`](guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md).
+
+The completed slice uses a distinct current-task-bound demo broker capability,
+real two-node VFS operations, and one fixed 2x2 integer GEMM lifecycle through
+the existing job, completion, Experience-observation, byte-shadow approval,
+commit, cancellation, and rollback seams. A strict host runner accepts only the
+18 expected versioned frames and exclusively publishes one
+`raveil.sonatine-demo-result/v1` record bound to the kernel and input hashes.
+This closes the operator demo only; it does not advance Gate 3 or Gate 4.
 
 ## Queued visibility side project — graph directory view
 

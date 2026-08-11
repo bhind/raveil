@@ -37,3 +37,4 @@ rewrite it.
 | [ADR-0030](ADR-0030-four-plane-writes-require-distinct-capabilities.md) | Accepted | Four-plane writes require distinct capabilities |
 | [ADR-0031](ADR-0031-byte-shadows-freeze-before-atomic-publication.md) | Accepted | Byte shadows freeze before atomic publication |
 | [ADR-0032](ADR-0032-pinned-mlir-import-stays-behind-owned-lineage.md) | Accepted | Pinned MLIR import stays behind owned lineage |
+| [ADR-0033](ADR-0033-sonatine-operator-demo-is-brokered-and-replayable.md) | Accepted | Sonatine operator demo is brokered and replayable |

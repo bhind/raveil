@@ -56,7 +56,7 @@ The normal boot path now enters the persistent U-mode command shell:
 
 ```text
 raveil-u> help
-help info ticks ipc fs exit
+help info ticks ipc fs ls cat echo write stat jobs run cancel result exit
 raveil-u> info
 u-cmd info=ok
 ```
@@ -64,7 +64,10 @@ u-cmd info=ok
 Input is line-oriented. CR, LF, and CRLF are accepted; backspace and delete
 erase one character. Commands are bounded to eight ASCII bytes. An overlong or
 unknown command reports an error and returns to the prompt without stopping the
-kernel. `help`, `info`, `ticks`, `ipc`, `fs`, and `exit` are available. Their
+kernel. `help`, `info`, `ticks`, `ipc`, `fs`, `ls`, `cat`, `echo`, `write`,
+`stat`, `jobs`, `run`, `cancel`, `result`, and `exit` are available. `cat`,
+`echo`, and `write` deliberately use fixed documented values rather than
+general paths or arguments. Their
 kernel operations derive caller identity from the current U-mode task and
 resolve the corresponding capabilities; the line buffer never crosses as a
 user pointer.
@@ -85,7 +88,7 @@ Expected interactive prompt:
 
 ```text
 raveil-u> help
-help info ticks ipc fs exit
+help info ticks ipc fs ls cat echo write stat jobs run cancel result exit
 ```
 
 The retained M-mode diagnostic shell separately provides `help`, `info`,
@@ -138,6 +141,20 @@ python3 -m raveil graph-mvp --backend sonatine-qemu \
 
 The latter is QEMU emulation correctness only. It deliberately reports no
 latency or energy and cannot establish a hardware-performance result.
+
+The bounded interactive operator demo can also be captured as one strict,
+exclusive evidence record after building Sonatine:
+
+```bash
+make -C sonatine
+python3 -m raveil sonatine-demo \
+  --sonatine-kernel sonatine/build/sonatine.elf \
+  --output sonatine/build/raveil-sonatine-demo.json
+```
+
+The command drives the fixed VFS and completed/cancelled job transcript. Its
+result is `qemu-emulation-correctness`, not Experience, measurement, latency,
+energy, or hardware-performance evidence.
 
 The optional pinned IREE adapter validates one repository-owned MLIR fixture
 before running the same native guarded loop. Install the compiler in an

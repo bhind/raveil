@@ -28,7 +28,7 @@ MVP.
 
 ## High priority demo — Sonatine native operator shell
 
-- [ ] **T-0092** Extend the existing bounded Sonatine U-mode shell with an
+- [x] **T-0092** Extend the existing bounded Sonatine U-mode shell with an
   honest native operator demo covering `ls`, `cat`, `echo`, `write`, `stat`,
   `jobs`, `run`, `cancel`, and `result`. Reuse the capability-checked VFS and
   existing bounded graph job/completion/finalization path; derive listings and
