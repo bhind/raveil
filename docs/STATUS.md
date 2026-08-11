@@ -51,6 +51,15 @@ the result.
 
 ## GNU/Linux userspace graph MVP
 
+T-0098 adds `python3 -m raveil shell` as the primary human-facing Native
+userspace path. One explicit session owns the current graph, canonical variant
+slate, proposal, execution result, and local command history while delegating
+all authority to the existing GraphCompiler, AnalyticalPredictor,
+Miroirs/Pavane-backed GraphExecutor, and NativeCBackend. Invalid order,
+malformed arguments, duplicate execution, and overwrite fail without a
+traceback. Results retain `raveil.graph-mvp-result/v1` and remain host-
+correctness development evidence only.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

@@ -32,6 +32,7 @@ from .native_backend import NativeCBackend
 from .sonatine_backend import SonatineQEMUBackend
 from .sonatine_demo import MAX_TIMEOUT_SECONDS, run_sonatine_demo
 from .iree_import import PinnedIreeImporter
+from .interactive_shell import NativeInteractiveSession, run_interactive_shell
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -298,10 +299,28 @@ def command_sonatine_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_shell(args: argparse.Namespace) -> int:
+    return run_interactive_shell(NativeInteractiveSession(
+        source=Path(args.source), compiler=args.compiler,
+        timeout_seconds=args.timeout_seconds, warmups=args.warmups,
+        inner_iterations=args.inner_iterations,
+        minimum_predicted_improvement=args.minimum_predicted_improvement,
+    ))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    shell = subparsers.add_parser("shell", help="open the Native userspace graph session")
+    shell.add_argument("--compiler", default="cc")
+    shell.add_argument("--source", default="benchmarks/native/benchmark.c")
+    shell.add_argument("--timeout-seconds", type=float, default=30.0)
+    shell.add_argument("--warmups", type=int, default=1)
+    shell.add_argument("--inner-iterations", type=int, default=1)
+    shell.add_argument("--minimum-predicted-improvement", type=float, default=0.05)
+    shell.set_defaults(handler=command_shell)
 
     demo = subparsers.add_parser("demo", help="compare cold and warm tuning")
     demo.add_argument("--experience", default="experience/local.jsonl")

@@ -6,6 +6,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [x] **T-0098** Add `python3 -m raveil shell` as the Native userspace
+  interactive MVP. Keep one explicit Session over the existing guarded graph
+  compiler/adviser/executor and reject invalid ordering and overwrite without
+  traceback. Pause Sonatine shell feature growth pending human evaluation.
+
 - [x] **T-0097** Remove the accidentally tracked root `AgentNames.md`, retain
   the call-sign catalog only under ignored local `.codex/`, explicitly ignore
   the root filename, and add a regression preventing its reintroduction.

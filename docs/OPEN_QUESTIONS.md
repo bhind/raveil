@@ -57,6 +57,10 @@ resolves it.
 
 ## Kernel and platform
 
+- After human evaluation of the Native Interactive CLI, which concrete missing
+  operation or isolation property, if any, warrants further Sonatine shell
+  expansion rather than another Native userspace increment?
+
 - After the ADR-0024 GNU/Linux userspace MVP, which measured property, if any,
   justifies promoting Sonatine, a Linux kernel adapter, RISC-V, or another
   specialized authority path to a release prerequisite?

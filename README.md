@@ -3,7 +3,7 @@
 > This heading names the latest immutable feature release. Current development
 > is unreleased. The manufacturing line is active after the GNU/Linux graph MVP
 > and failure-governance milestones. Current work preserves those artifacts
-> while growing the Sonatine U-mode shell and backend integration. See
+> while prioritizing the Native userspace interactive MVP. See
 > `docs/STATUS.md` and `docs/ROADMAP.md` for current state.
 
 This is the smallest executable Raveil seed with two connected bootstrap tracks:
@@ -14,6 +14,20 @@ This is the smallest executable Raveil seed with two connected bootstrap tracks:
 It deliberately contains no production LLM, neural network, RTL, or real
 accelerator backend. A pinned TVM MetaSchedule adapter and completed negative
 Gate 1 evidence now exist; no latency or energy improvement is claimed.
+
+## Native Interactive CLI
+
+From the repository root on macOS or GNU/Linux:
+
+```sh
+python3 -m raveil shell
+```
+
+Then run `help`, `graph create gemm --m 128 --n 128 --k 128`, `graph show`,
+`variants`, `propose`, `execute`, `result`, `history`, `reset`, and `exit`.
+The host Python line editor supplies ordinary Backspace, cursor-key, and input
+history behavior. `result PATH` exclusively creates the existing strict JSON
+result and never overwrites an existing path.
 
 ## Sonatine Microkernel boot target
 

@@ -8,7 +8,12 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current delivery focus
 
-State: **T-0086 userspace vertical slice complete**
+State: **T-0098 Native Interactive CLI MVP complete; awaiting human evaluation**
+
+The current manufacturing focus is the ordinary macOS/GNU/Linux Native
+userspace operator path under ADR-0034. Sonatine remains a preserved later
+backend and OS/capability validation target; further Sonatine shell features
+are paused until the Native CLI is evaluated by a person.
 
 T-0086 was the sole restart P0. It ports the preserved userspace
 graph prototype onto current main and demonstrates one owned graph through

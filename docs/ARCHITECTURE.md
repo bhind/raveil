@@ -45,6 +45,13 @@ mappers, external solvers, and unadmitted candidate graphs are fallible.
 
 ## Native execution contract
 
+ADR-0034 places a thin Native Interactive Session above the existing owned
+frontend. The Session stores workflow state and command history but has no
+admission, semantic, measurement, or commit authority: GraphCompiler,
+MiroirsStructuralValidator, PavaneSemanticOracle, GraphExecutor, and
+NativeCBackend retain those responsibilities. Host terminal types do not enter
+an owned graph or result schema.
+
 ### GNU/Linux userspace vertical slice
 
 ADR-0025 instantiates the smallest complete control loop as owned Python
