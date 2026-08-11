@@ -444,7 +444,6 @@ class GraphExecutor:
     def _valid(measurement: NativeMeasurement) -> bool:
         return (
             measurement.semantic_valid
-            and measurement.latency_ns is not None
             and measurement.checksum is not None
             and measurement.checksum == measurement.reference_checksum
         )
@@ -531,6 +530,14 @@ class GraphExecutor:
                 selected_variant=baseline.variant_id,
                 outcome="rolled-back",
                 rollback_reason="proposal disagreed with the trusted baseline",
+            )
+        if proposed_measurement.latency_ns is None or baseline_measurement.latency_ns is None:
+            return GraphMVPResult(
+                **common,
+                observations=tuple(observations),
+                selected_variant=baseline.variant_id,
+                outcome="rolled-back",
+                rollback_reason="backend supplied no candidate-selection timing",
             )
         if int(proposed_measurement.latency_ns) >= int(baseline_measurement.latency_ns):
             return GraphMVPResult(

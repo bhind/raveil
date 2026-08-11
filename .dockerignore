@@ -5,5 +5,7 @@
 !benchmarks/
 !benchmarks/native/**
 !tests/**
+!sonatine/**
+sonatine/build/**
 **/__pycache__/**
 **/*.pyc

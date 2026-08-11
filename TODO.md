@@ -71,6 +71,10 @@ not pulled into this MVP.
   commands into a bounded line-oriented `raveil-u>` shell with CR/LF/CRLF,
   empty-line, delete/backspace, overflow-recovery, unknown-command, timer
   preemption, and capability-authority regression coverage.
+- [x] **T-0090** Add the explicit `sonatine-qemu` GNU/Linux graph backend with
+  a versioned pointer-free loader request, bounded fully bound serial result,
+  existing job/completion/finalization reuse, strict failure parsing, fixed
+  emulation evidence, and native differential verification.
 - [x] **T-0065** Implement ignored local research bundles plus immutable rclone
   copy, download-based content verification, overwrite refusal, external
   credential boundary, and completion-marker-last behavior. Real Drive sync is

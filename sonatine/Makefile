@@ -29,7 +29,8 @@ endif
 
 TARGET := $(BUILD)/sonatine.elf
 C_SOURCES := $(wildcard src/*.c)
-CONTRACT_SOURCES := ../contracts/src/job_contract.c ../contracts/src/object_manifest.c
+CONTRACT_SOURCES := ../contracts/src/job_contract.c ../contracts/src/object_manifest.c \
+                    ../contracts/src/graph_transport.c
 S_SOURCES := $(wildcard src/*.S)
 OBJECTS := $(patsubst src/%.c,$(BUILD)/%.o,$(C_SOURCES)) \
            $(patsubst ../contracts/src/%.c,$(BUILD)/contract_%.o,$(CONTRACT_SOURCES)) \
@@ -43,7 +44,7 @@ ASFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany $(ASDEBUG) -Iinclude
 LDFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -nostdlib -nostartfiles \
            -Wl,-T,link.ld -Wl,--gc-sections -Wl,--build-id=none
 
-.PHONY: all run smoke debug debug-server gdb gdb-client check-debug clean check-toolchain
+.PHONY: all run smoke graph-smoke debug debug-server gdb gdb-client check-debug clean check-toolchain
 
 all: $(TARGET)
 
@@ -105,6 +106,20 @@ smoke: $(TARGET)
 	  --input sonatine/$(BUILD)/smoke.log \
 	  --store sonatine/$(BUILD)/completion-telemetry.jsonl --run-id qemu-smoke | \
 	  grep -q 'appended=0'
+
+graph-smoke: $(TARGET)
+	rm -f $(BUILD)/graph-mvp-result.json $(BUILD)/graph-mvp-native-result.json
+	cd .. && python3 -m raveil graph-mvp --backend sonatine-qemu \
+	  --family gemm --m 8 --n 8 --k 8 --sonatine-kernel sonatine/$(TARGET) \
+	  --output sonatine/$(BUILD)/graph-mvp-result.json
+	grep -q '"backend": "sonatine-qemu-v1"' $(BUILD)/graph-mvp-result.json
+	grep -q '"evidence_class": "qemu-emulation-correctness"' $(BUILD)/graph-mvp-result.json
+	grep -q '"outcome": "abstained"' $(BUILD)/graph-mvp-result.json
+	grep -q '"semantic_valid": true' $(BUILD)/graph-mvp-result.json
+	cd .. && python3 -m raveil graph-mvp --backend native \
+	  --family gemm --m 8 --n 8 --k 8 \
+	  --output sonatine/$(BUILD)/graph-mvp-native-result.json
+	cd .. && python3 -c 'import json; from pathlib import Path; q=json.loads(Path("sonatine/$(BUILD)/graph-mvp-result.json").read_text()); n=json.loads(Path("sonatine/$(BUILD)/graph-mvp-native-result.json").read_text()); assert q["observations"][0]["checksum"] == n["observations"][0]["checksum"]'
 
 debug:
 	$(MAKE) DEBUG=1 debug-server

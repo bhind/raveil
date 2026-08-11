@@ -1,0 +1,19 @@
+ARG BASE_IMAGE=raveil-sonatine:gate0-clean-20260808
+FROM ${BASE_IMAGE}
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 gcc libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /raveil
+COPY raveil /raveil/raveil
+COPY benchmarks/native /raveil/benchmarks/native
+COPY contracts /raveil/contracts
+COPY sonatine /raveil/sonatine
+COPY tests /raveil/tests
+
+RUN make -C sonatine clean all \
+    && python3 -m unittest tests.test_graph_mvp tests.test_sonatine_backend -v \
+    && make -C sonatine graph-smoke
+
+CMD ["python3", "-m", "raveil", "graph-mvp", "--backend", "sonatine-qemu", "--family", "gemm", "--m", "8", "--n", "8", "--k", "8", "--sonatine-kernel", "sonatine/build/sonatine.elf", "--output", "/tmp/raveil-sonatine-result.json"]

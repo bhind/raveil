@@ -60,3 +60,31 @@ docker build --build-arg BASE_IMAGE=raveil-linux-driver:latest \
 This executes the owned graph/contract and native-C adapter entirely in
 GNU/Linux userspace. Its JSON is segregated host-correctness evidence; the
 container does not gain Sonatine, Experience, commit, or measurement authority.
+
+## Sonatine/QEMU graph backend
+
+T-0090 keeps the same graph frontend and adds an explicit emulation adapter.
+Build it from the repository root using the locally audited Sonatine toolchain
+image:
+
+```sh
+docker build -f linux/Dockerfile.sonatine-graph-mvp \
+  -t raveil-sonatine-graph:t-0090 .
+docker run --rm raveil-sonatine-graph:t-0090
+```
+
+The corresponding host command is:
+
+```sh
+python3 -m raveil graph-mvp \
+  --backend sonatine-qemu \
+  --family gemm --m 8 --n 8 --k 8 \
+  --sonatine-kernel sonatine/build/sonatine.elf \
+  --output /tmp/raveil-sonatine-result.json
+```
+
+The adapter passes a fixed 128-byte pointer-free v1 request through QEMU's
+loader device, then accepts exactly one bounded serial result bound to that
+request and the existing job/completion lifecycle. The output evidence class
+is `qemu-emulation-correctness`; its absent latency is deliberate and cannot be
+used for performance selection or a silicon claim.

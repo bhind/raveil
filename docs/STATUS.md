@@ -58,6 +58,20 @@ executes the vertical slice, and exclusively creates a segregated
 evidence, not Experience, MeasurementRecord, completion telemetry, silicon
 performance, or energy evidence.
 
+T-0090 makes backend choice explicit. `native` remains the default.
+`sonatine-qemu` accepts one bounded GEMM of at most 8x8x8 through a versioned
+128-byte pointer-free request loaded into the fixed QEMU RAM contract. Sonatine
+validates it, reuses JobDescriptor, ObjectManifest, rings, CompletionRecord,
+approval, and metadata finalization, then emits one request-bound result frame.
+The host rejects missing, duplicate, stale, malformed, unknown, unapproved,
+timeout, or nonzero-exit results. Its evidence class is fixed to
+`qemu-emulation-correctness`, and latency is deliberately absent.
+
+The verified 8x8 GEMM path runs the trusted baseline, produces the same exact
+checksum as the native backend, and records explicit adviser abstention. QEMU
+`EXECUTED` is not sufficient: semantic validity is exposed only after exact
+checksum agreement plus Sonatine approval/finalization.
+
 T-0041 now gives `GraphVariant`, `MemoryPlan`, and `OptimizationProposal`
 strict v1 schemas with exact-key deserialization. Variants bind the owned
 program and execution-contract identities; proposals additionally bind the

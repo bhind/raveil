@@ -102,6 +102,20 @@ labelled unknown.
 - Evidence: T-0071 and the preserved 3,600-record EXP-0003 history bundle.
 - State: open; T-0071 owns follow-up.
 
+## Root Docker allowlists must admit every owned build input
+
+- Symptom: the Sonatine graph container build could not copy the guest sources
+  even though the Dockerfile and sources were present in the repository.
+- Cause: the root `.dockerignore` was an allowlist for the earlier GNU/Linux
+  graph MVP and excluded the newly required `sonatine/` tree.
+- Prevention: when a root-context Dockerfile gains an owned build dependency,
+  update the root allowlist in the same change while continuing to exclude
+  generated build directories and research artifacts.
+- Detection: build the final root context from a clean checkout and run the
+  containerized end-to-end command, not only host tests or a cached image.
+- Evidence: T-0090 and `docs/log/2026-08-11.md`.
+- State: corrected for the Sonatine graph backend.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

@@ -33,3 +33,4 @@ rewrite it.
 | [ADR-0026](ADR-0026-failures-stay-canonical-and-actionable-bugs-use-issues.md) | Accepted | Failures stay canonical and actionable bugs use GitHub Issues |
 | [ADR-0027](ADR-0027-owned-graph-artifacts-bind-lineage-before-execution.md) | Accepted | Owned graph artifacts bind lineage before execution |
 | [ADR-0028](ADR-0028-u-mode-shell-keeps-bounded-scalar-state.md) | Accepted | U-mode command shell keeps bounded scalar state |
+| [ADR-0029](ADR-0029-sonatine-graph-transport-is-bounded-emulation.md) | Accepted | Sonatine graph transport is bounded emulation |

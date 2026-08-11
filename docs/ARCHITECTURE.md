@@ -59,6 +59,18 @@ promoted into Experience or measurement evidence. GNU/Linux is the first
 integration environment, but no Linux type appears in the owned graph contract;
 the same module runs on macOS.
 
+T-0090 adds a second explicit adapter without changing this frontend. The
+Sonatine/QEMU path loads a Raveil-owned fixed request envelope into the reserved
+top of the QEMU `virt` RAM contract, then accepts exactly one bounded serial
+result. Sonatine translates the envelope into the existing JobDescriptor,
+ObjectManifest, rings, CompletionRecord, approval, and metadata-finalization
+path. Loader bytes and UART text are transports, never authority. Backend types
+do not enter GraphProgram, GraphVariant, MemoryPlan, or proposal schemas.
+
+The adapter carries no selection timing and is always labelled
+`qemu-emulation-correctness`. Native and QEMU baseline checksums are compared,
+but this does not establish physical RISC-V behavior or performance.
+
 The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
 conventional sequential register instruction stream and not an exact-cycle VLIW
 schedule. A native job should carry:

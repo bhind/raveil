@@ -3,6 +3,7 @@
 #include "completion_telemetry.h"
 #include "context.h"
 #include "ipc.h"
+#include "graph_backend.h"
 #include "job_authority.h"
 #include "memory.h"
 #include "platform.h"
@@ -165,6 +166,8 @@ void kmain(void) {
   if(!job_contract_smoke()) boot_fail("Daphnis contract");
   boot_ok("Daphnis contract / object table + bounded rings + replay guard");
   boot_ok("Daphnis metadata shadow / injected approval + commit + cancel + rollback");
+
+  if(graph_backend_run_if_present()) boot_fail("graph backend returned");
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");

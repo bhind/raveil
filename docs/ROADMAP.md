@@ -116,6 +116,13 @@ preemption with partially entered input, and retains current-task capability
 authority. This remains QEMU emulation correctness, not a new isolation or
 performance claim.
 
+T-0090 supplies a narrow explicit Sonatine/QEMU backend connection for the
+existing userspace graph loop. It reuses Gate 3 job/completion/finalization
+artifacts and Gate 4 owned frontend contracts, but supports only an 8-or-smaller
+GEMM correctness seed with no timing. Gate 3 and full Gate 4 remain planned;
+this adapter is emulation integration evidence, not byte-shadow, Four-plane
+authority, general compiler, or performance completion.
+
 ## Gate 3 — connect authority and evidence
 
 State: **Planned**

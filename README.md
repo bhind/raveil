@@ -123,6 +123,22 @@ python -m unittest discover -s tests -v
 
 The demo trains on four shapes, then tunes a held-out shape with a two-measurement budget. It prints cold-start and warm-transfer Headroom Capture Rate (HCR).
 
+The owned graph MVP selects its backend explicitly. Native POSIX C remains the
+default; the bounded Sonatine/QEMU correctness path currently accepts only the
+8-or-smaller GEMM seed:
+
+```bash
+python3 -m raveil graph-mvp --backend native \
+  --family gemm --m 8 --n 8 --k 8 --output /tmp/raveil-native.json
+python3 -m raveil graph-mvp --backend sonatine-qemu \
+  --family gemm --m 8 --n 8 --k 8 \
+  --sonatine-kernel sonatine/build/sonatine.elf \
+  --output /tmp/raveil-sonatine-result.json
+```
+
+The latter is QEMU emulation correctness only. It deliberately reports no
+latency or energy and cannot establish a hardware-performance result.
+
 The persistent log defaults to `experience/local.jsonl`.
 
 ## Commands

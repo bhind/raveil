@@ -28,6 +28,7 @@ from .experiment_runner import (
 )
 from .graph_mvp import GraphProgram, run_graph_mvp
 from .native_backend import NativeCBackend
+from .sonatine_backend import SonatineQEMUBackend
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -215,29 +216,39 @@ def command_experiment_sync(args: argparse.Namespace) -> int:
 
 def command_graph_mvp(args: argparse.Namespace) -> int:
     program = GraphProgram.create(args.family, args.m, args.n, args.k)
-    source = Path(args.source)
     with tempfile.TemporaryDirectory(prefix="raveil-graph-mvp-") as directory:
-        backend = NativeCBackend(
-            source,
-            Path(directory) / "raveil-native",
-            compiler=args.compiler,
-            compiler_flags=(
-                "-O3", "-std=c11", "-Wall", "-Wextra", "-Werror",
-                "-D_POSIX_C_SOURCE=200809L",
-            ),
-            timeout_seconds=args.timeout_seconds,
-            warmups=args.warmups,
-        )
-        compile_command = backend.compile()
+        if args.backend == "native":
+            backend = NativeCBackend(
+                Path(args.source), Path(directory) / "raveil-native",
+                compiler=args.compiler,
+                compiler_flags=(
+                    "-O3", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                    "-D_POSIX_C_SOURCE=200809L",
+                ),
+                timeout_seconds=args.timeout_seconds, warmups=args.warmups,
+            )
+            compile_command = backend.compile()
+        else:
+            backend = SonatineQEMUBackend(
+                Path(args.sonatine_kernel), qemu=args.qemu,
+                timeout_seconds=args.timeout_seconds,
+            )
+            compile_command = ()
         result = run_graph_mvp(
             program,
             backend,
             minimum_predicted_improvement=args.minimum_predicted_improvement,
             inner_iterations=args.inner_iterations,
         ).to_dict()
-    result["backend"] = "native-c-posix-userspace"
-    result["compile_command"] = [*compile_command[:-1], "<temporary>/raveil-native"]
-    result["compile_command_kind"] = "logical-portable"
+    if args.backend == "native":
+        result["backend"] = "native-c-posix-userspace"
+        result["compile_command"] = [*compile_command[:-1], "<temporary>/raveil-native"]
+        result["compile_command_kind"] = "logical-portable"
+    else:
+        result["backend"] = "sonatine-qemu-v1"
+        result["evidence_class"] = "qemu-emulation-correctness"
+        result["compile_command"] = []
+        result["compile_command_kind"] = "prebuilt-kernel"
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if args.output:
         output = Path(args.output)
@@ -299,6 +310,7 @@ def build_parser() -> argparse.ArgumentParser:
     graph_mvp.add_argument(
         "--family", choices=("gemm", "gemm_bias_relu"), default="gemm_bias_relu"
     )
+    graph_mvp.add_argument("--backend", choices=("native", "sonatine-qemu"), default="native")
     graph_mvp.add_argument("--m", type=int, default=64)
     graph_mvp.add_argument("--n", type=int, default=64)
     graph_mvp.add_argument("--k", type=int, default=64)
@@ -308,6 +320,8 @@ def build_parser() -> argparse.ArgumentParser:
     graph_mvp.add_argument("--minimum-predicted-improvement", type=float, default=0.05)
     graph_mvp.add_argument("--compiler", default="cc")
     graph_mvp.add_argument("--source", default="benchmarks/native/benchmark.c")
+    graph_mvp.add_argument("--sonatine-kernel", default="sonatine/build/sonatine.elf")
+    graph_mvp.add_argument("--qemu", default="qemu-system-riscv64")
     graph_mvp.add_argument("--output")
     graph_mvp.set_defaults(handler=command_graph_mvp)
 

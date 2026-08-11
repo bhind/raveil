@@ -27,3 +27,4 @@ python3 -m unittest discover -s tests -v
 make -C sonatine clean all CROSS_COMPILE="$cross_compile"
 make -C sonatine check-debug CROSS_COMPILE="$cross_compile"
 make -C sonatine smoke CROSS_COMPILE="$cross_compile"
+make -C sonatine graph-smoke CROSS_COMPILE="$cross_compile"

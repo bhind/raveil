@@ -215,6 +215,21 @@ class SonatineSourceTests(unittest.TestCase):
             ], check=True)
             subprocess.run([str(executable)], check=True)
 
+    def test_graph_transport_contract_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        contracts = ROOT / "contracts"
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "graph-transport-test"
+            subprocess.run([
+                compiler, "-std=c11", "-pedantic-errors", "-Wall", "-Wextra",
+                "-Werror", f"-I{contracts / 'include'}",
+                str(ROOT / "tests/graph_transport_host_test.c"),
+                str(contracts / "src/graph_transport.c"), "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+
     def test_sonatine_job_authority_host_model(self) -> None:
         compiler = shutil.which("cc")
         if compiler is None:
