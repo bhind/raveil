@@ -59,6 +59,15 @@ components, special files, excessive sizes, and overwrite, and reveal no host
 absolute path. This is portable application-level containment only; T-0100
 retains descriptor-relative and platform-enforced isolation work.
 
+ADR-0036 adds a separate command-graph vertical slice above that workspace.
+A bounded shell-subset parser emits a versioned `CommandGraphProgram` with
+declared file or stream dependencies; it does not reinterpret the existing
+tensor `GraphProgram`. Direct baseline and graph execution use controlled argv
+for allowlisted OSS tools, validate stdout, outputs, exit status, and failure
+propagation before comparison, and keep construction, execution-only, and
+end-to-end timing distinct. T-0101 is ordinary host-work evaluation, not a
+general shell or a substitute for T-0100 isolation.
+
 ### GNU/Linux userspace vertical slice
 
 ADR-0025 instantiates the smallest complete control loop as owned Python

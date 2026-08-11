@@ -6,6 +6,22 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [ ] **T-0101** Build the Native Command Graph demo on the completed T-0099
+  workspace. Parse a documented safe shell subset into an owned, versioned
+  command DAG; execute the same preregistered ordinary file-processing
+  workloads through a direct baseline and the graph executor; require exact
+  stdout, output-file, exit-status, and failure-propagation agreement before
+  comparing timing. Start with built-ins plus allowlisted host OSS tools for
+  text filtering, counting, sorting, deduplication, slicing, hashing, and
+  bounded file movement. Support pipelines, explicit file inputs/outputs,
+  guarded sequencing, and independent fan-out without `shell=True`, arbitrary
+  executables, command substitution, environment expansion, globbing, append,
+  or host-path escape. Record graph construction, execution, end-to-end,
+  toolchain identity, and per-node outcomes separately under EXP-0004. Keep
+  existing tensor/GEMM graph schemas and authority unchanged, and do not claim
+  performance, energy, GNU/POSIX compatibility, or sandbox security beyond the
+  completed evidence.
+
 - [x] **T-0099** Extend the T-0098 Native Interactive CLI with one explicitly
   selected workspace root and the minimum file-oriented operator commands:
   `pwd`, `cd`, `ls`, `cat`, `stat`, `mkdir`, and bounded exclusive `write`.

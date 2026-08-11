@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current delivery focus
 
-State: **T-0099 Native CLI workspace implemented; human evaluation pending**
+State: **T-0101 Native Command Graph demo planned on completed T-0099**
 
 The current manufacturing focus is the ordinary macOS/GNU/Linux Native
 userspace operator path under ADR-0034. Sonatine remains a preserved later
@@ -17,9 +17,11 @@ are paused until the Native CLI is evaluated by a person. T-0099 is the next
 narrow usability slice: minimum file-oriented commands operate only below one
 explicit workspace and feed the existing guarded graph workflow. That bounded
 workspace slice is now executable on the host; human evaluation and release
-review remain. T-0100 is a
-separate post-evaluation hardening task for OS-enforced sandboxing; it does not
-delay the T-0099 human demo.
+review remain. T-0101 now owns the next product-facing question: whether
+ordinary bounded shell workloads can be compiled into a real command DAG,
+executed with exact baseline agreement, and benchmarked fairly under EXP-0004.
+T-0100 remains a separate hardening task for OS-enforced sandboxing; T-0101
+must not describe the T-0099 workspace as a hostile-input security boundary.
 
 T-0086 was the sole restart P0. It ports the preserved userspace
 graph prototype onto current main and demonstrates one owned graph through

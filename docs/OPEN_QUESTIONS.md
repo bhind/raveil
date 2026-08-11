@@ -89,6 +89,11 @@ resolves it.
 
 ## Ecosystem
 
+- After the T-0101 allowlisted command-graph slice, which additional shell
+  grammar and tools provide enough real workload coverage to justify their
+  authority and portability cost? General `sh -c`, arbitrary executable
+  lookup, command substitution, and ambient environment inheritance remain
+  unresolved, not implied follow-ups.
 - After human evaluation of T-0099's executable bounded workspace CLI, which
   T-0100 strong
   isolation backend should become required for release: Linux Landlock plus
