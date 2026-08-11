@@ -28,6 +28,13 @@ resolves it.
   traversal?
 - Can Daphnis handle variable latency without recreating a large centralized
   scoreboard, replay system, runahead engine, or OoO window?
+- Can one pinned Chisel/Chipyard environment support a fair matched comparison
+  among Rocket in-order, BOOM OoO, BOOM's same-core OoO-disabled diagnostic,
+  and an owned explicit-graph tile without inheriting upstream authority or
+  comparing unequal cache/memory/functional resources?
+- Which transition boundary should follow a successful simulation: a
+  RoCC-like attached engine, a standard/custom RISC-V extension, a programmable
+  accelerator fabric, or a separate ASIC plane? None is selected yet.
 
 ## Experience and policy
 

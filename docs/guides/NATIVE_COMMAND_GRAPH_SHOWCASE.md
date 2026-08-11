@@ -5,6 +5,16 @@ order and limits of the current Native Command Graph visible. It neither
 concludes EXP-0004 nor claims a host, ISA, energy, scheduling, ASIC, or silicon
 improvement.
 
+> **Abstraction warning:** this showcase uses whole host tools/processes such as
+> `sort` as nodes. It is only a conceptual operator-facing illustration and is
+> far above Raveil's intended native operation/dependency/effect/object graph.
+> It does not infer low-level dependencies from an instruction stream, replace
+> or simplify OoO machinery, model instruction/data caches or pipelines, define
+> a Daphnis encoding, or compare CPU microarchitectures. Its cache is ordinary
+> showcase-only content-addressed memoization. Graph-free build systems can
+> perform the same kind of reuse. Do not use this demo as evidence for the
+> native-graph, ISA-extension, area, energy, or performance thesis.
+
 ## Run in a few minutes
 
 Use a new empty directory; this is application-level workspace containment,

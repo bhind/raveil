@@ -125,6 +125,14 @@ surface and remains advice-only. This is host-development-smoke only; EXP-0004
 remains Planned and no timing line is a performance, scheduling, hardware, or
 special-ISA claim.
 
+The showcase now prints an explicit abstraction warning: whole host
+tools/processes are conceptual nodes, far above the intended native
+operation/dependency/effect/object graph. It does not test dependency discovery,
+OoO replacement, cache hierarchy, pipeline, ISA encoding, area, or energy, and
+its memoization is not evidence that Graph is required. RFC-0004 is only a
+proposal for the correctly ordered Chisel RTL/simulation study; no Chisel,
+Rocket, BOOM, Graph RTL, or CPU comparison is implemented in the current tree.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

@@ -21,6 +21,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   changes, output publication/rollback, cache budget/eviction, concurrent
   safety, measurement fairness, and an Experience boundary. Do not promote the
   T-0103 showcase cache or call its observed work avoidance a production win.
+  This tool/process-level follow-up is deferred behind T-0057, T-0042, and
+  T-0044; it is not the next test of the native CPU thesis.
 
 - [x] **T-0102** Add bounded Tab completion to the Native Interactive CLI.
   Complete only documented commands, graph subcommands/options, allowlisted
@@ -390,14 +392,24 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [x] **T-0041** Define strict, versioned Raveil-owned `GraphVariant`,
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.
-- [ ] **T-0042** Bootstrap a mapper/simulator adapter without leaking upstream types.
+- [ ] **T-0042** Bootstrap an owned mapper/simulator adapter without leaking
+  upstream types. After T-0057 freezes the minimal native graph/effect schema,
+  evaluate a pinned Chisel/Chipyard research environment with Rocket in-order,
+  BOOM OoO and same-core OoO-disabled diagnostic configurations plus an owned
+  Graph execution model. Chisel constructs RTL; use a simulator such as
+  Verilator for evidence and label it simulation, not silicon.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
   backend call; Pavane independently executes the bounded deterministic integer
   reference and requires exact baseline/candidate agreement without using
   latency or Experience as semantic authority.
-- [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis Execution Subsystem organizations.
+- [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis Execution
+  Subsystem organizations against matched in-order and conventional OoO
+  baselines. Hold ISA workload, cache/memory model, functional resources, and
+  correctness constant where possible; report frontend, rename/ROB/issue/LSU,
+  graph-ready/token/configuration, cycles, traffic, area, timing, and energy
+  proxies separately.
 
 ## Research backlog
 
@@ -409,8 +421,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [ ] **T-0055** ANN/near-memory profile before FPGA acceleration.
 - [ ] **T-0056** FPGA Experience retrieval/filter prototype only after access
   patterns and schemas stabilize.
-- [ ] **T-0057** Define and test the RFC-0001 native dependency/effect/object
-  graph schema against a sequential and VLIW-like baseline.
+- [ ] **T-0057** Define and test the RFC-0001 native operation/dependency/effect/
+  object graph schema before further tool-level optimization work. Specify one
+  structured repeated kernel, trusted RISC-V fallback, exact alias/effect
+  rules, graph encoding/configuration cost, and semantic oracle. Test it first
+  against sequential, in-order, conventional OoO, and VLIW-like models under
+  RFC-0004; do not infer CPU claims from the T-0103 process-level showcase.
 - [ ] **T-0058** Evaluate reuse-weighted optimization ROI and hot/warm/cold/
   archival budget classes.
 - [ ] **T-0059** Build a reproducible small-Transformer Experience demo only

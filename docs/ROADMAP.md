@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current delivery focus
 
-State: **T-0103 synthetic Native showcase implemented; Command Graph claim experiment pending**
+State: **T-0103 retained as a conceptual process-level demo; RFC-0004/T-0057 native microarchitecture study proposed**
 
 The current manufacturing focus is the ordinary macOS/GNU/Linux Native
 userspace operator path under ADR-0034. Sonatine remains a preserved later
@@ -31,6 +31,12 @@ the Gate state, connecting Experience, or accepting EXP-0004. The next
 production incremental-reuse question is separately T-0104.
 T-0100 remains a separate hardening task for OS-enforced sandboxing; T-0101
 must not describe the T-0099 workspace as a hostile-input security boundary.
+The released T-0103 showcase is not a native-graph or CPU experiment: its nodes
+are whole host tools and its cache is ordinary demo-only memoization. The next
+core-thesis sequence is proposed as T-0057 schema first, T-0042 matched Chisel
+RTL/simulation adapter second, and T-0044 static/elastic/stream/hybrid
+comparison third. T-0104 tool-level cache promotion is deferred behind that
+evidence.
 
 T-0086 was the sole restart P0. It ports the preserved userspace
 graph prototype onto current main and demonstrates one owned graph through
@@ -309,6 +315,11 @@ State: **Blocked by evidence, not implementation difficulty**
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
 simulation, FPGA, and silicon experiment records.
+
+RFC-0004 proposes the pre-FPGA foundation: an owned low-level graph contract
+and matched Chisel-generated RISC-V research configurations simulated under a
+common cache, memory, workload, and correctness envelope. Rocket/BOOM are
+candidate research references, not adopted product code or ARM equivalents.
 
 ## No calendar claim
 

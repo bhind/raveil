@@ -51,6 +51,10 @@ T-0103 adds a short, visibly baseline-first Native walkthrough for independent
 ordinary file sorting. It is intentionally synthetic and is development smoke,
 not EXP-0004 evidence or a speed claim.
 
+Its nodes are whole host tools/processes. This is a conceptual UI/control
+illustration, not the intended native operation/dependency/effect graph and not
+an ISA, OoO, cache, pipeline, area, energy, or CPU-microarchitecture evaluation.
+
 ```sh
 mkdir -p /tmp/raveil-showcase
 python3 -m raveil showcase list

@@ -119,6 +119,7 @@ def _spec(scenario: str, nodes: int | None = None) -> ShowcaseSpec:
 
 def list_showcases() -> str:
     return "\n".join((
+        "Scope: conceptual tool/process-level illustration only; this is far above the intended native operation/dependency/effect graph and does not test an ISA or CPU microarchitecture.",
         "showcase-parallel: synthetic 16/32/64-way independent sort; sequential, equal-concurrency, and graph paths",
         "showcase-incremental: the same synthetic fan-out plus verified demo-only derived-artifact reuse",
         "control-small: four 512-byte sorts; Graph overhead may dominate",
@@ -150,6 +151,7 @@ def prepare_showcase(workspace: NativeWorkspace, scenario: str, nodes: int | Non
     workspace.write_text(spec.state_path, _canonical(state) + "\n")
     return "\n".join((
         f"prepared scenario={spec.scenario} synthetic=true nodes={spec.nodes} bytes_per_input={spec.bytes_per_input}",
+        "abstraction=tool-process conceptual-only; not native operation/ISA/microarchitecture granularity",
         "workload=independent ordinary sort files; direct argv allowlist; shell=False",
         "Experience=not-connected (advice-only; no proposal, admission, scheduling, reuse, or commit authority)",
         "next: showcase run --workspace PATH --scenario " + spec.scenario,
@@ -295,6 +297,7 @@ def run_showcase(workspace: NativeWorkspace, scenario: str, nodes: int | None = 
     output_manifest = _sha256(_canonical(list(compared.graph.outputs)).encode("ascii"))
     lines = [
         f"showcase={spec.scenario} synthetic=true evidence=host-development-smoke claim=development-non-claim",
+        "abstraction=tool-process conceptual-only; native operation/dependency/effect graph, OoO replacement, cache hierarchy, pipeline, ISA, area, and energy are not evaluated",
         f"graph id={graph_program.graph_id} nodes={len(graph_program.nodes)} edges={len(graph_program.edges)} critical_path=one-independent-sort-node observed_ns={critical}",
         "graph_nodes=" + ",".join(node.node_id for node in graph_program.nodes),
         "graph_edges=none (independent fan-out)",
