@@ -45,6 +45,13 @@ T-0092 is the next demo P0 after already in-flight work reaches a clean
 milestone. It is a bounded demonstrability task, not permission to grow a
 general Unix personality or displace the GNU/Linux/RK3588 product path.
 
+## Demo release
+
+- [ ] **T-0095** Publish the completed T-0092 operator flow as the immutable
+  `v0.0000000000002` GitHub Pre-release. Tag the exact fresh-clone-audited
+  commit, attach no generated evidence, keep hosted CI disabled, and read back
+  the remote tag, target SHA, visibility, notes, and assets before closeout.
+
 ## Queued visibility side project — graph directory view
 
 - [ ] **T-0093** Add a deterministic read-only host directory view of one

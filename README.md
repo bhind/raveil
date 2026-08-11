@@ -1,4 +1,4 @@
-# Raveil v0.0000000000001
+# Raveil v0.0000000000002
 
 > This heading names the latest immutable feature release. Current development
 > is unreleased. The manufacturing line is active after the GNU/Linux graph MVP
@@ -276,7 +276,9 @@ scheduling completeness.
 
 ## Versioning
 
-The runtime and Experience schema use the exact version requested: `0.0000000000001` (`10^-13`). This intentionally predates semantic release numbering.
+The runtime release is `0.0000000000002`. The Experience schema deliberately
+remains `raveil.experience/v0.0000000000001` for compatibility; a release
+number does not silently migrate stored evidence.
 
 ## License
 
