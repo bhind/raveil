@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 from pathlib import Path
 import tempfile
@@ -12,6 +13,9 @@ from raveil.graph_mvp import (
     GraphCompiler,
     GraphExecutor,
     GraphProgram,
+    GraphVariant,
+    MemoryPlan,
+    OptimizationProposal,
 )
 from raveil.native_backend import NativeMeasurement
 
@@ -68,6 +72,31 @@ class GraphCompilerTests(unittest.TestCase):
         proposal = AnalyticalPredictor(0.99).propose(program, variants)
         self.assertTrue(proposal.abstained)
         self.assertIsNone(proposal.variant_id)
+
+    def test_owned_variant_memory_plan_and_proposal_round_trip_strictly(self) -> None:
+        program = GraphProgram.create("gemm_bias_relu", 32, 24, 16)
+        variants = GraphCompiler().compile(program)
+        proposal = AnalyticalPredictor().propose(program, variants)
+        self.assertEqual(GraphVariant.from_dict(variants[-1].to_dict()), variants[-1])
+        self.assertEqual(
+            MemoryPlan.from_dict(variants[-1].memory_plan.to_dict()),
+            variants[-1].memory_plan,
+        )
+        self.assertEqual(OptimizationProposal.from_dict(proposal.to_dict()), proposal)
+        self.assertEqual(variants[-1].program_sha256, program.identity)
+        self.assertEqual(variants[-1].memory_plan.maximum_intermediate_bytes, 0)
+
+    def test_owned_schemas_reject_unknown_fields_and_mismatched_memory_plan(self) -> None:
+        variant = GraphCompiler().compile(GraphProgram.create("gemm", 8, 8, 8))[0]
+        malformed = variant.to_dict()
+        malformed["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "fields do not match"):
+            GraphVariant.from_dict(malformed)
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            replace(
+                variant,
+                memory_plan=replace(variant.memory_plan, materialization="fused"),
+            )
 
 
 class GraphExecutorTests(unittest.TestCase):
@@ -130,13 +159,18 @@ class GraphExecutorTests(unittest.TestCase):
         self.assertEqual(backend.calls, ["baseline-ijk"])
 
     def test_unknown_proposal_cannot_bypass_the_admitted_slate(self) -> None:
-        proposal = self.proposal.__class__(
-            "not-admitted", 1.0, False, "untrusted", self.proposal.ranking
-        )
         backend = FakeBackend({"baseline-ijk": measurement(100)})
-        with self.assertRaisesRegex(ValueError, "non-baseline variant"):
+        with self.assertRaisesRegex(ValueError, "outside its ranking"):
+            proposal = replace(self.proposal, variant_id="not-admitted")
             GraphExecutor(backend).execute(self.program, self.variants, proposal)
-        self.assertEqual(backend.calls, ["baseline-ijk"])
+        self.assertEqual(backend.calls, [])
+
+    def test_stale_proposal_lineage_is_rejected_before_execution(self) -> None:
+        proposal = replace(self.proposal, candidate_set_sha256="0" * 64)
+        backend = FakeBackend({"baseline-ijk": measurement(100)})
+        with self.assertRaisesRegex(ValueError, "lineage does not match"):
+            GraphExecutor(backend).execute(self.program, self.variants, proposal)
+        self.assertEqual(backend.calls, [])
 
 
 class GraphMVPCLITests(unittest.TestCase):

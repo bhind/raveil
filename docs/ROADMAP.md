@@ -158,6 +158,11 @@ segregated host-correctness evidence on GNU/Linux. It does not satisfy the
 remaining full Gate 4 compiler, workload, resource-certificate, or semantic
 oracle scope.
 
+T-0041 additionally makes `GraphVariant`, `MemoryPlan`, and
+`OptimizationProposal` strict versioned artifacts and rejects stale program,
+contract, or candidate-set lineage before backend execution. This closes the
+owned schema slice only; the Gate state and remaining exit scope are unchanged.
+
 ## Gate 5 — hardware exploration
 
 State: **Blocked by evidence, not implementation difficulty**

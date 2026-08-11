@@ -142,6 +142,15 @@ MemoryPlan selects and composes policies such as `KeepSram`,
 `SpillExternal`, `Rematerialize`, and `Stream`. Evaluation includes
 latency, peak bytes, external traffic, energy, tail behavior, and recomputation.
 
+The current T-0041 userspace slice implements strict v1 owned artifacts for a
+narrower host boundary. Each `GraphVariant` binds its `GraphProgram`,
+`ExecutionContract`, transformation list, and bounded host-memory
+`MemoryPlan`. Each `OptimizationProposal` binds those identities and the full
+ordered candidate set. Exact-key validation and lineage checks run before any
+backend execution. This seed does not yet implement hardware signatures,
+ResourceCertificate, general placement policies, or enforcement of the
+descriptive memory bound.
+
 ## Adaptive Council
 
 Optimization uses multiple policy layers rather than replacing a cheap

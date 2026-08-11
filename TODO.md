@@ -231,8 +231,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 ## After the userspace MVP — compiler and adaptive execution
 
 - [ ] **T-0040** Import one real tensor workload through a pinned IREE/MLIR path.
-- [ ] **T-0041** Define Raveil-owned `GraphVariant`, `MemoryPlan`, and
-  `OptimizationProposal` schemas.
+- [x] **T-0041** Define strict, versioned Raveil-owned `GraphVariant`,
+  `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
+  the exact program, execution contract, and candidate set before execution.
 - [ ] **T-0042** Bootstrap a mapper/simulator adapter without leaking upstream types.
 - [ ] **T-0043** Implement Miroirs Graph Compiler structural validation and Pavane Semantic Oracle differential
   semantic checking.

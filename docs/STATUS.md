@@ -58,7 +58,14 @@ executes the vertical slice, and exclusively creates a segregated
 evidence, not Experience, MeasurementRecord, completion telemetry, silicon
 performance, or energy evidence.
 
-Thirteen focused tests pass on native macOS and in a Debian 12 arm64 GNU/Linux
+T-0041 now gives `GraphVariant`, `MemoryPlan`, and `OptimizationProposal`
+strict v1 schemas with exact-key deserialization. Variants bind the owned
+program and execution-contract identities; proposals additionally bind the
+complete ordered candidate set. The executor rejects stale or malformed
+lineage before invoking a backend. The bounded host-memory plan remains
+descriptive and is not resource-enforcement or performance evidence.
+
+Sixteen focused tests pass on native macOS and in a Debian 12 arm64 GNU/Linux
 container. The real Linux smoke ran baseline then candidate and chose rollback
 because the candidate did not improve that development run. This is functional
 control-loop evidence only. Sonatine and all prior artifacts remain unchanged.
