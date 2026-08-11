@@ -25,6 +25,25 @@ T-0086 is complete on GNU/Linux and macOS host-correctness paths. T-0034,
 T-0085, T-0018, compiler expansion, and hardware work remain preserved and were
 not pulled into this MVP.
 
+## Post-MVP side project — ReactOS portability probe
+
+- [ ] **T-0091** After the GNU/Linux userspace graph MVP and owned v1 artifact
+  lineage remain regression-clean, port the same bounded graph control loop to
+  ReactOS as a non-authoritative Win32 host. Start in an isolated x86/x64
+  virtual machine, cross-build a user-mode CLI, and preserve the existing
+  `GraphProgram`, `ExecutionContract`, `GraphVariant`, `MemoryPlan`,
+  `OptimizationProposal`, and result schemas without ReactOS-specific fields.
+  Exercise baseline-first execution, proposal or abstention, semantic checksum,
+  explicit commit or rollback, fail-closed unsupported-operation handling, and
+  replayable environment/result evidence. A direct CLI is sufficient for the
+  first slice; if process separation is useful, place the owned fixed-width ABI
+  behind a Win32 named-pipe adapter. Do not require a kernel driver, copy
+  ReactOS source, treat ReactOS as an RK3588/AArch64 target, or claim production
+  compatibility, security isolation, latency, or energy improvement.
+
+T-0091 is optional portability and fault-boundary work, not a dependency of the
+main GNU/Linux/RK3588 delivery line or any existing Gate.
+
 ## Now — make v0.0000000000001 independently reproducible
 
 - [x] **T-0009** Add repository-scoped Codex explorer/reviewer/verifier roles

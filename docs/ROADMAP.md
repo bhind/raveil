@@ -20,6 +20,36 @@ experiment artifact.
 This is an allowed narrow Gate 4 vertical slice under ADR-0024. It does not
 claim Gate 3 completion, custom-hardware performance, or a Gate 1 reversal.
 
+## Post-MVP side project — ReactOS portability probe
+
+State: **Planned; non-blocking**
+
+T-0091 preserves a ReactOS user-mode port as the first deliberately non-POSIX
+host probe after the GNU/Linux MVP. It tests whether the same Raveil-owned v1
+graph artifacts and guarded baseline/proposal/abstention/verification/rollback
+loop survive an NT-compatible OSS environment without moving OS-specific types
+into the owned contracts.
+
+Entry requires the current GNU/Linux/macOS host regressions and exact v1
+artifact-lineage tests to remain green. The first probe runs in an isolated
+x86/x64 virtual machine because ReactOS documents itself as Alpha-quality and
+recommends virtual-machine or non-sensitive test hardware. It may use a direct
+Win32 CLI; a message-mode named-pipe adapter is optional and a kernel driver is
+out of scope.
+
+Exit requires a pinned ReactOS build and architecture, reproducible cross-build
+command, one bounded graph run with trusted baseline-first semantics, semantic
+checksum and explicit commit/rollback or abstention, fail-closed unsupported
+API/candidate behavior, and replayable environment/result records. All results
+are VM host-correctness and portability evidence only. They do not advance a
+Gate, establish production Windows compatibility or isolation, reverse
+EXP-0003, or substitute for the separate GNU/Linux/AArch64/RK3588 direction.
+
+The port should depend only on documented Win32 interfaces or independently
+implemented adapters. ReactOS is GPL-2.0-licensed; implementation kickoff must
+revalidate the exact upstream version, license/provenance boundary, and any
+source-reuse or IP-review gaps before importing code.
+
 ## Gate 0 — independently reproducible minimum seed
 
 State: **Completed**
