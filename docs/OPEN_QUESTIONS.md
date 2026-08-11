@@ -99,6 +99,11 @@ resolves it.
   authority and portability cost? General `sh -c`, arbitrary executable
   lookup, command substitution, and ambient environment inheritance remain
   unresolved, not implied follow-ups.
+- T-0103 demonstrates only immutable-by-name showcase cache entries. What
+  durable artifact lineage, tool/environment/policy/workspace invalidation,
+  atomic output publication, cache budget/eviction, concurrent safety, and
+  measurement boundary are sufficient for T-0104 production
+  CommandGraphExecutor reuse without making Experience authoritative?
 - After human evaluation of T-0099's executable bounded workspace CLI, which
   T-0100 strong
   isolation backend should become required for release: Linux Landlock plus

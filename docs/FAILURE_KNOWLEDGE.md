@@ -145,6 +145,22 @@ labelled unknown.
 - State: corrected for future commits; immutable historical tags still contain
   the non-secret catalog and are not rewritten.
 
+## A baseline-first demo is not a production fast path
+
+- Symptom: a screen can show a favorable candidate interval even though it
+  repeatedly paid sequential/equal-concurrency baseline and validation cost.
+- Cause: evaluation timing and a deployed execution path are different
+  quantities; comparing only a weaker sequential baseline also confuses worker
+  count with a Graph effect.
+- Prevention: display baseline-first total cost separately, retain an
+  equal-concurrency direct control, and state production reuse as absent unless
+  the executor actually owns it.
+- Detection: T-0103 tests assert the three controls and output labels;
+  `showcase-incremental` names its cache as demo-only.
+- Evidence: T-0103, ADR-0037, EXP-0004 (Planned), and
+  `docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md`.
+- State: corrected for the synthetic walkthrough; T-0104 remains open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

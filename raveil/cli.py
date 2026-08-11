@@ -34,6 +34,7 @@ from .sonatine_demo import MAX_TIMEOUT_SECONDS, run_sonatine_demo
 from .iree_import import PinnedIreeImporter
 from .interactive_shell import NativeInteractiveSession, run_interactive_shell
 from .workspace import NativeWorkspace
+from .command_showcase import list_showcases, mutate_showcase, prepare_showcase, run_showcase
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -310,6 +311,26 @@ def command_shell(args: argparse.Namespace) -> int:
     ))
 
 
+def command_showcase_list(args: argparse.Namespace) -> int:
+    print(list_showcases())
+    return 0
+
+
+def command_showcase_prepare(args: argparse.Namespace) -> int:
+    print(prepare_showcase(NativeWorkspace(Path(args.workspace)), args.scenario, args.nodes))
+    return 0
+
+
+def command_showcase_run(args: argparse.Namespace) -> int:
+    print(run_showcase(NativeWorkspace(Path(args.workspace)), args.scenario, args.nodes))
+    return 0
+
+
+def command_showcase_mutate(args: argparse.Namespace) -> int:
+    print(mutate_showcase(NativeWorkspace(Path(args.workspace)), args.scenario, args.node, args.nodes))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -327,6 +348,26 @@ def build_parser() -> argparse.ArgumentParser:
     shell.add_argument("--inner-iterations", type=int, default=1)
     shell.add_argument("--minimum-predicted-improvement", type=float, default=0.05)
     shell.set_defaults(handler=command_shell)
+
+    showcase = subparsers.add_parser("showcase", help="run the synthetic Native Command Graph walkthrough")
+    showcase_commands = showcase.add_subparsers(dest="showcase_command", required=True)
+    showcase_list = showcase_commands.add_parser("list", help="list synthetic non-claim showcases")
+    showcase_list.set_defaults(handler=command_showcase_list)
+    for name, handler, help_text in (
+        ("prepare", command_showcase_prepare, "create deterministic inputs exclusively"),
+        ("run", command_showcase_run, "run baseline-first synthetic comparison"),
+        ("mutate", command_showcase_mutate, "add one deterministic changed input"),
+    ):
+        command = showcase_commands.add_parser(name, help=help_text)
+        command.add_argument("--workspace", required=True, help="existing empty-or-prepared host directory")
+        command.add_argument("--scenario", choices=("showcase-parallel", "showcase-incremental", "control-small"),
+                             default="showcase-parallel")
+        if name != "mutate":
+            command.add_argument("--nodes", type=int, choices=(16, 32, 64))
+        else:
+            command.add_argument("--nodes", type=int, choices=(16, 32, 64))
+            command.add_argument("--node", type=int, default=0)
+        command.set_defaults(handler=handler)
 
     demo = subparsers.add_parser("demo", help="compare cold and warm tuning")
     demo.add_argument("--experience", default="experience/local.jsonl")

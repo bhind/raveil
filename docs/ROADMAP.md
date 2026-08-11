@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current delivery focus
 
-State: **T-0102 Native shell completion implemented; Command Graph claim experiment pending**
+State: **T-0103 synthetic Native showcase implemented; Command Graph claim experiment pending**
 
 The current manufacturing focus is the ordinary macOS/GNU/Linux Native
 userspace operator path under ADR-0034. Sonatine remains a preserved later
@@ -24,6 +24,11 @@ The bounded implementation and development smoke are now executable; EXP-0004
 remains Planned and no crossover or performance claim has been accepted.
 T-0102 adds bounded Tab completion over that existing Native surface without
 changing the graph, evidence, or isolation gates.
+T-0103 adds an explicitly synthetic, host-development-smoke operator
+walkthrough. It makes sequential/equal-concurrency/DAG controls, topology,
+semantic agreement, and showcase-only verified reuse visible without changing
+the Gate state, connecting Experience, or accepting EXP-0004. The next
+production incremental-reuse question is separately T-0104.
 T-0100 remains a separate hardening task for OS-enforced sandboxing; T-0101
 must not describe the T-0099 workspace as a hostile-input security boundary.
 

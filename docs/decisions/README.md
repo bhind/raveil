@@ -41,3 +41,4 @@ rewrite it.
 | [ADR-0034](ADR-0034-native-interactive-session-wraps-the-guarded-graph-loop.md) | Accepted | Native interactive Session wraps the guarded graph loop |
 | [ADR-0035](ADR-0035-native-workspace-precedes-platform-sandbox.md) | Accepted | Bounded Native workspace precedes platform-enforced sandboxing |
 | [ADR-0036](ADR-0036-command-graphs-compile-a-bounded-shell-subset.md) | Accepted | Command graphs compile a bounded shell subset before general shell compatibility |
+| [ADR-0037](ADR-0037-synthetic-showcase-keeps-cache-outside-command-authority.md) | Accepted | Synthetic showcase keeps derived-artifact cache outside command authority |

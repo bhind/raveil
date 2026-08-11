@@ -13,6 +13,8 @@ Current Command Graph Pre-release: `v0.0000000000005`, T-0101 Native Command
 Graph, published from `8ba6c17794d27913b6c8f2b5318be6f6296488ac`.
 Current Native CLI Pre-release: `v0.0000000000006`, T-0102 bounded Tab
 completion, published from `5f3d8d0d0a3a609af7ffc25a8be40aeb78bf6524`.
+Local Native showcase Pre-release candidate: `v0.0000000000007`, T-0103
+synthetic Command Graph walkthrough; not tagged, pushed, or published.
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
@@ -105,6 +107,22 @@ virtual-workspace paths. Symlinks and host paths are omitted; completed input
 still passes through the existing parser, workspace checks, and guarded graph
 flow. Completion is ephemeral host usability, not expansion, arbitrary PATH
 lookup, persistence, or an OS isolation boundary.
+
+T-0103 adds `python3 -m raveil showcase list|prepare|run|mutate`: a synthetic
+16/32/64-way independent ordinary `sort` fan-out, plus a four-small-file
+control. It prints nodes/edges/critical path, hash-bound direct-argv admission,
+exact semantic output manifest hash, sequential and equal-concurrency direct
+baselines, DAG construction/execution/end-to-end intervals, observed
+parallelism, and baseline-first evaluation cost separately. Its first run
+executes all nodes; a deterministic one-input replacement then reuses only
+showcase cache artifacts whose complete node recipe/tool identity, active input
+SHA-256, and payload SHA-256 all match, while separately direct/Graph-validating
+the changed node. The cache is intentionally outside `CommandGraphExecutor`:
+the output states `production_reuse=not-implemented`, and T-0104 owns any
+production design. Experience is explicitly not connected to this command
+surface and remains advice-only. This is host-development-smoke only; EXP-0004
+remains Planned and no timing line is a performance, scheduling, hardware, or
+special-ISA claim.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

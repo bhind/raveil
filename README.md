@@ -1,6 +1,7 @@
-# Raveil v0.0000000000006
+# Raveil v0.0000000000007
 
-> This heading names the latest immutable feature release. Current development
+> This is the local candidate for the next feature pre-release; the latest
+> immutable feature release is `v0.0000000000006`. Current development
 > is unreleased. The manufacturing line is active after the GNU/Linux graph MVP
 > and failure-governance milestones. Current work preserves those artifacts
 > while prioritizing the Native userspace interactive MVP. See
@@ -43,6 +44,32 @@ and strict result instructions. It does not reuse tensor nodes as shell work.
 T-0102 adds Tab completion for documented commands, graph options, allowlisted
 tools, and virtual workspace paths. It is a readline/libedit usability adapter,
 not shell expansion or new authority.
+
+## Synthetic Command Graph showcase
+
+T-0103 adds a short, visibly baseline-first Native walkthrough for independent
+ordinary file sorting. It is intentionally synthetic and is development smoke,
+not EXP-0004 evidence or a speed claim.
+
+```sh
+mkdir -p /tmp/raveil-showcase
+python3 -m raveil showcase list
+python3 -m raveil showcase prepare --workspace /tmp/raveil-showcase \
+  --scenario showcase-incremental --nodes 16
+python3 -m raveil showcase run --workspace /tmp/raveil-showcase \
+  --scenario showcase-incremental --nodes 16
+python3 -m raveil showcase mutate --workspace /tmp/raveil-showcase \
+  --scenario showcase-incremental --nodes 16 --node 0
+python3 -m raveil showcase run --workspace /tmp/raveil-showcase \
+  --scenario showcase-incremental --nodes 16
+```
+
+It reports graph topology, hash-bound admission, exact semantic hashes,
+sequential and equal-concurrency baselines, candidate timing components,
+observed parallelism, and the verified demo-only cache state. The current
+CommandGraphExecutor has no production reuse fast path; Experience is not
+connected to this command surface and remains advice-only. See
+[`docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md`](docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md).
 
 ## Sonatine Microkernel boot target
 

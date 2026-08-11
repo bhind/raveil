@@ -76,6 +76,17 @@ sequence edges. `CommandGraphResult` permits publication only after exact
 semantic agreement. `CommandBenchmarkResult` is segregated development-smoke
 evidence and cannot authorize a graph result or change EXP-0004 by itself.
 
+ADR-0037 adds a separate T-0103 operator showcase above this execution path.
+It invokes the existing compiler/registry/comparison machinery for a synthetic
+independent `sort` fan-out and displays sequential plus equal-concurrency
+direct controls before the DAG candidate. Its immutable-by-name cache payloads
+bind node recipe/tool identity, active input hash, and payload hash; changed
+nodes are again direct/Graph checked. This cache is not a
+`CommandGraphExecutor` capability, does not modify command records or
+publication authority, and is not Experience. The current Native host runs the
+same ordinary ARM64/x86-64 instructions as other host processes; any observed
+effect is software work avoidance or scheduling, not a Raveil ISA/ASIC effect.
+
 The Native input adapter installs one readline/libedit completer. Its pure
 candidate function enumerates only fixed commands, graph subcommands/options,
 allowlisted tool names, and `NativeWorkspace` virtual paths. Path completion

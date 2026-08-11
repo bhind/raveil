@@ -6,6 +6,22 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [x] **T-0103** Release the synthetic Native Command Graph/Experience
+  walkthrough. Provide `showcase list|prepare|run|mutate` for 16/32/64
+  independent ordinary hash-bound direct-argv file transforms; display graph
+  topology, admission, exact semantic hashes, sequential and equal-concurrency
+  direct baselines, candidate timing, observed parallelism, and baseline-first
+  cost. Include a small-overhead control and one-input hash-verified demo cache
+  reuse. Keep the cache demo-only, Experience unconnected/advice-only,
+  EXP-0004 Planned, and make no performance or production-reuse claim.
+
+- [ ] **T-0104** Design and, only after explicit authority/semantics review,
+  implement production CommandGraphExecutor incremental reuse. Define durable
+  artifact lineage, invalidation across tool/policy/environment/workspace
+  changes, output publication/rollback, cache budget/eviction, concurrent
+  safety, measurement fairness, and an Experience boundary. Do not promote the
+  T-0103 showcase cache or call its observed work avoidance a production win.
+
 - [x] **T-0102** Add bounded Tab completion to the Native Interactive CLI.
   Complete only documented commands, graph subcommands/options, allowlisted
   command tools, and virtual workspace paths; omit symlinks and host absolute

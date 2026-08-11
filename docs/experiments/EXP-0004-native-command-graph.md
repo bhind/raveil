@@ -61,6 +61,14 @@ insufficient for the preregistered hypothesis, reports
 must not be interpreted as a speedup. T-0099 workspace and existing GEMM tests
 remain separate implementation evidence.
 
+T-0103 additionally supplies a synthetic `showcase-parallel`/
+`showcase-incremental`/`control-small` development walkthrough. It reports
+same-input sequential and equal-concurrency controls, exact semantic hashes,
+and a demo-only hash-verified cache state, but freezes no claim manifest and
+preserves no EXP raw bundle. It is not an EXP-0004 sample, does not change this
+experiment's evidence class or status, and cannot establish a crossover,
+scheduling, reuse, or performance result.
+
 ## Interpretation
 
 Pending. A faster graph path is not evidence of graph scheduling benefit until
@@ -71,5 +79,6 @@ no-crossover result remains valid evidence.
 
 The first experiment covers bounded file-processing tools on host silicon, not
 interactive applications, network services, energy, Sonatine, ASICs, or a
-general shell. Implement T-0101, freeze its manifest, and review measurement
-fairness before collecting claim-bearing results.
+general shell. Freeze a claim manifest, add/freeze the fair ordinary baselines,
+and complete measurement fairness review before collecting claim-bearing
+results. T-0103 is not a substitute for those steps.
