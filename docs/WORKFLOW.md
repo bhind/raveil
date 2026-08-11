@@ -118,6 +118,42 @@ in that local file when they want the recommended cap.
 Accepted ADRs are superseded, not silently rewritten. Analytical, simulated,
 emulated, FPGA, and silicon evidence are never merged into one claim.
 
+## Failure and defect triage
+
+Use ADR-0026's three layers:
+
+- EXP/raw bundles for scientific failures and negative results;
+- `docs/FAILURE_KNOWLEDGE.md` for short reusable prevention lessons;
+- GitHub Issues for actionable software defects that need ownership beyond the
+  current coherent branch.
+
+Fix a small defect immediately when it is safe and in scope. If it is fixed on
+the same branch with a regression test, record material context in the dated
+log but do not create an issue solely for ceremony. Create or retain an issue
+when the defect survives closeout, recurs, blocks a release, affects users,
+crosses owners/components, threatens security or evidence integrity, or is
+deliberately deferred.
+
+At progress and milestone review:
+
+1. de-duplicate against open GitHub Issues and TODO;
+2. assign a monotonic T-ID to material actionable work;
+3. link the issue to its T-ID and safe evidence rather than copying raw data;
+4. promote only reusable, evidence-backed lessons to failure knowledge;
+5. close the issue only after integration, regression verification, and record
+   reconciliation.
+
+GitHub Issues is a coordination view, not project authority. If GitHub is
+unavailable, record the T-ID and candidate locally and batch issue creation
+later. Negative experiments, expected fail-closed behavior, transient command
+errors, and speculative features are not bugs by themselves.
+
+Never put sensitive security detail, credentials, internal URLs/hostnames,
+absolute user paths, unpublished artifact contents, third-party text/figures,
+patent claims, or standards-draft text in a public issue. Follow `SECURITY.md`
+and escalate privately to the owner/Project Manager; Vreji inventories IP risk
+but does not provide legal clearance.
+
 ## Verification record
 
 Before declaring completion, record:

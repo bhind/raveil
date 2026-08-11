@@ -6,6 +6,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [x] **T-0088** Establish lightweight failure-knowledge and GitHub Issue
+  governance: preserve experiments and raw evidence, maintain a reusable lesson
+  index, provide a safe bug template, escalate only durable/actionable defects,
+  and keep TODO plus repository records authoritative.
+
 - [x] **T-0087** Reconcile the commodity-host/GNU/Linux/OSS-first pivot with
   current main without deleting Sonatine Microkernel, Linux harness, contract,
   telemetry, Experience, experiment, or metadata-shadow artifacts; reserve existing

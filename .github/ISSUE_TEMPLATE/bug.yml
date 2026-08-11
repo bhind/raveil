@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a reproducible Raveil software defect that needs tracked follow-up
+title: "[bug] "
+labels:
+  - bug
+  - triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, private evidence, personal data, internal URLs or hostnames, absolute user paths, third-party text or figures, patent claims, standards-draft text, or unsafe vulnerability details. Follow SECURITY.md and use an approved private channel for sensitive reports.
+  - type: input
+    id: task
+    attributes:
+      label: Canonical task or record
+      description: Existing T-ID, ADR, EXP, milestone, or `unassigned`.
+      placeholder: T-0000 / EXP-0000 / unassigned
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Defect and impact
+      description: What is wrong, who or what is affected, and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Exact commands or smallest deterministic sequence. Replace sensitive paths, hosts, identities, and values with neutral placeholders.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: Expected and actual behavior
+      description: Include the fail-closed expectation where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and evidence class
+      description: Commit, OS, ISA, tool versions, and analytical/simulated/emulated/silicon classification.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence locators
+      description: Canonical repository locators and safe hashes only; do not paste private logs, third-party material, or unpublished artifact contents.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, private/internal identifiers, absolute user paths, third-party material, patent or standards text, personal data, private artifact contents, and unsafe exploit detail.
+          required: true

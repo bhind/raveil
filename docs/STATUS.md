@@ -19,6 +19,12 @@ Task-governance, Gate 0 evidence, and remote-release skills remain available.
 These govern development workflow only; local IDEA/MCP endpoints and personal
 Codex runtime configuration remain ignored.
 
+ADR-0026 adds lightweight defect governance. Existing experiment failures,
+negative results, regression tests, and logs remain authoritative evidence;
+`docs/FAILURE_KNOWLEDGE.md` indexes reusable prevention lessons, and the GitHub
+bug template captures actionable defects without making Issues project
+authority. Same-branch corrected defects do not require issue-tracker churn.
+
 Gate 0 is complete, so tracked work now uses a dedicated
 `<type>/<record-id>-<short-slug>` lowercase branch.
 

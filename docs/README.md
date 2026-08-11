@@ -41,6 +41,7 @@ When records disagree, fix the weaker record using this order:
 | [OPEN_QUESTIONS](OPEN_QUESTIONS.md) | unresolved decisions | a question appears or is resolved |
 | [GLOSSARY](GLOSSARY.md) | canonical terminology | introducing or renaming a concept |
 | [WORKFLOW](WORKFLOW.md) | record, review, and agent process | changing project operations |
+| [failure knowledge](FAILURE_KNOWLEDGE.md) | reusable observed failure lessons and prevention | debugging, recurrence, and milestone review |
 | [ADRs](decisions/README.md) | accepted or rejected decisions | changing an invariant, boundary, or dependency strategy |
 | [RFCs](rfcs/README.md) | substantial proposals without authority | developing an unresolved architecture proposal |
 | [experiments](experiments/README.md) | reproducible evidence and claims | measuring or making a performance claim |
