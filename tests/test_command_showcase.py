@@ -11,6 +11,7 @@ from raveil.workspace import NativeWorkspace
 class CommandShowcaseTests(unittest.TestCase):
     def test_list_names_all_non_claim_scenarios(self) -> None:
         listed = list_showcases()
+        self.assertTrue(listed.startswith("=== NOT A CPU/ISA GRAPH EXPERIMENT ==="))
         self.assertIn("conceptual tool/process-level", listed)
         self.assertIn("does not test an ISA or CPU microarchitecture", listed)
         self.assertIn("showcase-parallel", listed)
@@ -22,9 +23,11 @@ class CommandShowcaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             workspace = NativeWorkspace(Path(directory))
             prepared = prepare_showcase(workspace, "showcase-incremental", 16)
+            self.assertTrue(prepared.startswith("=== NOT A CPU/ISA GRAPH EXPERIMENT ==="))
             self.assertIn("synthetic=true", prepared)
             self.assertIn("conceptual-only", prepared)
             first = run_showcase(workspace, "showcase-incremental", 16)
+            self.assertTrue(first.startswith("=== NOT A CPU/ISA GRAPH EXPERIMENT ==="))
             self.assertIn("OoO replacement", first)
             self.assertIn("semantic_hashes=valid", first)
             self.assertIn("reuse executed=16", first)

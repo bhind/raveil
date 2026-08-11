@@ -1,4 +1,6 @@
-# Native Command Graph showcase
+# ~~CPU/ISA Graph performance showcase~~ Native tool/process concept demo
+
+## ⛔ NOT A CPU/ISA GRAPH EXPERIMENT
 
 T-0103 is a reproducible **synthetic development smoke**, designed to make the
 order and limits of the current Native Command Graph visible. It neither

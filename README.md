@@ -45,7 +45,9 @@ T-0102 adds Tab completion for documented commands, graph options, allowlisted
 tools, and virtual workspace paths. It is a readline/libedit usability adapter,
 not shell expansion or new authority.
 
-## Synthetic Command Graph showcase
+## ~~CPU/ISA Graph showcase~~ Synthetic tool/process concept demo
+
+> ⛔ **NOT A CPU/ISA GRAPH EXPERIMENT.**
 
 T-0103 adds a short, visibly baseline-first Native walkthrough for independent
 ordinary file sorting. It is intentionally synthetic and is development smoke,
