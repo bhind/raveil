@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -130,30 +130,50 @@ tools/processes are conceptual nodes, far above the intended native
 operation/dependency/effect/object graph. It does not test dependency discovery,
 OoO replacement, cache hierarchy, pipeline, ISA encoding, area, or energy, and
 its memoization is not evidence that Graph is required. RFC-0004 is only a
-proposal for the correctly ordered Chisel RTL/simulation study; the generic
-Chisel tooling smoke exists, but no Rocket/BOOM execution, Graph RTL, or CPU
-comparison is implemented in the current tree.
-The roadmap now separates T-0105 generic Chisel/RISC-V substrate bootstrap from
-T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042 Graph RTL
-implementation. T-0057 phase A now has a non-authoritative, locator-backed
-matrix covering conventional OoO, EPIC, TRIPS/EDGE, WaveScalar, DySER and
+proposal for the correctly ordered Chisel RTL/simulation study. T-0105 now has
+unmodified Rocket functional execution, but no BOOM execution, Graph RTL,
+matched CPU comparison, or performance evidence exists.
+The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
+from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
+Graph RTL implementation. T-0057 phase A now has a non-authoritative,
+locator-backed matrix covering conventional OoO, EPIC, TRIPS/EDGE, WaveScalar,
+DySER and
 spatial-CGRA classes. It finds high mechanism similarity and records preliminary
 WaveCache and EDGE-family patent hits as unreviewed; it establishes neither
 novelty, infringement nor freedom to operate. No Graph mechanism, ISA or
 architecture has been selected, and T-0042 remains blocked pending the phase-B
 contract and mechanism-specific IP disposition. This is a planning/research
-correction, not a CPU experimental result. T-0105 now includes a
+correction, not a CPU experimental result. T-0105 includes a
 functional tooling smoke: under an explicit linux/amd64 Docker environment on
 the Apple Silicon host, Chisel 7.2.0 emitted SystemVerilog for an owned four-bit
 counter and Verilator 4.038 executed the C++ harness to
 `CHISEL-SMOKE-V1 status=OK cycles=10 value=8`. This is emulated-host tooling and
 RTL functional evidence only. No RISC-V core, Graph RTL, CPU comparison, or
-performance evidence has run.
+performance evidence has run in that owned-counter path.
 T-0105 also has a local ignored external Rocket Chip checkout at
 `749a3eae9678bc70b029c5b9091fae33fad539c4`, the gitlink selected by Chipyard
 1.11.0. Its fixed Chisel, CDE, and HardFloat submodules are fetched by the owned
-revision-checking helper. The checkout is source availability only: Rocket RTL
-has not yet been elaborated or executed.
+revision-checking helper. An owned fixed Git/Nix/Docker wrapper now elaborates
+the unmodified Rocket `DefaultSmallConfig`, builds the unmodified
+`DefaultConfig` Verilator emulator, and requires all 16 official `rv64mi-p`
+tests to pass with no failed logs. The verified run exited 0 and reported Nix
+2.13.3, Mill 0.11.1/OpenJDK 19.0.2, Rocket's Scala 2.13.12/Chisel 5.1.0,
+CIRCT firtool 1.56.1, Verilator 5.012, clang 11.1.0, CMake 3.26.4, Ninja 1.11.1,
+and DTC 1.7.0 on emulated Linux amd64 under an Apple Silicon Docker host.
+ADR-0038 fixes the ignored-source, immutable-container, locked Git-flake and
+selected-package boundary. It deliberately avoids the upstream mutable Python
+shell hook, excludes generated output from Nix input identity, and keeps a
+version-matched Nix-store, Mill `out/`, and Mill/Coursier user-cache volume set
+so foreign or vanished absolute paths cannot be silently reused. The
+user-facing `./hardware/chisel/run-rocket-reference.sh` path completed both a
+clean build/execution and a second separate-container cached rerun with the
+required 16/0 marker.
+
+This closes T-0105 as RTL functional/simulation substrate evidence only. The
+result is not a cycle comparison, performance or energy measurement, area or
+timing estimate, Graph RTL result, OoO-removal result, FPGA result, silicon
+result, or CPU/ISA advantage. T-0057B still gates any owned Graph contract and
+T-0042; T-0044 remains the later matched comparison.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
@@ -534,19 +554,16 @@ Not implemented or not yet evidenced:
 
 The original Gate 0 acceptance suite contains nine tests covering the Python
 loop, host-executable Sonatine Microkernel task/capability/IPC logic, and the
-isolated debug-build contract. The current host acceptance suite contains 61
-tests. On 2026-08-11 all 61 passed on macOS with Python 3.14.6; they include
-the Gate 1 manifest, native C checksums across all candidate families,
-baseline/randomization, timeout/dimension failure, energy/thermal fail-closed
-parsing, the compiled helper allowlist and installation-integrity boundary,
-standalone preflight, concise CLI failure reporting, statistics,
-run/analyze/seal lifecycle, bundle sync command boundaries, agent permissions,
-the existing Experience loop, Sonatine host checks, exact six-policy matrix
-integrity, preregistration planning and binding, raw-measurement summary
-verification, fixed-C/TVM manifest-contract identity,
-workload/repetition hierarchical bootstrap, the same-read sampler
-readiness/measurement boundary, and cross-RUN mutable path isolation.
-This is implementation verification, not EXP-0003 performance evidence.
+isolated debug-build contract. The current host acceptance suite contains 152
+tests. On 2026-08-12 all 152 passed in 53.363 seconds on macOS with Python
+3.14.6; one opt-in real-QEMU integration was skipped. The same
+`scripts/ci-local.sh` run completed RV64 release/debug/DWARF builds, normal and
+interrupt QEMU smoke, completion replay, Sonatine graph execution, and
+native/QEMU semantic checksum differential with exit status 0. The suite now
+also checks the Rocket wrapper's executable entrypoints, pin agreement,
+immutable environment and volume-name boundary, and functional-only/non-claim
+marker. This is implementation and emulation
+regression verification, not EXP-0003 or Rocket performance evidence.
 
 On the T-0022 policy-integrity worktree, `scripts/ci-local.sh` passed with exit
 status 0: all 40 host tests, clean RV64 release/debug builds, DWARF checks, and

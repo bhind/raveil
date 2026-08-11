@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -24,7 +24,7 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   This tool/process-level follow-up is deferred behind T-0057, T-0042, and
   T-0044; it is not the next test of the native CPU thesis.
 
-- [ ] **T-0105** Bootstrap a reproducible, pinned Chisel/RISC-V simulation
+- [x] **T-0105** Bootstrap a reproducible, pinned Chisel/RISC-V simulation
   substrate. First elaborate and simulate one trivial repository-owned RTL
   circuit; then execute one unmodified reference RISC-V configuration if host
   memory and build time permit. Record exact JDK, Scala/build tool, Chisel,
@@ -32,7 +32,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   proves tooling and functional execution only: do not implement the proposed
   Graph microarchitecture, collect performance evidence, call a reference core
   ARM-equivalent, or claim CPU/ISA advantage. T-0105 may precede T-0057 because
-  no Graph contract depends on it.
+  no Graph contract depends on it. Completed with the owned counter smoke plus
+  unmodified Rocket `DefaultSmallConfig` elaboration and `DefaultConfig`
+  Verilator execution of all 16 `rv64mi-p` tests. The fixed Git/Nix/Docker
+  wrapper rejects source drift, bypasses the upstream mutable Python shell
+  hook, and labels the result `rtl-simulation-functional`; Graph RTL and
+  performance remain unimplemented/unmeasured.
 
 - [x] **T-0102** Add bounded Tab completion to the Native Interactive CLI.
   Complete only documented commands, graph subcommands/options, allowlisted

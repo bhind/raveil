@@ -216,6 +216,37 @@ labelled unknown.
 - State: phase-A correction recorded; phase-B contract and qualified legal
   review where required remain open.
 
+## Locked build inputs must exclude convenience hooks and generated state
+
+- Symptom: Rocket's upstream Nix development shell installed current Python
+  packages into an untracked `venv/`; a later path-based flake evaluation tried
+  to scan a generated Mill Unix socket and failed. A cold container then reused
+  host `out/` from another Nix store and failed to load Mill's Zinc worker.
+  After isolating only Nix and `out/`, a second ephemeral-container run failed
+  again because the first run's Mill/Coursier user cache had vanished.
+  Nix's nested builder seccomp BPF also failed under Apple Silicon amd64
+  emulation.
+- Cause: the convenience development shell, mutable working tree, package
+  authority, and container security layers were treated as one environment.
+  The committed flake was fixed, but its shell hook and path input were not
+  sufficient evidence boundaries for this smoke.
+- Prevention: bind Nix evaluation to the exact Git revision and committed
+  `flake.lock`; select only required package attributes with `nix shell`; do not
+  run the upstream shell hook; keep generated output and cache volumes outside
+  input identity. Keep one generation-matched Nix-store, Mill-output, and
+  Mill/Coursier user-cache volume set; never share host `out/` across stores or
+  retain Mill output after discarding its worker cache. Under
+  cross-architecture Docker, disable only Nix's nested syscall filter while
+  retaining Docker seccomp and `no-new-privileges`.
+- Detection: require a clean pinned source/submodule tree, reject `nix develop`
+  and Python installation in the owned wrapper, rerun after generated output
+  exists, and require the exact functional-only completion marker.
+- Evidence: T-0105, ADR-0038,
+  `hardware/chisel/rocket-reference-in-container.sh`, and
+  `tests/test_chisel_substrate.py`.
+- State: corrected for the T-0105 reference smoke. Reassess the platform and
+  security envelope before T-0044 measurement.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

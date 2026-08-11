@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0105 Chisel/RISC-V substrate bootstrap; CPU thesis remains untested**
+State: **T-0105 Chisel/RISC-V substrate complete; T-0057B contract next; CPU thesis remains untested**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -19,10 +19,10 @@ or process-demo work would repeat that ordering error.
 
 The corrected critical path is:
 
-1. **T-0105 — reproducible substrate:** pin Chisel and an RTL simulator,
-   elaborate and simulate a trivial owned circuit, then execute one unmodified
-   RISC-V reference configuration. This proves tooling only and may precede
-   Graph-schema work.
+1. **T-0105 — reproducible substrate (complete):** the owned counter and pinned
+   unmodified Rocket reference now elaborate and execute under fixed
+   Docker/Git/Nix inputs. All 16 `rv64mi-p` functional tests pass. This proves
+   tooling and RTL simulation correctness only.
 2. **T-0057A — direct-prior-art boundary:** inventory conventional OoO,
    EPIC/VLIW, TRIPS/EDGE, WaveScalar, DySER and spatial-CGRA mechanisms with
    exact locators, counterevidence and preliminary patent/IP triage. This may
@@ -315,16 +315,16 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **T-0105 substrate bootstrap; Graph hardware evidence not yet started**
+State: **T-0105 substrate complete; Graph hardware evidence not yet started**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
 simulation, FPGA, and silicon experiment records.
 
-RFC-0004 proposes the pre-FPGA foundation. T-0105 may establish the generic
-Chisel/simulator/RISC-V substrate independently; T-0057 must first bound direct
-prior art and IP risk, then freeze the owned low-level Graph contract before
-T-0042 implements any Graph RTL. T-0044 then uses
+RFC-0004 proposes the pre-FPGA foundation. T-0105 establishes the generic
+Chisel/simulator/RISC-V functional substrate independently; T-0057 must first
+bound direct prior art and IP risk, then freeze the owned low-level Graph
+contract before T-0042 implements any Graph RTL. T-0044 then uses
 matched RISC-V configurations under a common cache, memory, workload,
 functional-resource, and correctness envelope. Rocket/BOOM remain candidate
 references, not adopted product code, ARM equivalents, or proof that OoO can

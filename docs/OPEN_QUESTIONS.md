@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -110,10 +110,11 @@ resolves it.
 
 ## Ecosystem
 
-- Chisel 7.2.0 resolves firtool 1.133.0, but its Maven distribution lacks a
-  Linux aarch64 artifact. Should T-0105 retain a slower linux/amd64 emulated
-  tooling smoke, build and pin firtool natively for arm64, or move to another
-  fully reviewed Chisel/firtool coordinate before larger RISC-V elaboration?
+- T-0105 deliberately closes its functional substrate on fixed linux/amd64
+  emulation. Before T-0044 performance work, should the matched Rocket/BOOM/
+  owned-Graph environment remain emulated amd64, move to a pinned native-arm64
+  CIRCT build, or use a dedicated amd64 host? That choice must be made in the
+  comparison contract and cannot reuse T-0105 timing as evidence.
 
 - Which additional context-sensitive completions, if any, justify more parser
   coupling after T-0102? Persistent history, fuzzy completion, arbitrary PATH

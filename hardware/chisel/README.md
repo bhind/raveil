@@ -1,11 +1,14 @@
 # Chisel/RISC-V simulation substrate
 
-Status: T-0105 tooling smoke; not a Graph or CPU performance experiment.
+Status: T-0105 functional substrate complete; not a Graph or CPU performance
+experiment.
 
-This directory first proves a pinned Chisel-to-SystemVerilog-to-Verilator path
-with a repository-owned four-bit counter. It does not implement the proposed
-Graph microarchitecture, execute a RISC-V core yet, or provide latency, energy,
-area, OoO-removal, ISA, FPGA, or silicon evidence.
+This directory proves two functional paths: a pinned
+Chisel-to-SystemVerilog-to-Verilator path with a repository-owned four-bit
+counter, and an unmodified pinned Rocket Chip reference elaboration plus ISA
+test smoke. Neither path implements the proposed Graph microarchitecture or
+provides latency, energy, area, OoO-removal, ISA-advantage, FPGA, or silicon
+evidence.
 
 Run from the repository root:
 
@@ -34,10 +37,9 @@ Pinned direct dependencies:
 - firtool 1.133.0 resolved by Chisel 7.2.0;
 - Ubuntu Jammy's packaged Verilator (the exact resolved version is printed).
 
-The base-image digest and apt-resolved package versions must be captured when
-promoting this smoke into durable evidence. External licenses, notices,
-source-reuse boundaries, patents, standards, and freedom-to-operate remain a
-separate review requirement; public source availability is not clearance.
+The owned-counter base image is not the Rocket reference environment. Its
+base-image digest and apt-resolved package versions must still be captured if
+that earlier smoke is promoted beyond local tooling evidence.
 
 ## Pinned Rocket Chip source
 
@@ -54,9 +56,66 @@ Chipyard 1.11.0 at commit
 `ROCKET-CHECKOUT-V1` line after verifying the origin, revision, and clean
 worktree. Its commit-pinned Chisel, CDE, and HardFloat submodules are initialized
 recursively with shallow history. The source lives under ignored
-`external/rocket-chip/`; it is not
-vendored, copied into Raveil contracts, or silently updated. Fetching it does
-not mean that it builds or executes in the T-0105 container yet.
+`external/rocket-chip/`; it is not vendored, copied into Raveil contracts, or
+silently updated.
+
+## Rocket reference functional smoke
+
+After fetching the source, run:
+
+```sh
+./hardware/chisel/run-rocket-reference.sh
+```
+
+The wrapper fixes all of these inputs:
+
+- `nixos/nix:2.13.3` manifest-list digest
+  `sha256:1f8fa57de6f2f9ea5ea8d115b339fa68d2f98f20b59438bdb9d3a082ad64d4bf`;
+- Docker platform `linux/amd64`, including on Apple Silicon;
+- Rocket revision `749a3eae9678bc70b029c5b9091fae33fad539c4` and its
+  CDE, Chisel, and HardFloat submodule revisions;
+- Rocket's committed `flake.lock`, including nixpkgs
+  `f5892ddac112a1e9b3612c39af1b72987ee5783a`;
+- one generation-matched set of named Nix-store, Mill-output, and Mill/Coursier
+  user-cache volumes. They accelerate later runs and prevent host,
+  foreign-store, or vanished-container state from entering the build, but are
+  never evidence or package authority.
+
+The first run needs network access and can download hundreds of megabytes (the
+verified cold run resolved about 856 MiB compressed and 3.2 GiB unpacked). It
+uses selected `nix shell` package attributes from the fixed Git revision. It
+does not use the upstream `devShell` hook, install Python packages, or import
+ignored/untracked build output into Nix evaluation. Under Docker's own seccomp
+and `no-new-privileges` boundary, only Nix's nested builder syscall filter is
+disabled because that BPF program fails under amd64 emulation on the current
+Apple Silicon Docker host.
+
+The dedicated Mill output and user-cache volumes are versioned from
+`RAVEIL_ROCKET_NIX_VOLUME` and mounted over Mill 0.11.1's fixed `/rocket/out`
+and `/root/.cache` locations, so its absolute Nix-store and downloaded worker
+references cannot be silently paired with another store or an ephemeral
+container. The smoke first elaborates unmodified
+`DefaultSmallConfig`. It then builds the
+unmodified `DefaultConfig` Verilator emulator and runs the official `rv64mi-p`
+suite. Success requires exactly 16 `*.passed.log` files, no `*.failed.log`, and
+ends with a line containing:
+
+```text
+ROCKET-REFERENCE-SMOKE-V1 status=OK ... suite=rv64mi-p passed=16 failed=0 evidence=rtl-simulation-functional graph_rtl=not-implemented performance=not-measured
+```
+
+The verified environment reported Nix 2.13.3, Mill 0.11.1 with OpenJDK 19.0.2,
+Scala 2.13.12 and Chisel 5.1.0 from the Rocket build, CIRCT firtool 1.56.1,
+Verilator 5.012, clang 11.1.0, CMake 3.26.4, Ninja 1.11.1, and DTC 1.7.0.
+This Rocket coordinate is independent of the earlier owned-counter Chisel
+7.2.0 coordinate.
+
+The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
+`LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the
+submodule license files for Chisel/CDE (Apache-2.0) and HardFloat
+(BSD-3-Clause-style). These locators record the source boundary; they are not a
+patent search, infringement decision, legal clearance, or freedom-to-operate
+opinion.
 
 ## IntelliJ warning in `Counter.scala`
 
