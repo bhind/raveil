@@ -38,3 +38,25 @@ The Dockerfile is verification scaffolding, not a deployment image.
 `BASE_IMAGE` may be overridden with an already-audited local Debian-derived
 image when registry metadata is temporarily unavailable; the default remains
 the public `debian:bookworm-slim` base.
+
+## Userspace graph MVP
+
+T-0086 uses a separate container definition so the transport harness above is
+not widened into an authority service:
+
+```sh
+docker build -f linux/Dockerfile.graph-mvp -t raveil-graph-mvp:t-0086 .
+docker run --rm raveil-graph-mvp:t-0086
+```
+
+When registry metadata is unavailable, an already-audited Debian-derived base
+can be selected explicitly:
+
+```sh
+docker build --build-arg BASE_IMAGE=raveil-linux-driver:latest \
+  -f linux/Dockerfile.graph-mvp -t raveil-graph-mvp:t-0086 .
+```
+
+This executes the owned graph/contract and native-C adapter entirely in
+GNU/Linux userspace. Its JSON is segregated host-correctness evidence; the
+container does not gain Sonatine, Experience, commit, or measurement authority.

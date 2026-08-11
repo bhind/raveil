@@ -29,3 +29,4 @@ rewrite it.
 | [ADR-0022](ADR-0022-completion-telemetry-is-segregated-cold-evidence.md) | Accepted | Completion telemetry is segregated cold evidence |
 | [ADR-0023](ADR-0023-shadow-finalization-publishes-versions-only-after-approval.md) | Accepted | Shadow finalization publishes versions only after approval |
 | [ADR-0024](ADR-0024-linux-userspace-mvp-precedes-specialized-authority.md) | Accepted | Linux userspace MVP precedes specialized authority |
+| [ADR-0025](ADR-0025-userspace-graph-mvp-keeps-advice-non-authoritative.md) | Accepted | Userspace graph MVP keeps advice non-authoritative |

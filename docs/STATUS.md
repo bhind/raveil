@@ -24,17 +24,38 @@ Gate 0 is complete, so tracked work now uses a dedicated
 
 ## Delivery-line state
 
-The manufacturing line is paused after T-0087 reconciliation. ADR-0024 makes a
+The manufacturing line resumed for the sole P0 T-0086 after T-0087
+reconciliation. ADR-0024 makes a
 GNU/Linux userspace graph vertical slice the next delivery line without
 discarding any current artifact. Sonatine Microkernel (Sonatine), the Linux harness,
 shared job/object/completion contracts, job rings, completion telemetry,
 Experience infrastructure, EXP-0003 evidence, and metadata-shadow finalization
 remain implemented and preserved.
 
-No implementation work is active during the pause. On explicit restart,
-T-0086 is the sole P0: review and port the preserved
-`feat/t-0086-linux-graph-mvp` implementation onto current main. That branch is
-not merge-safe because it predates and deletes later main work.
+T-0086 is implemented by selective port onto the T-0087 milestone state. The
+donor branch was not merged, so none of its deletions or stale records entered
+the result.
+
+## GNU/Linux userspace graph MVP
+
+ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
+`ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
+structural compiler emits a unique baseline-first slate; an analytical adviser
+either proposes an admitted variant or abstains. The executor always runs and
+semantically validates the trusted baseline first, compares a proposed result
+against both its reference checksum and the baseline, and then records explicit
+commit or rollback. Invalid baselines fail closed.
+
+The `graph-mvp` CLI compiles the existing native-C adapter with strict C11,
+executes the vertical slice, and exclusively creates a segregated
+`raveil.graph-mvp-result/v1` JSON result. The result is host-correctness
+evidence, not Experience, MeasurementRecord, completion telemetry, silicon
+performance, or energy evidence.
+
+Thirteen focused tests pass on native macOS and in a Debian 12 arm64 GNU/Linux
+container. The real Linux smoke ran baseline then candidate and chose rollback
+because the candidate did not improve that development run. This is functional
+control-loop evidence only. Sonatine and all prior artifacts remain unchanged.
 
 ## Executable track A: Sonatine Microkernel RV64 seed
 

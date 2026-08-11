@@ -4,21 +4,21 @@ Last updated: 2026-08-11
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-## Delivery line — paused after reconciliation
+## Delivery line — active GNU/Linux userspace MVP
 
 - [x] **T-0087** Reconcile the commodity-host/GNU/Linux/OSS-first pivot with
   current main without deleting Sonatine Microkernel, Linux harness, contract,
   telemetry, Experience, experiment, or metadata-shadow artifacts; reserve existing
   side-branch identifiers, adopt ADR-0024, and prepare a restart handoff.
-- [ ] **T-0086** Port the preserved `feat/t-0086-linux-graph-mvp` prototype onto
+- [x] **T-0086** Port the preserved `feat/t-0086-linux-graph-mvp` prototype onto
   current main without merging its deletions. Make one owned graph run in
   GNU/Linux userspace through baseline, proposal or abstention,
   structural/semantic checks, commit or rollback, and evidence output. This is
   the sole implementation P0 after the owner explicitly restarts the line.
 
-No implementation task is active while the manufacturing line is paused.
-T-0034, T-0085, T-0018, compiler expansion, and hardware work remain preserved
-but must not start ahead of T-0086 without a new owner decision.
+T-0086 is complete on GNU/Linux and macOS host-correctness paths. T-0034,
+T-0085, T-0018, compiler expansion, and hardware work remain preserved and were
+not pulled into this MVP.
 
 ## Now — make v0.0000000000001 independently reproducible
 

@@ -8,9 +8,9 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current delivery focus
 
-State: **Paused after T-0087 reconciliation**
+State: **T-0086 userspace vertical slice complete**
 
-On explicit restart, T-0086 is the sole P0. It ports the preserved userspace
+T-0086 was the sole restart P0. It ports the preserved userspace
 graph prototype onto current main and demonstrates one owned graph through
 baseline, proposal or abstention, structural/semantic checks, commit or
 rollback, and evidence output on GNU/Linux. It must preserve every existing
@@ -137,7 +137,7 @@ authority.
 
 ## Gate 4 — one owned adaptive graph path
 
-State: **Next narrow vertical slice; manufacturing paused**
+State: **T-0086 narrow vertical slice complete; full Gate remains planned**
 
 Import one pinned real workload behind an adapter; define Raveil-owned
 GraphVariant, MemoryPlan, OptimizationProposal, and ResourceCertificate; add
@@ -150,6 +150,13 @@ prefill/decode and memory-regime variants, if Gate 1 results justify it.
 T-0086 intentionally precedes the full exit: it proves the product control
 loop on an existing OS/ISA and replaceable native backend. It does not require
 a new kernel, ISA, driver, FPGA, or complete graph compiler.
+
+The verified slice now covers owned graph/contract construction, trusted
+baseline-first execution, candidate proposal or abstention, structural and
+checksum semantic validation, explicit candidate selection or rollback, and
+segregated host-correctness evidence on GNU/Linux. It does not satisfy the
+remaining full Gate 4 compiler, workload, resource-certificate, or semantic
+oracle scope.
 
 ## Gate 5 — hardware exploration
 

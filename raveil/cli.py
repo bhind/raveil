@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import statistics
 import sys
+import tempfile
 
 from . import __version__
 from .backend import ToyDaphnis
@@ -25,6 +26,8 @@ from .experiment_runner import (
     run_experiment,
     seal_bundle,
 )
+from .graph_mvp import GraphProgram, run_graph_mvp
+from .native_backend import NativeCBackend
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -210,6 +213,43 @@ def command_experiment_sync(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_graph_mvp(args: argparse.Namespace) -> int:
+    program = GraphProgram.create(args.family, args.m, args.n, args.k)
+    source = Path(args.source)
+    with tempfile.TemporaryDirectory(prefix="raveil-graph-mvp-") as directory:
+        backend = NativeCBackend(
+            source,
+            Path(directory) / "raveil-native",
+            compiler=args.compiler,
+            compiler_flags=(
+                "-O3", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                "-D_POSIX_C_SOURCE=200809L",
+            ),
+            timeout_seconds=args.timeout_seconds,
+            warmups=args.warmups,
+        )
+        compile_command = backend.compile()
+        result = run_graph_mvp(
+            program,
+            backend,
+            minimum_predicted_improvement=args.minimum_predicted_improvement,
+            inner_iterations=args.inner_iterations,
+        ).to_dict()
+    result["backend"] = "native-c-posix-userspace"
+    result["compile_command"] = [*compile_command[:-1], "<temporary>/raveil-native"]
+    result["compile_command_kind"] = "logical-portable"
+    encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with output.open("x", encoding="utf-8") as stream:
+            stream.write(encoded)
+        print(f"graph MVP outcome={result['outcome']} output={output}")
+    else:
+        print(encoded, end="")
+    return 2 if result["outcome"] == "failed-closed" else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -252,6 +292,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     completion_inspect.add_argument("--store", required=True)
     completion_inspect.set_defaults(handler=command_completion_inspect)
+
+    graph_mvp = subparsers.add_parser(
+        "graph-mvp", help="run one owned userspace graph through the guarded MVP loop"
+    )
+    graph_mvp.add_argument(
+        "--family", choices=("gemm", "gemm_bias_relu"), default="gemm_bias_relu"
+    )
+    graph_mvp.add_argument("--m", type=int, default=64)
+    graph_mvp.add_argument("--n", type=int, default=64)
+    graph_mvp.add_argument("--k", type=int, default=64)
+    graph_mvp.add_argument("--inner-iterations", type=int, default=1)
+    graph_mvp.add_argument("--warmups", type=int, default=1)
+    graph_mvp.add_argument("--timeout-seconds", type=float, default=30.0)
+    graph_mvp.add_argument("--minimum-predicted-improvement", type=float, default=0.05)
+    graph_mvp.add_argument("--compiler", default="cc")
+    graph_mvp.add_argument("--source", default="benchmarks/native/benchmark.c")
+    graph_mvp.add_argument("--output")
+    graph_mvp.set_defaults(handler=command_graph_mvp)
 
     experiment = subparsers.add_parser("experiment", help="run and preserve Gate experiments")
     experiment_commands = experiment.add_subparsers(dest="experiment_command", required=True)

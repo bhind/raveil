@@ -45,6 +45,20 @@ mappers, external solvers, and unadmitted candidate graphs are fallible.
 
 ## Native execution contract
 
+### GNU/Linux userspace vertical slice
+
+ADR-0025 instantiates the smallest complete control loop as owned Python
+records plus a replaceable strict-C11 native adapter. `GraphProgram` and
+`ExecutionContract` define the admitted graph, the compiler emits a sealed
+bounded variant slate, and an analytical proposal remains advice. Baseline-first
+execution, structural checks, checksum comparison against the trusted baseline,
+and explicit commit/rollback remain authoritative host mechanisms.
+
+The result is a segregated host-correctness record. It is not automatically
+promoted into Experience or measurement evidence. GNU/Linux is the first
+integration environment, but no Linux type appears in the owned graph contract;
+the same module runs on macOS.
+
 The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
 conventional sequential register instruction stream and not an exact-cycle VLIW
 schedule. A native job should carry:
