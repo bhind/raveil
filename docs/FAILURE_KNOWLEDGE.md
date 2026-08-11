@@ -128,8 +128,8 @@ labelled unknown.
 - Detection: real-QEMU smoke must assert that ETX exits, the normal transcript
   completes, and neither log contains `clint-preempt`.
 - Evidence: T-0096 and the v0.0000000000002 operator report.
-- State: corrected in local CI with real-QEMU ETX regression; new Pre-release
-  publication remains pending.
+- State: corrected in local and fresh-clone CI with real-QEMU ETX regression;
+  published in v0.0000000000003.
 
 ## Promotion checklist
 
