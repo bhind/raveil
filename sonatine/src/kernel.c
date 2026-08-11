@@ -30,6 +30,11 @@ static void boot_fail(const char *subsystem) {
   }
 }
 
+static bool kernel_bytes_equal(const uint8_t *left,const uint8_t *right,size_t size) {
+  for(size_t index=0;index<size;++index) if(left[index]!=right[index]) return false;
+  return true;
+}
+
 static bool job_contract_smoke(uint16_t task,cap_handle_t program_cap,
                                cap_handle_t graph_cap,cap_handle_t data_cap,
                                cap_handle_t experience_cap) {
@@ -41,6 +46,9 @@ static bool job_contract_smoke(uint16_t task,cap_handle_t program_cap,
   object.permitted_access=RAVEIL_OBJECT_READ|RAVEIL_OBJECT_WRITE;
   object.object_id=1u; object.generation=1u; object.version=1u;
   object.byte_length=8u; object.backing=RAVEIL_OBJECT_BACKING_VOLATILE;
+  const uint8_t initial_bytes[8]={1u,2u,3u,4u,5u,6u,7u,8u};
+  const uint8_t published_bytes[8]={8u,7u,6u,5u,4u,3u,2u,1u};
+  const uint8_t rolled_back_bytes[8]={9u,9u,9u,9u,9u,9u,9u,9u};
   struct raveil_job_descriptor_v1 job={0};
   job.magic=RAVEIL_JOB_MAGIC; job.schema_version=RAVEIL_JOB_SCHEMA_V1;
   job.struct_size=sizeof(job); job.object_count=1u; job.job_id=1u;
@@ -53,7 +61,8 @@ static bool job_contract_smoke(uint16_t task,cap_handle_t program_cap,
   if(!plane_program_install(task,program_cap,job.program_identity) ||
      !plane_graph_install(task,graph_cap,job.program_identity,
                           job.graph_variant_identity) ||
-     !plane_data_object_register(task,data_cap,&object) ||
+     !plane_data_object_register_bytes(task,data_cap,&object,initial_bytes,
+                                       sizeof(initial_bytes)) ||
      !plane_job_submit_bound(task,data_cap,&job,&binding)) return false;
   struct sonatine_submission issued;
   if(!job_submission_take(&issued)) return false;
@@ -75,11 +84,20 @@ static bool job_contract_smoke(uint16_t task,cap_handle_t program_cap,
   if(!plane_experience_record(task,experience_cap,&taken)) return false;
   completion_telemetry_emit(&taken,finished-started);
   struct raveil_object_manifest_v1 observed;
+  uint8_t visible_bytes[8];
   if(!job_object_lookup(1u,&observed) || observed.version!=1u) return false;
-  if(!plane_program_approve(task,program_cap,&binding) ||
+  if(!job_object_read(1u,0u,visible_bytes,sizeof(visible_bytes)) ||
+     !kernel_bytes_equal(visible_bytes,initial_bytes,sizeof(initial_bytes)) ||
+     !plane_data_shadow_write(task,data_cap,&binding,1u,0u,published_bytes,
+                              sizeof(published_bytes)) ||
+     !job_object_read(1u,0u,visible_bytes,sizeof(visible_bytes)) ||
+     !kernel_bytes_equal(visible_bytes,initial_bytes,sizeof(initial_bytes)) ||
+     !plane_program_approve(task,program_cap,&binding) ||
      plane_data_finalize(task,data_cap,&binding,true)!=SONATINE_FINALIZE_COMMITTED ||
      plane_data_finalize(task,data_cap,&binding,true)!=SONATINE_FINALIZE_INVALID ||
-     !job_object_lookup(1u,&observed) || observed.version!=2u) return false;
+     !job_object_lookup(1u,&observed) || observed.version!=2u ||
+     !job_object_read(1u,0u,visible_bytes,sizeof(visible_bytes)) ||
+     !kernel_bytes_equal(visible_bytes,published_bytes,sizeof(published_bytes))) return false;
   job.objects[0].expected_version=2u;
   job.job_id=2u;
   if(!plane_job_submit_bound(task,data_cap,&job,&binding) || !job_cancel(&binding) ||
@@ -94,7 +112,11 @@ static bool job_contract_smoke(uint16_t task,cap_handle_t program_cap,
     completion.completion_cookie[index]=issued.completion_cookie[index];
   completion.outputs[0].version=3u;
   if(!job_completion_post(&completion) || !job_completion_take(&taken) ||
-     plane_data_finalize(task,data_cap,&binding,false)!=SONATINE_FINALIZE_ROLLED_BACK)
+     !plane_data_shadow_write(task,data_cap,&binding,1u,0u,rolled_back_bytes,
+                              sizeof(rolled_back_bytes)) ||
+     plane_data_finalize(task,data_cap,&binding,false)!=SONATINE_FINALIZE_ROLLED_BACK ||
+     !job_object_read(1u,0u,visible_bytes,sizeof(visible_bytes)) ||
+     !kernel_bytes_equal(visible_bytes,published_bytes,sizeof(published_bytes)))
     return false;
   return job_inflight_count()==0u && job_shadow_count()==0u;
 }
@@ -192,6 +214,7 @@ void kmain(void) {
     boot_fail("Daphnis contract");
   boot_ok("Daphnis contract / object table + bounded rings + replay guard");
   boot_ok("Daphnis metadata shadow / injected approval + commit + cancel + rollback");
+  boot_ok("Daphnis byte shadow / atomic publish + rollback");
   boot_ok("four-plane authority / registry + capability write firewall");
 
   if(graph_backend_run_if_present(init_task,program_authority_cap,

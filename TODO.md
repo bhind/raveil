@@ -21,9 +21,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   structural/semantic checks, commit or rollback, and evidence output. This is
   the sole implementation P0 after the owner explicitly restarts the line.
 
-T-0086 is complete on GNU/Linux and macOS host-correctness paths. T-0034,
-T-0085, T-0018, compiler expansion, and hardware work remain preserved and were
-not pulled into this MVP.
+T-0086 is complete on GNU/Linux and macOS host-correctness paths. T-0034 and
+T-0085 were subsequently completed on independent Sonatine branches; T-0018,
+compiler expansion, and hardware work remain preserved outside the userspace
+MVP.
 
 ## Post-MVP side project — ReactOS portability probe
 
@@ -256,8 +257,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   capability-gated Data registration/submission/publication, separate Program
   approval, and restricted Experience observation admission. Raw job mutation
   primitives are internal and normal kernel/graph paths use the guarded API.
-- [ ] **T-0085** Add bounded object-byte backing and byte-shadow publication;
-  metadata rollback does not restore or publish data bytes.
+- [x] **T-0085** Add fixed 512-byte object backing, dispatch-time snapshots,
+  Data-authorized byte staging, approval-time freeze, and atomic byte/version
+  publication. Rollback, cancellation, and conflict preserve visible bytes.
 
 ## After the userspace MVP — compiler and adaptive execution
 

@@ -1,13 +1,18 @@
 #include "job_authority.h"
 #include "plane_authority.h"
 
-struct object_slot { bool active; struct raveil_object_manifest_v1 value; };
+struct object_slot {
+  bool active;
+  struct raveil_object_manifest_v1 value;
+  uint8_t visible[SONATINE_OBJECT_MAX_BYTES];
+};
 struct inflight_slot {
   bool active;
   bool dispatched;
   bool completion_posted;
   bool cancel_requested;
   struct sonatine_submission submission;
+  uint8_t snapshot[RAVEIL_JOB_MAX_OBJECTS][SONATINE_OBJECT_MAX_BYTES];
 };
 struct shadow_slot {
   bool active;
@@ -15,6 +20,8 @@ struct shadow_slot {
   bool cancel_requested;
   struct sonatine_submission submission;
   struct raveil_completion_record_v1 completion;
+  uint8_t bytes[RAVEIL_JOB_MAX_OBJECTS][SONATINE_OBJECT_MAX_BYTES];
+  uint8_t staged[RAVEIL_JOB_MAX_OBJECTS][SONATINE_OBJECT_MAX_BYTES];
 };
 static struct object_slot objects[SONATINE_OBJECT_TABLE_SIZE];
 static struct sonatine_submission submissions[SONATINE_JOB_RING_DEPTH];
@@ -24,6 +31,7 @@ static struct shadow_slot shadows[SONATINE_JOB_RING_DEPTH];
 static size_t submission_read,submission_write,submission_used;
 static size_t completion_read,completion_write,completion_used;
 static uint64_t authority_epoch,next_sequence;
+static struct object_slot *find_object(uint64_t id);
 
 static void bytes_zero(void *target,size_t size) {
   uint8_t *bytes=(uint8_t *)target;
@@ -42,15 +50,29 @@ void job_authority_init(uint64_t execution_epoch) {
   completion_read=0u; completion_write=0u; completion_used=0u;
   authority_epoch=execution_epoch==0u?1u:execution_epoch; next_sequence=1u;
 }
-static bool job_object_register_core(const struct raveil_object_manifest_v1 *manifest) {
-  if(!raveil_object_manifest_validate_v1(manifest)) return false;
+static bool job_object_register_bytes_core(
+    const struct raveil_object_manifest_v1 *manifest,
+    const void *initial_bytes,size_t length,bool zero_initial) {
+  if(!raveil_object_manifest_validate_v1(manifest) ||
+     manifest->byte_length>SONATINE_OBJECT_MAX_BYTES ||
+     (!zero_initial && (initial_bytes==NULL || length!=manifest->byte_length)))
+    return false;
   for(size_t index=0;index<SONATINE_OBJECT_TABLE_SIZE;++index)
     if(objects[index].active && objects[index].value.object_id==manifest->object_id)
       return false;
   for(size_t index=0;index<SONATINE_OBJECT_TABLE_SIZE;++index) if(!objects[index].active) {
-    objects[index].active=true; objects[index].value=*manifest; return true;
+    bytes_zero(&objects[index],sizeof(objects[index]));
+    objects[index].active=true; objects[index].value=*manifest;
+    if(!zero_initial) {
+      const uint8_t *source=(const uint8_t *)initial_bytes;
+      for(size_t byte=0;byte<length;++byte) objects[index].visible[byte]=source[byte];
+    }
+    return true;
   }
   return false;
+}
+static bool job_object_register_core(const struct raveil_object_manifest_v1 *manifest) {
+  return job_object_register_bytes_core(manifest,NULL,0u,true);
 }
 bool job_object_lookup(uint64_t object_id,
                        struct raveil_object_manifest_v1 *manifest) {
@@ -60,6 +82,15 @@ bool job_object_lookup(uint64_t object_id,
       *manifest=objects[index].value; return true;
     }
   return false;
+}
+bool job_object_read(uint64_t object_id,uint64_t offset,
+                     void *target,size_t length) {
+  struct object_slot *object=find_object(object_id);
+  if(object==NULL || target==NULL || offset>object->value.byte_length ||
+     length>object->value.byte_length-offset) return false;
+  uint8_t *out=(uint8_t *)target;
+  for(size_t index=0;index<length;++index) out[index]=object->visible[offset+index];
+  return true;
 }
 static bool admitted(const struct raveil_job_descriptor_v1 *job) {
   if(!raveil_job_descriptor_validate_v1(job)) return false;
@@ -130,8 +161,36 @@ static bool job_submit_bound_core(const struct raveil_job_descriptor_v1 *job,
   inflight[slot].completion_posted=false;
   inflight[slot].cancel_requested=false;
   inflight[slot].submission=value;
+  for(uint16_t ref_index=0;ref_index<job->object_count;++ref_index) {
+    struct object_slot *object=find_object(job->objects[ref_index].object_id);
+    for(size_t byte=0;byte<object->value.byte_length;++byte)
+      inflight[slot].snapshot[ref_index][byte]=object->visible[byte];
+  }
   binding_from_submission(&value,binding);
   return true;
+}
+bool job_submission_read(const struct sonatine_submission *submission,
+                         uint64_t object_id,uint64_t offset,
+                         void *target,size_t length) {
+  if(submission==NULL || target==NULL) return false;
+  for(size_t slot=0;slot<SONATINE_JOB_RING_DEPTH;++slot) {
+    struct inflight_slot *entry=&inflight[slot];
+    if(!entry->active || !entry->dispatched || entry->completion_posted ||
+       entry->cancel_requested ||
+       !submission_matches(&entry->submission,submission)) continue;
+    for(uint16_t ref_index=0;ref_index<entry->submission.job.object_count;++ref_index) {
+      const struct raveil_object_ref_v1 *ref=&entry->submission.job.objects[ref_index];
+      if(ref->access!=RAVEIL_OBJECT_READ || ref->object_id!=object_id ||
+         offset<ref->offset ||
+         offset>ref->offset+ref->length || length>ref->offset+ref->length-offset)
+        continue;
+      uint8_t *out=(uint8_t *)target;
+      for(size_t byte=0;byte<length;++byte)
+        out[byte]=entry->snapshot[ref_index][offset+byte];
+      return true;
+    }
+  }
+  return false;
 }
 #ifdef SONATINE_JOB_AUTHORITY_TESTING
 static bool job_submit_core(const struct raveil_job_descriptor_v1 *job) {
@@ -184,6 +243,7 @@ bool job_completion_take(struct raveil_completion_record_v1 *completion) {
        completion->execution_sequence==inflight[index].submission.execution_sequence &&
        bytes_equal(completion->completion_cookie,
                    inflight[index].submission.completion_cookie,16u)) {
+      bytes_zero(&shadows[index],sizeof(shadows[index]));
       shadows[index].active=true; shadows[index].approved=false;
       shadows[index].cancel_requested=inflight[index].cancel_requested;
       shadows[index].submission=inflight[index].submission;
@@ -202,6 +262,12 @@ static bool job_shadow_approve_core(const struct sonatine_job_binding *binding) 
   struct shadow_slot *shadow=find_shadow(binding);
   if(shadow==NULL || shadow->cancel_requested ||
      shadow->completion.status!=RAVEIL_COMPLETION_EXECUTED) return false;
+  for(uint16_t ref_index=0;ref_index<shadow->submission.job.object_count;++ref_index) {
+    const struct raveil_object_ref_v1 *ref=&shadow->submission.job.objects[ref_index];
+    if(ref->access!=RAVEIL_OBJECT_WRITE) continue;
+    for(uint64_t byte=ref->offset;byte<ref->offset+ref->length;++byte)
+      if(shadow->staged[ref_index][byte]==0u) return false;
+  }
   shadow->approved=true; return true;
 }
 bool job_cancel(const struct sonatine_job_binding *binding) {
@@ -224,12 +290,15 @@ bool job_cancel(const struct sonatine_job_binding *binding) {
           submissions[kept_index]=kept[kept_index];
         submission_used=count;
         bytes_zero(&inflight[index],sizeof(inflight[index]));
-      }
+      } else bytes_zero(inflight[index].snapshot,sizeof(inflight[index].snapshot));
       return true;
     }
   struct shadow_slot *shadow=find_shadow(binding);
   if(shadow==NULL || shadow->cancel_requested) return false;
-  shadow->cancel_requested=true; shadow->approved=false; return true;
+  shadow->cancel_requested=true; shadow->approved=false;
+  bytes_zero(shadow->bytes,sizeof(shadow->bytes));
+  bytes_zero(shadow->staged,sizeof(shadow->staged));
+  return true;
 }
 static struct object_slot *find_object(uint64_t id) {
   for(size_t index=0;index<SONATINE_OBJECT_TABLE_SIZE;++index)
@@ -262,6 +331,13 @@ static enum sonatine_finalize_result job_shadow_finalize_core(
        object->value.version==UINT64_MAX || output->version!=object->value.version+1u) {
       bytes_zero(shadow,sizeof(*shadow)); return SONATINE_FINALIZE_CONFLICT;
     }
+  }
+  for(uint16_t ref_index=0;ref_index<job->object_count;++ref_index) {
+    const struct raveil_object_ref_v1 *ref=&job->objects[ref_index];
+    if(ref->access!=RAVEIL_OBJECT_WRITE) continue;
+    struct object_slot *object=find_object(ref->object_id);
+    for(uint64_t byte=ref->offset;byte<ref->offset+ref->length;++byte)
+      object->visible[byte]=shadow->bytes[ref_index][byte];
   }
   for(uint16_t index=0;index<shadow->completion.output_count;++index) {
     struct object_slot *object=find_object(shadow->completion.outputs[index].object_id);
@@ -358,6 +434,13 @@ bool plane_data_object_register(uint16_t task,cap_handle_t cap,
   return plane_cap_authorized(task,cap,CAP_OBJECT_DATA_AUTHORITY,CAP_RIGHT_WRITE) &&
          job_object_register_core(manifest);
 }
+bool plane_data_object_register_bytes(
+    uint16_t task,cap_handle_t cap,
+    const struct raveil_object_manifest_v1 *manifest,
+    const void *initial_bytes,size_t length) {
+  return plane_cap_authorized(task,cap,CAP_OBJECT_DATA_AUTHORITY,CAP_RIGHT_WRITE) &&
+         job_object_register_bytes_core(manifest,initial_bytes,length,false);
+}
 
 bool plane_job_submit_bound(uint16_t task,cap_handle_t data_cap,
                             const struct raveil_job_descriptor_v1 *job,
@@ -371,6 +454,37 @@ bool plane_program_approve(uint16_t task,cap_handle_t program_cap,
   return plane_cap_authorized(task,program_cap,CAP_OBJECT_PROGRAM_AUTHORITY,
                               CAP_RIGHT_CONTROL) &&
          job_shadow_approve_core(binding);
+}
+static bool job_shadow_write_core(const struct sonatine_job_binding *binding,
+                                  uint64_t object_id,uint64_t offset,
+                                  const void *source,size_t length) {
+  if(binding==NULL || source==NULL || length==0u) return false;
+  struct shadow_slot *shadow=find_shadow(binding);
+  if(shadow==NULL || shadow->approved || shadow->cancel_requested ||
+     shadow->completion.status!=RAVEIL_COMPLETION_EXECUTED) return false;
+  for(uint16_t ref_index=0;ref_index<shadow->submission.job.object_count;++ref_index) {
+    const struct raveil_object_ref_v1 *ref=&shadow->submission.job.objects[ref_index];
+    if(ref->object_id!=object_id || ref->access!=RAVEIL_OBJECT_WRITE ||
+       offset<ref->offset || offset>ref->offset+ref->length ||
+       length>ref->offset+ref->length-offset) continue;
+    for(size_t byte=0;byte<length;++byte)
+      if(shadow->staged[ref_index][offset+byte]!=0u) return false;
+    const uint8_t *input=(const uint8_t *)source;
+    for(size_t byte=0;byte<length;++byte) {
+      shadow->bytes[ref_index][offset+byte]=input[byte];
+      shadow->staged[ref_index][offset+byte]=1u;
+    }
+    return true;
+  }
+  return false;
+}
+bool plane_data_shadow_write(uint16_t task,cap_handle_t data_cap,
+                             const struct sonatine_job_binding *binding,
+                             uint64_t object_id,uint64_t offset,
+                             const void *source,size_t length) {
+  return plane_cap_authorized(task,data_cap,CAP_OBJECT_DATA_AUTHORITY,
+                              CAP_RIGHT_WRITE) &&
+         job_shadow_write_core(binding,object_id,offset,source,length);
 }
 
 enum sonatine_finalize_result plane_data_finalize(
@@ -418,6 +532,24 @@ bool job_submit_bound_test(const struct raveil_job_descriptor_v1 *job,
 }
 bool job_shadow_approve_test(const struct sonatine_job_binding *binding) {
   return job_shadow_approve_core(binding);
+}
+bool job_shadow_stage_zero_test(const struct sonatine_job_binding *binding) {
+  struct shadow_slot *shadow=find_shadow(binding);
+  if(shadow==NULL || shadow->approved) return false;
+  for(uint16_t ref_index=0;ref_index<shadow->submission.job.object_count;++ref_index) {
+    const struct raveil_object_ref_v1 *ref=&shadow->submission.job.objects[ref_index];
+    if(ref->access!=RAVEIL_OBJECT_WRITE) continue;
+    for(uint64_t byte=ref->offset;byte<ref->offset+ref->length;++byte) {
+      shadow->bytes[ref_index][byte]=0u;
+      shadow->staged[ref_index][byte]=1u;
+    }
+  }
+  return true;
+}
+bool job_shadow_write_test(const struct sonatine_job_binding *binding,
+                           uint64_t object_id,uint64_t offset,
+                           const void *source,size_t length) {
+  return job_shadow_write_core(binding,object_id,offset,source,length);
 }
 enum sonatine_finalize_result job_shadow_finalize_test(
     const struct sonatine_job_binding *binding,bool commit) {

@@ -20,11 +20,19 @@ bool plane_graph_install(uint16_t task,cap_handle_t cap,
                          const uint8_t program[16],const uint8_t graph[16]);
 bool plane_data_object_register(uint16_t task,cap_handle_t cap,
                                 const struct raveil_object_manifest_v1 *manifest);
+bool plane_data_object_register_bytes(
+    uint16_t task,cap_handle_t cap,
+    const struct raveil_object_manifest_v1 *manifest,
+    const void *initial_bytes,size_t length);
 bool plane_job_submit_bound(uint16_t task,cap_handle_t data_cap,
                             const struct raveil_job_descriptor_v1 *job,
                             struct sonatine_job_binding *binding);
 bool plane_program_approve(uint16_t task,cap_handle_t program_cap,
                            const struct sonatine_job_binding *binding);
+bool plane_data_shadow_write(uint16_t task,cap_handle_t data_cap,
+                             const struct sonatine_job_binding *binding,
+                             uint64_t object_id,uint64_t offset,
+                             const void *source,size_t length);
 enum sonatine_finalize_result plane_data_finalize(
     uint16_t task,cap_handle_t data_cap,
     const struct sonatine_job_binding *binding,bool commit);

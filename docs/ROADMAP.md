@@ -150,8 +150,9 @@ T-0090 supplies a narrow explicit Sonatine/QEMU backend connection for the
 existing userspace graph loop. It reuses Gate 3 job/completion/finalization
 artifacts and Gate 4 owned frontend contracts, but supports only an 8-or-smaller
 GEMM correctness seed with no timing. Gate 3 and full Gate 4 remain planned;
-this adapter is emulation integration evidence, not byte-shadow, Four-plane
-authority, general compiler, or performance completion.
+this adapter by itself did not provide byte-shadow or Four-plane authority.
+T-0034 and T-0085 now supply those separate kernel seeds, but not a general
+compiler, real device path, or performance completion.
 
 ## Gate 3 — connect authority and evidence
 
@@ -173,10 +174,11 @@ Planned until byte-shadow execution, semantic verification, and Four-plane
 write authorities are executable. T-0033 now supplies only the kernel-owned
 metadata-shadow finalization and cancellation seed.
 
-T-0034 now supplies the boot-scoped Four-plane capability firewall and guarded
-normal graph path. T-0043 supplies bounded semantic verification. Gate 3 remains
-Planned because T-0085 byte-shadow execution, persistent/device lifetime, and
-non-seed authority integration are still absent.
+T-0034 supplies the boot-scoped Four-plane capability firewall and guarded
+normal graph path, T-0043 supplies bounded semantic verification, and T-0085
+supplies fixed byte-shadow publication. Gate 3 remains Planned because real
+device transport/lifetime, persistent recovery, and non-seed authority
+integration are still absent.
 
 Define JobDescriptor, ObjectManifest, and CompletionRecord; add
 submission/completion rings; append measured telemetry to Experience; implement

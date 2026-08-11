@@ -89,6 +89,13 @@ The public plane API composes with the existing job rings and metadata-shadow
 finalizer, while their raw mutation primitives remain internal trusted-core
 implementation details.
 
+ADR-0031 extends that finalizer with fixed kernel-owned object bytes. Admission
+captures stable input snapshots; a consumed completion may receive only bounded
+Data-authorized WRITE-range staging; Program approval freezes complete shadows;
+and finalization publishes all staged bytes and exact-successor versions only
+after every object and range revalidates. The contract remains pointer-free and
+the atomicity claim is limited to the single-hart kernel API.
+
 The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
 conventional sequential register instruction stream and not an exact-cycle VLIW
 schedule. A native job should carry:
@@ -148,8 +155,9 @@ does not establish semantics, commit, energy, or hardware performance.
 ADR-0023 adds a kernel-owned finalization ledger after completion observation.
 Only an explicit full-binding approval plus optimistic revalidation of every
 READ/WRITE version can publish exact-successor WRITE versions. Cancellation is
-sticky and multi-output metadata publication is all-or-nothing. This is not a
-semantic oracle or data-byte shadow: T-0085 and T-0043 retain those boundaries.
+sticky and multi-output metadata publication is all-or-nothing. ADR-0031 and
+T-0043 subsequently add the bounded data-byte and semantic boundaries without
+changing this metadata lifecycle.
 
 ## Named components
 

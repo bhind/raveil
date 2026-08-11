@@ -8,6 +8,7 @@
 
 #define SONATINE_OBJECT_TABLE_SIZE 8u
 #define SONATINE_JOB_RING_DEPTH 4u
+#define SONATINE_OBJECT_MAX_BYTES 512u
 
 struct sonatine_submission {
   struct raveil_job_descriptor_v1 job;
@@ -33,6 +34,11 @@ enum sonatine_finalize_result {
 void job_authority_init(uint64_t execution_epoch);
 bool job_object_lookup(uint64_t object_id,
                        struct raveil_object_manifest_v1 *manifest);
+bool job_object_read(uint64_t object_id,uint64_t offset,
+                     void *target,size_t length);
+bool job_submission_read(const struct sonatine_submission *submission,
+                         uint64_t object_id,uint64_t offset,
+                         void *target,size_t length);
 bool job_submission_take(struct sonatine_submission *submission);
 bool job_completion_post(const struct raveil_completion_record_v1 *completion);
 bool job_completion_take(struct raveil_completion_record_v1 *completion);

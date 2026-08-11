@@ -81,7 +81,18 @@ int main(void) {
   uint8_t unknown[16]; identity(unknown,9u);
   assert(!plane_graph_install(owner,caps[1],unknown,graph));
   struct raveil_object_manifest_v1 object=manifest(1u),visible;
-  assert(plane_data_object_register(owner,caps[2],&object));
+  struct raveil_object_manifest_v1 oversized=object;
+  oversized.byte_length=SONATINE_OBJECT_MAX_BYTES+1u;
+  assert(!plane_data_object_register(owner,caps[2],&oversized));
+  uint8_t initial[8]={1u,2u,3u,4u,5u,6u,7u,8u};
+  const uint8_t expected_initial[8]={1u,2u,3u,4u,5u,6u,7u,8u};
+  uint8_t staged[8]={8u,7u,6u,5u,4u,3u,2u,1u},readback[8];
+  assert(!plane_data_object_register_bytes(owner,caps[3],&object,initial,sizeof(initial)));
+  assert(!plane_data_object_register_bytes(owner,caps[2],&object,initial,7u));
+  assert(plane_data_object_register_bytes(owner,caps[2],&object,initial,sizeof(initial)));
+  memset(initial,0,sizeof(initial));
+  assert(job_object_read(1u,0u,readback,sizeof(readback)) &&
+         memcmp(readback,expected_initial,sizeof(readback))==0);
   struct raveil_job_descriptor_v1 work=job(7u,program,graph);
   struct sonatine_job_binding binding;
   assert(!plane_job_submit_bound(peer,caps[2],&work,&binding));
@@ -91,6 +102,7 @@ int main(void) {
   assert(plane_job_submit_bound(owner,caps[2],&work,&binding));
   struct sonatine_submission issued;
   assert(job_submission_take(&issued));
+  assert(!job_submission_read(&issued,1u,0u,readback,sizeof(readback)));
   struct raveil_completion_record_v1 done=completion(&issued),taken;
   assert(job_completion_post(&done)); assert(job_completion_take(&taken));
   struct raveil_completion_record_v1 forged=taken; forged.completion_cookie[0]^=1u;
@@ -101,11 +113,27 @@ int main(void) {
   assert(plane_experience_record(owner,caps[3],&taken));
   assert(!plane_experience_record(owner,caps[3],&taken));
   assert(!plane_program_approve(owner,caps[3],&binding));
+  assert(!plane_program_approve(owner,caps[0],&binding));
+  assert(!plane_data_shadow_write(owner,caps[3],&binding,1u,0u,staged,sizeof(staged)));
+  assert(!plane_data_shadow_write(peer,caps[2],&binding,1u,0u,staged,sizeof(staged)));
+  struct sonatine_job_binding stale_binding=binding; stale_binding.execution_sequence^=1u;
+  assert(!plane_data_shadow_write(owner,caps[2],&stale_binding,1u,0u,staged,sizeof(staged)));
+  assert(!plane_data_shadow_write(owner,caps[2],&binding,2u,0u,staged,sizeof(staged)));
+  assert(!plane_data_shadow_write(owner,caps[2],&binding,1u,8u,staged,1u));
+  assert(!plane_data_shadow_write(owner,caps[2],&binding,1u,0u,staged,0u));
+  assert(plane_data_shadow_write(owner,caps[2],&binding,1u,0u,staged,4u));
+  assert(!plane_program_approve(owner,caps[0],&binding));
+  assert(!plane_data_shadow_write(owner,caps[2],&binding,1u,0u,staged,4u));
+  assert(plane_data_shadow_write(owner,caps[2],&binding,1u,4u,staged+4u,4u));
+  assert(job_object_read(1u,0u,readback,sizeof(readback)) && readback[0]==1u);
   assert(plane_program_approve(owner,caps[0],&binding));
+  assert(!plane_data_shadow_write(owner,caps[2],&binding,1u,0u,staged,sizeof(staged)));
   assert(plane_data_finalize(owner,caps[3],&binding,true)==SONATINE_FINALIZE_INVALID);
   assert(job_object_lookup(1u,&visible) && visible.version==1u);
   assert(plane_data_finalize(owner,caps[2],&binding,true)==SONATINE_FINALIZE_COMMITTED);
   assert(job_object_lookup(1u,&visible) && visible.version==2u);
+  assert(job_object_read(1u,0u,readback,sizeof(readback)) &&
+         memcmp(readback,staged,sizeof(readback))==0);
   assert(plane_experience_count()==1u);
 
   /* The bounded ledger accepts only genuine consumed completions and never
@@ -118,6 +146,7 @@ int main(void) {
     done=completion(&issued); done.outputs[0].version=3u;
     assert(job_completion_post(&done)); assert(job_completion_take(&taken));
     assert(plane_experience_record(owner,caps[3],&taken));
+    assert(!plane_program_approve(owner,caps[0],&binding));
     assert(plane_data_finalize(owner,caps[2],&binding,false)==SONATINE_FINALIZE_ROLLED_BACK);
   }
   assert(plane_experience_count()==SONATINE_EXPERIENCE_LEDGER_SIZE);
@@ -129,6 +158,8 @@ int main(void) {
   assert(!plane_experience_record(owner,caps[3],&taken));
   assert(plane_experience_count()==SONATINE_EXPERIENCE_LEDGER_SIZE);
   assert(plane_data_finalize(owner,caps[2],&binding,false)==SONATINE_FINALIZE_ROLLED_BACK);
+  assert(job_object_read(1u,0u,readback,sizeof(readback)) &&
+         memcmp(readback,staged,sizeof(readback))==0);
 
   /* Attenuated Data/Experience leaves work only for their own plane. */
   cap_handle_t peer_data=cap_delegate(owner,caps[2],peer,CAP_RIGHT_WRITE);

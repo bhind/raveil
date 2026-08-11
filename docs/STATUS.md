@@ -276,11 +276,20 @@ successor versions and multi-output publication prevalidates every target
 before changing any visible version. Conflicting writers, cancellation, stale
 bindings, missing approval, and replay fail closed.
 
-This is version-metadata shadowing only. It contains no object bytes, byte-copy
-rollback, semantic oracle, real Daphnis execution, DMA/cache ordering,
-capability-authorized submitter/verifier, persistence, or hardware evidence.
-Queued cancellation discards undispatched state; dispatched cancellation is
-sticky and a late `EXECUTED` observation cannot commit.
+ADR-0031 completes T-0085's bounded byte-shadow seed. Each object owns at most
+512 visible bytes; admission snapshots referenced bytes, Data authority stages
+only exact consumed-completion WRITE ranges, Program approval requires complete
+coverage and freezes the shadow, and finalization publishes bytes with exact-
+successor versions only after whole-transaction revalidation. Rollback,
+cancellation, conflict, missing approval, and replay preserve visible bytes and
+zero the shadow. The QEMU graph path stages its real GEMM output and validates
+the checksum again from the committed backing.
+
+This is still a volatile, single-hart, copy-based kernel seed. It provides no
+general allocator, real Daphnis device, DMA/cache ordering, persistent recovery,
+multi-hart atomicity, U-mode byte API, or hardware evidence. Queued cancellation
+discards undispatched state; dispatched cancellation is sticky and a late
+`EXECUTED` observation cannot commit.
 
 ## Executable track B: bounded Experience seed
 

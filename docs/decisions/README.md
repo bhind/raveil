@@ -35,3 +35,4 @@ rewrite it.
 | [ADR-0028](ADR-0028-u-mode-shell-keeps-bounded-scalar-state.md) | Accepted | U-mode command shell keeps bounded scalar state |
 | [ADR-0029](ADR-0029-sonatine-graph-transport-is-bounded-emulation.md) | Accepted | Sonatine graph transport is bounded emulation |
 | [ADR-0030](ADR-0030-four-plane-writes-require-distinct-capabilities.md) | Accepted | Four-plane writes require distinct capabilities |
+| [ADR-0031](ADR-0031-byte-shadows-freeze-before-atomic-publication.md) | Accepted | Byte shadows freeze before atomic publication |

@@ -76,6 +76,10 @@ resolves it.
   boot-scoped Program/Graph registries. Before untrusted multi-user or device
   exposure, which per-object capability, persistent identity, revocation-tree,
   reset, and signed-admission rules are required?
+- ADR-0031 fixes the current object backing at 512 bytes and single-hart
+  copy-based publication. Which allocator, DMA/cache ordering, device reset,
+  persistent recovery, and multi-hart publication protocol should replace this
+  seed before real-device exposure?
 - Does the installed IntelliJ C/C++ plugin expose a genuine remote GDB run
   configuration? The observed UI has not established this.
 

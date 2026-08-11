@@ -143,13 +143,28 @@ bool graph_backend_run_if_present(uint16_t task,cap_handle_t program_cap,
     copy16(completion.completion_cookie,issued.completion_cookie);
     completion.output_count=1u;
     completion.outputs[0]=(struct raveil_object_version_v1){1u,1u,2u};
-    bool approved=false;
+    bool approved=false,committed=false;
     if(job_completion_post(&completion) && job_completion_take(&taken) &&
        plane_experience_record(task,experience_cap,&taken) &&
+       plane_data_shadow_write(task,data_cap,&binding,1u,0u,actual_values,
+                               (size_t)object.byte_length) &&
        actual==reference && plane_program_approve(task,program_cap,&binding) &&
-       plane_data_finalize(task,data_cap,&binding,true)==SONATINE_FINALIZE_COMMITTED)
-      approved=true;
-    else (void)plane_data_finalize(task,data_cap,&binding,false);
+       plane_data_finalize(task,data_cap,&binding,true)==SONATINE_FINALIZE_COMMITTED) {
+      committed=true;
+      int64_t published[64];
+      if(job_object_read(1u,0u,published,(size_t)object.byte_length) &&
+         checksum(published,(size_t)request->m*request->n)==reference)
+        approved=true;
+      else {
+        completion.status=RAVEIL_COMPLETION_FAULT;
+        completion.detail=RAVEIL_DETAIL_EXECUTION_FAULT;
+        completion.output_count=0u;
+        for(size_t index=0;index<RAVEIL_JOB_MAX_OBJECTS;++index)
+          completion.outputs[index]=(struct raveil_object_version_v1){0};
+      }
+    }
+    if(!approved && !committed)
+      (void)plane_data_finalize(task,data_cap,&binding,false);
     emit_result(request->request_id,completion.status,completion.detail,
                 &issued,actual,reference,approved);
   }
