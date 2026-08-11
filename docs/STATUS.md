@@ -97,8 +97,10 @@ boundaries only and create no performance or hardware claim.
 
 The `v0.0000000000002` source-demo candidate packages this verified graph MVP,
 the interactive U-mode shell, and the explicit native/Sonatine backend choices
-with hands-on instructions. Publication and the remote Release URL remain
-unverified until T-0092 completes.
+with hands-on instructions. A GitHub Draft Release now targets audited commit
+`e02e91289450ac48a31c079227f09f7ecd60aaf1`; it is not published, not a
+prerelease, and has no remote `v0.0000000000002` tag. T-0092 remains open until
+the owner reviews and explicitly approves publication.
 
 The completed tree passed 91 local tests plus RV64 release/debug, DWARF, U-mode
 shell, telemetry replay, and graph differential checks. A Linux arm64 container
