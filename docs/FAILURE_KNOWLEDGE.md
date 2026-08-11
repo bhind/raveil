@@ -161,6 +161,28 @@ labelled unknown.
   `docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md`.
 - State: corrected for the synthetic walkthrough; T-0104 remains open.
 
+## Measurement must follow a falsifiable architecture contract
+
+- Symptom: substantial Experience measurement and a process-level Command
+  Graph showcase existed before the intended CPU/ISA mechanism, matched CPU
+  controls, observable events, and fair resource envelope were defined.
+- Cause: an available harness and visible demo were treated as progress on the
+  core microarchitecture thesis even though they operated at different
+  abstraction levels and answered different questions.
+- Prevention: before performance work, record the candidate mechanism,
+  ISA-visible semantics, workload, in-order and OoO controls, cache/memory and
+  functional-resource matching, instrumentation, evidence class, confounders,
+  and stopping rule. Tooling smoke and semantic tests may run earlier but may
+  not produce performance claims.
+- Detection: reject any benchmark plan that cannot identify which architecture
+  hypothesis each metric can falsify, or that compares a Graph candidate only
+  with an artificially weakened CPU.
+- Evidence: EXP-0003 remains a valid narrow negative Experience result;
+  T-0103/ADR-0037 remain a synthetic process-level illustration; RFC-0004 and
+  T-0105/T-0057/T-0042/T-0044 record the corrected research order.
+- State: open until the first matched Chisel comparison contract is accepted
+  and executed; preserve this lesson even if that comparison is also negative.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

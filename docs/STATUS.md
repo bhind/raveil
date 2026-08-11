@@ -132,6 +132,15 @@ OoO replacement, cache hierarchy, pipeline, ISA encoding, area, or energy, and
 its memoization is not evidence that Graph is required. RFC-0004 is only a
 proposal for the correctly ordered Chisel RTL/simulation study; no Chisel,
 Rocket, BOOM, Graph RTL, or CPU comparison is implemented in the current tree.
+The roadmap now separates T-0105 generic Chisel/RISC-V substrate bootstrap from
+T-0057 Graph-contract definition and T-0042 Graph RTL implementation. This is a
+planning correction, not a CPU experimental result. T-0105 now includes a
+functional tooling smoke: under an explicit linux/amd64 Docker environment on
+the Apple Silicon host, Chisel 7.2.0 emitted SystemVerilog for an owned four-bit
+counter and Verilator 4.038 executed the C++ harness to
+`CHISEL-SMOKE-V1 status=OK cycles=10 value=8`. This is emulated-host tooling and
+RTL functional evidence only. No RISC-V core, Graph RTL, CPU comparison, or
+performance evidence has run.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

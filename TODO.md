@@ -24,6 +24,16 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   This tool/process-level follow-up is deferred behind T-0057, T-0042, and
   T-0044; it is not the next test of the native CPU thesis.
 
+- [ ] **T-0105** Bootstrap a reproducible, pinned Chisel/RISC-V simulation
+  substrate. First elaborate and simulate one trivial repository-owned RTL
+  circuit; then execute one unmodified reference RISC-V configuration if host
+  memory and build time permit. Record exact JDK, Scala/build tool, Chisel,
+  simulator, upstream revision, architecture, commands, and licenses. This
+  proves tooling and functional execution only: do not implement the proposed
+  Graph microarchitecture, collect performance evidence, call a reference core
+  ARM-equivalent, or claim CPU/ISA advantage. T-0105 may precede T-0057 because
+  no Graph contract depends on it.
+
 - [x] **T-0102** Add bounded Tab completion to the Native Interactive CLI.
   Complete only documented commands, graph subcommands/options, allowlisted
   command tools, and virtual workspace paths; omit symlinks and host absolute
@@ -393,8 +403,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.
 - [ ] **T-0042** Bootstrap an owned mapper/simulator adapter without leaking
-  upstream types. After T-0057 freezes the minimal native graph/effect schema,
-  evaluate a pinned Chisel/Chipyard research environment with Rocket in-order,
+  upstream types. After T-0105 proves the substrate and T-0057 freezes the
+  minimal native graph/effect schema, use the pinned Chisel/Chipyard research
+  environment with Rocket in-order,
   BOOM OoO and same-core OoO-disabled diagnostic configurations plus an owned
   Graph execution model. Chisel constructs RTL; use a simulator such as
   Verilator for evidence and label it simulation, not silicon.

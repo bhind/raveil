@@ -9,6 +9,7 @@
 !tools/iree/**
 !tests/**
 !sonatine/**
+!hardware/**
 sonatine/build/**
 **/__pycache__/**
 **/*.pyc

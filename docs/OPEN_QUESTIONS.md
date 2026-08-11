@@ -96,6 +96,11 @@ resolves it.
 
 ## Ecosystem
 
+- Chisel 7.2.0 resolves firtool 1.133.0, but its Maven distribution lacks a
+  Linux aarch64 artifact. Should T-0105 retain a slower linux/amd64 emulated
+  tooling smoke, build and pin firtool natively for arm64, or move to another
+  fully reviewed Chisel/firtool coordinate before larger RISC-V elaboration?
+
 - Which additional context-sensitive completions, if any, justify more parser
   coupling after T-0102? Persistent history, fuzzy completion, arbitrary PATH
   lookup, shell expansion, and external completion scripts remain outside the

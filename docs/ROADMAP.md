@@ -6,47 +6,47 @@ Last updated: 2026-08-11
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
-## Current delivery focus
+## Current research reset and delivery focus
 
-State: **T-0103 retained as a conceptual process-level demo; RFC-0004/T-0057 native microarchitecture study proposed**
+State: **T-0105 Chisel/RISC-V substrate bootstrap; CPU thesis remains untested**
 
-The current manufacturing focus is the ordinary macOS/GNU/Linux Native
-userspace operator path under ADR-0034. Sonatine remains a preserved later
-backend and OS/capability validation target; further Sonatine shell features
-are paused until the Native CLI is evaluated by a person. T-0099 is the next
-narrow usability slice: minimum file-oriented commands operate only below one
-explicit workspace and feed the existing guarded graph workflow. That bounded
-workspace slice is now executable on the host; human evaluation and release
-review remain. T-0101 now owns the next product-facing question: whether
-ordinary bounded shell workloads can be compiled into a real command DAG,
-executed with exact baseline agreement, and benchmarked fairly under EXP-0004.
-The bounded implementation and development smoke are now executable; EXP-0004
-remains Planned and no crossover or performance claim has been accepted.
-T-0102 adds bounded Tab completion over that existing Native surface without
-changing the graph, evidence, or isolation gates.
-T-0103 adds an explicitly synthetic, host-development-smoke operator
-walkthrough. It makes sequential/equal-concurrency/DAG controls, topology,
-semantic agreement, and showcase-only verified reuse visible without changing
-the Gate state, connecting Experience, or accepting EXP-0004. The next
-production incremental-reuse question is separately T-0104.
-T-0100 remains a separate hardening task for OS-enforced sandboxing; T-0101
-must not describe the T-0099 workspace as a hostile-input security boundary.
-The released T-0103 showcase is not a native-graph or CPU experiment: its nodes
-are whole host tools and its cache is ordinary demo-only memoization. The next
-core-thesis sequence is proposed as T-0057 schema first, T-0042 matched Chisel
-RTL/simulation adapter second, and T-0044 static/elastic/stream/hybrid
-comparison third. T-0104 tool-level cache promotion is deferred behind that
-evidence.
+The first Experience measurement campaign began before the CPU/ISA thesis,
+matched controls, observation points, and candidate microarchitecture were
+fixed. Its negative evidence remains valid for its narrow preregistered
+Experience hypothesis, but it cannot answer whether low-level explicit-graph
+execution can simplify or outperform an in-order or OoO CPU. More measurement
+or process-demo work would repeat that ordering error.
 
-T-0086 was the sole restart P0. It ports the preserved userspace
-graph prototype onto current main and demonstrates one owned graph through
-baseline, proposal or abstention, structural/semantic checks, commit or
-rollback, and evidence output on GNU/Linux. It must preserve every existing
-Sonatine Microkernel, Linux harness, contract, telemetry, Experience, and
-experiment artifact.
+The corrected critical path is:
 
-This is an allowed narrow Gate 4 vertical slice under ADR-0024. It does not
-claim Gate 3 completion, custom-hardware performance, or a Gate 1 reversal.
+1. **T-0105 — reproducible substrate:** pin Chisel and an RTL simulator,
+   elaborate and simulate a trivial owned circuit, then execute one unmodified
+   RISC-V reference configuration. This proves tooling only and may precede
+   Graph-schema work.
+2. **T-0057 — hypothesis and contract:** freeze one low-level operation,
+   dependency, effect, alias, object, fallback, and semantic-oracle contract;
+   choose a workload that does not predetermine a win.
+3. **T-0042 — owned RTL adapter:** implement the smallest Graph execution model
+   behind owned types in the pinned environment.
+4. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
+   valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
+   organizations with matched semantics, cache/memory, functional resources,
+   and correctness checks.
+5. **Transition only after survival:** evaluate an attached engine, custom
+   RISC-V extension, programmable fabric, or separate ASIC plane. ARM-hosted
+   software is transition/product evidence, not evidence about hidden CPU
+   internals.
+
+No performance campaign begins before its comparison contract,
+instrumentation, confounders, and stopping rule are recorded. Smoke tests may
+establish build and functional correctness only. Simulation, synthesis
+estimates, FPGA results, and silicon measurements remain separate evidence
+classes.
+
+The Native CLI, T-0103 synthetic tool/process showcase, Sonatine, and EXP-0003
+remain preserved artifacts. T-0104 production tool-cache work and further
+shell growth are deferred while the critical path above is tested. Sonatine
+remains a later OS/capability backend unless evidence makes it necessary.
 
 ## High-priority demo extension — Sonatine native operator shell
 
@@ -310,16 +310,19 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Blocked by evidence, not implementation difficulty**
+State: **T-0105 substrate bootstrap; Graph hardware evidence not yet started**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
 simulation, FPGA, and silicon experiment records.
 
-RFC-0004 proposes the pre-FPGA foundation: an owned low-level graph contract
-and matched Chisel-generated RISC-V research configurations simulated under a
-common cache, memory, workload, and correctness envelope. Rocket/BOOM are
-candidate research references, not adopted product code or ARM equivalents.
+RFC-0004 proposes the pre-FPGA foundation. T-0105 may establish the generic
+Chisel/simulator/RISC-V substrate independently; T-0057 must freeze the owned
+low-level Graph contract before T-0042 implements Graph RTL. T-0044 then uses
+matched RISC-V configurations under a common cache, memory, workload,
+functional-resource, and correctness envelope. Rocket/BOOM remain candidate
+references, not adopted product code, ARM equivalents, or proof that OoO can
+be removed.
 
 ## No calendar claim
 

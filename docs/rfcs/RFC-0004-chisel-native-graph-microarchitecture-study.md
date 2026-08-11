@@ -13,11 +13,14 @@ the microarchitecture hypothesis reverses the necessary research order.
 
 ## Proposed design
 
-First, T-0057 freezes one minimal owned native graph/effect schema and one
-structured repeated kernel with a trusted RISC-V fallback. Then T-0042 creates
-an owned adapter around a pinned Chisel RTL research environment and simulator.
-Chisel constructs hardware; Verilator or another recorded simulator executes
-the generated RTL.
+T-0105 first bootstraps a generic pinned Chisel RTL research environment and
+simulator, proves a trivial owned circuit, and attempts one unmodified RISC-V
+reference execution. This tooling smoke may precede Graph design because it
+does not select or implement a Graph mechanism. T-0057 then freezes one minimal
+owned native graph/effect schema and one structured repeated kernel with a
+trusted RISC-V fallback. Only then does T-0042 create the owned Graph adapter in
+that environment. Chisel constructs hardware; Verilator or another recorded
+simulator executes the generated RTL.
 
 Use RISC-V as the first research control because the Chisel ecosystem provides
 configurable in-order Rocket and OoO BOOM references. BOOM's documented
