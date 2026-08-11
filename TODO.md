@@ -6,6 +6,29 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [ ] **T-0099** Extend the T-0098 Native Interactive CLI with one explicitly
+  selected workspace root and the minimum file-oriented operator commands:
+  `pwd`, `cd`, `ls`, `cat`, `stat`, `mkdir`, and bounded exclusive `write`.
+  Resolve every CLI path beneath that root, reject absolute paths, `..`,
+  symlink escape, special files, oversized reads/writes, and overwrite, and
+  keep existing `graph create`, `graph show`, `variants`, `propose`, `execute`,
+  and `result` authority unchanged. Use the workspace for result publication
+  and human inspection; do not add arbitrary shell execution, pipes,
+  redirection, deletion, PATH lookup, GNU-tool emulation, or a performance
+  claim. This first slice is chroot-like containment and must not be described
+  as an OS security boundary.
+
+- [ ] **T-0100** Replace or reinforce T-0099's application-level workspace
+  containment with a modern enforceable sandbox after the minimum Native CLI
+  is human-evaluated. Preserve one portable capability-style workspace API;
+  evaluate descriptor-relative path resolution plus Linux `openat2`/Landlock
+  or a mount-namespace sandbox, and a container/VM or signed App Sandbox helper
+  on macOS. Separate read-only inputs from writable work/output, isolate the
+  compiler/executor worker, disable network by default, record the selected
+  sandbox backend, and fail closed when strong isolation is explicitly
+  requested but unavailable. Do not claim equivalent enforcement across OSes
+  without platform-specific tests and a security review.
+
 - [x] **T-0098** Add `python3 -m raveil shell` as the Native userspace
   interactive MVP. Keep one explicit Session over the existing guarded graph
   compiler/adviser/executor and reject invalid ordering and overwrite without

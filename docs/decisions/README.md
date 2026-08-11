@@ -39,3 +39,4 @@ rewrite it.
 | [ADR-0032](ADR-0032-pinned-mlir-import-stays-behind-owned-lineage.md) | Accepted | Pinned MLIR import stays behind owned lineage |
 | [ADR-0033](ADR-0033-sonatine-operator-demo-is-brokered-and-replayable.md) | Accepted | Sonatine operator demo is brokered and replayable |
 | [ADR-0034](ADR-0034-native-interactive-session-wraps-the-guarded-graph-loop.md) | Accepted | Native interactive Session wraps the guarded graph loop |
+| [ADR-0035](ADR-0035-native-workspace-precedes-platform-sandbox.md) | Accepted | Bounded Native workspace precedes platform-enforced sandboxing |
