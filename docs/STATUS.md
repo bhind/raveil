@@ -94,6 +94,13 @@ Implemented:
   clock, and scalar endpoint syscalls; no user-provided task/owner identity,
   `CONTROL` operation, kernel pointer, or arbitrary user pointer crosses the
   syscall veneer;
+- a line-oriented `raveil-u> ` U-mode command shell with an eight-byte
+  task-owned scalar buffer, CR/LF/CRLF handling, empty-line suppression,
+  backspace/delete editing, fail-closed overflow recovery, explicit unknown
+  command errors, and `help`, `info`, `ticks`, `ipc`, `fs`, and `exit`;
+- command state that remains intact across real CLINT preemption without
+  passing a line pointer to the kernel; the only added console operation emits
+  one seven-bit scalar byte after current-task and capability validation;
 - non-blocking U-mode console reads that return `WOULD_BLOCK` instead of
   polling in M-mode with interrupts masked; M-origin faults take a distinct
   fail-stop path, and seed shutdown is restricted to the scheduler-registered

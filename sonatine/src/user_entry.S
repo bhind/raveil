@@ -134,49 +134,195 @@ user_fault_payload_start:
   j .
 .global user_shell_payload_start
 user_shell_payload_start:
-3:
+  # s7 is an eight-byte little-endian command buffer. s8 is its length,
+  # s9 is the overflow flag, and s10 remembers a preceding CR.
+  li s7, 0
+  li s8, 0
+  li s9, 0
+  li s10, 0
+20:
   mv a0, s0
   li a1, 1
   li a7, 10
   ecall
-4:
+21:
   mv a0, s0
   li a7, 11
   ecall
   li t0, -3
-  beq a0, t0, 4b
-  li t0, 'i'
-  beq a0, t0, 5f
-  li t0, 's'
-  beq a0, t0, 6f
-  li t0, 'c'
-  beq a0, t0, 7f
-  li t0, 't'
-  beq a0, t0, 8f
-  li t0, 'f'
-  beq a0, t0, 15f
-  li t0, 'x'
-  beq a0, t0, 9f
-  j 4b
-5:
+  beq a0, t0, 21b
+  mv t6, a0
+  li t0, '\r'
+  beq t6, t0, 25f
+  li t0, '\n'
+  bne t6, t0, 22f
+  bnez s10, 24f
+  j 26f
+22:
+  li s10, 0
+  li t0, '\b'
+  beq t6, t0, 23f
+  li t0, 0x7f
+  beq t6, t0, 23f
+  li t0, 0x20
+  bltu t6, t0, 21b
+  li t0, 0x7f
+  bgeu t6, t0, 21b
+  li t0, 8
+  bgeu s8, t0, 29f
+  slli t1, s8, 3
+  sll t2, t6, t1
+  or s7, s7, t2
+  addi s8, s8, 1
+  mv a0, s0
+  mv a1, t6
+  li a7, 19
+  ecall
+  j 21b
+23:
+  bnez s9, 21b
+  beqz s8, 21b
+  addi s8, s8, -1
+  slli t1, s8, 3
+  li t0, 1
+  sll t0, t0, t1
+  addi t0, t0, -1
+  and s7, s7, t0
+  mv a0, s0
+  li a1, '\b'
+  li a7, 19
+  ecall
+  mv a0, s0
+  li a1, ' '
+  li a7, 19
+  ecall
+  mv a0, s0
+  li a1, '\b'
+  li a7, 19
+  ecall
+  j 21b
+24:
+  li s10, 0
+  j 21b
+25:
+  li s10, 1
+26:
+  mv a0, s0
+  li a1, '\n'
+  li a7, 19
+  ecall
+  bnez s9, 30f
+  beqz s8, 39f
+  li t0, 0x706c6568
+  beq s7, t0, 31f
+  li t0, 0x6f666e69
+  beq s7, t0, 32f
+  li t0, 0x736b636974
+  beq s7, t0, 33f
+  li t0, 0x637069
+  beq s7, t0, 34f
+  li t0, 0x7366
+  beq s7, t0, 35f
+  li t0, 0x74697865
+  beq s7, t0, 36f
+  li t0, 0x74736574666c6573
+  beq s7, t0, 37f
+  mv a0, s0
+  li a1, 6
+  li a7, 10
+  ecall
+  j 39f
+29:
+  li s9, 1
+  j 21b
+30:
+  mv a0, s0
+  li a1, 5
+  li a7, 10
+  ecall
+  j 39f
+31:
   mv a0, s0
   li a1, 2
   li a7, 10
   ecall
-  j 3b
-6:
+  j 39f
+32:
   mv a0, s0
   li a1, 3
   li a7, 10
   ecall
+  j 39f
+33:
+  mv a0, s1
+  li a7, 12
+  ecall
+  mv a0, s0
+  li a1, 9
+  li a7, 10
+  ecall
+  j 39f
+34:
+  mv a0, s2
+  li a1, 83
+  li a7, 13
+  ecall
+  bnez a0, 38f
+  mv a0, s2
+  li a7, 14
+  ecall
+  li t0, 83
+  bne a0, t0, 38f
+  mv a0, s0
+  li a1, 8
+  li a7, 10
+  ecall
+  j 39f
+35:
+  mv a0, s5
+  li a1, 1
+  li a7, 17
+  ecall
+  li t0, 'h'
+  bne a0, t0, 38f
+  mv a0, s5
+  li a1, (88 << 24) | 1
+  li a7, 18
+  ecall
+  li t0, -1
+  bne a0, t0, 38f
+  mv a0, s6
+  li a1, (82 << 24) | 2
+  li a7, 18
+  ecall
+  li t0, -1
+  bne a0, t0, 38f
+  mv a0, s5
+  li a1, (82 << 24) | 2
+  li a7, 18
+  ecall
+  bnez a0, 38f
+  mv a0, s5
+  li a1, 2
+  li a7, 17
+  ecall
+  li t0, 'R'
+  bne a0, t0, 38f
+  mv a0, s0
+  li a1, 13
+  li a7, 10
+  ecall
+  j 39f
+36:
+  li a7, 15
+  ecall
+  j .
+37:
+  # Smoke-only register/capability diagnostic; the command buffer remains in
+  # callee-saved registers throughout real timer preemption.
   li ra, -1
   li gp, -1
   li tp, -1
-  li s7, -1
-  li s8, -1
-  li s9, -1
-  li s10, -1
-  li s11, -1
   li t2, -1
   li t3, -1
   li t4, -1
@@ -196,40 +342,30 @@ user_shell_payload_start:
   bnez t0, 10b
   li t1, -1
   li a2, 1
-  bne ra, t1, 13f
+  bne ra, t1, 40f
   li a2, 3
-  bne gp, t1, 13f
+  bne gp, t1, 40f
   li a2, 4
-  bne tp, t1, 13f
-  li a2, 23
-  bne s7, t1, 13f
-  li a2, 24
-  bne s8, t1, 13f
-  li a2, 25
-  bne s9, t1, 13f
-  li a2, 26
-  bne s10, t1, 13f
-  li a2, 27
-  bne s11, t1, 13f
+  bne tp, t1, 40f
   li a2, 7
-  bne t2, t1, 13f
+  bne t2, t1, 40f
   li a2, 28
-  bne t3, t1, 13f
+  bne t3, t1, 40f
   li a2, 29
-  bne t4, t1, 13f
+  bne t4, t1, 40f
   li a2, 30
-  bne t5, t1, 13f
+  bne t5, t1, 40f
   li a2, 31
-  bne t6, t1, 13f
+  bne t6, t1, 40f
   li a2, -1
-  bne a0, t1, 14f
-  bne a1, t1, 14f
-  bne a2, t1, 14f
-  bne a3, t1, 14f
-  bne a4, t1, 14f
-  bne a5, t1, 14f
-  bne a6, t1, 14f
-  bne a7, t1, 14f
+  bne a0, t1, 41f
+  bne a1, t1, 41f
+  bne a2, t1, 41f
+  bne a3, t1, 41f
+  bne a4, t1, 41f
+  bne a5, t1, 41f
+  bne a6, t1, 41f
+  bne a7, t1, 41f
   mv a0, s0
   li a1, 10
   li a7, 10
@@ -238,101 +374,43 @@ user_shell_payload_start:
   li a1, 4
   li a7, 10
   ecall
-  j 3b
-7:
+  # Preserve the existing kernel-derived denial evidence.
   li a0, 0xdead
   li a1, 1
   li a7, 16
   ecall
-  bnez a0, 12f
+  bnez a0, 38f
   mv a0, s3
   li a1, 2
   li a7, 16
   ecall
-  bnez a0, 12f
+  bnez a0, 38f
   mv a0, s4
   li a1, 3
   li a7, 16
   ecall
-  bnez a0, 12f
-  mv a0, s2
-  li a1, 83
-  li a7, 13
-  ecall
-  bnez a0, 12f
-  mv a0, s2
-  li a7, 14
-  ecall
-  li t0, 83
-  bne a0, t0, 12f
-  mv a0, s0
-  li a1, 8
-  li a7, 10
-  ecall
-  j 3b
-8:
-  mv a0, s1
-  li a7, 12
-  ecall
-  mv a0, s0
-  li a1, 9
-  li a7, 10
-  ecall
-  j 3b
-9:
-  li a7, 15
-  ecall
-  j .
-15:
-  mv a0, s5
-  li a1, 1
-  li a7, 17
-  ecall
-  li t0, 'h'
-  bne a0, t0, 12f
-  mv a0, s5
-  li a1, (88 << 24) | 1
-  li a7, 18
-  ecall
-  li t0, -1
-  bne a0, t0, 12f
-  mv a0, s6
-  li a1, (82 << 24) | 2
-  li a7, 18
-  ecall
-  li t0, -1
-  bne a0, t0, 12f
-  mv a0, s5
-  li a1, (82 << 24) | 2
-  li a7, 18
-  ecall
-  bnez a0, 12f
-  mv a0, s5
-  li a1, 2
-  li a7, 17
-  ecall
-  li t0, 'R'
-  bne a0, t0, 12f
-  mv a0, s0
-  li a1, 13
-  li a7, 10
-  ecall
-  j 3b
-12:
+  bnez a0, 38f
+  j 39f
+38:
   unimp
   j .
-13:
+39:
+  li s7, 0
+  li s8, 0
+  li s9, 0
+  j 20b
+40:
   mv a3, t2
   mv a0, s0
   li a1, 11
   li a7, 10
   ecall
-  j 12b
-14:
+  j 38b
+41:
   mv a0, s0
   li a1, 12
   li a7, 10
   ecall
-  j 12b
+  j 38b
 .global user_payload_end
 user_payload_end:

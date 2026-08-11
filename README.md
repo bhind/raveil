@@ -1,10 +1,10 @@
 # Raveil v0.0000000000001
 
 > This heading names the latest immutable feature release. Current development
-> is unreleased. The manufacturing line is paused after ADR-0024/T-0087
-> reconciliation; on explicit restart, the sole P0 is to port the preserved
-> GNU/Linux userspace graph MVP onto current main without removing any existing
-> artifact. See `docs/STATUS.md` and `docs/ROADMAP.md` for current state.
+> is unreleased. The manufacturing line is active after the GNU/Linux graph MVP
+> and failure-governance milestones. Current work preserves those artifacts
+> while growing the Sonatine U-mode shell and backend integration. See
+> `docs/STATUS.md` and `docs/ROADMAP.md` for current state.
 
 This is the smallest executable Raveil seed with two connected bootstrap tracks:
 
@@ -32,9 +32,9 @@ Sonatine Microkernel
         ↓
 init task
         ↓
-Raveil shell
+U-mode command shell
         ↓
-raveil>
+raveil-u>
 ```
 
 The subsystems are small but executable: the shell can inspect tasks and
@@ -52,6 +52,23 @@ make
 make run
 ```
 
+The normal boot path now enters the persistent U-mode command shell:
+
+```text
+raveil-u> help
+help info ticks ipc fs exit
+raveil-u> info
+u-cmd info=ok
+```
+
+Input is line-oriented. CR, LF, and CRLF are accepted; backspace and delete
+erase one character. Commands are bounded to eight ASCII bytes. An overlong or
+unknown command reports an error and returns to the prompt without stopping the
+kernel. `help`, `info`, `ticks`, `ipc`, `fs`, and `exit` are available. Their
+kernel operations derive caller identity from the current U-mode task and
+resolve the corresponding capabilities; the line buffer never crosses as a
+user pointer.
+
 Or run it without installing the cross-toolchain on the host:
 
 ```bash
@@ -60,22 +77,20 @@ docker build -t raveil-sonatine .
 docker run --rm -it raveil-sonatine
 ```
 
-`make smoke` boots QEMU non-interactively, exercises the inspection commands,
-checks capability-protected IPC, and exits through the QEMU test finisher.
+`make smoke` boots QEMU non-interactively, exercises CR/LF handling, editing,
+overflow recovery, all public U-mode commands, timer preemption, capability
+denials and IPC, and exits through the QEMU test finisher.
 
-Expected final boot lines:
+Expected interactive prompt:
 
 ```text
-starting init task id=1
-
-Raveil shell v0.0000000000001
-type 'help' for commands
-
-raveil>
+raveil-u> help
+help info ticks ipc fs exit
 ```
 
-Available commands are `help`, `info`, `mem`, `ps`, `caps`, `ticks`, `ipc`,
-`alloc`, and `reboot`.
+The retained M-mode diagnostic shell separately provides `help`, `info`,
+`mem`, `ps`, `caps`, `ticks`, `ipc`, `alloc`, and `reboot`, but it is not the
+normal boot path.
 
 The published tag began as a one-hart machine-mode seed. Current unreleased
 development adds Sv39 construction, a persistent U-mode task, timer-driven

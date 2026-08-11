@@ -67,6 +67,10 @@ not pulled into this MVP.
   Experience/Systems/Measurement Implementers, Tester, Performance/Security
   Reviewers, and Researcher; enforce canonical-record and research-memo write
   boundaries.
+- [x] **T-0089** Grow the persistent Sonatine U-mode task from single-byte
+  commands into a bounded line-oriented `raveil-u>` shell with CR/LF/CRLF,
+  empty-line, delete/backspace, overflow-recovery, unknown-command, timer
+  preemption, and capability-authority regression coverage.
 - [x] **T-0065** Implement ignored local research bundles plus immutable rclone
   copy, download-based content verification, overwrite refusal, external
   credential boundary, and completion-marker-last behavior. Real Drive sync is

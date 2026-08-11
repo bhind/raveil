@@ -18,6 +18,7 @@
 #define SYS_CAP_PROBE 16u
 #define SYS_FS_READ 17u
 #define SYS_FS_WRITE 18u
+#define SYS_PUTC 19u
 
 #define SYS_OK 0u
 #define SYS_DENIED ((uint64_t)-1)
@@ -39,10 +40,12 @@ static bool resolve_current(cap_handle_t handle,uint16_t type,uint32_t rights) {
 
 static void log_event(uint64_t event,uint64_t detail,uint64_t value) {
   switch(event) {
-    case 1u: console_write("u-shell[1]> "); break;
-    case 2u: console_write("u-cmd info=ok\n"); break;
-    case 3u: console_write("u-shell[1]> spin\n"); break;
+    case 1u: console_write("raveil-u> "); break;
+    case 2u: console_write("help info ticks ipc fs exit\n"); break;
+    case 3u: console_write("u-cmd info=ok\n"); break;
     case 4u: console_write("u-shell resumed task=1\n"); break;
+    case 5u: console_write("error: command too long\n"); break;
+    case 6u: console_write("error: unknown command\n"); break;
     case 8u: console_write("u-ipc send=OK receive=OK\n"); break;
     case 9u: console_write("u-cmd ticks=ok\n"); break;
     case 10u: console_write("u-context register-frame=ok task=1\n"); break;
@@ -72,6 +75,11 @@ uintptr_t user_syscall_dispatch(struct trap_frame *frame) {
     if(resolve_current((cap_handle_t)arg0,CAP_OBJECT_CONSOLE,CAP_RIGHT_READ)) {
       char value;
       result=console_try_getc(&value)?(uint8_t)value:SYS_WOULD_BLOCK;
+    } else result=SYS_DENIED;
+  } else if(number==SYS_PUTC) {
+    if(resolve_current((cap_handle_t)arg0,CAP_OBJECT_CONSOLE,CAP_RIGHT_WRITE) &&
+       arg1<=0x7fu) {
+      console_putc((char)arg1); result=SYS_OK;
     } else result=SYS_DENIED;
   } else if(number==SYS_CLOCK) {
     if(resolve_current((cap_handle_t)arg0,CAP_OBJECT_CLOCK,CAP_RIGHT_READ))

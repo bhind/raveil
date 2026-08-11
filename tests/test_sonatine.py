@@ -70,6 +70,8 @@ class SonatineSourceTests(unittest.TestCase):
         self.assertIn("console_try_getc", syscall)
         self.assertNotIn("result=(uint8_t)console_getc()", syscall)
         self.assertIn("current==context_user_task()", syscall)
+        self.assertIn('console_write("raveil-u> ")', syscall)
+        self.assertIn("SYS_PUTC", syscall)
         for marker in ("kernel-cap forged=DENIED", "kernel-cap wrong-owner=DENIED",
                        "kernel-cap escalation=DENIED"):
             self.assertIn(marker, syscall)
@@ -79,6 +81,12 @@ class SonatineSourceTests(unittest.TestCase):
         for register in ("ra", "gp", "tp", "t6", "s11", "a7"):
             self.assertIn(f"sd {register}", trap)
             self.assertIn(f"ld {register}", trap)
+        makefile = (SONATINE / "Makefile").read_text(encoding="utf-8")
+        for command in ("help", "info", "ticks", "ipc", "fs", "exit"):
+            self.assertIn(command, makefile)
+        self.assertIn("infX\\177o", makefile)
+        self.assertIn("123456789", makefile)
+        self.assertNotIn("printf 'i\\rf\\rs", makefile)
 
     def test_makefile_has_isolated_debug_build(self) -> None:
         makefile = (SONATINE / "Makefile").read_text(encoding="utf-8")

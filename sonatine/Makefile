@@ -66,7 +66,8 @@ run: $(TARGET)
 	$(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET)
 
 smoke: $(TARGET)
-	printf 'i\rf\rs\rf\rc\rt\rx\r' | \
+	{ printf 'hel'; sleep 1; \
+	  printf 'p\r\n\rinfX\177o\rfs\rselftest\rticks\nipc\rfs\r123456789\runknown\rexit\r'; } | \
 	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
 	  tee $(BUILD)/smoke.log
 	grep -q 'starting U-mode init: U-mode' $(BUILD)/smoke.log
@@ -74,6 +75,8 @@ smoke: $(TARGET)
 	grep -q '\[ok\] U-mode fault / contained return to kernel' $(BUILD)/smoke.log
 	grep -q 'context switch: init -> idle -> init' $(BUILD)/smoke.log
 	grep -q '\[ok\] persistent U-mode shell / current-task syscall identity' $(BUILD)/smoke.log
+	grep -q 'raveil-u> hel' $(BUILD)/smoke.log
+	grep -q 'help info ticks ipc fs exit' $(BUILD)/smoke.log
 	grep -q 'u-cmd info=ok' $(BUILD)/smoke.log
 	grep -q 'clint-preempt from=1 to=2' $(BUILD)/smoke.log
 	grep -q 'clint-preempt from=2 to=1' $(BUILD)/smoke.log
@@ -91,6 +94,8 @@ smoke: $(TARGET)
 	grep -q 'kernel-cap escalation=DENIED' $(BUILD)/smoke.log
 	grep -q 'u-ipc send=OK receive=OK' $(BUILD)/smoke.log
 	grep -q 'u-cmd ticks=ok' $(BUILD)/smoke.log
+	grep -q 'error: command too long' $(BUILD)/smoke.log
+	grep -q 'error: unknown command' $(BUILD)/smoke.log
 	grep -q 'u-shell exit task=1' $(BUILD)/smoke.log
 	rm -f $(BUILD)/completion-telemetry.jsonl
 	cd .. && python3 -m raveil experience ingest-completions \

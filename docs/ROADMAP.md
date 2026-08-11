@@ -110,6 +110,12 @@ direction, not an implemented feature or production-OS compatibility promise.
 T-0017 supplies the first step as a bounded two-node, pointer-free VFS seed.
 VirtIO and persistent storage remain T-0018.
 
+T-0089 completes the next command-prompt growth step without reopening Gate 2:
+the persistent U-mode task now accepts bounded command lines, survives
+preemption with partially entered input, and retains current-task capability
+authority. This remains QEMU emulation correctness, not a new isolation or
+performance claim.
+
 ## Gate 3 — connect authority and evidence
 
 State: **Planned**
