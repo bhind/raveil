@@ -20,7 +20,27 @@ from .graph_mvp import (
 from .native_backend import NativeCBackend
 
 
-HELP = "help graph create gemm --m M --n N --k K | graph show | variants | propose | execute | result [PATH] | history | reset | exit"
+HELP = """Available commands:
+  help
+      Show this command reference.
+  graph create gemm --m M --n N --k K
+      Create a bounded GEMM graph with positive integer dimensions.
+  graph show
+      Show the current graph and its identity.
+  variants
+      Compile and list the canonical baseline-first variant slate.
+  propose
+      Ask the analytical adviser to select a variant or abstain.
+  execute
+      Run the trusted baseline first, then commit or roll back the proposal.
+  result [PATH]
+      Show the strict JSON result, or exclusively save it to PATH.
+  history
+      Show this session's graph workflow events.
+  reset
+      Clear the current graph workflow while retaining session history.
+  exit
+      Leave the Native Interactive CLI."""
 
 
 @dataclass

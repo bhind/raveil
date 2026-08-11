@@ -20,6 +20,18 @@ class NativeInteractiveShellTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown command"):
             dispatch(session, "not-a-command")
 
+    def test_help_is_vertical_and_describes_every_command(self) -> None:
+        help_text = dispatch(NativeInteractiveSession(), "help")[1]
+        self.assertTrue(help_text.startswith("Available commands:\n"))
+        self.assertGreaterEqual(help_text.count("\n"), 20)
+        for command in (
+            "help", "graph create gemm", "graph show", "variants", "propose",
+            "execute", "result [PATH]", "history", "reset", "exit",
+        ):
+            self.assertIn(command, help_text)
+        self.assertIn("trusted baseline first", help_text)
+        self.assertIn("exclusively save", help_text)
+
     def test_state_machine_create_show_variants_propose_reset(self) -> None:
         session = NativeInteractiveSession()
         dispatch(session, "graph create gemm --m 8 --n 8 --k 8")
