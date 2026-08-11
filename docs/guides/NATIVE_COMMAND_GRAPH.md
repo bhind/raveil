@@ -62,8 +62,8 @@ overhead and a future measured no-crossover remain valid negative results.
 
 Direct execution time is the source-order interpreter interval. Graph
 execution time is the ready-set DAG scheduler interval. Direct end-to-end adds
-semantic validation; graph end-to-end additionally adds the recorded parse and
-graph-construction costs. Workspace snapshot creation and output publication
+the recorded parse and semantic-validation costs; graph end-to-end adds parse,
+graph construction, and semantic-validation costs. Workspace snapshot creation and output publication
 are outside both intervals in this seed. Invalid or timed-out pairs are counted
 but excluded from summaries and paired bootstrap statistics.
 
