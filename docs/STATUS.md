@@ -13,8 +13,9 @@ Current Command Graph Pre-release: `v0.0000000000005`, T-0101 Native Command
 Graph, published from `8ba6c17794d27913b6c8f2b5318be6f6296488ac`.
 Current Native CLI Pre-release: `v0.0000000000006`, T-0102 bounded Tab
 completion, published from `5f3d8d0d0a3a609af7ffc25a8be40aeb78bf6524`.
-Local Native showcase Pre-release candidate: `v0.0000000000007`, T-0103
-synthetic Command Graph walkthrough; not tagged, pushed, or published.
+Current Native showcase Pre-release: `v0.0000000000007`, T-0103 synthetic
+Command Graph walkthrough, published from
+`a3befaa94b74700ced444e7384057f2c1a43c4e1`.
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
