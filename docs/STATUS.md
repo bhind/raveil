@@ -5,6 +5,7 @@ Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`
+Current release candidate: `v0.0000000000003`, T-0096 interactive control fix
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
@@ -184,7 +185,8 @@ Implemented:
   one seven-bit scalar byte after current-task and capability validation;
 - T-0096 in-progress correction removes per-preemption UART prose from normal
   operation and treats ETX as an operator request for the same current-task-
-  checked shutdown used by `exit`; publication remains pending verification;
+  checked shutdown used by `exit`; local QEMU verification passes and remote
+  publication remains pending;
 - non-blocking U-mode console reads that return `WOULD_BLOCK` instead of
   polling in M-mode with interrupts masked; M-origin faults take a distinct
   fail-stop path, and seed shutdown is restricted to the scheduler-registered
