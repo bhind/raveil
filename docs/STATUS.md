@@ -95,7 +95,7 @@ non-canonical scalar encodings, wrong JSON types, missing fields, negative
 latency, zero cookies, and invalid binding ranges. These checks are correctness
 boundaries only and create no performance or hardware claim.
 
-The completed tree passed 91 local tests plus RV64 release/debug, DWARF, U-mode
+The completed tree passed 92 local tests plus RV64 release/debug, DWARF, U-mode
 shell, telemetry replay, and graph differential checks. A Linux arm64 container
 also passed the 29 focused graph/backend tests and actual QEMU/native
 differential. These are host and emulation correctness results only.
@@ -108,6 +108,22 @@ control-loop evidence only. Sonatine and all prior artifacts remain unchanged.
 ## Executable track A: Sonatine Microkernel RV64 seed
 
 QEMU RISC-V `virt`向けのfreestanding kernel seedがあります。
+
+T-0034 adds an executable Four-plane write firewall under ADR-0030. Program,
+Graph, Data, and Experience use distinct capability object types and exact
+type/right/owner/generation checks. Fixed boot-scoped registries seal full
+Program identities and Program-bound Graph identities. The normal job path
+requires Data authority for object registration, submission, and metadata
+publication; separate Program authority gates injected semantic approval;
+Experience authority admits only a bounded consumed-completion observation.
+
+The public job authority header no longer exposes unguarded registration,
+submission, approval, or finalization functions. Host tests exercise all 16
+plane-capability/operation combinations, identity mismatch, wrong owner,
+attenuated delegation, and revoked-handle denial. QEMU smoke executes the same
+guarded path. This is a single-hart volatile kernel policy seed, not physical
+plane isolation, persistent authority, per-object least privilege, DMA/IOMMU,
+or hardware evidence.
 
 Implemented:
 

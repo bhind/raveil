@@ -80,6 +80,15 @@ reference field. Pavane decides semantic equivalence only; proposal advice,
 timing-based selection, Sonatine finalization, and evidence classification stay
 outside the oracle.
 
+ADR-0030 makes the Four-plane write split executable inside Sonatine. Four
+non-interchangeable capability types guard immutable Program admission,
+Program-bound Graph installation, Data registration/publication, and bounded
+Experience observation admission. Full artifact identities stay in fixed
+kernel registries; the capability object ID denotes only the authority domain.
+The public plane API composes with the existing job rings and metadata-shadow
+finalizer, while their raw mutation primitives remain internal trusted-core
+implementation details.
+
 The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
 conventional sequential register instruction stream and not an exact-cycle VLIW
 schedule. A native job should carry:

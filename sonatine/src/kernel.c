@@ -7,6 +7,7 @@
 #include "job_authority.h"
 #include "memory.h"
 #include "platform.h"
+#include "plane_authority.h"
 #include "shell.h"
 #include "task.h"
 #include "timer.h"
@@ -29,7 +30,9 @@ static void boot_fail(const char *subsystem) {
   }
 }
 
-static bool job_contract_smoke(void) {
+static bool job_contract_smoke(uint16_t task,cap_handle_t program_cap,
+                               cap_handle_t graph_cap,cap_handle_t data_cap,
+                               cap_handle_t experience_cap) {
   const uint64_t started=*(volatile uint64_t *)QEMU_CLINT_MTIME;
   struct raveil_object_manifest_v1 object={0};
   object.magic=RAVEIL_OBJECT_MANIFEST_MAGIC;
@@ -47,7 +50,11 @@ static bool job_contract_smoke(void) {
   job.objects[0]=(struct raveil_object_ref_v1){1u,1u,1u,0u,8u,RAVEIL_OBJECT_WRITE,0u};
   job_authority_init(1u);
   struct sonatine_job_binding binding;
-  if(!job_object_register(&object) || !job_submit_bound(&job,&binding)) return false;
+  if(!plane_program_install(task,program_cap,job.program_identity) ||
+     !plane_graph_install(task,graph_cap,job.program_identity,
+                          job.graph_variant_identity) ||
+     !plane_data_object_register(task,data_cap,&object) ||
+     !plane_job_submit_bound(task,data_cap,&job,&binding)) return false;
   struct sonatine_submission issued;
   if(!job_submission_take(&issued)) return false;
   struct raveil_completion_record_v1 completion={0},taken;
@@ -65,19 +72,21 @@ static bool job_contract_smoke(void) {
      job_inflight_count()!=0u) return false;
   const uint64_t finished=*(volatile uint64_t *)QEMU_CLINT_MTIME;
   if(finished<=started) return false;
+  if(!plane_experience_record(task,experience_cap,&taken)) return false;
   completion_telemetry_emit(&taken,finished-started);
   struct raveil_object_manifest_v1 observed;
   if(!job_object_lookup(1u,&observed) || observed.version!=1u) return false;
-  if(!job_shadow_approve(&binding) ||
-     job_shadow_finalize(&binding,true)!=SONATINE_FINALIZE_COMMITTED ||
-     job_shadow_finalize(&binding,true)!=SONATINE_FINALIZE_INVALID ||
+  if(!plane_program_approve(task,program_cap,&binding) ||
+     plane_data_finalize(task,data_cap,&binding,true)!=SONATINE_FINALIZE_COMMITTED ||
+     plane_data_finalize(task,data_cap,&binding,true)!=SONATINE_FINALIZE_INVALID ||
      !job_object_lookup(1u,&observed) || observed.version!=2u) return false;
   job.objects[0].expected_version=2u;
   job.job_id=2u;
-  if(!job_submit_bound(&job,&binding) || !job_cancel(&binding) ||
+  if(!plane_job_submit_bound(task,data_cap,&job,&binding) || !job_cancel(&binding) ||
      job_submission_take(&issued)) return false;
   job.job_id=3u;
-  if(!job_submit_bound(&job,&binding) || !job_submission_take(&issued)) return false;
+  if(!plane_job_submit_bound(task,data_cap,&job,&binding) ||
+     !job_submission_take(&issued)) return false;
   completion.job_id=issued.job.job_id;
   completion.execution_epoch=issued.execution_epoch;
   completion.execution_sequence=issued.execution_sequence;
@@ -85,7 +94,7 @@ static bool job_contract_smoke(void) {
     completion.completion_cookie[index]=issued.completion_cookie[index];
   completion.outputs[0].version=3u;
   if(!job_completion_post(&completion) || !job_completion_take(&taken) ||
-     job_shadow_finalize(&binding,false)!=SONATINE_FINALIZE_ROLLED_BACK)
+     plane_data_finalize(task,data_cap,&binding,false)!=SONATINE_FINALIZE_ROLLED_BACK)
     return false;
   return job_inflight_count()==0u && job_shadow_count()==0u;
 }
@@ -155,19 +164,40 @@ void kmain(void) {
       CAP_RIGHT_READ | CAP_RIGHT_WRITE);
   const cap_handle_t filesystem_read_cap = cap_create(
       init_task, CAP_OBJECT_FILESYSTEM, VFS_ROOT_OBJECT, CAP_RIGHT_READ);
+  const cap_handle_t program_authority_cap = cap_create(
+      init_task,CAP_OBJECT_PROGRAM_AUTHORITY,SONATINE_PLANE_AUTHORITY_OBJECT,
+      CAP_RIGHT_CONTROL);
+  const cap_handle_t graph_authority_cap = cap_create(
+      init_task,CAP_OBJECT_GRAPH_AUTHORITY,SONATINE_PLANE_AUTHORITY_OBJECT,
+      CAP_RIGHT_CONTROL);
+  const cap_handle_t data_authority_cap = cap_create(
+      init_task,CAP_OBJECT_DATA_AUTHORITY,SONATINE_PLANE_AUTHORITY_OBJECT,
+      CAP_RIGHT_WRITE|CAP_RIGHT_CONTROL);
+  const cap_handle_t experience_authority_cap = cap_create(
+      init_task,CAP_OBJECT_EXPERIENCE_AUTHORITY,SONATINE_PLANE_AUTHORITY_OBJECT,
+      CAP_RIGHT_WRITE|CAP_RIGHT_CONTROL);
   if (endpoint == 0u || endpoint_cap == 0u || task_cap == 0u ||
       console_cap == 0u || clock_cap == 0u || wrong_owner_cap == 0u ||
       send_only_cap == 0u || filesystem_cap == 0u ||
-      filesystem_read_cap == 0u) {
+      filesystem_read_cap == 0u || program_authority_cap == 0u ||
+      graph_authority_cap == 0u || data_authority_cap == 0u ||
+      experience_authority_cap == 0u) {
     boot_fail("IPC");
   }
   boot_ok("IPC / bounded mailbox protected by capabilities");
   boot_ok("VFS / immutable initramfs + bounded RamFS");
-  if(!job_contract_smoke()) boot_fail("Daphnis contract");
+  plane_authority_init();
+  if(!job_contract_smoke(init_task,program_authority_cap,graph_authority_cap,
+                         data_authority_cap,experience_authority_cap))
+    boot_fail("Daphnis contract");
   boot_ok("Daphnis contract / object table + bounded rings + replay guard");
   boot_ok("Daphnis metadata shadow / injected approval + commit + cancel + rollback");
+  boot_ok("four-plane authority / registry + capability write firewall");
 
-  if(graph_backend_run_if_present()) boot_fail("graph backend returned");
+  if(graph_backend_run_if_present(init_task,program_authority_cap,
+                                  graph_authority_cap,data_authority_cap,
+                                  experience_authority_cap))
+    boot_fail("graph backend returned");
 
   timer_init();
   boot_ok("timer / CLINT machine timer at 100 Hz");

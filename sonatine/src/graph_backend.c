@@ -6,6 +6,7 @@
 #include "console.h"
 #include "job_authority.h"
 #include "platform.h"
+#include "plane_authority.h"
 #include "raveil/graph_transport.h"
 #include "raveil/job_contract.h"
 
@@ -78,7 +79,9 @@ static uint64_t checksum(const int64_t *values,size_t count) {
   return hash;
 }
 
-bool graph_backend_run_if_present(void) {
+bool graph_backend_run_if_present(uint16_t task,cap_handle_t program_cap,
+                                  cap_handle_t graph_cap,cap_handle_t data_cap,
+                                  cap_handle_t experience_cap) {
   const struct raveil_graph_request_v1 *request=
       (const struct raveil_graph_request_v1 *)RAVEIL_GRAPH_REQUEST_ADDRESS;
   if(request->magic!=RAVEIL_GRAPH_REQUEST_MAGIC) return false;
@@ -121,7 +124,11 @@ bool graph_backend_run_if_present(void) {
   struct sonatine_job_binding binding;
   struct sonatine_submission issued;
   struct raveil_completion_record_v1 completion={0},taken;
-  if(!job_object_register(&object) || !job_submit_bound(&job,&binding) ||
+  if(!plane_program_install(task,program_cap,job.program_identity) ||
+     !plane_graph_install(task,graph_cap,job.program_identity,
+                          job.graph_variant_identity) ||
+     !plane_data_object_register(task,data_cap,&object) ||
+     !plane_job_submit_bound(task,data_cap,&job,&binding) ||
      !job_submission_take(&issued)) {
     emit_result(request->request_id,RAVEIL_COMPLETION_REJECTED,
                 RAVEIL_DETAIL_INVALID_CONTRACT,NULL,actual,reference,false);
@@ -138,10 +145,11 @@ bool graph_backend_run_if_present(void) {
     completion.outputs[0]=(struct raveil_object_version_v1){1u,1u,2u};
     bool approved=false;
     if(job_completion_post(&completion) && job_completion_take(&taken) &&
-       actual==reference && job_shadow_approve(&binding) &&
-       job_shadow_finalize(&binding,true)==SONATINE_FINALIZE_COMMITTED)
+       plane_experience_record(task,experience_cap,&taken) &&
+       actual==reference && plane_program_approve(task,program_cap,&binding) &&
+       plane_data_finalize(task,data_cap,&binding,true)==SONATINE_FINALIZE_COMMITTED)
       approved=true;
-    else (void)job_shadow_finalize(&binding,false);
+    else (void)plane_data_finalize(task,data_cap,&binding,false);
     emit_result(request->request_id,completion.status,completion.detail,
                 &issued,actual,reference,approved);
   }

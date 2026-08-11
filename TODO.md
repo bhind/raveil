@@ -251,7 +251,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [x] **T-0032** Send measured completion telemetry into append-only Experience.
 - [x] **T-0033** Implement the kernel-owned metadata-shadow lifecycle, explicit
   approval, atomic visible-version commit, cancellation, and rollback.
-- [ ] **T-0034** Enforce Program/Graph/Data/Experience write authorities.
+- [x] **T-0034** Enforce Program/Graph/Data/Experience write authorities with
+  distinct capability types, immutable boot-scoped Program/Graph registries,
+  capability-gated Data registration/submission/publication, separate Program
+  approval, and restricted Experience observation admission. Raw job mutation
+  primitives are internal and normal kernel/graph paths use the guarded API.
 - [ ] **T-0085** Add bounded object-byte backing and byte-shadow publication;
   metadata rollback does not restore or publish data bytes.
 

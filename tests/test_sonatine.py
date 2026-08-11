@@ -239,14 +239,41 @@ class SonatineSourceTests(unittest.TestCase):
             executable = Path(directory) / "sonatine-job-authority-test"
             subprocess.run([
                 compiler, "-std=c11", "-pedantic-errors", "-Wall", "-Wextra",
-                "-Werror", f"-I{SONATINE / 'include'}",
+                "-Werror", "-DSONATINE_JOB_AUTHORITY_TESTING",
+                f"-I{SONATINE / 'include'}", f"-I{ROOT / 'tests'}",
                 f"-I{contracts / 'include'}",
                 str(ROOT / "tests/sonatine_job_authority_host_test.c"),
+                str(SONATINE / "src/capability.c"),
                 str(SONATINE / "src/job_authority.c"),
                 str(contracts / "src/job_contract.c"),
                 str(contracts / "src/object_manifest.c"), "-o", str(executable),
             ], check=True)
             subprocess.run([str(executable)], check=True)
+
+    def test_sonatine_plane_authority_host_model(self) -> None:
+        compiler = shutil.which("cc")
+        if compiler is None:
+            self.skipTest("host C compiler is unavailable")
+        contracts = ROOT / "contracts"
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / "sonatine-plane-authority-test"
+            subprocess.run([
+                compiler, "-std=c11", "-pedantic-errors", "-Wall", "-Wextra",
+                "-Werror", f"-I{SONATINE / 'include'}",
+                f"-I{contracts / 'include'}",
+                str(ROOT / "tests/sonatine_plane_authority_host_test.c"),
+                str(SONATINE / "src/capability.c"),
+                str(SONATINE / "src/job_authority.c"),
+                str(contracts / "src/job_contract.c"),
+                str(contracts / "src/object_manifest.c"), "-o", str(executable),
+            ], check=True)
+            subprocess.run([str(executable)], check=True)
+        public = (SONATINE / "include/job_authority.h").read_text(encoding="utf-8")
+        for bypass in (
+            "job_object_register(", "job_submit_bound(",
+            "job_shadow_approve(", "job_shadow_finalize(",
+        ):
+            self.assertNotIn(bypass, public)
 
     def test_freestanding_c_sources_are_syntax_clean(self) -> None:
         compiler = shutil.which("cc")

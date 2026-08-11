@@ -1,6 +1,10 @@
 #include <assert.h>
 #include <string.h>
-#include "job_authority.h"
+#include "sonatine_job_authority_test_api.h"
+
+void console_write(const char *text) { (void)text; }
+void console_write_dec(uint64_t value) { (void)value; }
+void console_write_hex(uint64_t value) { (void)value; }
 
 static struct raveil_object_manifest_v1 manifest(
     uint64_t id,uint64_t generation,uint64_t version,uint64_t length,

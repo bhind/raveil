@@ -31,19 +31,12 @@ enum sonatine_finalize_result {
 };
 
 void job_authority_init(uint64_t execution_epoch);
-bool job_object_register(const struct raveil_object_manifest_v1 *manifest);
 bool job_object_lookup(uint64_t object_id,
                        struct raveil_object_manifest_v1 *manifest);
-bool job_submit(const struct raveil_job_descriptor_v1 *job);
-bool job_submit_bound(const struct raveil_job_descriptor_v1 *job,
-                      struct sonatine_job_binding *binding);
 bool job_submission_take(struct sonatine_submission *submission);
 bool job_completion_post(const struct raveil_completion_record_v1 *completion);
 bool job_completion_take(struct raveil_completion_record_v1 *completion);
-bool job_shadow_approve(const struct sonatine_job_binding *binding);
 bool job_cancel(const struct sonatine_job_binding *binding);
-enum sonatine_finalize_result job_shadow_finalize(
-    const struct sonatine_job_binding *binding,bool commit);
 size_t job_shadow_count(void);
 size_t job_submission_count(void);
 size_t job_completion_count(void);

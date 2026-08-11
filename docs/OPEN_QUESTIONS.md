@@ -72,6 +72,10 @@ resolves it.
 - After T-0030 fixes JobDescriptor and CompletionRecord, which Linux transport
   should follow the ADR-0019 userspace harness: a kernel adapter, vhost-user,
   VirtIO, PCI, or another owned boundary? DMA/IOMMU/IRQ/reset remain undecided.
+- ADR-0030 uses one coarse Data-producer authority domain and volatile
+  boot-scoped Program/Graph registries. Before untrusted multi-user or device
+  exposure, which per-object capability, persistent identity, revocation-tree,
+  reset, and signed-admission rules are required?
 - Does the installed IntelliJ C/C++ plugin expose a genuine remote GDB run
   configuration? The observed UI has not established this.
 

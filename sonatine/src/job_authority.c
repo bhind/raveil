@@ -1,4 +1,5 @@
 #include "job_authority.h"
+#include "plane_authority.h"
 
 struct object_slot { bool active; struct raveil_object_manifest_v1 value; };
 struct inflight_slot {
@@ -41,7 +42,7 @@ void job_authority_init(uint64_t execution_epoch) {
   completion_read=0u; completion_write=0u; completion_used=0u;
   authority_epoch=execution_epoch==0u?1u:execution_epoch; next_sequence=1u;
 }
-bool job_object_register(const struct raveil_object_manifest_v1 *manifest) {
+static bool job_object_register_core(const struct raveil_object_manifest_v1 *manifest) {
   if(!raveil_object_manifest_validate_v1(manifest)) return false;
   for(size_t index=0;index<SONATINE_OBJECT_TABLE_SIZE;++index)
     if(objects[index].active && objects[index].value.object_id==manifest->object_id)
@@ -104,7 +105,7 @@ static bool submission_matches(const struct sonatine_submission *left,
          left->execution_sequence==right->execution_sequence &&
          bytes_equal(left->completion_cookie,right->completion_cookie,16u);
 }
-bool job_submit_bound(const struct raveil_job_descriptor_v1 *job,
+static bool job_submit_bound_core(const struct raveil_job_descriptor_v1 *job,
                       struct sonatine_job_binding *binding) {
   if(binding==NULL) return false;
   if(!admitted(job) || submission_used==SONATINE_JOB_RING_DEPTH ||
@@ -132,10 +133,12 @@ bool job_submit_bound(const struct raveil_job_descriptor_v1 *job,
   binding_from_submission(&value,binding);
   return true;
 }
-bool job_submit(const struct raveil_job_descriptor_v1 *job) {
+#ifdef SONATINE_JOB_AUTHORITY_TESTING
+static bool job_submit_core(const struct raveil_job_descriptor_v1 *job) {
   struct sonatine_job_binding ignored;
-  return job_submit_bound(job,&ignored);
+  return job_submit_bound_core(job,&ignored);
 }
+#endif
 bool job_submission_take(struct sonatine_submission *submission) {
   if(submission==NULL || submission_used==0u) return false;
   while(submission_used!=0u) {
@@ -195,7 +198,7 @@ static struct shadow_slot *find_shadow(const struct sonatine_job_binding *bindin
       return &shadows[index];
   return NULL;
 }
-bool job_shadow_approve(const struct sonatine_job_binding *binding) {
+static bool job_shadow_approve_core(const struct sonatine_job_binding *binding) {
   struct shadow_slot *shadow=find_shadow(binding);
   if(shadow==NULL || shadow->cancel_requested ||
      shadow->completion.status!=RAVEIL_COMPLETION_EXECUTED) return false;
@@ -233,7 +236,7 @@ static struct object_slot *find_object(uint64_t id) {
     if(objects[index].active && objects[index].value.object_id==id) return &objects[index];
   return NULL;
 }
-enum sonatine_finalize_result job_shadow_finalize(
+static enum sonatine_finalize_result job_shadow_finalize_core(
     const struct sonatine_job_binding *binding,bool commit) {
   struct shadow_slot *shadow=find_shadow(binding);
   if(shadow==NULL) return SONATINE_FINALIZE_INVALID;
@@ -266,6 +269,162 @@ enum sonatine_finalize_result job_shadow_finalize(
   }
   bytes_zero(shadow,sizeof(*shadow)); return SONATINE_FINALIZE_COMMITTED;
 }
+
+struct program_authority_entry { bool active; uint8_t identity[16]; };
+struct graph_authority_entry {
+  bool active; uint8_t program_identity[16]; uint8_t graph_identity[16];
+};
+struct experience_authority_entry {
+  bool active; struct raveil_completion_record_v1 completion;
+};
+static struct program_authority_entry plane_programs[SONATINE_PROGRAM_REGISTRY_SIZE];
+static struct graph_authority_entry plane_graphs[SONATINE_GRAPH_REGISTRY_SIZE];
+static struct experience_authority_entry plane_experience[SONATINE_EXPERIENCE_LEDGER_SIZE];
+static size_t plane_experience_used;
+
+static bool identity_nonzero(const uint8_t value[16]) {
+  if(value==NULL) return false;
+  for(size_t index=0;index<16u;++index) if(value[index]!=0u) return true;
+  return false;
+}
+static void identity_copy(uint8_t target[16],const uint8_t source[16]) {
+  for(size_t index=0;index<16u;++index) target[index]=source[index];
+}
+static bool identity_equal(const uint8_t left[16],const uint8_t right[16]) {
+  return bytes_equal(left,right,16u);
+}
+static bool plane_cap_authorized(uint16_t task,cap_handle_t cap,
+                                 uint16_t type,uint32_t right) {
+  struct cap_view view;
+  return cap_resolve(task,cap,type,right,&view) &&
+         view.object_id==SONATINE_PLANE_AUTHORITY_OBJECT;
+}
+
+void plane_authority_init(void) {
+  bytes_zero(plane_programs,sizeof(plane_programs));
+  bytes_zero(plane_graphs,sizeof(plane_graphs));
+  bytes_zero(plane_experience,sizeof(plane_experience));
+  plane_experience_used=0u;
+}
+
+bool plane_program_install(uint16_t task,cap_handle_t cap,
+                           const uint8_t identity[16]) {
+  if(!plane_cap_authorized(task,cap,CAP_OBJECT_PROGRAM_AUTHORITY,CAP_RIGHT_CONTROL) ||
+     !identity_nonzero(identity)) return false;
+  for(size_t index=0;index<SONATINE_PROGRAM_REGISTRY_SIZE;++index)
+    if(plane_programs[index].active &&
+       identity_equal(plane_programs[index].identity,identity)) return false;
+  for(size_t index=0;index<SONATINE_PROGRAM_REGISTRY_SIZE;++index)
+    if(!plane_programs[index].active) {
+      plane_programs[index].active=true;
+      identity_copy(plane_programs[index].identity,identity); return true;
+    }
+  return false;
+}
+
+bool plane_graph_install(uint16_t task,cap_handle_t cap,
+                         const uint8_t program[16],const uint8_t graph[16]) {
+  if(!plane_cap_authorized(task,cap,CAP_OBJECT_GRAPH_AUTHORITY,CAP_RIGHT_CONTROL) ||
+     !identity_nonzero(program) || !identity_nonzero(graph)) return false;
+  bool program_known=false;
+  for(size_t index=0;index<SONATINE_PROGRAM_REGISTRY_SIZE;++index)
+    if(plane_programs[index].active &&
+       identity_equal(plane_programs[index].identity,program)) program_known=true;
+  if(!program_known) return false;
+  for(size_t index=0;index<SONATINE_GRAPH_REGISTRY_SIZE;++index)
+    if(plane_graphs[index].active &&
+       identity_equal(plane_graphs[index].graph_identity,graph)) return false;
+  for(size_t index=0;index<SONATINE_GRAPH_REGISTRY_SIZE;++index)
+    if(!plane_graphs[index].active) {
+      plane_graphs[index].active=true;
+      identity_copy(plane_graphs[index].program_identity,program);
+      identity_copy(plane_graphs[index].graph_identity,graph); return true;
+    }
+  return false;
+}
+
+static bool plane_job_pair_installed(const struct raveil_job_descriptor_v1 *job) {
+  if(job==NULL) return false;
+  for(size_t index=0;index<SONATINE_GRAPH_REGISTRY_SIZE;++index)
+    if(plane_graphs[index].active &&
+       identity_equal(plane_graphs[index].program_identity,job->program_identity) &&
+       identity_equal(plane_graphs[index].graph_identity,job->graph_variant_identity))
+      return true;
+  return false;
+}
+
+bool plane_data_object_register(uint16_t task,cap_handle_t cap,
+                                const struct raveil_object_manifest_v1 *manifest) {
+  return plane_cap_authorized(task,cap,CAP_OBJECT_DATA_AUTHORITY,CAP_RIGHT_WRITE) &&
+         job_object_register_core(manifest);
+}
+
+bool plane_job_submit_bound(uint16_t task,cap_handle_t data_cap,
+                            const struct raveil_job_descriptor_v1 *job,
+                            struct sonatine_job_binding *binding) {
+  return plane_cap_authorized(task,data_cap,CAP_OBJECT_DATA_AUTHORITY,CAP_RIGHT_WRITE) &&
+         plane_job_pair_installed(job) && job_submit_bound_core(job,binding);
+}
+
+bool plane_program_approve(uint16_t task,cap_handle_t program_cap,
+                           const struct sonatine_job_binding *binding) {
+  return plane_cap_authorized(task,program_cap,CAP_OBJECT_PROGRAM_AUTHORITY,
+                              CAP_RIGHT_CONTROL) &&
+         job_shadow_approve_core(binding);
+}
+
+enum sonatine_finalize_result plane_data_finalize(
+    uint16_t task,cap_handle_t data_cap,
+    const struct sonatine_job_binding *binding,bool commit) {
+  if(!plane_cap_authorized(task,data_cap,CAP_OBJECT_DATA_AUTHORITY,CAP_RIGHT_WRITE))
+    return SONATINE_FINALIZE_INVALID;
+  return job_shadow_finalize_core(binding,commit);
+}
+
+bool plane_experience_record(uint16_t task,cap_handle_t experience_cap,
+                             const struct raveil_completion_record_v1 *completion) {
+  if(!plane_cap_authorized(task,experience_cap,CAP_OBJECT_EXPERIENCE_AUTHORITY,
+                           CAP_RIGHT_WRITE) || completion==NULL ||
+     plane_experience_used==SONATINE_EXPERIENCE_LEDGER_SIZE) return false;
+  struct sonatine_job_binding binding={0};
+  binding.job_id=completion->job_id;
+  binding.execution_epoch=completion->execution_epoch;
+  binding.execution_sequence=completion->execution_sequence;
+  for(size_t index=0;index<16u;++index)
+    binding.completion_cookie[index]=completion->completion_cookie[index];
+  struct shadow_slot *shadow=find_shadow(&binding);
+  if(shadow==NULL ||
+     !bytes_equal(&shadow->completion,completion,sizeof(*completion))) return false;
+  for(size_t index=0;index<plane_experience_used;++index)
+    if(bytes_equal(&plane_experience[index].completion,completion,sizeof(*completion)))
+      return false;
+  plane_experience[plane_experience_used].active=true;
+  plane_experience[plane_experience_used].completion=*completion;
+  ++plane_experience_used; return true;
+}
+
+size_t plane_experience_count(void) { return plane_experience_used; }
+
+#ifdef SONATINE_JOB_AUTHORITY_TESTING
+bool job_object_register_test(const struct raveil_object_manifest_v1 *manifest) {
+  return job_object_register_core(manifest);
+}
+bool job_submit_test(const struct raveil_job_descriptor_v1 *job) {
+  return job_submit_core(job);
+}
+bool job_submit_bound_test(const struct raveil_job_descriptor_v1 *job,
+                           struct sonatine_job_binding *binding) {
+  return job_submit_bound_core(job,binding);
+}
+bool job_shadow_approve_test(const struct sonatine_job_binding *binding) {
+  return job_shadow_approve_core(binding);
+}
+enum sonatine_finalize_result job_shadow_finalize_test(
+    const struct sonatine_job_binding *binding,bool commit) {
+  return job_shadow_finalize_core(binding,commit);
+}
+#endif
+
 size_t job_submission_count(void) { return submission_used; }
 size_t job_completion_count(void) { return completion_used; }
 size_t job_inflight_count(void) {

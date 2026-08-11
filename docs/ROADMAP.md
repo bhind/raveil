@@ -173,6 +173,11 @@ Planned until byte-shadow execution, semantic verification, and Four-plane
 write authorities are executable. T-0033 now supplies only the kernel-owned
 metadata-shadow finalization and cancellation seed.
 
+T-0034 now supplies the boot-scoped Four-plane capability firewall and guarded
+normal graph path. T-0043 supplies bounded semantic verification. Gate 3 remains
+Planned because T-0085 byte-shadow execution, persistent/device lifetime, and
+non-seed authority integration are still absent.
+
 Define JobDescriptor, ObjectManifest, and CompletionRecord; add
 submission/completion rings; append measured telemetry to Experience; implement
 shadow execution, cancellation, commit, and rollback; enforce Four-plane write
