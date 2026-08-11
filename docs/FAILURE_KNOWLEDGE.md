@@ -197,6 +197,25 @@ labelled unknown.
 - Evidence: T-0105 Rocket checkout and the task-governance record checker.
 - State: corrected; retain this boundary for future external dependencies.
 
+## Direct prior art must precede mechanism sketches
+
+- Symptom: RFC-0004 named static, elastic, stream and hybrid Graph candidates
+  and a comparison sequence before directly mapping TRIPS/EDGE, WaveScalar and
+  DySER mechanisms, limitations and patent risk.
+- Cause: fair baseline design was conflated with candidate architecture design.
+  A useful OoO control does not establish that a proposed graph mechanism is
+  new, safe to adopt or even sufficiently specified.
+- Prevention: before Graph RTL, create a locator-backed mechanism matrix,
+  identify counterevidence, record high-similarity and patent-family hits, and
+  freeze node, ISA, memory, exception/commit, resource, invalidation, fallback
+  and no-go semantics. Keep generic tooling bootstrap separate.
+- Detection: reject an architecture task whose proposed mechanisms cannot be
+  traced to a reviewed T-0057 distinction and IP-risk disposition.
+- Evidence: T-0057, RFC-0003, RFC-0004, and
+  `docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md`.
+- State: phase-A correction recorded; phase-B contract and qualified legal
+  review where required remain open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

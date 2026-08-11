@@ -130,11 +130,19 @@ tools/processes are conceptual nodes, far above the intended native
 operation/dependency/effect/object graph. It does not test dependency discovery,
 OoO replacement, cache hierarchy, pipeline, ISA encoding, area, or energy, and
 its memoization is not evidence that Graph is required. RFC-0004 is only a
-proposal for the correctly ordered Chisel RTL/simulation study; no Chisel,
-Rocket, BOOM, Graph RTL, or CPU comparison is implemented in the current tree.
+proposal for the correctly ordered Chisel RTL/simulation study; the generic
+Chisel tooling smoke exists, but no Rocket/BOOM execution, Graph RTL, or CPU
+comparison is implemented in the current tree.
 The roadmap now separates T-0105 generic Chisel/RISC-V substrate bootstrap from
-T-0057 Graph-contract definition and T-0042 Graph RTL implementation. This is a
-planning correction, not a CPU experimental result. T-0105 now includes a
+T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042 Graph RTL
+implementation. T-0057 phase A now has a non-authoritative, locator-backed
+matrix covering conventional OoO, EPIC, TRIPS/EDGE, WaveScalar, DySER and
+spatial-CGRA classes. It finds high mechanism similarity and records preliminary
+WaveCache and EDGE-family patent hits as unreviewed; it establishes neither
+novelty, infringement nor freedom to operate. No Graph mechanism, ISA or
+architecture has been selected, and T-0042 remains blocked pending the phase-B
+contract and mechanism-specific IP disposition. This is a planning/research
+correction, not a CPU experimental result. T-0105 now includes a
 functional tooling smoke: under an explicit linux/amd64 Docker environment on
 the Apple Silicon host, Chisel 7.2.0 emitted SystemVerilog for an owned four-bit
 counter and Verilator 4.038 executed the C++ harness to

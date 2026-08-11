@@ -20,6 +20,16 @@ resolves it.
   identity, reset recovery, and persistent multi-object atomicity work?
 - Which dependencies and alias facts can admission prove without making compile
   or verification cost impractical?
+- What exact node granularity remains useful after accounting for TRIPS/EDGE
+  block graphs, WaveScalar instruction graphs, DySER computation slices and
+  coarse spatial dataflow—and which component, if any, is a distinct Raveil
+  research contribution rather than known mechanism composition?
+- Is the first candidate ordinary RISC-V plus an attached command, a custom ISA
+  extension, or an internal microarchitectural encoding? What state is visible
+  to debuggers, interrupts and context switches?
+- What memory-order, alias-failure, precise-exception, block/region commit,
+  cancellation and rollback model can be implemented without importing
+  high-similarity EDGE/WaveScalar mechanisms or recreating a ROB/LSU?
 - Where is the measured boundary between static, elastic dataflow, stream, and
   hybrid Daphnis Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?
@@ -35,6 +45,10 @@ resolves it.
 - Which transition boundary should follow a successful simulation: a
   RoCC-like attached engine, a standard/custom RISC-V extension, a programmable
   accelerator fabric, or a separate ASIC plane? None is selected yet.
+- Which intended jurisdictions and concrete proposed features require a
+  qualified claim-to-feature patent review before moving beyond research
+  simulation? Preliminary WaveCache and EDGE-family hits are unreviewed and
+  cannot support an FTO conclusion.
 
 ## Experience and policy
 

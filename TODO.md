@@ -403,9 +403,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.
 - [ ] **T-0042** Bootstrap an owned mapper/simulator adapter without leaking
-  upstream types. After T-0105 proves the substrate and T-0057 freezes the
-  minimal native graph/effect schema, use the pinned Chisel/Chipyard research
-  environment with Rocket in-order,
+  upstream types. After T-0105 proves the substrate and T-0057 completes its
+  direct-prior-art/IP review and freezes the minimal native graph/effect schema,
+  use the pinned Chisel/Chipyard research environment with Rocket in-order,
   BOOM OoO and same-core OoO-disabled diagnostic configurations plus an owned
   Graph execution model. Chisel constructs RTL; use a simulator such as
   Verilator for evidence and label it simulation, not silicon.
@@ -420,7 +420,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   baselines. Hold ISA workload, cache/memory model, functional resources, and
   correctness constant where possible; report frontend, rename/ROB/issue/LSU,
   graph-ready/token/configuration, cycles, traffic, area, timing, and energy
-  proxies separately.
+  proxies separately. Admit only mechanisms that passed the T-0057 source and
+  IP-risk review; retain an explicit no-go outcome.
 
 ## Research backlog
 
@@ -433,11 +434,18 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [ ] **T-0056** FPGA Experience retrieval/filter prototype only after access
   patterns and schemas stabilize.
 - [ ] **T-0057** Define and test the RFC-0001 native operation/dependency/effect/
-  object graph schema before further tool-level optimization work. Specify one
-  structured repeated kernel, trusted RISC-V fallback, exact alias/effect
-  rules, graph encoding/configuration cost, and semantic oracle. Test it first
-  against sequential, in-order, conventional OoO, and VLIW-like models under
-  RFC-0004; do not infer CPU claims from the T-0103 process-level showcase.
+  object graph schema before further tool-level optimization work. Phase A now
+  records the direct-prior-art matrix for OoO/EPIC/TRIPS/WaveScalar/DySER/CGRA
+  and preliminary patent/IP triage in
+  `docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md`.
+  Phase B must specify one structured repeated kernel, trusted RISC-V fallback,
+  exact node/dependency/alias/effect rules, ISA visibility, memory ordering,
+  exception/commit/rollback semantics, bounded ready state, graph
+  encoding/configuration cost, semantic oracle, and no-go rule. Do not begin
+  T-0042 Graph RTL until phase B and the mechanism-specific IP disposition are
+  reviewed. Test admitted candidates against sequential, in-order,
+  conventional OoO, and relevant VLIW/dataflow controls under RFC-0004; do not
+  infer CPU claims from the T-0103 process-level showcase.
 - [ ] **T-0058** Evaluate reuse-weighted optimization ROI and hot/warm/cold/
   archival budget classes.
 - [ ] **T-0059** Build a reproducible small-Transformer Experience demo only

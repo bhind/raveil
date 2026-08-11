@@ -16,11 +16,24 @@ the microarchitecture hypothesis reverses the necessary research order.
 T-0105 first bootstraps a generic pinned Chisel RTL research environment and
 simulator, proves a trivial owned circuit, and attempts one unmodified RISC-V
 reference execution. This tooling smoke may precede Graph design because it
-does not select or implement a Graph mechanism. T-0057 then freezes one minimal
-owned native graph/effect schema and one structured repeated kernel with a
-trusted RISC-V fallback. Only then does T-0042 create the owned Graph adapter in
-that environment. Chisel constructs hardware; Verilator or another recorded
-simulator executes the generated RTL.
+does not select or implement a Graph mechanism.
+
+T-0057 has two ordered phases. Phase A records a locator-backed direct-prior-art
+matrix and preliminary patent/IP triage covering at least conventional OoO,
+EPIC/VLIW, TRIPS/EDGE, WaveScalar, DySER and spatial CGRA designs. Phase B then
+freezes one minimal owned native graph/effect schema and one structured repeated
+kernel with a trusted RISC-V fallback. Only after both phases are reviewed does
+T-0042 create the owned Graph adapter in that environment. Chisel constructs
+hardware; Verilator or another recorded simulator executes the generated RTL.
+
+The matrix separates comparison controls from mechanisms proposed for adoption.
+An in-order core, an OoO core and valid diagnostics are controls chosen to
+falsify the Raveil hypothesis; they are not copied architecture designs.
+Explicit dependency graphs, compiler-created atomic blocks, direct
+producer-consumer targets, resident graph instructions, static spatial routes,
+token readiness, local memories and hybrid CPU fallback are already prior-art
+mechanism classes. No RFC-0004 text may imply that those classes are Raveil
+novelty.
 
 Use RISC-V as the first research control because the Chisel ecosystem provides
 configurable in-order Rocket and OoO BOOM references. BOOM's documented
@@ -51,6 +64,15 @@ software/hybrid executor, but host measurements cannot attribute effects to
 OoO, cache, or pipeline internals and cannot establish parity with a current
 commercial ARM core.
 
+The candidate itself is not yet selected. T-0057 must state node granularity,
+dependency/alias producer, ISA visibility, memory ordering, precise exception
+and commit semantics, cancellation/rollback, resource bounds, configuration
+identity and invalidation, fallback, semantic oracle, and a no-go rule. It must
+also explain how graph-ready state differs from merely renaming a ROB, issue
+window, scoreboard or replay mechanism. Until then, “static”, “elastic”,
+“stream” and “hybrid” are alternatives to investigate, not implementation
+instructions.
+
 ## Alternatives
 
 - Continue tool/process Command Graph work first: fast to demonstrate but does
@@ -75,18 +97,33 @@ Simulation, synthesis estimate, FPGA, and silicon evidence remain separate.
 Experience is excluded from the first comparison so graph-organization effects
 are isolated; it may later advise among already admitted variants.
 
+The T-0057 review identified high technical similarity to TRIPS/EDGE,
+WaveScalar and DySER, plus preliminary patent-family hits around WaveCache,
+explicit-dataflow commit/precise exceptions and multi-modal EDGE instruction
+issue. Those results are discovery metadata only, not legal conclusions.
+Direct adoption of those mechanisms is blocked until the exact proposed feature
+is compared with source and patent claims and the Project Manager records the
+required disposition. Qualified legal review is required before any conclusion
+beyond research-context similarity or before an FTO claim.
+
 ## Experiments required
 
-1. Schema/semantic-oracle differential tests for one repeated kernel.
-2. Matched in-order/OoO/OoO-disabled sanity comparison.
-3. Static/elastic/stream/hybrid graph ablation.
-4. Cache, memory, width, queue, fallback-rate, and repetition-count sweeps.
-5. RTL synthesis estimates with identical library and constraint reporting.
-6. Only then, FPGA validation and a separately authorized transition backend.
+1. Complete T-0057 phase A prior-art and IP-risk review; this is research input,
+   not an experiment result.
+2. Accept a falsifiable T-0057 phase B schema/comparison contract and stopping
+   rule before Graph RTL or performance collection.
+3. Schema/semantic-oracle differential tests for one repeated kernel.
+4. Matched in-order/OoO/OoO-disabled sanity comparison.
+5. Static/elastic/stream/hybrid graph ablation only for admitted candidates.
+6. Cache, memory, width, queue, fallback-rate, and repetition-count sweeps.
+7. RTL synthesis estimates with identical library and constraint reporting.
+8. Only then, FPGA validation and a separately authorized transition backend.
 
 ## Open questions
 
 - Which kernel exposes dependency-discovery cost without predetermining a win?
+- What is the narrowest contract-level distinction not already subsumed by
+  EDGE, WaveScalar, DySER, EPIC or spatial-CGRA prior art?
 - Which BOOM/Rocket/Chipyard versions and licenses form a reproducible packet?
 - What graph-ready machinery avoids recreating a centralized OoO window?
 - Which cache and functional-unit budgets constitute a fair area-normalized

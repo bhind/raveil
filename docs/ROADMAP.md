@@ -23,16 +23,21 @@ The corrected critical path is:
    elaborate and simulate a trivial owned circuit, then execute one unmodified
    RISC-V reference configuration. This proves tooling only and may precede
    Graph-schema work.
-2. **T-0057 — hypothesis and contract:** freeze one low-level operation,
-   dependency, effect, alias, object, fallback, and semantic-oracle contract;
-   choose a workload that does not predetermine a win.
-3. **T-0042 — owned RTL adapter:** implement the smallest Graph execution model
-   behind owned types in the pinned environment.
-4. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
+2. **T-0057A — direct-prior-art boundary:** inventory conventional OoO,
+   EPIC/VLIW, TRIPS/EDGE, WaveScalar, DySER and spatial-CGRA mechanisms with
+   exact locators, counterevidence and preliminary patent/IP triage. This may
+   reject mechanisms; it does not authorize adoption.
+3. **T-0057B — hypothesis and contract:** only after 0057A, freeze one low-level
+   operation, dependency, effect, alias, object, memory-order, commit, fallback,
+   semantic-oracle and no-go contract; choose a workload that does not
+   predetermine a win.
+4. **T-0042 — owned RTL adapter:** implement the smallest admitted Graph
+   execution model behind owned types in the pinned environment.
+5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,
    and correctness checks.
-5. **Transition only after survival:** evaluate an attached engine, custom
+6. **Transition only after survival:** evaluate an attached engine, custom
    RISC-V extension, programmable fabric, or separate ASIC plane. ARM-hosted
    software is transition/product evidence, not evidence about hidden CPU
    internals.
@@ -317,8 +322,9 @@ Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
 simulation, FPGA, and silicon experiment records.
 
 RFC-0004 proposes the pre-FPGA foundation. T-0105 may establish the generic
-Chisel/simulator/RISC-V substrate independently; T-0057 must freeze the owned
-low-level Graph contract before T-0042 implements Graph RTL. T-0044 then uses
+Chisel/simulator/RISC-V substrate independently; T-0057 must first bound direct
+prior art and IP risk, then freeze the owned low-level Graph contract before
+T-0042 implements any Graph RTL. T-0044 then uses
 matched RISC-V configurations under a common cache, memory, workload,
 functional-resource, and correctness envelope. Rocket/BOOM remain candidate
 references, not adopted product code, ARM equivalents, or proof that OoO can
