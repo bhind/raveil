@@ -45,6 +45,20 @@ T-0092 is the next demo P0 after already in-flight work reaches a clean
 milestone. It is a bounded demonstrability task, not permission to grow a
 general Unix personality or displace the GNU/Linux/RK3588 product path.
 
+## Queued visibility side project — graph directory view
+
+- [ ] **T-0093** Add a deterministic read-only host directory view of one
+  validated Raveil graph snapshot. Materialize the existing owned v1 program,
+  contract, nodes, variants, memory plans, proposal, selection, and result into
+  an explicitly selected empty output directory with stable names, exact
+  identity hashes, a root manifest, and a text tree summary. Parse every input
+  through the existing strict schema and reject stale lineage, unknown fields,
+  duplicate names, traversal, symlinks, nonempty targets, and overwrite. The
+  first slice is an inspection artifact only: no FUSE mount, Sonatine VFS
+  projection, write-back, execution authority, Experience promotion, or
+  performance claim. Preserve a later live `/graphs` view as a separate design
+  decision after the host snapshot proves useful.
+
 ## Post-MVP side project — ReactOS portability probe
 
 - [ ] **T-0091** After the GNU/Linux userspace graph MVP and owned v1 artifact

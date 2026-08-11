@@ -45,6 +45,25 @@ arbitrary user pointer, new Gate claim, or RK3588 replacement enters T-0092.
 The exact ownership, acceptance transcript, and sequential handoff prompts are
 in [`guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md`](guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md).
 
+## Queued visibility side project — graph directory view
+
+State: **T-0093 planned; non-blocking**
+
+T-0093 exposes one validated graph snapshot as an ordinary read-only host
+directory so a person can inspect program, contract, node, variant,
+memory-plan, proposal, selection, and result relationships with `find`, `tree`,
+and `cat`. The materializer consumes only strict existing v1 artifacts, emits a
+root manifest with source and output hashes, uses deterministic collision-free
+names, and refuses stale lineage, symlinks, traversal, nonempty targets, and
+overwrite.
+
+The first slice is a generated inspection artifact, never an authority or
+database. It does not mount FUSE, expose a writable graph filesystem, add a
+Sonatine VFS namespace, execute a graph, ingest Experience, or make a
+performance/security claim. A live `/graphs` namespace requires a later ADR
+covering snapshot consistency, capability visibility, lifecycle, and
+write-back prohibition; T-0093 deliberately does not pre-decide it.
+
 ## Post-MVP side project — ReactOS portability probe
 
 State: **Planned; non-blocking**
