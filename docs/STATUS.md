@@ -141,6 +141,11 @@ counter and Verilator 4.038 executed the C++ harness to
 `CHISEL-SMOKE-V1 status=OK cycles=10 value=8`. This is emulated-host tooling and
 RTL functional evidence only. No RISC-V core, Graph RTL, CPU comparison, or
 performance evidence has run.
+T-0105 also has a local ignored external Rocket Chip checkout at
+`749a3eae9678bc70b029c5b9091fae33fad539c4`, the gitlink selected by Chipyard
+1.11.0. Its fixed Chisel, CDE, and HardFloat submodules are fetched by the owned
+revision-checking helper. The checkout is source availability only: Rocket RTL
+has not yet been elaborated or executed.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

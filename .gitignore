@@ -11,3 +11,4 @@ AgentNames.md
 !.codex/agents/
 !.codex/agents/*.toml
 .idea/
+external/

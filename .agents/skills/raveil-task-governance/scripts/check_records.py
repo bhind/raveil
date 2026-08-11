@@ -38,7 +38,7 @@ ALLOWED_STATUS = {
 
 
 def markdown_files() -> list[Path]:
-    ignored = {".git", ".idea", "build", "__pycache__"}
+    ignored = {".git", ".idea", "build", "external", "__pycache__"}
     return sorted(
         path
         for path in ROOT.rglob("*.md")

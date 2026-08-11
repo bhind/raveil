@@ -183,6 +183,20 @@ labelled unknown.
 - State: open until the first matched Chisel comparison contract is accepted
   and executed; preserve this lesson even if that comparison is also negative.
 
+## External source trees are not Raveil records
+
+- Symptom: after fetching an ignored Rocket Chip reference checkout, the Raveil
+  record checker reported upstream Markdown links as broken project records.
+- Cause: the checker recursively scanned every Markdown file below the
+  repository and did not exclude the explicit external-source boundary.
+- Prevention: keep fetched upstream trees under ignored `external/` and exclude
+  that directory from project-record discovery. Validate upstream material with
+  its own pinned tooling rather than rewriting it to satisfy Raveil rules.
+- Detection: fetch a pinned external checkout, confirm `git check-ignore`, and
+  ensure the Raveil record count and result are unchanged.
+- Evidence: T-0105 Rocket checkout and the task-governance record checker.
+- State: corrected; retain this boundary for future external dependencies.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:
