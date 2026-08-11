@@ -47,7 +47,7 @@ general Unix personality or displace the GNU/Linux/RK3588 product path.
 
 ## Demo release
 
-- [ ] **T-0095** Publish the completed T-0092 operator flow as the immutable
+- [x] **T-0095** Publish the completed T-0092 operator flow as the immutable
   `v0.0000000000002` GitHub Pre-release. Tag the exact fresh-clone-audited
   commit, attach no generated evidence, keep hosted CI disabled, and read back
   the remote tag, target SHA, visibility, notes, and assets before closeout.

@@ -3,7 +3,8 @@
 Last updated: 2026-08-11
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
-Current release candidate: `v0.0000000000002`, T-0092 Sonatine operator demo
+Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
+published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
