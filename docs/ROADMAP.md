@@ -20,6 +20,31 @@ experiment artifact.
 This is an allowed narrow Gate 4 vertical slice under ADR-0024. It does not
 claim Gate 3 completion, custom-hardware performance, or a Gate 1 reversal.
 
+## High-priority demo extension — Sonatine native operator shell
+
+State: **T-0092 planned; next demo P0 after in-flight work**
+
+T-0092 turns the existing U-mode command prompt, two-node capability VFS, and
+bounded Sonatine graph lifecycle into one visible operator demo. The target
+surface is `ls`, `cat`, `echo`, `write`, `stat`, `jobs`, `run`, `cancel`, and
+`result`. Filesystem output must be derived from VFS state. Graph commands must
+report real bounded lifecycle states and may use only a fixed built-in demo job;
+`cancel` must never report success without a real transition or an explicit
+`EMPTY`/`TOO_LATE` result.
+
+Ciste implements and freezes the Sonatine/QEMU serial contract first. Lifri may
+then add a host-side runner that launches the pinned QEMU command, drives the
+fixed transcript, validates versioned machine-readable frames, and writes one
+exclusive replayable JSON record. The record is QEMU emulation correctness,
+not performance or production evidence.
+
+This work reuses current owned code only. BusyBox remains an optional external
+GPLv2 reference and is not imported or linked for this slice. No ELF loader,
+fork/exec, pipe, signal, tty, general argv/environment, POSIX compatibility,
+arbitrary user pointer, new Gate claim, or RK3588 replacement enters T-0092.
+The exact ownership, acceptance transcript, and sequential handoff prompts are
+in [`guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md`](guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md).
+
 ## Post-MVP side project — ReactOS portability probe
 
 State: **Planned; non-blocking**

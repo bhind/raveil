@@ -26,6 +26,25 @@ T-0085 were subsequently completed on independent Sonatine branches; T-0018,
 compiler expansion, and hardware work remain preserved outside the userspace
 MVP.
 
+## High priority demo — Sonatine native operator shell
+
+- [ ] **T-0092** Extend the existing bounded Sonatine U-mode shell with an
+  honest native operator demo covering `ls`, `cat`, `echo`, `write`, `stat`,
+  `jobs`, `run`, `cancel`, and `result`. Reuse the capability-checked VFS and
+  existing bounded graph job/completion/finalization path; derive listings and
+  state from kernel objects rather than hard-coded success prose. Keep all
+  U-mode requests scalar or fixed-width, preserve baseline/admission/semantic/
+  rollback authority, and add deterministic QEMU smoke plus a replayable
+  host-side demo record labelled emulation correctness. Do not import BusyBox,
+  add an ELF loader, claim POSIX compatibility, add arbitrary user pointers,
+  or report latency/energy. Execute Ciste's Sonatine slice first, then Lifri's
+  host demo after the serial contract is frozen. Use the owner packet in
+  [`docs/guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md`](docs/guides/T-0092-SONATINE-NATIVE-SHELL-DEMO.md).
+
+T-0092 is the next demo P0 after already in-flight work reaches a clean
+milestone. It is a bounded demonstrability task, not permission to grow a
+general Unix personality or displace the GNU/Linux/RK3588 product path.
+
 ## Post-MVP side project — ReactOS portability probe
 
 - [ ] **T-0091** After the GNU/Linux userspace graph MVP and owned v1 artifact
