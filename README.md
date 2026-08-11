@@ -139,6 +139,21 @@ python3 -m raveil graph-mvp --backend sonatine-qemu \
 The latter is QEMU emulation correctness only. It deliberately reports no
 latency or energy and cannot establish a hardware-performance result.
 
+The optional pinned IREE adapter validates one repository-owned MLIR fixture
+before running the same native guarded loop. Install the compiler in an
+isolated environment using `tools/iree/requirements.lock`, then run:
+
+```bash
+python3 -m raveil graph-mvp --backend native \
+  --import-manifest benchmarks/iree/gemm-8x8x8-i32-i64.import.json \
+  --iree-compile /path/to/iree-compile \
+  --output /tmp/raveil-iree-import.json
+```
+
+The graph result keeps the exact `raveil.graph-mvp-result/v1` schema; import
+provenance is written separately as `<output>.import.json`. This is import/host
+correctness, not IREE runtime or performance evidence.
+
 The persistent log defaults to `experience/local.jsonl`.
 
 ## Commands

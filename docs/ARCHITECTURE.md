@@ -218,6 +218,13 @@ GraphVariant, ObjectManifest, MemoryPlan, OptimizationProposal,
 ResourceCertificate, ExperienceRecord, JobDescriptor, and CompletionRecord.
 Upstream types do not become Raveil's public contract.
 
+The first executable IREE boundary is deliberately narrower: a pinned compiler
+validates one digest-bound, repository-authored MLIR fixture and the adapter
+emits only the canonical `GraphProgram` and `raveil.graph-import/v1`
+provenance. VMFB bytes, MLIR objects, compiler paths, and diagnostics remain
+private adapter state. Compiler acceptance cannot bypass Miroirs, Pavane,
+baseline-first execution, or explicit commit/rollback.
+
 ## Measurement and research-data boundary
 
 Raveil owns versioned BenchmarkManifest, EnvironmentSignature,

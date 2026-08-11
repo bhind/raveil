@@ -4,6 +4,9 @@
 !raveil/**
 !benchmarks/
 !benchmarks/native/**
+!benchmarks/iree/**
+!tools/
+!tools/iree/**
 !tests/**
 !sonatine/**
 sonatine/build/**

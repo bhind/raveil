@@ -61,6 +61,23 @@ This executes the owned graph/contract and native-C adapter entirely in
 GNU/Linux userspace. Its JSON is segregated host-correctness evidence; the
 container does not gain Sonatine, Experience, commit, or measurement authority.
 
+The optional pinned MLIR import slice has its own image and retains the same
+native graph backend after import:
+
+```sh
+docker build -f linux/Dockerfile.iree-import -t raveil-iree-import:t-0040 .
+docker run --rm raveil-iree-import:t-0040
+```
+
+The image verifies the locked IREE wheel, compiles the one admitted MLIR
+fixture, and runs the owned graph loop. It does not execute IREE VMFB or create
+runtime/performance evidence.
+
+If public registry metadata is unavailable, the already-audited local
+`raveil-graph-mvp:t-0041` image can be supplied explicitly with
+`--build-arg BASE_IMAGE=raveil-graph-mvp:t-0041`; this override must be
+recorded as local-base evidence rather than a clean-registry build.
+
 ## Sonatine/QEMU graph backend
 
 T-0090 keeps the same graph frontend and adds an explicit emulation adapter.

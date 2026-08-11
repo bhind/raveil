@@ -263,7 +263,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 
 ## After the userspace MVP — compiler and adaptive execution
 
-- [ ] **T-0040** Import one real tensor workload through a pinned IREE/MLIR path.
+- [x] **T-0040** Import the repository-owned 8x8x8 i32-to-i64 GEMM MLIR fixture
+  through pinned IREE 3.11.0, emit only a strict owned import record and
+  canonical GraphProgram, then retain the baseline-first Miroirs/Pavane and
+  explicit commit/rollback path.
 - [x] **T-0041** Define strict, versioned Raveil-owned `GraphVariant`,
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.

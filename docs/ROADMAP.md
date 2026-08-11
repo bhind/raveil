@@ -221,6 +221,13 @@ closes the current semantic-oracle slice, while full Gate 4 remains planned for
 the pinned real-workload import, mapper/resource boundary, and broader compiler
 scope.
 
+T-0040 adds one pinned real-workload import under ADR-0032. A bounded,
+repository-authored MLIR GEMM fixture is validated by IREE 3.11.0 and reduced
+to the existing owned `GraphProgram` plus a strict provenance record before
+the unchanged guarded graph loop runs. This closes the single-workload import
+slice only; the mapper/resource-certificate and broader compiler scope keep
+full Gate 4 planned.
+
 ## Gate 5 — hardware exploration
 
 State: **Blocked by evidence, not implementation difficulty**

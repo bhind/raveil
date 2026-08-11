@@ -1,0 +1,7 @@
+# Optional T-0040 compiler dependency. Core Raveil does not import this package.
+iree-base-compiler==3.11.0 \
+    --hash=sha256:c9cf39661b92bc0050f4ea9fef7d52a631294443bf2ae5d1978f0b9085be40b8 \
+    --hash=sha256:ac3505591b6b134784eae7bcdf806fc66a2d120a82134b98bd4fbe488fdf84c5 \
+    --hash=sha256:1aea934fdc2ebe1dd64e5f2063a96de675a35f0b4856f9ddb76b2df58dfefb87 \
+    --hash=sha256:99fc3369375405485f11da541a75ef2b153d529fa3712c1d9771c98a35e2669e \
+    --hash=sha256:2e9fc888b9044662a14eeba01b6302d75a6118f68874699dcf8f9c7e991a4ee2

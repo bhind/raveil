@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import statistics
 import sys
@@ -29,6 +30,7 @@ from .experiment_runner import (
 from .graph_mvp import GraphProgram, run_graph_mvp
 from .native_backend import NativeCBackend
 from .sonatine_backend import SonatineQEMUBackend
+from .iree_import import PinnedIreeImporter
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -215,7 +217,22 @@ def command_experiment_sync(args: argparse.Namespace) -> int:
 
 
 def command_graph_mvp(args: argparse.Namespace) -> int:
-    program = GraphProgram.create(args.family, args.m, args.n, args.k)
+    imported = None
+    if args.import_manifest:
+        if not args.output:
+            raise ValueError("--import-manifest requires --output for segregated provenance")
+        requested_output = Path(args.output)
+        requested_import_output = requested_output.with_name(
+            requested_output.name + ".import.json"
+        )
+        if os.path.lexists(requested_output) or os.path.lexists(requested_import_output):
+            raise FileExistsError("graph result or import provenance target already exists")
+        imported = PinnedIreeImporter(
+            Path(args.iree_compile), timeout_seconds=args.timeout_seconds
+        ).import_program(Path(args.import_manifest))
+        program = imported.program
+    else:
+        program = GraphProgram.create(args.family, args.m, args.n, args.k)
     with tempfile.TemporaryDirectory(prefix="raveil-graph-mvp-") as directory:
         if args.backend == "native":
             backend = NativeCBackend(
@@ -253,9 +270,16 @@ def command_graph_mvp(args: argparse.Namespace) -> int:
     if args.output:
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
+        message = f"graph MVP outcome={result['outcome']} output={output}"
+        if imported is not None:
+            import_output = output.with_name(output.name + ".import.json")
+            with import_output.open("x", encoding="utf-8") as stream:
+                json.dump(imported.record.to_dict(), stream, indent=2, sort_keys=True)
+                stream.write("\n")
+            message += f" import-record={import_output}"
         with output.open("x", encoding="utf-8") as stream:
             stream.write(encoded)
-        print(f"graph MVP outcome={result['outcome']} output={output}")
+        print(message)
     else:
         print(encoded, end="")
     return 2 if result["outcome"] == "failed-closed" else 0
@@ -322,6 +346,11 @@ def build_parser() -> argparse.ArgumentParser:
     graph_mvp.add_argument("--source", default="benchmarks/native/benchmark.c")
     graph_mvp.add_argument("--sonatine-kernel", default="sonatine/build/sonatine.elf")
     graph_mvp.add_argument("--qemu", default="qemu-system-riscv64")
+    graph_mvp.add_argument(
+        "--import-manifest",
+        help="validate one pinned MLIR fixture and run its Raveil-owned graph",
+    )
+    graph_mvp.add_argument("--iree-compile", default="iree-compile")
     graph_mvp.add_argument("--output")
     graph_mvp.set_defaults(handler=command_graph_mvp)
 

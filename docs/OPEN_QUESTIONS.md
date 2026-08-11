@@ -85,6 +85,12 @@ resolves it.
 
 ## Ecosystem
 
+- ADR-0032 fixes only one static linalg fixture and pinned IREE compiler. Which
+  additional dialects, tensor signatures, import-record evolution, and
+  sandboxed compiler distributions are justified before a general frontend?
+- What immutable environment receipt, base-image digest, and OS resource
+  limits are required before the pinned compiler adapter may process anything
+  beyond repository-owned allowlisted sources?
 - Which upstream components should be integrated, wrapped, progressively
   replaced, or rejected?
 - What measured threshold—performance, memory, energy, variance, security, or

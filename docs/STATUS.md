@@ -90,12 +90,29 @@ cannot approve a self-consistent wrong result. Semantic approval remains
 independent of selection timing, so the timing-free Sonatine/QEMU baseline
 continues to support explicit abstention.
 
+T-0040 adds the first pinned upstream compiler import under ADR-0032. The
+adapter admits only the repository-authored 8x8x8 i32-input/i64-accumulation
+GEMM fixture, verifies its strict manifest and SHA-256, checks
+`iree-base-compiler` package 3.11.0 and exact compiler revision, bounds the
+subprocess and private VMFB, and emits only the existing canonical
+`GraphProgram` plus a separate pointer-free `raveil.graph-import/v1`
+provenance sidecar. The imported graph then follows the
+unchanged Miroirs, baseline-first, Pavane, proposal/abstention, and explicit
+commit/rollback path. No MLIR/IREE object or VMFB enters an owned public
+contract.
+
+The GNU/Linux arm64 container compiled the real fixture and completed the
+native graph demo with explicit abstention and an exact valid baseline. This is
+compiler/import and host correctness only. IREE runtime execution, general
+MLIR import, optimization quality, latency, energy, FPGA, ASIC, and silicon
+remain non-claims.
+
 The native result adapter and Sonatine serial adapter now also reject
 non-canonical scalar encodings, wrong JSON types, missing fields, negative
 latency, zero cookies, and invalid binding ranges. These checks are correctness
 boundaries only and create no performance or hardware claim.
 
-The completed tree passed 92 local tests plus RV64 release/debug, DWARF, U-mode
+The completed tree passed 99 local tests plus RV64 release/debug, DWARF, U-mode
 shell, telemetry replay, and graph differential checks. A Linux arm64 container
 also passed the 29 focused graph/backend tests and actual QEMU/native
 differential. These are host and emulation correctness results only.

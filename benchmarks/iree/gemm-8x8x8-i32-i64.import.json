@@ -1,0 +1,21 @@
+{
+  "expected_distribution_sha256": {
+    "linux-aarch64": "c9cf39661b92bc0050f4ea9fef7d52a631294443bf2ae5d1978f0b9085be40b8",
+    "linux-x86_64": "ac3505591b6b134784eae7bcdf806fc66a2d120a82134b98bd4fbe488fdf84c5",
+    "macos-universal2": "2e9fc888b9044662a14eeba01b6302d75a6118f68874699dcf8f9c7e991a4ee2"
+  },
+  "entry_point": "main",
+  "family": "gemm",
+  "k": 8,
+  "license": "Apache-2.0",
+  "m": 8,
+  "n": 8,
+  "schema": "raveil.iree-import-manifest/v1",
+  "source": "gemm-8x8x8-i32-i64.mlir",
+  "source_sha256": "72e4409598aeacb0967fdb0e8ae1e7d42d716f973c2e469426ac6b2eb4eae7ce",
+  "source_size": 1009,
+  "target": "local-vmvx",
+  "tool_name": "iree-base-compiler",
+  "tool_revision": "e4a3b0405d7d23554da26403658d0e8c3c5ecf25",
+  "tool_version": "3.11.0rc20260316"
+}
