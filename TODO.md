@@ -6,6 +6,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [x] **T-0097** Remove the accidentally tracked root `AgentNames.md`, retain
+  the call-sign catalog only under ignored local `.codex/`, explicitly ignore
+  the root filename, and add a regression preventing its reintroduction.
+  Preserve published tags and history rather than rewriting immutable releases.
+
 - [x] **T-0088** Establish lightweight failure-knowledge and GitHub Issue
   governance: preserve experiments and raw evidence, maintain a reusable lesson
   index, provide a safe bug template, escalate only durable/actionable defects,

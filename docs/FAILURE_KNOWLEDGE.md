@@ -131,6 +131,20 @@ labelled unknown.
 - State: corrected in local and fresh-clone CI with real-QEMU ETX regression;
   published in v0.0000000000003.
 
+## Local call-sign catalogs must not share a public documentation path
+
+- Symptom: the local-only `AgentNames.md` appeared in main and public release
+  tags after being bundled into an unrelated reference-management commit.
+- Cause: the file was created at repository root, outside the existing
+  `.codex/*` ignore boundary, and no regression asserted its absence.
+- Prevention: keep the catalog only at ignored `.codex/AgentNames.md`, ignore
+  the root filename explicitly, and use generic role names in public records.
+- Detection: the minimum suite fails if root `AgentNames.md` exists or loses
+  its explicit ignore rule.
+- Evidence: T-0097 and commit `9d069be` where the file first entered history.
+- State: corrected for future commits; immutable historical tags still contain
+  the non-secret catalog and are not rewritten.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

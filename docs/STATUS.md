@@ -22,6 +22,9 @@ clearance, freedom to operate, or implementation approval.
 Task-governance, Gate 0 evidence, and remote-release skills remain available.
 These govern development workflow only; local IDEA/MCP endpoints and personal
 Codex runtime configuration remain ignored.
+The agent call-sign catalog is also local-only under ignored `.codex/` state;
+the root `AgentNames.md` is absent and explicitly ignored. Historical releases
+that already contained it remain immutable provenance.
 
 ADR-0026 adds lightweight defect governance. Existing experiment failures,
 negative results, regression tests, and logs remain authoritative evidence;

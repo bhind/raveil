@@ -12,11 +12,19 @@ from raveil.model import Context, seed_candidates
 from raveil.policy import NearestExperiencePolicy, Tuner
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
 def make_tuner(store: ExperienceStore) -> Tuner:
     return Tuner(ToyDaphnis(), store, NearestExperiencePolicy(), seed_candidates())
 
 
 class MinimumLoopTests(unittest.TestCase):
+    def test_local_agent_call_sign_catalog_cannot_reenter_public_root(self) -> None:
+        self.assertFalse((ROOT / "AgentNames.md").exists())
+        ignored = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        self.assertIn("AgentNames.md", ignored)
+
     def test_exact_version(self) -> None:
         self.assertEqual(raveil.__version__, "0.0000000000003")
 
