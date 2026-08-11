@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current delivery focus
 
-State: **T-0101 Native Command Graph demo planned on completed T-0099**
+State: **T-0101 Native Command Graph demo implemented; claim experiment pending**
 
 The current manufacturing focus is the ordinary macOS/GNU/Linux Native
 userspace operator path under ADR-0034. Sonatine remains a preserved later
@@ -20,6 +20,8 @@ workspace slice is now executable on the host; human evaluation and release
 review remain. T-0101 now owns the next product-facing question: whether
 ordinary bounded shell workloads can be compiled into a real command DAG,
 executed with exact baseline agreement, and benchmarked fairly under EXP-0004.
+The bounded implementation and development smoke are now executable; EXP-0004
+remains Planned and no crossover or performance claim has been accepted.
 T-0100 remains a separate hardening task for OS-enforced sandboxing; T-0101
 must not describe the T-0099 workspace as a hostile-input security boundary.
 

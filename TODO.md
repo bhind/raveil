@@ -6,7 +6,7 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
-- [ ] **T-0101** Build the Native Command Graph demo on the completed T-0099
+- [x] **T-0101** Build the Native Command Graph demo on the completed T-0099
   workspace. Parse a documented safe shell subset into an owned, versioned
   command DAG; execute the same preregistered ordinary file-processing
   workloads through a direct baseline and the graph executor; require exact

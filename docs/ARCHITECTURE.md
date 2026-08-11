@@ -68,6 +68,14 @@ propagation before comparison, and keep construction, execution-only, and
 end-to-end timing distinct. T-0101 is ordinary host-work evaluation, not a
 general shell or a substitute for T-0100 isolation.
 
+`CommandGraphCompiler` owns parsing and strict schemas; `DirectCommandExecutor`
+and `CommandGraphExecutor` share the same fixed tool registry, workspace
+snapshot, environment, resource policy, and concurrency cap. `|||` denotes a
+bounded join-fanout, while `|`, `&&`, and `;` retain stream, success, and
+sequence edges. `CommandGraphResult` permits publication only after exact
+semantic agreement. `CommandBenchmarkResult` is segregated development-smoke
+evidence and cannot authorize a graph result or change EXP-0004 by itself.
+
 ### GNU/Linux userspace vertical slice
 
 ADR-0025 instantiates the smallest complete control loop as owned Python

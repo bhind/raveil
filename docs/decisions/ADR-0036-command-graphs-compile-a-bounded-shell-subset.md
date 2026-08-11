@@ -52,6 +52,12 @@ globbing, append, background jobs, interactive programs, or network tools enter
 the first slice. Existing GEMM graph schemas and validation remain unchanged.
 Additional tools or grammar require explicit tests and authority review.
 
+The executable v1 grammar uses `|||` as an owned bounded join-fanout operator:
+independent branches share the same maximum concurrency and a following `&&`
+node depends on every branch. It is deliberately not POSIX `&` backgrounding.
+The graph records sanitized `system://` tool locators plus binary hashes and
+keeps host absolute executable paths private to the runtime adapter.
+
 ## Verification and supersession
 
 Acceptance requires parser rejection tests, exact baseline/graph differential

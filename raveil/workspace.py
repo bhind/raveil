@@ -130,6 +130,15 @@ class NativeWorkspace:
         self._check_root()
         return self._virtual(self._cwd_parts)
 
+    def normalize(self, path: str) -> str:
+        """Return a virtual path without exposing its host representation."""
+        return self._virtual(self._parts(path))
+
+    def existing_host_path(self, path: str) -> tuple[str, Path]:
+        """Trusted-adapter copy-in seam; callers must not expose the host path."""
+        parts = self._parts(path)
+        return self._virtual(parts), self._walk_existing(parts)
+
     def cd(self, path: str | None = None) -> str:
         parts = self._parts(path or "/")
         target = self._walk_existing(parts)
@@ -233,6 +242,13 @@ class NativeWorkspace:
         data = text.encode("utf-8")
         if len(data) > MAX_FILE_BYTES:
             raise WorkspaceError(f"content exceeds {MAX_FILE_BYTES} bytes")
+        return self.write_bytes(path, data, maximum=MAX_FILE_BYTES)
+
+    def write_bytes(self, path: str, data: bytes, *, maximum: int) -> str:
+        if type(data) is not bytes or type(maximum) is not int or maximum < 0:
+            raise WorkspaceError("invalid bounded byte write")
+        if len(data) > maximum:
+            raise WorkspaceError(f"content exceeds {maximum} bytes")
         parts, target = self._new_leaf(path)
         flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
         if hasattr(os, "O_NOFOLLOW"):
@@ -257,3 +273,65 @@ class NativeWorkspace:
         except OSError as exc:
             raise WorkspaceError(f"write failed: {exc.strerror}") from exc
         return self._virtual(parts)
+
+    def publish_many(self, entries: dict[str, bytes | None], *, maximum: int) -> None:
+        """Best-effort all-or-none exclusive publication of bounded outputs.
+
+        ``None`` denotes a directory.  Every target is preflighted before the
+        first mutation; if a later create fails, only entries created by this
+        call are removed.  This is not a filesystem transaction or an OS
+        security boundary.
+        """
+        if type(entries) is not dict or not entries:
+            if entries == {}:
+                return
+            raise WorkspaceError("invalid publication set")
+        prepared: list[tuple[str, tuple[str, ...], bytes | None]] = []
+        planned_directories = {self._parts(path) for path, data in entries.items() if data is None}
+        for path in sorted(entries, key=lambda value: (len(self._parts(value)), value)):
+            data = entries[path]
+            if data is not None and (type(data) is not bytes or len(data) > maximum):
+                raise WorkspaceError("publication exceeds byte bound")
+            parts = self._parts(path)
+            if not parts:
+                raise WorkspaceError("workspace root cannot be created or replaced")
+            existing_prefix = parts[:-1]
+            while existing_prefix in planned_directories:
+                existing_prefix = existing_prefix[:-1]
+            parent = self._walk_existing(existing_prefix)
+            if not stat_module.S_ISDIR(parent.lstat().st_mode):
+                raise WorkspaceError("publication parent is not a directory")
+            target = self._root.joinpath(*parts)
+            if os.path.lexists(target):
+                raise WorkspaceError(f"path already exists: {self._virtual(parts)}")
+            prepared.append((self._virtual(parts), parts, data))
+        created: list[Path] = []
+        try:
+            for _virtual_path, parts, data in prepared:
+                target = self._root.joinpath(*parts)
+                if data is None:
+                    os.mkdir(target, 0o700)
+                else:
+                    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                    if hasattr(os, "O_NOFOLLOW"):
+                        flags |= os.O_NOFOLLOW
+                    descriptor = os.open(target, flags, 0o600)
+                    try:
+                        view = memoryview(data)
+                        while view:
+                            written = os.write(descriptor, view)
+                            if written <= 0:
+                                raise WorkspaceError("publication made no progress")
+                            view = view[written:]
+                    finally:
+                        os.close(descriptor)
+                created.append(target)
+        except (OSError, WorkspaceError) as exc:
+            for target in reversed(created):
+                try:
+                    target.rmdir() if target.is_dir() else target.unlink()
+                except OSError:
+                    pass
+            if isinstance(exc, WorkspaceError):
+                raise
+            raise WorkspaceError(f"publication failed: {exc.strerror}") from exc

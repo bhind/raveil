@@ -75,6 +75,25 @@ This is application-level workspace containment and host-correctness evidence,
 not hostile-code isolation. T-0100 remains open for descriptor-relative and
 platform-enforced worker isolation. Sonatine and its shell are unchanged.
 
+T-0101 adds a separate strict `CommandGraphProgram` rather than reusing tensor
+graphs for shell work. The Native CLI now supports direct `run`, deterministic
+`graph compile`, command `graph show`, baseline-first `graph execute --compare`,
+balanced development `graph benchmark`, and exclusive `graph result`. The
+bounded grammar covers quoted argv, pipelines, redirection, success/sequence
+edges, and owned `|||` join-fanout over hash-bound allowlisted host tools.
+Direct and DAG executors use equal workspace snapshots, controlled environments,
+resource limits, and concurrency; exact stdout/status/output agreement gates
+publication. Failure, timeout, stale identity, undeclared mutation, and output
+collision remain uncommitted. Existing GEMM behavior and schemas are unchanged.
+
+The manual `cat | grep | wc` demo returned `2` through real host tools and exact
+direct/graph agreement. Its four-repetition timing is development/non-claim;
+EXP-0004 remains Planned; the smoke sets `crossover_evaluated=false` and makes
+no performance claim.
+The current direct interpreter buffers pipeline stages, so benchmark records
+mark ordinary-pipeline and scheduling claims ineligible; EXP-0004 retains the
+concurrent OS-pipeline baseline as required future measurement work.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

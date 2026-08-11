@@ -52,8 +52,14 @@ bundle workflow and is not implied by a local demo run.
 
 ## Results
 
-No measurements have been collected. T-0099 workspace and existing GEMM tests
-are implementation evidence only and do not answer this hypothesis.
+No claim-bearing measurements have been collected. A four-repetition manual
+development smoke on macOS arm64 observed exact semantic agreement and zero
+mismatches for `cat | grep | wc`. Its direct median was 60,775,479 ns and graph
+median was 60,057,729 ns in that single noisy run. The sample is deliberately
+insufficient for the preregistered hypothesis, reports
+`crossover_evaluated=false` / `crossover=null`, and
+must not be interpreted as a speedup. T-0099 workspace and existing GEMM tests
+remain separate implementation evidence.
 
 ## Interpretation
 

@@ -19,6 +19,15 @@ from .graph_mvp import (
 )
 from .native_backend import NativeCBackend
 from .workspace import NativeWorkspace, WorkspaceError
+from .command_graph import (
+    CommandBenchmarkResult,
+    CommandComparison,
+    CommandGraphCompiler,
+    CommandGraphProgram,
+    CommandGraphResult,
+    ToolRegistry,
+    benchmark as benchmark_command_graph,
+)
 
 
 HELP = """Available commands:
@@ -38,6 +47,16 @@ HELP = """Available commands:
       Create one directory without recursive parent creation.
   write PATH TEXT...
       Create one bounded UTF-8 file without overwriting.
+  run COMMAND...
+      Execute the bounded allowlisted command subset directly.
+  graph compile COMMAND...
+      Compile a pipeline, sequence, or ||| join-fanout into a command DAG.
+  graph execute --compare
+      Run the equal-policy direct baseline first and compare the graph result.
+  graph benchmark --warmups N --repetitions N
+      Run a balanced development/non-claim timing smoke.
+  graph result [PATH]
+      Show or exclusively save the strict command-graph comparison result.
   graph create gemm --m M --n N --k K
       Create a bounded GEMM graph with positive integer dimensions.
   graph show
@@ -72,16 +91,27 @@ class NativeInteractiveSession:
     proposal: OptimizationProposal | None = None
     execution_result: GraphMVPResult | None = None
     events: list[str] = field(default_factory=list)
+    command_program: CommandGraphProgram | None = None
+    command_result: CommandGraphResult | None = None
+    command_benchmark: CommandBenchmarkResult | None = None
+    command_registry: ToolRegistry = field(default_factory=ToolRegistry)
+    command_parse_ns: int = 0
+    command_construction_ns: int = 0
 
     def create_graph(self, family: str, m: int, n: int, k: int) -> str:
         self.graph = GraphProgram.create(family, m, n, k)  # type: ignore[arg-type]
         self.variants_value = None
         self.proposal = None
         self.execution_result = None
+        self.command_program = None
+        self.command_result = None
+        self.command_benchmark = None
         self.events.append(f"graph-created {self.graph.program_id}")
         return f"created {self.graph.program_id}"
 
     def show_graph(self) -> str:
+        if self.command_program is not None:
+            return json.dumps(self.command_program.to_dict(), indent=2, sort_keys=True)
         if self.graph is None:
             raise ValueError("no graph; run 'graph create' first")
         return json.dumps({
@@ -156,8 +186,74 @@ class NativeInteractiveSession:
         self.variants_value = None
         self.proposal = None
         self.execution_result = None
+        self.command_program = None
+        self.command_result = None
+        self.command_benchmark = None
         self.events.append("reset")
         return "session reset"
+
+    def compile_command_graph(self, source: str) -> str:
+        compiler = CommandGraphCompiler(self.workspace, self.command_registry)
+        self.command_program = compiler.compile(source)
+        self.command_parse_ns = compiler.last_parse_ns
+        self.command_construction_ns = compiler.last_construction_ns
+        self.command_result = None
+        self.command_benchmark = None
+        self.events.append(f"command-graph-compiled {self.command_program.graph_id}")
+        return f"graph={self.command_program.graph_id}\nnodes={len(self.command_program.nodes)} edges={len(self.command_program.edges)}"
+
+    def run_command(self, source: str) -> str:
+        compiler = CommandGraphCompiler(self.workspace, self.command_registry)
+        program = compiler.compile(source)
+        outcome = CommandComparison(self.workspace, self.command_registry).direct(program, publish=True)
+        self.events.append(f"command-direct {outcome.status}")
+        if outcome.status != "executed":
+            raise ValueError(f"command failed: status={outcome.status} exit={outcome.exit_status} {outcome.stderr}")
+        return outcome.stdout.decode("utf-8", "replace").rstrip("\n")
+
+    def execute_command_graph(self) -> str:
+        if self.command_program is None:
+            raise ValueError("no command graph; run 'graph compile' first")
+        if self.command_result is not None:
+            raise ValueError("command graph was already executed; compile or reset first")
+        self.command_result = CommandComparison(self.workspace, self.command_registry).execute(
+            self.command_program, publish=True
+        )
+        self.events.append(f"command-graph-execute semantic={self.command_result.semantic_valid}")
+        return "\n".join((
+            f"semantic={'valid' if self.command_result.semantic_valid else 'invalid'}",
+            f"baseline_exit={self.command_result.direct.exit_status}",
+            f"graph_exit={self.command_result.graph.exit_status}",
+            f"committed={str(self.command_result.committed).lower()}",
+        ))
+
+    def benchmark_command_graph(self, warmups: int, repetitions: int) -> str:
+        if self.command_program is None:
+            raise ValueError("no command graph; run 'graph compile' first")
+        self.command_benchmark = benchmark_command_graph(
+            self.command_program, self.workspace, self.command_registry,
+            warmups=warmups, repetitions=repetitions,
+            parse_ns=self.command_parse_ns, construction_ns=self.command_construction_ns,
+        )
+        value = self.command_benchmark.to_dict()
+        self.events.append("command-graph-benchmark development-non-claim")
+        return "\n".join((
+            "benchmark=development-non-claim",
+            f"direct_median_ns={value['direct_execution']['median_ns']}",
+            f"graph_median_ns={value['graph_execution']['median_ns']}",
+            f"semantic_mismatches={value['mismatch_count']}",
+            "crossover=none",
+        ))
+
+    def command_graph_result(self, output: str | None) -> str:
+        if self.command_result is None:
+            raise ValueError("no command graph result; run 'graph execute --compare' first")
+        encoded = json.dumps(self.command_result.to_dict(), indent=2, sort_keys=True) + "\n"
+        if output is not None:
+            virtual = self.workspace.write_text(output, encoded)
+            self.events.append(f"command-result-saved {virtual}")
+            return f"saved {virtual}"
+        return encoded.rstrip()
 
 
 def _dimension(tokens: list[str], name: str) -> int:
@@ -169,6 +265,25 @@ def _dimension(tokens: list[str], name: str) -> int:
 
 
 def dispatch(session: NativeInteractiveSession, line: str) -> tuple[bool, str]:
+    stripped = line.strip()
+    if stripped.startswith("run "):
+        return True, session.run_command(stripped[4:])
+    if stripped.startswith("graph compile "):
+        return True, session.compile_command_graph(stripped[len("graph compile "):])
+    if stripped == "graph execute --compare":
+        return True, session.execute_command_graph()
+    if stripped.startswith("graph benchmark "):
+        benchmark_tokens = shlex.split(stripped)
+        if len(benchmark_tokens) != 6 or benchmark_tokens[:2] != ["graph", "benchmark"]:
+            raise ValueError("usage: graph benchmark --warmups N --repetitions N")
+        return True, session.benchmark_command_graph(
+            _dimension(benchmark_tokens, "--warmups"), _dimension(benchmark_tokens, "--repetitions")
+        )
+    if stripped == "graph result" or stripped.startswith("graph result "):
+        result_tokens = shlex.split(stripped)
+        if len(result_tokens) not in {2, 3}:
+            raise ValueError("usage: graph result [PATH]")
+        return True, session.command_graph_result(result_tokens[2] if len(result_tokens) == 3 else None)
     try:
         tokens = shlex.split(line)
     except ValueError as exc:
@@ -199,7 +314,9 @@ def dispatch(session: NativeInteractiveSession, line: str) -> tuple[bool, str]:
     if tokens and tokens[0] == "mkdir" and len(tokens) == 2:
         return True, f"directory created: {session.workspace.mkdir(tokens[1])}"
     if tokens and tokens[0] == "write" and len(tokens) >= 3:
-        virtual_path = session.workspace.write_text(tokens[1], " ".join(tokens[2:]))
+        content = " ".join(tokens[2:])
+        content = content.replace("\\n", "\n").replace("\\t", "\t")
+        virtual_path = session.workspace.write_text(tokens[1], content)
         return True, f"file written: {virtual_path}"
     if tokens[:3] == ["graph", "create", "gemm"]:
         allowed = {"graph", "create", "gemm", "--m", "--n", "--k"}
