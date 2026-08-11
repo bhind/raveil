@@ -7,6 +7,8 @@ Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`
 Current corrective Pre-release: `v0.0000000000003`, T-0096 interactive
 control fix, published from `c8002cf4d87e6a0a907f9327dc42cce2c90e9673`
+Current release candidate: `v0.0000000000004`, T-0099 Native CLI workspace;
+local audit only, not tagged, pushed, or published
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
