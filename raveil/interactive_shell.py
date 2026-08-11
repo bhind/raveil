@@ -31,6 +31,7 @@ from .command_graph import (
 
 
 HELP = """Available commands:
+  Press Tab to complete commands, graph subcommands, allowlisted tools, and virtual workspace paths.
   help
       Show this command reference.
   pwd
@@ -347,7 +348,9 @@ def run_interactive_shell(
     output_fn: Callable[[str], None] = print,
 ) -> int:
     try:
-        import readline  # noqa: F401 - activates the host Python line editor
+        import readline
+        from .shell_completion import configure_readline
+        configure_readline(session, readline)
     except ImportError:
         pass
     output_fn("Raveil Native Interactive CLI; type 'help'")

@@ -89,6 +89,11 @@ resolves it.
 
 ## Ecosystem
 
+- Which additional context-sensitive completions, if any, justify more parser
+  coupling after T-0102? Persistent history, fuzzy completion, arbitrary PATH
+  lookup, shell expansion, and external completion scripts remain outside the
+  current bounded Native CLI.
+
 - After the T-0101 allowlisted command-graph slice, which additional shell
   grammar and tools provide enough real workload coverage to justify their
   authority and portability cost? General `sh -c`, arbitrary executable

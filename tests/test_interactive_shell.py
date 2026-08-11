@@ -41,6 +41,7 @@ class NativeInteractiveShellTests(unittest.TestCase):
             self.assertIn(command, help_text)
         self.assertIn("trusted baseline first", help_text)
         self.assertIn("exclusively save", help_text)
+        self.assertIn("Press Tab to complete", help_text)
 
     def test_state_machine_create_show_variants_propose_reset(self) -> None:
         session = NativeInteractiveSession()

@@ -28,6 +28,12 @@ raveil> cat /command-result.json
 raveil> exit
 ```
 
+Press Tab to complete documented commands, `graph` subcommands/options,
+allowlisted command tools, and paths below the virtual workspace root.
+Directories end in `/`; names containing spaces are escaped. Symlinks are not
+offered. Completion never enables arbitrary PATH lookup or bypasses normal
+workspace and command validation.
+
 The shell supports quoted argv, pipelines (`|`), input (`<`) and exclusive
 output (`>`) redirection, success dependencies (`&&`), explicit sequencing
 (`;`), and the owned join-fanout operator `|||`. `a ||| b && c` runs `a` and

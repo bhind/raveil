@@ -35,11 +35,14 @@ that workspace and never overwrites an existing path. See
 for the full walkthrough and limits. This is application-level workspace
 containment, not an OS security boundary.
 
-The unreleased T-0101 Command Graph path additionally compiles allowlisted file
+The T-0101 Command Graph path additionally compiles allowlisted file
 processing into a separate owned DAG. See
 [`docs/guides/NATIVE_COMMAND_GRAPH.md`](docs/guides/NATIVE_COMMAND_GRAPH.md)
 for `run`, `graph compile`, `graph execute --compare`, balanced benchmark smoke,
 and strict result instructions. It does not reuse tensor nodes as shell work.
+T-0102 adds Tab completion for documented commands, graph options, allowlisted
+tools, and virtual workspace paths. It is a readline/libedit usability adapter,
+not shell expansion or new authority.
 
 ## Sonatine Microkernel boot target
 

@@ -96,6 +96,14 @@ The current direct interpreter buffers pipeline stages, so benchmark records
 mark ordinary-pipeline and scheduling claims ineligible; EXP-0004 retains the
 concurrent OS-pipeline baseline as required future measurement work.
 
+T-0102 adds host readline/libedit Tab completion without changing dispatch or
+authority. Completion candidates are limited to documented commands, graph
+subcommands/options, the fixed Command Graph tool allowlist, and bounded
+virtual-workspace paths. Symlinks and host paths are omitted; completed input
+still passes through the existing parser, workspace checks, and guarded graph
+flow. Completion is ephemeral host usability, not expansion, arbitrary PATH
+lookup, persistence, or an OS isolation boundary.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

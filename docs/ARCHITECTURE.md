@@ -76,6 +76,13 @@ sequence edges. `CommandGraphResult` permits publication only after exact
 semantic agreement. `CommandBenchmarkResult` is segregated development-smoke
 evidence and cannot authorize a graph result or change EXP-0004 by itself.
 
+The Native input adapter installs one readline/libedit completer. Its pure
+candidate function enumerates only fixed commands, graph subcommands/options,
+allowlisted tool names, and `NativeWorkspace` virtual paths. Path completion
+uses the same bounded lexical directory view, omits symlinks, and never returns
+host absolute paths. Completion grants no authority: dispatch reparses and
+revalidates every resulting line normally.
+
 ### GNU/Linux userspace vertical slice
 
 ADR-0025 instantiates the smallest complete control loop as owned Python

@@ -167,6 +167,48 @@ class NativeWorkspace:
             raise WorkspaceError(f"directory is unavailable: {exc.strerror}") from exc
         return sorted(names)
 
+    def complete_paths(self, prefix: str, *, directories_only: bool = False) -> list[str]:
+        """Return bounded virtual path candidates without exposing host paths."""
+        if not isinstance(prefix, str) or "\x00" in prefix:
+            return []
+        absolute = prefix.startswith("/")
+        if prefix.endswith("/"):
+            parent_text, leaf = prefix, ""
+        elif "/" in prefix:
+            parent_text, leaf = prefix.rsplit("/", 1)
+            parent_text = parent_text or "/"
+        else:
+            parent_text, leaf = ".", prefix
+        try:
+            parent_parts = self._parts(parent_text)
+            parent = self._walk_existing(parent_parts)
+            if not stat_module.S_ISDIR(parent.lstat().st_mode):
+                return []
+            names = self.ls(self._virtual(parent_parts))
+        except WorkspaceError:
+            return []
+        candidates: list[str] = []
+        for name in names:
+            if not name.startswith(leaf):
+                continue
+            target = parent / name
+            try:
+                metadata = target.lstat()
+            except OSError:
+                continue
+            if stat_module.S_ISLNK(metadata.st_mode):
+                continue
+            is_directory = stat_module.S_ISDIR(metadata.st_mode)
+            if directories_only and not is_directory:
+                continue
+            parts = (*parent_parts, name)
+            virtual = self._virtual(parts)
+            if not absolute:
+                base = "" if parent_text == "." else parent_text.rstrip("/") + "/"
+                virtual = base + name
+            candidates.append(virtual + ("/" if is_directory else ""))
+        return candidates
+
     def read_text(self, path: str) -> str:
         parts = self._parts(path)
         target = self._walk_existing(parts)

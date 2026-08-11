@@ -6,6 +6,14 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 ## Delivery line — active GNU/Linux userspace MVP
 
+- [x] **T-0102** Add bounded Tab completion to the Native Interactive CLI.
+  Complete only documented commands, graph subcommands/options, allowlisted
+  command tools, and virtual workspace paths; omit symlinks and host absolute
+  paths, retain readline/libedit editing and ephemeral history, and keep every
+  completed token subject to the existing parser, workspace, validation, and
+  authority checks. This is host usability, not shell expansion, PATH lookup,
+  filesystem authority, or T-0100 isolation.
+
 - [x] **T-0101** Build the Native Command Graph demo on the completed T-0099
   workspace. Parse a documented safe shell subset into an owned, versioned
   command DAG; execute the same preregistered ordinary file-processing
