@@ -9,6 +9,8 @@ Current corrective Pre-release: `v0.0000000000003`, T-0096 interactive
 control fix, published from `c8002cf4d87e6a0a907f9327dc42cce2c90e9673`
 Current Native Pre-release: `v0.0000000000004`, T-0099 Native CLI workspace,
 published from `3cfb13c762b51291d08d519126286aad078df7a1`
+Prepared local candidate: `v0.0000000000005`, T-0101 Native Command Graph;
+tag, push, and GitHub Release remain unperformed pending owner approval.
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define RAVEIL_VERSION "0.0000000000004"
+#define RAVEIL_VERSION "0.0000000000005"
 
 #define SONATINE_PLATFORM_NAME "qemu-virt-rv64-v1"
 #define SONATINE_HART_COUNT 1u
