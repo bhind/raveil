@@ -1,4 +1,12 @@
-CROSS_COMPILE ?= riscv64-unknown-elf-
+ifeq ($(origin CROSS_COMPILE),undefined)
+ifneq ($(shell command -v riscv64-unknown-elf-gcc 2>/dev/null),)
+CROSS_COMPILE := riscv64-unknown-elf-
+else ifneq ($(shell command -v riscv64-elf-gcc 2>/dev/null),)
+CROSS_COMPILE := riscv64-elf-
+else
+CROSS_COMPILE := riscv64-unknown-elf-
+endif
+endif
 CC := $(CROSS_COMPILE)gcc
 OBJCOPY := $(CROSS_COMPILE)objcopy
 READELF := $(CROSS_COMPILE)readelf
@@ -44,7 +52,7 @@ ASFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany $(ASDEBUG) -Iinclude
 LDFLAGS := -march=rv64imac_zicsr -mabi=lp64 -mcmodel=medany -nostdlib -nostartfiles \
            -Wl,-T,link.ld -Wl,--gc-sections -Wl,--build-id=none
 
-.PHONY: all run smoke graph-smoke debug debug-server gdb gdb-client check-debug clean check-toolchain
+.PHONY: all run smoke interrupt-smoke graph-smoke debug debug-server gdb gdb-client check-debug clean check-toolchain
 
 all: $(TARGET)
 
@@ -79,8 +87,7 @@ smoke: $(TARGET)
 	grep -q 'raveil-u> hel' $(BUILD)/smoke.log
 	grep -q 'help info ticks ipc fs ls cat echo write stat jobs run cancel result exit' $(BUILD)/smoke.log
 	grep -q 'u-cmd info=ok' $(BUILD)/smoke.log
-	grep -q 'clint-preempt from=1 to=2' $(BUILD)/smoke.log
-	grep -q 'clint-preempt from=2 to=1' $(BUILD)/smoke.log
+	! grep -q 'clint-preempt' $(BUILD)/smoke.log
 	grep -q 'u-context register-frame=ok task=1' $(BUILD)/smoke.log
 	grep -q 'u-shell resumed task=1' $(BUILD)/smoke.log
 	grep -q '\[ok\] VFS / immutable initramfs + bounded RamFS' $(BUILD)/smoke.log
@@ -120,6 +127,14 @@ smoke: $(TARGET)
 	  --input sonatine/$(BUILD)/smoke.log \
 	  --store sonatine/$(BUILD)/completion-telemetry.jsonl --run-id qemu-smoke | \
 	  grep -q 'appended=0'
+
+interrupt-smoke: $(TARGET)
+	{ sleep 1; printf '\003'; } | \
+	  $(QEMU) $(QEMU_PLATFORM_ARGS) -nographic -kernel $(TARGET) | \
+	  tee $(BUILD)/interrupt-smoke.log
+	grep -q 'raveil-u> ' $(BUILD)/interrupt-smoke.log
+	grep -q 'u-shell exit task=1' $(BUILD)/interrupt-smoke.log
+	! grep -q 'clint-preempt' $(BUILD)/interrupt-smoke.log
 
 graph-smoke: $(TARGET)
 	rm -f $(BUILD)/graph-mvp-result.json $(BUILD)/graph-mvp-native-result.json

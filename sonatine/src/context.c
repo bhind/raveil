@@ -94,7 +94,6 @@ uintptr_t context_trap_select(uintptr_t frame,uintptr_t pc,uintptr_t *resume_pc)
     user_frame=(struct trap_frame *)frame;
     user_frame->mepc=pc;
     if(!task_set_current(idle_id)) for(;;) {}
-    console_write("clint-preempt from=1 to=2\n");
     *resume_pc=pc;
     return (uintptr_t)preempt_idle_frame;
   } else if(task_current()==idle_id) {
@@ -105,7 +104,6 @@ uintptr_t context_trap_select(uintptr_t frame,uintptr_t pc,uintptr_t *resume_pc)
     preempt_idle_frame=(struct trap_frame *)frame;
     preempt_idle_frame->mepc=pc;
     if(!task_set_current(init_id)) for(;;) {}
-    console_write("clint-preempt from=2 to=1\n");
     *resume_pc=pc;
     return (uintptr_t)user_frame;
   }

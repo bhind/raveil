@@ -152,6 +152,10 @@ user_shell_payload_start:
   li t0, -3
   beq a0, t0, 21b
   mv t6, a0
+  # ETX is an operator interrupt. Route it through the same capability- and
+  # current-task-checked shutdown syscall as the explicit `exit` command.
+  li t0, 0x03
+  beq t6, t0, 36f
   li t0, '\r'
   beq t6, t0, 25f
   li t0, '\n'

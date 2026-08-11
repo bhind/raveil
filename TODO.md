@@ -52,6 +52,12 @@ general Unix personality or displace the GNU/Linux/RK3588 product path.
   commit, attach no generated evidence, keep hosted CI disabled, and read back
   the remote tag, target SHA, visibility, notes, and assets before closeout.
 
+- [ ] **T-0096** Correct the published interactive-demo failure: remove
+  unbounded per-preemption UART logging from normal operation, map U-mode ETX
+  (`Ctrl+C`) to the existing checked shutdown path, add a real-QEMU interrupt
+  regression, auto-select either supported RV64 toolchain prefix, preserve the
+  immutable v0.0000000000002 tag, and publish a new audited Pre-release.
+
 ## Queued visibility side project — graph directory view
 
 - [ ] **T-0093** Add a deterministic read-only host directory view of one

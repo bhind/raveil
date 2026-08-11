@@ -60,7 +60,12 @@ static void log_event(uint64_t event,uint64_t detail,uint64_t value) {
     case 6u: console_write("error: unknown command\n"); break;
     case 8u: console_write("u-ipc send=OK receive=OK\n"); break;
     case 9u: console_write("u-cmd ticks=ok\n"); break;
-    case 10u: console_write("u-context register-frame=ok task=1\n"); break;
+    case 10u:
+      if(context_preemption_count()==0u)
+        console_write("u-context preemption=missing\n");
+      else
+        console_write("u-context register-frame=ok task=1\n");
+      break;
     case 11u:
       console_write("u-context mismatch=register-x");
       console_write_dec(detail); console_write(" value=");

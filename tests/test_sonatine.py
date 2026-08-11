@@ -72,6 +72,9 @@ class SonatineSourceTests(unittest.TestCase):
         self.assertIn("current==context_user_task()", syscall)
         self.assertIn('console_write("raveil-u> ")', syscall)
         self.assertIn("SYS_PUTC", syscall)
+        self.assertIn("context_preemption_count()==0u", syscall)
+        self.assertIn("li t0, 0x03", user_entry)
+        self.assertIn("beq t6, t0, 36f", user_entry)
         for marker in ("kernel-cap forged=DENIED", "kernel-cap wrong-owner=DENIED",
                        "kernel-cap escalation=DENIED"):
             self.assertIn(marker, syscall)
@@ -86,6 +89,9 @@ class SonatineSourceTests(unittest.TestCase):
             self.assertIn(command, makefile)
         self.assertIn("infX\\177o", makefile)
         self.assertIn("123456789", makefile)
+        self.assertIn("interrupt-smoke", makefile)
+        self.assertIn("printf '\\003'", makefile)
+        self.assertIn("! grep -q 'clint-preempt'", makefile)
         self.assertNotIn("printf 'i\\rf\\rs", makefile)
 
     def test_makefile_has_isolated_debug_build(self) -> None:
@@ -115,7 +121,7 @@ class SonatineSourceTests(unittest.TestCase):
             "QEMU_PLATFORM_ARGS :=",
         ):
             self.assertIn(expected, makefile)
-        self.assertEqual(3, makefile.count("$(QEMU) $(QEMU_PLATFORM_ARGS)"))
+        self.assertEqual(4, makefile.count("$(QEMU) $(QEMU_PLATFORM_ARGS)"))
         self.assertIn('SONATINE_PLATFORM_NAME "qemu-virt-rv64-v1"', platform)
         self.assertIn("SONATINE_HART_COUNT 1u", platform)
         self.assertIn("QEMU_RAM_BASE 0x80000000UL", platform)

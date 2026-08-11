@@ -182,6 +182,9 @@ Implemented:
 - command state that remains intact across real CLINT preemption without
   passing a line pointer to the kernel; the only added console operation emits
   one seven-bit scalar byte after current-task and capability validation;
+- T-0096 in-progress correction removes per-preemption UART prose from normal
+  operation and treats ETX as an operator request for the same current-task-
+  checked shutdown used by `exit`; publication remains pending verification;
 - non-blocking U-mode console reads that return `WOULD_BLOCK` instead of
   polling in M-mode with interrupts masked; M-origin faults take a distinct
   fail-stop path, and seed shutdown is restricted to the scheduler-registered

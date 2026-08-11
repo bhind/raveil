@@ -72,6 +72,11 @@ kernel operations derive caller identity from the current U-mode task and
 resolve the corresponding capabilities; the line buffer never crosses as a
 user pointer.
 
+Pressing `Ctrl+C` at the U-mode prompt follows the same checked shutdown path
+as `exit`. Routine timer preemption is intentionally silent; the `selftest`
+command verifies that real preemption occurred before reporting register-frame
+success.
+
 Or run it without installing the cross-toolchain on the host:
 
 ```bash

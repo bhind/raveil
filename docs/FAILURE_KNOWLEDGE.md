@@ -116,6 +116,20 @@ labelled unknown.
 - Evidence: T-0090 and `docs/log/2026-08-11.md`.
 - State: corrected for the Sonatine graph backend.
 
+## Per-tick UART diagnostics can destroy an interactive control path
+
+- Symptom: the released QEMU demo continuously printed `clint-preempt` and
+  neither the prompt nor `Ctrl+C` appeared responsive to its operator.
+- Cause: every 100 Hz context transition synchronously wrote UART prose, while
+  the U-mode line editor discarded ETX (`0x03`) as an unsupported control byte.
+- Prevention: keep routine preemption silent, verify its count at a bounded
+  self-test boundary, and route ETX through the same current-task-checked
+  shutdown syscall as `exit`.
+- Detection: real-QEMU smoke must assert that ETX exits, the normal transcript
+  completes, and neither log contains `clint-preempt`.
+- Evidence: T-0096 and the v0.0000000000002 operator report.
+- State: correction implemented; verification and new Pre-release pending.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:
