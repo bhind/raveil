@@ -108,9 +108,13 @@ The corrected critical path is:
    cases with synthetic events and an exact fail-closed marker verifier. The
    first pinned Rocket request/response/WB probe now supplies bounded positive
    RTL evidence for accepted store/load requests, captured DCache tags, a
-   separately matched load response, and WB retirement. Full Rocket replay,
-   kill, redirect, exception, reset/epoch, store-authorization and owned-D
-   lifecycle coverage, plus the BOOM probe, remain to be implemented.
+   separately matched load response, and WB retirement. A second pinned probe
+   covers one same-cycle accepted-request/MEM-redirect negative by recording a
+   killed wrong-path store with no WB retirement and equal completed loads
+   before and after the probe. Multi-live-token overlap, pre-request kill, later
+   post-request kill/exception, replay, reset/epoch, DCache S1-kill and owned A/D
+   correlation, store authorization and owned-D lifecycle coverage, plus the
+   BOOM probe, remain to be implemented.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

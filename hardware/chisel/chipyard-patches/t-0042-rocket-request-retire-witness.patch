@@ -1,7 +1,7 @@
 diff --git a/src/main/scala/rocket/RocketCore.scala b/src/main/scala/rocket/RocketCore.scala
 --- a/src/main/scala/rocket/RocketCore.scala
 +++ b/src/main/scala/rocket/RocketCore.scala
-@@ -930,6 +930,97 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
+@@ -930,6 +930,107 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
    io.dmem.req.bits.no_xcpt := DontCare
    io.dmem.req.bits.data := DontCare
    io.dmem.req.bits.mask := DontCare
@@ -49,6 +49,16 @@ diff --git a/src/main/scala/rocket/RocketCore.scala b/src/main/scala/rocket/Rock
 +    printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch=%d sequence=%d attempt=1 pc=0x%x address=0x%x store=%d tag=0x%x\n",
 +      raveilWitnessEpoch, raveilWitnessNextSequence, ex_reg_pc,
 +      io.dmem.req.bits.addr, raveilWitnessStore, io.dmem.req.bits.tag)
++    when(take_pc_mem) {
++      printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=kill epoch=%d sequence=%d branch_pc=0x%x pc=0x%x store=%d reason=mem-redirect request_accepted=1 branch=%d taken=%d direction_misprediction=%d promotion=blocked\n",
++        raveilWitnessEpoch, raveilWitnessNextSequence, mem_reg_pc,
++        ex_reg_pc, raveilWitnessStore, mem_ctrl.branch, mem_br_taken,
++        mem_direction_misprediction)
++      raveilWitnessActive := false.B
++      raveilWitnessAccepted := false.B
++      raveilWitnessAttempt := 0.U
++      raveilWitnessNextSequence := raveilWitnessNextSequence + 1.U
++    }
 +  }.elsewhen(raveilWitnessCandidate) {
 +    assert(ex_reg_pc === raveilWitnessPc &&
 +      raveilWitnessStore === raveilWitnessStoreReg,

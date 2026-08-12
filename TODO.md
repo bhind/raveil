@@ -527,11 +527,17 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   contract smoke, not a pinned Rocket probe. A bounded pinned Rocket diagnostic
   now observes accepted store/load requests, captures the request DCache tag,
   separately matches the load response, and observes WB retirement; its exact
-  positive workload and signature pass. It does not close ADR-0045: replay,
-  kill, redirect, exception, reset/epoch, store authorization, owned-manager D
-  completion, and negative lifecycle cases remain open. Next exercise those
-  Rocket lifecycle cases, then implement the BOOM ROB/LSU diagnostic under the
-  same normalized lifecycle contract.
+  positive workload and signature pass. One additional pinned negative now
+  records an accepted wrong-path store and blocks promotion when an older taken
+  branch redirects in the same cycle; bounded loads before and after the probe
+  observe the same non-magic value and complete as distinct tokens. The current
+  observer is deliberately single-live-token and rejects a new candidate while
+  a load still awaits response/retirement closure. This does not close
+  ADR-0045: multi-token overlap, pre-request kill, later post-request
+  kill/exception, replay, reset/epoch, DCache S1-kill and owned A/D correlation,
+  store authorization, and owned-manager D completion remain open. Next
+  exercise those Rocket lifecycle cases, then implement the BOOM ROB/LSU
+  diagnostic under the same normalized lifecycle contract.
   Do not connect either token to the ADR-0043 common bridge until both
   CPU-specific diagnostics pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and

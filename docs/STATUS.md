@@ -433,6 +433,20 @@ authorization or owned-manager completion, and replay, kill, redirect,
 exception, reset/epoch, BOOM lifecycle, common-bridge admission, semantic
 initiator identity, resource matching, and performance remain unverified.
 
+The pinned Rocket diagnostic now also closes one bounded same-cycle
+accepted-request/redirect outcome. A first owned-address load completes as
+sequence 1 and supplies a data dependency before a deliberately taken branch
+places an owned-address store on the wrong path. The store request is accepted
+while the older branch resolves as a MEM-stage direction misprediction. The
+diagnostic records `allocate/request/kill` with `promotion=blocked` as sequence
+2, then requires a second load's response plus WB as sequence 3. The wrong-path
+store has no WB retirement, and the two loads both observe `0xc5686cac` in the
+exact run. This is post-request redirect bookkeeping and differential readback
+for that simultaneous case, not pre-request-kill coverage, proof of DCache S1
+cancellation or TileLink A/D completion, general absence of a memory side
+effect, multi-live-token support, durable token transport, semantic initiator
+identity, resource matching, or performance evidence.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

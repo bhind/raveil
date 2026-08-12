@@ -668,6 +668,80 @@ labelled unknown.
 - State: corrected for the current marker; future marker formats need their own
   emitted-output fixtures.
 
+## A taken branch can accept the following wrong-path DCache request
+
+- Symptom: the first Rocket redirect-negative design expected zero owned-address
+  request records after an always-taken branch, but the pinned RTL emitted one
+  `allocate` and one accepted `request` for the immediately following store.
+- Cause: the older branch resolves in MEM while the younger store is already in
+  EX. `io.dmem.req.valid` is driven from the EX-stage memory instruction, so the
+  request handshake and `take_pc_mem` can occur in the same cycle.
+- Prevention: classify lifecycle evidence from the actual pinned pipeline
+  signals. Do not call a branch-skipped instruction a pre-request kill without
+  observing the request boundary.
+- Detection: require an exact `kill` event qualified by accepted request,
+  branch, taken direction misprediction, both correlated PCs, and
+  `promotion=blocked`; separately state that DCache S1-kill and TileLink A/D
+  fate were not checked.
+- Evidence: T-0042 `owned_memory_rocket_redirect_negative.S`, the preliminary
+  pinned RTL log with `allocate/request` only, the corrected Rocket patch, and
+  `docs/log/2026-08-13.md`.
+- State: corrected for the one simultaneous accepted-request/MEM-redirect
+  probe. Pre-request kill, later post-request exception/rollback, and transport
+  completion remain open.
+
+## Uninitialized RTL memory cannot supply a fixed negative-test baseline
+
+- Symptom: the first exact redirect-negative workload required the post-probe
+  load to return zero, but the pinned run returned `0xc5686cac` and exited with
+  failure after emitting the expected killed-token lifecycle.
+- Cause: the owned manager uses `SyncReadMem`; the workload had not initialized
+  the probed word, so zero was not an architectural or manager invariant.
+- Prevention: do not assign a fixed value to an uninitialized simulated memory.
+  Establish an ordered baseline or use bounded before/after differential
+  readback with a fail-closed collision value.
+- Detection: include all compared values in the signature and require exact
+  equality plus explicit rejection of the wrong-path magic value.
+- Evidence: T-0042 exact Rocket RTL runs, `owned_memory_rocket_redirect_negative.S`,
+  and `verify_owned_rocket_redirect_negative.py`.
+- State: corrected with two completed loads observing the same non-magic value;
+  this still does not prove general absence of a memory side effect.
+
+## A one-entry load witness remains live until response and retirement close
+
+- Symptom: a differential workload placed a second owned-address candidate
+  after the first load's WB event but before its response marker, triggering
+  `Raveil Rocket witness live-token mismatch`.
+- Cause: the observer intentionally retains a load token until both matching
+  response and WB have appeared. One register entry cannot represent a new
+  candidate during that interval.
+- Prevention: bounded single-token workloads must create a true dependency on
+  the prior load value before the next candidate. Supporting overlap requires a
+  separately specified multi-entry observer, not silent token replacement.
+- Detection: retain the fail-closed assertion and test response/WB ordering and
+  overlapping candidate cases before broadening the diagnostic claim.
+- Evidence: T-0042 exact Rocket RTL assertion, ADR-0045 lifecycle rules, the
+  pinned Rocket witness patch, and `docs/log/2026-08-13.md`.
+- State: the bounded negative is serialized by a data dependency. Multi-live-
+  token observation remains open and is not claimed.
+
+## Branch redirect stimuli depend on pinned fetch and predictor history
+
+- Symptom: adding initialization, moving the branch PC, using `jalr`, or
+  self-training a conditional changed the negative from an accepted wrong-path
+  request to pre-request suppression.
+- Cause: whether the younger store reaches EX when the older redirect resolves
+  depends on the exact pinned fetch/predictor history and intervening DCache
+  state; ISA control flow alone does not fix that microarchitectural timing.
+- Prevention: verify the exact emitted branch/store PCs and redirect
+  qualification in RTL, and retain the stimulus only when the accepted request
+  itself appears. Do not infer a request from assembly layout.
+- Detection: the verifier requires exact `allocate/request/kill`, adjacent PCs,
+  accepted request, branch/taken/direction-misprediction, and no store retire.
+- Evidence: T-0042 rejected workload variants and the final exact Rocket trace.
+- State: corrected for one pinned workload; no predictor behavior or
+  performance generalization is made.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

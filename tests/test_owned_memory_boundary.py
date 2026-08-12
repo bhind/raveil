@@ -106,6 +106,18 @@ ROCKET_REQUEST_RETIRE_VERIFIER = (
 ROCKET_REQUEST_RETIRE_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-rocket-request-retire-witness.sh"
 )
+ROCKET_REDIRECT_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_rocket_redirect_negative.S"
+)
+ROCKET_REDIRECT_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_rocket_redirect_negative.py"
+)
+ROCKET_REDIRECT_RUNNER = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "run-owned-rocket-postrequest-redirect-negative.sh"
+)
 ROCKET_MEMORY_WORKLOAD = (
     ROOT / "hardware" / "chisel" / "owned_memory_cpu_smoke.S"
 )
@@ -411,7 +423,7 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("RAVEIL_OWNED_CPU_MODE=rocket-request-retire", runner)
         self.assertIn("t-0042-rocket-request-retire-witness.patch", shared_runner)
         self.assertIn("0435dce882f4ad37", shared_runner)
-        self.assertIn("01dfb22c486fa222", shared_runner)
+        self.assertIn("29a1032a10aeb744", shared_runner)
         self.assertIn("timeout --foreground 180", shared_runner)
         self.assertIn('2>&1 | tee "$witness_log"', shared_runner)
         self.assertIn("cache initialization raced another invocation", shared_runner)
@@ -446,6 +458,82 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                     [
                         "python3",
                         str(ROCKET_REQUEST_RETIRE_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_rocket_postrequest_redirect_probe_is_bounded_and_non_claiming(self) -> None:
+        patch = ROCKET_REQUEST_RETIRE_PATCH.read_text(encoding="utf-8")
+        workload = ROCKET_REDIRECT_WORKLOAD.read_text(encoding="utf-8")
+        verifier = ROCKET_REDIRECT_VERIFIER.read_text(encoding="utf-8")
+        runner = ROCKET_REDIRECT_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("when(take_pc_mem)", patch)
+        self.assertIn("event=kill", patch)
+        self.assertIn("direction_misprediction=%d", patch)
+        self.assertIn("promotion=blocked", patch)
+        self.assertLess(workload.index("lw      s2, 0(s0)"), workload.index("beq     t2, t2"))
+        self.assertIn("xor     t3, s2, s2", workload)
+        self.assertLess(workload.index("beq     t2, t2"), workload.index("sw      t0, 0(s0)"))
+        self.assertLess(workload.index("sw      t0, 0(s0)"), workload.index("lw      t1, 0(s0)"))
+        self.assertIn("bne     t1, s2, fail", workload)
+        self.assertIn(".fill 3, 4, 0", workload)
+        self.assertIn("before_value == MAGIC", verifier)
+        self.assertIn("before_value != after_value", verifier)
+        self.assertIn("wrong_path_core_requests=1", verifier)
+        self.assertIn("wrong_path_retirements=0", verifier)
+        self.assertIn("before_after_equal=1", verifier)
+        self.assertIn("pre_request_kill=not-run", verifier)
+        self.assertIn("dcache_s1_kill_correlation=not-run", verifier)
+        self.assertIn("a_d_correlation=not-run", verifier)
+        self.assertIn("semantic_initiator=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertNotEqual(ROCKET_REDIRECT_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=rocket-postrequest-redirect", runner)
+        self.assertIn("rocket-postrequest-redirect:RaveilOwnedRocketConfig", shared_runner)
+        self.assertIn('"$rocket_witness_patch" "$boom_hook_patch"', shared_runner)
+        self.assertIn("29a1032a10aeb744", shared_runner)
+        self.assertIn("source_sha256=%s", shared_runner)
+
+    def test_rocket_redirect_verifier_rejects_lifecycle_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    1 pc=0x80000008 address=0x08000100 store=0 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    1 attempt=1 pc=0x80000008 address=0x08000100 store=0 tag=0x12",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch= 1 sequence=    1 pc=0x80000008 store=0 wb_valid=1 store_wb_predicate=0",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch= 1 sequence=    1 tag=0x12 store=0 response_valid=1 response_has_data=1",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    2 pc=0x80000020 address=0x08000100 store=1 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    2 attempt=1 pc=0x80000020 address=0x08000100 store=1 tag=0x00",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=kill epoch= 1 sequence=    2 branch_pc=0x8000001c pc=0x80000020 store=1 reason=mem-redirect request_accepted=1 branch=1 taken=1 direction_misprediction=1 promotion=blocked",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    3 pc=0x80000024 address=0x08000100 store=0 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    3 attempt=1 pc=0x80000024 address=0x08000100 store=0 tag=0x0c",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch= 1 sequence=    3 pc=0x80000024 store=0 wb_valid=1 store_wb_predicate=0",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch= 1 sequence=    3 tag=0x0c store=0 response_valid=1 response_has_data=1",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "redirect.log"
+            signature = Path(tmp) / "redirect.signature"
+            signature.write_text("00000001\nc5686cac\nc5686cac\n", encoding="ascii")
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("request_accepted=1", "request_accepted=0"), 1),
+                (records.replace("direction_misprediction=1", "direction_misprediction=0"), 1),
+                (records.replace("promotion=blocked", "promotion=allowed"), 1),
+                (records.replace("tag=0x0c store=0 response", "tag=0x0d store=0 response"), 1),
+                (records.replace("tag=0x12 store=0 response", "tag=0x13 store=0 response"), 1),
+                (records + records.splitlines()[6] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(ROCKET_REDIRECT_VERIFIER),
                         str(log),
                         str(signature),
                     ],

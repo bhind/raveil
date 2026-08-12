@@ -546,6 +546,25 @@ Rocket negative lifecycle suite and BOOM probe remain unimplemented. No token
 may enter the owned common bridge on this evidence, and it establishes no
 semantic initiator, resource match, matched comparison, or performance result.
 
+Run the bounded pinned Rocket redirect negative with:
+
+```sh
+./hardware/chisel/run-owned-rocket-postrequest-redirect-negative.sh
+```
+
+The workload first completes one owned-address load and consumes its value to
+keep the diagnostic's single live entry closed before the probe. An
+always-taken branch immediately precedes one wrong-path store. The store request
+is accepted in the same cycle that the older branch asserts the MEM redirect;
+the hook emits `allocate/request/kill`, requires branch, taken, and direction-
+misprediction qualification, records `promotion=blocked`, and closes sequence
+2. A following load is sequence 3 and must independently reach response plus
+WB. The two loads observe the same non-magic value (`0xc5686cac` in the recorded
+run), and the verifier requires exactly eleven records while rejecting mutation
+or duplication. This is not multi-live-token support, pre-request kill coverage,
+a DCache `s1_kill` or A/D correlation, proof of general side-effect absence,
+semantic initiator attribution, resource matching, or a performance result.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

@@ -13,6 +13,8 @@ workload="$repo_root/hardware/chisel/owned_memory_cpu_smoke.S"
 verifier="$repo_root/hardware/chisel/verify_owned_memory_cpu_signature.py"
 rocket_witness_workload="$repo_root/hardware/chisel/owned_memory_rocket_request_retire.S"
 rocket_witness_verifier="$repo_root/hardware/chisel/verify_owned_rocket_request_retire.py"
+rocket_redirect_workload="$repo_root/hardware/chisel/owned_memory_rocket_redirect_negative.S"
+rocket_redirect_verifier="$repo_root/hardware/chisel/verify_owned_rocket_redirect_negative.py"
 loader_probe="$repo_root/hardware/chisel/owned_memory_loader_probe.S"
 loader_probe_linker="$repo_root/hardware/chisel/owned_memory_loader_probe.ld"
 loader_probe_verifier="$repo_root/hardware/chisel/verify_owned_memory_loader_probe.py"
@@ -41,6 +43,7 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
     debug-sba:RaveilOwnedDebugSBASmallBoomConfig:chipyard.raveil.RaveilOwnedDebugSBASmallBoomConfig:boom:raveil-chipyard-owned-debug-sba-boom-sim-build-v1) ;;
     rocket-request-retire:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-request-retire-build-v1) ;;
+    rocket-postrequest-redirect:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-request-retire-build-v1) ;;
     *)
         echo 'error: unsupported owned CPU smoke configuration' >&2
         exit 1
@@ -48,7 +51,7 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
 esac
 
 for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
-    "$rocket_witness_workload" "$rocket_witness_verifier" \
+    "$rocket_witness_workload" "$rocket_witness_verifier" "$rocket_redirect_workload" "$rocket_redirect_verifier" \
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
     "$linker" "$runner" "$dockerfile"; do
@@ -80,7 +83,7 @@ boom_hook_patch_sha256=$(shasum -a 256 "$boom_hook_patch" | awk '{print $1}')
 xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 input_sha256=$(
     shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
-        "$rocket_witness_workload" "$rocket_witness_verifier" \
+        "$rocket_witness_workload" "$rocket_witness_verifier" "$rocket_redirect_workload" "$rocket_redirect_verifier" \
         "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
         "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
         "$linker" "$runner" "$dockerfile" |
@@ -90,7 +93,7 @@ input_sha256=$(
 )
 source_sha256=$(
     {
-        shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" \
+        shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$boom_hook_patch" \
             "$xbar_request_patch" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform"
@@ -139,7 +142,9 @@ verilator --version | grep -q "Verilator 5.020"
 riscv64-unknown-elf-gcc --version | grep -q "12.2.0"
 
 cache_key=$RAVEIL_INPUT_SHA256
-if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ]; then
+if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ] ||
+   [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ] ||
+   [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ]; then
   cache_key=$RAVEIL_SOURCE_SHA256
 fi
 build_root=/build/$cache_key
@@ -166,7 +171,8 @@ if [ ! -e "$build_root" ]; then
     /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch
   git -C "$build_root/chipyard/generators/rocket-chip" apply --unidiff-zero \
     /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch
-  if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
+  if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ] ||
+     [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ]; then
     git -C "$build_root/chipyard/generators/rocket-chip" apply --check \
       /repo/hardware/chisel/chipyard-patches/t-0042-rocket-request-retire-witness.patch
     git -C "$build_root/chipyard/generators/rocket-chip" apply \
@@ -181,8 +187,9 @@ if [ ! -e "$build_root" ]; then
   git -C "$build_root/chipyard/generators/rocket-chip" apply --unidiff-zero \
     /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch
   [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
-  if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
-    [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "01dfb22c486fa222e09dc346a339590db78797bd05e7c0e9fbc56243bfed2318" ]
+  if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ] ||
+     [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ]; then
+    [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "29a1032a10aeb744853fdf50b0bfa962415461d253e7a74152852b020539b7a2" ]
   else
     [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "0435dce882f4ad37ee566218fcd8b7d6f9e088c50448677d6eb6efac7e9029ac" ]
   fi
@@ -200,8 +207,9 @@ fi
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala" | awk "{print \$1}")" = "$RAVEIL_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala" | awk "{print \$1}")" = "$RAVEIL_ORIGIN_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
-if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
-  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "01dfb22c486fa222e09dc346a339590db78797bd05e7c0e9fbc56243bfed2318" ]
+if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ] ||
+   [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ]; then
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "29a1032a10aeb744853fdf50b0bfa962415461d253e7a74152852b020539b7a2" ]
 else
   [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "0435dce882f4ad37ee566218fcd8b7d6f9e088c50448677d6eb6efac7e9029ac" ]
 fi
@@ -271,6 +279,27 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
     "$witness_log" "$witness_signature"
   printf "OWNED-ROCKET-REQUEST-RETIRE-HOST-V1 status=OK cpu=rocket config=%s input_sha256=%s graph_sha256=%s event_source=rocket-pinned cpu_execution=rtl-simulation d_token_correlation=not-run semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
     "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" \
+    "$(sha256sum "$graph" | cut -c1-64)"
+  exit 0
+fi
+
+if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ]; then
+  riscv64-unknown-elf-gcc \
+    -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+    -nostdlib -nostartfiles -static -Wl,--no-relax \
+    -T /repo/hardware/chisel/boom_functional_smoke.ld \
+    /repo/hardware/chisel/owned_memory_rocket_redirect_negative.S \
+    -o "$build_root/owned_memory_rocket_redirect_negative.elf"
+  redirect_signature="$build_root/owned_memory_rocket_redirect_negative.signature"
+  redirect_log="$build_root/owned_memory_rocket_redirect_negative.log"
+  rm -f "$redirect_signature" "$redirect_log"
+  timeout --foreground 180 "$sim" +permissive +verbose \
+    +signature="$redirect_signature" +signature-granularity=4 +permissive-off \
+    "$build_root/owned_memory_rocket_redirect_negative.elf" 2>&1 | tee "$redirect_log"
+  python3 /repo/hardware/chisel/verify_owned_rocket_redirect_negative.py \
+    "$redirect_log" "$redirect_signature"
+  printf "OWNED-ROCKET-POSTREQUEST-REDIRECT-HOST-V1 status=OK cpu=rocket config=%s input_sha256=%s source_sha256=%s graph_sha256=%s event_source=rocket-pinned cpu_execution=rtl-simulation postrequest_redirect=covered pre_request_kill=not-run dcache_s1_kill_correlation=not-run a_d_correlation=not-run semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+    "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" "$RAVEIL_SOURCE_SHA256" \
     "$(sha256sum "$graph" | cut -c1-64)"
   exit 0
 fi

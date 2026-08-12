@@ -340,6 +340,19 @@ TileLink. It does not cover replay, kill, redirect, exception, reset epoch,
 store authorization, owned-manager D completion, or semantic initiator
 identity, and therefore cannot feed the common bridge or establish matched
 resources.
+The same pinned hook now handles one narrower redirect outcome: when the exact
+owned-address request is accepted in EX while an older taken branch asserts
+`take_pc_mem`, it emits an explicit killed-token event, blocks promotion, and
+advances the diagnostic sequence. The bounded workload completes a load before
+the probe and another after it; an explicit dependency prevents the one-entry
+observer from accepting the probe while the first load remains open. Both
+loads observe the same non-magic value in the exact run. The observer retains a
+load until both WB and its matching response have appeared, and rejects an
+overlapping candidate rather than silently reassigning the live entry. This
+establishes only the observed same-cycle post-request bookkeeping and bounded
+differential readback; it does not establish multi-token support, pre-request
+suppression, later-cycle cancellation, DCache `s1_kill`, TileLink A/D fate, or
+general absence of a side effect.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the
