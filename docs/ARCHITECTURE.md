@@ -216,6 +216,19 @@ CPU LSU, cache, upstream buffering/arbitration, initiator identity, lifecycle
 phase, and Graph storage. Observing one cycle there therefore cannot promote
 the inherited TLRAM prototype to a fixed-latency common architecture.
 
+ADR-0043 introduces the next, owned boundary below future CPU and Graph
+adapters. The first `OwnedFixedLatencyScratchpad` is a single-client,
+maximum-one-outstanding request/response module with explicit operation,
+address, data, byte mask, initiator, lifecycle phase, error, backpressure, and
+transaction accounting. It makes a response available one module-local cycle
+after acceptance and holds it until consumption. The emitted RTL and functional
+Verilator harness assert this local protocol only. The static Graph region and
+CPU controls are not connected yet, so this module remains an unmatched adapter
+target rather than the RFC-0005 common memory implementation. The next Graph
+adapter uses disjoint read-only input and private-output bank instances; later
+CPU adapters must prove equivalent ports, arbitration, buffering, and lifecycle
+accounting before any resource-match promotion.
+
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in
 GNU/Linux userspace, provided Raveil-owned admission, semantic, evidence, and

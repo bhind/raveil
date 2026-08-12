@@ -292,6 +292,28 @@ source revision, lock identity, tracked source cleanliness, and tool versions,
 and disables container networking; T-0044 still requires a separately frozen
 measurement environment.
 
+Exercise the first Raveil-owned local scratchpad transaction boundary with:
+
+```sh
+./hardware/chisel/run-owned-fixed-latency-scratchpad-rtl.sh
+```
+
+This is a standalone Graph/CPU adapter target, not yet either adapter. It has
+one decoupled request stream, one decoupled response stream, at most one
+outstanding transaction, explicit read/write plus byte mask, and bounded
+initiator/lifecycle-phase attribution. An accepted request makes exactly one
+response available on the following module-local cycle. A held response keeps
+all fields stable until consumed. The assert-enabled Verilator harness covers
+reads, writes, partial writes, request and response backpressure, deterministic
+range rejection, attribution, and accepted/completed/pending accounting.
+
+The successful marker deliberately reports
+`fixed_end_to_end_latency_claim=0`, `resource_match_verified=0`, and
+`matched_comparison_ready=0`. The module has not yet been connected to the
+static Graph region or either CPU, and its local one-cycle protocol is not a
+CPU/Graph latency, throughput, energy, area, FPGA, silicon, or performance
+result.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

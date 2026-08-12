@@ -392,6 +392,25 @@ labelled unknown.
 - State: corrected in the observer wrapper; no validated normal simulator was
   overwritten.
 
+## Endpoint latency without attribution is not a common memory contract
+
+- Symptom: the shared TLRAM observer reported 296 matched one-cycle read beats
+  in each CPU mode, but no writes and no distinction among CPU execution,
+  cache activity, FESVR staging, or signature recovery.
+- Cause: the passive bind was intentionally below the fragmenter at the memory
+  endpoint. That gives correct beat correspondence but loses request origin and
+  lifecycle context, while the Graph RTL does not use that path at all.
+- Prevention: define an owned request/response boundary with explicit
+  initiator, lifecycle phase, read/write, byte mask, error, backpressure, and
+  accepted/completed/pending accounting before adapting either machine.
+- Detection: reject resource matching when any initiator/phase is ambiguous,
+  either operation direction is unexercised, adapters bypass the owned
+  interface, or only endpoint `minLatency`/observed latency is available.
+- Evidence: T-0042 TLRAM observer, ADR-0042, ADR-0043, and the standalone
+  `OwnedFixedLatencyScratchpad` assert-enabled Verilator harness.
+- State: local owned protocol verified; Graph and CPU adapters remain open and
+  fixed end-to-end latency is not claimed.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

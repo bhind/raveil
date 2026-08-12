@@ -44,7 +44,11 @@ resolves it.
   The passive TLRAM observer found one-cycle bank-local intervals for all 296
   read beats in each pinned control run, but no write beat and no initiator or
   lifecycle attribution. Which owned boundary can expose those missing facts
-  without altering the compared machines?
+  without altering the compared machines? ADR-0043 answers only the local
+  protocol half with an owned one-outstanding attributed scratchpad target.
+  The unresolved part is how the Graph and each pinned CPU adapter reach this
+  boundary with provably equal ports, buffering, arbitration, staging, and
+  phase accounting without silently changing the machines under comparison.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

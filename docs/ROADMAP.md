@@ -52,8 +52,12 @@ The corrected critical path is:
    unverified. A passive post-fragmenter observer now confirms matched A/D
    source correspondence and one-cycle bank-local intervals for the read beats
    seen in one pinned run, while also exposing that no write beat and no
-   initiator/phase attribution are available there. An owned common CPU/Graph
-   interface and Graph adapter remain before T-0042 closes; none of these
+   initiator/phase attribution are available there. ADR-0043 now implements
+   and verifies the first standalone owned local transaction target with
+   read/write, backpressure, attribution, accounting, and a one-cycle
+   module-local response property. It is not yet connected to Graph or CPU, so
+   an owned common CPU/Graph interface and Graph adapter remain before T-0042
+   closes; none of these
    functional smokes or endpoint diagnostics is a performance or structural-
    ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

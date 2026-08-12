@@ -361,6 +361,18 @@ functional diagnostics only. They do not prove fixed end-to-end CPU latency,
 exercise a comparable write path, match the Graph storage, or change either
 resource matching or comparison readiness from false.
 
+ADR-0043 now establishes a Raveil-owned local scratchpad transaction boundary
+before either side is adapted. `OwnedFixedLatencyScratchpad` has one request
+and response stream, at most one outstanding transaction, explicit read/write,
+byte mask, initiator and lifecycle phase, deterministic range errors,
+backpressure, and accepted/completed/stall/pending counters. Its assert-enabled
+emitted RTL passed a standalone Verilator harness covering reads, writes,
+partial writes, request/response stalls, attribution, and rejection. A response
+is available one module-local cycle after acceptance and remains stable until
+consumed. This is functional RTL protocol evidence only: the existing static
+Graph region and CPU controls are not connected, fixed end-to-end latency is
+not claimed, and resource matching plus comparison readiness remain false.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

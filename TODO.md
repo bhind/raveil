@@ -454,7 +454,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   from cache refill or FESVR recovery phases. Next replace this run-local
   diagnostic with an owned CPU/Graph request adapter that exposes initiator,
   phase, read/write coverage, buffering, arbitration, ports, and invariant
-  latency under one interface before closing T-0042.
+  latency under one interface before closing T-0042. ADR-0043 now adds the
+  first standalone owned target: an assert-enabled,
+  maximum-one-outstanding scratchpad request/response module whose local
+  response is available one cycle after acceptance and whose initiator, phase,
+  read/write, byte-mask, backpressure, range-error, and transaction-accounting
+  paths pass Verilator. It is not connected to Graph or CPU and keeps fixed
+  end-to-end latency, resource matching, comparison readiness, and performance
+  claims false. Next replace the static Graph region's private register-vector
+  access with disjoint input/private-output instances of this contract, then
+  build and verify the pinned CPU adapters under the same interface.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
