@@ -494,7 +494,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   debug activity and proves where semantic initiator metadata is assigned,
   then design the matched resource boundary. The deployed CPU overlay is not
   yet the ADR-0043 common-contract adapter and does not provide the matched
-  resource boundary.
+  resource boundary. Direct protocol V3 now supplies a real negative classifier
+  control: expected range `[1,3)` completes 3/3 while deliberate boundary
+  sources 0 and 3 complete as unexpected 4/4, and same-source reuse is blocked
+  while D is pending. This remains harness-range-only evidence. Investigate the
+  shared next candidate at each CPU's DCache output before the tile master Xbar:
+  BOOM has `dCacheTap`, while Rocket needs an explicit attach point. Require
+  fail-closed separation of loader/FESVR/debug traffic and A/D sideband
+  retention on both cores before adopting durable owned attribution. Do not
+  promote a final config-dependent TileLink source ID, or DCache origin alone,
+  into target-ELF semantic identity.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

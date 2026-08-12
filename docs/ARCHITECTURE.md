@@ -245,6 +245,12 @@ end-to-end ordering, resource matching, and all measurement remain separate
 follow-ups. It also verifies manager-local expected/unexpected source-class
 conservation and preservation of the A-accepted software phase through D
 completion under backpressure.
+Protocol V3 deliberately makes the classifier's negative path executable. Its
+raw client has source IDs `[0,4)`, while the expected range is `[1,3)`; sources
+0 and 3 therefore exercise the two boundaries and conserve unexpected
+accepted/completed counts at 4/4, while expected traffic conserves at 3/3.
+Re-presenting the pending source under D backpressure is rejected. These are
+manager-harness invariants, not observations of either CPU or FESVR.
 
 The first CPU execution path is a shared bare-metal functional smoke with thin
 Rocket and BOOM entrypoints. Identical RV64 load/store and `fence iorw,iorw`
@@ -277,6 +283,16 @@ that assigns trustworthy CPU/loader/debug initiator identity. The standalone
 harness supplies that metadata directly, so its successful correlation is not
 semantic CPU attribution and does not alter ADR-0044's unmatched deployed
 manager or establish equal CPU/Graph resources.
+
+Attribution therefore has two distinct possible evidence layers. A final
+manager-side TileLink source range is a generated config/Xbar/fragmenter client
+class only. A future DCache-local sideband, inserted before the tile master
+crossbar, could instead establish structural DCache origin and exclude the
+separate SimTSI/FESVR master without relying on final source numbering. BOOM
+already exposes a DCache tap, while the pinned Rocket wiring needs an explicit
+attach point. Neither layer supplies an instruction PC or target-ELF semantic
+intent; the second remains only a design candidate until a later decision,
+implementation, and fail-closed loader/debug negative tests.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

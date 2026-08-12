@@ -75,8 +75,8 @@ class RaveilRawTLClientModule(outer: RaveilRawTLClient)
 class RaveilOwnedTLProtocolHarness(implicit p: Parameters) extends LazyModule {
   val client = LazyModule(new RaveilRawTLClient)
   val memory = LazyModule(new RaveilOwnedTLMemory(RaveilOwnedMemoryParams(
-    expectedClientSourceStart = 0,
-    expectedClientSourceEnd = 4
+    expectedClientSourceStart = 1,
+    expectedClientSourceEnd = 3
   )))
   memory.node := client.node
 

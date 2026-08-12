@@ -67,7 +67,13 @@ resolves it.
   its harness supplies the metadata and neither CPU is connected. How should a
   CPU-side boundary assign durable semantic initiator attribution, separate
   loader/FESVR/debug activity, and fail closed beyond topology-dependent source
-  IDs? What later topology makes both CPU
+  IDs? Pinned-source inspection finds a common conceptual point immediately
+  after each DCache and before the shared tile master Xbar. BOOM exposes a
+  `dCacheTap`; Rocket needs a new explicit attach point. How should one owned
+  sideband be retained through A/D response correlation on both, how should
+  non-DCache loader/debug traffic fail closed, and what additional witness is
+  required to distinguish DCache origin from a particular target-ELF
+  instruction? What later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.

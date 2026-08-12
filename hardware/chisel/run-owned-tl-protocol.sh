@@ -3,13 +3,15 @@ set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 chipyard="$repo_root/external/chipyard"
+runner="$repo_root/hardware/chisel/run-owned-tl-protocol.sh"
 memory_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala"
 harness_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLProtocolHarness.scala"
 driver="$repo_root/hardware/chisel/owned_tl_protocol_sim_main.cpp"
+dockerfile="$repo_root/hardware/chisel/Dockerfile.owned-tl"
 image=raveil-owned-tl-protocol:v1
 platform=linux/amd64
 
-for input in "$memory_overlay" "$harness_overlay" "$driver"; do
+for input in "$runner" "$memory_overlay" "$harness_overlay" "$driver" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned TL protocol input is missing: $input" >&2
         exit 1
@@ -31,7 +33,7 @@ command -v docker >/dev/null 2>&1 || {
 }
 
 input_sha256=$(
-    shasum -a 256 "$memory_overlay" "$harness_overlay" "$driver" |
+    shasum -a 256 "$runner" "$memory_overlay" "$harness_overlay" "$driver" "$dockerfile" |
         awk '{print $1}' |
         shasum -a 256 |
         awk '{print $1}'
@@ -45,12 +47,22 @@ overlay_sha256=$(
 
 docker build \
     --platform "$platform" \
-    --file "$repo_root/hardware/chisel/Dockerfile.owned-tl" \
+    --provenance=false \
+    --file "$dockerfile" \
     --tag "$image" \
     "$repo_root"
+image_id=$(docker image inspect --format '{{.Id}}' "$image")
+chipyard_revision=$(git -C "$chipyard" rev-parse HEAD)
+assembly_key=$(
+    printf '%s\n%s\n%s\n' \
+        "$overlay_sha256" "$chipyard_revision" "$image_id" |
+        shasum -a 256 |
+        awk '{print $1}'
+)
 
-printf 'OWNED-TL-PROTOCOL-HOST-V1 image=%s platform=%s input_sha256=%s overlay_sha256=%s source_copy=ephemeral assembly_cache=content-addressed cpu_execution=not-run resource_match_verified=0 evidence=rtl-simulation-functional performance=not-measured\n' \
-    "$image" "$platform" "$input_sha256" "$overlay_sha256"
+printf 'OWNED-TL-PROTOCOL-HOST-V2 image=%s image_id=%s platform=%s input_sha256=%s overlay_sha256=%s chipyard_revision=%s assembly_key=%s source_copy=ephemeral assembly_cache=content-addressed-verified cpu_execution=not-run semantic_initiator=not-proven resource_match_verified=0 evidence=rtl-simulation-functional performance=not-measured\n' \
+    "$image" "$image_id" "$platform" "$input_sha256" "$overlay_sha256" \
+    "$chipyard_revision" "$assembly_key"
 
 docker run --rm \
     --platform "$platform" \
@@ -63,7 +75,7 @@ docker run --rm \
     --mount type=volume,source=raveil-chipyard-ivy-cache-v1,target=/root/.ivy2 \
     --mount type=volume,source=raveil-chipyard-sbt-global-v1,target=/root/.sbt \
     --mount type=volume,source=raveil-owned-tl-assembly-v1,target=/assembly-cache \
-    --env "RAVEIL_OVERLAY_SHA256=$overlay_sha256" \
+    --env "RAVEIL_ASSEMBLY_KEY=$assembly_key" \
     "$image" \
     sh -c 'set -eu
 cp -a /source /work/chipyard
@@ -72,15 +84,24 @@ install -D -m 0444 /overlay/RaveilOwnedTLMemory.scala \
   generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala
 install -D -m 0444 /overlay/RaveilOwnedTLProtocolHarness.scala \
   generators/chipyard/src/main/scala/raveil/RaveilOwnedTLProtocolHarness.scala
-assembly_cache=/assembly-cache/$RAVEIL_OVERLAY_SHA256.jar
-if [ ! -s "$assembly_cache" ]; then
+assembly_dir=/assembly-cache/$RAVEIL_ASSEMBLY_KEY
+assembly=$assembly_dir/chipyard-assembly.jar
+assembly_checksum=$assembly_dir/chipyard-assembly.jar.sha256
+if [ -e "$assembly" ] || [ -e "$assembly_checksum" ]; then
+  [ -s "$assembly" ] && [ -s "$assembly_checksum" ] || {
+    echo "error: cached assembly is incomplete" >&2
+    exit 1
+  }
+  (cd "$assembly_dir" && sha256sum -c chipyard-assembly.jar.sha256)
+else
   java -Xmx6G -Dsbt.task.cpus=2 -jar scripts/sbt-launch.jar "project chipyard" assembly
   built_assembly=$(find generators/chipyard/target -type f -name "*assembly*.jar" -print | head -n 1)
   [ -n "$built_assembly" ] || { echo "error: chipyard assembly jar was not produced" >&2; exit 1; }
-  install -m 0444 "$built_assembly" "$assembly_cache"
+  mkdir "$assembly_dir"
+  install -m 0444 "$built_assembly" "$assembly"
+  (cd "$assembly_dir" && sha256sum chipyard-assembly.jar > chipyard-assembly.jar.sha256)
 fi
-assembly=$assembly_cache
-[ -n "$assembly" ] || { echo "error: chipyard assembly jar was not produced" >&2; exit 1; }
+[ -s "$assembly" ] || { echo "error: chipyard assembly jar was not produced" >&2; exit 1; }
 output=/work/generated-owned-tl-protocol
 mkdir -p "$output"
 java -Xmx8G -cp "$assembly" chipyard.Generator \

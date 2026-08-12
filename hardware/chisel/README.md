@@ -355,10 +355,21 @@ full and partial writes, masks `0x5` and `0xa`, invalid phase denial, response
 backpressure and metadata stability, maximum-one-outstanding admission, reset
 phase, aggregate counters, expected/unexpected source-class conservation, and
 preservation of accepted source/phase through D completion. Its content-addressed
-assembly cache is a functional-development optimization, not immutable
+assembly cache is keyed by the overlay, pinned Chipyard revision, and built
+image identity and verifies the cached JAR checksum before reuse. It remains a
+functional-development optimization, not immutable
 measurement evidence. The raw client bypasses Rocket and BOOM; success remains
 `rtl-simulation-functional`, with CPU execution not run, initiator attribution
 unverified, resource matching false, and performance not measured.
+
+Protocol V3 intentionally narrows the expected classifier range to `[1,3)`
+inside the client's legal `[0,4)` range. The 26-transaction run reports
+expected accepted/completed 3/3 and unexpected accepted/completed 4/4 for
+deliberate boundary sources 0 and 3. It also re-presents the same source while a
+D response is held and verifies that the one-outstanding manager refuses it.
+This is negative source-class and conservation evidence for the raw harness,
+not proof of CPU execution, DCache origin, loader/debug exclusion, or semantic
+initiator identity.
 
 Run the standalone TileLink-to-owned-contract bridge with:
 
@@ -415,6 +426,15 @@ target ELF's semantic initiator. The phase is correlated from A acceptance to
 D completion but remains a software-declared adapter label rather than
 ADR-0043 owned initiator/phase metadata. Resources are unmatched, OoO is not
 isolated, and performance is not measured.
+
+Pinned Rocket/BOOM source inspection places the narrowest common conceptual
+origin hook after the DCache and before the tile master Xbar. BOOM has an
+existing `dCacheTap`; Rocket's `HasHellaCache` wiring needs an explicit attach
+point. This is a candidate only. If implemented it could distinguish structural
+DCache traffic from the separate SimTSI/FESVR master, but it would still not
+prove which ELF instruction or PC semantically initiated a request. Durable
+owned attribution requires a later decision plus functional and negative
+loader/debug evidence.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program

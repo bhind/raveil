@@ -69,9 +69,11 @@ static Response transact(VRaveilOwnedTLProtocolHarness& dut,
       dut.io_responseCorrupt,
   };
   for (int cycle = 0; cycle < hold_response_cycles; ++cycle) {
+    dut.io_requestSource = source;
     dut.io_requestValid = 1;
     dut.eval();
-    if (dut.io_requestReady) fail("second request accepted while response pending");
+    if (dut.io_requestReady)
+      fail("same-source request accepted while response pending");
     dut.io_requestValid = 0;
     dut.eval();
     if (!dut.io_responseValid || dut.io_responseOpcode != first.opcode ||
@@ -167,17 +169,17 @@ int main(int argc, char** argv) {
   if (expect_data(transact(dut, get, control_base + 0x20, 0, 0xf, 2, 0), 2, 0) != 1)
     fail("execution-phase read counter mismatch");
 
-  if (expect_data(transact(dut, get, control_base + 0x50, 0, 0xf, 2, 0), 2, 0) != 0)
+  if (expect_data(transact(dut, get, control_base + 0x50, 0, 0xf, 2, 0), 2, 0) != 1)
     fail("expected source start mismatch");
-  if (expect_data(transact(dut, get, control_base + 0x54, 0, 0xf, 2, 0), 2, 0) != 4)
+  if (expect_data(transact(dut, get, control_base + 0x54, 0, 0xf, 2, 0), 2, 0) != 3)
     fail("expected source end mismatch");
-  if (expect_data(transact(dut, get, control_base + 0x58, 0, 0xf, 2, 0), 2, 0) != 7)
+  if (expect_data(transact(dut, get, control_base + 0x58, 0, 0xf, 2, 0), 2, 0) != 3)
     fail("expected-source accepted counter mismatch");
-  if (expect_data(transact(dut, get, control_base + 0x5c, 0, 0xf, 2, 0), 2, 0) != 7)
+  if (expect_data(transact(dut, get, control_base + 0x5c, 0, 0xf, 2, 0), 2, 0) != 3)
     fail("expected-source completed counter mismatch");
-  if (expect_data(transact(dut, get, control_base + 0x60, 0, 0xf, 2, 0), 2, 0) != 0)
+  if (expect_data(transact(dut, get, control_base + 0x60, 0, 0xf, 2, 0), 2, 0) != 4)
     fail("unexpected-source accepted counter mismatch");
-  if (expect_data(transact(dut, get, control_base + 0x64, 0, 0xf, 2, 0), 2, 0) != 0)
+  if (expect_data(transact(dut, get, control_base + 0x64, 0, 0xf, 2, 0), 2, 0) != 4)
     fail("unexpected-source completed counter mismatch");
   if (expect_data(transact(dut, get, control_base + 0x68, 0, 0xf, 2, 0), 2, 0) != 3)
     fail("last accepted source mismatch");
@@ -188,6 +190,6 @@ int main(int argc, char** argv) {
   if (expect_data(transact(dut, get, control_base + 0x74, 0, 0xf, 2, 0), 2, 0) != 2)
     fail("last completed phase mismatch");
 
-  std::printf("OWNED-TL-PROTOCOL-V2 status=OK transactions=26 put_full=1 put_partial=5 get=20 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data,execution-read,source-class,request-response-phase expected_source_accepted=7 expected_source_completed=7 unexpected_source_accepted=0 unexpected_source_completed=0 last_source=3 last_phase=2 cpu_execution=not-run source_client_class=harness-range-only semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
+  std::printf("OWNED-TL-PROTOCOL-V3 status=OK transactions=26 put_full=1 put_partial=5 get=20 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered same_source_reuse_blocking=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data,execution-read,source-class,request-response-phase source_classifier_range=1:3 unexpected_boundary_sources=0,3 expected_source_accepted=3 expected_source_completed=3 unexpected_source_accepted=4 unexpected_source_completed=4 last_source=3 last_phase=2 cpu_execution=not-run source_client_class=harness-range-only semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
   return 0;
 }

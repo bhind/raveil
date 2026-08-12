@@ -76,6 +76,13 @@ The corrected critical path is:
    initiator/phase handoff, backpressure, range denial, and 6/6 conservation.
    Its attribution is harness-supplied and neither CPU is connected, so it is
    a prerequisite rather than semantic initiator or resource-match proof.
+   Direct manager protocol V3 additionally separates a half-open expected
+   source range from deliberate lower/upper boundary sources with 3/3 versus
+   4/4 conservation and blocks same-source reuse while D is pending. This is a
+   harness-local negative classifier diagnostic. The next candidate boundary
+   is immediately after each DCache and before the shared tile master Xbar;
+   it remains unimplemented, and even a successful connection would prove
+   structural DCache origin rather than target-ELF semantic intent.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
