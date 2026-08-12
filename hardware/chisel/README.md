@@ -164,6 +164,27 @@ Rocket, BOOM, and its OoO-disabled diagnostic must eventually emit this owned
 schema through wrappers; no upstream implementation type is part of the
 contract. T-0042 does not close until those functional records exist.
 
+## Pinned BOOM control source
+
+ADR-0040 selects the BOOM control through Chipyard 1.11.0 rather than a moving
+checkout or unrelated prebuilt container:
+
+```sh
+./hardware/chisel/fetch-boom-reference.sh
+./hardware/chisel/verify-boom-reference.sh
+```
+
+The scripts fix Chipyard `ac58f38...bd43e1`, its BOOM gitlink
+`9459af0c...10847c`, `chipyard.SmallBoomConfig`, both upstream license hashes,
+and the exact source path for chicken CSR `0x7c1` bit 3. A successful check
+prints `BOOM-SOURCE-REFERENCE-V1` with `diagnostic=serialize-dispatch` and
+`structures=retained`.
+
+This is source verification only. The diagnostic waits for an empty ROB/LSU
+before dispatch but retains the OoO hardware, so it is not an in-order core or
+an area/energy ablation. BOOM RTL execution still needs an owned immutable
+Chipyard build path; an unofficial prebuilt image is not evidence authority.
+
 The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
 `LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the
 submodule license files for Chisel/CDE (Apache-2.0) and HardFloat

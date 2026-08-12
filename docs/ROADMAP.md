@@ -38,8 +38,9 @@ The corrected critical path is:
    Graph executor now matches an independent oracle and survives
    cancel/restart in Verilator. A strict common functional adapter now makes
    missing lifecycle accounting explicit and refuses a total. Pinned BOOM, the
-   same-core diagnostic, and Rocket/BOOM adapter records remain before T-0042
-   closes.
+   same-core diagnostic semantics and licenses are now source-verified through
+   ADR-0040. Immutable BOOM RTL execution and Rocket/BOOM adapter records remain
+   before T-0042 closes.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,

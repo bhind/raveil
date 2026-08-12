@@ -256,6 +256,21 @@ T-0042 remains open for pinned BOOM, its OoO-disabled diagnostic, and Rocket/
 BOOM functional records behind the same boundary; T-0044 remains the matched
 measurement task.
 
+ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
+`ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM
+`9459af0c1f6847f8411622dac770ac78fe10847c`; the initial configuration is
+`chipyard.SmallBoomConfig`. The ignored detached checkouts are clean, origin
+and parent gitlink checks pass, and BOOM's BSD-3-Clause plus SiFive Apache-2.0
+notice hashes are fixed in `boom-pin.env`.
+
+Source inspection verifies chicken CSR `0x7c1` mask `0x8`. Its bit-3
+`disableOOO` diagnostic makes dispatch wait for an empty ROB/LSU, but does not
+remove rename, ROB, issue, physical-register, or LSU structures. It is now
+named `boom-ooo-disabled-diagnostic`/`serialize-dispatch`, never an in-order or
+structurally stripped BOOM. `verify-boom-reference.sh` emits a successful
+source-verification marker. BOOM RTL has not yet elaborated or executed; no
+adapter record or comparison follows from the source pin.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

@@ -44,3 +44,4 @@ rewrite it.
 | [ADR-0037](ADR-0037-synthetic-showcase-keeps-cache-outside-command-authority.md) | Accepted | Synthetic showcase keeps derived-artifact cache outside command authority |
 | [ADR-0038](ADR-0038-rocket-reference-uses-a-locked-git-nix-boundary.md) | Accepted | Rocket reference uses a locked Git/Nix boundary |
 | [ADR-0039](ADR-0039-bounded-static-region-is-simulation-only.md) | Accepted | Bounded static Graph region is authorized only for repository-owned RTL simulation |
+| [ADR-0040](ADR-0040-boom-reference-is-a-pinned-control-not-a-candidate.md) | Accepted | BOOM is an exact pinned OoO control and its disable-OoO mode is a retained-structure diagnostic |

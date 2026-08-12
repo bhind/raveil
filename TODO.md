@@ -423,8 +423,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   types. The Graph record intentionally remains `accounting_complete=false`
   and has no total until installation, completion, validation, and publication
   phases are implemented. Keep T-0042 open for pinned BOOM, its same-core
-  diagnostic, and Rocket/BOOM records behind this boundary; do not turn the
-  1,536-cycle schedule assertion into a performance result.
+  diagnostic, and Rocket/BOOM records behind this boundary. ADR-0040 now fixes
+  Chipyard 1.11.0/BOOM `9459af0...10847c`, `SmallBoomConfig`, the retained-
+  structure serialize-dispatch diagnostic, and exact license hashes; source
+  verification passes, but BOOM RTL has not yet executed. Do not turn the
+  1,536-cycle schedule assertion or source pin into a performance result.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
