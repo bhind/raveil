@@ -18,26 +18,24 @@ resolves it.
 - ADR-0023 fixes single-hart metadata-version finalization and cancel-wins
   behavior. How should byte-shadow storage, cache/DMA ordering, verifier
   identity, reset recovery, and persistent multi-object atomicity work?
-- Which dependencies and alias facts can admission prove without making compile
-  or verification cost impractical?
-- What exact node granularity remains useful after accounting for TRIPS/EDGE
-  block graphs, WaveScalar instruction graphs, DySER computation slices and
-  coarse spatial dataflow—and which component, if any, is a distinct Raveil
-  research contribution rather than known mechanism composition?
-- Is the first candidate ordinary RISC-V plus an attached command, a custom ISA
-  extension, or an internal microarchitectural encoding? What state is visible
-  to debuggers, interrupts and context switches?
-- What memory-order, alias-failure, precise-exception, block/region commit,
-  cancellation and rollback model can be implemented without importing
-  high-similarity EDGE/WaveScalar mechanisms or recreating a ROB/LSU?
+- RFC-0005 proposes compiler SSA dependencies, affine/disjoint object proof,
+  operation-level nodes, an internal simulation interface, fixed scheduling,
+  private-output invalidation, and pre-start RV64IM fallback. Does review accept
+  this intentionally narrow boundary, or is even its compiler/configuration and
+  private-publication machinery too similar, too costly, or too weak to study?
+- Are the RFC-0005 decision thresholds—at least 10% total dynamic-energy-proxy
+  improvement, no more than 5% correct-latency regression, break-even by 64
+  invocations, and at most 25% incremental Rocket-core area—meaningful enough
+  for the low-power/low-cost objective before any data is collected?
 - Where is the measured boundary between static, elastic dataflow, stream, and
-  hybrid Daphnis Execution Subsystem organizations?
+  hybrid Graph Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?
 - Which regions remain on RISC-V or bounded dynamic tiles: pointer chasing,
   interpreters, JITs, branch-heavy control, exceptions, and unpredictable
   traversal?
-- Can Daphnis handle variable latency without recreating a large centralized
-  scoreboard, replay system, runahead engine, or OoO window?
+- If the fixed-latency RFC-0005 candidate fails, is that a no-go for the initial
+  path or sufficient evidence to draft a separately reviewed variable-latency
+  mechanism? Elastic token/readiness machinery is not authorized by RFC-0005.
 - Can one pinned Chisel/Chipyard environment support a fair matched comparison
   among Rocket in-order, BOOM OoO, BOOM's same-core OoO-disabled diagnostic,
   and an owned explicit-graph tile without inheriting upstream authority or

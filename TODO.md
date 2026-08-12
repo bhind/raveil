@@ -443,12 +443,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   records the direct-prior-art matrix for OoO/EPIC/TRIPS/WaveScalar/DySER/CGRA
   and preliminary patent/IP triage in
   `docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md`.
-  Phase B must specify one structured repeated kernel, trusted RISC-V fallback,
-  exact node/dependency/alias/effect rules, ISA visibility, memory ordering,
-  exception/commit/rollback semantics, bounded ready state, graph
-  encoding/configuration cost, semantic oracle, and no-go rule. Do not begin
-  T-0042 Graph RTL until phase B and the mechanism-specific IP disposition are
-  reviewed. Test admitted candidates against sequential, in-order,
+  RFC-0005 is the first phase-B draft: it proposes an operation-level,
+  fixed-latency, statically scheduled five-point-stencil region, internal
+  simulator interface, disjoint read/private-output objects, RV64IM fallback,
+  exact oracle, complete overhead accounting, and pre-registered no-go rule.
+  It is not accepted and creates no RTL or patent clearance. Review the
+  workload and thresholds, complete a mechanism-specific claim-to-feature
+  disposition, and record accept/revise/stop before T-0042. Test an admitted
+  candidate against sequential, in-order,
   conventional OoO, and relevant VLIW/dataflow controls under RFC-0004; do not
   infer CPU claims from the T-0103 process-level showcase.
 - [ ] **T-0058** Evaluate reuse-weighted optimization ROI and hot/warm/cold/

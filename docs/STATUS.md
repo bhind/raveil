@@ -141,8 +141,9 @@ DySER and
 spatial-CGRA classes. It finds high mechanism similarity and records preliminary
 WaveCache and EDGE-family patent hits as unreviewed; it establishes neither
 novelty, infringement nor freedom to operate. No Graph mechanism, ISA or
-architecture has been selected, and T-0042 remains blocked pending the phase-B
-contract and mechanism-specific IP disposition. This is a planning/research
+architecture has been accepted; RFC-0005 is only the later phase-B draft, and
+T-0042 remains blocked pending contract review and a mechanism-specific IP
+disposition. This is a planning/research
 correction, not a CPU experimental result. T-0105 includes a
 functional tooling smoke: under an explicit linux/amd64 Docker environment on
 the Apple Silicon host, Chisel 7.2.0 emitted SystemVerilog for an owned four-bit
@@ -172,8 +173,26 @@ required 16/0 marker.
 This closes T-0105 as RTL functional/simulation substrate evidence only. The
 result is not a cycle comparison, performance or energy measurement, area or
 timing estimate, Graph RTL result, OoO-removal result, FPGA result, silicon
-result, or CPU/ISA advantage. T-0057B still gates any owned Graph contract and
+result, or CPU/ISA advantage. T-0057B acceptance still gates Graph RTL under
 T-0042; T-0044 remains the later matched comparison.
+
+T-0057B now has a Proposed contract draft in RFC-0005. It selects, for review
+only, an operation-level uint32 five-point stencil lowered at installation to a
+fixed-cycle schedule over bounded resources. The candidate has an internal
+simulation interface, disjoint read-only/private-output objects, no runtime
+token store, alias speculation, general LSU, rename, ROB, or architectural
+block commit, and an ordinary RV64IM fallback. It defines configuration
+identity, invalidation, exact semantic checking, complete configuration/staging
+accounting, interruption behavior, and numerical no-go thresholds centered on
+energy rather than speed. No RTL or measurement has run.
+
+The updated T-0057 matrix maps the draft to TRIPS/EDGE, WaveScalar, DySER,
+EPIC/VLIW, and CGRA prior art. Similarity remains high, especially for installed
+static configuration, hybrid fallback, and private-output publication. The
+three patent discoveries remain unreviewed and fail-closed. RFC-0005 is not
+accepted, T-0057 remains open, and T-0042 remains blocked until the workload,
+thresholds, and mechanism-specific IP disposition receive an explicit
+accept/revise/stop review outcome.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

@@ -98,6 +98,33 @@ Until these are fixed, static, elastic, stream and hybrid organizations are
 study candidates only. There is no selected ISA and no authorization to
 replace OoO machinery.
 
+## Phase-B draft feature disposition
+
+RFC-0005 now supplies one proposed, not accepted, answer to the required design
+contract. It chooses an internal, fixed-latency, statically scheduled operation
+region for a uint32 five-point stencil. The candidate has no direct-consumer
+ISA fields, token-driven issue, dynamic alias prediction, general LSU, ROB, or
+architectural block commit. It uses disjoint read-only/private-output
+scratchpad objects and falls back to ordinary RV64IM before execution when an
+alias, effect, or range cannot be proved.
+
+That narrowing reduces bootstrap and correctness scope but does not establish
+technical novelty or IP clearance:
+
+| RFC-0005 feature | Closest checked mechanism class | Draft disposition |
+|---|---|---|
+| compiler-created operation graph and dependency edges | TRIPS/EDGE and dataflow compilation | research comparison only; no direct-target instruction encoding |
+| installed cycle schedule reused across new inputs | EPIC/VLIW, CGRA, DySER, and potentially WaveCache claim scope | high similarity; implementation remains blocked pending claim-to-feature review |
+| fixed functional resources and affine iteration | spatial CGRA and loop accelerators | known engineering mechanism, not novelty |
+| retained RV64IM fallback | DySER and other hybrid accelerators | known hybrid boundary; fallback area and power remain in total accounting |
+| private output invalidated on cancel/fault, host publishes only after validation | accelerator job buffers and potentially EDGE commit/precise-exception claim scope | not represented as architectural block commit; still requires claim review |
+| no runtime token store or general readiness window | contrast with WaveScalar/EDGE dynamic firing and OoO issue | candidate restriction, not evidence of non-infringement |
+
+The draft therefore keeps all three patent discoveries fail-closed. It does not
+resolve family, jurisdiction, status, claim scope, ownership, licensing,
+expiry, enforceability, infringement, or freedom to operate. T-0042 remains
+blocked until the Project Manager records a mechanism-specific disposition.
+
 ## Preliminary patent/IP triage
 
 This was a targeted discovery pass, not a patent search or legal opinion.
@@ -122,13 +149,13 @@ the work moves beyond research simulation, qualified legal advice.
 
 ## Recommendation
 
-Continue T-0105 only through unmodified RISC-V elaboration/execution evidence.
-Make this matrix phase A of T-0057. Phase B should write the minimal contract
-and explicitly choose whether the first candidate is a narrow attached engine
-or an internal execution model. A hybrid is presently the lower-bootstrap-risk
-candidate, but DySER and CGRA prior art mean it is not automatically novel or
-better. Do not begin T-0042 Graph RTL or T-0044 performance measurement until
-that phase-B contract and IP disposition are reviewed.
+T-0105 has completed only unmodified RISC-V elaboration/execution evidence.
+Retain this matrix as phase A of T-0057 and review RFC-0005 as the phase-B
+minimal-contract draft. Its internal static execution model and retained
+fallback are lower-bootstrap-risk choices, but DySER and CGRA prior art mean
+they are not automatically novel or better. Do not begin T-0042 Graph RTL or
+T-0044 performance measurement until the phase-B contract and IP disposition
+are reviewed.
 
 ## Non-claims and gaps
 
