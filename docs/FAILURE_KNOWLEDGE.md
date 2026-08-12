@@ -288,6 +288,29 @@ labelled unknown.
 - State: corrected with explicit non-recursive public gitlinks; optional and
   private integrations remain outside the owned boundary.
 
+## Chipyard simulator outputs and tool prefixes must be verified, not guessed
+
+- Symptom: the first simulator wrapper checked for a shortened executable name
+  after the Verilator link had succeeded; the actual Make output includes the
+  `chipyard.harness` package. Earlier tool probes also looked for the RISC-V
+  compiler directly under the environment `bin`, while the lock installs it
+  below the configured `RISCV` prefix. A full Spike build was started even
+  though Chipyard's simulator link needed only FESVR and its headers.
+- Cause: paths and prerequisites were inferred from component names instead of
+  the selected Chipyard Make flow and lockfile layout.
+- Prevention: use the exact Make-produced simulator path, export both the
+  locked environment and `$RISCV/bin`, and build only `libfesvr.a` plus the
+  installed FESVR headers. Require cached trees to have no tracked changes
+  while permitting untracked build outputs such as CDE `target/`. Stop and
+  replace a wider disposable build once its extra scope is recognized.
+- Detection: require the simulator executable, compiler version, FESVR archive
+  and header, ELF machine and symbols, normal Verilator finish, and exact
+  functional-only completion marker.
+- Evidence: T-0042 `run-boom-functional-smoke.sh` and
+  `docs/log/2026-08-12.md`.
+- State: corrected for the functional smoke; the conda-lock reader bootstrap
+  remains unlocked and explicitly outside future measurement authority.
+
 ## Locked build inputs must exclude convenience hooks and generated state
 
 - Symptom: Rocket's upstream Nix development shell installed current Python

@@ -1,0 +1,8 @@
+FROM condaforge/miniforge3:23.1.0-1@sha256:9fb6d720a8d20169c01747e44d9db36c3895593abba7c79959a6e847ff345903
+
+# conda-lock is only the bootstrap reader. The Chipyard-owned lockfile fixes
+# the simulator/toolchain environment installed by the host wrapper.
+RUN conda install -y -n base -c conda-forge conda-lock=1.4 \
+    && conda clean -afy
+
+WORKDIR /work

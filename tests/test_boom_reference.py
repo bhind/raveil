@@ -11,6 +11,11 @@ COMPILE = ROOT / "hardware" / "chisel" / "run-boom-project-compile.sh"
 FETCH_DEPS = ROOT / "hardware" / "chisel" / "fetch-boom-elaboration-deps.sh"
 ELABORATE = ROOT / "hardware" / "chisel" / "run-boom-elaboration.sh"
 DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom"
+FETCH_SIM = ROOT / "hardware" / "chisel" / "fetch-boom-simulator-deps.sh"
+RUN_SIM = ROOT / "hardware" / "chisel" / "run-boom-functional-smoke.sh"
+SIM_DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom-sim"
+SMOKE_ASM = ROOT / "hardware" / "chisel" / "boom_functional_smoke.S"
+SMOKE_LD = ROOT / "hardware" / "chisel" / "boom_functional_smoke.ld"
 
 
 class BoomReferenceTests(unittest.TestCase):
@@ -20,6 +25,8 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertNotEqual(COMPILE.stat().st_mode & 0o111, 0)
         self.assertNotEqual(FETCH_DEPS.stat().st_mode & 0o111, 0)
         self.assertNotEqual(ELABORATE.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(FETCH_SIM.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(RUN_SIM.stat().st_mode & 0o111, 0)
 
     def test_pin_is_exact_and_has_license_hashes(self) -> None:
         fields = dict(
@@ -73,11 +80,37 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertIn("apt_packages=unlocked", runner)
         self.assertIn("elaboration=not-run", runner)
         self.assertIn("performance=not-measured", runner)
+
+    def test_functional_simulator_is_locked_bounded_and_non_claiming(self) -> None:
+        fetch = FETCH_SIM.read_text(encoding="utf-8")
+        runner = RUN_SIM.read_text(encoding="utf-8")
+        dockerfile = SIM_DOCKERFILE.read_text(encoding="utf-8")
+        assembly = SMOKE_ASM.read_text(encoding="utf-8")
+        linker = SMOKE_LD.read_text(encoding="utf-8")
+        self.assertNotIn("--recursive", fetch)
+        self.assertIn("toolchains/riscv-tools/riscv-isa-sim", fetch)
+        self.assertIn("tools/DRAMSim2", fetch)
+        self.assertIn("tools/install-circt", fetch)
+        self.assertIn("5248d0e404ab5ac0", runner)
+        self.assertIn("e09cfe2f50fb9d3c", runner)
+        self.assertIn("b3a75b5ced0451f4", runner)
+        self.assertIn("target=/repo,readonly", runner)
+        self.assertIn("target=/source,readonly", runner)
+        self.assertIn("CONFIG=SmallBoomConfig", runner)
+        self.assertIn("--untracked-files=no --ignore-submodules=untracked", runner)
+        self.assertIn("adapter=not-emitted", runner)
+        self.assertIn("performance=not-measured", runner)
+        self.assertIn("conda_lock_bootstrap=unlocked", runner)
         self.assertIn(
-            "eclipse-temurin:17-jdk-jammy@sha256:"
-            "29467857e8bde40ab1f7befecbda0ea764b95afec1cc7f89aa90f7a766577e19",
+            "condaforge/miniforge3:23.1.0-1@sha256:"
+            "9fb6d720a8d20169c01747e44d9db36c3895593abba7c79959a6e847ff345903",
             dockerfile,
         )
+        self.assertIn("tohost", assembly)
+        self.assertIn("bne", assembly)
+        self.assertIn("0x80000000", linker)
+        self.assertIn("text PT_LOAD FLAGS(5)", linker)
+        self.assertIn("data PT_LOAD FLAGS(6)", linker)
 
     def test_elaboration_uses_exact_parent_gitlinks_and_ephemeral_source(self) -> None:
         fetch = FETCH_DEPS.read_text(encoding="utf-8")

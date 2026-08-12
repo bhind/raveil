@@ -426,10 +426,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   diagnostic, and Rocket/BOOM records behind this boundary. ADR-0040 now fixes
   Chipyard 1.11.0/BOOM `9459af0...10847c`, `SmallBoomConfig`, the retained-
   structure serialize-dispatch diagnostic, and exact license hashes; source
-  verification passes. The explicit-public-gitlink build now compiles BOOM and
-  elaborates `SmallBoomConfig` to FIRRTL containing `BoomCore`; BOOM still has
-  not executed a RISC-V program or emitted a common-adapter record. Do not turn
-  the 1,536-cycle schedule assertion or source pin into a performance result.
+  verification passes. The explicit-public-gitlink build compiles BOOM,
+  elaborates `SmallBoomConfig` to FIRRTL containing `BoomCore`, builds the
+  Verilator simulator, and executes a minimal sum/store/load/check RV64 ELF to
+  a successful `tohost` completion. This smoke is not the RFC-0005 workload and
+  emits no common-adapter record. Keep the task open for the same-core
+  serialize-dispatch diagnostic and matched Rocket/BOOM/Graph functional
+  records. Do not turn the 1,536-cycle Graph schedule assertion, source pin, or
+  minimal BOOM execution into a performance result.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

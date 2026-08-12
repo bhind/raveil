@@ -131,8 +131,9 @@ operation/dependency/effect/object graph. It does not test dependency discovery,
 OoO replacement, cache hierarchy, pipeline, ISA encoding, area, or energy, and
 its memoization is not evidence that Graph is required. RFC-0004 is only a
 proposal for the correctly ordered Chisel RTL/simulation study. T-0105 now has
-unmodified Rocket functional execution, but no BOOM execution, Graph RTL,
-matched CPU comparison, or performance evidence exists.
+unmodified Rocket functional execution. T-0042 separately has a bounded static
+Graph RTL smoke and a minimal BOOM RISC-V functional execution, but no matched
+CPU comparison or performance evidence exists.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
@@ -277,10 +278,25 @@ successful functional marker confirms non-empty FIRRTL and annotations with a
 `BoomCore`; emitted parameters include one-wide decode, three issue ports, a
 32-entry ROB, three 8-entry issue windows, 52 integer physical registers, and
 8/8 load/store queues. These are configuration/elaboration facts, not measured
-costs. The wrapper uses a digest-pinned Temurin 17 base but unlocked APT and
-Maven resolution, so it is not a measurement environment. BOOM has not yet
-executed a RISC-V program or emitted a common-adapter record; no performance,
-energy, area, timing, or Graph comparison follows.
+costs. The elaboration wrapper uses a digest-pinned Temurin 17 base but unlocked
+APT and Maven resolution, so it is not a measurement environment.
+
+The separate functional-simulator path pins a Miniforge linux/amd64 base,
+Chipyard's lean simulator lockfile and hash, Verilator 5.020, RISC-V GCC 12.2.0,
+DTC 1.6.1, CIRCT firtool 1.61.0 and the installed firtool binary hash. It uses
+explicit public parent gitlinks and read-only source mounts. The first owned
+workload executed on `chipyard.SmallBoomConfig`: an RV64 ELF summed 1 through
+16, stored and loaded the result, checked 136, and signalled success through
+`tohost`. Verilator reached its normal finish and emitted
+`BOOM-FUNCTIONAL-SMOKE-V1 status=OK`.
+
+This is a minimal RTL simulation-functional execution, not the RFC-0005 Graph
+workload and therefore not a common-adapter record. The conda-lock reader
+bootstrap remains an unlocked package solve, and the upstream CIRCT downloader
+is accepted only after validating the installed binary hash. No performance,
+energy, area, timing, OoO comparison, Graph comparison, FPGA, or silicon result
+follows. T-0042 remains open for the same-core serialize-dispatch diagnostic
+and matched Rocket/BOOM/Graph functional records behind the common boundary.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

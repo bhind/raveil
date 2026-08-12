@@ -183,18 +183,42 @@ and the exact source path for chicken CSR `0x7c1` bit 3. A successful check
 prints `BOOM-SOURCE-REFERENCE-V1` with `diagnostic=serialize-dispatch` and
 `structures=retained`.
 
-The final wrapper copies the checked-in Chipyard boot images into an ephemeral
+The elaboration wrapper copies the checked-in Chipyard boot images into an ephemeral
 target directory, prints the device-tree compiler version, and requires
 non-empty FIRRTL plus annotation output containing `BoomCore`. The observed
 functional marker is `BOOM-ELABORATION-V1 status=OK ... execution=not-run
 performance=not-measured`.
 
+Fetch the additional explicit public simulator gitlinks and run the minimal
+RISC-V functional smoke with:
+
+```sh
+./hardware/chisel/fetch-boom-simulator-deps.sh
+./hardware/chisel/run-boom-functional-smoke.sh
+```
+
+The runner verifies the pinned source and Chipyard lean lockfile hash, builds a
+linux/amd64 Docker tool host, retains the locked toolchain and generated
+simulator in named Docker volumes, compiles the tracked assembly/linker script,
+and runs it on `chipyard.SmallBoomConfig`. The program sums 1 through 16,
+stores and reloads the value, checks 136, then writes success to `tohost`. A
+successful run ends with:
+
+```text
+BOOM-FUNCTIONAL-SMOKE-V1 status=OK config=chipyard.SmallBoomConfig workload=sum-store-load-tohost evidence=rtl-simulation-functional adapter=not-emitted performance=not-measured
+```
+
+The named volumes are build caches, not evidence authority. Source mounts are
+read-only, and the wrapper revalidates the source revision, lockfile, tool
+versions, and installed firtool hash. The `conda-lock` reader installed in the
+Docker image is still an unlocked bootstrap solve, so this path is suitable for
+functional reproduction only.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
-execution. The current container has a digest-pinned base but unlocked APT and
-Maven dependencies and cannot support measurement claims. BOOM RISC-V
-execution still needs an owned immutable simulator path; an unofficial
-prebuilt image is not evidence authority.
+execution; the separate smoke above is program execution but not a Graph or
+comparison workload. Neither functional container can support measurement
+claims, and an unofficial prebuilt image is not evidence authority.
 
 The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
 `LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the

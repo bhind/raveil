@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0057 complete; first T-0042 static RTL slice functional; matched CPU thesis remains untested**
+State: **T-0057 complete; static Graph and BOOM functional smokes pass; matched CPU thesis remains untested**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -38,10 +38,11 @@ The corrected critical path is:
    Graph executor now matches an independent oracle and survives
    cancel/restart in Verilator. A strict common functional adapter now makes
    missing lifecycle accounting explicit and refuses a total. Pinned BOOM, the
-   same-core diagnostic semantics and licenses are now source-verified through
-   ADR-0040, and `SmallBoomConfig` now elaborates to FIRRTL containing
-   `BoomCore`. Immutable BOOM RISC-V execution and Rocket/BOOM adapter records
-   remain before T-0042 closes.
+   same-core diagnostic semantics and licenses are source-verified through
+   ADR-0040. `SmallBoomConfig` now elaborates to FIRRTL containing `BoomCore`
+   and executes a minimal RV64 sum/store/load/check ELF to successful `tohost`
+   completion. The same-core diagnostic and matched Rocket/BOOM/Graph adapter
+   records remain before T-0042 closes.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,
