@@ -487,6 +487,16 @@ does not prove which ELF instruction or PC semantically initiated a request.
 Durable owned attribution requires a later decision plus remaining loader/debug
 path testing.
 
+After the regular CPU and PT_LOAD signature verifiers pass,
+`verify_owned_cpu_source_nonidentity.py` compares both artifacts and ELF
+binaries. It requires two distinct ELF hashes and distinct semantic payload
+witnesses while also requiring the same exact final tagged DCache source:
+8224 for Rocket or 8288 for BOOM. The
+`OWNED-CPU-SOURCE-NONIDENTITY-V1` marker is an executable counterexample to
+treating a TileLink source or DCache-origin bit as ELF identity. It supplies no
+replacement identity, instruction/PC attribution, security property, resource
+match, or performance result.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

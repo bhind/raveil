@@ -515,7 +515,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   what durable semantic witness beyond DCache origin identifies the intended
   ELF request, cover remaining loader/debug paths fail closed, and design the
   matched resource boundary. Do not promote a config-dependent TileLink source
-  ID, or DCache origin alone, into target-ELF semantic identity.
+  ID, or DCache origin alone, into target-ELF semantic identity. A
+  cross-workload audit now makes that limit executable: two distinct ELFs reuse
+  exact DCache source 8224 on Rocket and 8288 on BOOM while retaining different
+  payload/signature semantics. Next define semantic-witness ownership and
+  replay/flush/commit rules in a superseding ADR before core/LSU modification.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

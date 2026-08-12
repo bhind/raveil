@@ -84,6 +84,10 @@ resolves it.
   and what additional durable witness is required to distinguish DCache origin
   from a particular target-ELF instruction? What later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
+  The regular and PT_LOAD workloads now form an executable counterexample:
+  distinct ELF hashes and semantics reuse exact DCache source 8224 on Rocket
+  and 8288 on BOOM. Therefore any accepted witness must add owned identity and
+  replay/flush/commit rules rather than reinterpret the existing source/origin.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

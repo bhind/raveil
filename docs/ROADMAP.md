@@ -97,7 +97,9 @@ The corrected critical path is:
    8-bit Debug SBA write in both CPU configurations; exact topology and runtime
    accounting separate the Debug client class from the following tagged DCache
    read at 1/1 each. Durable semantic attribution, remaining loader/debug
-   negatives, and matched resources remain open.
+   negatives, and matched resources remain open. A cross-workload audit now
+   demonstrates that two distinct ELFs reuse the same exact DCache source in
+   each CPU configuration, so source/origin cannot be promoted to ELF identity.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

@@ -105,6 +105,9 @@ LOADER_PROBE_LINKER = (
 LOADER_PROBE_VERIFIER = (
     ROOT / "hardware" / "chisel" / "verify_owned_memory_loader_probe.py"
 )
+SOURCE_NONIDENTITY_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_cpu_source_nonidentity.py"
+)
 DEBUG_SBA_WORKLOAD = (
     ROOT / "hardware" / "chisel" / "owned_memory_debug_sba_smoke.S"
 )
@@ -430,14 +433,74 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn('"boom": (8288, 8320)', verifier)
         self.assertNotEqual(LOADER_PROBE_VERIFIER.stat().st_mode & 0o111, 0)
         self.assertIn('"$loader_probe" "$loader_probe_linker"', runner)
-        self.assertIn('"$loader_probe_verifier" "$source_map_verifier"', runner)
+        self.assertIn('"$loader_probe_verifier" "$source_nonidentity_verifier"', runner)
+        self.assertIn('"$source_nonidentity_verifier" "$source_map_verifier"', runner)
         self.assertIn("riscv64-unknown-elf-readelf -lW", runner)
         self.assertIn("exactly one PT_LOAD at 0x08000000", runner)
         self.assertIn("owned_memory_loader_probe.signature", runner)
         self.assertIn("OWNED-CPU-LOADER-PROBE-AUDIT-V1", runner)
         self.assertIn('sha256sum "$graph" | cut -c1-64', runner)
         self.assertIn("preload_bypass=absent", runner)
+        self.assertIn("verify_owned_cpu_source_nonidentity.py", runner)
         self.assertNotIn("+loadmem", runner)
+
+    def test_same_dcache_source_does_not_identify_one_elf(self) -> None:
+        source = SOURCE_NONIDENTITY_VERIFIER.read_text(encoding="utf-8")
+        self.assertIn("OWNED-CPU-SOURCE-NONIDENTITY-V1", source)
+        self.assertIn("semantic_identity=not-carried", source)
+        self.assertNotEqual(SOURCE_NONIDENTITY_VERIFIER.stat().st_mode & 0o111, 0)
+
+        cpu_source = 8224
+        cpu_signature = [
+            1, 0, 0x11223344, 0x5522AA44, 0xCAFEBABE, 2, 8, 8,
+            2, 3, 2, 1, 8224, 8256, 8, 8, 0, 0,
+            cpu_source, cpu_source, 2, 2, 8, 8, 0, 0,
+            cpu_source, cpu_source, 2, 2,
+        ]
+        loader_signature = [
+            1, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2,
+            16, 16, 0, 0, 0x6C6F6164,
+            3, 3, 1, 1, 2, 2, 1, 1, 2, 2,
+            cpu_source, cpu_source, 0, 0, 8224, 8256, 0,
+        ]
+
+        def verify(
+            cpu_values: list[int], loader_values: list[int], same_elf: bool = False
+        ) -> subprocess.CompletedProcess[str]:
+            with (
+                tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as cpu_sig,
+                tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as loader_sig,
+                tempfile.NamedTemporaryFile(mode="wb") as cpu_elf,
+                tempfile.NamedTemporaryFile(mode="wb") as loader_elf,
+            ):
+                cpu_sig.write("".join(f"{value:08x}\n" for value in cpu_values))
+                loader_sig.write("".join(f"{value:08x}\n" for value in loader_values))
+                cpu_elf.write(b"cpu-elf")
+                loader_elf.write(b"cpu-elf" if same_elf else b"loader-elf")
+                for temporary in (cpu_sig, loader_sig, cpu_elf, loader_elf):
+                    temporary.flush()
+                return subprocess.run(
+                    [
+                        "python3", str(SOURCE_NONIDENTITY_VERIFIER), "rocket",
+                        cpu_sig.name, loader_sig.name, cpu_elf.name, loader_elf.name,
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+        self.assertEqual(verify(cpu_signature, loader_signature).returncode, 0)
+        different_source = loader_signature.copy()
+        different_source[26] += 1
+        self.assertNotEqual(verify(cpu_signature, different_source).returncode, 0)
+        self.assertNotEqual(verify(cpu_signature, loader_signature, same_elf=True).returncode, 0)
+        bad_origin = loader_signature.copy()
+        bad_origin[22] = 0
+        self.assertNotEqual(verify(cpu_signature, bad_origin).returncode, 0)
+        same_payload = loader_signature.copy()
+        same_payload[15] = cpu_signature[2]
+        self.assertNotEqual(verify(cpu_signature, same_payload).returncode, 0)
+        self.assertNotEqual(verify(cpu_signature[:-1], loader_signature).returncode, 0)
 
     def test_loader_probe_signature_rejects_bad_paths(self) -> None:
         source_start = 8224

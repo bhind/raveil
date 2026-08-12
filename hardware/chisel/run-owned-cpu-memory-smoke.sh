@@ -13,6 +13,7 @@ verifier="$repo_root/hardware/chisel/verify_owned_memory_cpu_signature.py"
 loader_probe="$repo_root/hardware/chisel/owned_memory_loader_probe.S"
 loader_probe_linker="$repo_root/hardware/chisel/owned_memory_loader_probe.ld"
 loader_probe_verifier="$repo_root/hardware/chisel/verify_owned_memory_loader_probe.py"
+source_nonidentity_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_nonidentity.py"
 source_map_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_map.py"
 debug_sba_workload="$repo_root/hardware/chisel/owned_memory_debug_sba_smoke.S"
 debug_sba_verifier="$repo_root/hardware/chisel/verify_owned_memory_debug_sba_signature.py"
@@ -43,7 +44,7 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
 esac
 
 for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
-    "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" \
+    "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
     "$linker" "$runner" "$dockerfile"; do
     [ -f "$input" ] || {
@@ -73,7 +74,7 @@ boom_hook_patch_sha256=$(shasum -a 256 "$boom_hook_patch" | awk '{print $1}')
 xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 input_sha256=$(
     shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
-        "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" \
+        "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
         "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
         "$linker" "$runner" "$dockerfile" |
         awk '{print $1}' |
@@ -273,6 +274,9 @@ rm -f "$loader_signature"
   +permissive +permissive-off "$probe_elf"
 python3 /repo/hardware/chisel/verify_owned_memory_loader_probe.py \
   "$RAVEIL_OWNED_CPU_LABEL" "$loader_signature"
+python3 /repo/hardware/chisel/verify_owned_cpu_source_nonidentity.py \
+  "$RAVEIL_OWNED_CPU_LABEL" "$signature" "$loader_signature" \
+  "$build_root/owned_memory_cpu_smoke.elf" "$probe_elf"
 printf "OWNED-CPU-LOADER-PROBE-AUDIT-V1 status=OK cpu=%s config=%s input_sha256=%s graph_sha256=%s transport=SimTSI-FESVR-PT_LOAD preload_bypass=absent evidence=rtl-simulation-functional performance=not-measured\n" \
   "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" \
   "$(sha256sum "$graph" | cut -c1-64)"

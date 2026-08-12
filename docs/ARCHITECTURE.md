@@ -306,6 +306,12 @@ client and the explicit field-stripping topology each observe origin 0/0 and
 non-origin 7/7. This establishes structural
 DCache-boundary crossing and distinguishes the separate SimTSI/FESVR master in
 these harnesses without treating final source numbering as semantic identity.
+The regular CPU smoke and PT_LOAD probe provide a direct counterexample to
+such promotion: their ELF hashes and semantic signatures differ, but their
+final tagged DCache source is identical within each configuration (8224 on
+Rocket and 8288 on BOOM). A fail-closed cross-workload verifier requires that
+equality and distinctness together. This is negative evidence about the
+current metadata boundary, not a replacement semantic witness.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

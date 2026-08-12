@@ -381,6 +381,14 @@ loader/debug path. Resources remain unmatched and no performance, power, area,
 OoO, FPGA, silicon, novelty, non-infringement, patent-clearance, or FTO claim
 follows.
 
+The regular CPU and PT_LOAD signatures now also feed a fail-closed
+cross-workload audit. Rocket reused exact DCache source 8224 and BOOM reused
+8288 across two distinct ELF binaries with different payload/semantic
+signatures. This executable counterexample shows that DCache source and origin
+class do not carry a unique ELF semantic identity. It narrows the next step to
+a separately decided CPU-side witness with replay/flush/commit semantics; it
+does not itself provide that witness.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned
