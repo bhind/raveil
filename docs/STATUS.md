@@ -284,7 +284,7 @@ This is not yet the ADR-0043 common-contract CPU adapter: the phase begins as a
 software-declared label and does not provide owned semantic initiator metadata.
 
 The owned manager now also passes a direct, monitor-enabled TileLink RTL
-simulation. Protocol V3's raw bounded client issued 26 legal negotiated
+simulation. Protocol V4's raw bounded client issued 30 legal negotiated
 transactions and
 verified `PutFull`, two `PutPartial` byte-mask patterns, readback, invalid
 phase-write denial, D-channel backpressure stability, maximum-one-outstanding
@@ -296,11 +296,13 @@ manager-local protocol corner-case bootstrap only. No CPU instruction executed;
 phase remains software-declared, initiator attribution and the ADR-0043 common
 contract remain open, and resource matching, comparison readiness, fixed
 end-to-end latency, performance, energy, and area remain unverified.
-Unlike V2, whose expected range covered every client source, V3 uses the
+Unlike V2, whose expected range covered every client source, V4 uses the
 half-open classifier range `[1,3)`: in-range traffic completed 3/3 and deliberate
-boundary sources 0 and 3 completed as unexpected 4/4. This is a negative control
-for harness-local source classification and A/D conservation only, not evidence
-of CPU execution, DCache origin, or loader/debug exclusion.
+boundary sources 0 and 3 completed as unexpected 4/4. Requests from this raw
+client, which has no DCache-origin request field, completed with DCache-origin
+accepted/completed 0/0 and non-DCache-origin 7/7. This is a negative control
+for manager-local classification and A/D conservation only, not evidence of CPU
+execution, target-ELF semantic initiator identity, or loader/debug exclusion.
 
 The same owned manager now passes one phase-fenced CPU workload through both
 the dedicated `RaveilOwnedRocketConfig` and `RaveilOwnedSmallBoomConfig`
@@ -322,10 +324,22 @@ the `[0,8192)` SimTSI/FESVR serial range. Runtime audit registers latch the
 accepted data A-channel source and software-declared phase until D completion.
 Both CPU runs observed expected-client accepted/completed 8/8,
 unexpected-client 0/0, in-range final sources, and final accepted/completed
-phases 2/2. These config/Xbar/fragmenter-dependent source IDs establish a
+phases 2/2. A repository-owned adapter immediately after each DCache adds a
+one-bit structural request field before the tile master Xbar. The pinned Xbar
+is patched ephemerally to preserve negotiated request fields while applying
+their declared false defaults to clients without the field. CPU signature V3
+extends the retained 22-word prefix to 30 words; both CPUs observed structural
+DCache-origin accepted/completed 8/8, non-DCache-origin 0/0, final origin
+sources inside their config-specific ranges, and final origin phases 2/2.
+The manager latches the field at A acceptance and holds it with source and
+software phase until D completion. These config/Xbar/fragmenter-dependent
+source IDs establish a
 TileLink client class, not an ISA identifier or proof that the target ELF was
-the semantic initiator. Matching signatures prove semantic agreement for this
-one workload only. The evidence does not implement ADR-0043 owned initiator
+the semantic initiator. The structural bit proves only that the request crossed
+the DCache-local adapter; it does not identify an instruction, PC, ELF, or
+exclude untested loader/debug DCache activity. Matching signatures prove
+semantic agreement for this one workload only. The evidence does not implement
+ADR-0043 owned semantic initiator
 metadata, establish equal resources, isolate OoO, or support a performance,
 energy, area, OoO-removal, FPGA, or silicon claim.
 The ADR-0043 common-contract adapter remains open.
@@ -348,16 +362,16 @@ CPU is connected, semantic CPU/ELF identity remains unproven, and resources
 remain unmatched. No performance, power, area, OoO, FPGA, silicon, novelty,
 non-infringement, patent-clearance, or FTO conclusion follows.
 
-Pinned-source inspection identifies a narrower candidate for the next
-attribution step: observe or assign metadata immediately after each CPU DCache
-and before its shared tile master crossbar. BOOM already exposes a `dCacheTap`;
-Rocket connects its DCache directly and would need a small explicit attach
-point rather than a manager-side source-ID inference. This candidate can
-structurally exclude the separate SimTSI/FESVR master, but even if implemented
-it would establish DCache-origin traffic only. It cannot by itself identify a
-particular ELF instruction, PC, or semantic intent, and it remains unimplemented
-and unverified. Selecting it as the durable ADR-0043 metadata assignment
-boundary requires a later decision and new functional evidence.
+The narrower pinned-source candidate is now implemented diagnostically:
+repository-owned Rocket and BOOM hooks insert the adapter immediately after
+each DCache and before the shared tile master crossbar. Runtime positive paths
+and the raw-client negative path verify field retention and fail-closed false
+classification in these bounded harnesses. This structurally excludes the
+separate SimTSI/FESVR master from the observed positive class, but it still
+cannot identify a particular ELF instruction, PC, or semantic intent, and it
+does not test every loader/debug path. Selecting a durable ADR-0043 semantic
+metadata assignment boundary requires later policy, negative tests, and a new
+decision if the field is promoted beyond ADR-0044 diagnostics.
 
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM

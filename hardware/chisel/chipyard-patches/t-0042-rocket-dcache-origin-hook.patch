@@ -1,0 +1,13 @@
+diff --git a/src/main/scala/rocket/HellaCache.scala b/src/main/scala/rocket/HellaCache.scala
+index d53998c3..93e82d67 100644
+--- a/src/main/scala/rocket/HellaCache.scala
++++ b/src/main/scala/rocket/HellaCache.scala
+@@ -253,0 +254,4 @@ case object BuildHellaCache extends Field[BaseTile => Parameters => HellaCache](
++case object DCacheTLNodeTransformKey
++    extends Field[Parameters => TLNode => TLNode](
++      (_: Parameters) => (node: TLNode) => node)
++
+@@ -271 +275,2 @@ trait HasHellaCache { this: BaseTile =>
+-  tlMasterXbar.node := TLWidthWidget(tileParams.dcache.get.rowBits/8) := dcache.node
++  tlMasterXbar.node := TLWidthWidget(tileParams.dcache.get.rowBits/8) :=
++    p(DCacheTLNodeTransformKey)(p)(dcache.node)

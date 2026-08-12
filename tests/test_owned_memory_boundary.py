@@ -1,4 +1,6 @@
 from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 
 
@@ -18,6 +20,34 @@ HOST_RUNNER = (
 )
 CPU_OVERLAY = (
     ROOT / "hardware" / "chisel" / "chipyard-overlay" / "RaveilOwnedTLMemory.scala"
+)
+DCACHE_ORIGIN_TAGGER = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-overlay"
+    / "RaveilDCacheOriginTagger.scala"
+)
+ROCKET_DCACHE_ORIGIN_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-rocket-dcache-origin-hook.patch"
+)
+BOOM_DCACHE_ORIGIN_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-dcache-origin-hook.patch"
+)
+TLXBAR_REQUEST_DEFAULTS_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-tlxbar-request-defaults.patch"
 )
 CPU_ELABORATION_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-cpu-memory-elaboration.sh"
@@ -110,9 +140,10 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
 
     def test_cpu_overlay_adds_owned_target_without_claiming_execution(self) -> None:
         overlay = CPU_OVERLAY.read_text(encoding="utf-8")
+        config_overlay = DCACHE_ORIGIN_TAGGER.read_text(encoding="utf-8")
         runner = CPU_ELABORATION_RUNNER.read_text(encoding="utf-8")
         self.assertIn("class RaveilOwnedTLMemory", overlay)
-        self.assertIn("new testchipip.soc.WithNoScratchpads", overlay)
+        self.assertIn("new testchipip.soc.WithNoScratchpads", config_overlay)
         self.assertIn("TLFragmenter(4, bus.blockBytes)", overlay)
         self.assertIn("TLWidthWidget(bus.beatBytes)", overlay)
         self.assertIn("busWhere: TLBusWrapperLocation = PBUS", overlay)
@@ -128,6 +159,12 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertNotEqual(CPU_ELABORATION_RUNNER.stat().st_mode & 0o111, 0)
         self.assertIn("source=$chipyard,target=/source,readonly", runner)
         self.assertIn("source=$overlay,target=/overlay", runner)
+        self.assertIn("RaveilDCacheOriginTagger.scala", runner)
+        self.assertIn("git -C generators/rocket-chip apply --check", runner)
+        self.assertIn("git -C generators/boom apply --check", runner)
+        self.assertIn("RaveilDCacheOriginTagger", runner)
+        self.assertIn("OWNED-CPU-MEMORY-ELABORATION-V2", runner)
+        self.assertIn("dcache_origin_path=structurally-elaborated", runner)
         self.assertIn("execution=not-run", runner)
         self.assertIn("bus=pbus-uncached", runner)
         self.assertIn("initiator_attribution=unverified", runner)
@@ -156,7 +193,9 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("unexpected_boundary_sources=0,3", driver)
         self.assertIn("expected_source_accepted=3", driver)
         self.assertIn("unexpected_source_accepted=4", driver)
-        self.assertIn("OWNED-TL-PROTOCOL-V3", driver)
+        self.assertIn("OWNED-TL-PROTOCOL-V4", driver)
+        self.assertIn("dcache_origin_accepted=0", driver)
+        self.assertIn("non_dcache_origin_accepted=7", driver)
         self.assertNotEqual(TL_PROTOCOL_RUNNER.stat().st_mode & 0o111, 0)
         self.assertIn("--assert --cc", runner)
         self.assertIn("assembly_cache=content-addressed-verified", runner)
@@ -235,12 +274,13 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn(
             "boom:raveil-chipyard-owned-boom-sim-build-v1", runner
         )
-        self.assertIn('"$linker" "$runner"', runner)
+        self.assertIn('"$linker" "$runner" "$dockerfile"', runner)
         self.assertIn("CONFIG_PACKAGE=chipyard.raveil", runner)
         self.assertIn("persistent simulator source cache contains an unexpected", runner)
         self.assertIn("submodule foreach --quiet --recursive", runner)
         self.assertIn("cpu_execution=%s-rtl-simulation", runner)
         self.assertIn("source_client_class=dcache-mmio-verified", runner)
+        self.assertIn("dcache_origin_path=observed", runner)
         self.assertIn("semantic_initiator=not-proven", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
@@ -248,6 +288,93 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("RAVEIL_OWNED_CPU_LABEL=rocket", rocket_runner)
         self.assertIn("RaveilOwnedSmallBoomConfig", boom_runner)
         self.assertIn("RAVEIL_OWNED_CPU_LABEL=boom", boom_runner)
+
+    def test_dcache_origin_sideband_is_structural_and_fail_closed(self) -> None:
+        overlay = CPU_OVERLAY.read_text(encoding="utf-8")
+        tagger = DCACHE_ORIGIN_TAGGER.read_text(encoding="utf-8")
+        rocket_patch = ROCKET_DCACHE_ORIGIN_PATCH.read_text(encoding="utf-8")
+        boom_patch = BOOM_DCACHE_ORIGIN_PATCH.read_text(encoding="utf-8")
+        xbar_patch = TLXBAR_REQUEST_DEFAULTS_PATCH.read_text(encoding="utf-8")
+        runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        workload = ROCKET_MEMORY_WORKLOAD.read_text(encoding="utf-8")
+        verifier = ROCKET_MEMORY_VERIFIER.read_text(encoding="utf-8")
+
+        self.assertIn('DataKey[Bool]("raveil_dcache_origin")', overlay)
+        self.assertIn("DCacheTLNodeTransformKey", tagger)
+        self.assertIn("out.a.bits.user(RaveilDCacheOrigin) := true.B", tagger)
+        self.assertIn("Connectable.waiveUnmatched", tagger)
+        self.assertIn("not identify an instruction, PC, ELF", tagger)
+        self.assertIn("tl.a.bits.user.lift(RaveilDCacheOrigin)", overlay)
+        self.assertIn("requestKeys = Seq(RaveilDCacheOrigin)", overlay)
+        self.assertIn("pinned, ephemeral TLXbar patch", tagger)
+        self.assertIn("responseDcacheOrigin := dcacheOriginRequest", overlay)
+        self.assertIn(
+            "dcacheOriginAcceptedCount === dcacheOriginCompletedCount", overlay
+        )
+        self.assertIn(
+            "nonDcacheOriginAcceptedCount === nonDcacheOriginCompletedCount",
+            overlay,
+        )
+        self.assertIn("HellaCache.scala", rocket_patch)
+        self.assertIn("src/main/scala/common/tile.scala", boom_patch)
+        self.assertIn("p(DCacheTLNodeTransformKey)(p)(dcache.node)", rocket_patch)
+        self.assertIn("p(DCacheTLNodeTransformKey)(p)(dcache.node)", boom_patch)
+        self.assertIn("BundleMap.setAlignedDefaults(in(i).a.bits.user)", xbar_patch)
+        self.assertIn("BundleMap.setAlignedDefaults(in(i).c.bits.user)", xbar_patch)
+        self.assertIn('build_root=/build/$RAVEIL_INPUT_SHA256', runner)
+        self.assertIn("persistent simulator source cache is incomplete", runner)
+        self.assertIn("RAVEIL_ROCKET_HOOK_PATCH_SHA256", runner)
+        self.assertIn("RAVEIL_BOOM_HOOK_PATCH_SHA256", runner)
+        self.assertIn("RAVEIL_XBAR_REQUEST_PATCH_SHA256", runner)
+        self.assertIn("src/main/scala/tilelink/Xbar.scala", runner)
+        self.assertIn(".fill 30, 4, 0", workload)
+        self.assertIn("OWNED-MEMORY-CPU-SIGNATURE-V3", verifier)
+
+    def test_dcache_origin_signature_rejects_legacy_and_bad_origin(self) -> None:
+        source_start = 8224
+        values = [
+            1, 0, 0x11223344, 0x5522AA44, 0xCAFEBABE, 2, 8, 8,
+            2, 3, 2, 1, source_start, 8256, 8, 8, 0, 0,
+            source_start, source_start, 2, 2, 8, 8, 0, 0,
+            source_start, source_start, 2, 2,
+        ]
+
+        def verify(candidate: list[int]) -> subprocess.CompletedProcess[str]:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as sig:
+                sig.write("".join(f"{value:08x}\n" for value in candidate))
+                sig.flush()
+                return subprocess.run(
+                    ["python3", str(ROCKET_MEMORY_VERIFIER), "rocket", sig.name],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+        self.assertEqual(verify(values).returncode, 0)
+        self.assertNotEqual(verify(values[:22]).returncode, 0)
+        bad_origin = values.copy()
+        bad_origin[24] = 1
+        self.assertNotEqual(verify(bad_origin).returncode, 0)
+        bad_source = values.copy()
+        bad_source[27] = 8256
+        self.assertNotEqual(verify(bad_source).returncode, 0)
+
+        with tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as sig:
+            sig.write("not-hex\n")
+            sig.flush()
+            malformed = subprocess.run(
+                ["python3", str(ROCKET_MEMORY_VERIFIER), "rocket", sig.name],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertNotEqual(malformed.returncode, 0)
+
+        extra_word = values + [0]
+        self.assertNotEqual(verify(extra_word).returncode, 0)
+        bad_prefix = values.copy()
+        bad_prefix[2] ^= 1
+        self.assertNotEqual(verify(bad_prefix).returncode, 0)
 
 
 if __name__ == "__main__":

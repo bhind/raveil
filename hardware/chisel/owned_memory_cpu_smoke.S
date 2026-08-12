@@ -99,6 +99,35 @@ _start:
     bne     t5, a5, fail_source_phase
     bne     t6, a5, fail_source_phase
 
+    lw      t0, 0x78(s1)
+    lw      t1, 0x7c(s1)
+    lw      t2, 0x80(s1)
+    lw      t3, 0x84(s1)
+    lw      t4, 0x88(s1)
+    lw      t5, 0x8c(s1)
+    lw      t6, 0x90(s1)
+    lw      a6, 0x94(s1)
+    sw      t0, 88(s2)
+    sw      t1, 92(s2)
+    sw      t2, 96(s2)
+    sw      t3, 100(s2)
+    sw      t4, 104(s2)
+    sw      t5, 108(s2)
+    sw      t6, 112(s2)
+    sw      a6, 116(s2)
+    li      a5, 8
+    bne     t0, a5, fail_dcache_origin_accepted
+    bne     t1, a5, fail_dcache_origin_completed
+    bnez    t2, fail_non_dcache_origin
+    bnez    t3, fail_non_dcache_origin
+    bltu    t4, s3, fail_dcache_origin_source
+    bgeu    t4, s4, fail_dcache_origin_source
+    bltu    t5, s3, fail_dcache_origin_source
+    bgeu    t5, s4, fail_dcache_origin_source
+    li      a5, 2
+    bne     t6, a5, fail_dcache_origin_phase
+    bne     a6, a5, fail_dcache_origin_phase
+
     li      a0, 1
     j       finish
 
@@ -152,6 +181,21 @@ fail_source_range:
     j       finish
 fail_source_phase:
     li      a0, 35
+    j       finish
+fail_dcache_origin_accepted:
+    li      a0, 37
+    j       finish
+fail_dcache_origin_completed:
+    li      a0, 39
+    j       finish
+fail_non_dcache_origin:
+    li      a0, 41
+    j       finish
+fail_dcache_origin_source:
+    li      a0, 43
+    j       finish
+fail_dcache_origin_phase:
+    li      a0, 45
 
 finish:
     sw      a0, 0(s2)
@@ -166,7 +210,7 @@ finish:
     .align 4
     .globl begin_signature
 begin_signature:
-    .fill 22, 4, 0
+    .fill 30, 4, 0
     .globl end_signature
 end_signature:
 

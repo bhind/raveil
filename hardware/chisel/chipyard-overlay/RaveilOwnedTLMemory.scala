@@ -6,6 +6,7 @@ import org.chipsalliance.cde.config.{Config, Field, Parameters}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.subsystem._
 import freechips.rocketchip.tilelink._
+import freechips.rocketchip.util._
 import chipyard.BuildSystem
 
 case class RaveilOwnedMemoryParams(
@@ -35,6 +36,11 @@ object RaveilOwnedMemoryPhase {
   val Fallback = 6
   val Count = 7
 }
+
+case object RaveilDCacheOrigin extends DataKey[Bool]("raveil_dcache_origin")
+
+case class RaveilDCacheOriginField()
+    extends SimpleBundleField[Bool](RaveilDCacheOrigin)(Output(Bool()), false.B)
 
 /**
   * Owned 32-bit, maximum-one-outstanding TileLink manager.
@@ -79,7 +85,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       fifoId = Some(0)
     )),
     beatBytes = beatBytes,
-    minLatency = 1
+    minLatency = 1,
+    requestKeys = Seq(RaveilDCacheOrigin)
   )))
 
   lazy val module = new LazyModuleImp(this) {
@@ -98,6 +105,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responseIsData = RegInit(false.B)
     val responsePhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val responseExpectedClient = RegInit(false.B)
+    val responseDcacheOrigin = RegInit(false.B)
 
     val phase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val acceptedCount = RegInit(0.U(32.W))
@@ -108,6 +116,16 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val expectedCompletedCount = RegInit(0.U(32.W))
     val unexpectedAcceptedCount = RegInit(0.U(32.W))
     val unexpectedCompletedCount = RegInit(0.U(32.W))
+    val dcacheOriginAcceptedCount = RegInit(0.U(32.W))
+    val dcacheOriginCompletedCount = RegInit(0.U(32.W))
+    val nonDcacheOriginAcceptedCount = RegInit(0.U(32.W))
+    val nonDcacheOriginCompletedCount = RegInit(0.U(32.W))
+    val lastDcacheOriginAcceptedSource = RegInit(0.U(32.W))
+    val lastDcacheOriginCompletedSource = RegInit(0.U(32.W))
+    val lastDcacheOriginAcceptedPhase =
+      RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val lastDcacheOriginCompletedPhase =
+      RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val lastAcceptedSource = RegInit(0.U(32.W))
     val lastCompletedSource = RegInit(0.U(32.W))
     val lastAcceptedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
@@ -131,6 +149,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val expectedClientRequest =
       tl.a.bits.source >= params.expectedClientSourceStart.U &&
       tl.a.bits.source < params.expectedClientSourceEnd.U
+    val dcacheOriginRequest =
+      tl.a.bits.user.lift(RaveilDCacheOrigin).getOrElse(false.B)
     val wordIndex = ((requestAddress - params.base.U) >> 2)(log2Ceil(words) - 1, 0)
 
     val memoryRead = tl.a.fire && dataRequest && get && !requestError
@@ -160,6 +180,14 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     when(controlOffset === 0x6c.U) { controlReadData := lastCompletedSource }
     when(controlOffset === 0x70.U) { controlReadData := lastAcceptedPhase }
     when(controlOffset === 0x74.U) { controlReadData := lastCompletedPhase }
+    when(controlOffset === 0x78.U) { controlReadData := dcacheOriginAcceptedCount }
+    when(controlOffset === 0x7c.U) { controlReadData := dcacheOriginCompletedCount }
+    when(controlOffset === 0x80.U) { controlReadData := nonDcacheOriginAcceptedCount }
+    when(controlOffset === 0x84.U) { controlReadData := nonDcacheOriginCompletedCount }
+    when(controlOffset === 0x88.U) { controlReadData := lastDcacheOriginAcceptedSource }
+    when(controlOffset === 0x8c.U) { controlReadData := lastDcacheOriginCompletedSource }
+    when(controlOffset === 0x90.U) { controlReadData := lastDcacheOriginAcceptedPhase }
+    when(controlOffset === 0x94.U) { controlReadData := lastDcacheOriginCompletedPhase }
     val freshResponseData = Mux(responseRead && !responseIsData,
       responseControlData, freshReadData)
 
@@ -173,6 +201,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseIsData := dataRequest
       responsePhase := phase
       responseExpectedClient := expectedClientRequest
+      responseDcacheOrigin := dcacheOriginRequest
       when(controlRequest && get) {
         responseControlData := controlReadData
       }
@@ -185,6 +214,13 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           expectedAcceptedCount := expectedAcceptedCount + 1.U
         }.otherwise {
           unexpectedAcceptedCount := unexpectedAcceptedCount + 1.U
+        }
+        when(dcacheOriginRequest) {
+          dcacheOriginAcceptedCount := dcacheOriginAcceptedCount + 1.U
+          lastDcacheOriginAcceptedSource := tl.a.bits.source
+          lastDcacheOriginAcceptedPhase := phase
+        }.otherwise {
+          nonDcacheOriginAcceptedCount := nonDcacheOriginAcceptedCount + 1.U
         }
         when(get) {
           phaseReadCounts(phase) := phaseReadCounts(phase) + 1.U
@@ -213,7 +249,6 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     tl.d.bits.denied := responseError
     tl.d.bits.data := Mux(responseRead, responseData, 0.U)
     tl.d.bits.corrupt := responseError && responseRead
-
     when(responseDue && !tl.d.ready) {
       responseHeld := true.B
       responseHeldData := freshResponseData
@@ -230,6 +265,13 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         }.otherwise {
           unexpectedCompletedCount := unexpectedCompletedCount + 1.U
         }
+        when(responseDcacheOrigin) {
+          dcacheOriginCompletedCount := dcacheOriginCompletedCount + 1.U
+          lastDcacheOriginCompletedSource := responseSource
+          lastDcacheOriginCompletedPhase := responsePhase
+        }.otherwise {
+          nonDcacheOriginCompletedCount := nonDcacheOriginCompletedCount + 1.U
+        }
       }
     }
 
@@ -240,6 +282,10 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         (busy && responseIsData && !responseError && responseExpectedClient).asUInt)
       assert(unexpectedAcceptedCount === unexpectedCompletedCount +
         (busy && responseIsData && !responseError && !responseExpectedClient).asUInt)
+      assert(dcacheOriginAcceptedCount === dcacheOriginCompletedCount +
+        (busy && responseIsData && !responseError && responseDcacheOrigin).asUInt)
+      assert(nonDcacheOriginAcceptedCount === nonDcacheOriginCompletedCount +
+        (busy && responseIsData && !responseError && !responseDcacheOrigin).asUInt)
       when(responseHeld) {
         assert(tl.d.valid)
       }
@@ -286,17 +332,3 @@ class WithRaveilOwnedMemorySourceRange(start: Int, end: Int)
     expectedClientSourceEnd = end
   ))
 })
-
-class RaveilOwnedRocketConfig extends Config(
-  new WithRaveilOwnedBuildSystem ++
-  new WithRaveilOwnedMemorySourceRange(8224, 8256) ++
-  new testchipip.soc.WithNoScratchpads ++
-  new chipyard.RocketConfig
-)
-
-class RaveilOwnedSmallBoomConfig extends Config(
-  new WithRaveilOwnedBuildSystem ++
-  new WithRaveilOwnedMemorySourceRange(8288, 8320) ++
-  new testchipip.soc.WithNoScratchpads ++
-  new chipyard.SmallBoomConfig
-)

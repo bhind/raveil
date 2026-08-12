@@ -1,0 +1,8 @@
+diff --git a/src/main/scala/common/tile.scala b/src/main/scala/common/tile.scala
+index 0fbcb382..f9597f13 100644
+--- a/src/main/scala/common/tile.scala
++++ b/src/main/scala/common/tile.scala
+@@ -134 +134,2 @@ class BoomTile private(
+-  tlMasterXbar.node := dCacheTap := TLWidthWidget(tileParams.dcache.get.rowBits/8) := visibilityNode := dcache.node
++  tlMasterXbar.node := dCacheTap := TLWidthWidget(tileParams.dcache.get.rowBits/8) :=
++    visibilityNode := p(DCacheTLNodeTransformKey)(p)(dcache.node)

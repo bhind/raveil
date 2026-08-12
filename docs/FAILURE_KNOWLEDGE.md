@@ -554,6 +554,30 @@ labelled unknown.
 - State: corrected with named bridge/client module implementations; the final
   assert-enabled Verilator run and checksum-verified cache rerun pass.
 
+## TileLink metadata must be verified through every negotiated junction
+
+- Symptom: a DCache-local origin bit compiled in the adapter but arrived false
+  at the owned manager; a later echo-field attempt stopped during FIRRTL
+  lowering with uninitialized Xbar and error-manager fields.
+- Cause: the pinned `TLXbar` intentionally replaced request `user` fields with
+  `DontCare`. Moving the diagnostic to an echo field avoided that assignment
+  but imposed a D-response echo obligation on every reachable manager,
+  including `TLError`, and a field present on only one client left unioned wide
+  bundle members without deterministic defaults.
+- Prevention: choose request metadata when only A-side observation is needed;
+  initialize absent unioned fields from their declared defaults and preserve
+  negotiated fields through the pinned Xbar. Do not infer metadata retention
+  from diplomacy negotiation or a tagger module name alone.
+- Detection: require complete firtool lowering plus runtime positive and
+  negative counters. For T-0042 the two CPU paths must report structural origin
+  8/8 and non-origin 0/0, while the untagged raw client must report origin 0/0
+  and non-origin 7/7.
+- Evidence: T-0042 `RaveilDCacheOriginTagger.scala`,
+  `t-0042-tlxbar-request-defaults.patch`, the failed request-user and echo
+  attempts, and the final Rocket/BOOM signature V3 plus protocol V4 markers.
+- State: corrected for the pinned diagnostic path. Target-ELF semantic
+  initiator identity and loader/debug negative coverage remain open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

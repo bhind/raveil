@@ -189,7 +189,15 @@ int main(int argc, char** argv) {
     fail("last accepted phase mismatch");
   if (expect_data(transact(dut, get, control_base + 0x74, 0, 0xf, 2, 0), 2, 0) != 2)
     fail("last completed phase mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x78, 0, 0xf, 2, 0), 2, 0) != 0)
+    fail("raw client was misclassified as DCache-origin at acceptance");
+  if (expect_data(transact(dut, get, control_base + 0x7c, 0, 0xf, 2, 0), 2, 0) != 0)
+    fail("raw client was misclassified as DCache-origin at completion");
+  if (expect_data(transact(dut, get, control_base + 0x80, 0, 0xf, 2, 0), 2, 0) != 7)
+    fail("non-DCache-origin accepted counter mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x84, 0, 0xf, 2, 0), 2, 0) != 7)
+    fail("non-DCache-origin completed counter mismatch");
 
-  std::printf("OWNED-TL-PROTOCOL-V3 status=OK transactions=26 put_full=1 put_partial=5 get=20 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered same_source_reuse_blocking=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data,execution-read,source-class,request-response-phase source_classifier_range=1:3 unexpected_boundary_sources=0,3 expected_source_accepted=3 expected_source_completed=3 unexpected_source_accepted=4 unexpected_source_completed=4 last_source=3 last_phase=2 cpu_execution=not-run source_client_class=harness-range-only semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
+  std::printf("OWNED-TL-PROTOCOL-V4 status=OK transactions=30 put_full=1 put_partial=5 get=24 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered same_source_reuse_blocking=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data,execution-read,source-class,request-response-phase,dcache-origin-sideband source_classifier_range=1:3 unexpected_boundary_sources=0,3 expected_source_accepted=3 expected_source_completed=3 unexpected_source_accepted=4 unexpected_source_completed=4 dcache_origin_accepted=0 dcache_origin_completed=0 non_dcache_origin_accepted=7 non_dcache_origin_completed=7 last_source=3 last_phase=2 cpu_execution=not-run source_client_class=harness-range-only dcache_origin_negative=raw-client-without-sideband semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
   return 0;
 }

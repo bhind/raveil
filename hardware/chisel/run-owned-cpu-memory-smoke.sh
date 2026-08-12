@@ -4,11 +4,16 @@ set -eu
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 chipyard="$repo_root/external/chipyard"
 overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala"
+origin_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilDCacheOriginTagger.scala"
+rocket_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch"
+boom_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch"
+xbar_request_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch"
 workload="$repo_root/hardware/chisel/owned_memory_cpu_smoke.S"
 verifier="$repo_root/hardware/chisel/verify_owned_memory_cpu_signature.py"
 source_map_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_map.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
+dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
 image=raveil-boom-functional-sim:v1
 platform=linux/amd64
 toolchain_volume=raveil-chipyard-conda-lock-v1
@@ -28,7 +33,8 @@ case "$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
         ;;
 esac
 
-for input in "$overlay" "$workload" "$verifier" "$source_map_verifier" "$linker" "$runner"; do
+for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
+    "$source_map_verifier" "$linker" "$runner" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
         exit 1
@@ -50,8 +56,13 @@ command -v docker >/dev/null 2>&1 || {
 }
 
 overlay_sha256=$(shasum -a 256 "$overlay" | awk '{print $1}')
+origin_overlay_sha256=$(shasum -a 256 "$origin_overlay" | awk '{print $1}')
+rocket_hook_patch_sha256=$(shasum -a 256 "$rocket_hook_patch" | awk '{print $1}')
+boom_hook_patch_sha256=$(shasum -a 256 "$boom_hook_patch" | awk '{print $1}')
+xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 input_sha256=$(
-    shasum -a 256 "$overlay" "$workload" "$verifier" "$source_map_verifier" "$linker" "$runner" |
+    shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
+        "$verifier" "$source_map_verifier" "$linker" "$runner" "$dockerfile" |
         awk '{print $1}' |
         shasum -a 256 |
         awk '{print $1}'
@@ -71,6 +82,11 @@ docker run --rm \
     --mount "type=volume,source=$toolchain_volume,target=/locked,readonly" \
     --mount "type=volume,source=$build_volume,target=/build" \
     --env "RAVEIL_OVERLAY_SHA256=$overlay_sha256" \
+    --env "RAVEIL_ORIGIN_OVERLAY_SHA256=$origin_overlay_sha256" \
+    --env "RAVEIL_ROCKET_HOOK_PATCH_SHA256=$rocket_hook_patch_sha256" \
+    --env "RAVEIL_BOOM_HOOK_PATCH_SHA256=$boom_hook_patch_sha256" \
+    --env "RAVEIL_XBAR_REQUEST_PATCH_SHA256=$xbar_request_patch_sha256" \
+    --env "RAVEIL_INPUT_SHA256=$input_sha256" \
     --env "RAVEIL_OWNED_CPU_CONFIG=$cpu_config" \
     --env "RAVEIL_OWNED_CPU_CONFIG_FQ=$cpu_config_fq" \
     --env "RAVEIL_OWNED_CPU_LABEL=$cpu_label" \
@@ -88,16 +104,52 @@ expected_lock='"$lock_sha"'
 verilator --version | grep -q "Verilator 5.020"
 riscv64-unknown-elf-gcc --version | grep -q "12.2.0"
 
-build_root=/build/$RAVEIL_OVERLAY_SHA256
-if [ ! -d "$build_root/chipyard/.git" ]; then
+build_root=/build/$RAVEIL_INPUT_SHA256
+ready_marker="$build_root/.raveil-source-ready"
+if [ -e "$build_root" ] && [ ! -f "$ready_marker" ]; then
+  echo "error: persistent simulator source cache is incomplete" >&2
+  exit 1
+fi
+if [ ! -e "$build_root" ]; then
   mkdir -p "$build_root"
   cp -a /source "$build_root/chipyard"
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "d7ce4d0fd84c118fc0db36254f98889b509b6070d1d48dfbc52bb7139a8ca6d2" ]
+  [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/common/tile.scala" | awk "{print \$1}")" = "570d48ccd0978b55ea9aba77af4a6b8280194d09e2e6c3f018dbe963ec65a9dc" ]
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "7ef8f49ccb3b8df8ba3860d1a54d1eee6d964431b77aa147dd2511f97fe3a613" ]
+  [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch | awk "{print \$1}")" = "$RAVEIL_ROCKET_HOOK_PATCH_SHA256" ]
+  [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_HOOK_PATCH_SHA256" ]
+  [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch | awk "{print \$1}")" = "$RAVEIL_XBAR_REQUEST_PATCH_SHA256" ]
+  git -C "$build_root/chipyard/generators/rocket-chip" apply --check --unidiff-zero \
+    /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch
+  git -C "$build_root/chipyard/generators/rocket-chip" apply --unidiff-zero \
+    /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch
+  git -C "$build_root/chipyard/generators/boom" apply --check --unidiff-zero \
+    /repo/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch
+  git -C "$build_root/chipyard/generators/boom" apply --unidiff-zero \
+    /repo/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch
+  git -C "$build_root/chipyard/generators/rocket-chip" apply --check --unidiff-zero \
+    /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch
+  git -C "$build_root/chipyard/generators/rocket-chip" apply --unidiff-zero \
+    /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
+  [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/common/tile.scala" | awk "{print \$1}")" = "2f25f75be69e2dc05c12137e35415224a950306cfbd19a0b2c1d071087bee9d6" ]
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "4867e293671c4df061637b01f358772595c0ec0efff359deeacb8572dde4cbe2" ]
   install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala \
     "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala"
+  install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilDCacheOriginTagger.scala \
+    "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala"
+  printf "%s\n" "$RAVEIL_INPUT_SHA256" > "$ready_marker"
 fi
+[ -d "$build_root/chipyard/.git" ]
+[ "$(cat "$ready_marker")" = "$RAVEIL_INPUT_SHA256" ]
 [ "$(git -C "$build_root/chipyard" rev-parse HEAD)" = "$expected_chipyard" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala" | awk "{print \$1}")" = "$RAVEIL_OVERLAY_SHA256" ]
-expected_overlay_status="?? generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala"
+[ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala" | awk "{print \$1}")" = "$RAVEIL_ORIGIN_OVERLAY_SHA256" ]
+[ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
+[ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/common/tile.scala" | awk "{print \$1}")" = "2f25f75be69e2dc05c12137e35415224a950306cfbd19a0b2c1d071087bee9d6" ]
+[ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "4867e293671c4df061637b01f358772595c0ec0efff359deeacb8572dde4cbe2" ]
+expected_overlay_status="?? generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala
+?? generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala"
 [ "$(git -C "$build_root/chipyard" status --porcelain --untracked-files=all --ignore-submodules=dirty)" = "$expected_overlay_status" ] || {
   echo "error: persistent simulator source cache contains an unexpected top-level change" >&2
   exit 1
@@ -105,8 +157,8 @@ expected_overlay_status="?? generators/chipyard/src/main/scala/raveil/RaveilOwne
 git -C "$build_root/chipyard" diff --quiet --ignore-submodules=dirty
 ! git -C "$build_root/chipyard" submodule status | grep -q "^+"
 git -C "$build_root/chipyard" submodule foreach --quiet --recursive '\''
-  git diff --quiet
-  unexpected=$(git status --porcelain --untracked-files=all | grep -v "^?? target/" || true)
+  git diff --check
+  unexpected=$(git status --porcelain --untracked-files=all | grep -v "^?? target/" | grep -v "^ M src/main/scala/rocket/HellaCache.scala$" | grep -v "^ M src/main/scala/tilelink/Xbar.scala$" | grep -v "^ M src/main/scala/common/tile.scala$" || true)
   [ -z "$unexpected" ] || {
     echo "error: persistent simulator submodule cache contains an unexpected change: $name" >&2
     echo "$unexpected" >&2
@@ -139,5 +191,5 @@ rm -f "$signature"
   +permissive +permissive-off "$build_root/owned_memory_cpu_smoke.elf"
 python3 /repo/hardware/chisel/verify_owned_memory_cpu_signature.py \
   "$RAVEIL_OWNED_CPU_LABEL" "$signature"
-printf "OWNED-CPU-MEMORY-SMOKE-V2 status=OK cpu=%s config=%s input_sha256=%s phase_fences=iorw direct_manager_path=verified source_client_class=dcache-mmio-verified semantic_initiator=not-proven cpu_execution=%s-rtl-simulation resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+printf "OWNED-CPU-MEMORY-SMOKE-V3 status=OK cpu=%s config=%s input_sha256=%s phase_fences=iorw direct_manager_path=verified source_client_class=dcache-mmio-verified dcache_origin_path=observed semantic_initiator=not-proven cpu_execution=%s-rtl-simulation resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
   "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" '"$input_sha256"' "$RAVEIL_OWNED_CPU_LABEL"'

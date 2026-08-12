@@ -245,12 +245,14 @@ end-to-end ordering, resource matching, and all measurement remain separate
 follow-ups. It also verifies manager-local expected/unexpected source-class
 conservation and preservation of the A-accepted software phase through D
 completion under backpressure.
-Protocol V3 deliberately makes the classifier's negative path executable. Its
+Protocol V4 deliberately makes the classifier's negative path executable. Its
 raw client has source IDs `[0,4)`, while the expected range is `[1,3)`; sources
 0 and 3 therefore exercise the two boundaries and conserve unexpected
 accepted/completed counts at 4/4, while expected traffic conserves at 3/3.
-Re-presenting the pending source under D backpressure is rejected. These are
-manager-harness invariants, not observations of either CPU or FESVR.
+Re-presenting the pending source under D backpressure is rejected. The same
+untagged raw client completes all seven legal data requests as structural
+DCache-origin 0/0 and non-origin 7/7. These are manager-harness invariants, not
+observations of either CPU or FESVR.
 
 The first CPU execution path is a shared bare-metal functional smoke with thin
 Rocket and BOOM entrypoints. Identical RV64 load/store and `fence iorw,iorw`
@@ -284,15 +286,22 @@ harness supplies that metadata directly, so its successful correlation is not
 semantic CPU attribution and does not alter ADR-0044's unmatched deployed
 manager or establish equal CPU/Graph resources.
 
-Attribution therefore has two distinct possible evidence layers. A final
+Attribution therefore has two distinct implemented diagnostic evidence layers.
+A final
 manager-side TileLink source range is a generated config/Xbar/fragmenter client
-class only. A future DCache-local sideband, inserted before the tile master
-crossbar, could instead establish structural DCache origin and exclude the
-separate SimTSI/FESVR master without relying on final source numbering. BOOM
-already exposes a DCache tap, while the pinned Rocket wiring needs an explicit
-attach point. Neither layer supplies an instruction PC or target-ELF semantic
-intent; the second remains only a design candidate until a later decision,
-implementation, and fail-closed loader/debug negative tests.
+class only. Repository-owned hooks now insert a one-bit request field after each
+DCache and before the tile master crossbar. A pinned ephemeral Xbar patch
+preserves negotiated request fields and initializes absent client fields from
+their declared false defaults; it is hash-checked against exact pre/post pinned
+sources. The manager latches the bit at A acceptance and uses the retained bit
+only for its internal D-completion accounting. Rocket and BOOM each observe
+origin 8/8 and non-origin 0/0 for the bounded workload, while the untagged raw
+client observes origin 0/0 and non-origin 7/7. This establishes structural
+DCache-boundary crossing and distinguishes the separate SimTSI/FESVR master in
+these harnesses without treating final source numbering as semantic identity.
+Neither layer supplies an instruction PC or target-ELF semantic intent, nor do
+the current tests exclude all loader/debug DCache activity. Durable semantic
+assignment and fail-closed loader/debug negatives remain later work.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

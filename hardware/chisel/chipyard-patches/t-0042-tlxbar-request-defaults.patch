@@ -1,0 +1,20 @@
+diff --git a/src/main/scala/tilelink/Xbar.scala b/src/main/scala/tilelink/Xbar.scala
+index e0f6c0f1..00000000 100644
+--- a/src/main/scala/tilelink/Xbar.scala
++++ b/src/main/scala/tilelink/Xbar.scala
+@@ -159,0 +160 @@ object TLXbar
++        BundleMap.setAlignedDefaults(in(i).a.bits.user)
+@@ -161 +161,0 @@ object TLXbar
+-        in(i).a.bits.user := DontCare
+@@ -180,0 +181 @@ object TLXbar
++        BundleMap.setAlignedDefaults(in(i).c.bits.user)
+@@ -182 +182,0 @@ object TLXbar
+-        in(i).c.bits.user := DontCare
+@@ -216,0 +217 @@ object TLXbar
++        BundleMap.setAlignedDefaults(out(o).a.bits.user)
+@@ -218 +218,0 @@ object TLXbar
+-        out(o).a.bits.user := DontCare
+@@ -235,0 +236 @@ object TLXbar
++        BundleMap.setAlignedDefaults(out(o).c.bits.user)
+@@ -237 +237,0 @@ object TLXbar
+-        out(o).c.bits.user := DontCare

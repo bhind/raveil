@@ -350,7 +350,7 @@ Run the direct owned-manager protocol simulation with:
 
 This builds a pinned Chipyard assembly in an ephemeral source copy, emits the
 raw-client/owned-manager harness through FIRRTL, compiles it with assert-enabled
-Verilator, and runs 26 legal negotiated TileLink transactions. The test covers
+Verilator, and runs 30 legal negotiated TileLink transactions. The test covers
 full and partial writes, masks `0x5` and `0xa`, invalid phase denial, response
 backpressure and metadata stability, maximum-one-outstanding admission, reset
 phase, aggregate counters, expected/unexpected source-class conservation, and
@@ -362,14 +362,16 @@ measurement evidence. The raw client bypasses Rocket and BOOM; success remains
 `rtl-simulation-functional`, with CPU execution not run, initiator attribution
 unverified, resource matching false, and performance not measured.
 
-Protocol V3 intentionally narrows the expected classifier range to `[1,3)`
-inside the client's legal `[0,4)` range. The 26-transaction run reports
+Protocol V4 intentionally narrows the expected classifier range to `[1,3)`
+inside the client's legal `[0,4)` range. The 30-transaction run reports
 expected accepted/completed 3/3 and unexpected accepted/completed 4/4 for
 deliberate boundary sources 0 and 3. It also re-presents the same source while a
 D response is held and verifies that the one-outstanding manager refuses it.
-This is negative source-class and conservation evidence for the raw harness,
-not proof of CPU execution, DCache origin, loader/debug exclusion, or semantic
-initiator identity.
+Because this raw client supplies no DCache-origin request field, it also reports
+DCache-origin accepted/completed 0/0 and non-origin 7/7. This is negative
+source-class, structural-origin, and conservation evidence for the raw harness,
+not proof of CPU execution, target-ELF semantic initiator identity, or complete
+loader/debug exclusion.
 
 Run the standalone TileLink-to-owned-contract bridge with:
 
@@ -410,7 +412,8 @@ manager-adjacent fragmenter. These are config/Xbar/fragmenter-derived source
 coordinates, not ISA-level IDs.
 The ELF uses `fence iorw,iorw`, covers a full write and two byte-lane writes,
 changes the software phase, and records data plus aggregate counters in a
-22-word signature that is independently decoded on the host. It additionally
+30-word signature whose first 22 words retain the previous layout and which is
+independently decoded on the host. It additionally
 requires expected-source accepted/completed 8/8, unexpected-source 0/0,
 in-range last accepted/completed sources, and phases 2/2. A successful marker is
 `rtl-simulation-functional` evidence for each mapped path only. Both runs
@@ -421,20 +424,26 @@ in the marker.
 Before reuse, the runner rejects unexpected tracked or untracked source-cache
 changes while allowing only the intended overlay and task-local SBT `target/`
 outputs.
-The observed source range establishes only a TileLink client class, not the
-target ELF's semantic initiator. The phase is correlated from A acceptance to
-D completion but remains a software-declared adapter label rather than
+The observed source range establishes only a TileLink client class. A
+repository-owned adapter immediately after each DCache sets a one-bit request
+field. A pinned ephemeral TLXbar patch preserves negotiated request fields and
+applies their declared false defaults to clients without the field; runners
+verify the patch and exact pre/post Xbar hashes. The manager latches the field
+at A acceptance and correlates it internally to D completion. Both CPU runs
+require origin accepted/completed 8/8, non-origin 0/0, in-range final origin
+sources, and origin phases 2/2. This proves bounded structural DCache-boundary
+crossing, not the target ELF's semantic initiator, instruction, or PC, and it
+does not exclude all untested loader/debug DCache activity. The phase remains a
+software-declared adapter label rather than
 ADR-0043 owned initiator/phase metadata. Resources are unmatched, OoO is not
 isolated, and performance is not measured.
 
-Pinned Rocket/BOOM source inspection places the narrowest common conceptual
-origin hook after the DCache and before the tile master Xbar. BOOM has an
-existing `dCacheTap`; Rocket's `HasHellaCache` wiring needs an explicit attach
-point. This is a candidate only. If implemented it could distinguish structural
-DCache traffic from the separate SimTSI/FESVR master, but it would still not
-prove which ELF instruction or PC semantically initiated a request. Durable
-owned attribution requires a later decision plus functional and negative
-loader/debug evidence.
+Pinned Rocket/BOOM source hooks now place the structural marker after the
+DCache and before the tile master Xbar. This distinguishes tagged DCache traffic
+from the separate SimTSI/FESVR master in the bounded positive and raw-client
+negative harnesses, but it does not prove which ELF instruction or PC
+semantically initiated a request. Durable owned attribution requires a later
+decision plus fail-closed loader/debug negative evidence.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
