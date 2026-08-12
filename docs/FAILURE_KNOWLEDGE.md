@@ -578,6 +578,29 @@ labelled unknown.
 - State: corrected for the pinned diagnostic path. Target-ELF semantic
   initiator identity and loader/debug negative coverage remain open.
 
+## ELF segment count is not transport request count
+
+- Symptom: the first dedicated four-byte loader probe expected one non-origin
+  TileLink request before CPU execution, but the pinned Rocket run observed two
+  accepted requests and failed its exact pre-CPU signature check.
+- Cause: the expectation equated one ELF `PT_LOAD` with one transport request.
+  FESVR aligns the four-byte write to the transport's eight-byte boundary by
+  reading the aligned chunk and writing the updated chunk, producing two
+  manager requests for this pinned case.
+- Prevention: validate ELF segment layout and observed transport multiplicity
+  as separate contracts. Do not derive TileLink request count from program-
+  header count.
+- Detection: snapshot accepted/completed and origin/non-origin counters before
+  the CPU touches the mapped page, then require their conservation again after
+  the CPU access. Keep source values bounded by the exact generated graph.
+- Evidence: T-0042 `owned_memory_loader_probe.S`,
+  `verify_owned_memory_loader_probe.py`, pinned FESVR `memif.cc`, the initial
+  failed Rocket signature, and the corrected Rocket/BOOM probe runs.
+- State: corrected as an expectation-model mismatch; the verifier now requires
+  serial-class non-origin 2/2 before CPU access and one additional tagged
+  DCache-origin completion afterward. This does not generalize the count to
+  other segments or transports.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

@@ -10,6 +10,9 @@ boom_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-dcache-
 xbar_request_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch"
 workload="$repo_root/hardware/chisel/owned_memory_cpu_smoke.S"
 verifier="$repo_root/hardware/chisel/verify_owned_memory_cpu_signature.py"
+loader_probe="$repo_root/hardware/chisel/owned_memory_loader_probe.S"
+loader_probe_linker="$repo_root/hardware/chisel/owned_memory_loader_probe.ld"
+loader_probe_verifier="$repo_root/hardware/chisel/verify_owned_memory_loader_probe.py"
 source_map_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_map.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
@@ -34,7 +37,7 @@ case "$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
 esac
 
 for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
-    "$source_map_verifier" "$linker" "$runner" "$dockerfile"; do
+    "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" "$linker" "$runner" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
         exit 1
@@ -62,7 +65,7 @@ boom_hook_patch_sha256=$(shasum -a 256 "$boom_hook_patch" | awk '{print $1}')
 xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 input_sha256=$(
     shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
-        "$verifier" "$source_map_verifier" "$linker" "$runner" "$dockerfile" |
+        "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" "$linker" "$runner" "$dockerfile" |
         awk '{print $1}' |
         shasum -a 256 |
         awk '{print $1}'
@@ -191,5 +194,41 @@ rm -f "$signature"
   +permissive +permissive-off "$build_root/owned_memory_cpu_smoke.elf"
 python3 /repo/hardware/chisel/verify_owned_memory_cpu_signature.py \
   "$RAVEIL_OWNED_CPU_LABEL" "$signature"
+
+riscv64-unknown-elf-gcc \
+  -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+  -nostdlib -nostartfiles -static -Wl,--no-relax \
+  -T /repo/hardware/chisel/owned_memory_loader_probe.ld \
+  /repo/hardware/chisel/owned_memory_loader_probe.S \
+  -o "$build_root/owned_memory_loader_probe.elf"
+probe_elf="$build_root/owned_memory_loader_probe.elf"
+probe_load_count=$(riscv64-unknown-elf-readelf -lW "$probe_elf" | \
+  awk '\''$1 == "LOAD" && $3 == "0x0000000008000000" { count += 1 } END { print count + 0 }'\'')
+[ "$probe_load_count" = 1 ] || {
+  echo "error: loader probe must contain exactly one PT_LOAD at 0x08000000" >&2
+  exit 1
+}
+probe_load=$(riscv64-unknown-elf-readelf -lW "$probe_elf" | \
+  awk '\''$1 == "LOAD" && $3 == "0x0000000008000000" { print $3, $4, $5, $6, $7 }'\'')
+[ "$probe_load" = "0x0000000008000000 0x0000000008000000 0x000004 0x000004 RW" ] || {
+  echo "error: loader probe PT_LOAD layout is not the exact four-byte writable owned-memory payload" >&2
+  exit 1
+}
+probe_symbols=$(riscv64-unknown-elf-nm -n "$probe_elf")
+[ "$(printf "%s\n" "$probe_symbols" | awk '\''$3 == "loader_probe_payload" { print $1 }'\'')" = 0000000008000000 ]
+[ "$(printf "%s\n" "$probe_symbols" | awk '\''$3 == "_start" { print $1 }'\'')" = 0000000080000000 ]
+[ "$(printf "%s\n" "$probe_symbols" | awk '\''$3 == "begin_signature" { print $1 }'\'')" = 00000000800001f0 ]
+[ "$(printf "%s\n" "$probe_symbols" | awk '\''$3 == "end_signature" { print $1 }'\'')" = 0000000080000274 ]
+[ "$(printf "%s\n" "$probe_symbols" | awk '\''$3 == "tohost" { print $1 }'\'')" = 0000000080000280 ]
+
+loader_signature="$build_root/owned_memory_loader_probe.signature"
+rm -f "$loader_signature"
+"$sim" +signature="$loader_signature" +signature-granularity=4 \
+  +permissive +permissive-off "$probe_elf"
+python3 /repo/hardware/chisel/verify_owned_memory_loader_probe.py \
+  "$RAVEIL_OWNED_CPU_LABEL" "$loader_signature"
+printf "OWNED-CPU-LOADER-PROBE-AUDIT-V1 status=OK cpu=%s config=%s input_sha256=%s graph_sha256=%s transport=SimTSI-FESVR-PT_LOAD preload_bypass=absent evidence=rtl-simulation-functional performance=not-measured\n" \
+  "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" \
+  "$(sha256sum "$graph" | cut -c1-64)"
 printf "OWNED-CPU-MEMORY-SMOKE-V3 status=OK cpu=%s config=%s input_sha256=%s phase_fences=iorw direct_manager_path=verified source_client_class=dcache-mmio-verified dcache_origin_path=observed semantic_initiator=not-proven cpu_execution=%s-rtl-simulation resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
   "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" '"$input_sha256"' "$RAVEIL_OWNED_CPU_LABEL"'

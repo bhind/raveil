@@ -306,9 +306,18 @@ client and the explicit field-stripping topology each observe origin 0/0 and
 non-origin 7/7. This establishes structural
 DCache-boundary crossing and distinguishes the separate SimTSI/FESVR master in
 these harnesses without treating final source numbering as semantic identity.
+The CPU runner also constructs a probe ELF with one four-byte writable
+`PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
+and invokes the simulator without `+loadmem`. In one manager lifetime the
+pre-CPU snapshot sees two serial-class non-origin requests from the pinned
+FESVR aligned transport, then a CPU read adds one config-specific tagged
+DCache-origin request. Accepted and completed classifications are conserved
+at 2/2 before and 3/3 after the CPU read. This tests one concrete PT_LOAD path;
+it does not make transport request count an ELF-segment invariant.
 Neither layer supplies an instruction PC or target-ELF semantic intent, nor do
 the current tests exclude all loader/debug DCache activity. Durable semantic
-assignment and fail-closed loader/debug negatives remain later work.
+assignment, Debug SBA coverage, and other loader/debug negatives remain later
+work.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

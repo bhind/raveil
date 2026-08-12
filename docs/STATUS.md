@@ -350,6 +350,22 @@ metadata, establish equal resources, isolate OoO, or support a performance,
 energy, area, OoO-removal, FPGA, or silicon claim.
 The ADR-0043 common-contract adapter remains open.
 
+The shared CPU runner now also executes a dedicated loader-path negative probe
+in each pinned configuration. Its ELF contains one four-byte writable
+`PT_LOAD` at the owned data page and keeps code, signature, and `tohost` in
+main RAM; exact `readelf` and symbol checks fail closed on layout drift, and
+the simulator invocation contains no `+loadmem` override. Before the CPU
+accesses the page, the manager observes two accepted/completed requests from
+the `[0,8192)` serial class, DCache-origin 0/0, and non-origin 2/2. The two
+requests are the pinned FESVR transport's aligned read/write sequence, not a
+one-request-per-segment invariant. After the CPU reads the loaded word, totals
+are 3/3, with DCache-origin 1/1, non-origin still 2/2, and the final origin
+source in the configuration-specific DCache range. This is bounded functional
+RTL evidence for the tested SimTSI/FESVR PT_LOAD path followed by a structural
+DCache crossing in the same simulation. Source and origin metadata do not
+prove the target ELF's semantic initiator, and Debug SBA, other loader/debug
+paths, durable semantic attribution, and matched resources remain open.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned
@@ -373,12 +389,14 @@ repository-owned Rocket and BOOM hooks insert the adapter immediately after
 each DCache and before the shared tile master crossbar. Runtime positive paths
 and the raw-client absence plus explicit field-stripping negative paths verify
 field retention and fail-closed false classification in these bounded
-harnesses. This structurally excludes the
-separate SimTSI/FESVR master from the observed positive class, but it still
-cannot identify a particular ELF instruction, PC, or semantic intent, and it
-does not test every loader/debug path. Selecting a durable ADR-0043 semantic
-metadata assignment boundary requires later policy, negative tests, and a new
-decision if the field is promoted beyond ADR-0044 diagnostics.
+harnesses. A concrete SimTSI/FESVR PT_LOAD probe now additionally observes
+serial-class traffic as non-origin before one tagged CPU read in the same run.
+This structurally separates that tested transport path from the observed CPU
+class, but it still cannot identify a particular ELF instruction, PC, or
+semantic intent, and it does not test every loader/debug path. Selecting a
+durable ADR-0043 semantic metadata assignment boundary requires later policy,
+negative tests, and a new decision if the field is promoted beyond ADR-0044
+diagnostics.
 
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM

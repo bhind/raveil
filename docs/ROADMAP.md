@@ -88,8 +88,12 @@ The corrected critical path is:
    test-only harness now drives origin true upstream, removes the negotiated
    field before the manager, and completes as origin 0/0 versus non-origin 7/7;
    metadata loss therefore fails closed in this bounded transport model.
-   Actual loader/debug path coverage and durable semantic attribution remain
-   open.
+   A dedicated four-byte writable PT_LOAD now exercises one actual pinned
+   SimTSI/FESVR transport path without `+loadmem`: its two aligned transport
+   requests complete as serial-class origin 0/0 versus non-origin 2/2 before a
+   CPU read adds one in-range DCache-origin completion. This is a bounded
+   loader-path negative, not complete loader/debug exclusion or target-ELF
+   semantic identity. Debug SBA and durable semantic attribution remain open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

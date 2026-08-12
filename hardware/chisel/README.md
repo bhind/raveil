@@ -447,13 +447,30 @@ software-declared adapter label rather than
 ADR-0043 owned initiator/phase metadata. Resources are unmatched, OoO is not
 isolated, and performance is not measured.
 
+Each CPU entrypoint also builds and runs `owned_memory_loader_probe.S` with
+`owned_memory_loader_probe.ld`. The probe ELF has exactly one four-byte
+writable `PT_LOAD` at `0x08000000`; code, its 33-word signature, and `tohost`
+remain in main RAM. The shared runner verifies the exact program-header and
+symbol addresses, does not pass `+loadmem`, and then checks two snapshots from
+one simulator process. Before CPU access, accepted/completed are 2/2, the
+sources are in SimTSI/FESVR `[0,8192)`, origin is 0/0, and non-origin is 2/2.
+The pinned FESVR transport aligns the partial segment write using a read then a
+write, so the two transport requests are not evidence that every ELF segment
+has a fixed request multiplicity. The CPU then reads payload `0x6c6f6164`;
+totals become 3/3, origin becomes 1/1, non-origin remains 2/2, and the final
+origin source falls in the selected Rocket or BOOM DCache range. The
+`OWNED-MEMORY-LOADER-PROBE-V1` and `OWNED-CPU-LOADER-PROBE-AUDIT-V1` markers
+are bounded `rtl-simulation-functional` evidence for this PT_LOAD path only.
+They do not prove a semantic ELF initiator, cover Debug SBA or every loader/
+debug path, establish resource matching, isolate OoO, or measure performance.
+
 Pinned Rocket/BOOM source hooks now place the structural marker after the
 DCache and before the tile master Xbar. This distinguishes tagged DCache traffic
 from the separate SimTSI/FESVR master in the bounded positive, raw-client
-absence, and test-only field-stripping harnesses, but it does not prove which
-ELF instruction or PC semantically initiated a request. Durable owned
-attribution requires a later decision plus testing of concrete loader/debug
-paths.
+absence, test-only field-stripping, and concrete PT_LOAD probe runs, but it
+does not prove which ELF instruction or PC semantically initiated a request.
+Durable owned attribution requires a later decision plus Debug SBA and other
+loader/debug path testing.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program

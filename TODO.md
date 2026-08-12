@@ -504,12 +504,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   completion. A second test-only protocol top now drives origin true upstream,
   removes the field before the manager, and completes as origin 0/0 and
   non-origin 7/7, proving that metadata loss fails closed in this transport
-  model. This is bounded structural-origin evidence only, not a real
-  loader/debug execution. Next select and exercise a concrete loader/debug
-  path, determine what semantic witness beyond DCache origin can identify the
-  intended ELF request, then design the matched resource boundary. Do not
-  promote a final config-dependent TileLink source ID, or DCache origin alone,
-  into target-ELF semantic identity.
+  model. A dedicated four-byte writable PT_LOAD probe now exercises the pinned
+  SimTSI/FESVR loader transport without `+loadmem`: before CPU access it
+  observes serial-class origin 0/0 and non-origin 2/2, then the CPU read adds
+  configuration-specific DCache origin 1/1 while non-origin remains 2/2.
+  This closes only that bounded loader-path negative. Next exercise a concrete
+  Debug SBA path, determine what semantic witness beyond DCache origin can
+  identify the intended ELF request, then design the matched resource
+  boundary. Do not promote a final config-dependent TileLink source ID, or
+  DCache origin alone, into target-ELF semantic identity.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

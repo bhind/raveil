@@ -96,6 +96,15 @@ CPU_SOURCE_MAP_VERIFIER = (
 CPU_MEMORY_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-cpu-memory-smoke.sh"
 )
+LOADER_PROBE_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_loader_probe.S"
+)
+LOADER_PROBE_LINKER = (
+    ROOT / "hardware" / "chisel" / "owned_memory_loader_probe.ld"
+)
+LOADER_PROBE_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_memory_loader_probe.py"
+)
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
@@ -389,6 +398,63 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         bad_prefix = values.copy()
         bad_prefix[2] ^= 1
         self.assertNotEqual(verify(bad_prefix).returncode, 0)
+
+    def test_loader_probe_is_pt_load_bounded_and_fail_closed(self) -> None:
+        workload = LOADER_PROBE_WORKLOAD.read_text(encoding="utf-8")
+        linker = LOADER_PROBE_LINKER.read_text(encoding="utf-8")
+        verifier = LOADER_PROBE_VERIFIER.read_text(encoding="utf-8")
+        runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+
+        self.assertIn("li      s0, 0x08000000", workload)
+        self.assertIn(".word 0x6c6f6164", workload)
+        self.assertIn(".fill 33, 4, 0", workload)
+        self.assertIn("probe PT_LOAD FLAGS(6)", linker)
+        self.assertIn(". = 0x08000000", linker)
+        self.assertIn("OWNED-MEMORY-LOADER-PROBE-V1", verifier)
+        self.assertIn('"rocket": (8224, 8256)', verifier)
+        self.assertIn('"boom": (8288, 8320)', verifier)
+        self.assertNotEqual(LOADER_PROBE_VERIFIER.stat().st_mode & 0o111, 0)
+        self.assertIn('"$loader_probe" "$loader_probe_linker"', runner)
+        self.assertIn('"$loader_probe_verifier" "$source_map_verifier"', runner)
+        self.assertIn("riscv64-unknown-elf-readelf -lW", runner)
+        self.assertIn("exactly one PT_LOAD at 0x08000000", runner)
+        self.assertIn("owned_memory_loader_probe.signature", runner)
+        self.assertIn("OWNED-CPU-LOADER-PROBE-AUDIT-V1", runner)
+        self.assertIn('sha256sum "$graph" | cut -c1-64', runner)
+        self.assertIn("preload_bypass=absent", runner)
+        self.assertNotIn("+loadmem", runner)
+
+    def test_loader_probe_signature_rejects_bad_paths(self) -> None:
+        source_start = 8224
+        values = [
+            1, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2,
+            0, 0, 0, 0, 0x6C6F6164,
+            3, 3, 1, 1, 2, 2, 1, 1, 2, 2,
+            source_start, source_start, 0, 0, source_start, 8256, 0,
+        ]
+
+        def verify(candidate: list[int]) -> subprocess.CompletedProcess[str]:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as sig:
+                sig.write("".join(f"{value:08x}\n" for value in candidate))
+                sig.flush()
+                return subprocess.run(
+                    ["python3", str(LOADER_PROBE_VERIFIER), "rocket", sig.name],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+        self.assertEqual(verify(values).returncode, 0)
+        bad_serial_source = values.copy()
+        bad_serial_source[11] = 8192
+        self.assertNotEqual(verify(bad_serial_source).returncode, 0)
+        bad_origin = values.copy()
+        bad_origin[7] = 1
+        self.assertNotEqual(verify(bad_origin).returncode, 0)
+        bad_dcache_source = values.copy()
+        bad_dcache_source[27] = 8256
+        self.assertNotEqual(verify(bad_dcache_source).returncode, 0)
+        self.assertNotEqual(verify(values[:-1]).returncode, 0)
 
 
 if __name__ == "__main__":
