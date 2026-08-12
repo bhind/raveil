@@ -233,6 +233,61 @@ labelled unknown.
 - State: corrected with five-bit coordinate padding; the full 512 checked
   outputs and cancel/restart path pass in Verilator.
 
+## SBT hardware builds may execute Git while loading project settings
+
+- Symptom: the first pinned BOOM Scala-project compile downloaded SBT and then
+  failed during project loading with `Cannot run program "git"`.
+- Cause: the minimal Temurin JDK container omitted Git, while an SBT Git plugin
+  queries repository metadata before the selected project compiles.
+- Prevention: include the exact external tool in the owned build environment;
+  do not assume a Java-only compile uses only the JVM.
+- Detection: start the build in a fresh container and require both tool-version
+  output and a final scoped success marker. Keep the source bind read-only and
+  compile an ephemeral copy so plugins cannot dirty evidence authority.
+- Evidence: T-0042 `run-boom-project-compile.sh` and
+  `docs/log/2026-08-12.md`.
+- State: dedicated compile image includes Git; Maven coordinate resolution is
+  still labelled unlocked and cannot support measurement evidence.
+
+## Chipyard elaboration needs the Make-provided boot ROM and device-tree compiler
+
+- Symptom: direct `chipyard.Generator` invocation first reached the configured
+  BOOM tile and failed on a missing target-directory `bootrom.rv64.img`; after
+  supplying the image it reached the next phase and failed because `dtc` was
+  absent from the minimal container.
+- Cause: invoking the Scala generator directly bypassed two prerequisites that
+  Chipyard's normal Make flow supplies: copying the checked-in testchip boot
+  images to the target directory and providing a device-tree compiler.
+- Prevention: reproduce both prerequisites explicitly in the owned functional
+  wrapper, print the `dtc` version, and retain the external Chipyard checkout as
+  read-only input. Treat digest-pinned base image plus unlocked APT/Maven
+  resolution as functional bootstrap only, never as measurement authority.
+- Detection: require the final elaboration marker and non-empty FIRRTL plus
+  annotation outputs containing `BoomCore`; reaching BOOM parameter output is
+  progress, not successful elaboration.
+- Evidence: T-0042 `run-boom-elaboration.sh`, `Dockerfile.boom`, and
+  `docs/log/2026-08-12.md`.
+- State: wrapper prerequisites corrected; retain both failed attempts as
+  bootstrap evidence.
+
+## Recursive Chipyard submodule setup is wider than the BOOM control boundary
+
+- Symptom: recursive initialization created nested checkout collisions and
+  attempted to fetch an unrelated private Mentor plugin before BOOM
+  elaboration could start.
+- Cause: the upstream repository's full recursive dependency graph includes
+  parent/nested ordering constraints and optional or private integrations that
+  are outside the BOOM functional-control scope.
+- Prevention: initialize only the explicit public parent gitlinks required by
+  the selected Chipyard project, without recursion, and accept each revision
+  only from the pinned parent tree.
+- Detection: require `git status --ignore-submodules=none` to be clean and the
+  source verifier to pass before every compile or elaboration.
+- Evidence: T-0042 `fetch-boom-elaboration-deps.sh` and
+  `docs/log/2026-08-12.md`.
+- State: corrected with explicit non-recursive public gitlinks; optional and
+  private integrations remain outside the owned boundary.
+
 ## Locked build inputs must exclude convenience hooks and generated state
 
 - Symptom: Rocket's upstream Nix development shell installed current Python

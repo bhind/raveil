@@ -172,6 +172,9 @@ checkout or unrelated prebuilt container:
 ```sh
 ./hardware/chisel/fetch-boom-reference.sh
 ./hardware/chisel/verify-boom-reference.sh
+./hardware/chisel/run-boom-project-compile.sh
+./hardware/chisel/fetch-boom-elaboration-deps.sh
+./hardware/chisel/run-boom-elaboration.sh
 ```
 
 The scripts fix Chipyard `ac58f38...bd43e1`, its BOOM gitlink
@@ -180,10 +183,18 @@ and the exact source path for chicken CSR `0x7c1` bit 3. A successful check
 prints `BOOM-SOURCE-REFERENCE-V1` with `diagnostic=serialize-dispatch` and
 `structures=retained`.
 
-This is source verification only. The diagnostic waits for an empty ROB/LSU
-before dispatch but retains the OoO hardware, so it is not an in-order core or
-an area/energy ablation. BOOM RTL execution still needs an owned immutable
-Chipyard build path; an unofficial prebuilt image is not evidence authority.
+The final wrapper copies the checked-in Chipyard boot images into an ephemeral
+target directory, prints the device-tree compiler version, and requires
+non-empty FIRRTL plus annotation output containing `BoomCore`. The observed
+functional marker is `BOOM-ELABORATION-V1 status=OK ... execution=not-run
+performance=not-measured`.
+
+The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
+is not an in-order core or an area/energy ablation. Elaboration is not program
+execution. The current container has a digest-pinned base but unlocked APT and
+Maven dependencies and cannot support measurement claims. BOOM RISC-V
+execution still needs an owned immutable simulator path; an unofficial
+prebuilt image is not evidence authority.
 
 The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
 `LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the

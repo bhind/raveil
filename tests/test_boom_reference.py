@@ -7,12 +7,19 @@ ROOT = Path(__file__).resolve().parents[1]
 PIN = ROOT / "hardware" / "chisel" / "boom-pin.env"
 FETCH = ROOT / "hardware" / "chisel" / "fetch-boom-reference.sh"
 VERIFY = ROOT / "hardware" / "chisel" / "verify-boom-reference.sh"
+COMPILE = ROOT / "hardware" / "chisel" / "run-boom-project-compile.sh"
+FETCH_DEPS = ROOT / "hardware" / "chisel" / "fetch-boom-elaboration-deps.sh"
+ELABORATE = ROOT / "hardware" / "chisel" / "run-boom-elaboration.sh"
+DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom"
 
 
 class BoomReferenceTests(unittest.TestCase):
     def test_entrypoints_are_executable(self) -> None:
         self.assertNotEqual(FETCH.stat().st_mode & 0o111, 0)
         self.assertNotEqual(VERIFY.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(COMPILE.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(FETCH_DEPS.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(ELABORATE.stat().st_mode & 0o111, 0)
 
     def test_pin_is_exact_and_has_license_hashes(self) -> None:
         fields = dict(
@@ -55,6 +62,40 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("BOOM-SOURCE-REFERENCE-V1 status=OK", completed.stdout)
         self.assertIn("evidence=source-verification", completed.stdout)
+
+    def test_project_compile_is_ephemeral_and_non_claiming(self) -> None:
+        runner = COMPILE.read_text(encoding="utf-8")
+        dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+        self.assertIn("target=/source,readonly", runner)
+        self.assertIn("cp -a /source /work/chipyard", runner)
+        self.assertIn('"project boom" compile', runner)
+        self.assertIn("dependency_resolution=maven-coordinate-not-lockfile", runner)
+        self.assertIn("apt_packages=unlocked", runner)
+        self.assertIn("elaboration=not-run", runner)
+        self.assertIn("performance=not-measured", runner)
+        self.assertIn(
+            "eclipse-temurin:17-jdk-jammy@sha256:"
+            "29467857e8bde40ab1f7befecbda0ea764b95afec1cc7f89aa90f7a766577e19",
+            dockerfile,
+        )
+
+    def test_elaboration_uses_exact_parent_gitlinks_and_ephemeral_source(self) -> None:
+        fetch = FETCH_DEPS.read_text(encoding="utf-8")
+        runner = ELABORATE.read_text(encoding="utf-8")
+        dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+        self.assertIn("submodule update --init", fetch)
+        self.assertNotIn("--recursive", fetch)
+        self.assertIn("--ignore-submodules=none", fetch)
+        self.assertIn("target=/source,readonly", runner)
+        self.assertIn("project chipyard", runner)
+        self.assertIn("dtc --version", runner)
+        self.assertIn("device-tree-compiler", dockerfile)
+        self.assertIn("chipyard:SmallBoomConfig", runner)
+        self.assertIn("bootrom/bootrom.rv64.img", runner)
+        self.assertIn("/work/generated-boom/bootrom.rv64.img", runner)
+        self.assertIn('grep -q "BoomCore"', runner)
+        self.assertIn("execution=not-run", runner)
+        self.assertIn("performance=not-measured", runner)
 
 
 if __name__ == "__main__":

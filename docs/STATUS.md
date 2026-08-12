@@ -268,8 +268,19 @@ Source inspection verifies chicken CSR `0x7c1` mask `0x8`. Its bit-3
 remove rename, ROB, issue, physical-register, or LSU structures. It is now
 named `boom-ooo-disabled-diagnostic`/`serialize-dispatch`, never an in-order or
 structurally stripped BOOM. `verify-boom-reference.sh` emits a successful
-source-verification marker. BOOM RTL has not yet elaborated or executed; no
-adapter record or comparison follows from the source pin.
+source-verification marker.
+
+The owned BOOM bootstrap now initializes only explicit public Chipyard
+gitlinks, compiles the 56-source BOOM Scala project, and elaborates
+`chipyard.SmallBoomConfig` through the integrated Chipyard generator. The
+successful functional marker confirms non-empty FIRRTL and annotations with a
+`BoomCore`; emitted parameters include one-wide decode, three issue ports, a
+32-entry ROB, three 8-entry issue windows, 52 integer physical registers, and
+8/8 load/store queues. These are configuration/elaboration facts, not measured
+costs. The wrapper uses a digest-pinned Temurin 17 base but unlocked APT and
+Maven resolution, so it is not a measurement environment. BOOM has not yet
+executed a RISC-V program or emitted a common-adapter record; no performance,
+energy, area, timing, or Graph comparison follows.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
