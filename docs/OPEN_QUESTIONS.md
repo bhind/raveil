@@ -57,8 +57,13 @@ resolves it.
   the manager-local legal Get/Put/mask/denial/backpressure/metadata paths, but
   bypasses the CPUs. The same phase-fenced ELF now reaches the manager through
   both Rocket and BOOM and validates identical expected data and aggregate
-  counters, but source/initiator identity is still not exposed. How should the adapter distinguish CPU
-  activity from loader/debug/recovery masters, and what later topology makes both CPU
+  counters. Exact generated graphs and runtime A/D audit registers now
+  distinguish the config-specific DCache-MMIO TileLink client class from the
+  SimTSI/FESVR serial range and observe only the expected class for the eight
+  data transactions. That source class is not semantic proof that the target
+  ELF initiated each transaction and is not ADR-0043 owned initiator metadata.
+  How should the adapter provide durable semantic initiator attribution beyond
+  topology-dependent source IDs, and what later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.

@@ -47,6 +47,9 @@ ROCKET_MEMORY_RUNNER = (
 BOOM_MEMORY_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-boom-memory-smoke.sh"
 )
+CPU_SOURCE_MAP_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_cpu_source_map.py"
+)
 CPU_MEMORY_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-cpu-memory-smoke.sh"
 )
@@ -131,6 +134,10 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("byte_masks=0x5,0xa", driver)
         self.assertIn("invalid_phase_denial=covered", driver)
         self.assertIn("response_metadata=param,size,source,sink,denied,corrupt", driver)
+        self.assertIn("expected-source accepted counter mismatch", driver)
+        self.assertIn("unexpected-source completed counter mismatch", driver)
+        self.assertIn("last completed phase mismatch", driver)
+        self.assertIn("OWNED-TL-PROTOCOL-V2", driver)
         self.assertNotEqual(TL_PROTOCOL_RUNNER.stat().st_mode & 0o111, 0)
         self.assertIn("--assert --cc", runner)
         self.assertIn("assembly_cache=content-addressed", runner)
@@ -141,6 +148,7 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
     def test_cpu_workload_reaches_owned_memory_with_phase_fences(self) -> None:
         workload = ROCKET_MEMORY_WORKLOAD.read_text(encoding="utf-8")
         verifier = ROCKET_MEMORY_VERIFIER.read_text(encoding="utf-8")
+        source_map_verifier = CPU_SOURCE_MAP_VERIFIER.read_text(encoding="utf-8")
         runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
         rocket_runner = ROCKET_MEMORY_RUNNER.read_text(encoding="utf-8")
         boom_runner = BOOM_MEMORY_RUNNER.read_text(encoding="utf-8")
@@ -156,6 +164,10 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("0xCAFEBABE", verifier)
         self.assertIn("accepted=8 completed=8", verifier)
         self.assertIn("signature_sha256=", verifier)
+        self.assertIn('"rocket": (8224, 8256)', verifier)
+        self.assertIn('"boom": (8288, 8320)', verifier)
+        self.assertIn("Core 0 DCache MMIO", source_map_verifier)
+        self.assertIn("fragmenter_factor=32", source_map_verifier)
         for entrypoint in (
             CPU_MEMORY_RUNNER,
             ROCKET_MEMORY_RUNNER,
@@ -174,7 +186,8 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("persistent simulator source cache contains an unexpected", runner)
         self.assertIn("submodule foreach --quiet --recursive", runner)
         self.assertIn("cpu_execution=%s-rtl-simulation", runner)
-        self.assertIn("initiator_attribution=cpu-workload-intended-not-proven", runner)
+        self.assertIn("source_client_class=dcache-mmio-verified", runner)
+        self.assertIn("semantic_initiator=not-proven", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
         self.assertIn("RaveilOwnedRocketConfig", rocket_runner)

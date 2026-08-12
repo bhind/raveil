@@ -240,20 +240,30 @@ initiator. Successful RTL elaboration can prove topology/type compatibility
 only. A separate raw TileLink harness now verifies the manager's negotiated
 Get/Put, byte-mask, denial, response-hold, one-outstanding, response-metadata,
 reset-phase, and bounded-counter behavior with the upstream monitor enabled.
-It bypasses both CPUs, so CPU execution, source attribution, end-to-end
-ordering, resource matching, and all measurement remain separate follow-ups.
+It bypasses both CPUs, so CPU execution, semantic initiator attribution,
+end-to-end ordering, resource matching, and all measurement remain separate
+follow-ups. It also verifies manager-local expected/unexpected source-class
+conservation and preservation of the A-accepted software phase through D
+completion under backpressure.
 
 The first CPU execution path is a shared bare-metal functional smoke with thin
 Rocket and BOOM entrypoints. Identical RV64 load/store and `fence iorw,iorw`
 instructions access the owned PBUS manager's data and control pages, and the
 same host verifier checks data, phase, and aggregate counters. Both generated
-systems produce the same decoded signature for this bounded workload. This
-proves that each CPU can execute the intended mapped path and preserve this
-workload's semantics; it does not prove which upstream TileLink source
-performed each request, carry ADR-0043 initiator/phase metadata with each
-response, isolate the effect of OoO, or make the peripheral topology
-resource-equivalent to the Graph memories. Common-contract and matched
-comparison work remains separate.
+systems produce the same decoded signature for this bounded workload. An exact
+graph verifier checks the DCache-MMIO range before execution: `[8224,8256)` for
+Rocket and `[8288,8320)` for BOOM after fragmenter expansion, disjoint from the
+`[0,8192)` serial range. The manager latches each accepted data request's
+TileLink source and software-declared phase and uses them at D completion;
+runtime registers separately count expected and unexpected source classes.
+Both runs observed expected 8/8, unexpected 0/0, in-range final sources, and
+final phases 2/2. This proves that each CPU can execute the intended mapped
+path, preserve this workload's semantics, and use the generated DCache-MMIO
+client class. TileLink source numbering is config/Xbar/fragmenter-dependent
+and does not prove the target ELF was the semantic initiator. The adapter still
+does not carry ADR-0043 owned initiator metadata, isolate the effect of OoO, or
+make the peripheral topology resource-equivalent to the Graph memories.
+Common-contract and matched comparison work remains separate.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

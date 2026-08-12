@@ -38,26 +38,46 @@ _start:
     bne     t2, t3, fail_execution
 
     fence   iorw, iorw
-    lw      t4, 0(s1)
-    lw      t5, 4(s1)
-    lw      t6, 8(s1)
+    lw      s5, 0(s1)
+    lw      s6, 4(s1)
+    lw      s7, 8(s1)
     lw      a1, 0x10(s1)
     lw      a2, 0x14(s1)
     lw      a3, 0x20(s1)
     lw      a4, 0x24(s1)
-    sw      t4, 20(s2)
-    sw      t5, 24(s2)
-    sw      t6, 28(s2)
+    lw      s3, 0x50(s1)
+    lw      s4, 0x54(s1)
+    lw      a7, 0x58(s1)
+    lw      t0, 0x5c(s1)
+    lw      t1, 0x60(s1)
+    lw      t2, 0x64(s1)
+    lw      t3, 0x68(s1)
+    lw      t4, 0x6c(s1)
+    lw      t5, 0x70(s1)
+    lw      t6, 0x74(s1)
+    sw      s5, 20(s2)
+    sw      s6, 24(s2)
+    sw      s7, 28(s2)
     sw      a1, 32(s2)
     sw      a2, 36(s2)
     sw      a3, 40(s2)
     sw      a4, 44(s2)
+    sw      s3, 48(s2)
+    sw      s4, 52(s2)
+    sw      a7, 56(s2)
+    sw      t0, 60(s2)
+    sw      t1, 64(s2)
+    sw      t2, 68(s2)
+    sw      t3, 72(s2)
+    sw      t4, 76(s2)
+    sw      t5, 80(s2)
+    sw      t6, 84(s2)
 
     li      a5, 2
-    bne     t4, a5, fail_phase
+    bne     s5, a5, fail_phase
     li      a5, 8
-    bne     t5, a5, fail_accepted
-    bne     t6, a5, fail_completed
+    bne     s6, a5, fail_accepted
+    bne     s7, a5, fail_completed
     li      a5, 2
     bne     a1, a5, fail_install_read
     li      a5, 3
@@ -66,6 +86,18 @@ _start:
     bne     a3, a5, fail_execution_read
     li      a5, 1
     bne     a4, a5, fail_execution_write
+    li      a5, 8
+    bne     a7, a5, fail_expected_accepted
+    bne     t0, a5, fail_expected_completed
+    bnez    t1, fail_unexpected_accepted
+    bnez    t2, fail_unexpected_completed
+    bltu    t3, s3, fail_source_range
+    bgeu    t3, s4, fail_source_range
+    bltu    t4, s3, fail_source_range
+    bgeu    t4, s4, fail_source_range
+    li      a5, 2
+    bne     t5, a5, fail_source_phase
+    bne     t6, a5, fail_source_phase
 
     li      a0, 1
     j       finish
@@ -102,6 +134,24 @@ fail_execution_read:
     j       finish
 fail_execution_write:
     li      a0, 23
+    j       finish
+fail_expected_accepted:
+    li      a0, 25
+    j       finish
+fail_expected_completed:
+    li      a0, 27
+    j       finish
+fail_unexpected_accepted:
+    li      a0, 29
+    j       finish
+fail_unexpected_completed:
+    li      a0, 31
+    j       finish
+fail_source_range:
+    li      a0, 33
+    j       finish
+fail_source_phase:
+    li      a0, 35
 
 finish:
     sw      a0, 0(s2)
@@ -116,7 +166,7 @@ finish:
     .align 4
     .globl begin_signature
 begin_signature:
-    .fill 12, 4, 0
+    .fill 22, 4, 0
     .globl end_signature
 end_signature:
 

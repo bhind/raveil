@@ -473,18 +473,20 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   writes, reads, phase selection, and aggregate counter checks through that
   manager with an exact host-verified signature. This is still a
   resource-unmatched step, not the RFC-0005 common memory. Before calling it a
-  common-contract CPU adapter, add initiator separation and per-request/
-  response owned phase correlation. Direct monitor-enabled TileLink RTL
+  common-contract CPU adapter, add semantic initiator separation. Direct monitor-enabled TileLink RTL
   coverage now passes for
   full/partial writes, two masks, invalid phase denial, response backpressure,
   one-outstanding admission, response metadata, reset phase, and bounded
   aggregate counters. The exact same ELF and verifier now pass on the dedicated
-  BOOM system with an identical decoded signature. This is bounded semantic
-  agreement, not comparative evidence. Next add initiator separation and
-  request/response-correlated owned metadata before designing the matched
-  resource boundary. The
+  BOOM system with an identical decoded signature. Exact generated-graph checks
+  now verify the config-specific DCache-MMIO source ranges, and runtime audit
+  registers correlate each accepted data request's source/software phase with
+  D completion: expected 8/8, unexpected 0/0, and last phase 2/2 on both CPUs.
+  This is bounded client-class and semantic agreement evidence, not semantic
+  initiator proof or comparative evidence. Next add durable semantic initiator
+  attribution before designing the matched resource boundary. The
   overlay is not yet the ADR-0043 common-contract adapter because it does not
-  carry owned initiator/phase metadata through each request and response.
+  carry owned initiator metadata or provide the matched resource boundary.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

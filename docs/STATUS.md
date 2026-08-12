@@ -280,14 +280,15 @@ remain unverified. The same phase-fenced workload now passes through both the
 Rocket and BOOM CPU paths as described below.
 The elaboration runner therefore reports execution not run, resource matching
 false, comparison readiness false, and performance not measured.
-This is not yet the ADR-0043 common-contract CPU adapter: phase is neither
-request/response-correlated owned metadata nor initiator attribution.
+This is not yet the ADR-0043 common-contract CPU adapter: the phase begins as a
+software-declared label and does not provide owned semantic initiator metadata.
 
 The owned manager now also passes a direct, monitor-enabled TileLink RTL
-simulation. A raw bounded client issued 16 legal negotiated transactions and
+simulation. A raw bounded client issued 26 legal negotiated transactions and
 verified `PutFull`, two `PutPartial` byte-mask patterns, readback, invalid
 phase-write denial, D-channel backpressure stability, maximum-one-outstanding
-backpressure, reset phase, selected aggregate counters, and D response
+backpressure, reset phase, selected aggregate counters, expected/unexpected
+source-class conservation, accepted-to-completed phase correlation, and D response
 `param`/`size`/`source`/`sink`/`denied`/`corrupt` metadata. This closes the
 manager-local protocol corner-case bootstrap only. No CPU instruction executed;
 phase remains software-declared, initiator attribution and the ADR-0043 common
@@ -306,11 +307,20 @@ installation reads/writes 2/3, and execution reads/writes 2/1. This upgrades
 both CPU paths for this bounded workload to `rtl-simulation-functional`. The
 shared runner admits only those two named configurations and keeps separate
 content-addressed simulator volumes; its payload hash covers the overlay, ELF
-source, linker script, signature verifier, and shared runner, while the marker
-separately identifies the CPU/configuration. Matching signatures prove semantic agreement for this one
-workload only. They do not identify the TileLink initiator, correlate owned
-phase metadata per request/response, establish equal resources, isolate OoO,
-or support a performance, energy, area, OoO-removal, FPGA, or silicon claim.
+source, linker script, source-map verifier, signature verifier, and shared
+runner, while the marker separately identifies the CPU/configuration. Exact
+generated-graph verification identifies the DCache-MMIO client ranges at the
+manager as `[8224,8256)` for Rocket and `[8288,8320)` for BOOM, disjoint from
+the `[0,8192)` SimTSI/FESVR serial range. Runtime audit registers latch the
+accepted data A-channel source and software-declared phase until D completion.
+Both CPU runs observed expected-client accepted/completed 8/8,
+unexpected-client 0/0, in-range final sources, and final accepted/completed
+phases 2/2. These config/Xbar/fragmenter-dependent source IDs establish a
+TileLink client class, not an ISA identifier or proof that the target ELF was
+the semantic initiator. Matching signatures prove semantic agreement for this
+one workload only. The evidence does not implement ADR-0043 owned initiator
+metadata, establish equal resources, isolate OoO, or support a performance,
+energy, area, OoO-removal, FPGA, or silicon claim.
 The ADR-0043 common-contract adapter remains open.
 
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at

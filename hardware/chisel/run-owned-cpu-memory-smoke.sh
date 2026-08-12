@@ -6,6 +6,7 @@ chipyard="$repo_root/external/chipyard"
 overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala"
 workload="$repo_root/hardware/chisel/owned_memory_cpu_smoke.S"
 verifier="$repo_root/hardware/chisel/verify_owned_memory_cpu_signature.py"
+source_map_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_map.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
 image=raveil-boom-functional-sim:v1
@@ -27,7 +28,7 @@ case "$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
         ;;
 esac
 
-for input in "$overlay" "$workload" "$verifier" "$linker" "$runner"; do
+for input in "$overlay" "$workload" "$verifier" "$source_map_verifier" "$linker" "$runner"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
         exit 1
@@ -50,7 +51,7 @@ command -v docker >/dev/null 2>&1 || {
 
 overlay_sha256=$(shasum -a 256 "$overlay" | awk '{print $1}')
 input_sha256=$(
-    shasum -a 256 "$overlay" "$workload" "$verifier" "$linker" "$runner" |
+    shasum -a 256 "$overlay" "$workload" "$verifier" "$source_map_verifier" "$linker" "$runner" |
         awk '{print $1}' |
         shasum -a 256 |
         awk '{print $1}'
@@ -117,6 +118,10 @@ cd "$build_root/chipyard/sims/verilator"
 make -j2 CONFIG="$RAVEIL_OWNED_CPU_CONFIG" CONFIG_PACKAGE=chipyard.raveil
 sim="$build_root/chipyard/sims/verilator/simulator-chipyard.harness-$RAVEIL_OWNED_CPU_CONFIG"
 test -x "$sim"
+graph="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG.graphml"
+test -f "$graph"
+python3 /repo/hardware/chisel/verify_owned_cpu_source_map.py \
+  "$RAVEIL_OWNED_CPU_LABEL" "$graph"
 
 riscv64-unknown-elf-gcc \
   -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
@@ -132,6 +137,7 @@ signature="$build_root/owned_memory_cpu.signature"
 rm -f "$signature"
 "$sim" +signature="$signature" +signature-granularity=4 \
   +permissive +permissive-off "$build_root/owned_memory_cpu_smoke.elf"
-python3 /repo/hardware/chisel/verify_owned_memory_cpu_signature.py "$signature"
-printf "OWNED-CPU-MEMORY-SMOKE-V1 status=OK cpu=%s config=%s input_sha256=%s phase_fences=iorw direct_manager_path=intended cpu_execution=%s-rtl-simulation initiator_attribution=cpu-workload-intended-not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+python3 /repo/hardware/chisel/verify_owned_memory_cpu_signature.py \
+  "$RAVEIL_OWNED_CPU_LABEL" "$signature"
+printf "OWNED-CPU-MEMORY-SMOKE-V2 status=OK cpu=%s config=%s input_sha256=%s phase_fences=iorw direct_manager_path=verified source_client_class=dcache-mmio-verified semantic_initiator=not-proven cpu_execution=%s-rtl-simulation resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
   "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" '"$input_sha256"' "$RAVEIL_OWNED_CPU_LABEL"'

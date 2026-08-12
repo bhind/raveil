@@ -65,8 +65,12 @@ The corrected critical path is:
    elaboration now has direct monitor-enabled protocol tests for the owned
    manager. The same phase-fenced RTL workload now traverses the mapped manager
    on both Rocket and BOOM and validates full/partial writes, reads, phase
-   selection, and aggregate counters with identical decoded signatures.
-   Initiator separation and matched common-memory topology remain. None of these
+   selection, and aggregate counters with identical decoded signatures. Exact
+   generated-graph verification and runtime A/D audit registers now observe
+   only each config's DCache-MMIO client range for the eight data transactions
+   and preserve accepted/completed phase 2/2. This is topology-dependent
+   client-class evidence, not semantic initiator proof. Semantic initiator
+   attribution and matched common-memory topology remain. None of these
    functional smokes or endpoint diagnostics is a performance or structural-
    ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

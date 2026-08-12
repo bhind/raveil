@@ -13,6 +13,8 @@ case class RaveilOwnedMemoryParams(
   size: BigInt = 64 * 1024,
   controlBase: BigInt = 0x08010000L,
   controlSize: BigInt = 4 * 1024,
+  expectedClientSourceStart: Int = 0,
+  expectedClientSourceEnd: Int = 1,
   // The first CPU adapter deliberately uses the uncached peripheral path so
   // mapped accesses are intended to reach the owned manager. CPU execution is
   // still unverified. Moving this boundary to a matched local-memory resource
@@ -51,6 +53,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
   require(params.base % params.size == 0)
   require(params.controlBase % params.controlSize == 0)
   require(params.base + params.size <= params.controlBase)
+  require(params.expectedClientSourceStart >= 0)
+  require(params.expectedClientSourceEnd > params.expectedClientSourceStart)
 
   private val beatBytes = 4
   private val words = (params.size / beatBytes).toInt
@@ -92,12 +96,22 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responseSource = RegInit(0.U(tl.d.bits.source.getWidth.W))
     val responseSize = RegInit(0.U(tl.d.bits.size.getWidth.W))
     val responseIsData = RegInit(false.B)
+    val responsePhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val responseExpectedClient = RegInit(false.B)
 
     val phase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val acceptedCount = RegInit(0.U(32.W))
     val completedCount = RegInit(0.U(32.W))
     val phaseReadCounts = RegInit(VecInit(Seq.fill(RaveilOwnedMemoryPhase.Count)(0.U(32.W))))
     val phaseWriteCounts = RegInit(VecInit(Seq.fill(RaveilOwnedMemoryPhase.Count)(0.U(32.W))))
+    val expectedAcceptedCount = RegInit(0.U(32.W))
+    val expectedCompletedCount = RegInit(0.U(32.W))
+    val unexpectedAcceptedCount = RegInit(0.U(32.W))
+    val unexpectedCompletedCount = RegInit(0.U(32.W))
+    val lastAcceptedSource = RegInit(0.U(32.W))
+    val lastCompletedSource = RegInit(0.U(32.W))
+    val lastAcceptedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val lastCompletedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
 
     val requestAddress = tl.a.bits.address
     val dataRequest = requestAddress >= params.base.U &&
@@ -114,6 +128,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val phaseByteEnabled = tl.a.bits.mask(0)
     val requestError = !supported ||
       (phaseWrite && (!phaseByteEnabled || !phaseValueValid))
+    val expectedClientRequest =
+      tl.a.bits.source >= params.expectedClientSourceStart.U &&
+      tl.a.bits.source < params.expectedClientSourceEnd.U
     val wordIndex = ((requestAddress - params.base.U) >> 2)(log2Ceil(words) - 1, 0)
 
     val memoryRead = tl.a.fire && dataRequest && get && !requestError
@@ -133,6 +150,16 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         controlReadData := phaseWriteCounts(index)
       }
     }
+    when(controlOffset === 0x50.U) { controlReadData := params.expectedClientSourceStart.U }
+    when(controlOffset === 0x54.U) { controlReadData := params.expectedClientSourceEnd.U }
+    when(controlOffset === 0x58.U) { controlReadData := expectedAcceptedCount }
+    when(controlOffset === 0x5c.U) { controlReadData := expectedCompletedCount }
+    when(controlOffset === 0x60.U) { controlReadData := unexpectedAcceptedCount }
+    when(controlOffset === 0x64.U) { controlReadData := unexpectedCompletedCount }
+    when(controlOffset === 0x68.U) { controlReadData := lastAcceptedSource }
+    when(controlOffset === 0x6c.U) { controlReadData := lastCompletedSource }
+    when(controlOffset === 0x70.U) { controlReadData := lastAcceptedPhase }
+    when(controlOffset === 0x74.U) { controlReadData := lastCompletedPhase }
     val freshResponseData = Mux(responseRead && !responseIsData,
       responseControlData, freshReadData)
 
@@ -144,12 +171,21 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseSource := tl.a.bits.source
       responseSize := tl.a.bits.size
       responseIsData := dataRequest
+      responsePhase := phase
+      responseExpectedClient := expectedClientRequest
       when(controlRequest && get) {
         responseControlData := controlReadData
       }
 
       when(dataRequest && !requestError) {
         acceptedCount := acceptedCount + 1.U
+        lastAcceptedSource := tl.a.bits.source
+        lastAcceptedPhase := phase
+        when(expectedClientRequest) {
+          expectedAcceptedCount := expectedAcceptedCount + 1.U
+        }.otherwise {
+          unexpectedAcceptedCount := unexpectedAcceptedCount + 1.U
+        }
         when(get) {
           phaseReadCounts(phase) := phaseReadCounts(phase) + 1.U
         }.otherwise {
@@ -187,12 +223,23 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       busy := false.B
       when(responseIsData && !responseError) {
         completedCount := completedCount + 1.U
+        lastCompletedSource := responseSource
+        lastCompletedPhase := responsePhase
+        when(responseExpectedClient) {
+          expectedCompletedCount := expectedCompletedCount + 1.U
+        }.otherwise {
+          unexpectedCompletedCount := unexpectedCompletedCount + 1.U
+        }
       }
     }
 
     when(!reset.asBool) {
       assert(acceptedCount === completedCount +
         (busy && responseIsData && !responseError).asUInt)
+      assert(expectedAcceptedCount === expectedCompletedCount +
+        (busy && responseIsData && !responseError && responseExpectedClient).asUInt)
+      assert(unexpectedAcceptedCount === unexpectedCompletedCount +
+        (busy && responseIsData && !responseError && !responseExpectedClient).asUInt)
       when(responseHeld) {
         assert(tl.d.valid)
       }
@@ -232,16 +279,24 @@ class WithRaveilOwnedMemory extends Config((site, here, up) => {
   case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams())
 })
 
+class WithRaveilOwnedMemorySourceRange(start: Int, end: Int)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end
+  ))
+})
+
 class RaveilOwnedRocketConfig extends Config(
   new WithRaveilOwnedBuildSystem ++
-  new WithRaveilOwnedMemory ++
+  new WithRaveilOwnedMemorySourceRange(8224, 8256) ++
   new testchipip.soc.WithNoScratchpads ++
   new chipyard.RocketConfig
 )
 
 class RaveilOwnedSmallBoomConfig extends Config(
   new WithRaveilOwnedBuildSystem ++
-  new WithRaveilOwnedMemory ++
+  new WithRaveilOwnedMemorySourceRange(8288, 8320) ++
   new testchipip.soc.WithNoScratchpads ++
   new chipyard.SmallBoomConfig
 )

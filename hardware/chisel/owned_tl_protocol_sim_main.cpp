@@ -167,6 +167,27 @@ int main(int argc, char** argv) {
   if (expect_data(transact(dut, get, control_base + 0x20, 0, 0xf, 2, 0), 2, 0) != 1)
     fail("execution-phase read counter mismatch");
 
-  std::printf("OWNED-TL-PROTOCOL-V1 status=OK transactions=16 put_full=1 put_partial=5 get=10 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data-and-execution-read cpu_execution=not-run initiator_attribution=unverified resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
+  if (expect_data(transact(dut, get, control_base + 0x50, 0, 0xf, 2, 0), 2, 0) != 0)
+    fail("expected source start mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x54, 0, 0xf, 2, 0), 2, 0) != 4)
+    fail("expected source end mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x58, 0, 0xf, 2, 0), 2, 0) != 7)
+    fail("expected-source accepted counter mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x5c, 0, 0xf, 2, 0), 2, 0) != 7)
+    fail("expected-source completed counter mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x60, 0, 0xf, 2, 0), 2, 0) != 0)
+    fail("unexpected-source accepted counter mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x64, 0, 0xf, 2, 0), 2, 0) != 0)
+    fail("unexpected-source completed counter mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x68, 0, 0xf, 2, 0), 2, 0) != 3)
+    fail("last accepted source mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x6c, 0, 0xf, 2, 0), 2, 0) != 3)
+    fail("last completed source mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x70, 0, 0xf, 2, 0), 2, 0) != 2)
+    fail("last accepted phase mismatch");
+  if (expect_data(transact(dut, get, control_base + 0x74, 0, 0xf, 2, 0), 2, 0) != 2)
+    fail("last completed phase mismatch");
+
+  std::printf("OWNED-TL-PROTOCOL-V2 status=OK transactions=26 put_full=1 put_partial=5 get=20 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data,execution-read,source-class,request-response-phase expected_source_accepted=7 expected_source_completed=7 unexpected_source_accepted=0 unexpected_source_completed=0 last_source=3 last_phase=2 cpu_execution=not-run source_client_class=harness-range-only semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
   return 0;
 }

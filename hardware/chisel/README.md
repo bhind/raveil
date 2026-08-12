@@ -350,10 +350,11 @@ Run the direct owned-manager protocol simulation with:
 
 This builds a pinned Chipyard assembly in an ephemeral source copy, emits the
 raw-client/owned-manager harness through FIRRTL, compiles it with assert-enabled
-Verilator, and runs 16 legal negotiated TileLink transactions. The test covers
+Verilator, and runs 26 legal negotiated TileLink transactions. The test covers
 full and partial writes, masks `0x5` and `0xa`, invalid phase denial, response
 backpressure and metadata stability, maximum-one-outstanding admission, reset
-phase, and a bounded subset of aggregate counters. Its content-addressed
+phase, aggregate counters, expected/unexpected source-class conservation, and
+preservation of accepted source/phase through D completion. Its content-addressed
 assembly cache is a functional-development optimization, not immutable
 measurement evidence. The raw client bypasses Rocket and BOOM; success remains
 `rtl-simulation-functional`, with CPU execution not run, initiator attribution
@@ -370,19 +371,29 @@ The two thin entrypoints select an allowlisted configuration and call one shared
 runner. Separate content-addressed simulator volumes compile the same bare-metal
 RV64 ELF and execute real Rocket or BOOM RTL load/store instructions against
 the owned data page at `0x08000000` and control page at `0x08010000`.
+Before simulation, the shared runner verifies the exact generated graph. It
+requires the Rocket DCache-MMIO range to expand to `[8224,8256)`, the BOOM
+range to `[8288,8320)`, and the SimTSI/FESVR serial range to `[0,8192)` at the
+manager-adjacent fragmenter. These are config/Xbar/fragmenter-derived source
+coordinates, not ISA-level IDs.
 The ELF uses `fence iorw,iorw`, covers a full write and two byte-lane writes,
 changes the software phase, and records data plus aggregate counters in a
-signature that is independently decoded on the host. A successful marker is
+22-word signature that is independently decoded on the host. It additionally
+requires expected-source accepted/completed 8/8, unexpected-source 0/0,
+in-range last accepted/completed sources, and phases 2/2. A successful marker is
 `rtl-simulation-functional` evidence for each mapped path only. Both runs
 produce the same decoded data, phase, and counter signature. The composite
-payload hash covers the overlay, ELF source, linker script, verifier, and shared
-runner; CPU/configuration is reported separately in the marker.
+payload hash covers the overlay, ELF source, linker script, source-map verifier,
+signature verifier, and shared runner; CPU/configuration is reported separately
+in the marker.
 Before reuse, the runner rejects unexpected tracked or untracked source-cache
 changes while allowing only the intended overlay and task-local SBT `target/`
 outputs.
-Initiator attribution remains intended but unproven, the phase is not
-request/response-correlated ADR-0043 metadata, resources are unmatched, OoO is
-not isolated, and performance is not measured.
+The observed source range establishes only a TileLink client class, not the
+target ELF's semantic initiator. The phase is correlated from A acceptance to
+D completion but remains a software-declared adapter label rather than
+ADR-0043 owned initiator/phase metadata. Resources are unmatched, OoO is not
+isolated, and performance is not measured.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
