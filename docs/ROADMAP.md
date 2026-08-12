@@ -84,8 +84,12 @@ The corrected critical path is:
    now insert a structural request marker immediately after each DCache and
    before the shared tile master Xbar. Both CPU signatures observe origin 8/8,
    non-origin 0/0, in-range final sources, and phase 2/2. This proves bounded
-   structural DCache origin rather than target-ELF semantic intent; loader/debug
-   negative coverage and durable semantic attribution remain open.
+   structural DCache origin rather than target-ELF semantic intent. A second
+   test-only harness now drives origin true upstream, removes the negotiated
+   field before the manager, and completes as origin 0/0 versus non-origin 7/7;
+   metadata loss therefore fails closed in this bounded transport model.
+   Actual loader/debug path coverage and durable semantic attribution remain
+   open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

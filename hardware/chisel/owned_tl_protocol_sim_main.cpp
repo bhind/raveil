@@ -1,4 +1,10 @@
+#ifdef RAVEIL_ORIGIN_STRIP_HARNESS
+#include "VRaveilOwnedTLOriginStripHarness.h"
+using DUT = VRaveilOwnedTLOriginStripHarness;
+#else
 #include "VRaveilOwnedTLProtocolHarness.h"
+using DUT = VRaveilOwnedTLProtocolHarness;
+#endif
 #include "verilated.h"
 
 #include <cstdint>
@@ -12,7 +18,7 @@ static void fail(const char* message) {
   std::exit(1);
 }
 
-static void tick(VRaveilOwnedTLProtocolHarness& dut) {
+static void tick(DUT& dut) {
   dut.clock = 0;
   dut.eval();
   dut.clock = 1;
@@ -30,7 +36,7 @@ struct Response {
   uint32_t corrupt;
 };
 
-static Response transact(VRaveilOwnedTLProtocolHarness& dut,
+static Response transact(DUT& dut,
                          uint32_t opcode,
                          uint32_t address,
                          uint32_t data,
@@ -115,7 +121,7 @@ static uint32_t expect_data(const Response& response, uint32_t size,
 
 int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv);
-  VRaveilOwnedTLProtocolHarness dut;
+  DUT dut;
   dut.io_requestValid = 0;
   dut.io_responseReady = 0;
   dut.reset = 1;
@@ -198,6 +204,10 @@ int main(int argc, char** argv) {
   if (expect_data(transact(dut, get, control_base + 0x84, 0, 0xf, 2, 0), 2, 0) != 7)
     fail("non-DCache-origin completed counter mismatch");
 
+#ifdef RAVEIL_ORIGIN_STRIP_HARNESS
+  std::printf("OWNED-TL-ORIGIN-STRIP-V1 status=OK transactions=30 upstream_origin=true downstream_origin=absent dcache_origin_accepted=0 dcache_origin_completed=0 non_dcache_origin_accepted=7 non_dcache_origin_completed=7 metadata_loss=fail-closed model=test-only-not-loader-debug cpu_execution=not-run semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
+#else
   std::printf("OWNED-TL-PROTOCOL-V4 status=OK transactions=30 put_full=1 put_partial=5 get=24 byte_masks=0x5,0xa invalid_phase_denial=covered response_backpressure=covered max_one_outstanding=covered same_source_reuse_blocking=covered response_metadata=param,size,source,sink,denied,corrupt reset_phase=covered counter_scope=aggregate-data,execution-read,source-class,request-response-phase,dcache-origin-sideband source_classifier_range=1:3 unexpected_boundary_sources=0,3 expected_source_accepted=3 expected_source_completed=3 unexpected_source_accepted=4 unexpected_source_completed=4 dcache_origin_accepted=0 dcache_origin_completed=0 non_dcache_origin_accepted=7 non_dcache_origin_completed=7 last_source=3 last_phase=2 cpu_execution=not-run source_client_class=harness-range-only dcache_origin_negative=raw-client-without-sideband semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n");
+#endif
   return 0;
 }

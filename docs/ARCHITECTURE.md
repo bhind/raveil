@@ -253,6 +253,12 @@ Re-presenting the pending source under D backpressure is rejected. The same
 untagged raw client completes all seven legal data requests as structural
 DCache-origin 0/0 and non-origin 7/7. These are manager-harness invariants, not
 observations of either CPU or FESVR.
+A separate test-only topology advertises and drives DCache-origin true at its
+raw client, then removes the request field at a diplomacy adapter before the
+manager. Reusing the same 30-transaction protocol driver produces origin 0/0
+and non-origin 7/7, so absent downstream metadata is classified false and held
+consistently from A acceptance to D completion. The topology is a transport
+loss model, not a loader/debug implementation or semantic-initiator witness.
 
 The first CPU execution path is a shared bare-metal functional smoke with thin
 Rocket and BOOM entrypoints. Identical RV64 load/store and `fence iorw,iorw`
@@ -296,7 +302,8 @@ their declared false defaults; it is hash-checked against exact pre/post pinned
 sources. The manager latches the bit at A acceptance and uses the retained bit
 only for its internal D-completion accounting. Rocket and BOOM each observe
 origin 8/8 and non-origin 0/0 for the bounded workload, while the untagged raw
-client observes origin 0/0 and non-origin 7/7. This establishes structural
+client and the explicit field-stripping topology each observe origin 0/0 and
+non-origin 7/7. This establishes structural
 DCache-boundary crossing and distinguishes the separate SimTSI/FESVR master in
 these harnesses without treating final source numbering as semantic identity.
 Neither layer supplies an instruction PC or target-ELF semantic intent, nor do

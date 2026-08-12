@@ -303,6 +303,12 @@ client, which has no DCache-origin request field, completed with DCache-origin
 accepted/completed 0/0 and non-DCache-origin 7/7. This is a negative control
 for manager-local classification and A/D conservation only, not evidence of CPU
 execution, target-ELF semantic initiator identity, or loader/debug exclusion.
+A second test-only top now drives the origin field true on every upstream raw
+request and then removes that field at an explicit diplomacy adapter before the
+same manager. The same 30-transaction driver completed with origin 0/0 and
+non-origin 7/7, showing that negotiated metadata loss fails closed through A/D
+accounting. This models field removal only; it is not an execution of a real
+FESVR, loader, or debugger path and does not close semantic attribution.
 
 The same owned manager now passes one phase-fenced CPU workload through both
 the dedicated `RaveilOwnedRocketConfig` and `RaveilOwnedSmallBoomConfig`
@@ -365,8 +371,9 @@ non-infringement, patent-clearance, or FTO conclusion follows.
 The narrower pinned-source candidate is now implemented diagnostically:
 repository-owned Rocket and BOOM hooks insert the adapter immediately after
 each DCache and before the shared tile master crossbar. Runtime positive paths
-and the raw-client negative path verify field retention and fail-closed false
-classification in these bounded harnesses. This structurally excludes the
+and the raw-client absence plus explicit field-stripping negative paths verify
+field retention and fail-closed false classification in these bounded
+harnesses. This structurally excludes the
 separate SimTSI/FESVR master from the observed positive class, but it still
 cannot identify a particular ELF instruction, PC, or semantic intent, and it
 does not test every loader/debug path. Selecting a durable ADR-0043 semantic

@@ -373,6 +373,15 @@ source-class, structural-origin, and conservation evidence for the raw harness,
 not proof of CPU execution, target-ELF semantic initiator identity, or complete
 loader/debug exclusion.
 
+The same runner also elaborates `RaveilOwnedTLOriginStripHarness`. Its test-only
+raw client advertises the request field and drives origin true on every request,
+then `RaveilOriginStrippingAdapter` removes that field from downstream
+negotiation. The same 30-transaction driver reports
+`OWNED-TL-ORIGIN-STRIP-V1` with upstream origin true, downstream origin absent,
+origin accepted/completed 0/0, and non-origin 7/7. This proves that loss of this
+metadata fails closed at the owned manager and remains correlated across A/D;
+it is not a model or execution of an actual FESVR, loader, or debugger path.
+
 Run the standalone TileLink-to-owned-contract bridge with:
 
 ```sh
@@ -440,10 +449,11 @@ isolated, and performance is not measured.
 
 Pinned Rocket/BOOM source hooks now place the structural marker after the
 DCache and before the tile master Xbar. This distinguishes tagged DCache traffic
-from the separate SimTSI/FESVR master in the bounded positive and raw-client
-negative harnesses, but it does not prove which ELF instruction or PC
-semantically initiated a request. Durable owned attribution requires a later
-decision plus fail-closed loader/debug negative evidence.
+from the separate SimTSI/FESVR master in the bounded positive, raw-client
+absence, and test-only field-stripping harnesses, but it does not prove which
+ELF instruction or PC semantically initiated a request. Durable owned
+attribution requires a later decision plus testing of concrete loader/debug
+paths.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program

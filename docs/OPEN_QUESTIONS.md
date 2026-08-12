@@ -71,10 +71,13 @@ resolves it.
   tile master Xbar is now instrumented by repository-owned Rocket and BOOM
   hooks. A one-bit request field is retained through manager-local A/D
   correlation: both CPU smokes observe origin 8/8 and an untagged raw client
-  observes origin 0/0. This proves structural DCache origin only. How should
-  loader/debug DCache traffic fail closed, and what additional witness is
-  required to distinguish DCache origin from a particular target-ELF
-  instruction? What later topology makes both CPU
+  observes origin 0/0. A test-only marked raw client now also drives origin
+  true before an adapter removes the field; the manager observes origin 0/0,
+  proving fail-closed metadata loss but not exercising a real loader/debug
+  path. This proves structural DCache origin only. Which concrete loader/debug
+  path should be tested next, how should DCache-local loader/debug traffic fail
+  closed, and what additional witness is required to distinguish DCache origin
+  from a particular target-ELF instruction? What later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.

@@ -129,3 +129,59 @@ verilator --assert --cc "$verilog" \
   --top-module RaveilOwnedTLProtocolHarness \
   -CFLAGS "-std=c++17 -Wall -Wextra -Werror"
 "$output/verilator/VRaveilOwnedTLProtocolHarness"'
+
+docker run --rm \
+    --platform "$platform" \
+    --security-opt no-new-privileges=true \
+    --mount "type=bind,source=$chipyard,target=/source,readonly" \
+    --mount "type=bind,source=$memory_overlay,target=/overlay/RaveilOwnedTLMemory.scala,readonly" \
+    --mount "type=bind,source=$harness_overlay,target=/overlay/RaveilOwnedTLProtocolHarness.scala,readonly" \
+    --mount "type=bind,source=$driver,target=/overlay/owned_tl_protocol_sim_main.cpp,readonly" \
+    --mount type=volume,source=raveil-chipyard-sbt-cache-v1,target=/root/.cache \
+    --mount type=volume,source=raveil-chipyard-ivy-cache-v1,target=/root/.ivy2 \
+    --mount type=volume,source=raveil-chipyard-sbt-global-v1,target=/root/.sbt \
+    --mount type=volume,source=raveil-owned-tl-assembly-v1,target=/assembly-cache \
+    --env "RAVEIL_ASSEMBLY_KEY=$assembly_key" \
+    "$image" \
+    sh -c 'set -eu
+cp -a /source /work/chipyard
+cd /work/chipyard
+install -D -m 0444 /overlay/RaveilOwnedTLMemory.scala \
+  generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala
+install -D -m 0444 /overlay/RaveilOwnedTLProtocolHarness.scala \
+  generators/chipyard/src/main/scala/raveil/RaveilOwnedTLProtocolHarness.scala
+assembly_dir=/assembly-cache/$RAVEIL_ASSEMBLY_KEY
+assembly=$assembly_dir/chipyard-assembly.jar
+assembly_checksum=$assembly_dir/chipyard-assembly.jar.sha256
+[ -s "$assembly" ] && [ -s "$assembly_checksum" ] || {
+  echo "error: verified protocol assembly cache is unavailable" >&2
+  exit 1
+}
+(cd "$assembly_dir" && sha256sum -c chipyard-assembly.jar.sha256)
+output=/work/generated-owned-tl-origin-strip
+mkdir -p "$output"
+java -Xmx8G -cp "$assembly" chipyard.Generator \
+  --target-dir "$output" \
+  --name chipyard.raveil.RaveilOwnedTLOriginStripHarness \
+  --top-module chipyard.raveil.RaveilOwnedTLOriginStripHarness \
+  --legacy-configs chipyard:chipyard.RocketConfig
+fir=$(find "$output" -maxdepth 1 -type f -name "*.fir" -print | head -n 1)
+anno=$(find "$output" -maxdepth 1 -type f -name "*.anno.json" -print | head -n 1)
+[ -s "$fir" ] || { echo "error: origin-strip harness FIRRTL was not emitted" >&2; exit 1; }
+[ -s "$anno" ] || { echo "error: origin-strip harness annotations were not emitted" >&2; exit 1; }
+verilog="$output/RaveilOwnedTLOriginStripHarness.v"
+java -Xmx8G -cp "$assembly" firrtl.stage.FirrtlMain \
+  -i "$fir" \
+  -o "$verilog" \
+  -td "$output" \
+  -faf "$anno" \
+  -X verilog
+[ -s "$verilog" ] || { echo "error: origin-strip harness Verilog was not emitted" >&2; exit 1; }
+verilator --assert --cc "$verilog" \
+  generators/rocket-chip/src/main/resources/vsrc/plusarg_reader.v \
+  --exe /overlay/owned_tl_protocol_sim_main.cpp \
+  --build \
+  --Mdir "$output/verilator" \
+  --top-module RaveilOwnedTLOriginStripHarness \
+  -CFLAGS "-DRAVEIL_ORIGIN_STRIP_HARNESS -std=c++17 -Wall -Wextra -Werror"
+"$output/verilator/VRaveilOwnedTLOriginStripHarness"'

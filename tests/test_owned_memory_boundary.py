@@ -194,8 +194,13 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("expected_source_accepted=3", driver)
         self.assertIn("unexpected_source_accepted=4", driver)
         self.assertIn("OWNED-TL-PROTOCOL-V4", driver)
+        self.assertIn("OWNED-TL-ORIGIN-STRIP-V1", driver)
+        self.assertIn("RAVEIL_ORIGIN_STRIP_HARNESS", driver)
         self.assertIn("dcache_origin_accepted=0", driver)
         self.assertIn("non_dcache_origin_accepted=7", driver)
+        self.assertIn("upstream_origin=true downstream_origin=absent", driver)
+        self.assertIn("metadata_loss=fail-closed", driver)
+        self.assertIn("model=test-only-not-loader-debug", driver)
         self.assertNotEqual(TL_PROTOCOL_RUNNER.stat().st_mode & 0o111, 0)
         self.assertIn("--assert --cc", runner)
         self.assertIn("assembly_cache=content-addressed-verified", runner)
@@ -329,6 +334,15 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("src/main/scala/tilelink/Xbar.scala", runner)
         self.assertIn(".fill 30, 4, 0", workload)
         self.assertIn("OWNED-MEMORY-CPU-SIGNATURE-V3", verifier)
+
+        protocol_harness = TL_PROTOCOL_HARNESS.read_text(encoding="utf-8")
+        protocol_runner = TL_PROTOCOL_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("class RaveilOriginStrippingAdapter", protocol_harness)
+        self.assertIn("filterNot(_.key == RaveilDCacheOrigin)", protocol_harness)
+        self.assertIn("tl.a.bits.user(RaveilDCacheOrigin) := true.B", protocol_harness)
+        self.assertIn("not a real loader/debug path", protocol_harness)
+        self.assertIn("RaveilOwnedTLOriginStripHarness", protocol_runner)
+        self.assertIn("verified protocol assembly cache is unavailable", protocol_runner)
 
     def test_dcache_origin_signature_rejects_legacy_and_bad_origin(self) -> None:
         source_start = 8224

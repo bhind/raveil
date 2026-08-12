@@ -501,10 +501,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   origin 0/0 and non-origin 7/7. Repository-owned Rocket and BOOM hooks now add
   a request marker immediately after each DCache; both CPU signatures report
   origin 8/8, non-origin 0/0, in-range sources, and phase 2/2 through D
-  completion. This is bounded structural-origin evidence only. Next add
-  fail-closed loader/debug negative tests and determine what semantic witness
-  beyond DCache origin can identify the intended ELF request, then design the
-  matched resource boundary. Do not
+  completion. A second test-only protocol top now drives origin true upstream,
+  removes the field before the manager, and completes as origin 0/0 and
+  non-origin 7/7, proving that metadata loss fails closed in this transport
+  model. This is bounded structural-origin evidence only, not a real
+  loader/debug execution. Next select and exercise a concrete loader/debug
+  path, determine what semantic witness beyond DCache origin can identify the
+  intended ELF request, then design the matched resource boundary. Do not
   promote a final config-dependent TileLink source ID, or DCache origin alone,
   into target-ELF semantic identity.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
