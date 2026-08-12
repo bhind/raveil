@@ -36,8 +36,9 @@ The corrected critical path is:
    simulation and makes no patent/FTO conclusion.
 4. **T-0042 — owned RTL adapter (in progress):** the smallest admitted static
    Graph executor now matches an independent oracle and survives
-   cancel/restart in Verilator. A strict common functional adapter now makes
-   missing lifecycle accounting explicit and refuses a total. Pinned BOOM, the
+   cancel/restart in Verilator. A strict common functional adapter v2 now makes
+   missing lifecycle accounting and unmatched memory/resources explicit and
+   refuses comparison readiness. Pinned BOOM, the
    same-core diagnostic semantics and licenses are source-verified through
    ADR-0040. `SmallBoomConfig` now elaborates to FIRRTL containing `BoomCore`
    and executes a minimal RV64 sum/store/load/check ELF to successful `tohost`

@@ -11,7 +11,7 @@ namespace {
 constexpr std::uint64_t kConfigurationTag = 0xd4bf9395a510385fULL;
 constexpr std::uint32_t kExpectedCycles = 256U * 6U;
 constexpr const char* kAdapterContract =
-    "8b12245438e4a5ffef23bfd4d29a86f6959307a79a437fe517960d043ed51968";
+    "56dbe3f2ab479233eb5e4fe1c79eb06e07458b42ea77acebb471a101afd24c1e";
 
 void cycle(VStaticStencilRegion& top) {
     top.clock = 0;
@@ -166,9 +166,11 @@ int main(int argc, char** argv) {
               << std::setfill('0') << kConfigurationTag << std::dec
               << " evidence=rtl-simulation-functional performance=not-measured"
               << std::endl;
-    std::cout << "SIMULATION-ADAPTER-V1 status=FUNCTIONAL implementation=static-graph"
+    std::cout << "SIMULATION-ADAPTER-V2 status=FUNCTIONAL implementation=static-graph"
               << " adapter_contract=" << kAdapterContract
               << " accounting_complete=0 total_cycles=UNAVAILABLE"
+              << " memory_model=owned-private-scratchpads"
+              << " resource_match_verified=0 matched_comparison_ready=0"
               << " missing=installation,completion,validation,publication"
               << " performance=not-measured" << std::endl;
     top.final();

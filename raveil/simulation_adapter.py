@@ -16,8 +16,8 @@ from typing import Any
 from .static_region import configuration_id
 
 
-SCHEMA = "raveil.simulation-adapter/v1"
-ADAPTER_IDENTITY = "raveil.bounded-region-simulation-adapter/v1"
+SCHEMA = "raveil.simulation-adapter/v2"
+ADAPTER_IDENTITY = "raveil.bounded-region-simulation-adapter/v2"
 EVIDENCE_CLASS = "rtl-simulation-functional"
 IMPLEMENTATIONS = {
     "static-graph",
@@ -33,6 +33,11 @@ ACCOUNTING_PHASES = (
     "validation_cycles",
     "publication_cycles",
 )
+MEMORY_MODELS = {
+    "owned-private-scratchpads",
+    "cache-backed-variable-latency",
+    "matched-fixed-latency-banked-scratchpad",
+}
 
 
 class SimulationAdapterError(ValueError):
@@ -65,7 +70,7 @@ def compile_simulation_adapter_contract() -> dict[str, Any]:
             },
         },
         "memory": {
-            "model": "fixed-latency-disjoint-private-scratchpad",
+            "required_comparison_model": "matched-fixed-latency-banked-scratchpad",
             "input_binding": "read-only",
             "output_binding": "exclusive-private-output",
             "input_read_ports": 1,
@@ -125,6 +130,9 @@ def validate_simulation_observation(observation: dict[str, Any]) -> None:
         "missing_accounting",
         "evidence_class",
         "performance_claim",
+        "memory_model",
+        "resource_match_verified",
+        "matched_comparison_ready",
     }
     if set(observation) != expected_fields:
         raise SimulationAdapterError("observation fields changed")
@@ -142,6 +150,16 @@ def validate_simulation_observation(observation: dict[str, Any]) -> None:
         raise SimulationAdapterError("evidence class changed")
     if observation["performance_claim"] is not False:
         raise SimulationAdapterError("functional adapter cannot make a performance claim")
+    if observation["memory_model"] not in MEMORY_MODELS:
+        raise SimulationAdapterError("unsupported memory model")
+    if type(observation["resource_match_verified"]) is not bool:
+        raise SimulationAdapterError("resource_match_verified must be boolean")
+    if type(observation["matched_comparison_ready"]) is not bool:
+        raise SimulationAdapterError("matched_comparison_ready must be boolean")
+    if observation["resource_match_verified"] and observation["memory_model"] != (
+        "matched-fixed-latency-banked-scratchpad"
+    ):
+        raise SimulationAdapterError("resource match requires the RFC-0005 memory model")
 
     status = observation["status"]
     if status not in {"completed", "cancelled"}:
@@ -210,6 +228,9 @@ def validate_simulation_observation(observation: dict[str, Any]) -> None:
             raise SimulationAdapterError("total cycles do not equal lifecycle phases")
     elif observation["total_cycles"] is not None:
         raise SimulationAdapterError("incomplete accounting cannot report total cycles")
+    ready = complete and observation["resource_match_verified"]
+    if observation["matched_comparison_ready"] is not ready:
+        raise SimulationAdapterError("matched comparison readiness is inconsistent")
 
 
 def static_graph_functional_observation(invocation: int) -> dict[str, Any]:
@@ -246,6 +267,9 @@ def static_graph_functional_observation(invocation: int) -> dict[str, Any]:
         ],
         "evidence_class": EVIDENCE_CLASS,
         "performance_claim": False,
+        "memory_model": "owned-private-scratchpads",
+        "resource_match_verified": False,
+        "matched_comparison_ready": False,
     }
     validate_simulation_observation(observation)
     return observation

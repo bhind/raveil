@@ -36,6 +36,9 @@ class SimulationAdapterTests(unittest.TestCase):
         observation = static_graph_functional_observation(1)
         validate_simulation_observation(observation)
         self.assertFalse(observation["accounting_complete"])
+        self.assertEqual(observation["memory_model"], "owned-private-scratchpads")
+        self.assertFalse(observation["resource_match_verified"])
+        self.assertFalse(observation["matched_comparison_ready"])
         self.assertIsNone(observation["total_cycles"])
         self.assertEqual(
             observation["missing_accounting"],
@@ -80,6 +83,20 @@ class SimulationAdapterTests(unittest.TestCase):
         observation["accounting_complete"] = True
         observation["total_cycles"] = 64 + 324 + 1536 + 3 + 256 + 2
         validate_simulation_observation(observation)
+
+    def test_unmatched_memory_cannot_be_comparison_ready(self) -> None:
+        observation = static_graph_functional_observation(2)
+        observation["resource_match_verified"] = True
+        with self.assertRaisesRegex(SimulationAdapterError, "RFC-0005 memory"):
+            validate_simulation_observation(observation)
+
+    def test_matched_readiness_requires_resources_and_complete_accounting(self) -> None:
+        observation = static_graph_functional_observation(2)
+        observation["memory_model"] = "matched-fixed-latency-banked-scratchpad"
+        observation["resource_match_verified"] = True
+        observation["matched_comparison_ready"] = True
+        with self.assertRaisesRegex(SimulationAdapterError, "readiness"):
+            validate_simulation_observation(observation)
 
     def test_module_cli_emits_validated_json(self) -> None:
         import json

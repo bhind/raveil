@@ -146,12 +146,15 @@ a performance result. The Docker path reuses the existing owned-counter Chisel
 a fresh matched and immutable environment before any comparison.
 
 After a successful RTL run the host wrapper emits three strict
-`raveil.simulation-adapter/v1` JSON records: completed, cancelled, then
+`raveil.simulation-adapter/v2` JSON records: completed, cancelled, then
 completed after restart. The common adapter fixes semantic and useful-operation
 counts and exposes separate installation, staging, execution, completion,
 validation, and publication phases. The current records explicitly use
 `accounting_complete=false` and `total_cycles=null` because four phases remain
-unknown. They are functional evidence and cannot be consumed as a benchmark.
+unknown. ADR-0041 also requires actual memory model and resource-match state:
+the current Graph records use owned private scratchpads but explicitly set
+resource matching and matched-comparison readiness false. They are functional
+evidence and cannot be consumed as a benchmark.
 
 To inspect the same validated record without rebuilding RTL:
 

@@ -417,12 +417,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   slice is functional: a deterministic compiler/validator binds RFC-0005
   configuration `d4bf9395...d1e2` to a six-phase Chisel stencil executor;
   Verilator matches an independent C++ oracle for 512 outputs and verifies
-  cancel invalidation plus restart. A strict common simulation adapter now
+  cancel invalidation plus restart. A strict common simulation adapter v2 now
   normalizes semantics, useful operations, implementation identity, private
   output state, and six lifecycle accounting phases without leaking upstream
-  types. The Graph record intentionally remains `accounting_complete=false`
-  and has no total until installation, completion, validation, and publication
-  phases are implemented. Keep T-0042 open for pinned BOOM, its same-core
+  types. ADR-0041 makes actual memory model, resource-match verification, and
+  matched-comparison readiness explicit; semantic success cannot imply matched
+  resources. The Graph record intentionally remains `accounting_complete=false`,
+  `resource_match_verified=false`, and has no total until installation,
+  completion, validation, and publication phases are implemented. Keep T-0042
+  open for pinned BOOM, its same-core
   diagnostic, and Rocket/BOOM records behind this boundary. ADR-0040 now fixes
   Chipyard 1.11.0/BOOM `9459af0...10847c`, `SmallBoomConfig`, the retained-
   structure serialize-dispatch diagnostic, and exact license hashes; source

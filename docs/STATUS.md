@@ -239,23 +239,30 @@ non-infringement, or FTO claim follows. T-0057 is complete as contract/prior-art
 and functional-schema validation.
 
 T-0042 now also has the implementation-neutral
-`raveil.simulation-adapter/v1` functional boundary. It fixes the descriptor,
+`raveil.simulation-adapter/v2` functional boundary. It fixes the descriptor,
 workload semantics, disjoint private scratchpad model, useful-operation counts,
 implementation identity, completion state, and installation/staging/execution/
 completion/validation/publication accounting fields without importing Rocket
-or BOOM types. Exact validation rejects unknown fields, mismatched semantic
-counts, publication before authority, and an asserted total while any phase is
-unknown. Common adapter SHA-256 is
-`8b12245438e4a5ffef23bfd4d29a86f6959307a79a437fe517960d043ed51968`.
+or BOOM types. ADR-0041 corrects the v1 ambiguity between semantic validity and
+matched resources: every observation now reports its actual memory model,
+resource-match verification, and matched-comparison readiness. Exact validation
+rejects unknown fields, mismatched semantic counts, publication before
+authority, an asserted total while any phase is unknown, or a match claim for
+anything other than the required fixed-latency banked scratchpad. Common v2
+adapter SHA-256 is
+`56dbe3f2ab479233eb5e4fe1c79eb06e07458b42ea77acebb471a101afd24c1e`.
 
 The Graph smoke now emits validated records for complete, cancelled, and
 restart invocations. All are deliberately `accounting_complete=false` with
 `total_cycles=null`: installation, completion, independent validation, and
 publication costs are not yet available. The reported 1,536 execution and 324
 staging cycles therefore cannot be added or compared as an end-to-end result.
-T-0042 remains open for pinned BOOM, its OoO-disabled diagnostic, and Rocket/
-BOOM functional records behind the same boundary; T-0044 remains the matched
-measurement task.
+They also declare `memory_model=owned-private-scratchpads`,
+`resource_match_verified=false`, and `matched_comparison_ready=false`; this RTL
+has not yet been resource-matched to either CPU control.
+T-0042 remains open for Rocket/BOOM semantic stencil records behind the same
+boundary and for a separately verified matched scratchpad adapter; T-0044
+remains the matched measurement task.
 
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM
