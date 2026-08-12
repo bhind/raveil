@@ -206,7 +206,14 @@ successful run ends with:
 
 ```text
 BOOM-FUNCTIONAL-SMOKE-V1 status=OK config=chipyard.SmallBoomConfig workload=sum-store-load-tohost evidence=rtl-simulation-functional adapter=not-emitted performance=not-measured
+BOOM-SERIALIZE-DISPATCH-SMOKE-V1 status=OK config=chipyard.SmallBoomConfig csr=0x7c1 mask=0x8 diagnostic=serialize-dispatch structures=retained workload=sum-store-load-tohost evidence=rtl-simulation-functional adapter=not-emitted performance=not-measured
 ```
+
+Both ELFs come from the same tracked assembly. The second is built with one
+preprocessor flag: before the shared workload it sets CSR `0x7c1` bit 3 and
+reads the bit back. A missing readback takes a failing `tohost` path. This
+isolates the functional difference to the pinned BOOM diagnostic setting; it
+does not establish a performance effect or remove OoO hardware.
 
 The named volumes are build caches, not evidence authority. Source mounts are
 read-only, and the wrapper revalidates the source revision, lockfile, tool

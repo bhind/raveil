@@ -295,8 +295,17 @@ workload and therefore not a common-adapter record. The conda-lock reader
 bootstrap remains an unlocked package solve, and the upstream CIRCT downloader
 is accepted only after validating the installed binary hash. No performance,
 energy, area, timing, OoO comparison, Graph comparison, FPGA, or silicon result
-follows. T-0042 remains open for the same-core serialize-dispatch diagnostic
-and matched Rocket/BOOM/Graph functional records behind the common boundary.
+follows.
+
+The same simulator also executed the identical workload after the tracked ELF
+set CSR `0x7c1` mask `0x8`, read the bit back, and failed closed to a non-success
+`tohost` code if the readback was absent. The diagnostic run completed normally
+with `BOOM-SERIALIZE-DISPATCH-SMOKE-V1 status=OK`,
+`diagnostic=serialize-dispatch`, and `structures=retained`. This proves only
+functional execution under that CSR setting; it neither proves which dynamic
+instructions overlapped nor measures any latency, energy, area, or benefit.
+T-0042 remains open for matched Rocket/BOOM/Graph functional records behind the
+common boundary.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

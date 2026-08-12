@@ -430,9 +430,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   elaborates `SmallBoomConfig` to FIRRTL containing `BoomCore`, builds the
   Verilator simulator, and executes a minimal sum/store/load/check RV64 ELF to
   a successful `tohost` completion. This smoke is not the RFC-0005 workload and
-  emits no common-adapter record. Keep the task open for the same-core
-  serialize-dispatch diagnostic and matched Rocket/BOOM/Graph functional
-  records. Do not turn the 1,536-cycle Graph schedule assertion, source pin, or
+  emits no common-adapter record. The same ELF source also sets and reads back
+  CSR `0x7c1` mask `0x8`, then completes the identical workload under the
+  retained-structure serialize-dispatch diagnostic. Keep the task open for
+  matched Rocket/BOOM/Graph functional records behind the common adapter. Do
+  not turn the 1,536-cycle Graph schedule assertion, source pin, or either
   minimal BOOM execution into a performance result.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits

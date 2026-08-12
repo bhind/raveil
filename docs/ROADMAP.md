@@ -41,8 +41,9 @@ The corrected critical path is:
    same-core diagnostic semantics and licenses are source-verified through
    ADR-0040. `SmallBoomConfig` now elaborates to FIRRTL containing `BoomCore`
    and executes a minimal RV64 sum/store/load/check ELF to successful `tohost`
-   completion. The same-core diagnostic and matched Rocket/BOOM/Graph adapter
-   records remain before T-0042 closes.
+   completion in both normal and CSR-verified serialize-dispatch modes. Matched
+   Rocket/BOOM/Graph adapter records remain before T-0042 closes; neither smoke
+   is a performance or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,

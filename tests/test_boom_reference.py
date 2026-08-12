@@ -100,6 +100,9 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertIn("--untracked-files=no --ignore-submodules=untracked", runner)
         self.assertIn("adapter=not-emitted", runner)
         self.assertIn("performance=not-measured", runner)
+        self.assertIn("BOOM-SERIALIZE-DISPATCH-SMOKE-V1", runner)
+        self.assertIn("diagnostic=serialize-dispatch", runner)
+        self.assertIn("structures=retained", runner)
         self.assertIn("conda_lock_bootstrap=unlocked", runner)
         self.assertIn(
             "condaforge/miniforge3:23.1.0-1@sha256:"
@@ -108,6 +111,9 @@ class BoomReferenceTests(unittest.TestCase):
         )
         self.assertIn("tohost", assembly)
         self.assertIn("bne", assembly)
+        self.assertIn("csrrs   zero, 0x7c1", assembly)
+        self.assertIn("csrr    t1, 0x7c1", assembly)
+        self.assertIn("beqz    t1, 5f", assembly)
         self.assertIn("0x80000000", linker)
         self.assertIn("text PT_LOAD FLAGS(5)", linker)
         self.assertIn("data PT_LOAD FLAGS(6)", linker)

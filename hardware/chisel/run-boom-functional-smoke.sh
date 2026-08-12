@@ -121,3 +121,26 @@ riscv64-unknown-elf-nm /build/boom_functional_smoke.elf | \
   grep -q " D tohost$"
 "$sim" +permissive +permissive-off /build/boom_functional_smoke.elf
 printf "BOOM-FUNCTIONAL-SMOKE-V1 status=OK config=chipyard.SmallBoomConfig workload=sum-store-load-tohost evidence=rtl-simulation-functional adapter=not-emitted performance=not-measured\n"'
+
+docker run --rm \
+    --platform "$platform" \
+    --security-opt no-new-privileges=true \
+    --mount "type=bind,source=$repo_root,target=/repo,readonly" \
+    --mount "type=volume,source=$toolchain_volume,target=/locked,readonly" \
+    --mount "type=volume,source=$build_volume,target=/build" \
+    "$image" \
+    bash -lc 'set -euo pipefail
+export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
+sim=/build/chipyard/sims/verilator/simulator-chipyard.harness-SmallBoomConfig
+test -x "$sim"
+riscv64-unknown-elf-gcc \
+  -DBOOM_SERIALIZE_DISPATCH=1 \
+  -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+  -nostdlib -nostartfiles -static -Wl,--no-relax \
+  -T /repo/hardware/chisel/boom_functional_smoke.ld \
+  /repo/hardware/chisel/boom_functional_smoke.S \
+  -o /build/boom_serialize_dispatch_smoke.elf
+riscv64-unknown-elf-objdump -d /build/boom_serialize_dispatch_smoke.elf | \
+  grep -q "0x7c1"
+"$sim" +permissive +permissive-off /build/boom_serialize_dispatch_smoke.elf
+printf "BOOM-SERIALIZE-DISPATCH-SMOKE-V1 status=OK config=chipyard.SmallBoomConfig csr=0x7c1 mask=0x8 diagnostic=serialize-dispatch structures=retained workload=sum-store-load-tohost evidence=rtl-simulation-functional adapter=not-emitted performance=not-measured\n"'

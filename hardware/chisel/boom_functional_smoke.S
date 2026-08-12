@@ -1,6 +1,14 @@
     .section .text.init
     .globl _start
 _start:
+#ifdef BOOM_SERIALIZE_DISPATCH
+    li      t0, 8
+    csrrs   zero, 0x7c1, t0
+    csrr    t1, 0x7c1
+    andi    t1, t1, 8
+    beqz    t1, 5f
+#endif
+
     li      t0, 0
     li      t1, 1
     li      t2, 17
@@ -21,6 +29,11 @@ _start:
 
 2:
     li      a0, 3
+
+    j       3f
+
+5:
+    li      a0, 5
 
 3:
     la      t6, tohost
