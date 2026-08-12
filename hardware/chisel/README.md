@@ -1,13 +1,14 @@
 # Chisel/RISC-V simulation substrate
 
-Status: T-0105 functional substrate complete; not a Graph or CPU performance
-experiment.
+Status: T-0105 functional substrate complete; T-0042 first bounded Graph RTL
+slice functional; not a CPU performance experiment.
 
-This directory proves two functional paths: a pinned
+This directory proves three functional paths: a pinned
 Chisel-to-SystemVerilog-to-Verilator path with a repository-owned four-bit
 counter, and an unmodified pinned Rocket Chip reference elaboration plus ISA
-test smoke. Neither path implements the proposed Graph microarchitecture or
-provides latency, energy, area, OoO-removal, ISA-advantage, FPGA, or silicon
+test smoke, plus the ADR-0039 simulation-only bounded static stencil region.
+Only the third path implements owned operation-level Graph RTL. None provides
+comparative latency, energy, area, OoO-removal, ISA-advantage, FPGA, or silicon
 evidence.
 
 Run from the repository root:
@@ -109,6 +110,40 @@ Scala 2.13.12 and Chisel 5.1.0 from the Rocket build, CIRCT firtool 1.56.1,
 Verilator 5.012, clang 11.1.0, CMake 3.26.4, Ninja 1.11.1, and DTC 1.7.0.
 This Rocket coordinate is independent of the earlier owned-counter Chisel
 7.2.0 coordinate.
+
+## Bounded static stencil RTL
+
+ADR-0039 permits only the RFC-0005 fixed-schedule research simulation. Run its
+complete owned compiler/validator checks and RTL smoke from the repository
+root:
+
+```sh
+python3 -m unittest tests.test_static_region -v
+./hardware/chisel/run-static-stencil-rtl.sh
+```
+
+The deterministic Python compiler constructs a ten-operation graph—five
+`LOAD_U32`, four `ADD_U32`, and one `STORE_U32`—and the independent validator
+requires the disjoint input/private-output objects, fixed six-cycle schedule,
+one read port, one adder, one write port, zero runtime-ready slots, RV64IM
+fallback declaration, and ADR-0039 exclusions. Its canonical SHA-256 is
+`d4bf9395a510385f42ba4a193ae2c747f308ad502a8fe807843ed19c2fa4d1e2`;
+the RTL exposes the first 64 bits only as a binding tag.
+
+The Chisel module applies that schedule to all 256 output points. The C++
+testbench computes the uint32 stencil independently, checks all outputs and the
+checksum for two different inputs, cancels a third invocation, requires the
+private output to become invalid, and then restarts successfully. Success emits:
+
+```text
+STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512 cycles_per_run=1536 configuration_tag=d4bf9395a510385f evidence=rtl-simulation-functional performance=not-measured
+```
+
+The 1,536-cycle check proves only that the implemented six-phase functional
+schedule terminates within `max_cycles`. It is not a Rocket/BOOM comparison or
+a performance result. The Docker path reuses the existing owned-counter Chisel
+7.2.0 tool coordinate and a disposable Scala/Coursier cache. T-0044 must define
+a fresh matched and immutable environment before any comparison.
 
 The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
 `LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the

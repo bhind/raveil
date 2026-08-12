@@ -186,16 +186,57 @@ token store, alias speculation, general LSU, rename, ROB, or architectural
 block commit, and an ordinary RV64IM fallback. It defines configuration
 identity, invalidation, exact semantic checking, complete configuration/staging
 accounting, interruption behavior, and numerical no-go thresholds centered on
-energy rather than speed. No RTL or measurement has run.
+energy rather than speed.
 
 The updated T-0057 matrix maps the draft to TRIPS/EDGE, WaveScalar, DySER,
 EPIC/VLIW, and CGRA prior art. Similarity remains high, especially for installed
 static configuration, hybrid fallback, and private-output publication. The
 three patent discoveries remain unreviewed and fail-closed. The 2026-08-12
 feature-to-document review records inspected claim locators and excluded
-features without making a legal conclusion. T-0057 remains open through
-functional validation, T-0042 may now implement only the fixed static slice,
-and T-0044 measurement remains separately gated.
+features without making a legal conclusion. ADR-0039 then admitted only the
+fixed static slice for T-0042 functional validation; T-0044 measurement remains
+separately gated.
+
+T-0042 now implements the first owned RFC-0005 functional slice. The
+`raveil.static-region/v1` compiler deterministically emits five `LOAD_U32`, four
+`ADD_U32`, and one `STORE_U32` nodes plus nine SSA edges, affine object effects,
+a six-cycle schedule, one-read/one-add/one-write resources, zero runtime-ready
+slots, and the ADR-0039 exclusion set. An independent validator recomputes the
+graph, schedule, object, effect, bound, and fallback invariants. Canonical
+descriptor SHA-256 is
+`d4bf9395a510385f42ba4a193ae2c747f308ad502a8fe807843ed19c2fa4d1e2`.
+The validator also rejects unknown fields, alternate schedules, altered effect
+kinds, and any dynamic-issue resource request rather than treating a different
+descriptor as compatible with the fixed RTL.
+
+The owned Chisel `StaticStencilRegion` binds the first 64 hash bits as a
+configuration tag, keeps separate 324-word input and 256-word private-output
+scratchpads, applies the fixed schedule over all 256 output points, and has no
+runtime dependency queue, token store, rename, ROB, general LSU, commit
+frontier, or issue-mode switch. Cancellation clears output validity; restart
+begins the fixed schedule from point zero.
+
+The user-facing `./hardware/chisel/run-static-stencil-rtl.sh` path completed in
+linux/amd64 Docker emulation on the Apple Silicon host. Chisel 7.2.0 emitted
+SystemVerilog and Verilator 4.038 checked two complete invocations with distinct
+inputs against an independently implemented C++ oracle: all 512 output words
+and both checksums matched. A third invocation cancelled after 17 execution
+cycles left `outputValid=0`, and a subsequent full restart passed. The fixed
+schedule asserted 1,536 execution cycles per complete invocation, below the
+8,192 functional bound.
+
+The first compile failed because the Chisel utility import for `switch/is` was
+missing. The first executable RTL then disagreed with the oracle at output 15
+because a four-bit column plus one wrapped before assignment to a five-bit
+wire. Adding the import and widening row/column slices before addition fixed
+both failures; the independent full-output check is retained.
+
+This is RTL simulation-functional evidence only. The cycle count is a schedule
+correctness assertion, not comparative performance. No Rocket/BOOM comparison,
+energy, area, timing, OoO-removal, FPGA, silicon, CPU/ISA, novelty,
+non-infringement, or FTO claim follows. T-0057 is complete as contract/prior-art
+and functional-schema validation; T-0042 remains open for BOOM/diagnostic/common
+adapter integration, and T-0044 remains the matched measurement task.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

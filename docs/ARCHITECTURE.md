@@ -154,9 +154,9 @@ and finalization publishes all staged bytes and exact-successor versions only
 after every object and range revalidates. The contract remains pointer-free and
 the atomicity claim is limited to the single-hart kernel API.
 
-The leading Daphnis Execution Subsystem (Daphnis) direction is a sealed explicit graph/effect contract, not a
-conventional sequential register instruction stream and not an exact-cycle VLIW
-schedule. A native job should carry:
+The long-term Graph Execution Subsystem direction remains a sealed explicit
+graph/effect contract rather than only a conventional sequential register
+instruction stream. A native job should carry:
 
 - explicit data and control dependencies;
 - explicit read, write, and external effects;
@@ -165,25 +165,38 @@ schedule. A native job should carry:
 - preferred placement, route, and memory plan;
 - semantic and numerical constraints.
 
-Hardware remains responsible for exact operand readiness, backpressure, token
-movement, arbitration, and variable latency. This split attempts to remove
-repeated *dependency-discovery* work from structured hot regions while
-preserving the *timing-dynamic* mechanisms required by physical uncertainty.
-The exact encoding remains Proposed in
-[`RFC-0001`](rfcs/RFC-0001-native-explicit-graph-machine.md).
+RFC-0001 leaves static, elastic, and variable-latency organizations open.
+ADR-0039 accepts a deliberately narrower first candidate: RFC-0005 lowers one
+ten-operation stencil graph to an exact six-cycle static schedule before
+execution. That simulation-only candidate has no runtime token movement,
+dependency-ready issue, rename, ROB, general LSU, commit frontier, or issue-mode
+switching. A later timing-dynamic organization requires a new contract and IP
+review; it is not implied by this first RTL.
 
-## RISC-V and Daphnis Execution Subsystem
+## RISC-V and Graph Execution Subsystem
 
 RISC-V/Sonatine is a preserved semantic/control/fallback and specialized
 authority architecture for boot, exceptions, irregular code, capabilities,
 object management, admission, and recovery. Under ADR-0024 it is not an MVP
 prerequisite and must earn primary-path status through a bounded comparison.
-It is not the native Daphnis machine code.
+It is not native Graph machine code.
 
-Daphnis is connected through owned job/object/completion contracts. Static,
+The Graph Execution Subsystem is connected through owned job/object/completion
+contracts. Static,
 elastic dataflow, stream, and hybrid organizations remain comparison
 candidates. Dynamic islands or RISC-V fallback handle pointer chasing,
 interpreters, unpredictable traversal, and other graph-hostile regions.
+
+T-0042 now supplies the first owned operation-level RTL slice. A deterministic
+Python compiler emits the RFC-0005 stencil descriptor; an independent validator
+recomputes its acyclic dependencies, affine READ/WRITE effects, disjoint-object
+requirements, resource limits, fixed schedule, exclusions, and RV64IM fallback
+declaration. Chisel binds the descriptor's configuration tag to separate input
+and private-output scratchpads and executes five loads, four modular uint32
+adds, and one store over 256 points. Cancellation clears output validity;
+normal completion grants only a private result for independent host-oracle
+checking. This is RTL functional simulation, not a product ISA, general Graph
+executor, matched CPU comparison, or hardware-performance result.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

@@ -18,10 +18,6 @@ resolves it.
 - ADR-0023 fixes single-hart metadata-version finalization and cancel-wins
   behavior. How should byte-shadow storage, cache/DMA ordering, verifier
   identity, reset recovery, and persistent multi-object atomicity work?
-- ADR-0039 accepts the RFC-0005 compiler SSA, affine/disjoint object,
-  operation-level, fixed-schedule, private-output and RV64IM-fallback boundary
-  only for simulation. Does functional implementation expose a contradiction
-  in that contract before T-0044 measurement planning?
 - RFC-0005 fixes at least 10% total dynamic-energy-proxy improvement, no more
   than 5% correct-latency regression, break-even by 64 invocations, and at most
   25% incremental Rocket-core area as later no-go thresholds. T-0044 must still

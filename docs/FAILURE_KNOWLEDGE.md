@@ -1,7 +1,7 @@
 # Failure knowledge
 
 Status: reusable operational guidance
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 This index captures short lessons that prevent repeated mistakes. It does not
 replace raw experiment bundles, EXP conclusions, regression tests, ADRs, TODO,
@@ -213,8 +213,25 @@ labelled unknown.
   traced to a reviewed T-0057 distinction and IP-risk disposition.
 - Evidence: T-0057, RFC-0003, RFC-0004, and
   `docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md`.
-- State: phase-A correction recorded; phase-B contract and qualified legal
-  review where required remain open.
+- State: phase A and the ADR-0039 simulation-only phase-B boundary are recorded;
+  qualified legal review remains open for broader implementation or claims.
+
+## RTL index arithmetic must widen before a boundary increment
+
+- Symptom: the first static-stencil RTL run matched its independent oracle for
+  output addresses 0 through 14, then disagreed at address 15.
+- Cause: a four-bit column slice added one without first widening, so logical
+  column 16 wrapped to zero. The same defect would have affected the final row.
+- Prevention: explicitly widen bounded index fields to the range required after
+  arithmetic, then add. Do not infer Chisel result width from the destination
+  wire.
+- Detection: compare every RTL output against an independently implemented
+  oracle, include both final-column and final-row boundaries, and fail before
+  accepting a self-reported checksum.
+- Evidence: T-0042 `StaticStencilRegion.scala`,
+  `static_stencil_sim_main.cpp`, and `docs/log/2026-08-12.md`.
+- State: corrected with five-bit coordinate padding; the full 512 checked
+  outputs and cancel/restart path pass in Verilator.
 
 ## Locked build inputs must exclude convenience hooks and generated state
 

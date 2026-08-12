@@ -413,7 +413,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   use the pinned Chisel/Chipyard research environment with Rocket in-order,
   BOOM OoO and same-core OoO-disabled diagnostic configurations plus an owned
   Graph execution model. Chisel constructs RTL; use a simulator such as
-  Verilator for evidence and label it simulation, not silicon.
+  Verilator for evidence and label it simulation, not silicon. The first owned
+  slice is functional: a deterministic compiler/validator binds RFC-0005
+  configuration `d4bf9395...d1e2` to a six-phase Chisel stencil executor;
+  Verilator matches an independent C++ oracle for 512 outputs and verifies
+  cancel invalidation plus restart. Keep T-0042 open for the pinned BOOM and
+  same-core diagnostic integration and a common adapter boundary; do not turn
+  the 1,536-cycle schedule assertion into a performance result.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
@@ -438,7 +444,7 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [ ] **T-0055** ANN/near-memory profile before FPGA acceleration.
 - [ ] **T-0056** FPGA Experience retrieval/filter prototype only after access
   patterns and schemas stabilize.
-- [ ] **T-0057** Define and test the RFC-0001 native operation/dependency/effect/
+- [x] **T-0057** Define and test the RFC-0001 native operation/dependency/effect/
   object graph schema before further tool-level optimization work. Phase A now
   records the direct-prior-art matrix for OoO/EPIC/TRIPS/WaveScalar/DySER/CGRA
   and preliminary patent/IP triage in
@@ -449,11 +455,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   simulator interface, disjoint read/private-output objects, RV64IM fallback,
   exact oracle, complete overhead accounting, and pre-registered no-go rule.
   The 2026-08-12 feature-to-document review records claim locators and excluded
-  mechanisms but creates no patent clearance. Keep T-0057 open until T-0042
-  supplies exact functional validation. Test the admitted candidate against
-  sequential, in-order,
-  conventional OoO, and relevant VLIW/dataflow controls under RFC-0004; do not
-  infer CPU claims from the T-0103 process-level showcase.
+  mechanisms but creates no patent clearance. T-0042 now supplies exact
+  compiler/validator and RTL-versus-independent-oracle functional validation,
+  including cancellation and restart. This closes the contract-definition
+  task only. T-0044 owns comparison against sequential, in-order, conventional
+  OoO, and relevant VLIW/dataflow controls under RFC-0004; do not infer CPU
+  claims from this functional smoke or the T-0103 process-level showcase.
 - [ ] **T-0058** Evaluate reuse-weighted optimization ROI and hot/warm/cold/
   archival budget classes.
 - [ ] **T-0059** Build a reproducible small-Transformer Experience demo only
