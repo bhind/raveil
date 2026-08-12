@@ -359,25 +359,30 @@ measurement evidence. The raw client bypasses Rocket and BOOM; success remains
 `rtl-simulation-functional`, with CPU execution not run, initiator attribution
 unverified, resource matching false, and performance not measured.
 
-Run the first Rocket CPU workload through the owned manager with:
+Run the same CPU workload through the owned manager on Rocket and BOOM with:
 
 ```sh
 ./hardware/chisel/run-owned-rocket-memory-smoke.sh
+./hardware/chisel/run-owned-boom-memory-smoke.sh
 ```
 
-The runner reuses the content-addressed dedicated Rocket simulator, compiles a
-bare-metal RV64 ELF, and executes real Rocket RTL load/store instructions
-against the owned data page at `0x08000000` and control page at `0x08010000`.
+The two thin entrypoints select an allowlisted configuration and call one shared
+runner. Separate content-addressed simulator volumes compile the same bare-metal
+RV64 ELF and execute real Rocket or BOOM RTL load/store instructions against
+the owned data page at `0x08000000` and control page at `0x08010000`.
 The ELF uses `fence iorw,iorw`, covers a full write and two byte-lane writes,
 changes the software phase, and records data plus aggregate counters in a
 signature that is independently decoded on the host. A successful marker is
-`rtl-simulation-functional` evidence for this Rocket mapped path only.
+`rtl-simulation-functional` evidence for each mapped path only. Both runs
+produce the same decoded data, phase, and counter signature. The composite
+payload hash covers the overlay, ELF source, linker script, verifier, and shared
+runner; CPU/configuration is reported separately in the marker.
 Before reuse, the runner rejects unexpected tracked or untracked source-cache
 changes while allowing only the intended overlay and task-local SBT `target/`
 outputs.
 Initiator attribution remains intended but unproven, the phase is not
-request/response-correlated ADR-0043 metadata, BOOM has not replayed this exact
-workload, resources are unmatched, and performance is not measured.
+request/response-correlated ADR-0043 metadata, resources are unmatched, OoO is
+not isolated, and performance is not measured.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program

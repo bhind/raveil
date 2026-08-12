@@ -44,6 +44,12 @@ ROCKET_MEMORY_VERIFIER = (
 ROCKET_MEMORY_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-rocket-memory-smoke.sh"
 )
+BOOM_MEMORY_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-memory-smoke.sh"
+)
+CPU_MEMORY_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-cpu-memory-smoke.sh"
+)
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
@@ -132,10 +138,12 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
 
-    def test_rocket_workload_reaches_owned_memory_with_phase_fences(self) -> None:
+    def test_cpu_workload_reaches_owned_memory_with_phase_fences(self) -> None:
         workload = ROCKET_MEMORY_WORKLOAD.read_text(encoding="utf-8")
         verifier = ROCKET_MEMORY_VERIFIER.read_text(encoding="utf-8")
-        runner = ROCKET_MEMORY_RUNNER.read_text(encoding="utf-8")
+        runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        rocket_runner = ROCKET_MEMORY_RUNNER.read_text(encoding="utf-8")
+        boom_runner = BOOM_MEMORY_RUNNER.read_text(encoding="utf-8")
         self.assertIn("li      s0, 0x08000000", workload)
         self.assertIn("li      s1, 0x08010000", workload)
         self.assertGreaterEqual(workload.count("fence   iorw, iorw"), 4)
@@ -148,15 +156,31 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("0xCAFEBABE", verifier)
         self.assertIn("accepted=8 completed=8", verifier)
         self.assertIn("signature_sha256=", verifier)
-        self.assertNotEqual(ROCKET_MEMORY_RUNNER.stat().st_mode & 0o111, 0)
-        self.assertIn("CONFIG=RaveilOwnedRocketConfig", runner)
+        for entrypoint in (
+            CPU_MEMORY_RUNNER,
+            ROCKET_MEMORY_RUNNER,
+            BOOM_MEMORY_RUNNER,
+        ):
+            self.assertNotEqual(entrypoint.stat().st_mode & 0o111, 0)
+        self.assertIn('CONFIG="$RAVEIL_OWNED_CPU_CONFIG"', runner)
+        self.assertIn(
+            "rocket:raveil-chipyard-owned-rocket-sim-build-v1", runner
+        )
+        self.assertIn(
+            "boom:raveil-chipyard-owned-boom-sim-build-v1", runner
+        )
+        self.assertIn('"$linker" "$runner"', runner)
         self.assertIn("CONFIG_PACKAGE=chipyard.raveil", runner)
         self.assertIn("persistent simulator source cache contains an unexpected", runner)
         self.assertIn("submodule foreach --quiet --recursive", runner)
-        self.assertIn("cpu_execution=rocket-rtl-simulation", runner)
+        self.assertIn("cpu_execution=%s-rtl-simulation", runner)
         self.assertIn("initiator_attribution=cpu-workload-intended-not-proven", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
+        self.assertIn("RaveilOwnedRocketConfig", rocket_runner)
+        self.assertIn("RAVEIL_OWNED_CPU_LABEL=rocket", rocket_runner)
+        self.assertIn("RaveilOwnedSmallBoomConfig", boom_runner)
+        self.assertIn("RAVEIL_OWNED_CPU_LABEL=boom", boom_runner)
 
 
 if __name__ == "__main__":

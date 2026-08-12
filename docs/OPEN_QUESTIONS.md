@@ -55,9 +55,9 @@ resolves it.
   added to dedicated Rocket and BOOM configurations, but it is deliberately
   resource-unmatched. Its direct monitor-enabled TileLink harness now verifies
   the manager-local legal Get/Put/mask/denial/backpressure/metadata paths, but
-  bypasses the CPUs. A phase-fenced Rocket ELF now reaches the manager and
-  validates its expected data and aggregate counters, but source/initiator
-  identity is still not exposed. How should the adapter distinguish CPU
+  bypasses the CPUs. The same phase-fenced ELF now reaches the manager through
+  both Rocket and BOOM and validates identical expected data and aggregate
+  counters, but source/initiator identity is still not exposed. How should the adapter distinguish CPU
   activity from loader/debug/recovery masters, and what later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only

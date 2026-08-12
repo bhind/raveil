@@ -243,15 +243,17 @@ reset-phase, and bounded-counter behavior with the upstream monitor enabled.
 It bypasses both CPUs, so CPU execution, source attribution, end-to-end
 ordering, resource matching, and all measurement remain separate follow-ups.
 
-The first CPU execution path is a dedicated Rocket bare-metal functional
-smoke. RV64 load/store and `fence iorw,iorw` instructions access the owned PBUS
-manager's data and control pages, and a host verifier checks the resulting
-data, phase, and aggregate counters. This proves that the generated Rocket
-system can execute the intended mapped path; it does not prove which upstream
-TileLink source performed each request, carry ADR-0043 initiator/phase metadata
-with each response, or make the peripheral topology resource-equivalent to the
-Graph memories. BOOM replay precedes any common-contract or matched comparison
-work.
+The first CPU execution path is a shared bare-metal functional smoke with thin
+Rocket and BOOM entrypoints. Identical RV64 load/store and `fence iorw,iorw`
+instructions access the owned PBUS manager's data and control pages, and the
+same host verifier checks data, phase, and aggregate counters. Both generated
+systems produce the same decoded signature for this bounded workload. This
+proves that each CPU can execute the intended mapped path and preserve this
+workload's semantics; it does not prove which upstream TileLink source
+performed each request, carry ADR-0043 initiator/phase metadata with each
+response, isolate the effect of OoO, or make the peripheral topology
+resource-equivalent to the Graph memories. Common-contract and matched
+comparison work remains separate.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

@@ -276,8 +276,8 @@ uncached peripheral bus. The manager implements logic for `Get`, `PutFull`, and
 source/size response routing, and aggregate software-declared phase counts.
 This placement is deliberately observable and resource-unmatched; initiator
 attribution, equal ports/arbitration/buffering, and common-memory promotion
-remain unverified. Rocket CPU execution and a phase-fenced workload now pass
-separately below; exact BOOM replay remains open.
+remain unverified. The same phase-fenced workload now passes through both the
+Rocket and BOOM CPU paths as described below.
 The elaboration runner therefore reports execution not run, resource matching
 false, comparison readiness false, and performance not measured.
 This is not yet the ADR-0043 common-contract CPU adapter: phase is neither
@@ -294,19 +294,24 @@ phase remains software-declared, initiator attribution and the ADR-0043 common
 contract remain open, and resource matching, comparison readiness, fixed
 end-to-end latency, performance, energy, and area remain unverified.
 
-The same owned manager now passes its first phase-fenced Rocket CPU workload.
-The dedicated `RaveilOwnedRocketConfig` Verilator system executed a bare-metal
-RV64 ELF whose CPU instructions read reset phase zero, performed full-word and
-two byte-lane writes through `0x08000000`, selected execution phase two through
-`0x08010000`, and checked the resulting data plus aggregate accepted/completed
-and per-phase counters. The independently decoded signature matched
+The same owned manager now passes one phase-fenced CPU workload through both
+the dedicated `RaveilOwnedRocketConfig` and `RaveilOwnedSmallBoomConfig`
+Verilator systems. The identical bare-metal RV64 ELF read reset phase zero,
+performed full-word and two byte-lane writes through `0x08000000`, selected
+execution phase two through `0x08010000`, and checked the resulting data plus
+aggregate accepted/completed and per-phase counters. Both independently
+decoded signatures matched
 `11223344`, `5522aa44`, `cafebabe`, phase 2, accepted/completed 8/8,
 installation reads/writes 2/3, and execution reads/writes 2/1. This upgrades
-the Rocket path from elaboration-only to `rtl-simulation-functional`; it does
-not identify the TileLink initiator, correlate owned phase metadata per
-request/response, establish equal resources, or support a performance, energy,
-area, OoO-removal, FPGA, or silicon claim. An exact BOOM replay and the later
-ADR-0043 common-contract adapter remain open.
+both CPU paths for this bounded workload to `rtl-simulation-functional`. The
+shared runner admits only those two named configurations and keeps separate
+content-addressed simulator volumes; its payload hash covers the overlay, ELF
+source, linker script, signature verifier, and shared runner, while the marker
+separately identifies the CPU/configuration. Matching signatures prove semantic agreement for this one
+workload only. They do not identify the TileLink initiator, correlate owned
+phase metadata per request/response, establish equal resources, isolate OoO,
+or support a performance, energy, area, OoO-removal, FPGA, or silicon claim.
+The ADR-0043 common-contract adapter remains open.
 
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM

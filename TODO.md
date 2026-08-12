@@ -478,8 +478,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   coverage now passes for
   full/partial writes, two masks, invalid phase denial, response backpressure,
   one-outstanding admission, response metadata, reset phase, and bounded
-  aggregate counters. Next repeat the exact CPU workload on BOOM before
-  designing the matched resource boundary. The
+  aggregate counters. The exact same ELF and verifier now pass on the dedicated
+  BOOM system with an identical decoded signature. This is bounded semantic
+  agreement, not comparative evidence. Next add initiator separation and
+  request/response-correlated owned metadata before designing the matched
+  resource boundary. The
   overlay is not yet the ADR-0043 common-contract adapter because it does not
   carry owned initiator/phase metadata through each request and response.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
