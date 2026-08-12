@@ -1,7 +1,7 @@
 # Failure knowledge
 
 Status: reusable operational guidance
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 This index captures short lessons that prevent repeated mistakes. It does not
 replace raw experiment bundles, EXP conclusions, regression tests, ADRs, TODO,
@@ -215,6 +215,27 @@ labelled unknown.
   `docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md`.
 - State: phase A and the ADR-0039 simulation-only phase-B boundary are recorded;
   qualified legal review remains open for broader implementation or claims.
+
+## DMI response readiness may participate in request readiness
+
+- Symptom: a repository-owned DMI driver never accepted its first request when
+  response ready was asserted only after request acceptance. After making the
+  response channel continuously ready, the first response instead arrived in
+  the same cycle as request acceptance and tripped an outstanding-only assert.
+- Cause: the pinned `DMIToTL` maps DMI response readiness into TileLink D
+  readiness, and intervening buffering can make that readiness part of the A
+  request-ready path. The return path can also be zero-latency at the harness
+  interface.
+- Prevention: keep response ready asserted for the bounded driver, and accept
+  a response only when it pairs with either a previously outstanding request
+  or a request firing in the same cycle. Retain a fail-closed assert for every
+  other response and a finite watchdog for missing progress.
+- Detection: require bounded request/response markers plus the final manager
+  signature in both Rocket and BOOM Debug SBA simulations.
+- Evidence: T-0042 repository-owned Debug SBA driver and
+  `docs/log/2026-08-13.md`.
+- State: corrected for the bounded functional harness; this is not a general
+  Debug transport, security, or semantic-initiator claim.
 
 ## RTL index arithmetic must widen before a boundary increment
 

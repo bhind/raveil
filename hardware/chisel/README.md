@@ -464,13 +464,28 @@ are bounded `rtl-simulation-functional` evidence for this PT_LOAD path only.
 They do not prove a semantic ELF initiator, cover Debug SBA or every loader/
 debug path, establish resource matching, isolate OoO, or measure performance.
 
+`run-owned-rocket-debug-sba-smoke.sh` and
+`run-owned-boom-debug-sba-smoke.sh` select dedicated configurations with an
+exported DMI port and a repository-owned finite driver. The driver activates
+the Debug Module, confirms an 8-bit `sbaccess`, writes `0xa5` to `0x08000000`
+through SBA, and checks busy/error completion. Exact generated graph checks
+require Debug `[8192,8224)`, Rocket DCache `[16416,16448)`, or BOOM DCache
+`[16480,16512)`. The 37-word signature then requires the Debug write to be
+unexpected/non-origin 1/1 and the CPU read to be expected/origin 1/1, with
+aggregate 2/2 and accepted/completed phase zero. The driver has finite RTL and
+simulator watchdogs and accepts a DMI response only when paired with an
+outstanding or same-cycle accepted request. These are bounded functional RTL
+and TileLink client-class checks; no halt/resume, instruction/PC, semantic ELF
+initiator, complete debug exclusion, resource match, OoO, or measurement claim
+is made.
+
 Pinned Rocket/BOOM source hooks now place the structural marker after the
 DCache and before the tile master Xbar. This distinguishes tagged DCache traffic
 from the separate SimTSI/FESVR master in the bounded positive, raw-client
 absence, test-only field-stripping, and concrete PT_LOAD probe runs, but it
 does not prove which ELF instruction or PC semantically initiated a request.
-Durable owned attribution requires a later decision plus Debug SBA and other
-loader/debug path testing.
+Durable owned attribution requires a later decision plus remaining loader/debug
+path testing.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program

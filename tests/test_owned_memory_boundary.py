@@ -105,6 +105,21 @@ LOADER_PROBE_LINKER = (
 LOADER_PROBE_VERIFIER = (
     ROOT / "hardware" / "chisel" / "verify_owned_memory_loader_probe.py"
 )
+DEBUG_SBA_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_debug_sba_smoke.S"
+)
+DEBUG_SBA_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_memory_debug_sba_signature.py"
+)
+DEBUG_SBA_SOURCE_MAP_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_debug_sba_source_map.py"
+)
+ROCKET_DEBUG_SBA_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-rocket-debug-sba-smoke.sh"
+)
+BOOM_DEBUG_SBA_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-debug-sba-smoke.sh"
+)
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
@@ -335,7 +350,7 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("p(DCacheTLNodeTransformKey)(p)(dcache.node)", boom_patch)
         self.assertIn("BundleMap.setAlignedDefaults(in(i).a.bits.user)", xbar_patch)
         self.assertIn("BundleMap.setAlignedDefaults(in(i).c.bits.user)", xbar_patch)
-        self.assertIn('build_root=/build/$RAVEIL_INPUT_SHA256', runner)
+        self.assertIn("cache_key=$RAVEIL_SOURCE_SHA256", runner)
         self.assertIn("persistent simulator source cache is incomplete", runner)
         self.assertIn("RAVEIL_ROCKET_HOOK_PATCH_SHA256", runner)
         self.assertIn("RAVEIL_BOOM_HOOK_PATCH_SHA256", runner)
@@ -453,6 +468,82 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertNotEqual(verify(bad_origin).returncode, 0)
         bad_dcache_source = values.copy()
         bad_dcache_source[27] = 8256
+        self.assertNotEqual(verify(bad_dcache_source).returncode, 0)
+        self.assertNotEqual(verify(values[:-1]).returncode, 0)
+
+    def test_debug_sba_path_is_dedicated_bounded_and_fail_closed(self) -> None:
+        overlay = CPU_OVERLAY.read_text(encoding="utf-8")
+        config = DCACHE_ORIGIN_TAGGER.read_text(encoding="utf-8")
+        workload = DEBUG_SBA_WORKLOAD.read_text(encoding="utf-8")
+        verifier = DEBUG_SBA_VERIFIER.read_text(encoding="utf-8")
+        source_verifier = DEBUG_SBA_SOURCE_MAP_VERIFIER.read_text(encoding="utf-8")
+        runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+
+        self.assertIn("lastNonDcacheOriginAcceptedSource", overlay)
+        self.assertIn("controlOffset === 0xa4.U", overlay)
+        self.assertIn("class RaveilDebugSBADriver", config)
+        self.assertIn("class WithRaveilDebugSBAHarness", config)
+        self.assertIn("new chipyard.config.WithDMIDTM", config)
+        self.assertIn("new freechips.rocketchip.subsystem.WithDebugSBA", config)
+        self.assertIn("WithRaveilOwnedMemorySourceRange(16416, 16448)", config)
+        self.assertIn("WithRaveilOwnedMemorySourceRange(16480, 16512)", config)
+        self.assertIn("io.reqValid && io.reqReady", config)
+        self.assertIn("io.respValid && io.respReady", config)
+        self.assertIn("assert(waiting || requestFire", config)
+        self.assertIn("Debug SBA system bus error", config)
+        self.assertIn("Debug SBA DMI driver timed out", config)
+        self.assertIn("li      t1, 32768", workload)
+        self.assertIn("bnez    t0, 2f", workload)
+        self.assertIn("lbu     t0, 0(s0)", workload)
+        self.assertIn(".fill 37, 4, 0", workload)
+        self.assertIn('"debug": (8192, 8224)', verifier)
+        self.assertIn('"dcache": (16416, 16448)', verifier)
+        self.assertIn('"dcache": (16480, 16512)', verifier)
+        self.assertIn('"debug_input": (256, 257)', source_verifier)
+        self.assertIn('observed["fragmenter"] != (0, 32800)', source_verifier)
+        self.assertIn("GraphML repeats a master", source_verifier)
+        self.assertIn("source_client_class=topology-only", source_verifier)
+        self.assertIn(
+            "RAVEIL_OWNED_CPU_MODE=debug-sba",
+            ROCKET_DEBUG_SBA_RUNNER.read_text(encoding="utf-8"),
+        )
+        self.assertIn("OWNED-CPU-DEBUG-SBA-SMOKE-V1", runner)
+        self.assertIn('timeout --foreground 180 "$sim"', runner)
+        for entrypoint in (ROCKET_DEBUG_SBA_RUNNER, BOOM_DEBUG_SBA_RUNNER):
+            self.assertNotEqual(entrypoint.stat().st_mode & 0o111, 0)
+
+    def test_debug_sba_signature_rejects_wrong_origin_and_source(self) -> None:
+        debug_source = 8192
+        dcache_source = 16416
+        values = [
+            1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+            debug_source, debug_source, 0, 0,
+            debug_source, debug_source, 0, 0, 0xA5,
+            2, 2, 1, 1, 1, 1, 1, 1, 1, 1,
+            dcache_source, dcache_source, 0, 0,
+            debug_source, debug_source,
+        ]
+
+        def verify(candidate: list[int]) -> subprocess.CompletedProcess[str]:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as sig:
+                sig.write("".join(f"{value:08x}\n" for value in candidate))
+                sig.flush()
+                return subprocess.run(
+                    ["python3", str(DEBUG_SBA_VERIFIER), "rocket", sig.name],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+
+        self.assertEqual(verify(values).returncode, 0)
+        bad_origin = values.copy()
+        bad_origin[27] = 0
+        self.assertNotEqual(verify(bad_origin).returncode, 0)
+        bad_debug_source = values.copy()
+        bad_debug_source[12] = 8224
+        self.assertNotEqual(verify(bad_debug_source).returncode, 0)
+        bad_dcache_source = values.copy()
+        bad_dcache_source[31] = 16448
         self.assertNotEqual(verify(bad_dcache_source).returncode, 0)
         self.assertNotEqual(verify(values[:-1]).returncode, 0)
 

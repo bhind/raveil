@@ -315,9 +315,17 @@ DCache-origin request. Accepted and completed classifications are conserved
 at 2/2 before and 3/3 after the CPU read. This tests one concrete PT_LOAD path;
 it does not make transport request count an ELF-segment invariant.
 Neither layer supplies an instruction PC or target-ELF semantic intent, nor do
-the current tests exclude all loader/debug DCache activity. Durable semantic
-assignment, Debug SBA coverage, and other loader/debug negatives remain later
-work.
+the current tests exclude all loader/debug DCache activity. A dedicated
+test-only configuration exports DMI to a repository-owned bounded driver and
+performs one 8-bit Debug SBA write before a CPU read. Generated graphs and
+manager-local A/D accounting classify the write in Debug `[8192,8224)` as
+non-DCache origin and the read in the configuration-specific DCache range as
+DCache origin. The DMI/SBA implementation uses the pinned Chipyard/Rocket-Chip
+`WithDebugSBA`, `DMIToTL`, and system-bus machinery; register encodings follow
+the RISC-V Debug interface. These are source-provenance locators and functional
+client-class evidence, not legal clearance or a semantic-initiator identity.
+Durable semantic assignment, remaining loader/debug negatives, and matched
+resources remain later work.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

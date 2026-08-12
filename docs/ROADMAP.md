@@ -93,7 +93,11 @@ The corrected critical path is:
    requests complete as serial-class origin 0/0 versus non-origin 2/2 before a
    CPU read adds one in-range DCache-origin completion. This is a bounded
    loader-path negative, not complete loader/debug exclusion or target-ELF
-   semantic identity. Debug SBA and durable semantic attribution remain open.
+   semantic identity. One repository-owned DMI sequence now also performs an
+   8-bit Debug SBA write in both CPU configurations; exact topology and runtime
+   accounting separate the Debug client class from the following tagged DCache
+   read at 1/1 each. Durable semantic attribution, remaining loader/debug
+   negatives, and matched resources remain open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

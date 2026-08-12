@@ -366,6 +366,21 @@ DCache crossing in the same simulation. Source and origin metadata do not
 prove the target ELF's semantic initiator, and Debug SBA, other loader/debug
 paths, durable semantic attribution, and matched resources remain open.
 
+A dedicated repository-owned DMI harness now exercises one concrete Debug
+System Bus Access path in both pinned CPU configurations. Exact generated
+graphs place the Debug client at `[8192,8224)`, with Rocket DCache MMIO at
+`[16416,16448)` and BOOM DCache MMIO at `[16480,16512)`. In each bounded RTL
+run, an 8-bit Debug SBA write of `0xa5` completed as unexpected/non-DCache
+origin 1/1 at software phase zero; the subsequent CPU read completed as
+expected/DCache origin 1/1, bringing aggregate accepted/completed to 2/2.
+Request source and phase were retained from A acceptance through D completion.
+This establishes generated-topology and runtime TileLink client-class
+classification for the tested path only. It does not halt/resume the hart,
+prove an instruction, PC, target-ELF semantic initiator, or exclude every
+loader/debug path. Resources remain unmatched and no performance, power, area,
+OoO, FPGA, silicon, novelty, non-infringement, patent-clearance, or FTO claim
+follows.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

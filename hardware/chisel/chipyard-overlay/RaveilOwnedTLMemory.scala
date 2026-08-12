@@ -126,6 +126,12 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val lastDcacheOriginCompletedPhase =
       RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val lastNonDcacheOriginAcceptedSource = RegInit(0.U(32.W))
+    val lastNonDcacheOriginCompletedSource = RegInit(0.U(32.W))
+    val lastNonDcacheOriginAcceptedPhase =
+      RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val lastNonDcacheOriginCompletedPhase =
+      RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val lastAcceptedSource = RegInit(0.U(32.W))
     val lastCompletedSource = RegInit(0.U(32.W))
     val lastAcceptedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
@@ -188,6 +194,10 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     when(controlOffset === 0x8c.U) { controlReadData := lastDcacheOriginCompletedSource }
     when(controlOffset === 0x90.U) { controlReadData := lastDcacheOriginAcceptedPhase }
     when(controlOffset === 0x94.U) { controlReadData := lastDcacheOriginCompletedPhase }
+    when(controlOffset === 0x98.U) { controlReadData := lastNonDcacheOriginAcceptedSource }
+    when(controlOffset === 0x9c.U) { controlReadData := lastNonDcacheOriginCompletedSource }
+    when(controlOffset === 0xa0.U) { controlReadData := lastNonDcacheOriginAcceptedPhase }
+    when(controlOffset === 0xa4.U) { controlReadData := lastNonDcacheOriginCompletedPhase }
     val freshResponseData = Mux(responseRead && !responseIsData,
       responseControlData, freshReadData)
 
@@ -221,6 +231,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           lastDcacheOriginAcceptedPhase := phase
         }.otherwise {
           nonDcacheOriginAcceptedCount := nonDcacheOriginAcceptedCount + 1.U
+          lastNonDcacheOriginAcceptedSource := tl.a.bits.source
+          lastNonDcacheOriginAcceptedPhase := phase
         }
         when(get) {
           phaseReadCounts(phase) := phaseReadCounts(phase) + 1.U
@@ -271,6 +283,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           lastDcacheOriginCompletedPhase := responsePhase
         }.otherwise {
           nonDcacheOriginCompletedCount := nonDcacheOriginCompletedCount + 1.U
+          lastNonDcacheOriginCompletedSource := responseSource
+          lastNonDcacheOriginCompletedPhase := responsePhase
         }
       }
     }

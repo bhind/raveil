@@ -14,6 +14,9 @@ loader_probe="$repo_root/hardware/chisel/owned_memory_loader_probe.S"
 loader_probe_linker="$repo_root/hardware/chisel/owned_memory_loader_probe.ld"
 loader_probe_verifier="$repo_root/hardware/chisel/verify_owned_memory_loader_probe.py"
 source_map_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_map.py"
+debug_sba_workload="$repo_root/hardware/chisel/owned_memory_debug_sba_smoke.S"
+debug_sba_verifier="$repo_root/hardware/chisel/verify_owned_memory_debug_sba_signature.py"
+debug_sba_source_map_verifier="$repo_root/hardware/chisel/verify_owned_debug_sba_source_map.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
 dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
@@ -24,12 +27,15 @@ cpu_config=${RAVEIL_OWNED_CPU_CONFIG:?owned CPU config is required}
 cpu_config_fq=${RAVEIL_OWNED_CPU_CONFIG_FQ:?owned CPU fully qualified config is required}
 cpu_label=${RAVEIL_OWNED_CPU_LABEL:?owned CPU label is required}
 build_volume=${RAVEIL_OWNED_CPU_BUILD_VOLUME:?owned CPU build volume is required}
+cpu_mode=${RAVEIL_OWNED_CPU_MODE:-regular}
 lock_sha=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc21da3d
 chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
 
-case "$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
-    RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-sim-build-v1) ;;
-    RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-sim-build-v1) ;;
+case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
+    regular:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-sim-build-v1) ;;
+    regular:RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-sim-build-v1) ;;
+    debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
+    debug-sba:RaveilOwnedDebugSBASmallBoomConfig:chipyard.raveil.RaveilOwnedDebugSBASmallBoomConfig:boom:raveil-chipyard-owned-debug-sba-boom-sim-build-v1) ;;
     *)
         echo 'error: unsupported owned CPU smoke configuration' >&2
         exit 1
@@ -37,7 +43,9 @@ case "$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
 esac
 
 for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
-    "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" "$linker" "$runner" "$dockerfile"; do
+    "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" \
+    "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
+    "$linker" "$runner" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
         exit 1
@@ -65,8 +73,20 @@ boom_hook_patch_sha256=$(shasum -a 256 "$boom_hook_patch" | awk '{print $1}')
 xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 input_sha256=$(
     shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
-        "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" "$linker" "$runner" "$dockerfile" |
+        "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_map_verifier" \
+        "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
+        "$linker" "$runner" "$dockerfile" |
         awk '{print $1}' |
+        shasum -a 256 |
+        awk '{print $1}'
+)
+source_sha256=$(
+    {
+        shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" \
+            "$xbar_request_patch" "$dockerfile" |
+            awk '{print $1}'
+        printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform"
+    } |
         shasum -a 256 |
         awk '{print $1}'
 )
@@ -90,9 +110,11 @@ docker run --rm \
     --env "RAVEIL_BOOM_HOOK_PATCH_SHA256=$boom_hook_patch_sha256" \
     --env "RAVEIL_XBAR_REQUEST_PATCH_SHA256=$xbar_request_patch_sha256" \
     --env "RAVEIL_INPUT_SHA256=$input_sha256" \
+    --env "RAVEIL_SOURCE_SHA256=$source_sha256" \
     --env "RAVEIL_OWNED_CPU_CONFIG=$cpu_config" \
     --env "RAVEIL_OWNED_CPU_CONFIG_FQ=$cpu_config_fq" \
     --env "RAVEIL_OWNED_CPU_LABEL=$cpu_label" \
+    --env "RAVEIL_OWNED_CPU_MODE=$cpu_mode" \
     "$image" \
     bash -lc 'set -euo pipefail
 export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
@@ -107,7 +129,11 @@ expected_lock='"$lock_sha"'
 verilator --version | grep -q "Verilator 5.020"
 riscv64-unknown-elf-gcc --version | grep -q "12.2.0"
 
-build_root=/build/$RAVEIL_INPUT_SHA256
+cache_key=$RAVEIL_INPUT_SHA256
+if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ]; then
+  cache_key=$RAVEIL_SOURCE_SHA256
+fi
+build_root=/build/$cache_key
 ready_marker="$build_root/.raveil-source-ready"
 if [ -e "$build_root" ] && [ ! -f "$ready_marker" ]; then
   echo "error: persistent simulator source cache is incomplete" >&2
@@ -141,10 +167,10 @@ if [ ! -e "$build_root" ]; then
     "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala"
   install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilDCacheOriginTagger.scala \
     "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala"
-  printf "%s\n" "$RAVEIL_INPUT_SHA256" > "$ready_marker"
+  printf "%s\n" "$cache_key" > "$ready_marker"
 fi
 [ -d "$build_root/chipyard/.git" ]
-[ "$(cat "$ready_marker")" = "$RAVEIL_INPUT_SHA256" ]
+[ "$(cat "$ready_marker")" = "$cache_key" ]
 [ "$(git -C "$build_root/chipyard" rev-parse HEAD)" = "$expected_chipyard" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala" | awk "{print \$1}")" = "$RAVEIL_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala" | awk "{print \$1}")" = "$RAVEIL_ORIGIN_OVERLAY_SHA256" ]
@@ -175,6 +201,26 @@ sim="$build_root/chipyard/sims/verilator/simulator-chipyard.harness-$RAVEIL_OWNE
 test -x "$sim"
 graph="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG.graphml"
 test -f "$graph"
+if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ]; then
+  python3 /repo/hardware/chisel/verify_owned_debug_sba_source_map.py \
+    "$RAVEIL_OWNED_CPU_LABEL" "$graph"
+  riscv64-unknown-elf-gcc \
+    -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+    -nostdlib -nostartfiles -static -Wl,--no-relax \
+    -T /repo/hardware/chisel/boom_functional_smoke.ld \
+    /repo/hardware/chisel/owned_memory_debug_sba_smoke.S \
+    -o "$build_root/owned_memory_debug_sba_smoke.elf"
+  debug_signature="$build_root/owned_memory_debug_sba_smoke.signature"
+  rm -f "$debug_signature"
+  timeout --foreground 180 "$sim" +signature="$debug_signature" +signature-granularity=4 \
+    +permissive +permissive-off "$build_root/owned_memory_debug_sba_smoke.elf"
+  python3 /repo/hardware/chisel/verify_owned_memory_debug_sba_signature.py \
+    "$RAVEIL_OWNED_CPU_LABEL" "$debug_signature"
+  printf "OWNED-CPU-DEBUG-SBA-SMOKE-V1 status=OK cpu=%s config=%s input_sha256=%s graph_sha256=%s dmi_driver=repository-owned source_client_class=debug-sba-observed semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+    "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" \
+    "$(sha256sum "$graph" | cut -c1-64)"
+  exit 0
+fi
 python3 /repo/hardware/chisel/verify_owned_cpu_source_map.py \
   "$RAVEIL_OWNED_CPU_LABEL" "$graph"
 

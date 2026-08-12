@@ -78,9 +78,10 @@ resolves it.
   serial-class traffic is origin 0/0 and non-origin 2/2, while the subsequent
   CPU read adds one tagged DCache-origin completion. This proves a bounded
   transport negative and structural DCache origin only, not complete
-  loader/debug exclusion. Which concrete Debug SBA path should be tested next,
-  how should DCache-local loader/debug traffic fail closed, and what additional
-  witness is required to distinguish DCache origin
+  loader/debug exclusion. One concrete repository-owned DMI-to-Debug-SBA write
+  now completes as non-DCache origin in both CPU configurations before a tagged
+  CPU read. Which remaining DCache-local loader/debug traffic must fail closed,
+  and what additional durable witness is required to distinguish DCache origin
   from a particular target-ELF instruction? What later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
