@@ -421,6 +421,18 @@ binding, target-ELF semantic initiator attribution, the BOOM probe, common
 bridge connection, resource matching, matched comparison, and performance are
 all still unimplemented or unverified.
 
+A separate pinned Rocket request/response/WB diagnostic now observes the exact
+`0x08000100` workload at the `RocketCore` DCache boundary. It allocates only
+when a request is accepted, captures that request's DCache tag, matches the
+load data response separately, and observes exception-free WB by PC and
+load/store kind. The bounded RTL run records one first-attempt store and one
+first-attempt load, two retirements, one matched load response, and the exact
+two-word signature. This is partial `rtl-simulation-functional` evidence only:
+the DCache-local tag is not a durable token, store WB is not store
+authorization or owned-manager completion, and replay, kill, redirect,
+exception, reset/epoch, BOOM lifecycle, common-bridge admission, semantic
+initiator identity, resource matching, and performance remain unverified.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

@@ -526,15 +526,32 @@ content-addressed proof of the mutable Docker/APT/Scala cache dependencies.
 This observer is not either CPU probe: `event_source=synthetic`,
 `cpu_execution=not-run`, `semantic_initiator=not-proven`,
 `resource_match_verified=0`, `matched_comparison_ready=0`, and
-`performance=not-measured`. The pinned Rocket signal hook and BOOM probe are
-still unimplemented, and the token must not enter the owned common bridge until
-both CPU-specific lifecycle suites pass.
+`performance=not-measured`.
 
-The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
-is not an in-order core or an area/energy ablation. Elaboration is not program
-execution; the separate smoke above is program execution but not a Graph or
-comparison workload. Neither functional container can support measurement
-claims, and an unofficial prebuilt image is not evidence authority.
+Run the first bounded pinned Rocket positive with:
+
+```sh
+./hardware/chisel/run-owned-rocket-request-retire-witness.sh
+```
+
+The runner enables Chisel diagnostics with `+permissive +verbose ...
++permissive-off`, captures stdout and stderr, and requires exactly seven
+records: store `allocate/request/retire`, then load `allocate/request` followed
+by `retire` and `response` in either order. Allocation occurs only on accepted
+`io.dmem.req`; the verifier binds the load response tag to its captured request
+tag and separately requires WB qualification and the exact two-word signature.
+This is only a first-attempt request/response/WB smoke. The tag is DCache-local,
+store WB is not store authorization or owned-manager completion, and the full
+Rocket negative lifecycle suite and BOOM probe remain unimplemented. No token
+may enter the owned common bridge on this evidence, and it establishes no
+semantic initiator, resource match, matched comparison, or performance result.
+
+The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
+retains the OoO hardware, so it is not an in-order core or an area/energy
+ablation. Elaboration is not program execution; the separate smoke above is
+program execution but not a Graph or comparison workload. Neither functional
+container can support measurement claims, and an unofficial prebuilt image is
+not evidence authority.
 
 The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
 `LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the

@@ -1,0 +1,101 @@
+diff --git a/src/main/scala/rocket/RocketCore.scala b/src/main/scala/rocket/RocketCore.scala
+--- a/src/main/scala/rocket/RocketCore.scala
++++ b/src/main/scala/rocket/RocketCore.scala
+@@ -930,6 +930,97 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
+   io.dmem.req.bits.no_xcpt := DontCare
+   io.dmem.req.bits.data := DontCare
+   io.dmem.req.bits.mask := DontCare
++
++  // Raveil T-0042 / ADR-0045 bounded diagnostic. This repository-owned
++  // ledger observes one exact bare-metal MMIO address in the pinned Rocket
++  // pipeline. It correlates request acceptance with Rocket writeback but does
++  // not carry the token through DCache/TL, prove an ELF semantic initiator, or
++  // establish a resource match.
++  val raveilWitnessAddress = "h08000100".U(xLen.W)
++  val raveilWitnessCandidate = io.dmem.req.valid &&
++    io.dmem.req.bits.addr === raveilWitnessAddress
++  val raveilWitnessRequest = raveilWitnessCandidate && io.dmem.req.ready
++  val raveilWitnessStore = isWrite(io.dmem.req.bits.cmd)
++  val raveilWitnessLoad = isRead(io.dmem.req.bits.cmd)
++  val raveilWitnessActive = RegInit(false.B)
++  val raveilWitnessAccepted = RegInit(false.B)
++  val raveilWitnessEpoch = RegInit(1.U(4.W))
++  val raveilWitnessNextSequence = RegInit(1.U(16.W))
++  val raveilWitnessSequence = RegInit(0.U(16.W))
++  val raveilWitnessPc = RegInit(0.U(xLen.W))
++  val raveilWitnessStoreReg = RegInit(false.B)
++  val raveilWitnessTag = RegInit(0.U(coreParams.dcacheReqTagBits.W))
++  val raveilWitnessAttempt = RegInit(0.U(8.W))
++  val raveilWitnessRetired = RegInit(false.B)
++  val raveilWitnessResponded = RegInit(false.B)
++
++  when(raveilWitnessRequest && !raveilWitnessActive) {
++    assert(raveilWitnessLoad || raveilWitnessStore,
++      "Raveil Rocket witness saw a non-load/store request")
++    assert(raveilWitnessNextSequence =/= "hffff".U,
++      "Raveil Rocket witness sequence exhausted")
++    raveilWitnessActive := true.B
++    raveilWitnessAccepted := true.B
++    raveilWitnessSequence := raveilWitnessNextSequence
++    raveilWitnessPc := ex_reg_pc
++    raveilWitnessStoreReg := raveilWitnessStore
++    raveilWitnessTag := io.dmem.req.bits.tag
++    raveilWitnessAttempt := 1.U
++    raveilWitnessRetired := false.B
++    raveilWitnessResponded := false.B
++    printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch=%d sequence=%d pc=0x%x address=0x%x store=%d event_source=rocket-pinned\n",
++      raveilWitnessEpoch, raveilWitnessNextSequence, ex_reg_pc,
++      io.dmem.req.bits.addr, raveilWitnessStore)
++    printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch=%d sequence=%d attempt=1 pc=0x%x address=0x%x store=%d tag=0x%x\n",
++      raveilWitnessEpoch, raveilWitnessNextSequence, ex_reg_pc,
++      io.dmem.req.bits.addr, raveilWitnessStore, io.dmem.req.bits.tag)
++  }.elsewhen(raveilWitnessCandidate) {
++    assert(ex_reg_pc === raveilWitnessPc &&
++      raveilWitnessStore === raveilWitnessStoreReg,
++      "Raveil Rocket witness live-token mismatch")
++    when(raveilWitnessRequest) {
++      assert(raveilWitnessAttempt =/= "hff".U,
++        "Raveil Rocket witness attempt exhausted")
++      raveilWitnessAccepted := true.B
++      raveilWitnessAttempt := raveilWitnessAttempt + 1.U
++      printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch=%d sequence=%d attempt=%d pc=0x%x address=0x%x store=%d tag=0x%x\n",
++        raveilWitnessEpoch, raveilWitnessSequence,
++        raveilWitnessAttempt + 1.U, ex_reg_pc, io.dmem.req.bits.addr,
++        raveilWitnessStore, io.dmem.req.bits.tag)
++    }
++  }
++
++  val raveilWitnessRetire = raveilWitnessActive && wb_valid && wb_ctrl.mem &&
++    wb_reg_pc === raveilWitnessPc &&
++    (isWrite(wb_ctrl.mem_cmd) === raveilWitnessStoreReg)
++  val raveilWitnessResponse = raveilWitnessActive &&
++    !raveilWitnessStoreReg && dmem_resp_valid && dmem_resp_xpu &&
++    io.dmem.resp.bits.tag === raveilWitnessTag
++  when(raveilWitnessRetire) {
++    assert(raveilWitnessAccepted,
++      "Raveil Rocket witness retired before request acceptance")
++    printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch=%d sequence=%d pc=0x%x store=%d wb_valid=1 store_wb_predicate=%d\n",
++      raveilWitnessEpoch, raveilWitnessSequence, wb_reg_pc,
++      raveilWitnessStoreReg, raveilWitnessStoreReg)
++    raveilWitnessRetired := true.B
++    when(raveilWitnessStoreReg || raveilWitnessResponded) {
++      raveilWitnessActive := false.B
++      raveilWitnessAccepted := false.B
++      raveilWitnessAttempt := 0.U
++      raveilWitnessNextSequence := raveilWitnessNextSequence + 1.U
++    }
++  }
++  when(raveilWitnessResponse) {
++    printf("RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch=%d sequence=%d tag=0x%x store=0 response_valid=1 response_has_data=1\n",
++      raveilWitnessEpoch, raveilWitnessSequence, raveilWitnessTag)
++    raveilWitnessResponded := true.B
++    when(raveilWitnessRetired || raveilWitnessRetire) {
++      raveilWitnessActive := false.B
++      raveilWitnessAccepted := false.B
++      raveilWitnessAttempt := 0.U
++      raveilWitnessNextSequence := raveilWitnessNextSequence + 1.U
++    }
++  }
+
+   io.dmem.s1_data.data := (if (fLen == 0) mem_reg_rs2 else Mux(mem_ctrl.fp, Fill((xLen max fLen) / fLen, io.fpu.store_data), mem_reg_rs2))
+   io.dmem.s1_data.mask := DontCare

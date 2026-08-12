@@ -524,10 +524,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   observer now passes those load/store and fail-closed cases with synthetic
   events, exact marker verification, and terminal conservation; it also rejects
   an invalid completion instead of promoting a retired operation. This is a
-  contract smoke, not a pinned Rocket probe. Next bind the same ledger to exact
-  Rocket lifecycle signals and source hashes, repeat every positive/negative
-  case under real CPU execution, then implement the BOOM ROB/LSU diagnostic
-  under the same normalized lifecycle contract.
+  contract smoke, not a pinned Rocket probe. A bounded pinned Rocket diagnostic
+  now observes accepted store/load requests, captures the request DCache tag,
+  separately matches the load response, and observes WB retirement; its exact
+  positive workload and signature pass. It does not close ADR-0045: replay,
+  kill, redirect, exception, reset/epoch, store authorization, owned-manager D
+  completion, and negative lifecycle cases remain open. Next exercise those
+  Rocket lifecycle cases, then implement the BOOM ROB/LSU diagnostic under the
+  same normalized lifecycle contract.
   Do not connect either token to the ADR-0043 common bridge until both
   CPU-specific diagnostics pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and

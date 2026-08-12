@@ -6,10 +6,13 @@ chipyard="$repo_root/external/chipyard"
 overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala"
 origin_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilDCacheOriginTagger.scala"
 rocket_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch"
+rocket_witness_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-request-retire-witness.patch"
 boom_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch"
 xbar_request_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch"
 workload="$repo_root/hardware/chisel/owned_memory_cpu_smoke.S"
 verifier="$repo_root/hardware/chisel/verify_owned_memory_cpu_signature.py"
+rocket_witness_workload="$repo_root/hardware/chisel/owned_memory_rocket_request_retire.S"
+rocket_witness_verifier="$repo_root/hardware/chisel/verify_owned_rocket_request_retire.py"
 loader_probe="$repo_root/hardware/chisel/owned_memory_loader_probe.S"
 loader_probe_linker="$repo_root/hardware/chisel/owned_memory_loader_probe.ld"
 loader_probe_verifier="$repo_root/hardware/chisel/verify_owned_memory_loader_probe.py"
@@ -37,13 +40,15 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     regular:RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-sim-build-v1) ;;
     debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
     debug-sba:RaveilOwnedDebugSBASmallBoomConfig:chipyard.raveil.RaveilOwnedDebugSBASmallBoomConfig:boom:raveil-chipyard-owned-debug-sba-boom-sim-build-v1) ;;
+    rocket-request-retire:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-request-retire-build-v1) ;;
     *)
         echo 'error: unsupported owned CPU smoke configuration' >&2
         exit 1
         ;;
 esac
 
-for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
+for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" "$verifier" \
+    "$rocket_witness_workload" "$rocket_witness_verifier" \
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
     "$linker" "$runner" "$dockerfile"; do
@@ -70,10 +75,12 @@ command -v docker >/dev/null 2>&1 || {
 overlay_sha256=$(shasum -a 256 "$overlay" | awk '{print $1}')
 origin_overlay_sha256=$(shasum -a 256 "$origin_overlay" | awk '{print $1}')
 rocket_hook_patch_sha256=$(shasum -a 256 "$rocket_hook_patch" | awk '{print $1}')
+rocket_witness_patch_sha256=$(shasum -a 256 "$rocket_witness_patch" | awk '{print $1}')
 boom_hook_patch_sha256=$(shasum -a 256 "$boom_hook_patch" | awk '{print $1}')
 xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 input_sha256=$(
-    shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
+    shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$boom_hook_patch" "$xbar_request_patch" "$workload" \
+        "$rocket_witness_workload" "$rocket_witness_verifier" \
         "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
         "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
         "$linker" "$runner" "$dockerfile" |
@@ -108,6 +115,7 @@ docker run --rm \
     --env "RAVEIL_OVERLAY_SHA256=$overlay_sha256" \
     --env "RAVEIL_ORIGIN_OVERLAY_SHA256=$origin_overlay_sha256" \
     --env "RAVEIL_ROCKET_HOOK_PATCH_SHA256=$rocket_hook_patch_sha256" \
+    --env "RAVEIL_ROCKET_WITNESS_PATCH_SHA256=$rocket_witness_patch_sha256" \
     --env "RAVEIL_BOOM_HOOK_PATCH_SHA256=$boom_hook_patch_sha256" \
     --env "RAVEIL_XBAR_REQUEST_PATCH_SHA256=$xbar_request_patch_sha256" \
     --env "RAVEIL_INPUT_SHA256=$input_sha256" \
@@ -141,18 +149,29 @@ if [ -e "$build_root" ] && [ ! -f "$ready_marker" ]; then
   exit 1
 fi
 if [ ! -e "$build_root" ]; then
-  mkdir -p "$build_root"
+  mkdir "$build_root" || {
+    echo "error: persistent simulator source cache initialization raced another invocation" >&2
+    exit 1
+  }
   cp -a /source "$build_root/chipyard"
   [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "d7ce4d0fd84c118fc0db36254f98889b509b6070d1d48dfbc52bb7139a8ca6d2" ]
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "0435dce882f4ad37ee566218fcd8b7d6f9e088c50448677d6eb6efac7e9029ac" ]
   [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/common/tile.scala" | awk "{print \$1}")" = "570d48ccd0978b55ea9aba77af4a6b8280194d09e2e6c3f018dbe963ec65a9dc" ]
   [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "7ef8f49ccb3b8df8ba3860d1a54d1eee6d964431b77aa147dd2511f97fe3a613" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch | awk "{print \$1}")" = "$RAVEIL_ROCKET_HOOK_PATCH_SHA256" ]
+  [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-rocket-request-retire-witness.patch | awk "{print \$1}")" = "$RAVEIL_ROCKET_WITNESS_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_HOOK_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch | awk "{print \$1}")" = "$RAVEIL_XBAR_REQUEST_PATCH_SHA256" ]
   git -C "$build_root/chipyard/generators/rocket-chip" apply --check --unidiff-zero \
     /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch
   git -C "$build_root/chipyard/generators/rocket-chip" apply --unidiff-zero \
     /repo/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch
+  if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
+    git -C "$build_root/chipyard/generators/rocket-chip" apply --check \
+      /repo/hardware/chisel/chipyard-patches/t-0042-rocket-request-retire-witness.patch
+    git -C "$build_root/chipyard/generators/rocket-chip" apply \
+      /repo/hardware/chisel/chipyard-patches/t-0042-rocket-request-retire-witness.patch
+  fi
   git -C "$build_root/chipyard/generators/boom" apply --check --unidiff-zero \
     /repo/hardware/chisel/chipyard-patches/t-0042-boom-dcache-origin-hook.patch
   git -C "$build_root/chipyard/generators/boom" apply --unidiff-zero \
@@ -162,6 +181,11 @@ if [ ! -e "$build_root" ]; then
   git -C "$build_root/chipyard/generators/rocket-chip" apply --unidiff-zero \
     /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch
   [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
+  if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
+    [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "01dfb22c486fa222e09dc346a339590db78797bd05e7c0e9fbc56243bfed2318" ]
+  else
+    [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "0435dce882f4ad37ee566218fcd8b7d6f9e088c50448677d6eb6efac7e9029ac" ]
+  fi
   [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/common/tile.scala" | awk "{print \$1}")" = "2f25f75be69e2dc05c12137e35415224a950306cfbd19a0b2c1d071087bee9d6" ]
   [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "4867e293671c4df061637b01f358772595c0ec0efff359deeacb8572dde4cbe2" ]
   install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala \
@@ -176,6 +200,11 @@ fi
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala" | awk "{print \$1}")" = "$RAVEIL_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala" | awk "{print \$1}")" = "$RAVEIL_ORIGIN_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
+if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "01dfb22c486fa222e09dc346a339590db78797bd05e7c0e9fbc56243bfed2318" ]
+else
+  [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/RocketCore.scala" | awk "{print \$1}")" = "0435dce882f4ad37ee566218fcd8b7d6f9e088c50448677d6eb6efac7e9029ac" ]
+fi
 [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/common/tile.scala" | awk "{print \$1}")" = "2f25f75be69e2dc05c12137e35415224a950306cfbd19a0b2c1d071087bee9d6" ]
 [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "4867e293671c4df061637b01f358772595c0ec0efff359deeacb8572dde4cbe2" ]
 expected_overlay_status="?? generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala
@@ -188,7 +217,7 @@ git -C "$build_root/chipyard" diff --quiet --ignore-submodules=dirty
 ! git -C "$build_root/chipyard" submodule status | grep -q "^+"
 git -C "$build_root/chipyard" submodule foreach --quiet --recursive '\''
   git diff --check
-  unexpected=$(git status --porcelain --untracked-files=all | grep -v "^?? target/" | grep -v "^ M src/main/scala/rocket/HellaCache.scala$" | grep -v "^ M src/main/scala/tilelink/Xbar.scala$" | grep -v "^ M src/main/scala/common/tile.scala$" || true)
+  unexpected=$(git status --porcelain --untracked-files=all | grep -v "^?? target/" | grep -v "^ M src/main/scala/rocket/HellaCache.scala$" | grep -v "^ M src/main/scala/rocket/RocketCore.scala$" | grep -v "^ M src/main/scala/tilelink/Xbar.scala$" | grep -v "^ M src/main/scala/common/tile.scala$" || true)
   [ -z "$unexpected" ] || {
     echo "error: persistent simulator submodule cache contains an unexpected change: $name" >&2
     echo "$unexpected" >&2
@@ -224,6 +253,27 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ]; then
 fi
 python3 /repo/hardware/chisel/verify_owned_cpu_source_map.py \
   "$RAVEIL_OWNED_CPU_LABEL" "$graph"
+
+if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ]; then
+  riscv64-unknown-elf-gcc \
+    -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+    -nostdlib -nostartfiles -static -Wl,--no-relax \
+    -T /repo/hardware/chisel/boom_functional_smoke.ld \
+    /repo/hardware/chisel/owned_memory_rocket_request_retire.S \
+    -o "$build_root/owned_memory_rocket_request_retire.elf"
+  witness_signature="$build_root/owned_memory_rocket_request_retire.signature"
+  witness_log="$build_root/owned_memory_rocket_request_retire.log"
+  rm -f "$witness_signature" "$witness_log"
+  timeout --foreground 180 "$sim" +permissive +verbose \
+    +signature="$witness_signature" +signature-granularity=4 +permissive-off \
+    "$build_root/owned_memory_rocket_request_retire.elf" 2>&1 | tee "$witness_log"
+  python3 /repo/hardware/chisel/verify_owned_rocket_request_retire.py \
+    "$witness_log" "$witness_signature"
+  printf "OWNED-ROCKET-REQUEST-RETIRE-HOST-V1 status=OK cpu=rocket config=%s input_sha256=%s graph_sha256=%s event_source=rocket-pinned cpu_execution=rtl-simulation d_token_correlation=not-run semantic_initiator=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+    "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" \
+    "$(sha256sum "$graph" | cut -c1-64)"
+  exit 0
+fi
 
 riscv64-unknown-elf-gcc \
   -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \

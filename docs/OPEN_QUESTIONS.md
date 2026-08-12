@@ -89,11 +89,14 @@ resolves it.
   and 8288 on BOOM. Therefore any accepted witness must add owned identity and
   replay/flush/commit rules rather than reinterpret the existing source/origin.
   ADR-0045 fixes CPU-owned token, epoch, replay, kill, exception, reset, and
-  commit rules. A synthetic Rocket ledger now satisfies the standalone
-  state-machine cases, but does not validate their mapping to pinned Rocket
-  signals. The remaining question is whether the real Rocket and BOOM probes
-  can satisfy every required positive/negative lifecycle case before
-  normalization into the ADR-0043 bridge.
+  commit rules. A bounded pinned Rocket probe now validates accepted request,
+  DCache-tag capture, separately matched load response, and WB retirement for
+  one positive store/load workload. It does not validate replay, kill,
+  redirect, exception, reset/epoch, store authorization, owned-manager D
+  completion, or semantic initiator identity. The remaining question is
+  whether Rocket can complete those lifecycle cases and whether the BOOM
+  ROB/LSU probe can satisfy the same fail-closed contract before normalization
+  into the ADR-0043 bridge.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

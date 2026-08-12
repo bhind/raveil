@@ -622,6 +622,52 @@ labelled unknown.
   DCache-origin completion afterward. This does not generalize the count to
   other segments or transports.
 
+## Load writeback is not a same-cycle DCache response
+
+- Symptom: the first pinned Rocket witness asserted that a load reaching WB
+  also had `dmem_resp_valid` in that cycle and stopped an otherwise valid run.
+- Cause: the diagnostic conflated separately timed load WB and DCache response
+  events; the failure says nothing about same-cycle request/response behavior.
+- Prevention: retain the accepted request tag and observe response and WB as
+  independent qualified events that may arrive in either order.
+- Detection: require both events and exact request/response tag equality before
+  accepting a bounded load witness; never infer response timing from WB alone.
+- Evidence: T-0042 pinned Rocket request-retire patch and the corrected RTL
+  replay recorded in `docs/log/2026-08-13.md`.
+- State: corrected for the bounded positive; replay, kill, exception, reset,
+  durable-token, and owned-manager completion cases remain open.
+
+## Chisel diagnostic output needs verbose mode and both output streams
+
+- Symptom: RTL execution and signature completed, but the verifier found zero
+  lifecycle records in the captured file.
+- Cause: one run omitted `+verbose`; after that was corrected, the runner still
+  piped only stdout while the pinned simulator emitted Chisel `printf` records
+  on stderr.
+- Prevention: invoke diagnostics as `+permissive +verbose ...
+  +permissive-off` and capture `2>&1` through a `pipefail`-protected `tee`.
+- Detection: require the exact record prefix, count, schema, and signature;
+  inspect the persisted raw log rather than relying on combined terminal text.
+- Evidence: T-0042 `run-owned-cpu-memory-smoke.sh`, the persistent-volume logs,
+  and `docs/log/2026-08-13.md`.
+- State: corrected; timeout and exact verifier remain mandatory.
+
+## Verifier fixtures must preserve emitted Chisel numeric formatting
+
+- Symptom: real records used padded decimal fields such as `epoch= 1` and
+  `sequence=    1`, while hand-written fixtures used unpadded values; the real
+  stream would fail parsing after log capture was corrected.
+- Cause: the fixture represented semantic values but not Chisel `%d` output
+  formatting, leaving a transport-format blind spot.
+- Prevention: normalize only whitespace following `=` before exact-schema
+  parsing and keep a fixture copied from the emitted field shape.
+- Detection: run the verifier against captured RTL output in addition to
+  mutation fixtures, and continue rejecting missing, extra, or duplicate keys.
+- Evidence: T-0042 `verify_owned_rocket_request_retire.py`, its boundary tests,
+  and the corrected direct RTL replay.
+- State: corrected for the current marker; future marker formats need their own
+  emitted-output fixtures.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:
