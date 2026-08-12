@@ -443,14 +443,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   records the direct-prior-art matrix for OoO/EPIC/TRIPS/WaveScalar/DySER/CGRA
   and preliminary patent/IP triage in
   `docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md`.
-  RFC-0005 is the first phase-B draft: it proposes an operation-level,
+  RFC-0005 and ADR-0039 accept, for repository-owned RTL simulation only, an
+  operation-level,
   fixed-latency, statically scheduled five-point-stencil region, internal
   simulator interface, disjoint read/private-output objects, RV64IM fallback,
   exact oracle, complete overhead accounting, and pre-registered no-go rule.
-  It is not accepted and creates no RTL or patent clearance. Review the
-  workload and thresholds, complete a mechanism-specific claim-to-feature
-  disposition, and record accept/revise/stop before T-0042. Test an admitted
-  candidate against sequential, in-order,
+  The 2026-08-12 feature-to-document review records claim locators and excluded
+  mechanisms but creates no patent clearance. Keep T-0057 open until T-0042
+  supplies exact functional validation. Test the admitted candidate against
+  sequential, in-order,
   conventional OoO, and relevant VLIW/dataflow controls under RFC-0004; do not
   infer CPU claims from the T-0103 process-level showcase.
 - [ ] **T-0058** Evaluate reuse-weighted optimization ROI and hot/warm/cold/

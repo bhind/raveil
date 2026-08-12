@@ -1,15 +1,16 @@
 # RFC-0005: Bounded installed static graph region
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-12
 Task: T-0057 phase B
+Decision: ADR-0039; bounded repository-owned RTL simulation only
 
 ## Purpose and non-claim
 
-This RFC is the first falsifiable low-level Graph contract draft. It does not
-authorize RTL, select a product ISA, claim novelty, or claim performance,
-energy, area, cost, or freedom to operate. T-0042 remains blocked until this
-draft and its mechanism-specific IP disposition are reviewed.
+This RFC is the first falsifiable low-level Graph contract. ADR-0039 authorizes
+only its bounded repository-owned RTL simulation. Neither record selects a
+product ISA or claims novelty, performance, energy, area, cost, non-infringement,
+or freedom to operate.
 
 The T-0103 Command Graph is not an implementation prototype for this RFC. Its
 nodes are host tools or processes; this RFC's nodes are integer and memory
@@ -243,7 +244,7 @@ copy external RTL/compiler source, and this RFC is not implementation
 clearance. A concrete claim-to-feature review and, before use beyond bounded
 research simulation, qualified legal advice remain required.
 
-## Review outcome required before T-0042
+## Recorded review outcome
 
 The Project Manager must record one of three outcomes:
 
@@ -252,5 +253,6 @@ The Project Manager must record one of three outcomes:
 2. revise it before any measurement or RTL; or
 3. stop the CPU/Graph path as no-go.
 
-Until then RFC-0005 remains Proposed, T-0057 remains open, and T-0042 is
-blocked.
+ADR-0039 records outcome 1 for bounded repository-owned RTL simulation only.
+T-0057 remains open through functional validation, and T-0042 may implement
+only this contract. T-0044 measurement remains separately gated.

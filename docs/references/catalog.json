@@ -194,9 +194,9 @@
       "authors": null,
       "publication_date": null,
       "roles": ["WaveCache patent-risk discovery"],
-      "versions": [{"version_key": "google-patents-us7490218b2-2026-08-11", "label": "Google Patents discovery page; legal status not independently verified", "persistent_id": "US7490218B2", "url": "https://patents.google.com/patent/US7490218B2/en", "accessed": "2026-08-11", "access": "public", "rights": "metadata/link only", "rights_verification_status": "unverified", "verification_status": "discovery-only", "correction_retraction_status": "not-applicable", "exact_locators": ["Bibliographic record, abstract and claims require qualified review"], "sha256": null, "bytes": null}],
-      "used_by": ["docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage"],
-      "raveil_authored_prior_art_note": {"label": "Raveil-authored patent-risk note; not a legal opinion", "status": "discovery-only", "basis_claims": ["claim-patent-wavecache-001"], "text": "A targeted search returned this document for WaveCache construction and WaveScalar graph execution. It blocks any claim that a resident graph cache is cleared for adoption until concrete features and claims are reviewed.", "non_claims": ["No claim scope, jurisdiction, ownership, expiry, enforceability, licensing, infringement or freedom-to-operate conclusion has been made."]}
+      "versions": [{"version_key": "google-patents-us7490218b2-2026-08-11", "label": "Google Patents discovery page; legal status not independently verified", "persistent_id": "US7490218B2", "url": "https://patents.google.com/patent/US7490218B2/en", "accessed": "2026-08-12", "access": "public", "rights": "metadata/link only", "rights_verification_status": "unverified", "verification_status": "claim-text-locator-reviewed-for-engineering-triage", "correction_retraction_status": "not-applicable", "exact_locators": ["Claims 1, 10, 21 and dependent claims: waves, wave tags, wave-ordered memory and ordered/unordered execution", "Displayed fee-related-expired status and related US7657882B2 are not independently verified"], "sha256": null, "bytes": null}],
+      "used_by": ["docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage", "docs/research/reviews/2026-08-12-T-0057b-simulation-ip-disposition.md#us7490218b2-building-a-wavecache"],
+      "raveil_authored_prior_art_note": {"label": "Raveil-authored patent-risk note; not a legal opinion", "status": "claim-text-engineering-triage-only", "basis_claims": ["claim-patent-wavecache-001"], "text": "The inspected claims center on waves, wave tags, wave-ordered memory and ordered/unordered memory execution in a dataflow device. RFC-0005 excludes those features, but related-family and resident-configuration risk remains unreviewed.", "non_claims": ["The displayed legal status is unverified.", "No claim construction, non-infringement, jurisdiction, ownership, expiry, enforceability, licensing or freedom-to-operate conclusion has been made."]}
     },
     {
       "key": "patent-us10824429b2-edge-commit",
@@ -208,9 +208,9 @@
       "authors": null,
       "publication_date": null,
       "roles": ["EDGE commit and precise-exception patent-risk discovery"],
-      "versions": [{"version_key": "google-patents-us10824429b2-2026-08-11", "label": "Google Patents discovery page; family/status not independently verified", "persistent_id": "US10824429B2", "url": "https://patents.google.com/patent/US10824429B2/en", "accessed": "2026-08-11", "access": "public", "rights": "metadata/link only", "rights_verification_status": "unverified", "verification_status": "discovery-only", "correction_retraction_status": "not-applicable", "exact_locators": ["Bibliographic record, abstract, related applications and claims require qualified review"], "sha256": null, "bytes": null}],
-      "used_by": ["docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage"],
-      "raveil_authored_prior_art_note": {"label": "Raveil-authored patent-risk note; not a legal opinion", "status": "discovery-only", "basis_claims": ["claim-patent-edge-commit-001"], "text": "A targeted search returned an explicit-dataflow graph document concerning commit logic and precise exceptions. Mechanisms in that class remain blocked from direct adoption pending a claim-to-feature review.", "non_claims": ["Displayed status and family metadata are not independently verified.", "No infringement or freedom-to-operate conclusion has been made."]}
+      "versions": [{"version_key": "google-patents-us10824429b2-2026-08-11", "label": "Google Patents discovery page; family/status not independently verified", "persistent_id": "US10824429B2", "url": "https://patents.google.com/patent/US10824429B2/en", "accessed": "2026-08-12", "access": "public", "rights": "metadata/link only", "rights_verification_status": "unverified", "verification_status": "claim-text-locator-reviewed-for-engineering-triage", "correction_retraction_status": "not-applicable", "exact_locators": ["Claims 1, 7 and 14: dependency-ready issue, commit frontier and exception-state resume", "Displayed active status and related EP/PCT applications are not independently verified"], "sha256": null, "bytes": null}],
+      "used_by": ["docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage", "docs/research/reviews/2026-08-12-T-0057b-simulation-ip-disposition.md#us10824429b2-commit-logic-and-precise-exceptions-in-explicit-dataflow-graph-execution-architectures"],
+      "raveil_authored_prior_art_note": {"label": "Raveil-authored patent-risk note; not a legal opinion", "status": "claim-text-engineering-triage-only", "basis_claims": ["claim-patent-edge-commit-001"], "text": "The inspected claims describe dependency-ready issue, a commit frontier and exception-state resume in a block-based processor. RFC-0005 excludes those features and uses private-output invalidation, but private-publication applicability remains unreviewed.", "non_claims": ["Displayed status and family metadata are not independently verified.", "No claim construction, infringement or freedom-to-operate conclusion has been made."]}
     },
     {
       "key": "patent-wo2015069583a1-multimodal-issue",
@@ -222,9 +222,9 @@
       "authors": null,
       "publication_date": null,
       "roles": ["EDGE issue-mode patent-risk discovery"],
-      "versions": [{"version_key": "google-patents-wo2015069583a1-2026-08-11", "label": "Google Patents discovery page; family/status not independently verified", "persistent_id": "WO2015069583A1", "url": "https://patents.google.com/patent/WO2015069583A1/en", "accessed": "2026-08-11", "access": "public", "rights": "metadata/link only", "rights_verification_status": "unverified", "verification_status": "discovery-only", "correction_retraction_status": "not-applicable", "exact_locators": ["Description discussing EDGE graph blocks, target instructions, ready bits and issue modes; claims require qualified review"], "sha256": null, "bytes": null}],
-      "used_by": ["docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage"],
-      "raveil_authored_prior_art_note": {"label": "Raveil-authored patent-risk note; not a legal opinion", "status": "discovery-only", "basis_claims": ["claim-patent-edge-issue-001"], "text": "A targeted search returned a document describing EDGE compiler graphs, explicit targets, readiness and multiple issue modes. Those mechanism classes must not be treated as an unencumbered Raveil design input.", "non_claims": ["Displayed status and family metadata are not independently verified.", "No infringement or freedom-to-operate conclusion has been made."]}
+      "versions": [{"version_key": "google-patents-wo2015069583a1-2026-08-11", "label": "Google Patents discovery page; family/status not independently verified", "persistent_id": "WO2015069583A1", "url": "https://patents.google.com/patent/WO2015069583A1/en", "accessed": "2026-08-12", "access": "public", "rights": "metadata/link only", "rights_verification_status": "unverified", "verification_status": "claim-text-locator-reviewed-for-engineering-triage", "correction_retraction_status": "not-applicable", "exact_locators": ["Claims 1, 3 and 6: switching between issue modes, including in-order and out-of-order logic", "WO displayed ceased; linked US9547496B2 displayed active with EP/CN entries; none independently verified"], "sha256": null, "bytes": null}],
+      "used_by": ["docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage", "docs/research/reviews/2026-08-12-T-0057b-simulation-ip-disposition.md#wo2015069583a1-and-us9547496b2-energy-efficient-multi-modal-instruction-issue"],
+      "raveil_authored_prior_art_note": {"label": "Raveil-authored patent-risk note; not a legal opinion", "status": "claim-text-engineering-triage-only", "basis_claims": ["claim-patent-edge-issue-001"], "text": "The inspected claims describe switching between issue modes, including separate in-order and out-of-order selection logic. RFC-0005 has one fixed schedule and no candidate-local mode switching, but the family remains unreviewed.", "non_claims": ["Displayed status and family metadata are not independently verified.", "No claim construction, infringement or freedom-to-operate conclusion has been made."]}
     }
   ],
   "claims": [
@@ -413,11 +413,11 @@
       "work_key": "patent-us7490218b2-building-wavecache",
       "version_key": "google-patents-us7490218b2-2026-08-11",
       "kind": "patent-discovery",
-      "paraphrase": "A targeted search found a patent document directly named for WaveCache construction.",
-      "repository_basis": "docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage",
-      "source_locator": "Google Patents bibliographic record; claims not reviewed",
-      "verification_status": "discovery-only",
-      "uncertainty": "All legal-status, claim-scope, jurisdiction and FTO questions remain open.",
+      "paraphrase": "The inspected claims describe waves, wave tags and wave-ordered memory in a dataflow computing device; RFC-0005 excludes those features but related-family and resident-configuration applicability remains unknown.",
+      "repository_basis": "docs/research/reviews/2026-08-12-T-0057b-simulation-ip-disposition.md#us7490218b2-building-a-wavecache",
+      "source_locator": "Google Patents claims 1, 10, 21 and dependent claims",
+      "verification_status": "claim-text-locator-reviewed-for-engineering-triage",
+      "uncertainty": "Legal status, related family, claim construction, jurisdiction and FTO remain open.",
       "non_claims": ["Not a legal opinion or infringement finding."]
     },
     {
@@ -425,10 +425,10 @@
       "work_key": "patent-us10824429b2-edge-commit",
       "version_key": "google-patents-us10824429b2-2026-08-11",
       "kind": "patent-discovery",
-      "paraphrase": "A targeted search found a patent document concerning commit logic and precise exceptions for explicit dataflow graph execution.",
-      "repository_basis": "docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage",
-      "source_locator": "Google Patents bibliographic record and description; claims not reviewed",
-      "verification_status": "discovery-only",
+      "paraphrase": "The inspected claims describe dependency-ready issue, a commit frontier and exception-state resume in a block-based processor; RFC-0005 excludes those features.",
+      "repository_basis": "docs/research/reviews/2026-08-12-T-0057b-simulation-ip-disposition.md#us10824429b2-commit-logic-and-precise-exceptions-in-explicit-dataflow-graph-execution-architectures",
+      "source_locator": "Google Patents claims 1, 7 and 14",
+      "verification_status": "claim-text-locator-reviewed-for-engineering-triage",
       "uncertainty": "Family, legal status, claim scope, jurisdictions and FTO remain open.",
       "non_claims": ["Not a legal opinion or infringement finding."]
     },
@@ -437,10 +437,10 @@
       "work_key": "patent-wo2015069583a1-multimodal-issue",
       "version_key": "google-patents-wo2015069583a1-2026-08-11",
       "kind": "patent-discovery",
-      "paraphrase": "A targeted search found a patent document describing EDGE compiler graphs, target instructions, ready bits and multiple issue modes.",
-      "repository_basis": "docs/research/reviews/2026-08-11-T-0057-native-graph-prior-art-matrix.md#preliminary-patentip-triage",
-      "source_locator": "Google Patents description; claims not reviewed",
-      "verification_status": "discovery-only",
+      "paraphrase": "The inspected claims describe choosing or switching between issue modes, including in-order and out-of-order logic; RFC-0005 has only one fixed schedule.",
+      "repository_basis": "docs/research/reviews/2026-08-12-T-0057b-simulation-ip-disposition.md#wo2015069583a1-and-us9547496b2-energy-efficient-multi-modal-instruction-issue",
+      "source_locator": "Google Patents WO claims 1, 3 and 6; linked US9547496B2 family record",
+      "verification_status": "claim-text-locator-reviewed-for-engineering-triage",
       "uncertainty": "Family, legal status, claim scope, jurisdictions and FTO remain open.",
       "non_claims": ["Not a legal opinion or infringement finding."]
     }

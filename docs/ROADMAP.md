@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0057B contract drafted for review; Graph RTL remains blocked; CPU thesis remains untested**
+State: **T-0057B static contract accepted for simulation; T-0042 implementation next; CPU thesis remains untested**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -27,12 +27,13 @@ The corrected critical path is:
    EPIC/VLIW, TRIPS/EDGE, WaveScalar, DySER and spatial-CGRA mechanisms with
    exact locators, counterevidence and preliminary patent/IP triage. This may
    reject mechanisms; it does not authorize adoption.
-3. **T-0057B — hypothesis and contract (draft review):** RFC-0005 proposes one
+3. **T-0057B — hypothesis and contract (simulation-only accepted):** RFC-0005
+   and ADR-0039 fix one
    low-level, fixed-latency static operation/effect region and a memory-heavy
    five-point stencil that does not predetermine a win. Its exact alias,
-   private-output, fallback, oracle, accounting, and no-go rules remain
-   Proposed until workload, numerical thresholds, and mechanism-specific IP
-   disposition receive an accept/revise/stop decision.
+   private-output, fallback, oracle, accounting, and no-go rules. The
+   mechanism-specific review authorizes only repository-owned functional RTL
+   simulation and makes no patent/FTO conclusion.
 4. **T-0042 — owned RTL adapter:** implement the smallest admitted Graph
    execution model behind owned types in the pinned environment.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

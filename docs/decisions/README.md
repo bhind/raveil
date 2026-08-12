@@ -43,3 +43,4 @@ rewrite it.
 | [ADR-0036](ADR-0036-command-graphs-compile-a-bounded-shell-subset.md) | Accepted | Command graphs compile a bounded shell subset before general shell compatibility |
 | [ADR-0037](ADR-0037-synthetic-showcase-keeps-cache-outside-command-authority.md) | Accepted | Synthetic showcase keeps derived-artifact cache outside command authority |
 | [ADR-0038](ADR-0038-rocket-reference-uses-a-locked-git-nix-boundary.md) | Accepted | Rocket reference uses a locked Git/Nix boundary |
+| [ADR-0039](ADR-0039-bounded-static-region-is-simulation-only.md) | Accepted | Bounded static Graph region is authorized only for repository-owned RTL simulation |

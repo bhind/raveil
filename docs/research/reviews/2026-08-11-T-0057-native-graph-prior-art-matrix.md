@@ -100,8 +100,8 @@ replace OoO machinery.
 
 ## Phase-B draft feature disposition
 
-RFC-0005 now supplies one proposed, not accepted, answer to the required design
-contract. It chooses an internal, fixed-latency, statically scheduled operation
+RFC-0005 and ADR-0039 now supply one simulation-only accepted answer to the
+required design contract. It chooses an internal, fixed-latency, statically scheduled operation
 region for a uint32 five-point stencil. The candidate has no direct-consumer
 ISA fields, token-driven issue, dynamic alias prediction, general LSU, ROB, or
 architectural block commit. It uses disjoint read-only/private-output
@@ -114,7 +114,7 @@ technical novelty or IP clearance:
 | RFC-0005 feature | Closest checked mechanism class | Draft disposition |
 |---|---|---|
 | compiler-created operation graph and dependency edges | TRIPS/EDGE and dataflow compilation | research comparison only; no direct-target instruction encoding |
-| installed cycle schedule reused across new inputs | EPIC/VLIW, CGRA, DySER, and potentially WaveCache claim scope | high similarity; implementation remains blocked pending claim-to-feature review |
+| installed cycle schedule reused across new inputs | EPIC/VLIW, CGRA, DySER, and potentially WaveCache claim scope | high similarity; only the exact static research simulation is authorized by ADR-0039 |
 | fixed functional resources and affine iteration | spatial CGRA and loop accelerators | known engineering mechanism, not novelty |
 | retained RV64IM fallback | DySER and other hybrid accelerators | known hybrid boundary; fallback area and power remain in total accounting |
 | private output invalidated on cancel/fault, host publishes only after validation | accelerator job buffers and potentially EDGE commit/precise-exception claim scope | not represented as architectural block commit; still requires claim review |
@@ -122,8 +122,8 @@ technical novelty or IP clearance:
 
 The draft therefore keeps all three patent discoveries fail-closed. It does not
 resolve family, jurisdiction, status, claim scope, ownership, licensing,
-expiry, enforceability, infringement, or freedom to operate. T-0042 remains
-blocked until the Project Manager records a mechanism-specific disposition.
+expiry, enforceability, infringement, or freedom to operate. ADR-0039 records a
+simulation-only engineering disposition; broader use remains blocked.
 
 ## Preliminary patent/IP triage
 
@@ -150,12 +150,12 @@ the work moves beyond research simulation, qualified legal advice.
 ## Recommendation
 
 T-0105 has completed only unmodified RISC-V elaboration/execution evidence.
-Retain this matrix as phase A of T-0057 and review RFC-0005 as the phase-B
-minimal-contract draft. Its internal static execution model and retained
+Retain this matrix as phase A of T-0057 and RFC-0005 as the phase-B
+minimal contract. Its internal static execution model and retained
 fallback are lower-bootstrap-risk choices, but DySER and CGRA prior art mean
-they are not automatically novel or better. Do not begin T-0042 Graph RTL or
-T-0044 performance measurement until the phase-B contract and IP disposition
-are reviewed.
+they are not automatically novel or better. ADR-0039 now permits only the
+bounded T-0042 functional RTL simulation. T-0044 performance measurement and
+all broader implementations remain separately gated.
 
 ## Non-claims and gaps
 

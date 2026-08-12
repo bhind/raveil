@@ -18,15 +18,15 @@ resolves it.
 - ADR-0023 fixes single-hart metadata-version finalization and cancel-wins
   behavior. How should byte-shadow storage, cache/DMA ordering, verifier
   identity, reset recovery, and persistent multi-object atomicity work?
-- RFC-0005 proposes compiler SSA dependencies, affine/disjoint object proof,
-  operation-level nodes, an internal simulation interface, fixed scheduling,
-  private-output invalidation, and pre-start RV64IM fallback. Does review accept
-  this intentionally narrow boundary, or is even its compiler/configuration and
-  private-publication machinery too similar, too costly, or too weak to study?
-- Are the RFC-0005 decision thresholds—at least 10% total dynamic-energy-proxy
-  improvement, no more than 5% correct-latency regression, break-even by 64
-  invocations, and at most 25% incremental Rocket-core area—meaningful enough
-  for the low-power/low-cost objective before any data is collected?
+- ADR-0039 accepts the RFC-0005 compiler SSA, affine/disjoint object,
+  operation-level, fixed-schedule, private-output and RV64IM-fallback boundary
+  only for simulation. Does functional implementation expose a contradiction
+  in that contract before T-0044 measurement planning?
+- RFC-0005 fixes at least 10% total dynamic-energy-proxy improvement, no more
+  than 5% correct-latency regression, break-even by 64 invocations, and at most
+  25% incremental Rocket-core area as later no-go thresholds. T-0044 must still
+  define the estimator, repetitions, interval construction, and matched
+  synthesis boundary before collecting data.
 - Where is the measured boundary between static, elastic dataflow, stream, and
   hybrid Graph Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?
