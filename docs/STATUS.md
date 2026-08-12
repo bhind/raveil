@@ -389,6 +389,21 @@ class do not carry a unique ELF semantic identity. It narrows the next step to
 a separately decided CPU-side witness with replay/flush/commit semantics; it
 does not itself provide that witness.
 
+ADR-0045 now fixes that next attribution policy without claiming its
+implementation. CPU-owned, non-software-writable tokens name candidate memory
+operations before DCache request acceptance; Rocket binds a bounded sequence
+to the corresponding EX/MEM PC and epoch, while BOOM uses sequence/epoch as
+identity and ROB index plus branch mask only as lifecycle context. Exhaustion
+or wrap alias fails closed. Replay retains one token, reset advances its epoch,
+loader/FESVR/Debug traffic cannot mint it, and kill, exception, rollback, stale
+epoch, or duplicate outcome fails closed. Load attribution requires both
+successful memory response and architectural retirement; store attribution
+requires retirement, CPU-specific store authorization, and owned-manager D
+completion. A post-A exception does not cancel transport and any later side
+effect is reported as a lifecycle violation. CPU-specific probes and the
+required positive and negative lifecycle tests remain unimplemented, so
+target-ELF semantic initiator attribution remains unproven.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

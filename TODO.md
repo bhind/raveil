@@ -518,8 +518,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   ID, or DCache origin alone, into target-ELF semantic identity. A
   cross-workload audit now makes that limit executable: two distinct ELFs reuse
   exact DCache source 8224 on Rocket and 8288 on BOOM while retaining different
-  payload/signature semantics. Next define semantic-witness ownership and
-  replay/flush/commit rules in a superseding ADR before core/LSU modification.
+  payload/signature semantics. ADR-0045 now defines CPU-owned, commit-aware
+  token and epoch semantics plus replay/kill/exception/reset rules before any
+  core/LSU modification. Next implement the Rocket diagnostic first, including
+  load/store positive paths and replay, kill, exception, reset, stale-epoch,
+  duplicate-token, stripped-field, and untagged-master negatives; then implement
+  the BOOM ROB/LSU diagnostic under the same normalized lifecycle contract.
+  Do not connect either token to the ADR-0043 common bridge until both
+  CPU-specific diagnostics pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

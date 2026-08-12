@@ -88,6 +88,10 @@ resolves it.
   distinct ELF hashes and semantics reuse exact DCache source 8224 on Rocket
   and 8288 on BOOM. Therefore any accepted witness must add owned identity and
   replay/flush/commit rules rather than reinterpret the existing source/origin.
+  ADR-0045 fixes CPU-owned token, epoch, replay, kill, exception, reset, and
+  commit rules. The remaining question is whether the separate Rocket and BOOM
+  probes can satisfy every required positive/negative lifecycle case before
+  normalization into the ADR-0043 bridge.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

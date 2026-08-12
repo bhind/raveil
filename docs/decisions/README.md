@@ -49,3 +49,4 @@ rewrite it.
 | [ADR-0042](ADR-0042-shared-tlram-is-an-unmatched-functional-prototype.md) | Accepted | Shared subsystem TileLink RAM is an unmatched functional prototype, not fixed-latency comparison evidence |
 | [ADR-0043](ADR-0043-owned-local-memory-contract-precedes-common-adapters.md) | Accepted | An owned attributed local scratchpad transaction contract precedes common CPU/Graph adapters |
 | [ADR-0044](ADR-0044-cpu-translation-adapter-starts-uncached-and-unmatched.md) | Accepted | The first CPU TileLink translation adapter uses an observable uncached path and remains resource-unmatched |
+| [ADR-0045](ADR-0045-semantic-attribution-is-commit-aware-and-cpu-owned.md) | Accepted | CPU semantic attribution uses implementation-owned tokens and requires memory completion plus architectural commit |

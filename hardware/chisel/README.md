@@ -497,6 +497,20 @@ treating a TileLink source or DCache-origin bit as ELF identity. It supplies no
 replacement identity, instruction/PC attribution, security property, resource
 match, or performance result.
 
+ADR-0045 defines the next diagnostic before any additional pinned-core patch.
+Rocket must correlate a bounded CPU-owned sequence with the matching EX/MEM PC,
+operation, and reset/redirect epoch across DCache issue,
+replay/kill/exception, response, and retirement. BOOM uses sequence/epoch as
+identity and ROB index plus branch mask as lifecycle context through its LSU and
+commit paths. Exhaustion or alias fails closed. Replay keeps one token; loads
+require response plus retirement, stores require retirement plus CPU-specific
+store authorization and owned-manager D completion, and killed,
+exceptional, reset, stale, duplicated, stripped, loader/FESVR, Debug, or
+untagged cases fail closed. A post-A exception cannot cancel transport and a
+later side effect is a lifecycle violation. Neither CPU probe is implemented yet, and the token
+must not enter the owned common bridge until both CPU-specific lifecycle suites
+pass.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

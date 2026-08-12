@@ -312,6 +312,19 @@ final tagged DCache source is identical within each configuration (8224 on
 Rocket and 8288 on BOOM). A fail-closed cross-workload verifier requires that
 equality and distinctness together. This is negative evidence about the
 current metadata boundary, not a replacement semantic witness.
+ADR-0045 assigns the replacement candidate at the CPU lifecycle boundary. A
+non-software-writable token names one candidate operation across replay attempts
+and is scoped by a redirect/reset epoch; exhaustion or alias fails closed.
+Rocket correlates sequence with the matching EX/MEM PC, operation, and epoch;
+BOOM uses sequence/epoch as identity and ROB index plus branch mask only as
+lifecycle context. The
+normalized result distinguishes issue attempts, A/D transport completion, and
+architectural commit. Loads require response plus retirement, stores require
+retirement plus CPU-specific store authorization and actual completion, and killed, exceptional,
+rolled-back, stale, duplicated, loader, FESVR, Debug, or untagged traffic cannot
+be promoted. A post-A exception cannot cancel transport; a later side effect is
+an explicit lifecycle violation. These are accepted design invariants; the CPU-specific probes are
+not yet implemented and do not alter the unmatched memory topology.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the
