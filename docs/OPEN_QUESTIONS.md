@@ -41,6 +41,10 @@ resolves it.
   TileLink banked scratchpad now passes the exact stencil on both controls but
   still needs an owned adapter and explicit proof of ports, buffering,
   arbitration, fixed latency, and equivalence to the Graph storage boundary.
+  The passive TLRAM observer found one-cycle bank-local intervals for all 296
+  read beats in each pinned control run, but no write beat and no initiator or
+  lifecycle attribution. Which owned boundary can expose those missing facts
+  without altering the compared machines?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

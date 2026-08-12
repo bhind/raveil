@@ -347,6 +347,20 @@ cycle fields remain unknown and both resource matching and comparison readiness
 remain false. Common addressable TLRAM is a functional bridge, not proof of
 fixed latency, matched CPU paths, or a Graph-side common adapter.
 
+T-0042 now also has a passive TLRAM endpoint observer. Separate non-tracing
+Verilator models bind below the bank-local TileLink fragmenter and match each
+accepted single-beat A request to its completed D response by source ID. In the
+pinned Rocket, BOOM normal, and serialize-dispatch diagnostic runs, all three
+signatures remained correct and each observer reported 296 completed beats,
+all classified as reads: 162 in the input range, 128 in the private-output
+range, and 6 elsewhere;
+all observed endpoint intervals were one cycle with no unmatched response,
+premature source reuse, or pending request. No write beat was observed, and the
+boundary cannot attribute initiator or lifecycle phase. These are run-local
+functional diagnostics only. They do not prove fixed end-to-end CPU latency,
+exercise a comparable write path, match the Graph storage, or change either
+resource matching or comparison readiness from false.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

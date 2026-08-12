@@ -357,6 +357,41 @@ labelled unknown.
   `docs/log/2026-08-12.md`.
 - State: corrected; the subsequent Rocket/BOOM/diagnostic TLRAM run passed.
 
+## TileLink latency observers must match the fragmented beat boundary
+
+- Symptom: an observer above `TLFragmenter` accepted 37 logical requests but
+  saw 296 response beats, so a one-entry-per-source A-to-D matcher reported
+  hundreds of unmatched responses even though the signature was correct.
+- Cause: the upstream request and downstream response were observed at
+  different effective granularities; the fragmenter expands logical transfers
+  into bank-local beats and recombines their responses.
+- Prevention: attach endpoint-latency telemetry below the fragmenter, key each
+  accepted A beat to D completion by the expanded source ID, and keep upstream
+  logical-request accounting as a separate metric.
+- Detection: fail closed on unmatched D beats, premature source reuse, pending
+  requests at finish, and inconsistent opcode/address-region totals.
+- Evidence: T-0042 `tlram_endpoint_latency_observer.sv`, its parser tests, and
+  `docs/log/2026-08-12.md`.
+- State: corrected for bank-local functional diagnostics; CPU end-to-end and
+  Graph-matched latency remain open.
+
+## Generated simulator file lists retain their container locator
+
+- Symptom: rebuilding an existing Chipyard generated source tree from a volume
+  mounted at `/rocket` failed because its file list still named every source
+  below the original `/build/chipyard` locator.
+- Cause: the generated Verilator file list records absolute build-container
+  paths; moving the same bytes to another mount name does not rewrite it.
+- Prevention: recreate the original read-only locator inside the disposable
+  build container, or regenerate the file list from the new locator. Keep
+  observer model and binary paths separate from validated normal artifacts.
+- Detection: inspect the first missing-module path before treating the failure
+  as RTL or source corruption.
+- Evidence: T-0042 `run-tlram-latency-observer.sh` and
+  `docs/log/2026-08-12.md`.
+- State: corrected in the observer wrapper; no validated normal simulator was
+  overwritten.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

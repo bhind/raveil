@@ -266,6 +266,32 @@ reported as `shared-tilelink-banked-scratchpad-unverified-latency`; TileLink and
 CPU request paths have not been proven constant-latency or equivalent to the
 Graph RTL, so resource matching remains false.
 
+Observe the bank-local TLRAM single-beat request/response boundary with:
+
+```sh
+./hardware/chisel/run-tlram-latency-observer.sh
+```
+
+The wrapper builds separate non-tracing Rocket and BOOM simulator models with
+a passive SystemVerilog bind, leaving the validated normal simulators intact.
+It matches each accepted TileLink A beat to its completed D beat by source ID,
+checks unmatched responses, premature source reuse, and pending requests, and
+classifies accepted addresses into the RFC-0005 input, output, or other region.
+The current pinned run observed 296 completed beats in every CPU mode, all
+classified as reads: 162 input-region, 128 output-region, and 6 other-region
+beats, each with one cycle from bank-local TLRAM acceptance to response
+completion. No write beat was observed. Initiator and lifecycle phase are not
+identifiable at this boundary, so cache refill, execution, and FESVR signature recovery traffic
+cannot be separated. This is functional diagnostic telemetry for one pinned
+run, not fixed end-to-end latency, resource matching, comparison readiness, or
+performance evidence.
+
+The local simulator image tag and persistent build volumes are functional
+bootstrap caches, not immutable evidence inputs. The wrapper checks the pinned
+source revision, lock identity, tracked source cleanliness, and tool versions,
+and disables container networking; T-0044 still requires a separately frozen
+measurement environment.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

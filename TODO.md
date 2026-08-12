@@ -447,9 +447,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   common fixed-latency scratchpad/resource boundary remains open. ADR-0042 now
   places all three CPU control buffers in their inherited common 64 KiB Mbus
   TLRAM and validates the same signatures, but labels its latency unverified
-  and keeps resource matching false. Next prove or replace the CPU request path
-  and adapt the Graph RTL to one owned, explicitly matched interface before
-  closing T-0042.
+  and keeps resource matching false. A passive observer now validates the
+  bank-local, post-fragmenter single-beat request/response correspondence in all
+  three CPU modes. It observed the same one-cycle endpoint interval for 296
+  read beats per run but no write beat and cannot distinguish CPU execution
+  from cache refill or FESVR recovery phases. Next replace this run-local
+  diagnostic with an owned CPU/Graph request adapter that exposes initiator,
+  phase, read/write coverage, buffering, arbitration, ports, and invariant
+  latency under one interface before closing T-0042.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

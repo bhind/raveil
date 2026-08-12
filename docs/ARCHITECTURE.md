@@ -207,6 +207,15 @@ and the Graph RTL still has different private storage. The active adapter must
 therefore report the intermediate memory model as latency-unverified and refuse
 resource matching.
 
+The T-0042 latency observer is a passive diagnostic boundary below the
+`ScratchpadBank` fragmenter and directly above its TLRAM request/response
+ports. It keys accepted A beats and completed D beats by TileLink source ID and
+exports only run-local counts and observed intervals. This placement makes
+single-beat endpoint correspondence checkable, but intentionally excludes the
+CPU LSU, cache, upstream buffering/arbitration, initiator identity, lifecycle
+phase, and Graph storage. Observing one cycle there therefore cannot promote
+the inherited TLRAM prototype to a fixed-latency common architecture.
+
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in
 GNU/Linux userspace, provided Raveil-owned admission, semantic, evidence, and

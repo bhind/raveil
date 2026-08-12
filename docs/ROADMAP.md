@@ -49,8 +49,12 @@ The corrected critical path is:
    emits the same honest unmatched record class. ADR-0042 additionally moves
    every CPU control's buffers onto the inherited common subsystem TLRAM and
    validates them, but correctly leaves end-to-end latency and resource matching
-   unverified. An owned common interface and Graph adapter remain before T-0042
-   closes; none of these functional smokes is a performance or structural-
+   unverified. A passive post-fragmenter observer now confirms matched A/D
+   source correspondence and one-cycle bank-local intervals for the read beats
+   seen in one pinned run, while also exposing that no write beat and no
+   initiator/phase attribution are available there. An owned common CPU/Graph
+   interface and Graph adapter remain before T-0042 closes; none of these
+   functional smokes or endpoint diagnostics is a performance or structural-
    ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
