@@ -55,9 +55,10 @@ The corrected critical path is:
    initiator/phase attribution are available there. ADR-0043 now implements
    and verifies the first standalone owned local transaction target with
    read/write, backpressure, attribution, accounting, and a one-cycle
-   module-local response property. It is not yet connected to Graph or CPU, so
-   an owned common CPU/Graph interface and Graph adapter remain before T-0042
-   closes; none of these
+   module-local response property. The static Graph region now uses disjoint
+   input/private-output instances for staging, execution, validation, and
+   cancel/drain/restart. CPU adapters and proof of equal ports, buffering,
+   arbitration, and lifecycle accounting remain before T-0042 closes; none of these
    functional smokes or endpoint diagnostics is a performance or structural-
    ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

@@ -76,6 +76,12 @@ class StaticRegionContractTests(unittest.TestCase):
         expected_tag = configuration_id()[:16]
         self.assertIn(f'val ConfigurationTag = "{expected_tag}"', source)
         self.assertIn("runtime_ready_slots=0", source)
+        self.assertIn("new OwnedFixedLatencyScratchpad(512, 324)", source)
+        self.assertIn("new OwnedFixedLatencyScratchpad(256, 256)", source)
+        self.assertIn("OwnedMemoryContract.InitiatorGraph", source)
+        self.assertIn("OwnedMemoryContract.PhaseExecution", source)
+        self.assertIn("graphInputReadsAccepted", source)
+        self.assertIn("graphOutputWritesAccepted", source)
         self.assertNotIn("IssueQueue", source)
         self.assertNotIn("ReorderBuffer", source)
 
@@ -86,9 +92,11 @@ class StaticRegionContractTests(unittest.TestCase):
         inner = CONTAINER_RUNNER.read_text(encoding="utf-8")
         self.assertIn("platform=linux/amd64", host)
         self.assertIn("no-new-privileges=true", host)
+        self.assertIn("--network none", host)
         self.assertIn("run-static-stencil.sh", host)
         self.assertIn("performance=not-measured", host)
         self.assertIn("StaticStencilRegion.scala", inner)
+        self.assertIn("OwnedFixedLatencyScratchpad.scala", inner)
 
 
 if __name__ == "__main__":

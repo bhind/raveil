@@ -47,7 +47,6 @@ class SimulationAdapterTests(unittest.TestCase):
             [
                 "installation_cycles",
                 "completion_cycles",
-                "validation_cycles",
                 "publication_cycles",
             ],
         )
@@ -67,7 +66,10 @@ class SimulationAdapterTests(unittest.TestCase):
     def test_cancelled_record_cannot_publish_or_validate(self) -> None:
         observation = static_graph_cancelled_observation(1)
         self.assertEqual(observation["execution_cycles"], 17)
-        self.assertEqual(observation["useful_adds"], 12)
+        self.assertEqual(observation["useful_loads"], 7)
+        self.assertEqual(observation["useful_adds"], 5)
+        self.assertEqual(observation["useful_stores"], 1)
+        self.assertEqual(observation["validation_cycles"], 0)
         observation["output_published"] = True
         with self.assertRaisesRegex(SimulationAdapterError, "publish"):
             validate_simulation_observation(observation)
@@ -77,13 +79,12 @@ class SimulationAdapterTests(unittest.TestCase):
         for field, value in {
             "installation_cycles": 64,
             "completion_cycles": 3,
-            "validation_cycles": 256,
             "publication_cycles": 2,
         }.items():
             observation[field] = value
         observation["missing_accounting"] = []
         observation["accounting_complete"] = True
-        observation["total_cycles"] = 64 + 324 + 1536 + 3 + 256 + 2
+        observation["total_cycles"] = 64 + 648 + 3072 + 3 + 512 + 2
         validate_simulation_observation(observation)
 
     def test_unmatched_memory_cannot_be_comparison_ready(self) -> None:

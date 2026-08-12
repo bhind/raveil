@@ -437,7 +437,7 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   CSR `0x7c1` mask `0x8`, then completes the identical workload under the
   retained-structure serialize-dispatch diagnostic. Keep the task open for
   matched Rocket/BOOM/Graph functional records behind the common adapter. Do
-  not turn the 1,536-cycle Graph schedule assertion, source pin, or either
+  not turn the Graph schedule assertion, source pin, or either
   minimal BOOM execution into a performance result. BOOM normal and diagnostic
   now also execute the exact 324-word/256-output RFC-0005 fallback; independent
   host signature validation passes and emits honest cache-backed/unmatched v2
@@ -459,11 +459,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   maximum-one-outstanding scratchpad request/response module whose local
   response is available one cycle after acceptance and whose initiator, phase,
   read/write, byte-mask, backpressure, range-error, and transaction-accounting
-  paths pass Verilator. It is not connected to Graph or CPU and keeps fixed
-  end-to-end latency, resource matching, comparison readiness, and performance
-  claims false. Next replace the static Graph region's private register-vector
-  access with disjoint input/private-output instances of this contract, then
-  build and verify the pinned CPU adapters under the same interface.
+  paths pass Verilator. The static Graph region now uses disjoint input and
+  private-output instances of this contract for control staging, Graph
+  execution, and control validation. Two full runs each passed 1,280 execution
+  reads, 256 execution writes, every oracle output, and cancel/drain/restart.
+  The CPU path is not connected and fixed end-to-end latency, resource matching,
+  comparison readiness, and performance claims remain false. Next build and
+  verify the pinned CPU adapters under the same interface.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

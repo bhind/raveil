@@ -124,7 +124,7 @@ python3 -m unittest tests.test_static_region -v
 
 The deterministic Python compiler constructs a ten-operation graph—five
 `LOAD_U32`, four `ADD_U32`, and one `STORE_U32`—and the independent validator
-requires the disjoint input/private-output objects, fixed six-cycle schedule,
+requires the disjoint input/private-output objects, fixed six-phase logical schedule,
 one read port, one adder, one write port, zero runtime-ready slots, RV64IM
 fallback declaration, and ADR-0039 exclusions. Its canonical SHA-256 is
 `d4bf9395a510385f42ba4a193ae2c747f308ad502a8fe807843ed19c2fa4d1e2`;
@@ -136,21 +136,26 @@ checksum for two different inputs, cancels a third invocation, requires the
 private output to become invalid, and then restarts successfully. Success emits:
 
 ```text
-STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512 cycles_per_run=1536 configuration_tag=d4bf9395a510385f evidence=rtl-simulation-functional performance=not-measured
+STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512 cycles_per_run=3072 graph_input_reads_per_run=1280 graph_output_writes_per_run=256 configuration_tag=d4bf9395a510385f memory_model=owned-private-banked-scratchpads cpu_connected=0 fixed_end_to_end_latency_claim=0 resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured
 ```
 
-The 1,536-cycle check proves only that the implemented six-phase functional
-schedule terminates within `max_cycles`. It is not a Rocket/BOOM comparison or
-a performance result. The Docker path reuses the existing owned-counter Chisel
-7.2.0 tool coordinate and a disposable Scala/Coursier cache. T-0044 must define
-a fresh matched and immutable environment before any comparison.
+The six logical load/store phases now traverse two disjoint instances of the
+owned request/response scratchpad. Its conservative one-outstanding protocol
+uses an acceptance cycle and a response-retirement cycle for each of five reads
+and one write, so the current functional FSM checks 3,072 execution cycles per
+run. Input staging takes 648 local cycles and independent output validation
+takes 512. These are implementation accounting facts, not a Rocket/BOOM
+comparison or performance result. The Docker path reuses the existing
+owned-counter Chisel 7.2.0 tool coordinate and a disposable Scala/Coursier
+cache. T-0044 must define a fresh matched and immutable environment before any
+comparison.
 
 After a successful RTL run the host wrapper emits three strict
 `raveil.simulation-adapter/v2` JSON records: completed, cancelled, then
 completed after restart. The common adapter fixes semantic and useful-operation
 counts and exposes separate installation, staging, execution, completion,
 validation, and publication phases. The current records explicitly use
-`accounting_complete=false` and `total_cycles=null` because four phases remain
+`accounting_complete=false` and `total_cycles=null` because three phases remain
 unknown. ADR-0041 also requires actual memory model and resource-match state:
 the current Graph records use owned private scratchpads but explicitly set
 resource matching and matched-comparison readiness false. They are functional
@@ -309,8 +314,9 @@ range rejection, attribution, and accepted/completed/pending accounting.
 
 The successful marker deliberately reports
 `fixed_end_to_end_latency_claim=0`, `resource_match_verified=0`, and
-`matched_comparison_ready=0`. The module has not yet been connected to the
-static Graph region or either CPU, and its local one-cycle protocol is not a
+`matched_comparison_ready=0`. The standalone module is now also instantiated by
+the static Graph region, but it is not connected to either CPU; its local
+one-cycle protocol is not a
 CPU/Graph latency, throughput, energy, area, FPGA, silicon, or performance
 result.
 

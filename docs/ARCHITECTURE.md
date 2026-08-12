@@ -167,7 +167,7 @@ instruction stream. A native job should carry:
 
 RFC-0001 leaves static, elastic, and variable-latency organizations open.
 ADR-0039 accepts a deliberately narrower first candidate: RFC-0005 lowers one
-ten-operation stencil graph to an exact six-cycle static schedule before
+ten-operation stencil graph to an exact six-phase logical schedule before
 execution. That simulation-only candidate has no runtime token movement,
 dependency-ready issue, rename, ROB, general LSU, commit frontier, or issue-mode
 switching. A later timing-dynamic organization requires a new contract and IP
@@ -222,10 +222,10 @@ maximum-one-outstanding request/response module with explicit operation,
 address, data, byte mask, initiator, lifecycle phase, error, backpressure, and
 transaction accounting. It makes a response available one module-local cycle
 after acceptance and holds it until consumption. The emitted RTL and functional
-Verilator harness assert this local protocol only. The static Graph region and
-CPU controls are not connected yet, so this module remains an unmatched adapter
-target rather than the RFC-0005 common memory implementation. The next Graph
-adapter uses disjoint read-only input and private-output bank instances; later
+Verilator harness assert this local protocol only. The static Graph region is
+connected, but CPU controls are not, so this module remains an unmatched
+adapter target rather than the RFC-0005 common memory implementation. The static Graph
+adapter now uses disjoint input and private-output bank instances; later
 CPU adapters must prove equivalent ports, arbitration, buffering, and lifecycle
 accounting before any resource-match promotion.
 

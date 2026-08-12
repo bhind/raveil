@@ -54,6 +54,7 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("OwnedFixedLatencyScratchpad.scala", inner)
         self.assertIn("platform=linux/amd64", host)
         self.assertIn("no-new-privileges=true", host)
+        self.assertIn("--network none", host)
         self.assertIn("performance=not-measured", host)
         self.assertNotIn("run-tlram-latency-observer.sh", host)
 

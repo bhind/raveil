@@ -22,6 +22,7 @@ docker build \
 
 docker run --rm \
     --platform "$platform" \
+    --network none \
     --security-opt no-new-privileges=true \
     --mount "type=volume,source=$scala_cache,target=/root/.cache" \
     "$image" \

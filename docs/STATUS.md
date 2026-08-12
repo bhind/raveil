@@ -201,7 +201,7 @@ separately gated.
 T-0042 now implements the first owned RFC-0005 functional slice. The
 `raveil.static-region/v1` compiler deterministically emits five `LOAD_U32`, four
 `ADD_U32`, and one `STORE_U32` nodes plus nine SSA edges, affine object effects,
-a six-cycle schedule, one-read/one-add/one-write resources, zero runtime-ready
+a six-phase logical schedule, one-read/one-add/one-write resources, zero runtime-ready
 slots, and the ADR-0039 exclusion set. An independent validator recomputes the
 graph, schedule, object, effect, bound, and fallback invariants. Canonical
 descriptor SHA-256 is
@@ -211,8 +211,9 @@ kinds, and any dynamic-issue resource request rather than treating a different
 descriptor as compatible with the fixed RTL.
 
 The owned Chisel `StaticStencilRegion` binds the first 64 hash bits as a
-configuration tag, keeps separate 324-word input and 256-word private-output
-scratchpads, applies the fixed schedule over all 256 output points, and has no
+configuration tag and now reaches separate input and private-output instances
+of the ADR-0043 request/response scratchpad for staging, execution, and
+validation. It applies the fixed logical schedule over all 256 output points and has no
 runtime dependency queue, token store, rename, ROB, general LSU, commit
 frontier, or issue-mode switch. Cancellation clears output validity; restart
 begins the fixed schedule from point zero.
@@ -223,7 +224,7 @@ SystemVerilog and Verilator 4.038 checked two complete invocations with distinct
 inputs against an independently implemented C++ oracle: all 512 output words
 and both checksums matched. A third invocation cancelled after 17 execution
 cycles left `outputValid=0`, and a subsequent full restart passed. The fixed
-schedule asserted 1,536 execution cycles per complete invocation, below the
+schedule asserted 3,072 interface-accounted execution cycles per complete invocation, below the
 8,192 functional bound.
 
 The first compile failed because the Chisel utility import for `switch/is` was
@@ -254,9 +255,9 @@ adapter SHA-256 is
 
 The Graph smoke now emits validated records for complete, cancelled, and
 restart invocations. All are deliberately `accounting_complete=false` with
-`total_cycles=null`: installation, completion, independent validation, and
-publication costs are not yet available. The reported 1,536 execution and 324
-staging cycles therefore cannot be added or compared as an end-to-end result.
+`total_cycles=null`: installation, completion, and publication costs are not
+yet available. The reported 3,072 execution, 648 staging, and 512 validation
+cycles therefore cannot be added or compared as an end-to-end result.
 They also declare `memory_model=owned-private-scratchpads`,
 `resource_match_verified=false`, and `matched_comparison_ready=false`; this RTL
 has not yet been resource-matched to either CPU control.
@@ -369,9 +370,12 @@ backpressure, and accepted/completed/stall/pending counters. Its assert-enabled
 emitted RTL passed a standalone Verilator harness covering reads, writes,
 partial writes, request/response stalls, attribution, and rejection. A response
 is available one module-local cycle after acceptance and remains stable until
-consumed. This is functional RTL protocol evidence only: the existing static
-Graph region and CPU controls are not connected, fixed end-to-end latency is
-not claimed, and resource matching plus comparison readiness remain false.
+consumed. The static Graph region is now connected through disjoint input and
+private-output instances: two full runs each accepted 1,280 execution reads and
+256 execution writes, matched all 512 host-oracle outputs in total, and passed
+cancel/drain/restart. The CPU controls remain unconnected, fixed end-to-end
+latency is not claimed, and resource matching plus comparison readiness remain
+false.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

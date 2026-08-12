@@ -408,8 +408,44 @@ labelled unknown.
   interface, or only endpoint `minLatency`/observed latency is available.
 - Evidence: T-0042 TLRAM observer, ADR-0042, ADR-0043, and the standalone
   `OwnedFixedLatencyScratchpad` assert-enabled Verilator harness.
-- State: local owned protocol verified; Graph and CPU adapters remain open and
-  fixed end-to-end latency is not claimed.
+- State: local owned protocol and the Graph adapter are verified; CPU adapters
+  remain open and fixed end-to-end latency is not claimed.
+
+## Chisel integration runners must compile every emitted child module
+
+- Symptom: the first owned-memory Graph integration emitted the top-level
+  `StaticStencilRegion` successfully, but Verilator could not find the two
+  generated `OwnedFixedLatencyScratchpad` child modules.
+- Cause: the older runner passed only `StaticStencilRegion.sv`; that was enough
+  while the design emitted one module but not after structural composition.
+- Prevention: pass the complete bounded generated-SystemVerilog directory to
+  Verilator and retain an explicit top-module selection. Keep generated output
+  outside Git and clear only its exact task-local directories.
+- Detection: distinguish Chisel elaboration success from downstream Verilator
+  module-resolution success; require the executable RTL marker, not only the
+  generated top file.
+- Evidence: T-0042 `run-static-stencil.sh` and the Graph owned-memory adapter
+  integration log.
+- State: corrected; the subsequent assert-enabled two-bank Graph run passed.
+
+## Adapter accounting must follow the executable memory schedule
+
+- Symptom: the first successful two-bank Graph RTL marker reported 3,072
+  execution cycles while the host's adapter v2 JSON still reported the former
+  direct-storage value of 1,536.
+- Cause: the six logical operation phases stayed unchanged, but each owned
+  request now needs a request-acceptance and response-retirement cycle. Static
+  observation defaults had not moved with the executable implementation.
+- Prevention: compare every human marker with every machine-readable adapter
+  field in the same run before accepting a milestone. Separate logical Graph
+  schedule phases from interface cycles.
+- Detection: fail review on unequal staging, execution, validation, cancelled
+  useful-operation, or missing-accounting facts across RTL, adapter JSON,
+  tests, STATUS, and operator guidance.
+- Evidence: T-0042 `StaticStencilRegion.scala`, `simulation_adapter.py`, the
+  Verilator marker, and strict adapter tests.
+- State: corrected to 648 staging, 3,072 execution, and 512 validation cycles;
+  installation, completion, publication, CPU matching, and total remain open.
 
 ## Promotion checklist
 

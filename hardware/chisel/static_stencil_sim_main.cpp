@@ -3,13 +3,16 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 
 namespace {
 
 constexpr std::uint64_t kConfigurationTag = 0xd4bf9395a510385fULL;
-constexpr std::uint32_t kExpectedCycles = 256U * 6U;
+constexpr std::uint32_t kExpectedCycles = 256U * 12U;
+constexpr std::uint32_t kExpectedInputReads = 256U * 5U;
+constexpr std::uint32_t kExpectedOutputWrites = 256U;
 constexpr const char* kAdapterContract =
     "56dbe3f2ab479233eb5e4fe1c79eb06e07458b42ea77acebb471a101afd24c1e";
 
@@ -52,13 +55,29 @@ void load_input(
     VStaticStencilRegion& top,
     const std::array<std::uint32_t, 324>& input
 ) {
-    top.io_inputWriteEnable = 1;
     for (std::uint32_t address = 0; address < input.size(); ++address) {
-        top.io_inputWriteAddress = address;
-        top.io_inputWriteData = input[address];
+        if (!top.io_inputStageReady || top.io_memoryPending) {
+            std::cerr << "input staging boundary was not ready address="
+                      << address << '\n';
+            std::exit(1);
+        }
+        top.io_inputStageValid = 1;
+        top.io_inputStageAddress = address;
+        top.io_inputStageData = input[address];
         cycle(top);
+        top.io_inputStageValid = 0;
+        top.eval();
+        if (!top.io_inputStageResponseValid
+            || top.io_inputStageResponseError) {
+            std::cerr << "input staging response mismatch address="
+                      << address << '\n';
+            std::exit(1);
+        }
+        top.io_inputStageResponseReady = 1;
+        cycle(top);
+        top.io_inputStageResponseReady = 0;
+        top.eval();
     }
-    top.io_inputWriteEnable = 0;
 }
 
 bool run_to_completion(VStaticStencilRegion& top) {
@@ -83,6 +102,14 @@ bool run_to_completion(VStaticStencilRegion& top) {
                   << " actual=" << top.io_cycleCount << '\n';
         return false;
     }
+    if (top.io_graphInputReadsAccepted != kExpectedInputReads
+        || top.io_graphOutputWritesAccepted != kExpectedOutputWrites
+        || top.io_memoryPending) {
+        std::cerr << "graph memory operation count mismatch reads="
+                  << top.io_graphInputReadsAccepted << " writes="
+                  << top.io_graphOutputWritesAccepted << '\n';
+        return false;
+    }
     return true;
 }
 
@@ -92,15 +119,33 @@ bool check_output(
 ) {
     std::uint64_t checksum = 0;
     for (std::uint32_t address = 0; address < expected.size(); ++address) {
-        top.io_outputReadAddress = address;
+        if (!top.io_outputValidationReady || top.io_memoryPending) {
+            std::cerr << "output validation boundary was not ready address="
+                      << address << '\n';
+            return false;
+        }
+        top.io_outputValidationValid = 1;
+        top.io_outputValidationAddress = address;
+        cycle(top);
+        top.io_outputValidationValid = 0;
         top.eval();
-        const std::uint32_t actual = top.io_outputReadData;
+        if (!top.io_outputValidationResponseValid
+            || top.io_outputValidationResponseError) {
+            std::cerr << "output validation response mismatch address="
+                      << address << '\n';
+            return false;
+        }
+        const std::uint32_t actual = top.io_outputValidationReadData;
         if (actual != expected[address]) {
             std::cerr << "stencil mismatch address=" << address
                       << " expected=" << expected[address]
                       << " actual=" << actual << '\n';
             return false;
         }
+        top.io_outputValidationResponseReady = 1;
+        cycle(top);
+        top.io_outputValidationResponseReady = 0;
+        top.eval();
         checksum += expected[address];
     }
     if (top.io_checksum != checksum) {
@@ -118,12 +163,15 @@ int main(int argc, char** argv) {
     VStaticStencilRegion top;
 
     top.reset = 1;
-    top.io_inputWriteEnable = 0;
-    top.io_inputWriteAddress = 0;
-    top.io_inputWriteData = 0;
+    top.io_inputStageValid = 0;
+    top.io_inputStageAddress = 0;
+    top.io_inputStageData = 0;
+    top.io_inputStageResponseReady = 0;
     top.io_start = 0;
     top.io_cancel = 0;
-    top.io_outputReadAddress = 0;
+    top.io_outputValidationValid = 0;
+    top.io_outputValidationAddress = 0;
+    top.io_outputValidationResponseReady = 0;
     cycle(top);
     top.reset = 0;
 
@@ -148,11 +196,22 @@ int main(int argc, char** argv) {
     }
     top.io_cancel = 1;
     cycle(top);
-    if (!top.io_cancelled || top.io_busy || top.io_outputValid) {
+    top.io_cancel = 0;
+    for (unsigned guard = 0; top.io_busy && guard < 4; ++guard) {
+        cycle(top);
+    }
+    if (!top.io_cancelled || top.io_busy || top.io_outputValid
+        || top.io_memoryPending) {
         std::cerr << "cancel did not invalidate the private output\n";
         return 1;
     }
-    top.io_cancel = 0;
+    if (top.io_graphInputReadsAccepted != 8
+        || top.io_graphOutputWritesAccepted != 1) {
+        std::cerr << "cancelled graph transaction count mismatch reads="
+                  << top.io_graphInputReadsAccepted << " writes="
+                  << top.io_graphOutputWritesAccepted << '\n';
+        return 1;
+    }
 
     const auto second_input = make_input(3);
     load_input(top, second_input);
@@ -162,8 +221,13 @@ int main(int argc, char** argv) {
 
     std::cout << "STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512"
               << " cycles_per_run=" << kExpectedCycles
+              << " graph_input_reads_per_run=" << kExpectedInputReads
+              << " graph_output_writes_per_run=" << kExpectedOutputWrites
               << " configuration_tag=" << std::hex << std::setw(16)
               << std::setfill('0') << kConfigurationTag << std::dec
+              << " memory_model=owned-private-banked-scratchpads"
+              << " cpu_connected=0 fixed_end_to_end_latency_claim=0"
+              << " resource_match_verified=0 matched_comparison_ready=0"
               << " evidence=rtl-simulation-functional performance=not-measured"
               << std::endl;
     std::cout << "SIMULATION-ADAPTER-V2 status=FUNCTIONAL implementation=static-graph"
@@ -171,7 +235,7 @@ int main(int argc, char** argv) {
               << " accounting_complete=0 total_cycles=UNAVAILABLE"
               << " memory_model=owned-private-scratchpads"
               << " resource_match_verified=0 matched_comparison_ready=0"
-              << " missing=installation,completion,validation,publication"
+              << " missing=installation,completion,publication"
               << " performance=not-measured" << std::endl;
     top.final();
     return 0;
