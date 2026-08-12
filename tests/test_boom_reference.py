@@ -13,6 +13,7 @@ ELABORATE = ROOT / "hardware" / "chisel" / "run-boom-elaboration.sh"
 DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom"
 FETCH_SIM = ROOT / "hardware" / "chisel" / "fetch-boom-simulator-deps.sh"
 RUN_SIM = ROOT / "hardware" / "chisel" / "run-boom-functional-smoke.sh"
+RUN_STENCIL = ROOT / "hardware" / "chisel" / "run-boom-stencil-functional.sh"
 SIM_DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom-sim"
 SMOKE_ASM = ROOT / "hardware" / "chisel" / "boom_functional_smoke.S"
 SMOKE_LD = ROOT / "hardware" / "chisel" / "boom_functional_smoke.ld"
@@ -27,6 +28,7 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertNotEqual(ELABORATE.stat().st_mode & 0o111, 0)
         self.assertNotEqual(FETCH_SIM.stat().st_mode & 0o111, 0)
         self.assertNotEqual(RUN_SIM.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(RUN_STENCIL.stat().st_mode & 0o111, 0)
 
     def test_pin_is_exact_and_has_license_hashes(self) -> None:
         fields = dict(
@@ -117,6 +119,17 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertIn("0x80000000", linker)
         self.assertIn("text PT_LOAD FLAGS(5)", linker)
         self.assertIn("data PT_LOAD FLAGS(6)", linker)
+
+    def test_stencil_runner_is_semantic_unmatched_and_non_claiming(self) -> None:
+        runner = RUN_STENCIL.read_text(encoding="utf-8")
+        self.assertIn("+signature=", runner)
+        self.assertIn("raveil.riscv_stencil_signature", runner)
+        self.assertIn("--implementation boom-ooo", runner)
+        self.assertIn("boom-ooo-disabled-diagnostic", runner)
+        self.assertIn("memory_model=cache-backed-variable-latency", runner)
+        self.assertIn("resource_match_verified=0", runner)
+        self.assertIn("matched_comparison_ready=0", runner)
+        self.assertIn("performance=not-measured", runner)
 
     def test_elaboration_uses_exact_parent_gitlinks_and_ephemeral_source(self) -> None:
         fetch = FETCH_DEPS.read_text(encoding="utf-8")

@@ -438,7 +438,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   retained-structure serialize-dispatch diagnostic. Keep the task open for
   matched Rocket/BOOM/Graph functional records behind the common adapter. Do
   not turn the 1,536-cycle Graph schedule assertion, source pin, or either
-  minimal BOOM execution into a performance result.
+  minimal BOOM execution into a performance result. BOOM normal and diagnostic
+  now also execute the exact 324-word/256-output RFC-0005 fallback; independent
+  host signature validation passes and emits honest cache-backed/unmatched v2
+  records. Rocket semantic execution and the verified matched scratchpad/
+  resource boundary remain open.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

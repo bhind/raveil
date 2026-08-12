@@ -311,8 +311,20 @@ with `BOOM-SERIALIZE-DISPATCH-SMOKE-V1 status=OK`,
 `diagnostic=serialize-dispatch`, and `structures=retained`. This proves only
 functional execution under that CSR setting; it neither proves which dynamic
 instructions overlapped nor measures any latency, energy, area, or benefit.
-T-0042 remains open for matched Rocket/BOOM/Graph functional records behind the
-common boundary.
+This minimal diagnostic does not by itself supply a semantic stencil record or
+matched comparison boundary.
+
+BOOM normal and serialize-dispatch modes now also execute the RFC-0005 semantic
+five-point stencil rather than only the minimal sum smoke. One tracked RV64
+fallback initializes 324 deterministic uint32 words, computes all 256 outputs,
+and exposes the private output range through FESVR's signature boundary. A
+separate Python parser validated every word against the repository-owned oracle;
+both modes produced checksum `0000007f11ba2640`. Their validated adapter v2
+records identify `boom-ooo` and `boom-ooo-disabled-diagnostic`, but report
+`memory_model=cache-backed-variable-latency`, all lifecycle cycles unknown,
+resource matching false, and comparison readiness false. This is semantic
+functional evidence, not the RFC-0005 isolation comparison. Rocket stencil
+execution and the matched scratchpad/resource boundary remain open.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

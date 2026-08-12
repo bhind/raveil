@@ -14,6 +14,7 @@ SECTIONS
   .rodata : { *(.rodata .rodata.*) } :text
   .data : { *(.data .data.*) } :data
   .bss : { *(.bss .bss.*) *(COMMON) } :data
+  .signature : { *(.signature) } :data
   . = ALIGN(64);
   .tohost : { *(.tohost) } :data
 }

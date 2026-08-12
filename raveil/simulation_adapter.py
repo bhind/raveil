@@ -295,17 +295,46 @@ def static_graph_cancelled_observation(invocation: int) -> dict[str, Any]:
     return observation
 
 
+def cpu_functional_observation(implementation: str, invocation: int) -> dict[str, Any]:
+    """Describe a cache-backed CPU semantic smoke without claiming matching."""
+
+    if implementation not in {
+        "rocket-in-order",
+        "boom-ooo",
+        "boom-ooo-disabled-diagnostic",
+    }:
+        raise SimulationAdapterError("unsupported CPU implementation")
+    observation = static_graph_functional_observation(invocation)
+    observation.update(
+        {
+            "implementation": implementation,
+            "memory_model": "cache-backed-variable-latency",
+            "missing_accounting": list(ACCOUNTING_PHASES),
+            **{phase: None for phase in ACCOUNTING_PHASES},
+        }
+    )
+    validate_simulation_observation(observation)
+    return observation
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="emit one validated functional-only static-region observation"
+        description="emit one validated functional-only simulation observation"
     )
     parser.add_argument("--invocation", type=int, required=True)
+    parser.add_argument(
+        "--implementation", choices=sorted(IMPLEMENTATIONS), default="static-graph"
+    )
     parser.add_argument(
         "--status", choices=("completed", "cancelled"), required=True
     )
     args = parser.parse_args(argv)
     try:
-        if args.status == "completed":
+        if args.implementation != "static-graph" and args.status == "cancelled":
+            raise SimulationAdapterError("CPU cancellation observation is not implemented")
+        if args.implementation != "static-graph":
+            observation = cpu_functional_observation(args.implementation, args.invocation)
+        elif args.status == "completed":
             observation = static_graph_functional_observation(args.invocation)
         else:
             observation = static_graph_cancelled_observation(args.invocation)

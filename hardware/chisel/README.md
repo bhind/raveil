@@ -224,6 +224,20 @@ versions, and installed firtool hash. The `conda-lock` reader installed in the
 Docker image is still an unlocked bootstrap solve, so this path is suitable for
 functional reproduction only.
 
+Run the exact RFC-0005 semantic fallback on both BOOM modes with:
+
+```sh
+./hardware/chisel/run-boom-stencil-functional.sh
+```
+
+This compiles one tracked RV64 C/assembly workload twice, extracts its private
+256-word `begin_signature`/`end_signature` range through FESVR, and validates
+every word with the independent Python oracle. It then emits adapter v2 records
+for `boom-ooo` and `boom-ooo-disabled-diagnostic`. These executions use the
+normal `SmallBoomConfig` cache-backed memory path, so the records deliberately
+leave every lifecycle cycle unknown and set resource matching and comparison
+readiness false.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

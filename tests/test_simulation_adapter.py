@@ -3,8 +3,10 @@ from pathlib import Path
 import unittest
 
 from raveil.simulation_adapter import (
+    ACCOUNTING_PHASES,
     SimulationAdapterError,
     compile_simulation_adapter_contract,
+    cpu_functional_observation,
     simulation_adapter_contract_id,
     static_graph_cancelled_observation,
     static_graph_functional_observation,
@@ -97,6 +99,21 @@ class SimulationAdapterTests(unittest.TestCase):
         observation["matched_comparison_ready"] = True
         with self.assertRaisesRegex(SimulationAdapterError, "readiness"):
             validate_simulation_observation(observation)
+
+    def test_cpu_semantics_do_not_imply_matched_memory(self) -> None:
+        for implementation in (
+            "rocket-in-order",
+            "boom-ooo",
+            "boom-ooo-disabled-diagnostic",
+        ):
+            observation = cpu_functional_observation(implementation, 4)
+            self.assertTrue(observation["semantic_valid"])
+            self.assertEqual(
+                observation["memory_model"], "cache-backed-variable-latency"
+            )
+            self.assertFalse(observation["resource_match_verified"])
+            self.assertFalse(observation["matched_comparison_ready"])
+            self.assertEqual(observation["missing_accounting"], list(ACCOUNTING_PHASES))
 
     def test_module_cli_emits_validated_json(self) -> None:
         import json
