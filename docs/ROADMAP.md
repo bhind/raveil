@@ -63,8 +63,10 @@ The corrected critical path is:
    TileLink manager on the uncached peripheral path in dedicated Rocket and
    BOOM configurations. It is observable by design but explicitly unmatched;
    elaboration now has direct monitor-enabled protocol tests for the owned
-   manager. A phase-fenced CPU functional workload, initiator separation, and
-   matched common-memory topology remain. None of these
+   manager. A phase-fenced Rocket RTL workload now traverses the mapped manager
+   and validates full/partial writes, reads, phase selection, and aggregate
+   counters. Exact BOOM replay, initiator separation, and matched common-memory
+   topology remain. None of these
    functional smokes or endpoint diagnostics is a performance or structural-
    ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

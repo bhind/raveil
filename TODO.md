@@ -468,14 +468,17 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   verify the pinned CPU adapters under the same interface. ADR-0044 adds the
   first repository-owned CPU TileLink translation target in dedicated Rocket
   and BOOM configurations. It intentionally uses the uncached peripheral bus
-  so accesses to its mapped region are intended to traverse the manager; CPU
-  execution is still unverified. This is an elaboration-first,
+  so accesses to its mapped region are intended to traverse the manager. A
+  phase-fenced bare-metal Rocket workload now executes full and partial data
+  writes, reads, phase selection, and aggregate counter checks through that
+  manager with an exact host-verified signature. This is still a
   resource-unmatched step, not the RFC-0005 common memory. Before calling it a
-  functional CPU adapter, add a phase-fenced Rocket workload and initiator
-  separation. Direct monitor-enabled TileLink RTL coverage now passes for
+  common-contract CPU adapter, add initiator separation and per-request/
+  response owned phase correlation. Direct monitor-enabled TileLink RTL
+  coverage now passes for
   full/partial writes, two masks, invalid phase denial, response backpressure,
   one-outstanding admission, response metadata, reset phase, and bounded
-  aggregate counters. Then repeat the exact CPU workload on BOOM before
+  aggregate counters. Next repeat the exact CPU workload on BOOM before
   designing the matched resource boundary. The
   overlay is not yet the ADR-0043 common-contract adapter because it does not
   carry owned initiator/phase metadata through each request and response.

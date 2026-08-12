@@ -35,6 +35,15 @@ TL_PROTOCOL_DRIVER = (
 TL_PROTOCOL_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-tl-protocol.sh"
 )
+ROCKET_MEMORY_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_cpu_smoke.S"
+)
+ROCKET_MEMORY_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_memory_cpu_signature.py"
+)
+ROCKET_MEMORY_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-rocket-memory-smoke.sh"
+)
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
@@ -120,6 +129,32 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("--assert --cc", runner)
         self.assertIn("assembly_cache=content-addressed", runner)
         self.assertIn("cpu_execution=not-run", runner)
+        self.assertIn("resource_match_verified=0", runner)
+        self.assertIn("performance=not-measured", runner)
+
+    def test_rocket_workload_reaches_owned_memory_with_phase_fences(self) -> None:
+        workload = ROCKET_MEMORY_WORKLOAD.read_text(encoding="utf-8")
+        verifier = ROCKET_MEMORY_VERIFIER.read_text(encoding="utf-8")
+        runner = ROCKET_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("li      s0, 0x08000000", workload)
+        self.assertIn("li      s1, 0x08010000", workload)
+        self.assertGreaterEqual(workload.count("fence   iorw, iorw"), 4)
+        self.assertIn("sb      t2, 1(s0)", workload)
+        self.assertIn("sb      t2, 3(s0)", workload)
+        self.assertIn("lwu     t3, 4(s0)", workload)
+        self.assertIn("lw      a3, 0x20(s1)", workload)
+        self.assertIn("lw      a4, 0x24(s1)", workload)
+        self.assertIn("0x5522AA44", verifier)
+        self.assertIn("0xCAFEBABE", verifier)
+        self.assertIn("accepted=8 completed=8", verifier)
+        self.assertIn("signature_sha256=", verifier)
+        self.assertNotEqual(ROCKET_MEMORY_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertIn("CONFIG=RaveilOwnedRocketConfig", runner)
+        self.assertIn("CONFIG_PACKAGE=chipyard.raveil", runner)
+        self.assertIn("persistent simulator source cache contains an unexpected", runner)
+        self.assertIn("submodule foreach --quiet --recursive", runner)
+        self.assertIn("cpu_execution=rocket-rtl-simulation", runner)
+        self.assertIn("initiator_attribution=cpu-workload-intended-not-proven", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
 

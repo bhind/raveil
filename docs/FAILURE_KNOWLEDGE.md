@@ -513,6 +513,26 @@ labelled unknown.
   execution, initiator attribution, resource matching, and measurement remain
   open.
 
+## RV64 signed loads can create false 32-bit data mismatches
+
+- Symptom: the first Rocket-owned-memory workload reached the manager and its
+  diagnostic signature showed the expected `cafebabe` word, but the ELF took
+  its execution-data failure branch.
+- Cause: `lw` sign-extends bit 31 into RV64 while the `li 0xcafebabe` comparison
+  value was represented as a zero-extended 64-bit constant. The stored 32-bit
+  values were equal; the test compared unequal 64-bit register values.
+- Prevention: choose `lw` or `lwu` deliberately for every 32-bit test value and
+  keep an independently decoded signature that records observed values before
+  a failure exit.
+- Detection: on a CPU smoke mismatch, inspect both the signature and ELF
+  disassembly before attributing the failure to the memory RTL. Retain a value
+  with bit 31 set in the workload so signedness stays covered.
+- Evidence: T-0042 `owned_memory_cpu_smoke.S`,
+  `verify_owned_memory_cpu_signature.py`, the failed diagnostic signature, and
+  the subsequent successful `OWNED-ROCKET-MEMORY-SMOKE-V1` run.
+- State: corrected by using `lwu` for the unsigned `cafebabe` comparison; the
+  exact Rocket RTL workload and host signature verifier now pass.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:
