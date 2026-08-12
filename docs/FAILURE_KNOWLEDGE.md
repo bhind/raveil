@@ -447,6 +447,46 @@ labelled unknown.
 - State: corrected to 648 staging, 3,072 execution, and 512 validation cycles;
   installation, completion, publication, CPU matching, and total remain open.
 
+## Non-cacheable managers cannot be inserted behind a coherent cache unchanged
+
+- Symptom: the first CPU-owned TileLink overlay compiled but Rocket elaboration
+  stopped in `TLSlaveParameters` when the inclusive cache added acquire support
+  to an idempotent manager.
+- Cause: the overlay initially attached a non-cacheable manager to MBUS. The
+  inherited inclusive-cache adapter expects a cacheable/uncached manager there;
+  adding coherent acquire support while retaining `IDEMPOTENT` region type is
+  an invalid TileLink capability combination.
+- Prevention: select the bus from the evidence question. Use an uncached path
+  for the first observable translation test; design and verify a separate
+  matched local-memory topology before comparison rather than changing region
+  attributes merely to make elaboration pass.
+- Detection: require both Rocket and BOOM top-level elaboration, inspect the
+  manager's region/capability negotiation, and keep resource matching false for
+  any peripheral-bus bootstrap.
+- Evidence: T-0042 `RaveilOwnedTLMemory.scala`, pinned inclusive-cache
+  `InclusiveCache.scala`, and the failed first elaboration attempt.
+- State: corrected by ADR-0044's explicit uncached, unmatched bootstrap; CPU
+  execution and matched memory remain open.
+
+## Bus-attached stateful LazyModules need an explicit clock domain
+
+- Symptom: after moving the owned manager to PBUS, diplomacy completed its
+  address map but Chisel elaboration stopped with `No implicit clock` while
+  instantiating the stateful manager.
+- Cause: the first overlay coupled a plain `LazyModule` directly to the bus and
+  never connected the bus wrapper's fixed clock to the manager registers and
+  synchronous memory.
+- Prevention: wrap stateful bus peripherals in an explicit `ClockSinkDomain`
+  and connect its `clockNode` to the selected bus clock. Do not rely on an
+  ambient top-level clock.
+- Detection: top-level elaboration must instantiate the manager under both
+  Rocket and BOOM configurations; source-string or standalone Scala checks are
+  insufficient.
+- Evidence: T-0042 `RaveilOwnedTLMemory.scala` and the failed PBUS elaboration
+  attempt.
+- State: corrected with the bus wrapper's generated synchronous domain; the
+  final Rocket and BOOM dual-target elaboration passed.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

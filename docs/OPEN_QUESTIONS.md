@@ -50,7 +50,12 @@ resolves it.
   execution, validation, and cancel/drain/restart. The unresolved part is how
   each pinned CPU adapter reaches the boundary with provably equal ports,
   buffering, arbitration, staging, and phase accounting without silently
-  changing the machines under comparison.
+  changing the machines under comparison. ADR-0044 answers only the preceding
+  translation step: an observable, uncached peripheral-bus manager can be
+  added to dedicated Rocket and BOOM configurations, but it is deliberately
+  resource-unmatched. Can a phase-fenced workload distinguish CPU activity
+  from loader/debug/recovery masters, and what later topology makes both CPU
+  and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

@@ -16,6 +16,12 @@ INNER_RUNNER = (
 HOST_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-fixed-latency-scratchpad-rtl.sh"
 )
+CPU_OVERLAY = (
+    ROOT / "hardware" / "chisel" / "chipyard-overlay" / "RaveilOwnedTLMemory.scala"
+)
+CPU_ELABORATION_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-cpu-memory-elaboration.sh"
+)
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
@@ -57,6 +63,33 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("--network none", host)
         self.assertIn("performance=not-measured", host)
         self.assertNotIn("run-tlram-latency-observer.sh", host)
+
+    def test_cpu_overlay_adds_owned_target_without_claiming_execution(self) -> None:
+        overlay = CPU_OVERLAY.read_text(encoding="utf-8")
+        runner = CPU_ELABORATION_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("class RaveilOwnedTLMemory", overlay)
+        self.assertIn("new testchipip.soc.WithNoScratchpads", overlay)
+        self.assertIn("TLFragmenter(4, bus.blockBytes)", overlay)
+        self.assertIn("TLWidthWidget(bus.beatBytes)", overlay)
+        self.assertIn("busWhere: TLBusWrapperLocation = PBUS", overlay)
+        self.assertIn("regionType = RegionType.IDEMPOTENT", overlay)
+        self.assertIn("mayDenyPut = true", overlay)
+        self.assertIn("phaseByteEnabled = tl.a.bits.mask(0)", overlay)
+        self.assertIn("responseControlData := controlReadData", overlay)
+        self.assertIn("bus.generateSynchronousDomain", overlay)
+        self.assertIn("val memory = domain { LazyModule", overlay)
+        self.assertIn("RaveilOwnedMemoryPhase", overlay)
+        self.assertIn("responseDue = RegNext(tl.a.fire", overlay)
+        self.assertNotIn("class TLRAM", overlay)
+        self.assertNotEqual(CPU_ELABORATION_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertIn("source=$chipyard,target=/source,readonly", runner)
+        self.assertIn("source=$overlay,target=/overlay", runner)
+        self.assertIn("execution=not-run", runner)
+        self.assertIn("bus=pbus-uncached", runner)
+        self.assertIn("initiator_attribution=unverified", runner)
+        self.assertIn("resource_match_verified=0", runner)
+        self.assertIn("matched_comparison_ready=0", runner)
+        self.assertIn("performance=not-measured", runner)
 
 
 if __name__ == "__main__":

@@ -229,6 +229,17 @@ adapter now uses disjoint input and private-output bank instances; later
 CPU adapters must prove equivalent ports, arbitration, buffering, and lifecycle
 accounting before any resource-match promotion.
 
+ADR-0044 defines the first CPU translation adapter as an intentionally
+unmatched intermediate boundary. Dedicated Rocket and BOOM configurations
+remove the inherited subsystem scratchpad and add a Raveil-owned 32-bit
+TileLink manager at the same data base, but attach it to the uncached
+peripheral bus. This prevents cache residency from hiding manager transactions
+while the adapter contract is being debugged. A software-written phase
+register labels subsequent aggregate traffic; it does not identify the actual
+initiator. Successful RTL elaboration can prove topology/type compatibility
+only. CPU execution, source attribution, protocol corner cases, resource
+matching, and all measurement remain separate follow-ups.
+
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in
 GNU/Linux userspace, provided Raveil-owned admission, semantic, evidence, and

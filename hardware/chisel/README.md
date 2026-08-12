@@ -320,6 +320,28 @@ one-cycle protocol is not a
 CPU/Graph latency, throughput, energy, area, FPGA, silicon, or performance
 result.
 
+Elaborate the first CPU-side translation target with:
+
+```sh
+./hardware/chisel/run-owned-cpu-memory-elaboration.sh
+```
+
+The runner installs one repository-owned overlay into an ephemeral copy of the
+pinned Chipyard source and generates dedicated Rocket and Small BOOM systems.
+The overlay removes the inherited scratchpad configuration, adds the owned
+32-bit TileLink manager at `0x08000000` plus its control page at `0x08010000`,
+and attaches it to the uncached peripheral bus. This is intentionally not the
+same resource topology as the private Graph memories. The phase register is a
+software-declared label, and initiator attribution is still unverified.
+
+Success means both RTL topologies elaborate and contain the owned manager. It
+does not mean either CPU executed a program, the TileLink protocol corner cases
+ran in simulation, the manager-local response property became end-to-end CPU
+latency, or the resources are matched. The marker keeps execution not run,
+resource matching and comparison readiness false, and performance not
+measured. ADR-0044 requires a later phase-fenced functional workload and direct
+protocol testing before promotion.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

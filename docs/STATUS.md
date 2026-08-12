@@ -266,6 +266,22 @@ serialize-dispatch diagnostic, and the Graph RTL behind this boundary. It
 remains open for a separately verified matched scratchpad adapter; T-0044
 remains the matched measurement task.
 
+ADR-0044 now adds the first CPU-side translation target without pretending it
+is that matched scratchpad. A repository-owned Chipyard overlay removes the
+inherited subsystem scratchpad from dedicated Rocket and BOOM configurations
+and attaches a 32-bit, maximum-one-outstanding TileLink manager at
+`0x08000000`, with a phase/counter control page at `0x08010000`, to the
+uncached peripheral bus. The manager implements logic for `Get`, `PutFull`, and
+`PutPartial`, byte masks, response backpressure, invalid phase-write denial,
+source/size response routing, and aggregate software-declared phase counts.
+This placement is deliberately observable and resource-unmatched; initiator
+attribution, CPU program execution, phase-fenced workload validation, equal
+ports/arbitration/buffering, and common-memory promotion remain unverified.
+The elaboration runner therefore reports execution not run, resource matching
+false, comparison readiness false, and performance not measured.
+This is not yet the ADR-0043 common-contract CPU adapter: phase is neither
+request/response-correlated owned metadata nor initiator attribution.
+
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM
 `9459af0c1f6847f8411622dac770ac78fe10847c`; the initial configuration is
