@@ -342,6 +342,23 @@ resource matching and comparison readiness false, and performance not
 measured. ADR-0044 requires a later phase-fenced functional workload and direct
 protocol testing before promotion.
 
+Run the direct owned-manager protocol simulation with:
+
+```sh
+./hardware/chisel/run-owned-tl-protocol.sh
+```
+
+This builds a pinned Chipyard assembly in an ephemeral source copy, emits the
+raw-client/owned-manager harness through FIRRTL, compiles it with assert-enabled
+Verilator, and runs 16 legal negotiated TileLink transactions. The test covers
+full and partial writes, masks `0x5` and `0xa`, invalid phase denial, response
+backpressure and metadata stability, maximum-one-outstanding admission, reset
+phase, and a bounded subset of aggregate counters. Its content-addressed
+assembly cache is a functional-development optimization, not immutable
+measurement evidence. The raw client bypasses Rocket and BOOM; success remains
+`rtl-simulation-functional`, with CPU execution not run, initiator attribution
+unverified, resource matching false, and performance not measured.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

@@ -282,6 +282,17 @@ false, comparison readiness false, and performance not measured.
 This is not yet the ADR-0043 common-contract CPU adapter: phase is neither
 request/response-correlated owned metadata nor initiator attribution.
 
+The owned manager now also passes a direct, monitor-enabled TileLink RTL
+simulation. A raw bounded client issued 16 legal negotiated transactions and
+verified `PutFull`, two `PutPartial` byte-mask patterns, readback, invalid
+phase-write denial, D-channel backpressure stability, maximum-one-outstanding
+backpressure, reset phase, selected aggregate counters, and D response
+`param`/`size`/`source`/`sink`/`denied`/`corrupt` metadata. This closes the
+manager-local protocol corner-case bootstrap only. No CPU instruction executed;
+phase remains software-declared, initiator attribution and the ADR-0043 common
+contract remain open, and resource matching, comparison readiness, fixed
+end-to-end latency, performance, energy, and area remain unverified.
+
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM
 `9459af0c1f6847f8411622dac770ac78fe10847c`; the initial configuration is

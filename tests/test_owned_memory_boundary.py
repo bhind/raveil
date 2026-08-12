@@ -22,6 +22,19 @@ CPU_OVERLAY = (
 CPU_ELABORATION_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-cpu-memory-elaboration.sh"
 )
+TL_PROTOCOL_HARNESS = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-overlay"
+    / "RaveilOwnedTLProtocolHarness.scala"
+)
+TL_PROTOCOL_DRIVER = (
+    ROOT / "hardware" / "chisel" / "owned_tl_protocol_sim_main.cpp"
+)
+TL_PROTOCOL_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-tl-protocol.sh"
+)
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
@@ -89,6 +102,25 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("initiator_attribution=unverified", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("matched_comparison_ready=0", runner)
+        self.assertIn("performance=not-measured", runner)
+
+    def test_owned_tl_protocol_runner_is_bounded_and_non_claiming(self) -> None:
+        harness = TL_PROTOCOL_HARNESS.read_text(encoding="utf-8")
+        driver = TL_PROTOCOL_DRIVER.read_text(encoding="utf-8")
+        runner = TL_PROTOCOL_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("class RaveilOwnedTLProtocolHarness", harness)
+        self.assertIn("sourceId = IdRange(0, 4)", harness)
+        self.assertIn("memory.node := client.node", harness)
+        self.assertIn("response_backpressure=covered", driver)
+        self.assertIn("max_one_outstanding=covered", driver)
+        self.assertIn("byte_masks=0x5,0xa", driver)
+        self.assertIn("invalid_phase_denial=covered", driver)
+        self.assertIn("response_metadata=param,size,source,sink,denied,corrupt", driver)
+        self.assertNotEqual(TL_PROTOCOL_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertIn("--assert --cc", runner)
+        self.assertIn("assembly_cache=content-addressed", runner)
+        self.assertIn("cpu_execution=not-run", runner)
+        self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
 
 

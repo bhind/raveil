@@ -237,8 +237,11 @@ peripheral bus. This prevents cache residency from hiding manager transactions
 while the adapter contract is being debugged. A software-written phase
 register labels subsequent aggregate traffic; it does not identify the actual
 initiator. Successful RTL elaboration can prove topology/type compatibility
-only. CPU execution, source attribution, protocol corner cases, resource
-matching, and all measurement remain separate follow-ups.
+only. A separate raw TileLink harness now verifies the manager's negotiated
+Get/Put, byte-mask, denial, response-hold, one-outstanding, response-metadata,
+reset-phase, and bounded-counter behavior with the upstream monitor enabled.
+It bypasses both CPUs, so CPU execution, source attribution, end-to-end
+ordering, resource matching, and all measurement remain separate follow-ups.
 
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in

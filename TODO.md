@@ -471,10 +471,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   so accesses to its mapped region are intended to traverse the manager; CPU
   execution is still unverified. This is an elaboration-first,
   resource-unmatched step, not the RFC-0005 common memory. Before calling it a
-  functional CPU adapter, add a phase-fenced Rocket workload and direct
-  TileLink coverage for full/partial writes, masks, invalid phase denial,
-  response backpressure, counters, and initiator separation. Then repeat the
-  exact workload on BOOM before designing the matched resource boundary. The
+  functional CPU adapter, add a phase-fenced Rocket workload and initiator
+  separation. Direct monitor-enabled TileLink RTL coverage now passes for
+  full/partial writes, two masks, invalid phase denial, response backpressure,
+  one-outstanding admission, response metadata, reset phase, and bounded
+  aggregate counters. Then repeat the exact CPU workload on BOOM before
+  designing the matched resource boundary. The
   overlay is not yet the ADR-0043 common-contract adapter because it does not
   carry owned initiator/phase metadata through each request and response.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and

@@ -53,7 +53,9 @@ resolves it.
   changing the machines under comparison. ADR-0044 answers only the preceding
   translation step: an observable, uncached peripheral-bus manager can be
   added to dedicated Rocket and BOOM configurations, but it is deliberately
-  resource-unmatched. Can a phase-fenced workload distinguish CPU activity
+  resource-unmatched. Its direct monitor-enabled TileLink harness now verifies
+  the manager-local legal Get/Put/mask/denial/backpressure/metadata paths, but
+  bypasses the CPUs. Can a phase-fenced workload distinguish CPU activity
   from loader/debug/recovery masters, and what later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only

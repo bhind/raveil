@@ -1,0 +1,13 @@
+FROM eclipse-temurin:17-jdk-jammy@sha256:29467857e8bde40ab1f7befecbda0ea764b95afec1cc7f89aa90f7a766577e19
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        device-tree-compiler \
+        g++ \
+        git \
+        make \
+        verilator \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work

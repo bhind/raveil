@@ -487,6 +487,32 @@ labelled unknown.
 - State: corrected with the bus wrapper's generated synchronous domain; the
   final Rocket and BOOM dual-target elaboration passed.
 
+## Raw TileLink tests must obey the negotiated protocol before testing a manager
+
+- Symptom: the first direct owned-manager harness failed during elaboration
+  when client `supports*` fields were misused as emitted-request declarations;
+  a later run tripped the upstream monitor by clocking a lane-one byte request
+  with an incompatible transfer size. Separate attempts also failed from an
+  unbounded parallel assembly build, the wrong upstream `plusarg_reader`, and
+  an omitted legacy-Verilator `sc_time_stamp` definition.
+- Cause: TileLink master `supports*` fields describe slave-to-master behavior,
+  legal A-channel masks depend on address and size, and emitted BlackBox/model
+  support must match the exact pinned Rocket Chip version. Full Chipyard
+  assembly also exceeded the available Docker memory when left unconstrained.
+- Prevention: derive legality from the pinned `Parameters.scala` and monitor,
+  keep the monitor enabled, test manager rejection only with legal negotiated
+  requests, use the exact pinned BlackBox resource, bound SBT parallelism, and
+  cache assemblies by the overlay content hash rather than by a mutable name.
+- Detection: require the complete FIRRTL-to-Verilog-to-Verilator path and the
+  final `OWNED-TL-PROTOCOL-V1 status=OK` marker; Scala compilation or monitor-
+  disabled simulation is insufficient.
+- Evidence: T-0042 `RaveilOwnedTLProtocolHarness.scala`,
+  `run-owned-tl-protocol.sh`, the failed direct-protocol attempts, and the final
+  16-transaction monitor-enabled run.
+- State: corrected; the manager-local legal protocol slice passes. CPU
+  execution, initiator attribution, resource matching, and measurement remain
+  open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:
