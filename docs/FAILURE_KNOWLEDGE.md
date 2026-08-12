@@ -533,6 +533,27 @@ labelled unknown.
 - State: corrected by using `lwu` for the unsigned `cafebabe` comparison; the
   exact Rocket RTL workload and host signature verifier now pass.
 
+## Diplomacy child ports require a named LazyModuleImp type
+
+- Symptom: the first standalone TileLink-to-owned bridge assembly reached the
+  repository overlay, then Scala reported that `io`, `ownedRequest`, and
+  `ownedResponse` were not members of the child `LazyModuleImp` as referenced
+  by the parent harness.
+- Cause: each child used an anonymous `new LazyModuleImp(this)`. Its public
+  `module` value widened to the base `LazyModuleImp` type, which hides ports
+  that exist only on the anonymous subclass.
+- Prevention: when a parent diplomacy harness must connect child-specific
+  ports, define a named `LazyModuleImp` subclass and return that concrete type
+  from the child's `lazy val module`.
+- Detection: compile the complete pinned Chipyard project and elaborate the
+  parent harness; source inspection or compiling an isolated child cannot
+  prove that the parent sees the refined module type.
+- Evidence: T-0042 `RaveilOwnedTLContractBridge.scala`, the failed first
+  `run-owned-tl-contract-bridge.sh` assembly, and
+  `docs/log/2026-08-12.md`.
+- State: corrected with named bridge/client module implementations; the final
+  assert-enabled Verilator run and checksum-verified cache rerun pass.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

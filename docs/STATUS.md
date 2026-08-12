@@ -323,6 +323,24 @@ metadata, establish equal resources, isolate OoO, or support a performance,
 energy, area, OoO-removal, FPGA, or silicon claim.
 The ADR-0043 common-contract adapter remains open.
 
+T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
+bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
+and `PutPartial` requests, translates them into an upstream-type-free owned
+request carrying write/address/data/mask plus explicit adapter-supplied
+initiator and lifecycle phase, and retains TileLink source/size until the owned
+response is consumed on D. An independent owned target holds response data,
+error, operation, initiator, and phase under backpressure and asserts
+accepted/completed conservation. The assert-enabled pinned Chipyard/Verilator
+harness passed six requests with full and two partial writes, both byte masks,
+readback, deterministic range denial, single-outstanding request blocking, D
+backpressure, source/size routing, and initiator/phase correlation at 6/6.
+The exact rerun verified the content-addressed assembly checksum before
+reproducing the same marker. This proves the mechanical bridge and explicit
+metadata handoff only: the harness supplies the initiator/phase inputs, neither
+CPU is connected, semantic CPU/ELF identity remains unproven, and resources
+remain unmatched. No performance, power, area, OoO, FPGA, silicon, novelty,
+non-infringement, patent-clearance, or FTO conclusion follows.
+
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
 `ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1` selects BOOM
 `9459af0c1f6847f8411622dac770ac78fe10847c`; the initial configuration is

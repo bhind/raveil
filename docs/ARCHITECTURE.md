@@ -265,6 +265,19 @@ does not carry ADR-0043 owned initiator metadata, isolate the effect of OoO, or
 make the peripheral topology resource-equivalent to the Graph memories.
 Common-contract and matched comparison work remains separate.
 
+The next T-0042 prerequisite is now executable as a standalone bridge. A real
+post-fragmenter TileLink manager converts negotiated `Get`, `PutFull`, and
+`PutPartial` A beats into an upstream-type-free owned request and converts the
+owned response back to D. TileLink source/size stay in the bridge; operation,
+address, data, byte mask, explicit initiator, phase, error, and backpressure
+cross the owned boundary. The test target implements the same maximum-one-
+outstanding request/response shape and asserts conservation and response
+stability. This separates translation mechanics from the unresolved policy
+that assigns trustworthy CPU/loader/debug initiator identity. The standalone
+harness supplies that metadata directly, so its successful correlation is not
+semantic CPU attribution and does not alter ADR-0044's unmatched deployed
+manager or establish equal CPU/Graph resources.
+
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in
 GNU/Linux userspace, provided Raveil-owned admission, semantic, evidence, and

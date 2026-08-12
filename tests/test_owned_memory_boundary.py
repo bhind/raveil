@@ -35,6 +35,19 @@ TL_PROTOCOL_DRIVER = (
 TL_PROTOCOL_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-tl-protocol.sh"
 )
+TL_CONTRACT_BRIDGE = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-overlay"
+    / "RaveilOwnedTLContractBridge.scala"
+)
+TL_CONTRACT_BRIDGE_DRIVER = (
+    ROOT / "hardware" / "chisel" / "owned_tl_contract_bridge_sim_main.cpp"
+)
+TL_CONTRACT_BRIDGE_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-tl-contract-bridge.sh"
+)
 ROCKET_MEMORY_WORKLOAD = (
     ROOT / "hardware" / "chisel" / "owned_memory_cpu_smoke.S"
 )
@@ -142,6 +155,37 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("--assert --cc", runner)
         self.assertIn("assembly_cache=content-addressed", runner)
         self.assertIn("cpu_execution=not-run", runner)
+        self.assertIn("resource_match_verified=0", runner)
+        self.assertIn("performance=not-measured", runner)
+
+    def test_tl_to_owned_contract_bridge_is_bounded_and_non_claiming(self) -> None:
+        bridge = TL_CONTRACT_BRIDGE.read_text(encoding="utf-8")
+        driver = TL_CONTRACT_BRIDGE_DRIVER.read_text(encoding="utf-8")
+        runner = TL_CONTRACT_BRIDGE_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("class RaveilOwnedTLContractBridge", bridge)
+        self.assertIn("class RaveilOwnedContractScratchpad", bridge)
+        self.assertIn("val ownedRequest = IO(Decoupled", bridge)
+        self.assertIn("val ownedResponse = IO(Flipped(Decoupled", bridge)
+        self.assertIn("ownedRequest.bits.initiator := requestInitiator", bridge)
+        self.assertIn("ownedRequest.bits.phase := requestPhase", bridge)
+        self.assertIn("responseSource := tl.a.bits.source", bridge)
+        self.assertIn("responseSize := tl.a.bits.size", bridge)
+        self.assertIn("val addressInRange = tl.a.bits.address", bridge)
+        self.assertIn("val supported = addressInRange && (get || put)", bridge)
+        self.assertIn("assert(acceptedCount === completedCount + busy.asUInt)", bridge)
+        self.assertIn("assert(ownedResponse.bits.initiator === responseInitiator)", bridge)
+        self.assertIn("assert(ownedResponse.bits.phase === responsePhase)", bridge)
+        self.assertIn("OWNED-TL-CONTRACT-BRIDGE-V1", driver)
+        self.assertIn("owned_accepted=6 owned_completed=6", driver)
+        self.assertIn("single_outstanding_request_blocking=covered", driver)
+        self.assertIn("attribution=adapter-input-only", driver)
+        self.assertNotEqual(TL_CONTRACT_BRIDGE_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertIn("source=$chipyard,target=/source,readonly", runner)
+        self.assertIn("no-new-privileges=true", runner)
+        self.assertIn("assembly_cache=content-addressed-verified", runner)
+        self.assertIn("sha256sum -c", runner)
+        self.assertIn('shasum -a 256 "$runner" "$bridge_overlay"', runner)
+        self.assertIn("semantic_initiator=not-proven", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
 

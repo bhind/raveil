@@ -62,8 +62,12 @@ resolves it.
   SimTSI/FESVR serial range and observe only the expected class for the eight
   data transactions. That source class is not semantic proof that the target
   ELF initiated each transaction and is not ADR-0043 owned initiator metadata.
-  How should the adapter provide durable semantic initiator attribution beyond
-  topology-dependent source IDs, and what later topology makes both CPU
+  A standalone TileLink-to-owned bridge now proves the mechanical handoff of
+  explicit initiator/phase metadata plus source/size response correlation, but
+  its harness supplies the metadata and neither CPU is connected. How should a
+  CPU-side boundary assign durable semantic initiator attribution, separate
+  loader/FESVR/debug activity, and fail closed beyond topology-dependent source
+  IDs? What later topology makes both CPU
   and Graph use equal memory resources without hiding traffic in caches?
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.

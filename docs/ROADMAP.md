@@ -70,9 +70,14 @@ The corrected critical path is:
    only each config's DCache-MMIO client range for the eight data transactions
    and preserve accepted/completed phase 2/2. This is topology-dependent
    client-class evidence, not semantic initiator proof. Semantic initiator
-   attribution and matched common-memory topology remain. None of these
-   functional smokes or endpoint diagnostics is a performance or structural-
-   ablation result.
+   attribution and matched common-memory topology remain. A standalone
+   post-fragmenter TileLink-to-owned bridge now verifies the mechanical
+   request/response translation, TileLink source/size retention, explicit
+   initiator/phase handoff, backpressure, range denial, and 6/6 conservation.
+   Its attribution is harness-supplied and neither CPU is connected, so it is
+   a prerequisite rather than semantic initiator or resource-match proof.
+   None of these functional smokes or endpoint diagnostics is a performance
+   or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,

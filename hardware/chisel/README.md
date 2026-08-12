@@ -360,6 +360,27 @@ measurement evidence. The raw client bypasses Rocket and BOOM; success remains
 `rtl-simulation-functional`, with CPU execution not run, initiator attribution
 unverified, resource matching false, and performance not measured.
 
+Run the standalone TileLink-to-owned-contract bridge with:
+
+```sh
+./hardware/chisel/run-owned-tl-contract-bridge.sh
+```
+
+This uses a real post-fragmenter TileLink client/manager connection but keeps
+both CPUs out of the harness. The bridge retains TileLink source and size for D
+while translating operation, word address, data, byte mask, and explicit
+adapter inputs for initiator/phase into an upstream-type-free owned
+request/response. The assert-enabled target covers full and partial writes,
+masks `0x5` and `0xa`, readback, range denial, single-outstanding request
+blocking, response backpressure, metadata stability, and 6/6 conservation.
+The assembly cache key covers the exact overlay, pinned Chipyard revision, and
+built image identity; reuse verifies the cached JAR checksum before
+elaboration. The successful marker says `attribution=adapter-input-only` and
+`semantic_initiator=not-proven`: this is translation-mechanics evidence, not a
+claim that a CPU, ELF, loader, or debugger supplied the request. CPU connection,
+matched resources, end-to-end latency, performance, power, and area remain
+open.
+
 Run the same CPU workload through the owned manager on Rocket and BOOM with:
 
 ```sh

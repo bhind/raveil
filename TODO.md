@@ -483,10 +483,18 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   registers correlate each accepted data request's source/software phase with
   D completion: expected 8/8, unexpected 0/0, and last phase 2/2 on both CPUs.
   This is bounded client-class and semantic agreement evidence, not semantic
-  initiator proof or comparative evidence. Next add durable semantic initiator
-  attribution before designing the matched resource boundary. The
-  overlay is not yet the ADR-0043 common-contract adapter because it does not
-  carry owned initiator metadata or provide the matched resource boundary.
+  initiator proof or comparative evidence. A standalone post-fragmenter
+  TileLink-to-owned-contract bridge now translates six assert-enabled harness
+  transactions into explicit owned request/response initiator and phase
+  metadata while preserving TileLink source/size; full/partial writes, both
+  masks, range denial, one-outstanding blocking, D backpressure, metadata
+  correlation, and 6/6 conservation pass. Those metadata values are supplied
+  by the harness, not derived as durable CPU/ELF identity. Next connect the
+  bridge through a CPU-side attribution boundary that separates loader/FESVR/
+  debug activity and proves where semantic initiator metadata is assigned,
+  then design the matched resource boundary. The deployed CPU overlay is not
+  yet the ADR-0043 common-contract adapter and does not provide the matched
+  resource boundary.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
