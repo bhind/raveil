@@ -46,3 +46,4 @@ rewrite it.
 | [ADR-0039](ADR-0039-bounded-static-region-is-simulation-only.md) | Accepted | Bounded static Graph region is authorized only for repository-owned RTL simulation |
 | [ADR-0040](ADR-0040-boom-reference-is-a-pinned-control-not-a-candidate.md) | Accepted | BOOM is an exact pinned OoO control and its disable-OoO mode is a retained-structure diagnostic |
 | [ADR-0041](ADR-0041-functional-semantics-do-not-imply-matched-resources.md) | Accepted | Functional semantic agreement does not imply matched memory or comparison readiness |
+| [ADR-0042](ADR-0042-shared-tlram-is-an-unmatched-functional-prototype.md) | Accepted | Shared subsystem TileLink RAM is an unmatched functional prototype, not fixed-latency comparison evidence |

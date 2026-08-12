@@ -38,8 +38,9 @@ resolves it.
   comparing unequal cache/memory/functional resources? Source survey found no
   existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
-  TileLink banked scratchpad still needs an owned adapter and explicit proof of
-  ports, buffering, arbitration, and fixed latency.
+  TileLink banked scratchpad now passes the exact stencil on both controls but
+  still needs an owned adapter and explicit proof of ports, buffering,
+  arbitration, fixed latency, and equivalence to the Graph storage boundary.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

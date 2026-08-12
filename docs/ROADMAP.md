@@ -46,9 +46,12 @@ The corrected critical path is:
    semantic stencil outputs are also validated for both BOOM modes, but their
    v2 records correctly remain cache-backed and comparison-ineligible. The
    pinned Rocket control now validates the same 256-word stencil signature and
-   emits the same honest unmatched record class. A verified common scratchpad/
-   resource adapter remains before T-0042 closes; none of these functional
-   smokes is a performance or structural-ablation result.
+   emits the same honest unmatched record class. ADR-0042 additionally moves
+   every CPU control's buffers onto the inherited common subsystem TLRAM and
+   validates them, but correctly leaves end-to-end latency and resource matching
+   unverified. An owned common interface and Graph adapter remain before T-0042
+   closes; none of these functional smokes is a performance or structural-
+   ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,

@@ -444,7 +444,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   records. The pinned Rocket control now executes the same fallback and matches
   the same 256-word signature/checksum while emitting an honest cache-backed/
   unmatched v2 record. All four semantic identities are present; the verified
-  common fixed-latency scratchpad/resource boundary remains open.
+  common fixed-latency scratchpad/resource boundary remains open. ADR-0042 now
+  places all three CPU control buffers in their inherited common 64 KiB Mbus
+  TLRAM and validates the same signatures, but labels its latency unverified
+  and keeps resource matching false. Next prove or replace the CPU request path
+  and adapt the Graph RTL to one owned, explicitly matched interface before
+  closing T-0042.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

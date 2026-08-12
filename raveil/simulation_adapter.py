@@ -36,6 +36,7 @@ ACCOUNTING_PHASES = (
 MEMORY_MODELS = {
     "owned-private-scratchpads",
     "cache-backed-variable-latency",
+    "shared-tilelink-banked-scratchpad-unverified-latency",
     "matched-fixed-latency-banked-scratchpad",
 }
 
@@ -295,8 +296,12 @@ def static_graph_cancelled_observation(invocation: int) -> dict[str, Any]:
     return observation
 
 
-def cpu_functional_observation(implementation: str, invocation: int) -> dict[str, Any]:
-    """Describe a cache-backed CPU semantic smoke without claiming matching."""
+def cpu_functional_observation(
+    implementation: str,
+    invocation: int,
+    memory_model: str = "cache-backed-variable-latency",
+) -> dict[str, Any]:
+    """Describe a CPU semantic smoke without claiming resource matching."""
 
     if implementation not in {
         "rocket-in-order",
@@ -304,11 +309,16 @@ def cpu_functional_observation(implementation: str, invocation: int) -> dict[str
         "boom-ooo-disabled-diagnostic",
     }:
         raise SimulationAdapterError("unsupported CPU implementation")
+    if memory_model not in {
+        "cache-backed-variable-latency",
+        "shared-tilelink-banked-scratchpad-unverified-latency",
+    }:
+        raise SimulationAdapterError("unsupported CPU functional memory model")
     observation = static_graph_functional_observation(invocation)
     observation.update(
         {
             "implementation": implementation,
-            "memory_model": "cache-backed-variable-latency",
+            "memory_model": memory_model,
             "missing_accounting": list(ACCOUNTING_PHASES),
             **{phase: None for phase in ACCOUNTING_PHASES},
         }
@@ -326,6 +336,11 @@ def main(argv: list[str] | None = None) -> int:
         "--implementation", choices=sorted(IMPLEMENTATIONS), default="static-graph"
     )
     parser.add_argument(
+        "--memory-model",
+        choices=sorted(MEMORY_MODELS),
+        default="cache-backed-variable-latency",
+    )
+    parser.add_argument(
         "--status", choices=("completed", "cancelled"), required=True
     )
     args = parser.parse_args(argv)
@@ -333,7 +348,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.implementation != "static-graph" and args.status == "cancelled":
             raise SimulationAdapterError("CPU cancellation observation is not implemented")
         if args.implementation != "static-graph":
-            observation = cpu_functional_observation(args.implementation, args.invocation)
+            observation = cpu_functional_observation(
+                args.implementation, args.invocation, args.memory_model
+            )
         elif args.status == "completed":
             observation = static_graph_functional_observation(args.invocation)
         else:

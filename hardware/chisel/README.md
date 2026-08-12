@@ -251,6 +251,21 @@ it through the same independent oracle before emitting a `rocket-in-order`
 adapter v2 record. This normal Rocket configuration is also cache-backed and
 unmatched; its functional success does not authorize a comparison.
 
+Exercise the inherited subsystem TLRAM on all three CPU control identities:
+
+```sh
+./hardware/chisel/run-shared-scratchpad-stencil-functional.sh
+```
+
+The wrapper revalidates both pinned simulators, compiles the same source with a
+dedicated linker, requires `input_words=0x08000000` and
+`begin_signature=0x08000510`, and validates all three 256-word signatures. Code
+and `tohost` stay in the normal `0x80000000` region. The inherited device is one
+64 KiB Mbus TLRAM bank shared by both configurations. Its successful use is
+reported as `shared-tilelink-banked-scratchpad-unverified-latency`; TileLink and
+CPU request paths have not been proven constant-latency or equivalent to the
+Graph RTL, so resource matching remains false.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

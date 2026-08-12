@@ -22,13 +22,21 @@ _start:
 3:
     j       3b
 
+#ifdef RFC0005_SYSTEM_SCRATCHPAD
+    .section .scratchpad.input,"aw",@nobits
+#else
     .section .bss
+#endif
     .align 4
     .globl input_words
 input_words:
     .space 1296
 
+#ifdef RFC0005_SYSTEM_SCRATCHPAD
+    .section .scratchpad.signature,"aw",@progbits
+#else
     .section .signature,"aw",@progbits
+#endif
     .align 4
     .globl begin_signature
     .globl output_words

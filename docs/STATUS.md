@@ -335,6 +335,18 @@ sets resource matching and comparison readiness false. All required control
 identities now have semantic functional records; the common fixed-latency
 banked scratchpad/resource boundary remains unimplemented and unverified.
 
+ADR-0042 now records one intermediate shared-memory prototype. Pinned
+`AbstractConfig` gives both CPU controls the same 64 KiB, one-bank subsystem
+TileLink RAM at `0x08000000`. A separate linker keeps code and `tohost` in the
+normal `0x80000000` region while placing the 324 input words and private 256
+output words at `0x08000000` and `0x08000510`. Rocket, BOOM normal, and the
+serialize-dispatch diagnostic all completed from this placement and again
+matched the 256-word oracle with checksum `0000007f11ba2640`. Their v2 records
+use `memory_model=shared-tilelink-banked-scratchpad-unverified-latency`; all
+cycle fields remain unknown and both resource matching and comparison readiness
+remain false. Common addressable TLRAM is a functional bridge, not proof of
+fixed latency, matched CPU paths, or a Graph-side common adapter.
+
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed
 structural compiler emits a unique baseline-first slate; an analytical adviser

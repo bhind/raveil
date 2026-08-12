@@ -198,6 +198,15 @@ normal completion grants only a private result for independent host-oracle
 checking. This is RTL functional simulation, not a product ISA, general Graph
 executor, matched CPU comparison, or hardware-performance result.
 
+ADR-0042 uses the pinned subsystem TileLink RAM inherited by Rocket and BOOM as
+an intermediate functional bridge. Only the fallback's input and private output
+are linked there; code and completion control remain in normal memory. This
+common addressable device removes cache-backed buffer placement as one
+functional confounder, but its TileLink/LSU paths are not constant-latency proof
+and the Graph RTL still has different private storage. The active adapter must
+therefore report the intermediate memory model as latency-unverified and refuse
+resource matching.
+
 Linux retains the non-authoritative transport harness implemented under
 ADR-0019. ADR-0024 additionally permits the first complete product loop in
 GNU/Linux userspace, provided Raveil-owned admission, semantic, evidence, and

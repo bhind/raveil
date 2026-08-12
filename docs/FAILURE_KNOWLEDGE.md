@@ -342,6 +342,21 @@ labelled unknown.
 - State: corrected for the T-0105 reference smoke. Reassess the platform and
   security envelope before T-0044 measurement.
 
+## ELF section checks must request wide names
+
+- Symptom: the first shared-scratchpad functional wrapper stopped after both
+  prerequisite CPU smokes even though compilation emitted the requested long
+  section name.
+- Cause: `readelf -S` abbreviates long section names to fit its default display;
+  an exact grep for `.scratchpad_signature` therefore failed closed.
+- Prevention: use `readelf -SW` for exact section-name validation and use `nm`
+  independently for the required input/output addresses.
+- Detection: distinguish an absent final marker from RTL failure, then inspect
+  the first failing static assertion before rerunning a simulator.
+- Evidence: T-0042 `run-shared-scratchpad-stencil-functional.sh` and
+  `docs/log/2026-08-12.md`.
+- State: corrected; the subsequent Rocket/BOOM/diagnostic TLRAM run passed.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

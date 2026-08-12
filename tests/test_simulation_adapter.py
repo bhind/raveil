@@ -115,6 +115,16 @@ class SimulationAdapterTests(unittest.TestCase):
             self.assertFalse(observation["matched_comparison_ready"])
             self.assertEqual(observation["missing_accounting"], list(ACCOUNTING_PHASES))
 
+    def test_shared_tlram_prototype_does_not_imply_fixed_latency(self) -> None:
+        observation = cpu_functional_observation(
+            "rocket-in-order",
+            5,
+            "shared-tilelink-banked-scratchpad-unverified-latency",
+        )
+        self.assertTrue(observation["semantic_valid"])
+        self.assertFalse(observation["resource_match_verified"])
+        self.assertFalse(observation["matched_comparison_ready"])
+
     def test_module_cli_emits_validated_json(self) -> None:
         import json
         import subprocess
