@@ -417,16 +417,21 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   slice is functional: a deterministic compiler/validator binds RFC-0005
   configuration `d4bf9395...d1e2` to a six-phase Chisel stencil executor;
   Verilator matches an independent C++ oracle for 512 outputs and verifies
-  cancel invalidation plus restart. Keep T-0042 open for the pinned BOOM and
-  same-core diagnostic integration and a common adapter boundary; do not turn
-  the 1,536-cycle schedule assertion into a performance result.
+  cancel invalidation plus restart. A strict common simulation adapter now
+  normalizes semantics, useful operations, implementation identity, private
+  output state, and six lifecycle accounting phases without leaking upstream
+  types. The Graph record intentionally remains `accounting_complete=false`
+  and has no total until installation, completion, validation, and publication
+  phases are implemented. Keep T-0042 open for pinned BOOM, its same-core
+  diagnostic, and Rocket/BOOM records behind this boundary; do not turn the
+  1,536-cycle schedule assertion into a performance result.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
   backend call; Pavane independently executes the bounded deterministic integer
   reference and requires exact baseline/candidate agreement without using
   latency or Experience as semantic authority.
-- [ ] **T-0044** Compare static, elastic, stream, and hybrid Daphnis Execution
+- [ ] **T-0044** Compare static, elastic, stream, and hybrid Graph Execution
   Subsystem organizations against matched in-order and conventional OoO
   baselines. Hold ISA workload, cache/memory model, functional resources, and
   correctness constant where possible; report frontend, rename/ROB/issue/LSU,

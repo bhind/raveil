@@ -145,6 +145,25 @@ a performance result. The Docker path reuses the existing owned-counter Chisel
 7.2.0 tool coordinate and a disposable Scala/Coursier cache. T-0044 must define
 a fresh matched and immutable environment before any comparison.
 
+After a successful RTL run the host wrapper emits three strict
+`raveil.simulation-adapter/v1` JSON records: completed, cancelled, then
+completed after restart. The common adapter fixes semantic and useful-operation
+counts and exposes separate installation, staging, execution, completion,
+validation, and publication phases. The current records explicitly use
+`accounting_complete=false` and `total_cycles=null` because four phases remain
+unknown. They are functional evidence and cannot be consumed as a benchmark.
+
+To inspect the same validated record without rebuilding RTL:
+
+```sh
+python3 -m raveil.simulation_adapter --invocation 1 --status completed
+python3 -m raveil.simulation_adapter --invocation 2 --status cancelled
+```
+
+Rocket, BOOM, and its OoO-disabled diagnostic must eventually emit this owned
+schema through wrappers; no upstream implementation type is part of the
+contract. T-0042 does not close until those functional records exist.
+
 The external checkout retains `LICENSE.Berkeley` (BSD-3-Clause-style),
 `LICENSE.SiFive` (Apache-2.0), `LICENSE.jtag` (BSD-3-Clause-style), and the
 submodule license files for Chisel/CDE (Apache-2.0) and HardFloat

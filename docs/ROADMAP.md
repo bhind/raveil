@@ -36,8 +36,10 @@ The corrected critical path is:
    simulation and makes no patent/FTO conclusion.
 4. **T-0042 — owned RTL adapter (in progress):** the smallest admitted static
    Graph executor now matches an independent oracle and survives
-   cancel/restart in Verilator. Pinned BOOM, the same-core diagnostic, and the
-   common adapter/resource boundary remain before T-0042 closes.
+   cancel/restart in Verilator. A strict common functional adapter now makes
+   missing lifecycle accounting explicit and refuses a total. Pinned BOOM, the
+   same-core diagnostic, and Rocket/BOOM adapter records remain before T-0042
+   closes.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,

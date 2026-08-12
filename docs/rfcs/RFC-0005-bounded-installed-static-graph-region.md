@@ -254,5 +254,6 @@ The Project Manager must record one of three outcomes:
 3. stop the CPU/Graph path as no-go.
 
 ADR-0039 records outcome 1 for bounded repository-owned RTL simulation only.
-T-0057 remains open through functional validation, and T-0042 may implement
-only this contract. T-0044 measurement remains separately gated.
+T-0057 subsequently closed after exact schema and independent functional RTL
+validation. T-0042 may implement only this contract, and T-0044 measurement
+remains separately gated.

@@ -235,8 +235,26 @@ This is RTL simulation-functional evidence only. The cycle count is a schedule
 correctness assertion, not comparative performance. No Rocket/BOOM comparison,
 energy, area, timing, OoO-removal, FPGA, silicon, CPU/ISA, novelty,
 non-infringement, or FTO claim follows. T-0057 is complete as contract/prior-art
-and functional-schema validation; T-0042 remains open for BOOM/diagnostic/common
-adapter integration, and T-0044 remains the matched measurement task.
+and functional-schema validation.
+
+T-0042 now also has the implementation-neutral
+`raveil.simulation-adapter/v1` functional boundary. It fixes the descriptor,
+workload semantics, disjoint private scratchpad model, useful-operation counts,
+implementation identity, completion state, and installation/staging/execution/
+completion/validation/publication accounting fields without importing Rocket
+or BOOM types. Exact validation rejects unknown fields, mismatched semantic
+counts, publication before authority, and an asserted total while any phase is
+unknown. Common adapter SHA-256 is
+`8b12245438e4a5ffef23bfd4d29a86f6959307a79a437fe517960d043ed51968`.
+
+The Graph smoke now emits validated records for complete, cancelled, and
+restart invocations. All are deliberately `accounting_complete=false` with
+`total_cycles=null`: installation, completion, independent validation, and
+publication costs are not yet available. The reported 1,536 execution and 324
+staging cycles therefore cannot be added or compared as an end-to-end result.
+T-0042 remains open for pinned BOOM, its OoO-disabled diagnostic, and Rocket/
+BOOM functional records behind the same boundary; T-0044 remains the matched
+measurement task.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

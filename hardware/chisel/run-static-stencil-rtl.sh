@@ -26,3 +26,8 @@ docker run --rm \
     --mount "type=volume,source=$scala_cache,target=/root/.cache" \
     "$image" \
     ./run-static-stencil.sh
+
+cd "$repo_root"
+python3 -m raveil.simulation_adapter --invocation 1 --status completed
+python3 -m raveil.simulation_adapter --invocation 2 --status cancelled
+python3 -m raveil.simulation_adapter --invocation 3 --status completed
