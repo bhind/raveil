@@ -14,6 +14,7 @@ DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom"
 FETCH_SIM = ROOT / "hardware" / "chisel" / "fetch-boom-simulator-deps.sh"
 RUN_SIM = ROOT / "hardware" / "chisel" / "run-boom-functional-smoke.sh"
 RUN_STENCIL = ROOT / "hardware" / "chisel" / "run-boom-stencil-functional.sh"
+RUN_ROCKET_STENCIL = ROOT / "hardware" / "chisel" / "run-rocket-stencil-functional.sh"
 SIM_DOCKERFILE = ROOT / "hardware" / "chisel" / "Dockerfile.boom-sim"
 SMOKE_ASM = ROOT / "hardware" / "chisel" / "boom_functional_smoke.S"
 SMOKE_LD = ROOT / "hardware" / "chisel" / "boom_functional_smoke.ld"
@@ -29,6 +30,7 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertNotEqual(FETCH_SIM.stat().st_mode & 0o111, 0)
         self.assertNotEqual(RUN_SIM.stat().st_mode & 0o111, 0)
         self.assertNotEqual(RUN_STENCIL.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(RUN_ROCKET_STENCIL.stat().st_mode & 0o111, 0)
 
     def test_pin_is_exact_and_has_license_hashes(self) -> None:
         fields = dict(
@@ -126,6 +128,17 @@ class BoomReferenceTests(unittest.TestCase):
         self.assertIn("raveil.riscv_stencil_signature", runner)
         self.assertIn("--implementation boom-ooo", runner)
         self.assertIn("boom-ooo-disabled-diagnostic", runner)
+        self.assertIn("memory_model=cache-backed-variable-latency", runner)
+        self.assertIn("resource_match_verified=0", runner)
+        self.assertIn("matched_comparison_ready=0", runner)
+        self.assertIn("performance=not-measured", runner)
+
+    def test_rocket_stencil_uses_same_oracle_and_honest_adapter(self) -> None:
+        runner = RUN_ROCKET_STENCIL.read_text(encoding="utf-8")
+        self.assertIn("CONFIG=RocketConfig CONFIG_PACKAGE=chipyard", runner)
+        self.assertIn("riscv_stencil_smoke.c", runner)
+        self.assertIn("raveil.riscv_stencil_signature", runner)
+        self.assertIn("--implementation rocket-in-order", runner)
         self.assertIn("memory_model=cache-backed-variable-latency", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("matched_comparison_ready=0", runner)

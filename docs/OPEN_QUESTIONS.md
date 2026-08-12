@@ -35,7 +35,11 @@ resolves it.
 - Can one pinned Chisel/Chipyard environment support a fair matched comparison
   among Rocket in-order, BOOM OoO, BOOM's same-core OoO-disabled diagnostic,
   and an owned explicit-graph tile without inheriting upstream authority or
-  comparing unequal cache/memory/functional resources?
+  comparing unequal cache/memory/functional resources? Source survey found no
+  existing upstream config that proves this boundary: Rocket's tile-internal
+  `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
+  TileLink banked scratchpad still needs an owned adapter and explicit proof of
+  ports, buffering, arbitration, and fixed latency.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

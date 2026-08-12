@@ -44,10 +44,11 @@ The corrected critical path is:
    and executes a minimal RV64 sum/store/load/check ELF to successful `tohost`
    completion in both normal and CSR-verified serialize-dispatch modes. Matched
    semantic stencil outputs are also validated for both BOOM modes, but their
-   v2 records correctly remain cache-backed and comparison-ineligible. Rocket
-   stencil execution and a verified common scratchpad/resource adapter remain
-   before T-0042 closes; neither smoke is a performance or structural-ablation
-   result.
+   v2 records correctly remain cache-backed and comparison-ineligible. The
+   pinned Rocket control now validates the same 256-word stencil signature and
+   emits the same honest unmatched record class. A verified common scratchpad/
+   resource adapter remains before T-0042 closes; none of these functional
+   smokes is a performance or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,

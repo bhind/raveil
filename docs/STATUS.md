@@ -260,8 +260,9 @@ staging cycles therefore cannot be added or compared as an end-to-end result.
 They also declare `memory_model=owned-private-scratchpads`,
 `resource_match_verified=false`, and `matched_comparison_ready=false`; this RTL
 has not yet been resource-matched to either CPU control.
-T-0042 remains open for Rocket/BOOM semantic stencil records behind the same
-boundary and for a separately verified matched scratchpad adapter; T-0044
+T-0042 now has semantic stencil records for Rocket, BOOM normal, BOOM's
+serialize-dispatch diagnostic, and the Graph RTL behind this boundary. It
+remains open for a separately verified matched scratchpad adapter; T-0044
 remains the matched measurement task.
 
 ADR-0040 now pins the BOOM control source. Chipyard tag 1.11.0 at
@@ -323,8 +324,16 @@ both modes produced checksum `0000007f11ba2640`. Their validated adapter v2
 records identify `boom-ooo` and `boom-ooo-disabled-diagnostic`, but report
 `memory_model=cache-backed-variable-latency`, all lifecycle cycles unknown,
 resource matching false, and comparison readiness false. This is semantic
-functional evidence, not the RFC-0005 isolation comparison. Rocket stencil
-execution and the matched scratchpad/resource boundary remain open.
+functional evidence, not the RFC-0005 isolation comparison.
+
+The pinned `chipyard.RocketConfig` Verilator simulator now executes the same
+tracked C/assembly stencil and validates the same 256-word FESVR signature
+against the same independent oracle. It also produced checksum
+`0000007f11ba2640` and emitted a validated `rocket-in-order` adapter v2 record.
+That record is likewise cache-backed, has every lifecycle cycle unknown, and
+sets resource matching and comparison readiness false. All required control
+identities now have semantic functional records; the common fixed-latency
+banked scratchpad/resource boundary remains unimplemented and unverified.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

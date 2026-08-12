@@ -238,6 +238,19 @@ normal `SmallBoomConfig` cache-backed memory path, so the records deliberately
 leave every lifecycle cycle unknown and set resource matching and comparison
 readiness false.
 
+Run the identical fallback on the pinned in-order Rocket control with:
+
+```sh
+./hardware/chisel/run-rocket-stencil-functional.sh
+```
+
+The first run builds `chipyard.RocketConfig` in its own Docker volume using the
+same pinned Chipyard source and functional toolchain. It compiles the same
+tracked C/assembly source, extracts the same 256-word signature, and validates
+it through the same independent oracle before emitting a `rocket-in-order`
+adapter v2 record. This normal Rocket configuration is also cache-backed and
+unmatched; its functional success does not authorize a comparison.
+
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program
 execution; the separate smoke above is program execution but not a Graph or

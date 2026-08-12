@@ -441,8 +441,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   minimal BOOM execution into a performance result. BOOM normal and diagnostic
   now also execute the exact 324-word/256-output RFC-0005 fallback; independent
   host signature validation passes and emits honest cache-backed/unmatched v2
-  records. Rocket semantic execution and the verified matched scratchpad/
-  resource boundary remain open.
+  records. The pinned Rocket control now executes the same fallback and matches
+  the same 256-word signature/checksum while emitting an honest cache-backed/
+  unmatched v2 record. All four semantic identities are present; the verified
+  common fixed-latency scratchpad/resource boundary remains open.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
