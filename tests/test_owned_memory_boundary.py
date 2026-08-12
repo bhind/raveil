@@ -78,6 +78,18 @@ TL_CONTRACT_BRIDGE_DRIVER = (
 TL_CONTRACT_BRIDGE_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-tl-contract-bridge.sh"
 )
+ROCKET_LIFECYCLE_OBSERVER = (
+    ROOT / "hardware" / "chisel" / "RaveilRocketLifecycleObserver.scala"
+)
+ROCKET_LIFECYCLE_DRIVER = (
+    ROOT / "hardware" / "chisel" / "rocket_lifecycle_observer_sim_main.cpp"
+)
+ROCKET_LIFECYCLE_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-rocket-lifecycle-observer.sh"
+)
+ROCKET_LIFECYCLE_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_rocket_lifecycle_observer.py"
+)
 ROCKET_MEMORY_WORKLOAD = (
     ROOT / "hardware" / "chisel" / "owned_memory_cpu_smoke.S"
 )
@@ -269,6 +281,89 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("semantic_initiator=not-proven", runner)
         self.assertIn("resource_match_verified=0", runner)
         self.assertIn("performance=not-measured", runner)
+
+    def test_rocket_lifecycle_observer_is_synthetic_and_fail_closed(self) -> None:
+        observer = ROCKET_LIFECYCLE_OBSERVER.read_text(encoding="utf-8")
+        driver = ROCKET_LIFECYCLE_DRIVER.read_text(encoding="utf-8")
+        runner = ROCKET_LIFECYCLE_RUNNER.read_text(encoding="utf-8")
+        verifier = ROCKET_LIFECYCLE_VERIFIER.read_text(encoding="utf-8")
+        self.assertIn("class RaveilRocketLifecycleObserver", observer)
+        self.assertIn("eventMatchesActive", observer)
+        self.assertIn("sequenceExhausted", observer)
+        self.assertIn("epochExhausted", observer)
+        self.assertIn("PostTerminalSideEffect", observer)
+        self.assertIn("activeDCompleted || validDCompletion", observer)
+        self.assertIn("activeRetired || validRetirement", observer)
+        self.assertIn("activeStoreAuthorized || validStoreAuthorization", observer)
+        self.assertIn("commitEligibleEvent", observer)
+        self.assertIn("allocatedCount === committedLoadCount", observer)
+        self.assertIn("ROCKET-LIFECYCLE-OBSERVER-V1", driver)
+        self.assertIn("load_positive=covered", driver)
+        self.assertIn("store_positive=covered", driver)
+        self.assertIn("post_a_exception=covered", driver)
+        self.assertIn("reset_outstanding=covered", driver)
+        self.assertIn("stale_epoch=covered", driver)
+        self.assertIn("stripped_metadata=covered", driver)
+        self.assertIn("duplicate_token=covered", driver)
+        self.assertIn("invalid_completion=covered", driver)
+        self.assertIn("sequence_exhaustion=covered", driver)
+        self.assertIn("event_source=synthetic", driver)
+        self.assertIn("cpu_execution=not-run", driver)
+        self.assertIn("semantic_initiator=not-proven", driver)
+        self.assertNotEqual(ROCKET_LIFECYCLE_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertIn("--network none", runner)
+        self.assertIn("--assert --cc", runner)
+        self.assertIn("--provenance=false", runner)
+        self.assertIn(
+            'shasum -a 256 "$rtl" "$driver" "$verifier" "$runner"', runner
+        )
+        self.assertIn('python3 "$verifier" "$observer_log"', runner)
+        self.assertIn('"semantic_initiator": "not-proven"', verifier)
+        self.assertIn("terminal outcome conservation mismatch", verifier)
+        self.assertIn("resource_match_verified=0", runner)
+        self.assertIn("performance=not-measured", runner)
+
+    def test_rocket_lifecycle_marker_rejects_mutation_and_duplicates(self) -> None:
+        marker = (
+            "ROCKET-LIFECYCLE-OBSERVER-V1 status=OK allocated=21 "
+            "committed_load=3 committed_store=1 noncommitted=17 "
+            "core_attempts=8 core_replays=1 dcache_retries=1 a_accepted=7 "
+            "d_completed=7 retired=5 store_authorized=1 unknown=2 violations=8 "
+            "load_positive=covered store_positive=covered pre_a_kill=covered "
+            "post_a_exception=covered reset_outstanding=covered stale_epoch=covered "
+            "stripped_metadata=covered duplicate_token=covered "
+            "duplicate_outcome=covered invalid_completion=covered "
+            "untagged_event=covered d_error=covered "
+            "sequence_exhaustion=covered event_source=synthetic "
+            "cpu_execution=not-run semantic_initiator=not-proven "
+            "resource_match_verified=0 matched_comparison_ready=0 "
+            "evidence=rtl-simulation-functional performance=not-measured\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "observer.log"
+            log.write_text(marker, encoding="utf-8")
+            accepted = subprocess.run(
+                ["python3", str(ROCKET_LIFECYCLE_VERIFIER), str(log)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            self.assertIn("schema=exact", accepted.stdout)
+
+            for mutation in (
+                marker.replace("stale_epoch=covered ", ""),
+                marker.replace("violations=8", "violations=7"),
+                marker + marker,
+            ):
+                log.write_text(mutation, encoding="utf-8")
+                rejected = subprocess.run(
+                    ["python3", str(ROCKET_LIFECYCLE_VERIFIER), str(log)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertNotEqual(rejected.returncode, 0)
 
     def test_cpu_workload_reaches_owned_memory_with_phase_fences(self) -> None:
         workload = ROCKET_MEMORY_WORKLOAD.read_text(encoding="utf-8")

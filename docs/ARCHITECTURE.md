@@ -323,8 +323,13 @@ architectural commit. Loads require response plus retirement, stores require
 retirement plus CPU-specific store authorization and actual completion, and killed, exceptional,
 rolled-back, stale, duplicated, loader, FESVR, Debug, or untagged traffic cannot
 be promoted. A post-A exception cannot cancel transport; a later side effect is
-an explicit lifecycle violation. These are accepted design invariants; the CPU-specific probes are
-not yet implemented and do not alter the unmatched memory topology.
+an explicit lifecycle violation. These are accepted design invariants. A
+standalone repository-owned Chisel ledger now exercises them with synthetic
+events, a single-live-token state machine, exact marker verification, and
+fail-closed invalid-transition tests. It is a contract harness, not a CPU
+boundary: it has no pinned Rocket input, performs no CPU execution, and cannot
+mint a semantic witness for the ADR-0043 bridge. The CPU-specific probes remain
+unimplemented and the harness does not alter the unmatched memory topology.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

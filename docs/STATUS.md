@@ -400,9 +400,26 @@ epoch, or duplicate outcome fails closed. Load attribution requires both
 successful memory response and architectural retirement; store attribution
 requires retirement, CPU-specific store authorization, and owned-manager D
 completion. A post-A exception does not cancel transport and any later side
-effect is reported as a lifecycle violation. CPU-specific probes and the
-required positive and negative lifecycle tests remain unimplemented, so
-target-ELF semantic initiator attribution remains unproven.
+effect is reported as a lifecycle violation.
+
+A repository-owned standalone Chisel observer now makes that lifecycle policy
+executable against synthetic events before any pinned-core hook. Its
+assert-enabled `linux/amd64` RTL simulation accepted 21 tokens and conserved
+them as 3 committed loads, 1 committed store, and 17 noncommitted outcomes. It
+separately recorded 8 core attempts, 1 core replay, 1 DCache retry, A/D counts
+of 7/7, 5 retirements, 1 store authorization, 2 unknown inputs, and 8
+violations. Positive load/store cases and pre-A kill, post-A exception,
+reset-outstanding, stale epoch, stripped/untagged metadata, duplicate token and
+outcome, invalid completion, D error, and sequence exhaustion negatives passed.
+An exact-schema verifier rejected missing fields, changed counters, and
+duplicate markers and checked terminal conservation. Review found and the RTL
+regression closed one invalid-completion promotion bug by requiring the event
+that completes the existing ADR-0045 load/store conjunction to itself be a
+valid D-completion, retirement, or store-authorization transition.
+The event source remains synthetic: pinned Rocket execution, CPU signal
+binding, target-ELF semantic initiator attribution, the BOOM probe, common
+bridge connection, resource matching, matched comparison, and performance are
+all still unimplemented or unverified.
 
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,

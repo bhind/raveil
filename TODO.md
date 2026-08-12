@@ -520,10 +520,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   exact DCache source 8224 on Rocket and 8288 on BOOM while retaining different
   payload/signature semantics. ADR-0045 now defines CPU-owned, commit-aware
   token and epoch semantics plus replay/kill/exception/reset rules before any
-  core/LSU modification. Next implement the Rocket diagnostic first, including
-  load/store positive paths and replay, kill, exception, reset, stale-epoch,
-  duplicate-token, stripped-field, and untagged-master negatives; then implement
-  the BOOM ROB/LSU diagnostic under the same normalized lifecycle contract.
+  core/LSU modification. A repository-owned standalone Rocket lifecycle
+  observer now passes those load/store and fail-closed cases with synthetic
+  events, exact marker verification, and terminal conservation; it also rejects
+  an invalid completion instead of promoting a retired operation. This is a
+  contract smoke, not a pinned Rocket probe. Next bind the same ledger to exact
+  Rocket lifecycle signals and source hashes, repeat every positive/negative
+  case under real CPU execution, then implement the BOOM ROB/LSU diagnostic
+  under the same normalized lifecycle contract.
   Do not connect either token to the ADR-0043 common bridge until both
   CPU-specific diagnostics pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and

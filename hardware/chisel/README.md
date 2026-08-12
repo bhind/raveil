@@ -507,9 +507,28 @@ require response plus retirement, stores require retirement plus CPU-specific
 store authorization and owned-manager D completion, and killed,
 exceptional, reset, stale, duplicated, stripped, loader/FESVR, Debug, or
 untagged cases fail closed. A post-A exception cannot cancel transport and a
-later side effect is a lifecycle violation. Neither CPU probe is implemented yet, and the token
-must not enter the owned common bridge until both CPU-specific lifecycle suites
-pass.
+later side effect is a lifecycle violation.
+
+`./hardware/chisel/run-rocket-lifecycle-observer.sh` now exercises a standalone
+repository-owned Chisel ledger with synthetic events. The assert-enabled
+`linux/amd64` RTL simulation reports exactly one
+`ROCKET-LIFECYCLE-OBSERVER-V1` marker: 21 allocations resolve to 3 committed
+loads, 1 committed store, and 17 noncommitted operations; A/D counts are 7/7,
+with 5 retirements, 2 unknown inputs, and 8 violations. The cases include
+load/store positives plus replay, retry, kill, exception after A, reset with an
+outstanding request, stale epoch, stripped/untagged metadata, duplicate token
+and outcome, invalid completion, D error, and finite sequence exhaustion. The
+host verifier requires the exact schema and bounded claim fields, checks
+terminal conservation, and rejects field deletion, counter mutation, or marker
+duplication. The recorded input hash is for the repository inputs, not a
+content-addressed proof of the mutable Docker/APT/Scala cache dependencies.
+
+This observer is not either CPU probe: `event_source=synthetic`,
+`cpu_execution=not-run`, `semantic_initiator=not-proven`,
+`resource_match_verified=0`, `matched_comparison_ready=0`, and
+`performance=not-measured`. The pinned Rocket signal hook and BOOM probe are
+still unimplemented, and the token must not enter the owned common bridge until
+both CPU-specific lifecycle suites pass.
 
 The diagnostic waits for an empty ROB/LSU but retains the OoO hardware, so it
 is not an in-order core or an area/energy ablation. Elaboration is not program

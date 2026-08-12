@@ -103,8 +103,11 @@ The corrected critical path is:
    ADR-0045 fixes the next boundary as CPU-owned, commit-aware token correlation:
    replay retains identity, kill/exception/reset fails closed, and load/store
    attribution requires the applicable architectural retirement and memory
-   completion; stores additionally require CPU-specific authorization. Rocket
-   and BOOM lifecycle probes remain to be implemented.
+   completion; stores additionally require CPU-specific authorization. A
+   standalone repository-owned Rocket ledger now passes these state-machine
+   cases with synthetic events and an exact fail-closed marker verifier. The
+   pinned Rocket signal probe, real CPU lifecycle execution, and BOOM probe
+   remain to be implemented.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
