@@ -657,6 +657,25 @@ same token. Complete store attribution, semantic initiator identity, general
 store behavior, resource matching, OoO effects, and performance are not
 proven.
 
+Run the bounded pinned BOOM post-request redirect diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-boom-postrequest-redirect.sh
+```
+
+The workload uses a fixed cacheable DRAM scratch word at `0x80010000` and an
+exact wrong-path `lwu` at PC `0x80000048`. The LSU hook allocates a local
+repository sequence only on that accepted DCache request, matches its response,
+then requires the retained branch mask to be killed with no matching valid or
+architectural commit. The verifier requires exactly
+`request -> response -> redirect` and unchanged software readback. PC,
+ROB/LDQ indices, branch mask, and lane are context only. The uncached owned PBUS
+manager is not exercised because BOOM holds that memory class until ROB-head
+wakeup; therefore no TileLink-A event, transport cancellation, memory
+side-effect absence, token transport, same-token manager completion, semantic
+initiator identity, general rollback, resource result, OoO effect, or
+performance result is proven.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

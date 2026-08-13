@@ -90,6 +90,22 @@ BOOM_STORE_AUTHORIZATION_VERIFIER = (
 BOOM_STORE_AUTHORIZATION_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-boom-store-authorization.sh"
 )
+BOOM_POSTREQUEST_REDIRECT_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-postrequest-redirect.patch"
+)
+BOOM_POSTREQUEST_REDIRECT_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_boom_postrequest_redirect.S"
+)
+BOOM_POSTREQUEST_REDIRECT_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_boom_postrequest_redirect.py"
+)
+BOOM_POSTREQUEST_REDIRECT_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-postrequest-redirect.sh"
+)
 TLXBAR_REQUEST_DEFAULTS_PATCH = (
     ROOT
     / "hardware"
@@ -1006,6 +1022,87 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                     [
                         "python3",
                         str(BOOM_STORE_AUTHORIZATION_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_boom_postrequest_redirect_is_bounded_and_non_claiming(self) -> None:
+        patch = BOOM_POSTREQUEST_REDIRECT_PATCH.read_text(encoding="utf-8")
+        workload = BOOM_POSTREQUEST_REDIRECT_WORKLOAD.read_text(encoding="utf-8")
+        verifier = BOOM_POSTREQUEST_REDIRECT_VERIFIER.read_text(encoding="utf-8")
+        runner = BOOM_POSTREQUEST_REDIRECT_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("dmem_req_fire(w)", patch)
+        self.assertIn("dmem_req(w).bits.uop.br_mask =/= 0.U", patch)
+        self.assertIn("IsKilledByBranch(io.core.brupdate", patch)
+        self.assertIn("io.core.commit.valids(w)", patch)
+        self.assertIn("repository sequence is identity", patch)
+        self.assertIn("No token is carried through DCache or TileLink", patch)
+        self.assertIn("li      s0, 0x80010000", workload)
+        self.assertIn("divu    t2, t0, t1", workload)
+        self.assertIn("xor     t2, t2, t2", workload)
+        self.assertIn("bne     t2, zero, wrong_path_load", workload)
+        self.assertIn("j       redirect_landed", workload)
+        self.assertIn("lwu     t4, 0(s0)", workload)
+        self.assertIn("postrequest_redirect=covered", verifier)
+        self.assertIn("owned_manager=not-exercised", verifier)
+        self.assertIn("post_tl_a_redirect=not-proven", verifier)
+        self.assertIn("transport_cancellation=not-proven", verifier)
+        self.assertIn("side_effect_absence=not-proven", verifier)
+        self.assertIn("transport_token_correlation=not-carried", verifier)
+        self.assertIn("semantic_initiator=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=boom-postrequest-redirect", runner)
+        self.assertIn(
+            "boom-postrequest-redirect:RaveilOwnedSmallBoomConfig", shared_runner
+        )
+        self.assertIn("d4a331e3d69e62f2", shared_runner)
+        self.assertNotEqual(BOOM_POSTREQUEST_REDIRECT_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(BOOM_POSTREQUEST_REDIRECT_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_boom_postrequest_redirect_verifier_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-BOOM-POSTREQUEST-REDIRECT-V1 event=request epoch=1 sequence=1 pc=0x80000048 address=0x80010000 rob_idx=9 ldq_idx=1 br_mask=0x1 lane=0 request_accepted=1 branch_context=1 event_source=boom-pinned",
+                "RAVEIL-BOOM-POSTREQUEST-REDIRECT-V1 event=response epoch=1 sequence=1 pc=0x80000048 address=0x80010000 rob_idx=9 ldq_idx=1 br_mask=0x1 lane=0 response_valid=1 before_redirect=1",
+                "RAVEIL-BOOM-POSTREQUEST-REDIRECT-V1 event=redirect epoch=1 sequence=1 pc=0x80000048 address=0x80010000 rob_idx=9 ldq_idx=1 br_mask=0x1 lane=0 request_seen=1 response_seen=1 branch_killed=1 commit_valid=0 arch_valid=0 promotion=blocked",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-redirect.log"
+            signature = Path(tmp) / "boom-redirect.signature"
+            signature.write_text("00000001\n682513da\n682513da\n", encoding="ascii")
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("request_accepted=1", "request_accepted=0"), 1),
+                (records.replace("branch_context=1", "branch_context=0"), 1),
+                (records.replace("response_valid=1", "response_valid=0"), 1),
+                (records.replace("before_redirect=1", "before_redirect=0"), 1),
+                (records.replace("request_seen=1", "request_seen=0"), 1),
+                (records.replace("response_seen=1", "response_seen=0"), 1),
+                (records.replace("branch_killed=1", "branch_killed=0"), 1),
+                (records.replace("commit_valid=0", "commit_valid=1"), 1),
+                (records.replace("arch_valid=0", "arch_valid=1"), 1),
+                (records.replace("promotion=blocked", "promotion=eligible"), 1),
+                (records.replace("br_mask=0x1", "br_mask=0x0"), 1),
+                (records.replace("address=0x80010000", "address=0x80010004"), 1),
+                (records.replace("pc=0x80000048", "pc=0x8000004c"), 1),
+                (records.replace("rob_idx=9", "rob_idx=10", 1), 1),
+                (records.replace("ldq_idx=1", "ldq_idx=2", 1), 1),
+                (records.replace("pc=0x80000048", "pc=0x8000004c", 1), 1),
+                (records.replace("lane=0", "lane=1", 1), 1),
+                (records + records.splitlines()[1] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(BOOM_POSTREQUEST_REDIRECT_VERIFIER),
                         str(log),
                         str(signature),
                     ],

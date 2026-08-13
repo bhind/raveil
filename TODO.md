@@ -562,11 +562,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   authorization transition with DCache request, response, and STQ clear, and
   independently observes one successful manager Put A/D pair plus readback.
   The sequence is not carried into TileLink, so complete same-token store
-  attribution remains open. Next prefer a deterministic post-request BOOM
-  negative or a fail-closed metadata handoff without promoting ROB/STQ context
-  into identity.
+  attribution remains open. One deterministic cacheable BOOM negative now
+  correlates an exact wrong-path LSU DCache request and response with a later
+  branch kill and zero matching commit. It does not exercise the uncached owned
+  manager or establish post-A cancellation. Next prefer a fail-closed metadata
+  handoff without promoting ROB/STQ/PC/source context into identity; remaining
+  replay, reset/epoch, stripped/stale metadata, and owned-path post-request
+  transport cases also stay open.
   Do not connect either local sequence to the ADR-0043 common bridge until the
-  required CPU-specific negative, store, and transport boundaries pass.
+  required CPU-specific negative, same-token store, and transport boundaries
+  pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

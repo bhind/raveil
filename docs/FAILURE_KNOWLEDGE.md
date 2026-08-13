@@ -891,6 +891,45 @@ labelled unknown.
   `docs/log/2026-08-13.md`.
 - State: corrected; fresh and cached exact runs exit 0.
 
+## BOOM uncached loads cannot supply this speculative post-request stimulus
+
+- Symptom: a wrong-path BOOM load to the owned PBUS address completed the
+  workload with zero lifecycle records, so there was no accepted request to
+  cancel or kill.
+- Cause: BOOM marks the target uncacheable, suppresses the incoming speculative
+  DCache request, and wakes that load only at the ROB/LDQ head. The older
+  unresolved branch prevents the wrong-path load from reaching that point;
+  redirect removes it first.
+- Prevention: choose the memory class from the evidence question. Use a fixed
+  cacheable scratch word for a CPU-local speculative request/kill diagnostic,
+  and state explicitly that the owned manager is not exercised.
+- Detection: require exact nonzero event cardinality together with an explicit
+  memory-class and manager marker. Treat zero events as failed stimulus, never
+  as cancellation evidence.
+- Evidence: pinned BOOM LSU source inspection and the failed uncached T-0042
+  post-request-redirect attempt recorded in `docs/log/2026-08-13.md`.
+- State: corrected for the bounded CPU-local diagnostic; owned-path post-A
+  cancellation remains open.
+
+## Address-only BOOM lifecycle probes can conflate distinct instructions
+
+- Symptom: after the intended request/response/redirect sequence, a correct-path
+  load to the same cacheable scratch address qualified while the retained
+  candidate was still live and triggered a context assertion.
+- Cause: setup, speculative, and final validation loads intentionally reuse the
+  scratch address. Address and live branch context did not uniquely select the
+  wrong-path instruction.
+- Prevention: inspect the exact ELF layout and qualify the bounded candidate by
+  instruction PC plus accepted request and branch context. Keep PC, ROB/LDQ
+  indices, branch mask, and lane as validation context, never durable identity.
+- Detection: assert the expected label address in the runner, require exact
+  event order and cardinality, and mutation-test both the PC and address
+  predicates.
+- Evidence: the T-0042 BOOM post-request-redirect feasibility runs and exact ELF
+  disassembly recorded in `docs/log/2026-08-13.md`.
+- State: corrected for the exact workload; general replay, stale context, and
+  durable transport identity remain open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

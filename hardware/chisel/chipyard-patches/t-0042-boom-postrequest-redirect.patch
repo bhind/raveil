@@ -1,0 +1,100 @@
+diff --git a/src/main/scala/lsu/lsu.scala b/src/main/scala/lsu/lsu.scala
+index 8ee25bd..0000000 100644
+--- a/src/main/scala/lsu/lsu.scala
++++ b/src/main/scala/lsu/lsu.scala
+@@ -753,0 +754,16 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++  // Raveil T-0042 / ADR-0045 bounded BOOM-local post-request redirect.
++  // The repository sequence is identity; ROB/LDQ/branch fields are context.
++  // No token is carried through DCache or TileLink.
++  // The owned MMIO target is uncached and cannot issue speculatively in BOOM;
++  // this CPU-local negative therefore uses a fixed cacheable DRAM scratch word.
++  val raveilBoomRedirectAddress = "h80010000".U(coreMaxAddrBits.W)
++  val raveilBoomRedirectExpectedPc = "h80000048".U(vaddrBitsExtended.W)
++  val raveilBoomRedirectSequence = RegInit(0.U(32.W))
++  val raveilBoomRedirectActive = RegInit(false.B)
++  val raveilBoomRedirectResponseSeen = RegInit(false.B)
++  val raveilBoomRedirectRobIdx = Reg(UInt(robAddrSz.W))
++  val raveilBoomRedirectLdqIdx = Reg(UInt(ldqAddrSz.W))
++  val raveilBoomRedirectPc = Reg(UInt(vaddrBitsExtended.W))
++  val raveilBoomRedirectBrMask = Reg(UInt(maxBrCount.W))
++  val raveilBoomRedirectLane = Reg(UInt(log2Ceil(memWidth max 2).W))
++  val raveilBoomRedirectCandidates = Wire(Vec(memWidth, Bool()))
+@@ -880,0 +897,29 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++
++    raveilBoomRedirectCandidates(w) := dmem_req_fire(w) &&
++      dmem_req(w).bits.uop.uses_ldq && !dmem_req(w).bits.is_hella &&
++      dmem_req(w).bits.addr === raveilBoomRedirectAddress &&
++      dmem_req(w).bits.uop.debug_pc === raveilBoomRedirectExpectedPc &&
++      dmem_req(w).bits.uop.br_mask =/= 0.U
++    when (raveilBoomRedirectCandidates(w)) {
++      assert(!raveilBoomRedirectActive,
++        "Raveil BOOM redirect witness accepts only one live token")
++      assert(raveilBoomRedirectSequence =/= "hffffffff".U,
++        "Raveil BOOM redirect witness sequence exhausted")
++      raveilBoomRedirectSequence := raveilBoomRedirectSequence + 1.U
++      raveilBoomRedirectActive := true.B
++      raveilBoomRedirectResponseSeen := false.B
++      raveilBoomRedirectRobIdx := dmem_req(w).bits.uop.rob_idx
++      raveilBoomRedirectLdqIdx := dmem_req(w).bits.uop.ldq_idx
++      raveilBoomRedirectPc := dmem_req(w).bits.uop.debug_pc
++      raveilBoomRedirectBrMask := dmem_req(w).bits.uop.br_mask
++      raveilBoomRedirectLane := w.U
++      printf("RAVEIL-BOOM-POSTREQUEST-REDIRECT-V1 event=request epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d request_accepted=1 branch_context=1 event_source=boom-pinned\n",
++        raveilBoomRedirectSequence + 1.U, dmem_req(w).bits.uop.debug_pc,
++        dmem_req(w).bits.addr, dmem_req(w).bits.uop.rob_idx,
++        dmem_req(w).bits.uop.ldq_idx, dmem_req(w).bits.uop.br_mask, w.U)
++    }
++    when (raveilBoomRedirectActive && dmem_req_fire(w) &&
++      dmem_req(w).bits.uop.rob_idx === raveilBoomRedirectRobIdx &&
++      !raveilBoomRedirectCandidates(w)) {
++      assert(false.B, "Raveil BOOM redirect witness request context mismatch")
++    }
+@@ -881,0 +927,2 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++  assert(PopCount(raveilBoomRedirectCandidates) <= 1.U,
++    "Raveil BOOM redirect witness saw multiple request candidates")
+@@ -1343,0 +1391,15 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++    when (raveilBoomRedirectActive && io.dmem.resp(w).valid &&
++      io.dmem.resp(w).bits.uop.rob_idx === raveilBoomRedirectRobIdx) {
++      assert(!raveilBoomRedirectResponseSeen &&
++        io.dmem.resp(w).bits.uop.uses_ldq && !io.dmem.resp(w).bits.is_hella &&
++        io.dmem.resp(w).bits.uop.ldq_idx === raveilBoomRedirectLdqIdx &&
++        io.dmem.resp(w).bits.uop.debug_pc === raveilBoomRedirectPc &&
++        io.dmem.resp(w).bits.uop.br_mask === raveilBoomRedirectBrMask &&
++        raveilBoomRedirectLane === w.U,
++        "Raveil BOOM redirect witness response context mismatch")
++      raveilBoomRedirectResponseSeen := true.B
++      printf("RAVEIL-BOOM-POSTREQUEST-REDIRECT-V1 event=response epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d response_valid=1 before_redirect=1\n",
++        raveilBoomRedirectSequence, io.dmem.resp(w).bits.uop.debug_pc,
++        raveilBoomRedirectAddress, io.dmem.resp(w).bits.uop.rob_idx,
++        io.dmem.resp(w).bits.uop.ldq_idx, io.dmem.resp(w).bits.uop.br_mask, w.U)
++    }
+@@ -1380,0 +1443,29 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++
++  val raveilBoomRedirectCommitMatches = Wire(Vec(coreWidth, Bool()))
++  for (w <- 0 until coreWidth) {
++    raveilBoomRedirectCommitMatches(w) := raveilBoomRedirectActive &&
++      io.core.commit.valids(w) &&
++      io.core.commit.uops(w).rob_idx === raveilBoomRedirectRobIdx &&
++      io.core.commit.uops(w).ldq_idx === raveilBoomRedirectLdqIdx &&
++      io.core.commit.uops(w).debug_pc === raveilBoomRedirectPc
++    when (raveilBoomRedirectCommitMatches(w)) {
++      assert(false.B, "Raveil BOOM redirect witness unexpectedly committed")
++    }
++  }
++  assert(PopCount(raveilBoomRedirectCommitMatches) === 0.U,
++    "Raveil BOOM redirect witness saw a commit outcome")
++
++  val raveilBoomRedirectKilled = raveilBoomRedirectActive &&
++    IsKilledByBranch(io.core.brupdate, raveilBoomRedirectBrMask)
++  when (raveilBoomRedirectKilled) {
++    assert(io.core.brupdate.b1.mispredict_mask =/= 0.U &&
++      raveilBoomRedirectResponseSeen,
++      "Raveil BOOM redirect witness kill preceded response")
++    printf("RAVEIL-BOOM-POSTREQUEST-REDIRECT-V1 event=redirect epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d request_seen=1 response_seen=1 branch_killed=1 commit_valid=0 arch_valid=0 promotion=blocked\n",
++      raveilBoomRedirectSequence, raveilBoomRedirectPc,
++      raveilBoomRedirectAddress, raveilBoomRedirectRobIdx,
++      raveilBoomRedirectLdqIdx, raveilBoomRedirectBrMask,
++      raveilBoomRedirectLane)
++    raveilBoomRedirectActive := false.B
++    raveilBoomRedirectResponseSeen := false.B
++  }

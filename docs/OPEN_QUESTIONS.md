@@ -106,13 +106,17 @@ resolves it.
   semantic initiator identity. A first pinned BOOM positive now correlates one
   exact LSU DCache load request, response, and architecturally valid ROB commit
   by repository sequence; ROB/LDQ indices and branch mask are context only. It
-  does not carry that sequence into TileLink or cover a BOOM negative/store
-  lifecycle. A separate BOOM negative now correlates one exact misaligned-load
+  does not carry that sequence into TileLink. A separate BOOM negative now
+  correlates one exact misaligned-load
   candidate with its LSU exception, a matching DCache request accepted after
   the exception, and later global ROB rollback state while requiring no
   matching response or architectural commit; the faulting entry is not a
-  matching rollback row. Because exception precedes request acceptance, the
-  remaining question is which fail-closed handoff can carry the BOOM-local
+  matching rollback row. Because exception precedes request acceptance, it does
+  not close post-request exception handling. A second BOOM negative now
+  correlates one cacheable wrong-path LSU DCache request and response with a
+  later branch kill and zero matching commit, but does not exercise the owned
+  PBUS manager or post-A transport. The remaining question is which fail-closed
+  handoff can carry the BOOM-local
   store sequence through DCache/TileLink to the independently observed
   owned-manager D completion without promoting ROB/STQ/source context into
   identity. The local authorization/request/response/clear trace and separate

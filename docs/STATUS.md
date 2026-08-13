@@ -522,6 +522,17 @@ completion, complete store attribution, semantic initiator identity, general
 store behavior, resource matching, OoO effects, and performance remain
 unproven.
 
+A fourth pinned BOOM diagnostic now covers one cacheable, CPU-local
+post-request redirect. The exact wrong-path `lwu` at PC `0x80000048` and DRAM
+scratch address `0x80010000` produces one accepted LSU DCache request, its
+matching response, and a later branch-mask kill with no matching architectural
+commit. The repository sequence remains identity; PC, ROB index 17, LDQ index
+0, branch mask 1, and lane 0 are bounded validation context. The owned PBUS
+manager is not exercised, no token crosses DCache or TileLink, and no
+post-TileLink-A cancellation, transport side-effect absence, semantic
+initiator, same-token manager completion, general rollback, resource matching,
+OoO effect, or performance result follows.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

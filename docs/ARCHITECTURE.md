@@ -404,6 +404,17 @@ readback Get A/D pair. These are deliberately separate ledgers: no repository
 sequence crosses DCache or TileLink, and temporal/address agreement does not
 join the manager completion to the CPU-local token or prove complete store
 attribution.
+A separate BOOM post-request redirect diagnostic is deliberately CPU-local and
+cacheable. BOOM does not issue the owned PBUS region's uncached wrong-path load
+before the older branch resolves because that load waits for ROB-head wakeup,
+so the diagnostic instead pins one wrong-path `lwu` at PC `0x80000048` and DRAM
+scratch address `0x80010000`. It allocates a repository sequence only when that
+exact LSU DCache request is accepted, retains it through the matching response,
+and then requires `IsKilledByBranch` with no matching commit. Exact PC, ROB/LDQ
+indices, branch mask, and lane qualify this bounded trace but remain context,
+not identity. The owned manager is not exercised, no sequence crosses DCache or
+TileLink, and the trace establishes neither post-A cancellation nor memory
+side-effect absence, semantic initiator identity, or general rollback.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the
