@@ -1,0 +1,103 @@
+diff --git a/src/main/scala/lsu/lsu.scala b/src/main/scala/lsu/lsu.scala
+--- a/src/main/scala/lsu/lsu.scala
++++ b/src/main/scala/lsu/lsu.scala
+@@ -750,5 +750,17 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+   io.dmem.req.valid := dmem_req.map(_.valid).reduce(_||_)
+   io.dmem.req.bits  := dmem_req
+   val dmem_req_fire = widthMap(w => dmem_req(w).valid && io.dmem.req.fire)
++  // Raveil T-0042 / ADR-0045 bounded BOOM-local load lifecycle diagnostic.
++  // The repository sequence is the identity; ROB/LDQ/branch fields are context.
++  // This token is not carried through DCache or TileLink.
++  val raveilBoomAuditAddress = "h08000100".U(coreMaxAddrBits.W)
++  val raveilBoomSequence = RegInit(0.U(32.W))
++  val raveilBoomActive = RegInit(false.B)
++  val raveilBoomResponseSeen = RegInit(false.B)
++  val raveilBoomRobIdx = Reg(UInt(robAddrSz.W))
++  val raveilBoomLdqIdx = Reg(UInt(ldqAddrSz.W))
++  val raveilBoomPc = Reg(UInt(vaddrBitsExtended.W))
++  val raveilBoomAddress = Reg(UInt(coreMaxAddrBits.W))
++  val raveilBoomRequestCandidates = Wire(Vec(memWidth, Bool()))
+
+   val s0_executing_loads = WireInit(VecInit((0 until numLdqEntries).map(x=>false.B)))
+@@ -878,5 +890,28 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+       assert(!(stq(sidx).bits.data.valid),
+         "[lsu] Incoming store is overwriting a valid data entry")
+     }
++
++    raveilBoomRequestCandidates(w) := dmem_req_fire(w) &&
++      dmem_req(w).bits.addr === raveilBoomAuditAddress &&
++      dmem_req(w).bits.uop.uses_ldq && !dmem_req(w).bits.is_hella
++    when (raveilBoomRequestCandidates(w)) {
++      assert(!raveilBoomActive,
++        "Raveil BOOM load witness accepts only one live token")
++      assert(raveilBoomSequence =/= "hffffffff".U,
++        "Raveil BOOM load witness sequence exhausted")
++      raveilBoomSequence := raveilBoomSequence + 1.U
++      raveilBoomActive := true.B
++      raveilBoomResponseSeen := false.B
++      raveilBoomRobIdx := dmem_req(w).bits.uop.rob_idx
++      raveilBoomLdqIdx := dmem_req(w).bits.uop.ldq_idx
++      raveilBoomPc := dmem_req(w).bits.uop.debug_pc
++      raveilBoomAddress := dmem_req(w).bits.addr
++      printf("RAVEIL-BOOM-LOAD-LIFECYCLE-V1 event=request epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d request_accepted=1 event_source=boom-pinned\n",
++        raveilBoomSequence + 1.U, dmem_req(w).bits.uop.debug_pc,
++        dmem_req(w).bits.addr, dmem_req(w).bits.uop.rob_idx,
++        dmem_req(w).bits.uop.ldq_idx, dmem_req(w).bits.uop.br_mask, w.U)
++    }
+   }
++  assert(PopCount(raveilBoomRequestCandidates) <= 1.U,
++    "Raveil BOOM load witness saw multiple request candidates")
+   val will_fire_stdf_incoming = io.core.fp_stdata.fire
+@@ -1341,6 +1376,22 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+         }
+       }
+     }
++    when (raveilBoomActive && io.dmem.resp(w).valid &&
++      io.dmem.resp(w).bits.uop.rob_idx === raveilBoomRobIdx) {
++      assert(io.dmem.resp(w).bits.uop.uses_ldq &&
++        !io.dmem.resp(w).bits.is_hella &&
++        io.dmem.resp(w).bits.uop.ldq_idx === raveilBoomLdqIdx &&
++        io.dmem.resp(w).bits.uop.debug_pc === raveilBoomPc,
++        "Raveil BOOM load witness response context mismatch")
++      assert(!raveilBoomResponseSeen,
++        "Raveil BOOM load witness saw a duplicate response")
++      raveilBoomResponseSeen := true.B
++      printf("RAVEIL-BOOM-LOAD-LIFECYCLE-V1 event=response epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d response_valid=1 data=0x%x\n",
++        raveilBoomSequence, io.dmem.resp(w).bits.uop.debug_pc,
++        raveilBoomAddress, io.dmem.resp(w).bits.uop.rob_idx,
++        io.dmem.resp(w).bits.uop.ldq_idx,
++        io.dmem.resp(w).bits.uop.br_mask, w.U, io.dmem.resp(w).bits.data)
++    }
+
+
+     when (dmem_resp_fired(w) && wb_forward_valid(w))
+@@ -1447,4 +1498,29 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+   //-------------------------------------------------------------
+   //-------------------------------------------------------------
+
++  val raveilBoomCommitMatches = Wire(Vec(coreWidth, Bool()))
++  for (w <- 0 until coreWidth) {
++    raveilBoomCommitMatches(w) := raveilBoomActive &&
++      io.core.commit.valids(w) &&
++      io.core.commit.uops(w).rob_idx === raveilBoomRobIdx
++    when (raveilBoomCommitMatches(w)) {
++      assert(io.core.commit.arch_valids(w) &&
++        io.core.commit.uops(w).uses_ldq &&
++        io.core.commit.uops(w).ldq_idx === raveilBoomLdqIdx &&
++        io.core.commit.uops(w).debug_pc === raveilBoomPc,
++        "Raveil BOOM load witness commit context mismatch")
++      assert(raveilBoomResponseSeen,
++        "Raveil BOOM load witness committed before response")
++      printf("RAVEIL-BOOM-LOAD-LIFECYCLE-V1 event=retire epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d commit_valid=1 arch_valid=1 promotion=eligible\n",
++        raveilBoomSequence, io.core.commit.uops(w).debug_pc,
++        raveilBoomAddress, io.core.commit.uops(w).rob_idx,
++        io.core.commit.uops(w).ldq_idx,
++        io.core.commit.uops(w).br_mask, w.U)
++      raveilBoomActive := false.B
++      raveilBoomResponseSeen := false.B
++    }
++  }
++  assert(PopCount(raveilBoomCommitMatches) <= 1.U,
++    "Raveil BOOM load witness saw duplicate commit outcomes")
++
+   var temp_stq_commit_head = stq_commit_head

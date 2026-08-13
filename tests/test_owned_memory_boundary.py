@@ -42,6 +42,22 @@ BOOM_DCACHE_ORIGIN_PATCH = (
     / "chipyard-patches"
     / "t-0042-boom-dcache-origin-hook.patch"
 )
+BOOM_LOAD_LIFECYCLE_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-load-lifecycle.patch"
+)
+BOOM_LOAD_LIFECYCLE_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_boom_load_lifecycle.S"
+)
+BOOM_LOAD_LIFECYCLE_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_boom_load_lifecycle.py"
+)
+BOOM_LOAD_LIFECYCLE_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-load-lifecycle.sh"
+)
 TLXBAR_REQUEST_DEFAULTS_PATCH = (
     ROOT
     / "hardware"
@@ -723,6 +739,69 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                     [
                         "python3",
                         str(ROCKET_EXCEPTION_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_boom_load_lifecycle_probe_is_bounded_and_non_claiming(self) -> None:
+        patch = BOOM_LOAD_LIFECYCLE_PATCH.read_text(encoding="utf-8")
+        workload = BOOM_LOAD_LIFECYCLE_WORKLOAD.read_text(encoding="utf-8")
+        verifier = BOOM_LOAD_LIFECYCLE_VERIFIER.read_text(encoding="utf-8")
+        runner = BOOM_LOAD_LIFECYCLE_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("io.dmem.req.fire", patch)
+        self.assertIn('val raveilBoomAuditAddress = "h08000100"', patch)
+        self.assertIn("io.dmem.resp(w).valid", patch)
+        self.assertIn("io.core.commit.arch_valids(w)", patch)
+        self.assertIn("repository sequence is the identity", patch)
+        self.assertIn("not carried through DCache or TileLink", patch)
+        self.assertIn("lwu     t0, 0(s0)", workload)
+        self.assertIn("transport_token_correlation=not-carried", verifier)
+        self.assertIn("semantic_initiator=not-proven", verifier)
+        self.assertIn("store_authorization=not-run", verifier)
+        self.assertIn("general_boom_lifecycle=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=boom-load-lifecycle", runner)
+        self.assertIn("boom-load-lifecycle:RaveilOwnedSmallBoomConfig", shared_runner)
+        self.assertIn("d96fa9f10ddc07c5", shared_runner)
+        self.assertNotEqual(BOOM_LOAD_LIFECYCLE_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(BOOM_LOAD_LIFECYCLE_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_boom_load_lifecycle_verifier_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-BOOM-LOAD-LIFECYCLE-V1 event=request epoch=1 sequence=1 pc=0x80000008 address=0x08000100 rob_idx=6 ldq_idx=1 br_mask=0x0 lane=0 request_accepted=1 event_source=boom-pinned",
+                "RAVEIL-BOOM-LOAD-LIFECYCLE-V1 event=response epoch=1 sequence=1 pc=0x80000008 address=0x08000100 rob_idx=6 ldq_idx=1 br_mask=0x0 lane=0 response_valid=1 data=0x682513da",
+                "RAVEIL-BOOM-LOAD-LIFECYCLE-V1 event=retire epoch=1 sequence=1 pc=0x80000008 address=0x08000100 rob_idx=6 ldq_idx=1 br_mask=0x0 lane=0 commit_valid=1 arch_valid=1 promotion=eligible",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-lifecycle.log"
+            signature = Path(tmp) / "boom-lifecycle.signature"
+            signature.write_text("00000001\n682513da\n", encoding="ascii")
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("request_accepted=1", "request_accepted=0"), 1),
+                (records.replace("response_valid=1", "response_valid=0"), 1),
+                (records.replace("arch_valid=1", "arch_valid=0"), 1),
+                (records.replace("promotion=eligible", "promotion=blocked"), 1),
+                (records.replace("rob_idx=6", "rob_idx=7", 1), 1),
+                (records.replace("ldq_idx=1", "ldq_idx=2", 1), 1),
+                (records.replace("pc=0x80000008", "pc=0x8000000c", 1), 1),
+                (records.replace("br_mask=0x0", "br_mask=0x1", 1), 1),
+                (records.replace("lane=0", "lane=1", 1), 1),
+                (records + records.splitlines()[1] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(BOOM_LOAD_LIFECYCLE_VERIFIER),
                         str(log),
                         str(signature),
                     ],

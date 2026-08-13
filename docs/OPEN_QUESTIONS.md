@@ -100,14 +100,17 @@ resolves it.
   Rocket token into TileLink. A fourth pinned run correlates one accepted
   misaligned load with its later WB exception and exact trap recovery, but does
   not observe a corresponding TileLink A or post-A rollback. The one-entry
-  observer still does not validate multi-token operation, pre-request kill,
-  post-A exception/rollback, replay, reset/epoch, durable transport-token
+  Rocket observer still does not validate multi-token operation, pre-request
+  kill, post-A exception/rollback, replay, reset/epoch, durable transport-token
   correlation, store authorization, complete owned-manager lifecycle, or
-  semantic initiator identity.
-  The remaining question is
-  whether Rocket can complete those lifecycle cases and whether the BOOM
-  ROB/LSU probe can satisfy the same fail-closed contract before normalization
-  into the ADR-0043 bridge.
+  semantic initiator identity. A first pinned BOOM positive now correlates one
+  exact LSU DCache load request, response, and architecturally valid ROB commit
+  by repository sequence; ROB/LDQ indices and branch mask are context only. It
+  does not carry that sequence into TileLink or cover a BOOM negative/store
+  lifecycle. The remaining question is which deterministic BOOM negative or
+  store-authorization boundary can next satisfy ADR-0045 without promoting
+  context fields into identity, and how the still-open Rocket cases can obtain
+  direct, non-synthetic signals before normalization into the ADR-0043 bridge.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

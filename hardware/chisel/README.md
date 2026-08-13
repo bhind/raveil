@@ -601,6 +601,23 @@ carry the Rocket token through DCache, prove a post-A exception or general
 rollback/side-effect absence, identify a semantic initiator, match resources,
 or measure performance.
 
+Run the first bounded pinned BOOM load lifecycle diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-boom-load-lifecycle.sh
+```
+
+The workload issues one `lwu` at `0x08000100`. The pinned LSU hook allocates a
+repository sequence on the accepted DCache request, correlates the matching
+DCache response by retained PC plus ROB/LDQ context, and requires an
+architecturally valid ROB commit before emitting `promotion=eligible`. The
+verifier requires exactly `request,response,retire`, the response/signature
+value match, and exact schema/cardinality. ROB/LDQ indices, branch mask, and
+lane are context rather than identity. The sequence is not carried through
+DCache or TileLink; this does not prove a semantic initiator, store
+authorization, general BOOM lifecycle, resource matching, OoO effects, or
+performance.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

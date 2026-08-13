@@ -119,8 +119,11 @@ The corrected critical path is:
    exception and exact trap recovery, while explicitly leaving post-A fate
    untested. Multi-live-token overlap, pre-request kill, post-A exception or
    rollback, replay, reset/epoch, durable DCache/TL token correlation, store
-   authorization and complete owned-D lifecycle coverage, plus the BOOM probe,
-   remain to be implemented.
+   authorization and complete owned-D lifecycle coverage remain to be
+   implemented. The first pinned BOOM positive now correlates one exact LSU
+   DCache load request, its response, and architecturally valid ROB commit by
+   repository sequence. It carries no token through DCache/TileLink and leaves
+   BOOM negative, replay, exception, reset, and store cases open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

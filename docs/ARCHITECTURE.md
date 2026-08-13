@@ -374,6 +374,17 @@ the DCache `ma.ld` indication, and `take_pc_wb` before recording
 transition only. The misaligned request is not correlated to a TileLink A beat,
 the token is not transported through DCache, and no post-A rollback or general
 side-effect invariant follows.
+A first pinned BOOM lifecycle hook is similarly narrower than the full
+ADR-0045 ledger. It allocates a repository sequence when the exact
+`0x08000100` load request fires at the LSU DCache interface, retains the
+request PC plus ROB/LDQ context, matches the returned DCache response, and
+requires `commit.valids` together with `commit.arch_valids` before promotion.
+Sequence is the local identity; ROB index, LDQ index, branch mask, and lane are
+context only. The positive diagnostic is single-live and fail-closed on
+overlap, sequence exhaustion, response-context mismatch, duplicate response,
+commit-before-response, and duplicate commit. It does not carry its sequence
+through DCache or TileLink, authorize a store, identify a semantic ELF
+initiator, or establish general BOOM replay/kill/exception/reset behavior.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

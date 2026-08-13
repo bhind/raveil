@@ -476,7 +476,19 @@ not a post-TileLink-A exception, does not carry a token through DCache or
 TileLink, and does not prove general rollback, side-effect absence, semantic
 initiator identity, resource matching, or performance. Pre-request kill,
 post-A exception/rollback, replay, reset/epoch, multi-live-token operation,
-and the BOOM lifecycle probe remain open.
+and the remaining BOOM lifecycle cases remain open.
+
+The first pinned BOOM lifecycle diagnostic now covers one positive load at the
+BOOM LSU boundary. For the exact `0x08000100` load, a repository-owned sequence
+correlates one accepted LSU DCache request, its matching DCache response, and
+one architecturally valid ROB commit. The bounded trace reports PC
+`0x80000010`, ROB index 4, LDQ index 0, response/signature value `0xdaab9780`,
+and `promotion=eligible`. Sequence is the identity; ROB/LDQ indices, branch
+mask, and lane remain context only. No token is carried through DCache or
+TileLink, and this does not prove target-ELF semantic initiator identity, store
+authorization, replay/kill/exception/reset behavior, complete BOOM lifecycle,
+resource matching, OoO effects, or performance. T-0042 remains open for those
+boundaries and the remaining Rocket lifecycle cases.
 
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,

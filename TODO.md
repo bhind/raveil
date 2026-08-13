@@ -545,11 +545,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   not post-TileLink-A rollback evidence. ADR-0045 therefore remains open for
   multi-token overlap, pre-request kill, post-A exception/rollback, replay,
   reset/epoch, durable DCache/TL token correlation, store authorization, and
-  complete owned-manager lifecycle coverage. Next
-  exercise those Rocket lifecycle cases, then implement the BOOM ROB/LSU
-  diagnostic under the same normalized lifecycle contract.
-  Do not connect either token to the ADR-0043 common bridge until both
-  CPU-specific diagnostics pass.
+  complete owned-manager lifecycle coverage. A first pinned BOOM positive now
+  correlates one exact LSU DCache load request, matching response, and
+  architecturally valid ROB commit by repository sequence; ROB/LDQ indices and
+  branch mask remain context, and no token crosses DCache or TileLink. The
+  existing Rocket two-attempt trace is not a replay witness because every
+  directly surveyed replay/nack qualifier was zero. Next add a non-duplicative
+  BOOM negative or store-authorization boundary, while keeping Rocket replay
+  and post-A cases open until a deterministic direct signal path exists.
+  Do not connect either local sequence to the ADR-0043 common bridge until the
+  required CPU-specific negative, store, and transport boundaries pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any

@@ -799,6 +799,42 @@ labelled unknown.
 - State: corrected for the exact two-retry surrounding-load trace; this does
   not establish general replay support or a durable token.
 
+## A repeated DCache request is not a core replay witness by itself
+
+- Symptom: each aligned load in the Rocket post-request-exception workload
+  fired the same request twice, making that stable trace look like a minimal
+  replay candidate.
+- Cause: an exploratory pinned-source hook found every directly surveyed core
+  replay, DCache nack, and replay-next qualifier low on both second attempts.
+  Attempt cardinality alone did not identify the cause of refiring.
+- Prevention: require an exact upstream replay/nack qualifier correlated with
+  the retained token, PC, address, and attempt before describing a pinned trace
+  as replay. Keep retry and architectural replay terminology separate.
+- Detection: instrument the direct pinned signals first and treat an all-zero
+  result as a candidate no-go, not proof that replay never occurs.
+- Evidence: T-0042 exploratory Rocket replay trace and
+  `docs/log/2026-08-13.md`.
+- State: the exploratory hook was removed; replay remains open under ADR-0045.
+
+## A TileLink denied response need not become a precise CPU exception
+
+- Symptom: manager-side denied/error injection appeared to offer a small
+  post-A exception workload for the pinned Rocket.
+- Cause: the current owned manager does not advertise `mayDenyGet`, and the
+  pinned Rocket DCache reports uncached denied/corrupt D responses through its
+  bus-error output rather than `s2_xcpt.ae`, which is the Rocket WB access-
+  exception input.
+- Prevention: survey manager capabilities, TileLink monitors, DCache response
+  handling, and core exception wiring before designing an error stimulus. Do
+  not infer a precise architectural exception from a manager D error.
+- Detection: require a legal monitor-clean A/D path and an existing precise
+  request-identity-to-WB-exception path; otherwise classify a manager-only
+  injection as no-go.
+- Evidence: T-0042 pinned `RaveilOwnedTLMemory`, DCache, and RocketCore source
+  inspection recorded in `docs/log/2026-08-13.md`.
+- State: manager-only injection was rejected. Adding precise DCache/Core error
+  semantics would be a larger mechanism and needs an ADR decision before use.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:
