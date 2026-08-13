@@ -74,6 +74,22 @@ BOOM_MISALIGNED_ROLLBACK_VERIFIER = (
 BOOM_MISALIGNED_ROLLBACK_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-boom-misaligned-rollback.sh"
 )
+BOOM_STORE_AUTHORIZATION_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-store-authorization.patch"
+)
+BOOM_STORE_AUTHORIZATION_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_boom_store_authorization.S"
+)
+BOOM_STORE_AUTHORIZATION_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_boom_store_authorization.py"
+)
+BOOM_STORE_AUTHORIZATION_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-store-authorization.sh"
+)
 TLXBAR_REQUEST_DEFAULTS_PATCH = (
     ROOT
     / "hardware"
@@ -908,6 +924,88 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                     [
                         "python3",
                         str(BOOM_MISALIGNED_ROLLBACK_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_boom_store_authorization_is_bounded_and_non_claiming(self) -> None:
+        patch = BOOM_STORE_AUTHORIZATION_PATCH.read_text(encoding="utf-8")
+        workload = BOOM_STORE_AUTHORIZATION_WORKLOAD.read_text(encoding="utf-8")
+        verifier = BOOM_STORE_AUTHORIZATION_VERIFIER.read_text(encoding="utf-8")
+        runner = BOOM_STORE_AUTHORIZATION_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        origin = DCACHE_ORIGIN_TAGGER.read_text(encoding="utf-8")
+        self.assertIn("io.core.commit.arch_valids(w)", patch)
+        self.assertIn("stq(idx).bits.committed := true.B", patch)
+        self.assertIn("stq(idx).valid && stq(idx).bits.addr.valid", patch)
+        self.assertIn("dmem_req_fire(w)", patch)
+        self.assertIn("io.dmem.resp(w).bits.uop.uses_stq", patch)
+        self.assertIn("when (clear_store)", patch)
+        self.assertIn("repository sequence is the identity", patch)
+        self.assertIn("not carried through DCache or TileLink", patch)
+        self.assertIn("sw      t0, 0(s0)", workload)
+        self.assertIn("lwu     t1, 0(s0)", workload)
+        self.assertIn("boom_local_request_response_clear=observed", verifier)
+        self.assertIn("manager_put_a_d=independently-observed", verifier)
+        self.assertIn("transport_token_correlation=not-carried", verifier)
+        self.assertIn("store_attribution=not-proven", verifier)
+        self.assertIn("semantic_initiator=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertIn("class RaveilOwnedSmallBoomFateConfig", origin)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=boom-store-authorization", runner)
+        self.assertIn(
+            "boom-store-authorization:RaveilOwnedSmallBoomFateConfig",
+            shared_runner,
+        )
+        self.assertIn("beaf195dfed44573", shared_runner)
+        self.assertNotEqual(BOOM_STORE_AUTHORIZATION_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(BOOM_STORE_AUTHORIZATION_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_boom_store_authorization_verifier_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=authorize epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 commit_valid=1 arch_valid=1 committed_write=1 event_source=boom-pinned",
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=request epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 request_accepted=1 store=1",
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=response epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 response_valid=1 uses_stq=1 succeeded_write=1",
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=clear epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 request_seen=1 response_seen=1 stq_succeeded=1 promotion=eligible-local",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=1 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=1 source=8304 opcode=0 size=2 denied=0 corrupt=0 request_opcode=0 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=2 address=0x08000100 source=8288 opcode=4 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=2 source=8288 opcode=1 size=2 denied=0 corrupt=0 request_opcode=4 phase=0",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-store.log"
+            signature = Path(tmp) / "boom-store.signature"
+            signature.write_text("00000001\n51a7c0de\n51a7c0de\n", encoding="ascii")
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("arch_valid=1", "arch_valid=0"), 1),
+                (records.replace("committed_write=1", "committed_write=0"), 1),
+                (records.replace("request_accepted=1", "request_accepted=0"), 1),
+                (records.replace("response_valid=1", "response_valid=0"), 1),
+                (records.replace("stq_succeeded=1", "stq_succeeded=0"), 1),
+                (records.replace("promotion=eligible-local", "promotion=blocked"), 1),
+                (records.replace("rob_idx=7", "rob_idx=8", 1), 1),
+                (records.replace("stq_idx=1", "stq_idx=2", 1), 1),
+                (records.replace("pc=0x80000010", "pc=0x80000014", 1), 1),
+                (records.replace("br_mask=0x0", "br_mask=0x1", 1), 1),
+                (records.replace("lane=0", "lane=1", 1), 1),
+                (records.replace("source=8304", "source=8320", 1), 1),
+                (records.replace("opcode=0 size=2 dcache_origin", "opcode=3 size=2 dcache_origin"), 1),
+                (records.replace("denied=0", "denied=1", 1), 1),
+                (records + records.splitlines()[2] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(BOOM_STORE_AUTHORIZATION_VERIFIER),
                         str(log),
                         str(signature),
                     ],

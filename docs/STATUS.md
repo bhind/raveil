@@ -506,6 +506,22 @@ sequence is not carried through DCache or TileLink; general rollback, semantic
 initiator identity, store authorization, replay/reset behavior, resource
 matching, OoO effects, and performance remain unproven.
 
+A third pinned BOOM diagnostic now covers one exact store-authorization path.
+At PC `0x8000001c`, a repository-local sequence correlates architecturally
+valid ROB retirement and the matching STQ committed transition with one
+accepted DCache store request, one store response/succeeded transition, and
+the later STQ clear. The exact context is ROB index 7, STQ index 3, branch mask
+0, and lane 0. Independently, the owned-manager audit records one successful
+`PutFullData`/`AccessAck` pair at `0x08000100` with source 8304 and one
+successful readback `Get`/`AccessAckData` pair with source 8288; the software
+readback equals `0x51a7c0de`. This is bounded `rtl-simulation-functional`
+evidence for a BOOM-local authorization/request/response/clear correlation and
+a separate manager-local A/D source correlation. The repository sequence is
+not carried through DCache or TileLink, so same-token owned-manager D
+completion, complete store attribution, semantic initiator identity, general
+store behavior, resource matching, OoO effects, and performance remain
+unproven.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

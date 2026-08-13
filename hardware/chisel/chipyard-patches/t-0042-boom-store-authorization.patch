@@ -1,0 +1,143 @@
+diff --git a/src/main/scala/lsu/lsu.scala b/src/main/scala/lsu/lsu.scala
+--- a/src/main/scala/lsu/lsu.scala
++++ b/src/main/scala/lsu/lsu.scala
+@@ -750,6 +750,20 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+   io.dmem.req.valid := dmem_req.map(_.valid).reduce(_||_)
+   io.dmem.req.bits  := dmem_req
+   val dmem_req_fire = widthMap(w => dmem_req(w).valid && io.dmem.req.fire)
++  // Raveil T-0042 / ADR-0045 bounded BOOM-local store authorization diagnostic.
++  // The repository sequence is the identity; ROB/STQ/branch fields are context.
++  // This token is not carried through DCache or TileLink.
++  val raveilBoomStoreAuditAddress = "h08000100".U(coreMaxAddrBits.W)
++  val raveilBoomStoreSequence = RegInit(0.U(32.W))
++  val raveilBoomStoreActive = RegInit(false.B)
++  val raveilBoomStoreRequestSeen = RegInit(false.B)
++  val raveilBoomStoreResponseSeen = RegInit(false.B)
++  val raveilBoomStoreRobIdx = Reg(UInt(robAddrSz.W))
++  val raveilBoomStoreStqIdx = Reg(UInt(stqAddrSz.W))
++  val raveilBoomStorePc = Reg(UInt(vaddrBitsExtended.W))
++  val raveilBoomStoreAddress = Reg(UInt(coreMaxAddrBits.W))
++  val raveilBoomStoreBrMask = Reg(UInt(maxBrCount.W))
++  val raveilBoomStoreLane = Reg(UInt(8.W))
+
+   val s0_executing_loads = WireInit(VecInit((0 until numLdqEntries).map(x=>false.B)))
+
+@@ -878,6 +892,35 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+       assert(!(stq(sidx).bits.data.valid),
+         "[lsu] Incoming store is overwriting a valid data entry")
+     }
++
++    val raveilBoomStoreRequestMatch = raveilBoomStoreActive &&
++      dmem_req_fire(w) && dmem_req(w).bits.uop.uses_stq &&
++      !dmem_req(w).bits.is_hella &&
++      dmem_req(w).bits.addr === raveilBoomStoreAddress &&
++      dmem_req(w).bits.uop.rob_idx === raveilBoomStoreRobIdx &&
++      dmem_req(w).bits.uop.stq_idx === raveilBoomStoreStqIdx &&
++      dmem_req(w).bits.uop.debug_pc === raveilBoomStorePc
++    when (raveilBoomStoreRequestMatch) {
++      assert(!raveilBoomStoreRequestSeen,
++        "Raveil BOOM store witness saw a duplicate request")
++      assert(dmem_req(w).bits.uop.br_mask === raveilBoomStoreBrMask &&
++        raveilBoomStoreLane === w.U,
++        "Raveil BOOM store witness request context mismatch")
++      raveilBoomStoreRequestSeen := true.B
++      printf("RAVEIL-BOOM-STORE-AUTH-V1 event=request epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d stq_idx=%d br_mask=0x%x lane=%d request_accepted=1 store=1\n",
++        raveilBoomStoreSequence, dmem_req(w).bits.uop.debug_pc,
++        dmem_req(w).bits.addr, dmem_req(w).bits.uop.rob_idx,
++        dmem_req(w).bits.uop.stq_idx, dmem_req(w).bits.uop.br_mask, w.U)
++    }
++    when (raveilBoomStoreActive && dmem_req_fire(w) &&
++      dmem_req(w).bits.uop.rob_idx === raveilBoomStoreRobIdx &&
++      !raveilBoomStoreRequestMatch) {
++      assert(false.B, "Raveil BOOM store witness request context mismatch")
++    }
+   }
++  assert(PopCount((0 until memWidth).map(w => raveilBoomStoreActive &&
++    dmem_req_fire(w) && dmem_req(w).bits.uop.uses_stq &&
++    dmem_req(w).bits.addr === raveilBoomStoreAddress)) <= 1.U,
++    "Raveil BOOM store witness saw multiple request candidates")
+   val will_fire_stdf_incoming = io.core.fp_stdata.fire
+   require (xLen >= fLen) // for correct SDQ size
+@@ -1330,6 +1374,25 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+       }
+         .elsewhen (io.dmem.resp(w).bits.uop.uses_stq)
+       {
++        when (raveilBoomStoreActive &&
++          io.dmem.resp(w).bits.uop.rob_idx === raveilBoomStoreRobIdx) {
++          assert(raveilBoomStoreRequestSeen,
++            "Raveil BOOM store witness responded before request")
++          assert(!raveilBoomStoreResponseSeen,
++            "Raveil BOOM store witness saw a duplicate response")
++          assert(!io.dmem.resp(w).bits.is_hella &&
++            io.dmem.resp(w).bits.uop.stq_idx === raveilBoomStoreStqIdx &&
++            io.dmem.resp(w).bits.uop.debug_pc === raveilBoomStorePc &&
++            io.dmem.resp(w).bits.uop.br_mask === raveilBoomStoreBrMask &&
++            raveilBoomStoreLane === w.U,
++            "Raveil BOOM store witness response context mismatch")
++          raveilBoomStoreResponseSeen := true.B
++          printf("RAVEIL-BOOM-STORE-AUTH-V1 event=response epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d stq_idx=%d br_mask=0x%x lane=%d response_valid=1 uses_stq=1 succeeded_write=1\n",
++            raveilBoomStoreSequence, io.dmem.resp(w).bits.uop.debug_pc,
++            raveilBoomStoreAddress, io.dmem.resp(w).bits.uop.rob_idx,
++            io.dmem.resp(w).bits.uop.stq_idx,
++            io.dmem.resp(w).bits.uop.br_mask, w.U)
++        }
+         assert(!io.dmem.resp(w).bits.is_hella)
+         stq(io.dmem.resp(w).bits.uop.stq_idx).bits.succeeded := true.B
+         when (io.dmem.resp(w).bits.uop.is_amo) {
+@@ -1454,5 +1518,32 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+     val idx = Mux(commit_store, temp_stq_commit_head, temp_ldq_head)
+     when (commit_store)
+     {
++      when (stq(idx).valid && stq(idx).bits.addr.valid &&
++        stq(idx).bits.addr.bits === raveilBoomStoreAuditAddress) {
++        assert(!raveilBoomStoreActive,
++          "Raveil BOOM store witness accepts only one live token")
++        assert(raveilBoomStoreSequence =/= "hffffffff".U,
++          "Raveil BOOM store witness sequence exhausted")
++        assert(io.core.commit.arch_valids(w) && stq(idx).valid &&
++          stq(idx).bits.addr.valid && stq(idx).bits.data.valid &&
++          stq(idx).bits.uop.rob_idx === io.core.commit.uops(w).rob_idx &&
++          stq(idx).bits.uop.stq_idx === io.core.commit.uops(w).stq_idx &&
++          stq(idx).bits.uop.debug_pc === io.core.commit.uops(w).debug_pc,
++          "Raveil BOOM store witness authorization context mismatch")
++        raveilBoomStoreSequence := raveilBoomStoreSequence + 1.U
++        raveilBoomStoreActive := true.B
++        raveilBoomStoreRequestSeen := false.B
++        raveilBoomStoreResponseSeen := false.B
++        raveilBoomStoreRobIdx := stq(idx).bits.uop.rob_idx
++        raveilBoomStoreStqIdx := stq(idx).bits.uop.stq_idx
++        raveilBoomStorePc := stq(idx).bits.uop.debug_pc
++        raveilBoomStoreAddress := stq(idx).bits.addr.bits
++        raveilBoomStoreBrMask := stq(idx).bits.uop.br_mask
++        raveilBoomStoreLane := w.U
++        printf("RAVEIL-BOOM-STORE-AUTH-V1 event=authorize epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d stq_idx=%d br_mask=0x%x lane=%d commit_valid=1 arch_valid=1 committed_write=1 event_source=boom-pinned\n",
++          raveilBoomStoreSequence + 1.U, stq(idx).bits.uop.debug_pc,
++          stq(idx).bits.addr.bits, stq(idx).bits.uop.rob_idx,
++          stq(idx).bits.uop.stq_idx, stq(idx).bits.uop.br_mask, w.U)
++      }
+       stq(idx).bits.committed := true.B
+     } .elsewhen (commit_load) {
+@@ -1505,6 +1595,23 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+
+   when (clear_store)
+   {
++    when (raveilBoomStoreActive &&
++      stq(stq_head).bits.uop.rob_idx === raveilBoomStoreRobIdx) {
++      assert(raveilBoomStoreRequestSeen && raveilBoomStoreResponseSeen &&
++        stq(stq_head).bits.committed && stq(stq_head).bits.succeeded &&
++        stq_head === raveilBoomStoreStqIdx &&
++        stq(stq_head).bits.uop.debug_pc === raveilBoomStorePc &&
++        stq(stq_head).bits.addr.bits === raveilBoomStoreAddress &&
++        stq(stq_head).bits.uop.br_mask === raveilBoomStoreBrMask,
++        "Raveil BOOM store witness clear context mismatch")
++      printf("RAVEIL-BOOM-STORE-AUTH-V1 event=clear epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d stq_idx=%d br_mask=0x%x lane=%d request_seen=1 response_seen=1 stq_succeeded=1 promotion=eligible-local\n",
++        raveilBoomStoreSequence, stq(stq_head).bits.uop.debug_pc,
++        stq(stq_head).bits.addr.bits, stq(stq_head).bits.uop.rob_idx,
++        stq_head, stq(stq_head).bits.uop.br_mask, raveilBoomStoreLane)
++      raveilBoomStoreActive := false.B
++      raveilBoomStoreRequestSeen := false.B
++      raveilBoomStoreResponseSeen := false.B
++    }
+     stq(stq_head).valid           := false.B
+     stq(stq_head).bits.addr.valid := false.B
+     stq(stq_head).bits.data.valid := false.B

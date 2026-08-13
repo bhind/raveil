@@ -395,6 +395,15 @@ This is an exact exception-before-request ordering diagnostic only: because the
 exception precedes request acceptance, it neither establishes post-request
 exception/cancellation nor transports the sequence into DCache, TileLink, or
 the owned manager.
+A separate BOOM store diagnostic allocates its local sequence at architectural
+ROB retirement while the matching STQ entry is authorized. It retains ROB/STQ,
+PC, address, branch-mask, and lane context through the accepted DCache store
+request, store response/succeeded transition, and STQ clear. The optional
+owned-manager audit independently records the exact-address Put A/D pair and a
+readback Get A/D pair. These are deliberately separate ledgers: no repository
+sequence crosses DCache or TileLink, and temporal/address agreement does not
+join the manager completion to the CPU-local token or prove complete store
+attribution.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

@@ -130,7 +130,12 @@ The corrected critical path is:
    ROB rollback state, with no matching response or architectural commit. The
    faulting entry is not a rollback-row match. Because exception precedes
    request acceptance, post-request BOOM exception/cancellation and general
-   rollback remain open.
+   rollback remain open. A third pinned BOOM diagnostic now observes the exact
+   local ROB/STQ store-authorization transition through DCache request,
+   response, and STQ clear, while a separate manager audit observes the exact
+   Put A/D pair and readback. Since the local sequence is not transported,
+   same-token owned-manager D completion and complete store attribution remain
+   open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

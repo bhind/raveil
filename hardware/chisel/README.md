@@ -639,6 +639,24 @@ general side-effect absence, general rollback, semantic initiator identity,
 store authorization, resource matching, OoO effects, and performance are not
 proven.
 
+Run the bounded pinned BOOM store-authorization diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-boom-store-authorization.sh
+```
+
+The pinned LSU hook correlates one architecturally valid ROB store retirement
+and matching STQ committed transition with one accepted DCache store request,
+one store response/succeeded transition, and STQ clear. The exact workload
+stores and reads back `0x51a7c0de` at `0x08000100`. A separate manager audit
+requires one `PutFullData`/`AccessAck` A/D pair followed by one
+`Get`/`AccessAckData` readback pair, with each pair retaining its own TileLink
+source. The repository sequence is not carried through DCache or TileLink;
+therefore the manager D is independently observed, not proven to complete the
+same token. Complete store attribution, semantic initiator identity, general
+store behavior, resource matching, OoO effects, and performance are not
+proven.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

@@ -873,6 +873,24 @@ labelled unknown.
 - State: corrected for the exact bounded workload; general stale-response and
   index-wrap handling remain open.
 
+## A stale queue payload must not qualify a new lifecycle candidate
+
+- Symptom: the first complete BOOM store trace passed its intended four events,
+  then a later unrelated store commit stopped on an authorization-context
+  assertion.
+- Cause: the candidate predicate compared only the STQ address payload. BOOM
+  retains stale address bits after clearing an entry, so an invalid entry could
+  still equal the audit address when the commit head advanced.
+- Prevention: require both queue-entry validity and address validity before
+  reading payload fields as candidate context. Keep exact mode patches inside
+  their own apply/check branches.
+- Detection: run the complete workload past the intended terminal event under
+  assertions, then require a successful process exit and exact event
+  cardinality; do not accept an apparently complete prefix.
+- Evidence: T-0042 BOOM store-authorization fresh RTL attempts recorded in
+  `docs/log/2026-08-13.md`.
+- State: corrected; fresh and cached exact runs exit 0.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

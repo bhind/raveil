@@ -544,8 +544,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   before/after readback. This is Rocket-local post-request exception evidence,
   not post-TileLink-A rollback evidence. ADR-0045 therefore remains open for
   multi-token overlap, pre-request kill, post-A exception/rollback, replay,
-  reset/epoch, durable DCache/TL token correlation, store authorization, and
-  complete owned-manager lifecycle coverage. A first pinned BOOM positive now
+  reset/epoch, durable DCache/TL token correlation, same-token owned-manager D
+  completion, and complete owned-manager lifecycle coverage. A first pinned
+  BOOM positive now
   correlates one exact LSU DCache load request, matching response, and
   architecturally valid ROB commit by repository sequence; ROB/LDQ indices and
   branch mask remain context, and no token crosses DCache or TileLink. The
@@ -557,8 +558,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   architectural commits. The exception precedes request acceptance and the
   faulting entry is not present in a rollback row, so this does not close the
   still-required post-request BOOM exception/cancellation or general rollback
-  boundary. Next prefer a deterministic post-request BOOM negative or the
-  store-authorization path without promoting ROB/LDQ context into identity.
+  boundary. A pinned BOOM store diagnostic now correlates the local ROB/STQ
+  authorization transition with DCache request, response, and STQ clear, and
+  independently observes one successful manager Put A/D pair plus readback.
+  The sequence is not carried into TileLink, so complete same-token store
+  attribution remains open. Next prefer a deterministic post-request BOOM
+  negative or a fail-closed metadata handoff without promoting ROB/STQ context
+  into identity.
   Do not connect either local sequence to the ADR-0043 common bridge until the
   required CPU-specific negative, store, and transport boundaries pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and

@@ -94,6 +94,14 @@ class RaveilOwnedSmallBoomConfig extends Config(
   new chipyard.SmallBoomConfig
 )
 
+class RaveilOwnedSmallBoomFateConfig extends Config(
+  new WithRaveilOwnedBuildSystem ++
+  new WithRaveilOwnedMemorySourceRangeAndFateAudit(8288, 8320, 0x08000100L) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.SmallBoomConfig
+)
+
 /** Drives one bounded 8-bit Debug SBA write through the exported DMI port. */
 class RaveilDebugSBADriver extends Module {
   val io = IO(new Bundle {

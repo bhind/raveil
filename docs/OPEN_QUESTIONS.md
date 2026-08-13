@@ -112,9 +112,12 @@ resolves it.
   the exception, and later global ROB rollback state while requiring no
   matching response or architectural commit; the faulting entry is not a
   matching rollback row. Because exception precedes request acceptance, the
-  remaining question is which deterministic post-request BOOM negative or
-  store-authorization boundary can next satisfy ADR-0045 without promoting
-  context fields into identity, and how the still-open Rocket cases can obtain
+  remaining question is which fail-closed handoff can carry the BOOM-local
+  store sequence through DCache/TileLink to the independently observed
+  owned-manager D completion without promoting ROB/STQ/source context into
+  identity. The local authorization/request/response/clear trace and separate
+  manager Put A/D trace are now available, but complete same-token store
+  attribution is not. Also open is how the still-open Rocket cases can obtain
   direct, non-synthetic signals before normalization into the ADR-0043 bridge.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
