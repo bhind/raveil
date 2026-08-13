@@ -615,7 +615,11 @@ labelled unknown.
 - Detection: require an end-to-end verifier to compare the CPU-minted token
   with the manager's exact A acceptance and retained D completion. Compilation
   and local producer assertions alone are insufficient; invalid/zero at the
-  consumer is a failed handoff, not an untagged success.
+  consumer is a failed handoff when a valid producer is expected, not an
+  untagged success. A configuration that deliberately omits the producer is a
+  separate negative and must instead require default-invalid metadata,
+  unknown classification, and a completed ordinary transaction without
+  semantic promotion.
 - Evidence: T-0042 `t-0042-boom-store-token-handoff.patch`, the failed first
   BOOM token simulation, and `docs/log/2026-08-14.md`.
 - State: corrected for the bounded BOOM store path by copying all three fields

@@ -121,9 +121,13 @@ resolves it.
   `{valid, epoch, sequence}` through DCache/TileLink and retains the same token
   from owned-manager Put A to D without promoting ROB/STQ/source context. Still
   open are stale/duplicate/exhausted token rejection, reset with outstanding
-  work, replay/source reuse/backpressure, stripped/default-invalid metadata,
+  work, replay/source reuse/backpressure, stripping after a valid producer,
+  malformed nonzero metadata,
   untagged loader/FESVR/Debug traffic, BOOM load and Rocket parity, CPU-side D
-  consumption, and the boundary that may drive `InitiatorCpu`. Also open is how
+  consumption, and the boundary that may drive `InitiatorCpu`. One negotiated
+  absent-producer negative now observes invalid/zero at manager A/D and blocks
+  attribution without blocking the store; it does not answer those remaining
+  questions. Also open is how
   the remaining Rocket cases obtain direct, non-synthetic signals before
   normalization into the ADR-0043 bridge.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only

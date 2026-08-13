@@ -571,8 +571,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   manager Put A, and observes it unchanged at the matching D completion.
   ROB/STQ/PC/address/branch/source remain validation or transport context, not
   identity. This closes only the immediate same-token BOOM-store transport
-  candidate. Next implement real epoch/reset/stale/duplicate/exhaustion and
-  stripped/default-invalid live negatives, replay/source-reuse/backpressure,
+  candidate. One live negative now advertises the fields but omits the BOOM
+  producer and observes explicit invalid/zero metadata at manager A/D while
+  the store transaction and readback still complete; attribution remains
+  unknown and is not promoted. Next implement real epoch/reset/stale/duplicate/exhaustion and
+  stripped-after-valid or malformed-nonzero negatives,
+  replay/source-reuse/backpressure,
   untagged loader/FESVR/Debug exclusion, BOOM load and Rocket parity, and
   owned-path post-A rollback before any semantic promotion.
   Do not connect either local sequence to the ADR-0043 common bridge until the

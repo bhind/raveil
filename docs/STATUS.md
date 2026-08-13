@@ -551,6 +551,21 @@ Debug negatives, CPU-side consumption of manager D, common-bridge promotion,
 semantic initiator identity, resources, OoO effects, and performance remain
 unproven.
 
+A sixth pinned BOOM diagnostic now exercises the negotiated default-invalid
+case live. It advertises the three token fields at the BOOM DCache client but
+deliberately omits LSU token minting and I/O-MSHR token assignment. The same
+committed store still completes its owned-manager `PutFullData`/`AccessAck`
+pair and software readback, while the manager observes `{valid=0, epoch=0,
+sequence=0}` unchanged at A and D and classifies both records unknown. This is
+bounded `rtl-simulation-functional` evidence that one absent producer becomes
+the explicit negotiated default and does not promote semantic attribution,
+without denying the underlying transaction. It does not test stripping after a
+valid producer, malformed nonzero metadata, stale epochs, duplicate/exhausted
+tokens, reset with work outstanding, replay/source reuse/backpressure, untagged
+loader/FESVR/Debug traffic, BOOM loads, Rocket parity, CPU-side D consumption,
+common-bridge promotion, semantic initiator identity, resources, OoO effects,
+or performance.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

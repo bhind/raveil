@@ -427,6 +427,14 @@ invalid, and no result feeds the ADR-0043 bridge or `InitiatorCpu`. The current
 epoch is the fixed diagnostic value 1, so this mechanism is not yet the
 reset/redirect-aware epoch policy of ADR-0045. ROB/STQ/PC/address/branch and TL
 source remain local validation or transport context only.
+A companion negative configuration retains only DCache request-field
+advertisement and the Xbar's aligned explicit defaults; it omits LSU token
+members/minting and I/O-MSHR token assignments. For one committed owned-region
+store, manager A and D therefore observe the negotiated
+`{valid=0, epoch=0, sequence=0}` value and keep classification unknown while
+the transaction and readback complete. This is fail-closed semantic
+attribution, not access denial, and it does not model a field stripped after a
+valid producer or authorize the default as CPU identity.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

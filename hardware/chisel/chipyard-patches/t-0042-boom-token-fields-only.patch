@@ -1,0 +1,11 @@
+diff --git a/src/main/scala/lsu/dcache.scala b/src/main/scala/lsu/dcache.scala
+index 9f326f5..0000000 100644
+--- a/src/main/scala/lsu/dcache.scala
++++ b/src/main/scala/lsu/dcache.scala
+@@ -398 +398,5 @@ class BoomNonBlockingDCache(staticIdForMetadataUseOnly: Int)(implicit p: Paramet
+-    minLatency = 1)))
++    minLatency = 1,
++    requestFields = Seq(
++      RaveilCpuTokenValidField(),
++      RaveilCpuTokenEpochField(),
++      RaveilCpuTokenSequenceField()))))

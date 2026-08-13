@@ -97,6 +97,13 @@ BOOM_STORE_TOKEN_HANDOFF_PATCH = (
     / "chipyard-patches"
     / "t-0042-boom-store-token-handoff.patch"
 )
+BOOM_TOKEN_FIELDS_ONLY_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-token-fields-only.patch"
+)
 TL_TOKEN_METADATA_PATCH = (
     ROOT
     / "hardware"
@@ -109,6 +116,18 @@ BOOM_STORE_TOKEN_HANDOFF_VERIFIER = (
 )
 BOOM_STORE_TOKEN_HANDOFF_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-boom-store-token-handoff.sh"
+)
+BOOM_STORE_TOKEN_DEFAULT_INVALID_VERIFIER = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "verify_owned_boom_store_token_default_invalid.py"
+)
+BOOM_STORE_TOKEN_DEFAULT_INVALID_RUNNER = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "run-owned-boom-store-token-default-invalid.sh"
 )
 BOOM_POSTREQUEST_REDIRECT_PATCH = (
     ROOT
@@ -1140,6 +1159,88 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                         str(BOOM_STORE_TOKEN_HANDOFF_VERIFIER),
                         str(log),
                         str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_boom_store_token_default_invalid_is_negotiated_and_fail_closed(self) -> None:
+        patch = BOOM_TOKEN_FIELDS_ONLY_PATCH.read_text(encoding="utf-8")
+        verifier = BOOM_STORE_TOKEN_DEFAULT_INVALID_VERIFIER.read_text(
+            encoding="utf-8"
+        )
+        runner = BOOM_STORE_TOKEN_DEFAULT_INVALID_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("requestFields = Seq(", patch)
+        self.assertIn("RaveilCpuTokenValidField()", patch)
+        self.assertNotIn("raveilTokenValid :=", patch)
+        self.assertNotIn("req.raveilToken", patch)
+        self.assertIn("token_classification=unknown-default-invalid", verifier)
+        self.assertIn("semantic_attribution=not-promoted", verifier)
+        self.assertIn("semantic_initiator=not-promoted", verifier)
+        self.assertIn(
+            "RAVEIL_OWNED_CPU_MODE=boom-store-token-default-invalid", runner
+        )
+        self.assertIn(
+            "boom-store-token-default-invalid:RaveilOwnedSmallBoomTokenConfig",
+            shared_runner,
+        )
+        self.assertIn("t-0042-boom-token-fields-only.patch", shared_runner)
+        self.assertIn("producer=absent-negotiated-default", shared_runner)
+        self.assertIn("metadata_default_invalid=observed", shared_runner)
+        self.assertIn("token_classification=unknown-default-invalid", shared_runner)
+        self.assertIn("semantic_attribution=not-promoted", shared_runner)
+        self.assertIn("manager_transaction=completed", shared_runner)
+        self.assertIn("store_side_effect_readback=observed", shared_runner)
+        self.assertIn('printf \'%s\\n\' "$cpu_mode" "$applied_patch_manifest"', shared_runner)
+        self.assertIn("stripped_after_valid=not-proven", shared_runner)
+        self.assertNotEqual(
+            BOOM_STORE_TOKEN_DEFAULT_INVALID_RUNNER.stat().st_mode & 0o111, 0
+        )
+        self.assertNotEqual(
+            BOOM_STORE_TOKEN_DEFAULT_INVALID_VERIFIER.stat().st_mode & 0o111, 0
+        )
+
+    def test_boom_store_token_default_invalid_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=1 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-TOKEN-V1 event=a valid=0 epoch=0 sequence=0 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 classification=0",
+                "RAVEIL-OWNED-TL-TOKEN-V1 event=d valid=0 epoch=0 sequence=0 source=8304 opcode=0 size=2 denied=0 corrupt=0 classification=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=1 source=8304 opcode=0 size=2 denied=0 corrupt=0 request_opcode=0 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=2 address=0x08000100 source=8288 opcode=4 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=2 source=8288 opcode=1 size=2 denied=0 corrupt=0 request_opcode=4 phase=0",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-store-token-default-invalid.log"
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("event=a valid=0", "event=a valid=1"), 1),
+                (records.replace("event=d valid=0", "event=d valid=1"), 1),
+                (records.replace("RAVEIL-OWNED-TL-TOKEN-V1 event=a", "RAVEIL-REMOVED event=a"), 1),
+                (records.replace("epoch=0", "epoch=1", 1), 1),
+                (records.replace("sequence=0", "sequence=1", 1), 1),
+                (records.replace("classification=0", "classification=1", 1), 1),
+                (records.replace("event=a valid=0 epoch=0 sequence=0 address=0x08000100 source=8304 opcode=0", "event=a valid=0 epoch=0 sequence=0 address=0x08000100 source=8304 opcode=1"), 1),
+                (records.replace("event=a valid=0 epoch=0 sequence=0 address=0x08000100 source=8304 opcode=0 size=2", "event=a valid=0 epoch=0 sequence=0 address=0x08000100 source=8304 opcode=0 size=3"), 1),
+                (records.replace("address=0x08000100 source=8304", "address=0x08000104 source=8304", 1), 1),
+                (records.replace("source=8304 opcode=0", "source=8320 opcode=0", 1), 1),
+                (records.replace("event=d valid=0 epoch=0 sequence=0 source=8304", "event=d valid=0 epoch=0 sequence=0 source=8305"), 1),
+                (records.replace("dcache_origin=1", "dcache_origin=0", 1), 1),
+                (records.replace("denied=0", "denied=1", 1), 1),
+                (records.replace("event=d valid=0 epoch=0 sequence=0 source=8304 opcode=0 size=2 denied=0 corrupt=0", "event=d valid=0 epoch=0 sequence=0 source=8304 opcode=0 size=2 denied=0 corrupt=1"), 1),
+                (records.replace("RAVEIL-OWNED-TL-TOKEN-V1 event=d", "RAVEIL-REMOVED event=d"), 1),
+                (records + records.splitlines()[1] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(BOOM_STORE_TOKEN_DEFAULT_INVALID_VERIFIER),
+                        str(log),
                     ],
                     check=False,
                     capture_output=True,

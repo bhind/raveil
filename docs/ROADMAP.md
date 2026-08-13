@@ -147,6 +147,13 @@ The corrected critical path is:
    it does not promote ROB/STQ/PC/source context, implement reset/stale/replay
    policy, establish Rocket parity, or connect semantic initiator authority to
    the common bridge.
+   A sixth pinned BOOM diagnostic negotiates the same request fields while
+   deliberately omitting the LSU/I/O-MSHR producer. The committed store and
+   readback complete, but manager A/D both retain invalid/zero metadata and
+   classification remains unknown. This closes one absent-producer default
+   case only; stripping after a valid producer, malformed nonzero metadata,
+   epoch/reset/stale/duplicate/exhaustion, replay/source reuse/backpressure,
+   non-CPU traffic, parity, and semantic promotion remain open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

@@ -676,6 +676,23 @@ rollback, loader/FESVR/Debug exclusion, CPU-side D consumption, semantic
 initiator promotion, resource matching, OoO effects, and performance remain
 unproven.
 
+Run the bounded negotiated default-invalid BOOM store negative with:
+
+```sh
+./hardware/chisel/run-owned-boom-store-token-default-invalid.sh
+```
+
+This configuration advertises the token request fields at the BOOM DCache
+client but deliberately omits LSU token production and I/O-MSHR assignments.
+The Xbar supplies each field's explicit invalid/zero default. The verifier
+requires the same committed store, manager Put A/D, and readback to complete,
+while both token records remain `{valid=0, epoch=0, sequence=0}` and
+classification remains unknown. This is a live fail-closed attribution
+negative, not an access-denial test. It does not prove stripping after a valid
+producer, malformed nonzero handling, epoch/reset/stale/duplicate behavior,
+replay/source reuse/backpressure, non-CPU exclusion, semantic promotion,
+resource matching, OoO effects, or performance.
+
 Run the bounded pinned BOOM post-request redirect diagnostic with:
 
 ```sh
