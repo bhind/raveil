@@ -415,6 +415,18 @@ indices, branch mask, and lane qualify this bounded trace but remain context,
 not identity. The owned manager is not exercised, no sequence crosses DCache or
 TileLink, and the trace establishes neither post-A cancellation nor memory
 side-effect absence, semantic initiator identity, or general rollback.
+A separate BOOM store-token diagnostic extends only the already-authorized
+store path. The LSU mints `{valid, epoch, sequence}` while ROB retirement and
+the matching STQ commit authorize the exact request; DCache pipeline and I/O
+MSHR fields preserve it into negotiated TileLink A metadata. Cached refill and
+prefetch producers explicitly emit invalid/zero metadata. At the owned target,
+the exact Put A acceptance latches the token into the target's existing
+single-outstanding response state, so the subsequent D record is correlated
+without treating TileLink source as identity. Missing or zero fields classify
+invalid, and no result feeds the ADR-0043 bridge or `InitiatorCpu`. The current
+epoch is the fixed diagnostic value 1, so this mechanism is not yet the
+reset/redirect-aware epoch policy of ADR-0045. ROB/STQ/PC/address/branch and TL
+source remain local validation or transport context only.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

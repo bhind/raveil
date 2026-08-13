@@ -1,0 +1,19 @@
+diff --git a/src/main/scala/tilelink/Bundles.scala b/src/main/scala/tilelink/Bundles.scala
+index 5bb53df..3d55d3b 100644
+--- a/src/main/scala/tilelink/Bundles.scala
++++ b/src/main/scala/tilelink/Bundles.scala
+@@ -13,0 +14,14 @@ abstract class TLBundleBase(val params: TLBundleParameters) extends Bundle
++// Raveil T-0042 / ADR-0045 bounded CPU-owned diagnostic identity. These are
++// control metadata fields: adapters must preserve them unchanged, while an
++// absent producer negotiates them to the explicit invalid/zero defaults.
++case object RaveilCpuTokenValid extends ControlKey[Bool]("raveil_cpu_token_valid")
++case object RaveilCpuTokenEpoch extends ControlKey[UInt]("raveil_cpu_token_epoch")
++case object RaveilCpuTokenSequence extends ControlKey[UInt]("raveil_cpu_token_sequence")
++
++case class RaveilCpuTokenValidField()
++    extends SimpleBundleField[Bool](RaveilCpuTokenValid)(Output(Bool()), false.B)
++case class RaveilCpuTokenEpochField()
++    extends SimpleBundleField[UInt](RaveilCpuTokenEpoch)(Output(UInt(16.W)), 0.U)
++case class RaveilCpuTokenSequenceField()
++    extends SimpleBundleField[UInt](RaveilCpuTokenSequence)(Output(UInt(32.W)), 0.U)
++

@@ -140,6 +140,13 @@ The corrected critical path is:
    correlates accepted LSU DCache request, response, and later branch kill while
    forbidding architectural commit. It does not exercise the uncached owned
    manager, carry a token to TileLink, or prove post-A cancellation.
+   A fifth pinned BOOM diagnostic carries only the local store's
+   `{valid, epoch, sequence}` through the DCache and uncached TileLink request,
+   then retains the same token from the exact owned-manager Put A acceptance to
+   its D completion. This is one fixed-epoch, single-store transport witness;
+   it does not promote ROB/STQ/PC/source context, implement reset/stale/replay
+   policy, establish Rocket parity, or connect semantic initiator authority to
+   the common bridge.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

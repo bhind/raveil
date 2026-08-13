@@ -657,6 +657,25 @@ same token. Complete store attribution, semantic initiator identity, general
 store behavior, resource matching, OoO effects, and performance are not
 proven.
 
+Run the bounded BOOM store-token handoff diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-boom-store-token-handoff.sh
+```
+
+This uses the same exact committed store but carries only repository-owned
+`{valid, epoch, sequence}` fields through the BOOM DCache request, I/O MSHR,
+and negotiated TileLink A metadata. The owned manager latches the fields on
+the exact Put A acceptance and retains them to D. The verifier requires one
+BOOM-local authorization/request/response/clear sequence, one identical token
+at manager A/D, the independent manager Put/Get A/D ledger, and successful
+software readback. Absent producers default invalid/zero and mutation tests
+reject malformed or inconsistent records. Epoch 1 is fixed for this diagnostic;
+reset/stale/replay/multi-live behavior, BOOM loads, Rocket parity, post-A
+rollback, loader/FESVR/Debug exclusion, CPU-side D consumption, semantic
+initiator promotion, resource matching, OoO effects, and performance remain
+unproven.
+
 Run the bounded pinned BOOM post-request redirect diagnostic with:
 
 ```sh

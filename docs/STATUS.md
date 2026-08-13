@@ -533,6 +533,24 @@ post-TileLink-A cancellation, transport side-effect absence, semantic
 initiator, same-token manager completion, general rollback, resource matching,
 OoO effect, or performance result follows.
 
+A fifth pinned BOOM diagnostic now carries the repository-owned token for the
+exact committed store at PC `0x8000001c` across the BOOM DCache request and
+uncached TileLink A metadata. The owned manager latches `{valid=1, epoch=1,
+sequence=1}` with the exact `PutFullData` acceptance at `0x08000100`, retains
+it across backpressure, and emits the same token with the successful
+`AccessAck` D completion and source 8304. The BOOM-local authorization,
+request, response, and STQ-clear ledger uses the same epoch/sequence, and
+software readback remains `0x51a7c0de`. Absent producers default the negotiated
+fields to invalid/zero, malformed fields classify invalid, and verifier
+mutations reject missing, altered, duplicated, denied, or source-mismatched
+records. This is bounded `rtl-simulation-functional` transport-correlation
+evidence for one pinned BOOM store only. Epoch 1 is diagnostic and fixed;
+reset/redirect advancement, stale/duplicate/exhaustion behavior, replay,
+multi-live tokens, BOOM loads, Rocket parity, post-A rollback, loader/FESVR/
+Debug negatives, CPU-side consumption of manager D, common-bridge promotion,
+semantic initiator identity, resources, OoO effects, and performance remain
+unproven.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

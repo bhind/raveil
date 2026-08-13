@@ -22,6 +22,7 @@ EXPECTED = {
         "configs": (
             "RaveilOwnedSmallBoomConfig",
             "RaveilOwnedSmallBoomFateConfig",
+            "RaveilOwnedSmallBoomTokenConfig",
         ),
         "input": (259, 260),
         "expanded": (8288, 8320),

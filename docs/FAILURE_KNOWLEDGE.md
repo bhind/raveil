@@ -599,6 +599,29 @@ labelled unknown.
 - State: corrected for the pinned diagnostic path. Target-ELF semantic
   initiator identity and loader/debug negative coverage remain open.
 
+## Extending a request Bundle does not extend partial pipeline assignments
+
+- Symptom: the BOOM LSU asserted token `{valid=1, epoch=1, sequence=1}` on its
+  accepted store request, but the first owned-manager trace received the
+  negotiated TileLink fields as invalid/zero.
+- Cause: `BoomDCacheReq` gained the token fields and the I/O MSHR copied them to
+  TileLink, but the intervening DCache MSHR request was initialized with
+  `DontCare` and assigned selected legacy members individually. The new fields
+  therefore never crossed the `s2_req` to MSHR boundary.
+- Prevention: when extending a Bundle that traverses partial member
+  assignments, audit every register, wire, arbiter, and request conversion;
+  explicitly copy authority-bearing fields and explicitly invalidate producers
+  that must not carry them.
+- Detection: require an end-to-end verifier to compare the CPU-minted token
+  with the manager's exact A acceptance and retained D completion. Compilation
+  and local producer assertions alone are insufficient; invalid/zero at the
+  consumer is a failed handoff, not an untagged success.
+- Evidence: T-0042 `t-0042-boom-store-token-handoff.patch`, the failed first
+  BOOM token simulation, and `docs/log/2026-08-14.md`.
+- State: corrected for the bounded BOOM store path by copying all three fields
+  from `s2_req` into the MSHR request. Replay, reset/epoch, other request classes,
+  and general multi-live behavior remain open.
+
 ## ELF segment count is not transport request count
 
 - Symptom: the first dedicated four-byte loader probe expected one non-origin

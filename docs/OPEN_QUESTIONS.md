@@ -115,14 +115,17 @@ resolves it.
   not close post-request exception handling. A second BOOM negative now
   correlates one cacheable wrong-path LSU DCache request and response with a
   later branch kill and zero matching commit, but does not exercise the owned
-  PBUS manager or post-A transport. The remaining question is which fail-closed
-  handoff can carry the BOOM-local
-  store sequence through DCache/TileLink to the independently observed
-  owned-manager D completion without promoting ROB/STQ/source context into
-  identity. The local authorization/request/response/clear trace and separate
-  manager Put A/D trace are now available, but complete same-token store
-  attribution is not. Also open is how the still-open Rocket cases can obtain
-  direct, non-synthetic signals before normalization into the ADR-0043 bridge.
+  PBUS manager or post-A transport. The remaining question is which
+  epoch/reset-aware authority can safely promote the now-observed BOOM-local
+  store token transport. One fixed-epoch diagnostic carries
+  `{valid, epoch, sequence}` through DCache/TileLink and retains the same token
+  from owned-manager Put A to D without promoting ROB/STQ/source context. Still
+  open are stale/duplicate/exhausted token rejection, reset with outstanding
+  work, replay/source reuse/backpressure, stripped/default-invalid metadata,
+  untagged loader/FESVR/Debug traffic, BOOM load and Rocket parity, CPU-side D
+  consumption, and the boundary that may drive `InitiatorCpu`. Also open is how
+  the remaining Rocket cases obtain direct, non-synthetic signals before
+  normalization into the ADR-0043 bridge.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

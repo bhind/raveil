@@ -1,0 +1,69 @@
+diff --git a/src/main/scala/lsu/dcache.scala b/src/main/scala/lsu/dcache.scala
+index 9f326f5..7e571ff 100644
+--- a/src/main/scala/lsu/dcache.scala
++++ b/src/main/scala/lsu/dcache.scala
+@@ -398 +398,5 @@ class BoomNonBlockingDCache(staticIdForMetadataUseOnly: Int)(implicit p: Paramet
+-    minLatency = 1)))
++    minLatency = 1,
++    requestFields = Seq(
++      RaveilCpuTokenValidField(),
++      RaveilCpuTokenEpochField(),
++      RaveilCpuTokenSequenceField()))))
+@@ -768,0 +773,3 @@ class BoomNonBlockingDCacheModule(outer: BoomNonBlockingDCache) extends LazyModu
++    mshrs.io.req(w).bits.raveilTokenValid := s2_req(w).raveilTokenValid
++    mshrs.io.req(w).bits.raveilTokenEpoch := s2_req(w).raveilTokenEpoch
++    mshrs.io.req(w).bits.raveilTokenSequence := s2_req(w).raveilTokenSequence
+diff --git a/src/main/scala/lsu/lsu.scala b/src/main/scala/lsu/lsu.scala
+index c9046cf..6b9f0b8 100644
+--- a/src/main/scala/lsu/lsu.scala
++++ b/src/main/scala/lsu/lsu.scala
+@@ -70,0 +71,5 @@ class BoomDCacheReq(implicit p: Parameters) extends BoomBundle()(p)
++  // Raveil T-0042 / ADR-0045 diagnostic identity. These fields are minted by
++  // the CPU and must default invalid for every non-owned or untracked request.
++  val raveilTokenValid = Bool()
++  val raveilTokenEpoch = UInt(16.W)
++  val raveilTokenSequence = UInt(32.W)
+@@ -756 +761 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+-  // This token is not carried through DCache or TileLink.
++  // The follow-on handoff patch carries only epoch/sequence through DCache/TL.
+@@ -777,0 +783,3 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++    dmem_req(w).bits.raveilTokenValid := false.B
++    dmem_req(w).bits.raveilTokenEpoch := 0.U
++    dmem_req(w).bits.raveilTokenSequence := 0.U
+@@ -802,0 +811,9 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++      val raveilBoomStoreTokenMatch = raveilBoomStoreActive &&
++        stq_commit_e.bits.addr.bits === raveilBoomStoreAddress &&
++        stq_commit_e.bits.uop.rob_idx === raveilBoomStoreRobIdx &&
++        stq_commit_e.bits.uop.stq_idx === raveilBoomStoreStqIdx &&
++        stq_commit_e.bits.uop.debug_pc === raveilBoomStorePc
++      dmem_req(w).bits.raveilTokenValid := raveilBoomStoreTokenMatch
++      dmem_req(w).bits.raveilTokenEpoch := Mux(raveilBoomStoreTokenMatch, 1.U, 0.U)
++      dmem_req(w).bits.raveilTokenSequence := Mux(
++        raveilBoomStoreTokenMatch, raveilBoomStoreSequence, 0.U)
+@@ -908,0 +926,4 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
++      assert(dmem_req(w).bits.raveilTokenValid &&
++        dmem_req(w).bits.raveilTokenEpoch === 1.U &&
++        dmem_req(w).bits.raveilTokenSequence === raveilBoomStoreSequence,
++        "Raveil BOOM store witness request token mismatch")
+diff --git a/src/main/scala/lsu/mshrs.scala b/src/main/scala/lsu/mshrs.scala
+index 88bf519..43c5ef1 100644
+--- a/src/main/scala/lsu/mshrs.scala
++++ b/src/main/scala/lsu/mshrs.scala
+@@ -399,0 +400,6 @@ class BoomMSHR(implicit edge: TLEdgeOut, p: Parameters) extends BoomModule()(p)
++
++  // Cached refills and prefetches never carry a semantic token in this
++  // bounded BOOM store diagnostic.
++  io.mem_acquire.bits.user(RaveilCpuTokenValid) := false.B
++  io.mem_acquire.bits.user(RaveilCpuTokenEpoch) := 0.U
++  io.mem_acquire.bits.user(RaveilCpuTokenSequence) := 0.U
+@@ -457,0 +464,10 @@ class BoomIOMSHR(id: Int)(implicit edge: TLEdgeOut, p: Parameters) extends BoomM
++  io.mem_access.bits.user(RaveilCpuTokenValid) := req.raveilTokenValid
++  io.mem_access.bits.user(RaveilCpuTokenEpoch) := req.raveilTokenEpoch
++  io.mem_access.bits.user(RaveilCpuTokenSequence) := req.raveilTokenSequence
++
++  when (state =/= s_idle && req.raveilTokenValid) {
++    assert(req.raveilTokenEpoch =/= 0.U && req.raveilTokenSequence =/= 0.U,
++      "Raveil BOOM token metadata is malformed")
++    assert(!req.is_hella && isWrite(req.uop.mem_cmd),
++      "Raveil BOOM token metadata appeared on a non-store request")
++  }

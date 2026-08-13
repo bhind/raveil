@@ -90,6 +90,26 @@ BOOM_STORE_AUTHORIZATION_VERIFIER = (
 BOOM_STORE_AUTHORIZATION_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-boom-store-authorization.sh"
 )
+BOOM_STORE_TOKEN_HANDOFF_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-store-token-handoff.patch"
+)
+TL_TOKEN_METADATA_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-tl-token-metadata.patch"
+)
+BOOM_STORE_TOKEN_HANDOFF_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_boom_store_token_handoff.py"
+)
+BOOM_STORE_TOKEN_HANDOFF_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-store-token-handoff.sh"
+)
 BOOM_POSTREQUEST_REDIRECT_PATCH = (
     ROOT
     / "hardware"
@@ -1031,6 +1051,102 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, expected_returncode, result.stderr)
 
+    def test_boom_store_token_handoff_is_cpu_owned_and_fail_closed(self) -> None:
+        boom_patch = BOOM_STORE_TOKEN_HANDOFF_PATCH.read_text(encoding="utf-8")
+        tl_patch = TL_TOKEN_METADATA_PATCH.read_text(encoding="utf-8")
+        overlay = CPU_OVERLAY.read_text(encoding="utf-8")
+        origin = DCACHE_ORIGIN_TAGGER.read_text(encoding="utf-8")
+        verifier = BOOM_STORE_TOKEN_HANDOFF_VERIFIER.read_text(encoding="utf-8")
+        runner = BOOM_STORE_TOKEN_HANDOFF_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("val raveilTokenValid = Bool()", boom_patch)
+        self.assertIn("val raveilTokenEpoch = UInt(16.W)", boom_patch)
+        self.assertIn("val raveilTokenSequence = UInt(32.W)", boom_patch)
+        self.assertIn("RaveilCpuTokenValidField()", boom_patch)
+        self.assertIn("req.raveilTokenSequence", boom_patch)
+        self.assertIn(
+            "mshrs.io.req(w).bits.raveilTokenSequence := "
+            "s2_req(w).raveilTokenSequence",
+            boom_patch,
+        )
+        self.assertIn("Cached refills and prefetches never carry", boom_patch)
+        self.assertIn("ControlKey[Bool]", tl_patch)
+        self.assertIn("false.B", tl_patch)
+        self.assertIn("Output(UInt(16.W)), 0.U", tl_patch)
+        self.assertIn("Output(UInt(32.W)), 0.U", tl_patch)
+        self.assertIn("tokenAuditAddress", overlay)
+        self.assertIn("tokenWellFormed", overlay)
+        self.assertIn("RAVEIL-OWNED-TL-TOKEN-V1 event=a", overlay)
+        self.assertIn("RAVEIL-OWNED-TL-TOKEN-V1 event=d", overlay)
+        self.assertIn("class RaveilOwnedSmallBoomTokenConfig", origin)
+        self.assertIn("transport_token_correlation=same-token-observed", verifier)
+        self.assertIn("semantic_initiator=not-promoted", verifier)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=boom-store-token-handoff", runner)
+        self.assertIn(
+            "boom-store-token-handoff:RaveilOwnedSmallBoomTokenConfig",
+            shared_runner,
+        )
+        self.assertIn(
+            "RaveilOwnedSmallBoomTokenConfig",
+            CPU_SOURCE_MAP_VERIFIER.read_text(encoding="utf-8"),
+        )
+        self.assertIn("boom-store-token-handoff-build-v4", runner)
+        self.assertNotEqual(BOOM_STORE_TOKEN_HANDOFF_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(BOOM_STORE_TOKEN_HANDOFF_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_boom_store_token_handoff_verifier_rejects_identity_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=authorize epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 commit_valid=1 arch_valid=1 committed_write=1 event_source=boom-pinned",
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=request epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 request_accepted=1 store=1",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=1 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-TOKEN-V1 event=a valid=1 epoch=1 sequence=1 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 classification=1",
+                "RAVEIL-OWNED-TL-TOKEN-V1 event=d valid=1 epoch=1 sequence=1 source=8304 opcode=0 size=2 denied=0 corrupt=0 classification=1",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=1 source=8304 opcode=0 size=2 denied=0 corrupt=0 request_opcode=0 phase=0",
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=response epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 response_valid=1 uses_stq=1 succeeded_write=1",
+                "RAVEIL-BOOM-STORE-AUTH-V1 event=clear epoch=1 sequence=1 pc=0x80000010 address=0x08000100 rob_idx=7 stq_idx=1 br_mask=0x0 lane=0 request_seen=1 response_seen=1 stq_succeeded=1 promotion=eligible-local",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=2 address=0x08000100 source=8288 opcode=4 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=2 source=8288 opcode=1 size=2 denied=0 corrupt=0 request_opcode=4 phase=0",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-store-token.log"
+            signature = Path(tmp) / "boom-store-token.signature"
+            signature.write_text("00000001\n51a7c0de\n51a7c0de\n", encoding="ascii")
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("event=a valid=1", "event=a valid=0"), 1),
+                (records.replace("event=d valid=1", "event=d valid=0"), 1),
+                (records.replace("event=a valid=1 epoch=1", "event=a valid=1 epoch=2"), 1),
+                (records.replace("event=d valid=1 epoch=1", "event=d valid=1 epoch=2"), 1),
+                (records.replace("event=a valid=1 epoch=1 sequence=1", "event=a valid=1 epoch=1 sequence=2"), 1),
+                (records.replace("event=d valid=1 epoch=1 sequence=1", "event=d valid=1 epoch=1 sequence=2"), 1),
+                (records.replace("classification=1", "classification=0", 1), 1),
+                (records.replace("dcache_origin=1", "dcache_origin=0", 1), 1),
+                (records.replace("source=8304 opcode=0", "source=8320 opcode=0", 1), 1),
+                (records.replace("address=0x08000100 source=8304 opcode=0", "address=0x08000104 source=8304 opcode=0", 1), 1),
+                (records.replace("event=d valid=1 epoch=1 sequence=1 source=8304", "event=d valid=1 epoch=1 sequence=1 source=8305"), 1),
+                (records.replace("manager_sequence=1", "manager_sequence=3", 1), 1),
+                (records.replace("denied=0", "denied=1", 1), 1),
+                (records.replace("RAVEIL-BOOM-STORE-AUTH-V1 event=response", "RAVEIL-REMOVED event=response"), 1),
+                (records.replace("RAVEIL-OWNED-TL-TOKEN-V1 event=d", "RAVEIL-REMOVED event=d"), 1),
+                (records + records.splitlines()[3] + "\n", 1),
+                (records + records.splitlines()[4] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(BOOM_STORE_TOKEN_HANDOFF_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
     def test_boom_postrequest_redirect_is_bounded_and_non_claiming(self) -> None:
         patch = BOOM_POSTREQUEST_REDIRECT_PATCH.read_text(encoding="utf-8")
         workload = BOOM_POSTREQUEST_REDIRECT_WORKLOAD.read_text(encoding="utf-8")
@@ -1181,7 +1297,8 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("Connectable.waiveUnmatched", tagger)
         self.assertIn("not identify an instruction, PC, ELF", tagger)
         self.assertIn("tl.a.bits.user.lift(RaveilDCacheOrigin)", overlay)
-        self.assertIn("requestKeys = Seq(RaveilDCacheOrigin)", overlay)
+        self.assertIn("requestKeys = Seq(", overlay)
+        self.assertIn("RaveilDCacheOrigin,", overlay)
         self.assertIn("pinned, ephemeral TLXbar patch", tagger)
         self.assertIn("responseDcacheOrigin := dcacheOriginRequest", overlay)
         self.assertIn(

@@ -565,10 +565,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   attribution remains open. One deterministic cacheable BOOM negative now
   correlates an exact wrong-path LSU DCache request and response with a later
   branch kill and zero matching commit. It does not exercise the uncached owned
-  manager or establish post-A cancellation. Next prefer a fail-closed metadata
-  handoff without promoting ROB/STQ/PC/source context into identity; remaining
-  replay, reset/epoch, stripped/stale metadata, and owned-path post-request
-  transport cases also stay open.
+  manager or establish post-A cancellation. One bounded BOOM-store diagnostic
+  now carries only `{valid, epoch, sequence}` from the already-authorized LSU
+  request through DCache/TileLink, latches that identity on the exact owned
+  manager Put A, and observes it unchanged at the matching D completion.
+  ROB/STQ/PC/address/branch/source remain validation or transport context, not
+  identity. This closes only the immediate same-token BOOM-store transport
+  candidate. Next implement real epoch/reset/stale/duplicate/exhaustion and
+  stripped/default-invalid live negatives, replay/source-reuse/backpressure,
+  untagged loader/FESVR/Debug exclusion, BOOM load and Rocket parity, and
+  owned-path post-A rollback before any semantic promotion.
   Do not connect either local sequence to the ADR-0043 common bridge until the
   required CPU-specific negative, same-token store, and transport boundaries
   pass.

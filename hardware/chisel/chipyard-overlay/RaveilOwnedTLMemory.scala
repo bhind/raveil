@@ -17,6 +17,7 @@ case class RaveilOwnedMemoryParams(
   expectedClientSourceStart: Int = 0,
   expectedClientSourceEnd: Int = 1,
   fateAuditAddress: Option[BigInt] = None,
+  tokenAuditAddress: Option[BigInt] = None,
   // The first CPU adapter deliberately uses the uncached peripheral path so
   // mapped accesses are intended to reach the owned manager. CPU execution is
   // still unverified. Moving this boundary to a matched local-memory resource
@@ -68,6 +69,10 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     require(address >= params.base && address < params.base + params.size)
     require(address % beatBytes == 0)
   }
+  params.tokenAuditAddress.foreach { address =>
+    require(address >= params.base && address < params.base + params.size)
+    require(address % beatBytes == 0)
+  }
 
   private val words = (params.size / beatBytes).toInt
   private val device = new SimpleDevice(
@@ -92,7 +97,11 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     )),
     beatBytes = beatBytes,
     minLatency = 1,
-    requestKeys = Seq(RaveilDCacheOrigin)
+    requestKeys = Seq(
+      RaveilDCacheOrigin,
+      RaveilCpuTokenValid,
+      RaveilCpuTokenEpoch,
+      RaveilCpuTokenSequence)
   )))
 
   lazy val module = new LazyModuleImp(this) {
@@ -115,6 +124,10 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responseFateAudit = RegInit(false.B)
     val responseFateAuditSequence = RegInit(0.U(16.W))
     val responseFateAuditOpcode = RegInit(0.U(tl.a.bits.opcode.getWidth.W))
+    val responseTokenAudit = RegInit(false.B)
+    val responseTokenValid = RegInit(false.B)
+    val responseTokenEpoch = RegInit(0.U(16.W))
+    val responseTokenSequence = RegInit(0.U(32.W))
 
     val phase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val acceptedCount = RegInit(0.U(32.W))
@@ -223,6 +236,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseExpectedClient := expectedClientRequest
       responseDcacheOrigin := dcacheOriginRequest
       responseFateAudit := false.B
+      responseTokenAudit := false.B
       params.fateAuditAddress.foreach { address =>
         when(requestAddress === address.U) {
           assert(fateAuditNextSequence =/= "hffff".U,
@@ -235,6 +249,23 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
             fateAuditNextSequence, requestAddress, tl.a.bits.source,
             tl.a.bits.opcode, tl.a.bits.size, dcacheOriginRequest,
             expectedClientRequest, phase)
+        }
+      }
+      params.tokenAuditAddress.foreach { address =>
+        val tokenValid = tl.a.bits.user(RaveilCpuTokenValid)
+        val tokenEpoch = tl.a.bits.user(RaveilCpuTokenEpoch)
+        val tokenSequence = tl.a.bits.user(RaveilCpuTokenSequence)
+        val tokenWellFormed = tokenValid && tokenEpoch =/= 0.U &&
+          tokenSequence =/= 0.U
+        when(dataRequest && put && requestAddress === address.U) {
+          responseTokenAudit := true.B
+          responseTokenValid := tokenWellFormed
+          responseTokenEpoch := tokenEpoch
+          responseTokenSequence := tokenSequence
+          printf("RAVEIL-OWNED-TL-TOKEN-V1 event=a valid=%d epoch=%d sequence=%d address=0x%x source=%d opcode=%d size=%d dcache_origin=%d classification=%d\n",
+            tokenWellFormed, tokenEpoch, tokenSequence, requestAddress,
+            tl.a.bits.source, tl.a.bits.opcode, tl.a.bits.size,
+            dcacheOriginRequest, Mux(tokenWellFormed, 1.U, 0.U))
         }
       }
       when(controlRequest && get) {
@@ -291,6 +322,14 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseHeldData := freshResponseData
     }
     when(tl.d.fire) {
+      when(responseTokenAudit) {
+        printf("RAVEIL-OWNED-TL-TOKEN-V1 event=d valid=%d epoch=%d sequence=%d source=%d opcode=%d size=%d denied=%d corrupt=%d classification=%d\n",
+          responseTokenValid, responseTokenEpoch, responseTokenSequence,
+          tl.d.bits.source, tl.d.bits.opcode, tl.d.bits.size,
+          tl.d.bits.denied, tl.d.bits.corrupt,
+          Mux(responseTokenValid && !tl.d.bits.denied && !tl.d.bits.corrupt,
+            1.U, 0.U))
+      }
       when(responseFateAudit) {
         printf("RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=%d source=%d opcode=%d size=%d denied=%d corrupt=%d request_opcode=%d phase=%d\n",
           responseFateAuditSequence, tl.d.bits.source, tl.d.bits.opcode,
@@ -298,6 +337,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           responseFateAuditOpcode, responsePhase)
       }
       responseFateAudit := false.B
+      responseTokenAudit := false.B
       responseHeld := false.B
       busy := false.B
       when(responseIsData && !responseError) {
@@ -388,5 +428,18 @@ class WithRaveilOwnedMemorySourceRangeAndFateAudit(
     expectedClientSourceStart = start,
     expectedClientSourceEnd = end,
     fateAuditAddress = Some(auditAddress)
+  ))
+})
+
+class WithRaveilOwnedMemorySourceRangeAndTokenAudit(
+    start: Int,
+    end: Int,
+    auditAddress: BigInt)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    fateAuditAddress = Some(auditAddress),
+    tokenAuditAddress = Some(auditAddress)
   ))
 })
