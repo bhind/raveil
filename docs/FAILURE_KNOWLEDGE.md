@@ -835,6 +835,44 @@ labelled unknown.
 - State: manager-only injection was rejected. Adding precise DCache/Core error
   semantics would be a larger mechanism and needs an ADR decision before use.
 
+## Mode-specific patches must not fall through into a neighboring mode
+
+- Symptom: the first BOOM misaligned-rollback build applied its own LSU patch,
+  then stopped fail closed while attempting to apply the BOOM load-lifecycle
+  patch to the same source.
+- Cause: the shared runner selected the new patch in one branch but left the
+  neighboring lifecycle patch application outside its matching mode branch.
+- Prevention: keep `apply --check` and `apply` together inside each exact mode
+  branch, and give an incomplete source cache a new dedicated volume name.
+- Detection: require the mode/config/volume tuple, exact ordered patch set,
+  and post-patch source hash before building or reusing a ready marker.
+- Evidence: T-0042 BOOM misaligned-rollback runner's initial fail-closed build
+  and the corrected dedicated `build-v2` run recorded in
+  `docs/log/2026-08-13.md`.
+- State: corrected; the unrelated long-running Docker workload and prior
+  incomplete cache were not stopped or deleted.
+
+## A BOOM ROB index alone is not lifecycle identity
+
+- Symptom: the first later-request guard for the BOOM misaligned-load probe
+  stopped on a request that matched only the retained ROB index, leaving the
+  event's relationship to the retained context ambiguous.
+- Cause: a finite ROB coordinate alone cannot distinguish the retained uop
+  context from later index reuse, and the repository sequence is not carried
+  into the DCache request bundle.
+- Prevention: within a bounded exact workload, qualify a candidate-relative
+  request with every available retained field: ROB index, LDQ index, PC, and
+  address. Keep those fields as context rather than promoting them to durable
+  identity.
+- Detection: emit a separate request record and require exact event order,
+  cardinality, and field correlation in the verifier. Preserve the limitation
+  that same-context reuse outside the bounded trace is not excluded.
+- Evidence: the T-0042 BOOM misaligned-rollback feasibility runs. After the
+  guard was expanded, the final exact trace did match the complete available
+  tuple and is recorded in `docs/log/2026-08-13.md`.
+- State: corrected for the exact bounded workload; general stale-response and
+  index-wrap handling remain open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

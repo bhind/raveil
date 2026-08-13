@@ -490,6 +490,22 @@ authorization, replay/kill/exception/reset behavior, complete BOOM lifecycle,
 resource matching, OoO effects, or performance. T-0042 remains open for those
 boundaries and the remaining Rocket lifecycle cases.
 
+A second pinned BOOM diagnostic now covers one deterministic but narrower
+negative ordering. At the exact `0x08000101` misaligned-load addrgen candidate,
+an LSU-local repository sequence retains the PC and ROB/LDQ context, correlates
+the following LSU misaligned-load exception, then observes one matching DCache
+request accepted after that exception but before the later global ROB rollback
+state. The exact trace has no matching response or architectural commit, and
+the faulting ROB entry does not appear in a rollback row (`matching_rbk=0`).
+This is bounded `rtl-simulation-functional` evidence for the exact BOOM-local
+`candidate -> exception -> request -> rollback-state` order only. Because the
+exception precedes request acceptance, it is not the still-required
+post-request exception/cancellation case; absence of a response in this trace
+does not prove transport cancellation or general side-effect absence. The
+sequence is not carried through DCache or TileLink; general rollback, semantic
+initiator identity, store authorization, replay/reset behavior, resource
+matching, OoO effects, and performance remain unproven.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

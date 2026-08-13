@@ -618,6 +618,27 @@ DCache or TileLink; this does not prove a semantic initiator, store
 authorization, general BOOM lifecycle, resource matching, OoO effects, or
 performance.
 
+Run the bounded pinned BOOM exception-before-request diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-boom-misaligned-rollback.sh
+```
+
+The workload traps once on a misaligned `lw` at `0x08000101`, validates
+`mcause`, `mtval`, and `mepc`, resumes, and requires equal aligned loads before
+and after the fault. The LSU hook allocates a local sequence at the exact
+addrgen candidate, matches the per-lane misaligned-load exception, then matches
+one DCache request accepted after that exception and observes the later global
+ROB rollback state. The exact verifier requires the four-event order
+`candidate -> exception -> request -> rollback`, zero matching responses or
+valid/architectural commits, and `matching_rbk=0`: the faulting entry itself is
+not emitted in a rollback row. Since the exception precedes request acceptance,
+this is not post-request exception/cancellation or post-A evidence. The
+sequence is not carried through DCache/TileLink, and transport cancellation,
+general side-effect absence, general rollback, semantic initiator identity,
+store authorization, resource matching, OoO effects, and performance are not
+proven.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

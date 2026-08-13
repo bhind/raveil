@@ -550,9 +550,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   architecturally valid ROB commit by repository sequence; ROB/LDQ indices and
   branch mask remain context, and no token crosses DCache or TileLink. The
   existing Rocket two-attempt trace is not a replay witness because every
-  directly surveyed replay/nack qualifier was zero. Next add a non-duplicative
-  BOOM negative or store-authorization boundary, while keeping Rocket replay
-  and post-A cases open until a deterministic direct signal path exists.
+  directly surveyed replay/nack qualifier was zero. One pinned BOOM
+  exception-ordering diagnostic now correlates a misaligned-load candidate,
+  LSU exception, one later matching DCache request acceptance, and the global
+  ROB rollback state while requiring zero matching responses and zero
+  architectural commits. The exception precedes request acceptance and the
+  faulting entry is not present in a rollback row, so this does not close the
+  still-required post-request BOOM exception/cancellation or general rollback
+  boundary. Next prefer a deterministic post-request BOOM negative or the
+  store-authorization path without promoting ROB/LDQ context into identity.
   Do not connect either local sequence to the ADR-0043 common bridge until the
   required CPU-specific negative, store, and transport boundaries pass.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and

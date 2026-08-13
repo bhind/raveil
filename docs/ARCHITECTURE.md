@@ -385,6 +385,16 @@ overlap, sequence exhaustion, response-context mismatch, duplicate response,
 commit-before-response, and duplicate commit. It does not carry its sequence
 through DCache or TileLink, authorize a store, identify a semantic ELF
 initiator, or establish general BOOM replay/kill/exception/reset behavior.
+A separate BOOM negative allocates its local sequence at the exact
+misaligned-load addrgen candidate. It retains PC plus ROB/LDQ context through
+the per-lane LSU exception, one matching DCache request accepted after that
+exception, and the later global ROB rollback state while asserting that no
+matching response or commit is valid. The faulting ROB entry is removed outside
+the reported rollback rows in the exact trace, so `matching_rbk=0` is required.
+This is an exact exception-before-request ordering diagnostic only: because the
+exception precedes request acceptance, it neither establishes post-request
+exception/cancellation nor transports the sequence into DCache, TileLink, or
+the owned manager.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

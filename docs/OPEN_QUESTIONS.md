@@ -107,7 +107,12 @@ resolves it.
   exact LSU DCache load request, response, and architecturally valid ROB commit
   by repository sequence; ROB/LDQ indices and branch mask are context only. It
   does not carry that sequence into TileLink or cover a BOOM negative/store
-  lifecycle. The remaining question is which deterministic BOOM negative or
+  lifecycle. A separate BOOM negative now correlates one exact misaligned-load
+  candidate with its LSU exception, a matching DCache request accepted after
+  the exception, and later global ROB rollback state while requiring no
+  matching response or architectural commit; the faulting entry is not a
+  matching rollback row. Because exception precedes request acceptance, the
+  remaining question is which deterministic post-request BOOM negative or
   store-authorization boundary can next satisfy ADR-0045 without promoting
   context fields into identity, and how the still-open Rocket cases can obtain
   direct, non-synthetic signals before normalization into the ADR-0043 bridge.

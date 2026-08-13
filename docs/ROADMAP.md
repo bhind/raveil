@@ -123,7 +123,14 @@ The corrected critical path is:
    implemented. The first pinned BOOM positive now correlates one exact LSU
    DCache load request, its response, and architecturally valid ROB commit by
    repository sequence. It carries no token through DCache/TileLink and leaves
-   BOOM negative, replay, exception, reset, and store cases open.
+   BOOM post-request negative, replay, reset, and store cases open.
+   A second pinned BOOM diagnostic covers one narrower negative ordering: an
+   exact misaligned-load candidate is correlated with its LSU exception, one
+   matching DCache request accepted after the exception, and the later global
+   ROB rollback state, with no matching response or architectural commit. The
+   faulting entry is not a rollback-row match. Because exception precedes
+   request acceptance, post-request BOOM exception/cancellation and general
+   rollback remain open.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

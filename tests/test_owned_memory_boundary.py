@@ -58,6 +58,22 @@ BOOM_LOAD_LIFECYCLE_VERIFIER = (
 BOOM_LOAD_LIFECYCLE_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-boom-load-lifecycle.sh"
 )
+BOOM_MISALIGNED_ROLLBACK_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-misaligned-rollback.patch"
+)
+BOOM_MISALIGNED_ROLLBACK_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_boom_misaligned_rollback.S"
+)
+BOOM_MISALIGNED_ROLLBACK_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_boom_misaligned_rollback.py"
+)
+BOOM_MISALIGNED_ROLLBACK_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-boom-misaligned-rollback.sh"
+)
 TLXBAR_REQUEST_DEFAULTS_PATCH = (
     ROOT
     / "hardware"
@@ -802,6 +818,96 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                     [
                         "python3",
                         str(BOOM_LOAD_LIFECYCLE_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_boom_misaligned_rollback_probe_is_bounded_and_non_claiming(self) -> None:
+        patch = BOOM_MISALIGNED_ROLLBACK_PATCH.read_text(encoding="utf-8")
+        workload = BOOM_MISALIGNED_ROLLBACK_WORKLOAD.read_text(encoding="utf-8")
+        verifier = BOOM_MISALIGNED_ROLLBACK_VERIFIER.read_text(encoding="utf-8")
+        runner = BOOM_MISALIGNED_ROLLBACK_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("val raveilBoomNegativeAddress", patch)
+        self.assertIn("ma_ld(w)", patch)
+        self.assertIn("mem_xcpt_valids(w)", patch)
+        self.assertIn("io.core.commit.rollback", patch)
+        self.assertIn("io.core.commit.arch_valids", patch)
+        self.assertIn("repository sequence is allocated", patch)
+        self.assertIn("not carried through DCache or TileLink", patch)
+        self.assertIn("lw      t1, 1(s0)", workload)
+        self.assertIn("csrr    t0, mcause", workload)
+        self.assertIn("csrr    t1, mtval", workload)
+        self.assertIn("transport_token_correlation=not-carried", verifier)
+        self.assertIn("semantic_initiator=not-proven", verifier)
+        self.assertIn("post_exception_request=observed", verifier)
+        self.assertIn("postrequest_exception=not-covered", verifier)
+        self.assertIn("rob_rollback_state=observed", verifier)
+        self.assertIn("rob_rollback_state_events=1", verifier)
+        self.assertNotIn("rob_rollbacks=1", verifier)
+        self.assertIn("general_rollback=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=boom-misaligned-rollback", runner)
+        self.assertIn(
+            "boom-misaligned-rollback:RaveilOwnedSmallBoomConfig", shared_runner
+        )
+        self.assertIn(
+            "request_boundary=after-exception-before-rollback", shared_runner
+        )
+        self.assertIn("matching_rbk=0", shared_runner)
+        self.assertIn("1a12fdf33d797d2a", shared_runner)
+        self.assertNotEqual(BOOM_MISALIGNED_ROLLBACK_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(BOOM_MISALIGNED_ROLLBACK_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_boom_misaligned_rollback_verifier_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=candidate epoch=1 sequence=1 pc=0x80000024 address=0x08000101 rob_idx=9 ldq_idx=2 br_mask=0x0 lane=0 cause=4 ma_ld=1 request_accepted=0 event_source=boom-pinned",
+                "RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=exception epoch=1 sequence=1 pc=0x80000024 address=0x08000101 rob_idx=9 ldq_idx=2 br_mask=0x0 lane=0 cause=4 mem_xcpt_valid=1 promotion=blocked",
+                "RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=request epoch=1 sequence=1 pc=0x80000024 address=0x08000101 rob_idx=9 ldq_idx=2 br_mask=0x0 lane=0 request_accepted=1 after_exception=1",
+                "RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=rollback epoch=1 sequence=1 pc=0x80000024 address=0x08000101 rob_idx=9 ldq_idx=2 br_mask=0x0 lane=0 rollback=1 matching_rbk=0 request_accepted=1 request_count=1 response_seen=0 core_exception_seen=1 commit_valid=0 arch_valid=0 promotion=blocked",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-negative.log"
+            signature = Path(tmp) / "boom-negative.signature"
+            signature.write_text(
+                "00000001\n682513da\n682513da\n00000004\n08000101\n00000001\n",
+                encoding="ascii",
+            )
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("cause=4", "cause=5", 1), 1),
+                (records.replace("ma_ld=1", "ma_ld=0"), 1),
+                (records.replace("mem_xcpt_valid=1", "mem_xcpt_valid=0"), 1),
+                (records.replace("after_exception=1", "after_exception=0"), 1),
+                (records.replace("rollback=1", "rollback=0"), 1),
+                (records.replace("matching_rbk=0", "matching_rbk=1"), 1),
+                (records.replace("request_accepted=0", "request_accepted=1", 1), 1),
+                (records.replace("request_accepted=1", "request_accepted=0", 1), 1),
+                (records.replace("request_count=1", "request_count=0"), 1),
+                (records.replace("response_seen=0", "response_seen=1"), 1),
+                (records.replace("core_exception_seen=1", "core_exception_seen=0"), 1),
+                (records.replace("commit_valid=0", "commit_valid=1"), 1),
+                (records.replace("arch_valid=0", "arch_valid=1"), 1),
+                (records.replace("promotion=blocked", "promotion=allowed", 1), 1),
+                (records.replace("rob_idx=9", "rob_idx=10", 1), 1),
+                (records.replace("ldq_idx=2", "ldq_idx=3", 1), 1),
+                (records.replace("pc=0x80000024", "pc=0x80000028", 1), 1),
+                (records.replace("br_mask=0x0", "br_mask=0x1", 1), 1),
+                (records.replace("lane=0", "lane=1", 1), 1),
+                (records + records.splitlines()[1] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(BOOM_MISALIGNED_ROLLBACK_VERIFIER),
                         str(log),
                         str(signature),
                     ],

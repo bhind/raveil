@@ -1,0 +1,167 @@
+diff --git a/src/main/scala/lsu/lsu.scala b/src/main/scala/lsu/lsu.scala
+--- a/src/main/scala/lsu/lsu.scala
++++ b/src/main/scala/lsu/lsu.scala
+@@ -879,5 +879,163 @@ class LSU(implicit p: Parameters, edge: TLEdgeOut) extends BoomModule()(p)
+         "[lsu] Incoming store is overwriting a valid data entry")
+     }
+   }
++
++  // Raveil T-0042 / ADR-0045 bounded BOOM-local exception/rollback diagnostic.
++  // The repository sequence is allocated at the exact addrgen candidate. It
++  // remains LSU-local and is not carried through DCache or TileLink; ROB/LDQ,
++  // branch-mask, PC, and lane fields are retained diagnostic context only.
++  val raveilBoomNegativeAddress = "h08000101".U(coreMaxAddrBits.W)
++  val raveilBoomNegativeSequence = RegInit(0.U(32.W))
++  val raveilBoomNegativeActive = RegInit(false.B)
++  val raveilBoomNegativeExceptionSeen = RegInit(false.B)
++  val raveilBoomNegativeFlushSeen = RegInit(false.B)
++  val raveilBoomNegativeResponseSeen = RegInit(false.B)
++  val raveilBoomNegativeRequestAccepted = RegInit(false.B)
++  val raveilBoomNegativeRequestCount = RegInit(0.U(2.W))
++  val raveilBoomNegativeRobIdx = Reg(UInt(robAddrSz.W))
++  val raveilBoomNegativeLdqIdx = Reg(UInt(ldqAddrSz.W))
++  val raveilBoomNegativePc = Reg(UInt(vaddrBitsExtended.W))
++  val raveilBoomNegativeBrMask = Reg(UInt(maxBrCount.W))
++  val raveilBoomNegativeLane = Reg(UInt(log2Ceil(memWidth max 2).W))
++  val raveilBoomNegativeCandidates = Wire(Vec(memWidth, Bool()))
++
++  for (w <- 0 until memWidth) {
++    raveilBoomNegativeCandidates(w) := ma_ld(w) &&
++      exe_tlb_vaddr(w) === raveilBoomNegativeAddress &&
++      exe_tlb_uop(w).uses_ldq
++    when (raveilBoomNegativeCandidates(w)) {
++      assert(!raveilBoomNegativeActive,
++        "Raveil BOOM negative witness accepts only one live token")
++      assert(raveilBoomNegativeSequence =/= "hffffffff".U,
++        "Raveil BOOM negative witness sequence exhausted")
++      assert(exe_req(w).bits.mxcpt.bits === rocket.Causes.misaligned_load.U,
++        "Raveil BOOM negative witness candidate cause mismatch")
++      raveilBoomNegativeSequence := raveilBoomNegativeSequence + 1.U
++      raveilBoomNegativeActive := true.B
++      raveilBoomNegativeExceptionSeen := false.B
++      raveilBoomNegativeFlushSeen := false.B
++      raveilBoomNegativeResponseSeen := false.B
++      raveilBoomNegativeRequestAccepted := dmem_req_fire(w)
++      raveilBoomNegativeRequestCount := dmem_req_fire(w)
++      raveilBoomNegativeRobIdx := exe_tlb_uop(w).rob_idx
++      raveilBoomNegativeLdqIdx := exe_tlb_uop(w).ldq_idx
++      raveilBoomNegativePc := exe_tlb_uop(w).debug_pc
++      raveilBoomNegativeBrMask := exe_tlb_uop(w).br_mask
++      raveilBoomNegativeLane := w.U
++      printf("RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=candidate epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d cause=%d ma_ld=1 request_accepted=%d event_source=boom-pinned\n",
++        raveilBoomNegativeSequence + 1.U, exe_tlb_uop(w).debug_pc,
++        exe_tlb_vaddr(w), exe_tlb_uop(w).rob_idx,
++        exe_tlb_uop(w).ldq_idx, exe_tlb_uop(w).br_mask, w.U,
++        exe_req(w).bits.mxcpt.bits, dmem_req_fire(w))
++    }
++  }
++  assert(PopCount(raveilBoomNegativeCandidates) <= 1.U,
++    "Raveil BOOM negative witness saw multiple candidates")
++
++  val raveilBoomNegativeExceptions = Wire(Vec(memWidth, Bool()))
++  val raveilBoomNegativeResponses = Wire(Vec(memWidth, Bool()))
++  val raveilBoomNegativeLaterRequests = Wire(Vec(memWidth, Bool()))
++  for (w <- 0 until memWidth) {
++    raveilBoomNegativeLaterRequests(w) := raveilBoomNegativeActive &&
++      dmem_req_fire(w) &&
++      dmem_req(w).bits.uop.rob_idx === raveilBoomNegativeRobIdx &&
++      dmem_req(w).bits.uop.ldq_idx === raveilBoomNegativeLdqIdx &&
++      dmem_req(w).bits.uop.debug_pc === raveilBoomNegativePc &&
++      dmem_req(w).bits.addr === raveilBoomNegativeAddress
++    when (raveilBoomNegativeLaterRequests(w)) {
++      raveilBoomNegativeRequestCount := raveilBoomNegativeRequestCount + 1.U
++      raveilBoomNegativeRequestAccepted := true.B
++      printf("RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=request epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d request_accepted=1 after_exception=%d\n",
++        raveilBoomNegativeSequence, dmem_req(w).bits.uop.debug_pc,
++        dmem_req(w).bits.addr, dmem_req(w).bits.uop.rob_idx,
++        dmem_req(w).bits.uop.ldq_idx, dmem_req(w).bits.uop.br_mask, w.U,
++        raveilBoomNegativeExceptionSeen)
++    }
++
++    raveilBoomNegativeExceptions(w) := raveilBoomNegativeActive &&
++      mem_xcpt_valids(w) &&
++      mem_xcpt_uops(w).rob_idx === raveilBoomNegativeRobIdx
++    when (raveilBoomNegativeExceptions(w)) {
++      assert(!raveilBoomNegativeExceptionSeen &&
++        mem_xcpt_uops(w).uses_ldq &&
++        mem_xcpt_uops(w).ldq_idx === raveilBoomNegativeLdqIdx &&
++        mem_xcpt_uops(w).debug_pc === raveilBoomNegativePc &&
++        mem_xcpt_causes(w) === rocket.Causes.misaligned_load.U &&
++        mem_xcpt_vaddrs(w) === raveilBoomNegativeAddress,
++        "Raveil BOOM negative witness exception context mismatch")
++      raveilBoomNegativeExceptionSeen := true.B
++      printf("RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=exception epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d cause=%d mem_xcpt_valid=1 promotion=blocked\n",
++        raveilBoomNegativeSequence, mem_xcpt_uops(w).debug_pc,
++        mem_xcpt_vaddrs(w), mem_xcpt_uops(w).rob_idx,
++        mem_xcpt_uops(w).ldq_idx, mem_xcpt_uops(w).br_mask, w.U,
++        mem_xcpt_causes(w))
++    }
++
++    raveilBoomNegativeResponses(w) := raveilBoomNegativeActive &&
++      io.dmem.resp(w).valid &&
++      io.dmem.resp(w).bits.uop.rob_idx === raveilBoomNegativeRobIdx &&
++      io.dmem.resp(w).bits.uop.ldq_idx === raveilBoomNegativeLdqIdx &&
++      io.dmem.resp(w).bits.uop.debug_pc === raveilBoomNegativePc
++    when (raveilBoomNegativeResponses(w)) {
++      assert(!raveilBoomNegativeResponseSeen &&
++        io.dmem.resp(w).bits.uop.uses_ldq &&
++        io.dmem.resp(w).bits.uop.ldq_idx === raveilBoomNegativeLdqIdx &&
++        io.dmem.resp(w).bits.uop.debug_pc === raveilBoomNegativePc,
++        "Raveil BOOM negative witness response context mismatch")
++      raveilBoomNegativeResponseSeen := true.B
++    }
++  }
++  assert(PopCount(raveilBoomNegativeExceptions) <= 1.U,
++    "Raveil BOOM negative witness saw duplicate exceptions")
++  assert(PopCount(raveilBoomNegativeResponses) <= 1.U,
++    "Raveil BOOM negative witness saw duplicate responses")
++  assert(PopCount(raveilBoomNegativeLaterRequests) <= 1.U,
++    "Raveil BOOM negative witness saw duplicate later requests")
++
++  when (raveilBoomNegativeActive && io.core.exception) {
++    assert(raveilBoomNegativeExceptionSeen,
++      "Raveil BOOM negative witness saw a core flush before its exception")
++    raveilBoomNegativeFlushSeen := true.B
++  }
++
++  val raveilBoomNegativeCommitMatches = Wire(Vec(coreWidth, Bool()))
++  val raveilBoomNegativeRollbackMatches = Wire(Vec(coreWidth, Bool()))
++  for (w <- 0 until coreWidth) {
++    raveilBoomNegativeCommitMatches(w) := raveilBoomNegativeActive &&
++      (io.core.commit.valids(w) || io.core.commit.arch_valids(w)) &&
++      io.core.commit.uops(w).rob_idx === raveilBoomNegativeRobIdx &&
++      io.core.commit.uops(w).ldq_idx === raveilBoomNegativeLdqIdx &&
++      io.core.commit.uops(w).debug_pc === raveilBoomNegativePc
++    when (raveilBoomNegativeCommitMatches(w)) {
++      assert(false.B,
++        "Raveil BOOM negative witness unexpectedly committed")
++    }
++    raveilBoomNegativeRollbackMatches(w) := raveilBoomNegativeActive &&
++      io.core.commit.rbk_valids(w) &&
++      io.core.commit.uops(w).rob_idx === raveilBoomNegativeRobIdx &&
++      io.core.commit.uops(w).ldq_idx === raveilBoomNegativeLdqIdx &&
++      io.core.commit.uops(w).debug_pc === raveilBoomNegativePc
++  }
++  assert(PopCount(raveilBoomNegativeCommitMatches) === 0.U,
++    "Raveil BOOM negative witness saw duplicate commit outcomes")
++  assert(PopCount(raveilBoomNegativeRollbackMatches) <= 1.U,
++    "Raveil BOOM negative witness saw duplicate rollback contexts")
++
++  when (raveilBoomNegativeActive && io.core.commit.rollback) {
++    assert(raveilBoomNegativeExceptionSeen && raveilBoomNegativeFlushSeen,
++      "Raveil BOOM negative witness rollback preceded exception flush")
++    printf("RAVEIL-BOOM-MISALIGNED-ROLLBACK-V1 event=rollback epoch=1 sequence=%d pc=0x%x address=0x%x rob_idx=%d ldq_idx=%d br_mask=0x%x lane=%d rollback=1 matching_rbk=%d request_accepted=%d request_count=%d response_seen=%d core_exception_seen=1 commit_valid=0 arch_valid=0 promotion=blocked\n",
++      raveilBoomNegativeSequence, raveilBoomNegativePc,
++      raveilBoomNegativeAddress, raveilBoomNegativeRobIdx,
++      raveilBoomNegativeLdqIdx, raveilBoomNegativeBrMask,
++      raveilBoomNegativeLane, raveilBoomNegativeRollbackMatches.asUInt.orR,
++      raveilBoomNegativeRequestAccepted, raveilBoomNegativeRequestCount,
++      raveilBoomNegativeResponseSeen)
++    raveilBoomNegativeActive := false.B
++    raveilBoomNegativeExceptionSeen := false.B
++    raveilBoomNegativeFlushSeen := false.B
++    raveilBoomNegativeResponseSeen := false.B
++    raveilBoomNegativeRequestCount := 0.U
++  }
+   val will_fire_stdf_incoming = io.core.fp_stdata.fire
+   require (xLen >= fLen) // for correct SDQ size
