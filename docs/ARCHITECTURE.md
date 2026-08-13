@@ -365,6 +365,15 @@ wrong-path store `Put`. Manager A/D source equality is a local transport
 correlation only: the Rocket token/tag is not carried across DCache,
 Fragmenter, or TileLink, so these observations cannot be joined into semantic
 initiator identity or a general cancellation invariant.
+A separate pinned Rocket exception hook retains one accepted misaligned-load
+request's PC and DCache-local tag until WB. The exact workload checks trap
+cause, fault address, exception PC, single trap recovery, and equal aligned
+loads before and after the fault; the hook requires WB misaligned-load cause,
+the DCache `ma.ld` indication, and `take_pc_wb` before recording
+`promotion=blocked`. This closes one Rocket-local post-request exception
+transition only. The misaligned request is not correlated to a TileLink A beat,
+the token is not transported through DCache, and no post-A rollback or general
+side-effect invariant follows.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

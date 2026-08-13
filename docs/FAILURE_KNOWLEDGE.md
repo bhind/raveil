@@ -763,6 +763,42 @@ labelled unknown.
 - State: corrected for the admitted Rocket and Rocket-fate configs and the
   bounded fate schema; future configs remain fail closed until enumerated.
 
+## Patch context must not move an observer before its state definitions
+
+- Symptom: the first post-request-exception elaboration failed with a null
+  `raveilExceptionActive` reference even though the patch applied cleanly.
+- Cause: a broad second hunk matched an earlier `wb_valid` definition, placing
+  the outcome logic before the later request-state registers in Scala class
+  initialization order.
+- Prevention: keep dependent diagnostic state and outcome logic in one
+  narrowly anchored hunk, then inspect the fully composed pinned source rather
+  than accepting `git apply` success as placement evidence.
+- Detection: apply every ordered patch to a temporary pinned source, check its
+  exact post-patch hash and diff, and require full Chisel elaboration.
+- Evidence: T-0042 post-request-exception patch, failed elaboration, and
+  `docs/log/2026-08-13.md`.
+- State: corrected by colocating the state and outcome logic; the subsequent
+  exact RTL run passed.
+
+## A new workload can change retry cardinality of reused lifecycle records
+
+- Symptom: the first successful exception RTL simulation emitted the intended
+  request/exception pair, but its verifier expected eight surrounding aligned-
+  load records and rejected the actual ten.
+- Cause: each aligned load made two accepted DCache request attempts in this
+  exact workload, while the new verifier fixture assumed the one-attempt shape
+  from a different positive workload.
+- Prevention: treat request attempts as explicit lifecycle events and define
+  exact per-workload cardinality; do not inherit replay assumptions from a
+  neighboring test.
+- Detection: verify the persisted raw RTL markers before relaxing a count. For
+  this workload require attempts 1 then 2 with identical token, PC, address,
+  operation, and tag for each aligned load.
+- Evidence: T-0042 post-request-exception raw RTL log, verifier mutation tests,
+  and `docs/log/2026-08-13.md`.
+- State: corrected for the exact two-retry surrounding-load trace; this does
+  not establish general replay support or a durable token.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

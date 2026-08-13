@@ -131,6 +131,22 @@ ROCKET_REDIRECT_FATE_VERIFIER = (
 ROCKET_REDIRECT_FATE_RUNNER = (
     ROOT / "hardware" / "chisel" / "run-owned-rocket-redirect-dcache-fate.sh"
 )
+ROCKET_EXCEPTION_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-rocket-postrequest-exception.patch"
+)
+ROCKET_EXCEPTION_WORKLOAD = (
+    ROOT / "hardware" / "chisel" / "owned_memory_rocket_postrequest_exception.S"
+)
+ROCKET_EXCEPTION_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_rocket_postrequest_exception.py"
+)
+ROCKET_EXCEPTION_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-rocket-postrequest-exception.sh"
+)
 ROCKET_MEMORY_WORKLOAD = (
     ROOT / "hardware" / "chisel" / "owned_memory_cpu_smoke.S"
 )
@@ -509,7 +525,10 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertNotEqual(ROCKET_REDIRECT_RUNNER.stat().st_mode & 0o111, 0)
         self.assertIn("RAVEIL_OWNED_CPU_MODE=rocket-postrequest-redirect", runner)
         self.assertIn("rocket-postrequest-redirect:RaveilOwnedRocketConfig", shared_runner)
-        self.assertIn('"$rocket_witness_patch" "$rocket_fate_patch" "$boom_hook_patch"', shared_runner)
+        self.assertIn(
+            '"$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch"',
+            shared_runner,
+        )
         self.assertIn("29a1032a10aeb744", shared_runner)
         self.assertIn("source_sha256=%s", shared_runner)
 
@@ -627,6 +646,83 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                     [
                         "python3",
                         str(ROCKET_REDIRECT_FATE_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_rocket_postrequest_exception_probe_is_bounded_and_non_claiming(self) -> None:
+        patch = ROCKET_EXCEPTION_PATCH.read_text(encoding="utf-8")
+        workload = ROCKET_EXCEPTION_WORKLOAD.read_text(encoding="utf-8")
+        verifier = ROCKET_EXCEPTION_VERIFIER.read_text(encoding="utf-8")
+        runner = ROCKET_EXCEPTION_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("io.dmem.req.fire", patch)
+        self.assertIn('val raveilExceptionAddress = "h08000101"', patch)
+        self.assertIn("wb_xcpt &&", patch)
+        self.assertIn("wb_cause === Causes.misaligned_load.U", patch)
+        self.assertIn("io.dmem.s2_xcpt.ma.ld", patch)
+        self.assertIn("promotion=blocked", patch)
+        self.assertIn("not carried through DCache/TL", patch)
+        self.assertIn("lw      t1, 1(s0)", workload)
+        self.assertIn("csrr    t0, mcause", workload)
+        self.assertIn("csrr    t1, mtval", workload)
+        self.assertIn("csrr    t3, mepc", workload)
+        self.assertIn("post_tl_a_exception=not-run", verifier)
+        self.assertIn("transport_token_correlation=not-carried", verifier)
+        self.assertIn("general_rollback=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=rocket-postrequest-exception", runner)
+        self.assertIn("rocket-postrequest-exception:RaveilOwnedRocketConfig", shared_runner)
+        self.assertIn("f3015d47932074f7", shared_runner)
+        self.assertNotEqual(ROCKET_EXCEPTION_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(ROCKET_EXCEPTION_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_rocket_postrequest_exception_verifier_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    1 pc=0x80000018 address=0x08000100 store=0 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    1 attempt=1 pc=0x80000018 address=0x08000100 store=0 tag=0x24",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    1 attempt=2 pc=0x80000018 address=0x08000100 store=0 tag=0x24",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch= 1 sequence=    1 pc=0x80000018 store=0 wb_valid=1 store_wb_predicate=0",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch= 1 sequence=    1 tag=0x24 store=0 response_valid=1 response_has_data=1",
+                "RAVEIL-ROCKET-POSTREQUEST-EXCEPTION-V1 event=request epoch=1 sequence=1 attempt=1 pc=0x80000024 address=0x08000101 store=0 tag=0x0c request_accepted=1 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-POSTREQUEST-EXCEPTION-V1 event=exception epoch=1 sequence=1 pc=0x80000024 address=0x08000101 store=0 tag=0x0c cause=4 ma_ld=1 ma_st=0 take_pc_wb=1 promotion=blocked",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    2 pc=0x8000002c address=0x08000100 store=0 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    2 attempt=1 pc=0x8000002c address=0x08000100 store=0 tag=0x26",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    2 attempt=2 pc=0x8000002c address=0x08000100 store=0 tag=0x26",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch= 1 sequence=    2 pc=0x8000002c store=0 wb_valid=1 store_wb_predicate=0",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch= 1 sequence=    2 tag=0x26 store=0 response_valid=1 response_has_data=1",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "exception.log"
+            signature = Path(tmp) / "exception.signature"
+            signature.write_text(
+                "00000001\n682513da\n682513da\n00000004\n08000101\n00000001\n",
+                encoding="ascii",
+            )
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("request_accepted=1", "request_accepted=0"), 1),
+                (records.replace("cause=4", "cause=5"), 1),
+                (records.replace("ma_ld=1", "ma_ld=0"), 1),
+                (records.replace("take_pc_wb=1", "take_pc_wb=0"), 1),
+                (records.replace("promotion=blocked", "promotion=allowed"), 1),
+                (records.replace("tag=0x0c cause", "tag=0x0d cause"), 1),
+                (records.replace("store_wb_predicate=0", "store_wb_predicate=1", 1), 1),
+                (records.replace("response_has_data=1", "response_has_data=0", 1), 1),
+                (records + records.splitlines()[5] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(ROCKET_EXCEPTION_VERIFIER),
                         str(log),
                         str(signature),
                     ],

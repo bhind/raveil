@@ -538,10 +538,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   successful manager `Get` A/D pairs for the before/after loads; the probed
   wrong-path `Put` is absent from that bounded log. The Rocket request/S1
   sequence, PC, address, and local tag correlate, but no token is carried into
-  TileLink. ADR-0045 therefore remains open for multi-token overlap,
-  pre-request kill, later post-request kill/exception, replay, reset/epoch,
-  durable DCache/TL token correlation, store authorization, and complete
-  owned-manager lifecycle coverage. Next
+  TileLink. A separate pinned diagnostic now correlates one accepted
+  misaligned load with its later WB misaligned-load exception, blocks
+  promotion, verifies exact trap recovery, and preserves equal aligned
+  before/after readback. This is Rocket-local post-request exception evidence,
+  not post-TileLink-A rollback evidence. ADR-0045 therefore remains open for
+  multi-token overlap, pre-request kill, post-A exception/rollback, replay,
+  reset/epoch, durable DCache/TL token correlation, store authorization, and
+  complete owned-manager lifecycle coverage. Next
   exercise those Rocket lifecycle cases, then implement the BOOM ROB/LSU
   diagnostic under the same normalized lifecycle contract.
   Do not connect either token to the ADR-0043 common bridge until both

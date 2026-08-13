@@ -583,6 +583,24 @@ value. The marker deliberately reports
 connect the Rocket token to TileLink and does not prove semantic initiator,
 general cancellation, resource match, or performance.
 
+Run the bounded pinned Rocket post-request exception diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-rocket-postrequest-exception.sh
+```
+
+The workload performs an aligned load, an accepted misaligned load at
+`0x08000101`, and an aligned load after exact machine-mode trap recovery. The
+Rocket-local hook retains the accepted request PC and DCache tag, then requires
+the matching WB PC, misaligned-load cause 4, DCache `ma_ld=1`, and
+`take_pc_wb=1` before emitting `promotion=blocked`. The verifier requires the
+exact request/exception lifecycle, two exact retrying aligned-load lifecycles,
+one trap, `mtval=0x08000101`, and equal before/after values (`0x682513da` in the
+recorded run). This does not observe a TileLink A for the misaligned request,
+carry the Rocket token through DCache, prove a post-A exception or general
+rollback/side-effect absence, identify a semantic initiator, match resources,
+or measure performance.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

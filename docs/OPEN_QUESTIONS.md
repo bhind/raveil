@@ -97,10 +97,13 @@ resolves it.
   probe. A separate exact-config run now directly correlates that Rocket
   request to following-cycle `s1_kill=1` and independently observes only the
   two before/after load A/D pairs at the owned manager. It does not carry the
-  Rocket token into TileLink, and the one-entry observer still does not validate
-  multi-token operation, pre-request kill, later-cycle kill/exception, replay,
-  reset/epoch, durable transport-token correlation, store authorization,
-  complete owned-manager lifecycle, or semantic initiator identity.
+  Rocket token into TileLink. A fourth pinned run correlates one accepted
+  misaligned load with its later WB exception and exact trap recovery, but does
+  not observe a corresponding TileLink A or post-A rollback. The one-entry
+  observer still does not validate multi-token operation, pre-request kill,
+  post-A exception/rollback, replay, reset/epoch, durable transport-token
+  correlation, store authorization, complete owned-manager lifecycle, or
+  semantic initiator identity.
   The remaining question is
   whether Rocket can complete those lifecycle cases and whether the BOOM
   ROB/LSU probe can satisfy the same fail-closed contract before normalization

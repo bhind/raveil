@@ -114,11 +114,13 @@ The corrected critical path is:
    before and after the probe. A third exact-config diagnostic directly observes
    the following-cycle Rocket `s1_kill` for that request and separately records
    two successful owned-manager load A/D pairs with no probed-address Put in the
-   bounded log. It carries no Rocket token into TileLink. Multi-live-token
-   overlap, pre-request kill, later post-request kill/exception, replay,
-   reset/epoch, durable DCache/TL token correlation, store authorization and
-   complete owned-D lifecycle coverage, plus the BOOM probe, remain to be
-   implemented.
+   bounded log. It carries no Rocket token into TileLink. A fourth pinned probe
+   correlates one accepted misaligned load with its later WB misaligned-load
+   exception and exact trap recovery, while explicitly leaving post-A fate
+   untested. Multi-live-token overlap, pre-request kill, post-A exception or
+   rollback, replay, reset/epoch, durable DCache/TL token correlation, store
+   authorization and complete owned-D lifecycle coverage, plus the BOOM probe,
+   remain to be implemented.
    None of these functional smokes or endpoint diagnostics is a performance
    or structural-ablation result.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,

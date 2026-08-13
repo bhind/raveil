@@ -464,6 +464,20 @@ patent-clearance, or FTO result. Pre-request kill, later-cycle kill/exception,
 replay, reset/epoch, multi-live-token operation, and the BOOM lifecycle probe
 remain open.
 
+A fourth pinned Rocket diagnostic now covers one distinct later post-request
+exception boundary. An exact misaligned load at `0x08000101` is accepted at
+the Rocket DCache request interface, and the retained Rocket-local PC and tag
+match a later WB misaligned-load exception with cause 4, `ma_ld=1`,
+`take_pc_wb=1`, and `promotion=blocked`. Aligned loads before and after the
+trap both return `0x682513da`; the trap handler verifies `mcause`, `mtval`, and
+`mepc` and resumes exactly once. This is bounded `rtl-simulation-functional`
+evidence for a Rocket-local accepted-request/WB-exception correlation. It is
+not a post-TileLink-A exception, does not carry a token through DCache or
+TileLink, and does not prove general rollback, side-effect absence, semantic
+initiator identity, resource matching, or performance. Pre-request kill,
+post-A exception/rollback, replay, reset/epoch, multi-live-token operation,
+and the BOOM lifecycle probe remain open.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

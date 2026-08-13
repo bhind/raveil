@@ -1,0 +1,53 @@
+diff --git a/src/main/scala/rocket/RocketCore.scala b/src/main/scala/rocket/RocketCore.scala
+--- a/src/main/scala/rocket/RocketCore.scala
++++ b/src/main/scala/rocket/RocketCore.scala
+@@ -1039,2 +1039,49 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
++  // Raveil T-0042 / ADR-0045 bounded post-request exception diagnostic.
++  // This token remains Rocket-local and is not carried through DCache/TL.
++  val raveilExceptionAddress = "h08000101".U(xLen.W)
++  val raveilExceptionRequest = io.dmem.req.fire &&
++    io.dmem.req.bits.addr === raveilExceptionAddress
++  val raveilExceptionActive = RegInit(false.B)
++  val raveilExceptionPc = RegInit(0.U(xLen.W))
++  val raveilExceptionTag = RegInit(0.U(coreParams.dcacheReqTagBits.W))
++  val raveilExceptionStore = RegInit(false.B)
++  when(raveilExceptionRequest) {
++    assert(!raveilExceptionActive,
++      "Raveil Rocket exception witness saw an overlapping request")
++    assert(isRead(io.dmem.req.bits.cmd) || isWrite(io.dmem.req.bits.cmd),
++      "Raveil Rocket exception witness saw a non-load/store request")
++    raveilExceptionActive := true.B
++    raveilExceptionPc := ex_reg_pc
++    raveilExceptionTag := io.dmem.req.bits.tag
++    raveilExceptionStore := isWrite(io.dmem.req.bits.cmd)
++    printf("RAVEIL-ROCKET-POSTREQUEST-EXCEPTION-V1 event=request epoch=1 sequence=1 attempt=1 pc=0x%x address=0x%x store=%d tag=0x%x request_accepted=1 event_source=rocket-pinned\n",
++      ex_reg_pc, io.dmem.req.bits.addr, isWrite(io.dmem.req.bits.cmd),
++      io.dmem.req.bits.tag)
++  }
++  val raveilExceptionOutcome = raveilExceptionActive && wb_xcpt &&
++    wb_ctrl.mem && wb_reg_pc === raveilExceptionPc
++  val raveilExceptionRetire = raveilExceptionActive && wb_valid &&
++    wb_ctrl.mem && wb_reg_pc === raveilExceptionPc
++  val raveilExceptionResponse = raveilExceptionActive &&
++    dmem_resp_valid && dmem_resp_xpu &&
++    io.dmem.resp.bits.tag === raveilExceptionTag
++  when(raveilExceptionOutcome) {
++    assert(!raveilExceptionStore && wb_cause === Causes.misaligned_load.U &&
++      io.dmem.s2_xcpt.ma.ld && !io.dmem.s2_xcpt.ma.st && take_pc_wb,
++      "Raveil Rocket exception witness outcome mismatch")
++    printf("RAVEIL-ROCKET-POSTREQUEST-EXCEPTION-V1 event=exception epoch=1 sequence=1 pc=0x%x address=0x%x store=0 tag=0x%x cause=%d ma_ld=%d ma_st=%d take_pc_wb=%d promotion=blocked\n",
++      wb_reg_pc, raveilExceptionAddress, raveilExceptionTag, wb_cause,
++      io.dmem.s2_xcpt.ma.ld, io.dmem.s2_xcpt.ma.st, take_pc_wb)
++    raveilExceptionActive := false.B
++  }
++  when(raveilExceptionRetire) {
++    assert(false.B,
++      "Raveil Rocket exception witness unexpectedly retired")
++  }
++  when(raveilExceptionResponse && !raveilExceptionOutcome) {
++    assert(false.B,
++      "Raveil Rocket exception witness saw a data response")
++  }
++
+   io.dmem.s1_data.data := (if (fLen == 0) mem_reg_rs2 else Mux(mem_ctrl.fp, Fill((xLen max fLen) / fLen, io.fpu.store_data), mem_reg_rs2))
+   io.dmem.s1_data.mask := DontCare
