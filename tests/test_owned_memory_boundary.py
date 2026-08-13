@@ -118,6 +118,19 @@ ROCKET_REDIRECT_RUNNER = (
     / "chisel"
     / "run-owned-rocket-postrequest-redirect-negative.sh"
 )
+ROCKET_REDIRECT_FATE_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-rocket-redirect-dcache-fate.patch"
+)
+ROCKET_REDIRECT_FATE_VERIFIER = (
+    ROOT / "hardware" / "chisel" / "verify_owned_rocket_redirect_dcache_fate.py"
+)
+ROCKET_REDIRECT_FATE_RUNNER = (
+    ROOT / "hardware" / "chisel" / "run-owned-rocket-redirect-dcache-fate.sh"
+)
 ROCKET_MEMORY_WORKLOAD = (
     ROOT / "hardware" / "chisel" / "owned_memory_cpu_smoke.S"
 )
@@ -496,7 +509,7 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertNotEqual(ROCKET_REDIRECT_RUNNER.stat().st_mode & 0o111, 0)
         self.assertIn("RAVEIL_OWNED_CPU_MODE=rocket-postrequest-redirect", runner)
         self.assertIn("rocket-postrequest-redirect:RaveilOwnedRocketConfig", shared_runner)
-        self.assertIn('"$rocket_witness_patch" "$boom_hook_patch"', shared_runner)
+        self.assertIn('"$rocket_witness_patch" "$rocket_fate_patch" "$boom_hook_patch"', shared_runner)
         self.assertIn("29a1032a10aeb744", shared_runner)
         self.assertIn("source_sha256=%s", shared_runner)
 
@@ -543,6 +556,86 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, expected_returncode, result.stderr)
 
+    def test_rocket_redirect_dcache_fate_probe_is_direct_and_non_claiming(self) -> None:
+        overlay = CPU_OVERLAY.read_text(encoding="utf-8")
+        origin = DCACHE_ORIGIN_TAGGER.read_text(encoding="utf-8")
+        patch = ROCKET_REDIRECT_FATE_PATCH.read_text(encoding="utf-8")
+        verifier = ROCKET_REDIRECT_FATE_VERIFIER.read_text(encoding="utf-8")
+        runner = ROCKET_REDIRECT_FATE_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("fateAuditAddress: Option[BigInt] = None", overlay)
+        self.assertIn("RAVEIL-OWNED-TL-FATE-V1 event=a", overlay)
+        self.assertIn("RAVEIL-OWNED-TL-FATE-V1 event=d", overlay)
+        self.assertIn("class RaveilOwnedRocketFateConfig", origin)
+        self.assertIn("WithRaveilOwnedMemorySourceRangeAndFateAudit(8224, 8256, 0x08000100L)", origin)
+        self.assertIn("RegNext(raveilRedirectAccepted, false.B)", patch)
+        self.assertIn("io.dmem.s1_kill", patch)
+        self.assertIn("RAVEIL-ROCKET-DCACHE-FATE-V1 event=s1", patch)
+        self.assertIn("dcache_s1_kill=observed", verifier)
+        self.assertIn("wrong_path_store_tl_a=not-observed", verifier)
+        self.assertIn("transport_token_correlation=not-carried", verifier)
+        self.assertIn("semantic_initiator=not-proven", verifier)
+        self.assertIn("performance=not-measured", verifier)
+        self.assertIn("RAVEIL_OWNED_CPU_MODE=rocket-redirect-dcache-fate", runner)
+        self.assertIn("rocket-redirect-dcache-fate:RaveilOwnedRocketFateConfig", shared_runner)
+        self.assertIn("de13ae897d3df31d", shared_runner)
+        self.assertLess(
+            shared_runner.index("verify_owned_rocket_redirect_negative.py", shared_runner.index("rocket-redirect-dcache-fate ]; then")),
+            shared_runner.index("verify_owned_rocket_redirect_dcache_fate.py", shared_runner.index("rocket-redirect-dcache-fate ]; then")),
+        )
+        self.assertNotEqual(ROCKET_REDIRECT_FATE_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(ROCKET_REDIRECT_FATE_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_rocket_redirect_dcache_fate_verifier_rejects_transport_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    1 pc=0x80000008 address=0x08000100 store=0 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    1 attempt=1 pc=0x80000008 address=0x08000100 store=0 tag=0x24",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch= 1 sequence=    1 pc=0x80000008 store=0 wb_valid=1 store_wb_predicate=0",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch= 1 sequence=    1 tag=0x24 store=0 response_valid=1 response_has_data=1",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    2 pc=0x80000024 address=0x08000100 store=1 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    2 attempt=1 pc=0x80000024 address=0x08000100 store=1 tag=0x00",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=kill epoch= 1 sequence=    2 branch_pc=0x80000020 pc=0x80000024 store=1 reason=mem-redirect request_accepted=1 branch=1 taken=1 direction_misprediction=1 promotion=blocked",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=allocate epoch= 1 sequence=    3 pc=0x80000028 address=0x08000100 store=0 event_source=rocket-pinned",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=request epoch= 1 sequence=    3 attempt=1 pc=0x80000028 address=0x08000100 store=0 tag=0x0c",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=retire epoch= 1 sequence=    3 pc=0x80000028 store=0 wb_valid=1 store_wb_predicate=0",
+                "RAVEIL-ROCKET-REQUEST-RETIRE-V1 event=response epoch= 1 sequence=    3 tag=0x0c store=0 response_valid=1 response_has_data=1",
+                "RAVEIL-ROCKET-DCACHE-FATE-V1 event=s1 epoch= 1 sequence=    2 pc=0x80000024 address=0x08000100 store=1 tag=0x00 s1_kill=1 s2_kill=0 correlation=accepted-request-next-cycle",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=    1 address=0x08000100 source= 8224 opcode= 4 size= 2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=    1 source= 8224 opcode= 1 size= 2 denied=0 corrupt=0 request_opcode= 4 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=    2 address=0x08000100 source= 8224 opcode= 4 size= 2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=    2 source= 8224 opcode= 1 size= 2 denied=0 corrupt=0 request_opcode= 4 phase=0",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "fate.log"
+            signature = Path(tmp) / "fate.signature"
+            signature.write_text("00000001\nc5686cac\nc5686cac\n", encoding="ascii")
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("s1_kill=1", "s1_kill=0"), 1),
+                (records.replace("tag=0x00 s1_kill", "tag=0x01 s1_kill"), 1),
+                (records + records.splitlines()[0] + "\n", 1),
+                (records.replace("source= 8224", "source= 9000", 1), 1),
+                (records.replace("opcode= 4", "opcode= 0", 1), 1),
+                (records.replace("denied=0", "denied=1", 1), 1),
+                (records.rsplit("\n", 2)[0] + "\n", 1),
+                (records + records.splitlines()[-1] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    [
+                        "python3",
+                        str(ROCKET_REDIRECT_FATE_VERIFIER),
+                        str(log),
+                        str(signature),
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
     def test_cpu_workload_reaches_owned_memory_with_phase_fences(self) -> None:
         workload = ROCKET_MEMORY_WORKLOAD.read_text(encoding="utf-8")
         verifier = ROCKET_MEMORY_VERIFIER.read_text(encoding="utf-8")
@@ -566,6 +659,8 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn('"boom": (8288, 8320)', verifier)
         self.assertIn("Core 0 DCache MMIO", source_map_verifier)
         self.assertIn("fragmenter_factor=32", source_map_verifier)
+        self.assertIn('"RaveilOwnedRocketFateConfig"', source_map_verifier)
+        self.assertIn("graph.name ==", source_map_verifier)
         for entrypoint in (
             CPU_MEMORY_RUNNER,
             ROCKET_MEMORY_RUNNER,

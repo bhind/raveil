@@ -94,10 +94,13 @@ resolves it.
   one positive store/load workload. One bounded negative additionally records
   an accepted wrong-path store and blocks its promotion on a simultaneous
   older-branch MEM redirect, with matching completed loads before and after the
-  probe. The one-entry observer rejects overlapping live candidates and does
-  not validate multi-token operation, pre-request kill, later-cycle
-  kill/exception, replay, reset/epoch, DCache S1-kill or owned A/D correlation,
-  store authorization, owned-manager D completion, or semantic initiator identity.
+  probe. A separate exact-config run now directly correlates that Rocket
+  request to following-cycle `s1_kill=1` and independently observes only the
+  two before/after load A/D pairs at the owned manager. It does not carry the
+  Rocket token into TileLink, and the one-entry observer still does not validate
+  multi-token operation, pre-request kill, later-cycle kill/exception, replay,
+  reset/epoch, durable transport-token correlation, store authorization,
+  complete owned-manager lifecycle, or semantic initiator identity.
   The remaining question is
   whether Rocket can complete those lifecycle cases and whether the BOOM
   ROB/LSU probe can satisfy the same fail-closed contract before normalization

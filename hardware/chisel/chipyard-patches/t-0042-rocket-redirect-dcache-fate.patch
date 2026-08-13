@@ -1,0 +1,22 @@
+diff --git a/src/main/scala/rocket/RocketCore.scala b/src/main/scala/rocket/RocketCore.scala
+--- a/src/main/scala/rocket/RocketCore.scala
++++ b/src/main/scala/rocket/RocketCore.scala
+@@ -1042,4 +1042,18 @@ class Rocket(implicit p: Parameters) extends CoreModule()(p)
+   io.dmem.s1_kill := killm_common || mem_ldst_xcpt || fpu_kill_mem
+   io.dmem.s2_kill := false.B
++  val raveilRedirectAccepted = raveilWitnessRequest &&
++    !raveilWitnessActive && take_pc_mem
++  val raveilRedirectS1Pending = RegNext(raveilRedirectAccepted, false.B)
++  val raveilRedirectS1Sequence = RegEnable(
++    raveilWitnessNextSequence, raveilRedirectAccepted)
++  val raveilRedirectS1Pc = RegEnable(ex_reg_pc, raveilRedirectAccepted)
++  val raveilRedirectS1Tag = RegEnable(
++    io.dmem.req.bits.tag, raveilRedirectAccepted)
++  when(raveilRedirectS1Pending) {
++    printf("RAVEIL-ROCKET-DCACHE-FATE-V1 event=s1 epoch=%d sequence=%d pc=0x%x address=0x%x store=1 tag=0x%x s1_kill=%d s2_kill=%d correlation=accepted-request-next-cycle\n",
++      raveilWitnessEpoch, raveilRedirectS1Sequence, raveilRedirectS1Pc,
++      raveilWitnessAddress, raveilRedirectS1Tag, io.dmem.s1_kill,
++      io.dmem.s2_kill)
++  }
+   // don't let D$ go to sleep if we're probably going to use it soon
+   io.dmem.keep_clock_enabled := ibuf.io.inst(0).valid && id_ctrl.mem && !csr.io.csr_stall

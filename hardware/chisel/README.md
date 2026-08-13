@@ -565,6 +565,24 @@ or duplication. This is not multi-live-token support, pre-request kill coverage,
 a DCache `s1_kill` or A/D correlation, proof of general side-effect absence,
 semantic initiator attribution, resource matching, or a performance result.
 
+Run the bounded pinned Rocket redirect DCache-fate diagnostic with:
+
+```sh
+./hardware/chisel/run-owned-rocket-redirect-dcache-fate.sh
+```
+
+This uses the dedicated `RaveilOwnedRocketFateConfig`, build volume, and exact
+generated-graph check. The Rocket hook emits one following-cycle S1 record and
+the verifier requires its sequence, PC, address, and local tag to match the
+accepted/killed request, with `s1_kill=1` and `s2_kill=0`. The owned manager
+independently emits A/D records only for `0x08000100`; the exact run contains
+two successful `Get` pairs for the before/after loads, sources 8240 and 8224 in
+`[8224,8256)`, and no `Put`. The two loads match and avoid the magic store
+value. The marker deliberately reports
+`transport_token_correlation=not-carried`: manager A/D source matching does not
+connect the Rocket token to TileLink and does not prove semantic initiator,
+general cancellation, resource match, or performance.
+
 The separate BOOM serialize-dispatch diagnostic waits for an empty ROB/LSU but
 retains the OoO hardware, so it is not an in-order core or an area/energy
 ablation. Elaboration is not program execution; the separate smoke above is

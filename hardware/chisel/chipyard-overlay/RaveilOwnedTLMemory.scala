@@ -16,6 +16,7 @@ case class RaveilOwnedMemoryParams(
   controlSize: BigInt = 4 * 1024,
   expectedClientSourceStart: Int = 0,
   expectedClientSourceEnd: Int = 1,
+  fateAuditAddress: Option[BigInt] = None,
   // The first CPU adapter deliberately uses the uncached peripheral path so
   // mapped accesses are intended to reach the owned manager. CPU execution is
   // still unverified. Moving this boundary to a matched local-memory resource
@@ -54,6 +55,8 @@ case class RaveilDCacheOriginField()
   */
 class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameters)
     extends LazyModule {
+  private val beatBytes = 4
+
   require(isPow2(params.size))
   require(isPow2(params.controlSize))
   require(params.base % params.size == 0)
@@ -61,8 +64,11 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
   require(params.base + params.size <= params.controlBase)
   require(params.expectedClientSourceStart >= 0)
   require(params.expectedClientSourceEnd > params.expectedClientSourceStart)
+  params.fateAuditAddress.foreach { address =>
+    require(address >= params.base && address < params.base + params.size)
+    require(address % beatBytes == 0)
+  }
 
-  private val beatBytes = 4
   private val words = (params.size / beatBytes).toInt
   private val device = new SimpleDevice(
     "raveil-owned-memory",
@@ -106,6 +112,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responsePhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val responseExpectedClient = RegInit(false.B)
     val responseDcacheOrigin = RegInit(false.B)
+    val responseFateAudit = RegInit(false.B)
+    val responseFateAuditSequence = RegInit(0.U(16.W))
+    val responseFateAuditOpcode = RegInit(0.U(tl.a.bits.opcode.getWidth.W))
 
     val phase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val acceptedCount = RegInit(0.U(32.W))
@@ -136,6 +145,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val lastCompletedSource = RegInit(0.U(32.W))
     val lastAcceptedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val lastCompletedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val fateAuditNextSequence = RegInit(1.U(16.W))
 
     val requestAddress = tl.a.bits.address
     val dataRequest = requestAddress >= params.base.U &&
@@ -212,6 +222,21 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responsePhase := phase
       responseExpectedClient := expectedClientRequest
       responseDcacheOrigin := dcacheOriginRequest
+      responseFateAudit := false.B
+      params.fateAuditAddress.foreach { address =>
+        when(requestAddress === address.U) {
+          assert(fateAuditNextSequence =/= "hffff".U,
+            "Raveil owned-memory fate audit sequence exhausted")
+          responseFateAudit := true.B
+          responseFateAuditSequence := fateAuditNextSequence
+          responseFateAuditOpcode := tl.a.bits.opcode
+          fateAuditNextSequence := fateAuditNextSequence + 1.U
+          printf("RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=%d address=0x%x source=%d opcode=%d size=%d dcache_origin=%d expected_source=%d phase=%d\n",
+            fateAuditNextSequence, requestAddress, tl.a.bits.source,
+            tl.a.bits.opcode, tl.a.bits.size, dcacheOriginRequest,
+            expectedClientRequest, phase)
+        }
+      }
       when(controlRequest && get) {
         responseControlData := controlReadData
       }
@@ -266,6 +291,13 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseHeldData := freshResponseData
     }
     when(tl.d.fire) {
+      when(responseFateAudit) {
+        printf("RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=%d source=%d opcode=%d size=%d denied=%d corrupt=%d request_opcode=%d phase=%d\n",
+          responseFateAuditSequence, tl.d.bits.source, tl.d.bits.opcode,
+          tl.d.bits.size, tl.d.bits.denied, tl.d.bits.corrupt,
+          responseFateAuditOpcode, responsePhase)
+      }
+      responseFateAudit := false.B
       responseHeld := false.B
       busy := false.B
       when(responseIsData && !responseError) {
@@ -344,5 +376,17 @@ class WithRaveilOwnedMemorySourceRange(start: Int, end: Int)
   case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
     expectedClientSourceStart = start,
     expectedClientSourceEnd = end
+  ))
+})
+
+class WithRaveilOwnedMemorySourceRangeAndFateAudit(
+    start: Int,
+    end: Int,
+    auditAddress: BigInt)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    fateAuditAddress = Some(auditAddress)
   ))
 })

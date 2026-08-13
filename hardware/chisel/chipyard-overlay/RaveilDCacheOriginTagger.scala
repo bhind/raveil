@@ -78,6 +78,14 @@ class RaveilOwnedRocketConfig extends Config(
   new chipyard.RocketConfig
 )
 
+class RaveilOwnedRocketFateConfig extends Config(
+  new WithRaveilOwnedBuildSystem ++
+  new WithRaveilOwnedMemorySourceRangeAndFateAudit(8224, 8256, 0x08000100L) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.RocketConfig
+)
+
 class RaveilOwnedSmallBoomConfig extends Config(
   new WithRaveilOwnedBuildSystem ++
   new WithRaveilOwnedMemorySourceRange(8288, 8320) ++

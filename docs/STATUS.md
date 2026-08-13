@@ -447,6 +447,23 @@ cancellation or TileLink A/D completion, general absence of a memory side
 effect, multi-live-token support, durable token transport, semantic initiator
 identity, resource matching, or performance evidence.
 
+The same exact redirect workload now has a separate pinned Rocket DCache-fate
+diagnostic. One cycle after the accepted sequence-2 request, the Rocket-facing
+S1 record directly reports `s1_kill=1` and `s2_kill=0`; its sequence, PC,
+address, and local DCache tag match the existing killed request. An independent
+owned-manager monitor records exactly two successful `Get` A/D pairs for the
+before/after loads, with sources 8240 and 8224 inside the exact generated
+Rocket manager range `[8224,8256)`, and records no `Put` for the probed address.
+Both loads observe `0x682513da`. This is bounded `rtl-simulation-functional`
+evidence for a Rocket-local request/S1 correlation and separate manager-local
+A/D source correlations in that exact log. No token is carried from Rocket
+through DCache/TileLink, so it is not semantic-initiator attribution, general
+transport cancellation or side-effect proof, resource matching, or a
+performance, power, area, OoO, FPGA, silicon, novelty, non-infringement,
+patent-clearance, or FTO result. Pre-request kill, later-cycle kill/exception,
+replay, reset/epoch, multi-live-token operation, and the BOOM lifecycle probe
+remain open.
+
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
 and `PutPartial` requests, translates them into an upstream-type-free owned

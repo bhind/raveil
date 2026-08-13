@@ -742,6 +742,27 @@ labelled unknown.
 - State: corrected for one pinned workload; no predictor behavior or
   performance generalization is made.
 
+## Exact graph and numeric verifiers must admit new diagnostic identities
+
+- Symptom: the first Rocket DCache-fate build completed RTL elaboration and
+  Verilator compilation but stopped because the source-map verifier admitted
+  only `RaveilOwnedRocketConfig`; the next run completed RTL but rejected the
+  same address when Chisel printed additional hexadecimal leading zeros.
+- Cause: the diagnostic introduced an exact new config identity while the
+  topology verifier retained a single old name, and the fate verifier compared
+  a numeric address as presentation text rather than as an integer.
+- Prevention: enumerate every admitted generated graph by exact filename and
+  compare numeric RTL fields after base-aware parsing. Keep schema, cardinality,
+  source-range, opcode, and A/D ordering checks strict.
+- Detection: require the graph filename to match exactly one admitted config,
+  reject all other names, and include zero-padded numeric encodings plus
+  request/S1 tag mismatches in verifier mutation tests.
+- Evidence: T-0042 `verify_owned_cpu_source_map.py`,
+  `verify_owned_rocket_redirect_dcache_fate.py`, the two fail-closed runs, and
+  the subsequent successful exact Rocket RTL run.
+- State: corrected for the admitted Rocket and Rocket-fate configs and the
+  bounded fate schema; future configs remain fail closed until enumerated.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

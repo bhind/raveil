@@ -348,11 +348,23 @@ the probe and another after it; an explicit dependency prevents the one-entry
 observer from accepting the probe while the first load remains open. Both
 loads observe the same non-magic value in the exact run. The observer retains a
 load until both WB and its matching response have appeared, and rejects an
-overlapping candidate rather than silently reassigning the live entry. This
-establishes only the observed same-cycle post-request bookkeeping and bounded
+overlapping candidate rather than silently reassigning the live entry. That
+earlier diagnostic establishes only the observed same-cycle post-request
+bookkeeping and bounded
 differential readback; it does not establish multi-token support, pre-request
 suppression, later-cycle cancellation, DCache `s1_kill`, TileLink A/D fate, or
 general absence of a side effect.
+An optional exact-address manager audit and a second pinned Rocket patch now
+separate the next two boundaries. The Rocket patch retains the accepted
+sequence-2 request's PC, address, and local tag for one cycle and directly
+samples the Rocket-facing `s1_kill`; the exact run reports `s1_kill=1` and the
+hardwired `s2_kill=0`. The manager audit independently records each matching A
+acceptance and holds its source/opcode/size/phase until D completion. In the
+bounded redirect log it sees the two before/after load `Get` pairs and no
+wrong-path store `Put`. Manager A/D source equality is a local transport
+correlation only: the Rocket token/tag is not carried across DCache,
+Fragmenter, or TileLink, so these observations cannot be joined into semantic
+initiator identity or a general cancellation invariant.
 The CPU runner also constructs a probe ELF with one four-byte writable
 `PT_LOAD` at `0x08000000`, verifies that exact program-header and symbol layout,
 and invokes the simulator without `+loadmem`. In one manager lifetime the

@@ -11,12 +11,15 @@ import sys
 
 EXPECTED = {
     "rocket": {
-        "config": "RaveilOwnedRocketConfig",
+        "configs": (
+            "RaveilOwnedRocketConfig",
+            "RaveilOwnedRocketFateConfig",
+        ),
         "input": (257, 258),
         "expanded": (8224, 8256),
     },
     "boom": {
-        "config": "RaveilOwnedSmallBoomConfig",
+        "configs": ("RaveilOwnedSmallBoomConfig",),
         "input": (259, 260),
         "expanded": (8288, 8320),
     },
@@ -46,10 +49,17 @@ def main() -> int:
     text = raw.decode("utf-8")
     expected = EXPECTED[cpu]
 
-    if expected["config"] not in graph.name:
+    matching_configs = tuple(
+        config
+        for config in expected["configs"]
+        if graph.name == f"chipyard.harness.TestHarness.{config}.graphml"
+    )
+    if len(matching_configs) != 1:
         raise SystemExit(
-            f"wrong graph for {cpu}: expected {expected['config']} in {graph.name}"
+            f"wrong graph for {cpu}: expected one of {expected['configs']}, "
+            f"got {graph.name}"
         )
+    config = matching_configs[0]
     if source_range(text, "serial_tl_0") != (0, 256):
         raise SystemExit("serial/SimTSI source range drifted")
     if source_range(text, "Core 0 DCache MMIO") != expected["input"]:
@@ -70,7 +80,7 @@ def main() -> int:
 
     print(
         "OWNED-CPU-SOURCE-MAP-V1 status=OK "
-        f"cpu={cpu} config={expected['config']} "
+        f"cpu={cpu} config={config} "
         f"input_mmio_range={expected['input'][0]}:{expected['input'][1]} "
         f"manager_mmio_range={observed_expanded[0]}:{observed_expanded[1]} "
         "serial_range=0:8192 fragmenter_factor=32 "
