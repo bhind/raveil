@@ -99,4 +99,9 @@ the first, lifecycle staging includes the interval from the preceding rearm to
 release; the nested provider window is separately fixed at 648 cycles. This
 keeps candidate control progress in end-to-end accounting while preserving a
 common provider boundary. The implementation note is not commissioning data;
-EXP-0007 must still freeze and run the complete 1/4 matrix.
+EXP-0007 subsequently froze and passed the complete 1/4 matrix. EXP-0008 then
+passed the same provider/order/release/rearm/resource boundary for all 256
+fresh inputs in each primary and diagnostic session. This verifies the accepted
+boundary in RTL simulation; it does not extend the decision to a product DMA,
+general semantic initiator, energy, synthesis timing, area, or other Graph
+organizations.

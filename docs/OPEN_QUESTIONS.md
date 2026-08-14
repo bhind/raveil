@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -65,8 +65,10 @@ resolves it.
   EXP-0008 now freezes the nested-prefix and paired-latency analysis before
   data. Its first collection preserved all completed primary sessions but hit
   a hardcoded operational timeout in the diagnostic column; a hash-bound retry
-  of that diagnostic is now the only campaign recovery step. Its result can resolve only the
-  bounded latency/traffic slice; energy, timing, area, IP disposition, and the
+  of that diagnostic completed and the full matrix is sealed. The bounded
+  latency/traffic question is now answered in favor of continuing: the
+  64-input upper correct-latency bound is 0.2086002 and break-even is input 1.
+  Energy, timing, area, IP disposition, and the
   missing organizations remain open even if latency does not trigger no-go.
   The earlier
   source survey found

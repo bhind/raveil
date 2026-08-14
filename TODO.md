@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0044 install-once repeated-input boundary |
+| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0044 remaining matched measurement gates |
 | **P1 — next** | Start only after P0's recorded exit conditions pass. | — |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -715,7 +715,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   3,600-second timeout at invocation 115. Preserve its failed raw seal and do
   not reuse its RUN-ID. The operational-only recovery authority and manifest
   are now frozen; import all three completed primary logs by exact hash without
-  rerunning them, and recollect only the diagnostic with 10,800 seconds.
+  rerunning them, and recollect only the diagnostic with 10,800 seconds. This
+  recovery is complete and EXP-0008 returns
+  `advance-partial-latency-traffic`: the 64-input latency no-go and break-even
+  rules do not fire. Keep T-0044 open. Next work must separately preregister
+  the energy proxy, matched synthesis timing/area, IP disposition, and missing
+  VLIW/CGRA, elastic, stream, and hybrid organization evidence; do not infer
+  those passes from latency/traffic.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

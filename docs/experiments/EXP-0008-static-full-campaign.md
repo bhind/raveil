@@ -1,6 +1,6 @@
 # EXP-0008: Static Graph nested-prefix latency/traffic campaign
 
-Status: In progress
+Status: Completed
 Evidence class: RTL simulation latency/traffic campaign
 Date: 2026-08-14
 Task: T-0044
@@ -175,3 +175,98 @@ The runtime session artifact is independently bound as
 `1b097009c39e773b0c567ceafded69be95be11d5b0210141d300423467edea4b`;
 the frozen policy never treats a separate build-only artifact as byte-equal
 session evidence.
+
+## Result
+
+Recovery derivation commit
+`68ae28f4db067efd987b150bfb8a9792948404a4` parsed the completed raw matrix
+without rerunning any simulator. Every one of 256 ordered fresh inputs matches
+the independent oracle across all candidates. Matrix completeness, common
+resource identity, common fixture initiator, execution-window meaning,
+one-process/reset/installation/no-reload, accounting, input order, and nested
+prefix checks all pass. Secondary ablation was not activated.
+
+The primary result is:
+
+| Prefix | Graph cumulative total | Rocket cumulative total | BOOM cumulative total | Graph/Rocket correct-latency ratio, 95% interval |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 4,233 | 65,804 | 75,467 | 0.0643274 [exact] |
+| 4 | 16,932 | 124,561 | 163,128 | 0.1359334 [0.1358440, 0.1359814] |
+| 16 | 67,728 | 359,401 | 513,772 | 0.1884469 [0.1884008, 0.1884715] |
+| 64 | 270,912 | 1,298,761 | 1,916,377 | 0.2085927 [0.2085784, 0.2086002] |
+| 256 | 1,083,648 | 5,056,201 | 7,526,797 | 0.2143206 [0.2143168, 0.2143226] |
+
+At prefix 256, execution-window medians are 3,072 cycles for Graph, 14,539
+for Rocket, and 21,893 for BOOM. Graph/Rocket paired execution ratio is
+0.2112938 with an exact observed median interval; Graph/BOOM is 0.1403188.
+Graph is input-invariant at 3,072 cycles. Rocket ranges 14,539--14,594 and BOOM
+21,889--21,897 across the finite seed schedule; both median 95% intervals
+collapse to their respective medians.
+
+The exact 256-input phase totals are:
+
+| Candidate | Installation | Staging | Execution | Completion | Validation | Publication | Total | Amortized total/input |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Static Graph | 0 | 165,888 | 786,432 | 256 | 131,072 | 0 | 1,083,648 | 4,233.000 |
+| Rocket in-order | 46,186 | 173,075 | 3,722,039 | 4,096 | 1,110,805 | 0 | 5,056,201 | 19,750.785 |
+| BOOM OoO | 46,285 | 174,559 | 5,604,833 | 3,584 | 1,697,536 | 0 | 7,526,797 | 29,401.551 |
+| BOOM serialize-dispatch, diagnostic | 46,524 | 200,351 | 18,118,159 | 25,375 | 4,047,616 | 0 | 22,438,025 | 87,648.535 |
+
+Each input performs 1,280 useful loads, 1,024 useful adds, 256 useful stores,
+and 256 outputs. Graph exposes 1,280 reads plus 256 writes, 6,144 execution
+bytes, and 1,536 transactions; each CPU exposes 800 reads plus 256 writes,
+4,224 bytes, and 1,056 transactions. Accepted equals completed, pending is
+zero, and observed request-stall and response-backpressure cycles are zero.
+Graph schedule activity is 3,072 cycles. CPU frontend and rename/ROB/issue/LSU
+activity are unavailable, not recorded as zero. BOOM serialize-dispatch has a
+70,774-cycle median and remains diagnostic-only.
+
+## Decision and evidence boundary
+
+RFC-0005 latency no-go does not trigger: at 64 fresh inputs the upper 95%
+correct-latency bound versus Rocket is 0.2086002, below the frozen 1.05
+threshold. Cumulative configuration break-even occurs at invocation 1. The
+bounded decision is `advance-partial-latency-traffic`.
+
+This does not establish RFC-0005 go. Energy proxy, synthesis timing, area, IP
+disposition, and VLIW/CGRA, elastic, stream, and hybrid organizations remain
+unevaluated. The finite deterministic seed schedule is not an unbounded input
+population, simulator wall-clock is operations-only, and Graph toolchain
+identity remains recipe/version rather than complete byte identity. T-0044
+stays open.
+
+## Evidence, commands, and replay
+
+The complete report is SHA-256
+`1e52c4e213cb19cb2455cfef67077d3d3acb959bfb834c24e6b12e932d2f7a65`.
+Raw seal SHA-256 is
+`7c90f8a4a09291f5269e19d1425d1eac1a7915b8b3abcc4f16eb7206f438eeef`.
+The report and seal are under ignored RUN-ID
+`artifacts/research/EXP-0008/20260814T153738Z-0203248-campaign256-recovery/`;
+raw and derived evidence remain separate.
+
+Successful operations-only simulator times were 43.886987 seconds for Graph,
+2,051.982703 for Rocket, 2,722.331250 for BOOM, and 8,005.834626 for the
+diagnostic. The successful evidence sessions total 12,824.035566 seconds
+(3.562 hours). Including the retained 3,614.052009-second failed diagnostic
+attempt yields 16,438.087575 seconds (4.566 hours), within the initial 2--6
+hour warm-cache matrix estimate. These are operational facts only.
+
+From a clean checkout of the result commit with the same pinned external
+checkouts and preserved ignored evidence, replay derivation and seal validation
+with:
+
+```sh
+python3 -m raveil.t0044_campaign_recovery derive \
+  --run-dir artifacts/research/EXP-0008/20260814T153738Z-0203248-campaign256-recovery \
+  --base-manifest benchmarks/manifests/t0044-fixture-campaign-v1.json \
+  --recovery-manifest benchmarks/manifests/t0044-fixture-campaign-recovery-v1.json
+python3 -m unittest tests.test_t0044_campaign_recovery \
+  tests.test_t0044_campaign tests.test_t0044_fixture tests.test_t0044_repeated -v
+python3 .agents/skills/raveil-task-governance/scripts/check_records.py
+git diff --check
+```
+
+Because `derive` is append-protecting, replay into a copied unsealed RUN-ID
+directory or compare the sealed report hash above; do not overwrite the sealed
+evidence directory.

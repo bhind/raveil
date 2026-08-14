@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -325,6 +325,20 @@ manifest SHA-256
 `c9226d05f348c740801b7cbceb673514495c3f5fc15c1192629f31b2f58a1eb6`
 are frozen before retry data. The new RUN-ID is
 `20260814T153738Z-0203248-campaign256-recovery`.
+That recovery completed and sealed EXP-0008. All 256 fresh inputs pass the
+oracle and all matrix/resource/fixture/window/session/accounting/prefix gates.
+At 256 inputs, execution medians are Graph 3,072, Rocket 14,539, and BOOM
+21,893 cycles; Graph traffic is 1,536 versus each CPU's 1,056 transactions.
+At the claim-bearing 64-input prefix, cumulative six-phase Graph/Rocket ratio
+is 0.2085927 with 95% interval [0.2085784, 0.2086002], below the 1.05 latency
+no-go threshold, and break-even occurs at invocation 1. The decision is
+`advance-partial-latency-traffic`: execution latency/traffic and end-to-end
+reuse amortization are eligible RTL-simulation evidence, but energy, synthesis
+timing, area, IP disposition, and the missing Graph organizations remain open.
+Report SHA-256 is
+`1e52c4e213cb19cb2455cfef67077d3d3acb959bfb834c24e6b12e932d2f7a65`;
+raw-seal SHA-256 is
+`7c90f8a4a09291f5269e19d1425d1eac1a7915b8b3abcc4f16eb7206f438eeef`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0042 complete; T-0044 EXP-0008 full latency/traffic campaign frozen before data**
+State: **T-0042 complete; T-0044 EXP-0008 latency/traffic campaign completed with advance-partial**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -201,7 +201,11 @@ merely because a branch or partial implementation already exists.
    sealed an operational timeout after all primary sessions completed; a
    separately frozen recovery may import those exact primary raw hashes and
    rerun only the diagnostic serialize session. It may not alter the estimator,
-   decision thresholds, RTL, ELF, or sample count.
+   decision thresholds, RTL, ELF, or sample count. Recovery is now complete:
+   the 64-input correct-latency upper 95% bound is 0.2086002 versus the frozen
+   1.05 threshold, and break-even is invocation 1. The bounded result is
+   `advance-partial-latency-traffic`; matched energy/timing/area, IP, and the
+   other organizations remain the open T-0044 gates.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
