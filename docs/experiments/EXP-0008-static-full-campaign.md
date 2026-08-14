@@ -107,6 +107,19 @@ early-no-go decisions, terminal-marker draining, failed-run sealing, and
 EXP-0007 immutability. The implementation commit and machine-readable
 manifest must be frozen before any campaign command runs.
 
+## Frozen pre-registration
+
+Implementation authority is
+`fb8e95aca23da021918ed22d8798134d5ca99c5e`. Before any EXP-0008 RTL data,
+`benchmarks/manifests/t0044-fixture-campaign-v1.json` was frozen at SHA-256
+`2e2b71097bb88acf60904d17ce87ec6ec4399eaf1795a45c14542ee39f7d6359`.
+The single RUN-ID is `20260814T130018Z-4368066-campaign256`. The manifest fixes
+the full matrix, ordered 256-input session, five nested prefixes, fresh-input
+inference unit, first-invocation-fixed paired bootstrap, 100,000 resamples,
+64-input latency and break-even rules, all fail-closed conditions, identity
+expectations, raw/derived separation, failure sealing, disk/log/drain limits,
+and toolchain-byte limitation. No campaign command ran before this freeze.
+
 ## Estimate
 
 EXP-0007's two complete collections used 508.863150 operations-only seconds.

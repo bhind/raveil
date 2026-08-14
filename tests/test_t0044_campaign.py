@@ -14,6 +14,7 @@ from raveil.t0044_campaign import (
     _seal_failed_raw,
     _tail_has_prefix,
     build_report,
+    load_manifest,
 )
 from raveil.t0044_fixture import _observation, _session, verify_graph_log
 from tests.test_t0044_fixture import _graph_log
@@ -135,6 +136,16 @@ class FullCampaignTests(unittest.TestCase):
         source = (ROOT / "raveil/t0044_fixture.py").read_text(encoding="utf-8")
         self.assertIn("EXP-0007 commissioning account must be 1 or 4", source)
         self.assertIn("choices=(1, 4)", source)
+
+    def test_frozen_manifest_is_exact(self) -> None:
+        manifest = load_manifest(
+            ROOT / "benchmarks/manifests/t0044-fixture-campaign-v1.json")
+        self.assertEqual(manifest["sampling"]["prefixes"], list(PREFIXES))
+        self.assertEqual(manifest["session"]["full_account"], FULL_ACCOUNT)
+        self.assertEqual(
+            manifest["estimator"]["correct_latency_interval_95"],
+            "paired-bootstrap-ratio-with-first-invocation-fixed-once",
+        )
 
 if __name__ == "__main__":
     unittest.main()

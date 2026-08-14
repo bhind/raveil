@@ -13,4 +13,4 @@ inconclusive, and superseded experiments remain available.
 | [EXP-0005](EXP-0005-static-latency-traffic-pilot.md) | Completed pilot; paused | RTL simulation pilot | Execution/traffic eligible; repeated-installation lifecycle boundary remains |
 | [EXP-0006](EXP-0006-static-repeated-invocation-boundary.md) | Completed commissioning; paused | RTL simulation pilot | Install-once 1/4 passes; staging initiator meaning blocks repeated-account campaign |
 | [EXP-0007](EXP-0007-fixture-owned-input-staging.md) | Completed commissioning; advance | RTL simulation pilot | Common fixture-owned staging passes; full repeated campaign may be separately frozen |
-| [EXP-0008](EXP-0008-static-full-campaign.md) | In progress; pre-freeze | RTL simulation latency/traffic campaign | One 256-input session with nested 1/4/16/64/256 paired analysis |
+| [EXP-0008](EXP-0008-static-full-campaign.md) | In progress; frozen before data | RTL simulation latency/traffic campaign | One 256-input session with nested 1/4/16/64/256 paired analysis |

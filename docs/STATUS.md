@@ -307,8 +307,10 @@ new collector keeps EXP-0007 immutable, runs one 256-input session per matrix
 member, derives nested 1/4/16/64/256 prefixes, and adds paired execution plus
 six-phase correct-latency intervals with installation fixed once. It also
 records failed raw evidence, bounds disk/log/drain operations, and distinguishes
-missing activity from zero. Six campaign tests pass. This is pre-freeze
-implementation state only; no EXP-0008 RTL measurement or claim exists.
+missing activity from zero. Seven campaign tests pass. Implementation authority
+`fb8e95aca23da021918ed22d8798134d5ca99c5e` and manifest SHA-256
+`2e2b71097bb88acf60904d17ce87ec6ec4399eaf1795a45c14542ee39f7d6359`
+are frozen before data. No EXP-0008 RTL measurement or claim exists yet.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

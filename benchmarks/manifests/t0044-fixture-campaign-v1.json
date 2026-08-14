@@ -1,0 +1,257 @@
+{
+  "schema": "raveil.t0044-fixture-campaign-manifest/v1",
+  "experiment_id": "EXP-0008",
+  "status": "frozen-before-data",
+  "authority": {
+    "implementation_commit": "fb8e95aca23da021918ed22d8798134d5ca99c5e",
+    "governance_ancestor": "ae606dea3f74d6694eecbe91fc368b097f03758c",
+    "t0042_commit": "528fbe28a0dcdfbab65d4ae2995c0876857e053a",
+    "architecture_decision": "ADR-0047",
+    "commissioning_experiment": "EXP-0007"
+  },
+  "scope": {
+    "stage": "nested-prefix-1-4-16-64-256",
+    "primary": [
+      "static-graph",
+      "rocket-in-order",
+      "boom-ooo"
+    ],
+    "diagnostic_only": [
+      "boom-serialize-dispatch"
+    ],
+    "secondary_ablation": "not-activated",
+    "performance_scope": "latency-traffic-only",
+    "rfc0005_go": false
+  },
+  "matrix": {
+    "complete": [
+      "static-graph",
+      "rocket-in-order",
+      "boom-ooo",
+      "boom-serialize-dispatch"
+    ],
+    "configurations": {
+      "static-graph": "StaticStencilRegion:d4bf9395a510385f:fixture-v1",
+      "rocket-in-order": "chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig",
+      "boom-ooo": "chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig",
+      "boom-serialize-dispatch": "chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig"
+    }
+  },
+  "resource": {
+    "resource_sha256": "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7",
+    "fixture_contract_sha256": "64b14ad77baba722a0e9f5d6c7403783c07fcfd49c1b7c96cca1b7406be84861",
+    "single_ingress": true,
+    "maximum_outstanding_requests": 1,
+    "provider_request_buffer_depth": 0,
+    "provider_window_cycles": 648,
+    "release_edge": "response-consume-for-word-323",
+    "rearm_edge": "validation-response-consume-for-word-255"
+  },
+  "workload": {
+    "name": "rfc-0005-five-point-stencil-u32",
+    "input_shape": [18, 18],
+    "output_shape": [16, 16],
+    "input_words": 324,
+    "output_words": 256,
+    "formula": "u32(((index+1)*u32(seed*2654435761))^u32(index<<(seed&7))^u32(seed*17))",
+    "seed_schedule": "seed-equals-invocation-index-1-through-256",
+    "oracle": "independent-host-static-stencil-oracle-v1",
+    "result_reuse": false,
+    "intermediate_reuse": false
+  },
+  "session": {
+    "processes_per_candidate": 1,
+    "resets_per_candidate": 1,
+    "installation_count": 1,
+    "artifact_reloads": 0,
+    "re_elaboration_or_reboot_between_invocations": false,
+    "full_account": 256
+  },
+  "phases": {
+    "order": [
+      "installation",
+      "staging",
+      "execution",
+      "completion",
+      "validation",
+      "publication"
+    ],
+    "installation": "reset-through-first-fixture-trigger-once",
+    "staging": "initial-trigger-or-previous-rearm-through-word-323-response-consume",
+    "provider_window": "fixture-trigger-through-word-323-response-consume-exact-648",
+    "execution": "common-release-through-final-candidate-memory-response",
+    "completion": "execution-quiescence-through-validation-admission",
+    "validation": "256-ordered-output-read-responses",
+    "publication": "zero-cycle-marker-publication",
+    "total": "sum-of-six-disjoint-phases"
+  },
+  "metrics": {
+    "cycles": [
+      "installation",
+      "staging",
+      "execution",
+      "completion",
+      "validation",
+      "publication",
+      "session-total",
+      "amortized-total",
+      "execution-window",
+      "fixture-provider-window"
+    ],
+    "traffic": [
+      "accepted-read",
+      "accepted-write",
+      "completed-read",
+      "completed-write",
+      "bytes",
+      "stall",
+      "backpressure"
+    ],
+    "useful_operations": [
+      "load",
+      "add",
+      "store",
+      "output"
+    ],
+    "activity": [
+      "fetch-decode-register",
+      "rename-rob-issue-lsu",
+      "graph-schedule-control"
+    ],
+    "missing_activity_policy": "unavailable-is-not-zero",
+    "simulator_wall_clock_role": "operations-only"
+  },
+  "sampling": {
+    "inference_unit": "fresh-input-version",
+    "prefix_relationship": "nested-prefixes-of-one-256-input-session",
+    "prefixes": [1, 4, 16, 64, 256],
+    "new_inputs_by_prefix": {
+      "1": 1,
+      "4": 3,
+      "16": 12,
+      "64": 48,
+      "256": 192
+    },
+    "deterministic_rerun_is_not_sample": true,
+    "minimum_for_rfc0005_numerical_no_go": 64,
+    "run_id": "20260814T130018Z-4368066-campaign256"
+  },
+  "estimator": {
+    "candidate_point": "median-across-fresh-input-versions",
+    "candidate_interval_95": "exact-if-observed-input-invariant-else-percentile-bootstrap-median",
+    "paired_execution_point": "median-of-same-input-graph-over-cpu-ratios",
+    "paired_execution_interval_95": "percentile-bootstrap-paired-median",
+    "correct_latency_point": "ratio-of-prefix-cumulative-six-phase-cycles",
+    "correct_latency_interval_95": "paired-bootstrap-ratio-with-first-invocation-fixed-once",
+    "bootstrap_resamples": 100000,
+    "candidate_seed_base": 27007,
+    "paired_seed_base": 37007,
+    "interval_claim_bearing_prefixes": [64, 256],
+    "finite-seed-schedule_scope": "empirical-prefix-not-unbounded-workload-population"
+  },
+  "decision_rules": {
+    "functional_or_fairness_failure": "fail-closed-no-claim",
+    "rfc0005_correct_latency_ratio": "static-graph-over-rocket",
+    "latency_no_go_at_64": "upper-95-percent-bound-greater-than-1.05",
+    "configuration_break_even": "cumulative-six-phase-graph-no-greater-than-rocket-by-64",
+    "numeric_decision_prefix": 64,
+    "continue_to_256_after_latency_result": true,
+    "go_from_latency_traffic_only": false,
+    "energy_timing_area_rules": "not-evaluated",
+    "other_organizations": "not-evaluated"
+  },
+  "environment": {
+    "path": "pinned-linux-amd64-docker-verilator",
+    "host": "apple-silicon-non-authoritative",
+    "chipyard_revision": "ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1",
+    "rocket_chip_revision": "749a3eae9678bc70b029c5b9091fae33fad539c4",
+    "toolchain_identity": "version-and-recipe-hash",
+    "toolchain_byte_identity_limitation": "floating-apt-and-unchecksummed-scala-cli-inherited"
+  },
+  "identity_policy": {
+    "required_per_session": [
+      "configuration_sha256",
+      "source_sha256",
+      "artifact_sha256",
+      "toolchain_sha256",
+      "resource_sha256",
+      "contract_sha256",
+      "input_sha256",
+      "oracle_output_sha256",
+      "observed_output_sha256"
+    ],
+    "stable_expected_by_variant": {
+      "static-graph": {
+        "implementation": "static-graph",
+        "implementation_configuration": "StaticStencilRegion:d4bf9395a510385f:fixture-v1",
+        "source_sha256": "739ed0e3a4dcdff546761d337261a2b2b67f49911224fb982307e01f702d38fd",
+        "configuration_sha256": "f007981d5a593ccc7c7c34d0a498179be8fe55881472cb55af2a0dbd989267e1",
+        "toolchain_sha256": "2009341570a17fbe47fb9600be97eec8fa50b1dceba0b04357c2eb01fe947037",
+        "resource_sha256": "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7",
+        "contract_sha256": "64b14ad77baba722a0e9f5d6c7403783c07fcfd49c1b7c96cca1b7406be84861"
+      },
+      "rocket-in-order": {
+        "implementation": "rocket-in-order",
+        "implementation_configuration": "chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig",
+        "source_sha256": "44430323d4e62ba2b48c0a8f611536740cfd4dc4dc4a8a5e1cd806abb447e65d",
+        "configuration_sha256": "d6e3bfcedf2b9ec1a688469c2f0171fe704dac1bc85423dbeb21a65aaae5fcd2",
+        "toolchain_sha256": "ae2488b8904a8f6246a11df60be85bc08e965c3aee0518c976319bc34d448eee",
+        "resource_sha256": "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7",
+        "contract_sha256": "64b14ad77baba722a0e9f5d6c7403783c07fcfd49c1b7c96cca1b7406be84861"
+      },
+      "boom-ooo": {
+        "implementation": "boom-ooo",
+        "implementation_configuration": "chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig",
+        "source_sha256": "ccc85c069dc760fca23609ca804b1e8e3737e3eb7404c7b79162b3af74ea774a",
+        "configuration_sha256": "ae6a2f9479b3d96f8fc24870b44f10e630b08a17ddcb8ec256a4a9dd4f1e9ab0",
+        "toolchain_sha256": "ae2488b8904a8f6246a11df60be85bc08e965c3aee0518c976319bc34d448eee",
+        "resource_sha256": "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7",
+        "contract_sha256": "64b14ad77baba722a0e9f5d6c7403783c07fcfd49c1b7c96cca1b7406be84861"
+      },
+      "boom-serialize-dispatch": {
+        "implementation": "boom-ooo",
+        "implementation_configuration": "chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig",
+        "source_sha256": "812f2127cddf6afe2116006e3fa2361b1dfffa1b59f29151439b5c33d197e336",
+        "configuration_sha256": "9dee2b77536883bcb1030d1f6f5d439f46202a10c14bd5ead1973f11813fba7c",
+        "toolchain_sha256": "ae2488b8904a8f6246a11df60be85bc08e965c3aee0518c976319bc34d448eee",
+        "resource_sha256": "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7",
+        "contract_sha256": "64b14ad77baba722a0e9f5d6c7403783c07fcfd49c1b7c96cca1b7406be84861"
+      }
+    },
+    "stable_across_full_session": true,
+    "artifact_difference_policy": "account-256-artifact-bound-per-session-no-cross-account-equality",
+    "commissioning_evidence": "EXP-0007-hashes-used-for-identity-only-not-performance-values"
+  },
+  "operations": {
+    "minimum_free_bytes_before_collection": 5368709120,
+    "maximum_raw_log_bytes_per_candidate": 2147483648,
+    "terminal_marker_drain_timeout_seconds": 120,
+    "partial_failure_evidence": "append-once-failure-record-and-failed-raw-seal",
+    "host_wall_clock_use": "operations-only"
+  },
+  "stop_conditions": [
+    "oracle-mismatch",
+    "resource-equality-failure",
+    "unexplained-traffic",
+    "required-accounting-missing",
+    "source-config-toolchain-drift",
+    "artifact-or-session-drift",
+    "incomplete-matrix",
+    "execution-window-meaning-differs",
+    "restart-reset-reload-observed",
+    "fixture-overlap-or-early-candidate-acceptance",
+    "fixture-order-count-pending-or-release-failure",
+    "fixture-rearm-failure",
+    "input-byte-or-order-mismatch",
+    "prefix-relationship-failure",
+    "raw-log-limit-exceeded",
+    "insufficient-free-space"
+  ],
+  "evidence": {
+    "raw": "one-256-input-command-log-per-variant-plus-frozen-manifest",
+    "derived": "one-report-with-five-nested-prefix-summaries",
+    "seal": "sha256-manifest-after-derived-report",
+    "evidence_class": "rtl-simulation-latency-traffic-campaign",
+    "clean_checkout_replay": true
+  }
+}

@@ -62,8 +62,8 @@ resolves it.
   the same boundary on Graph, Rocket, BOOM, and diagnostic BOOM and closes this
   staging-initiator question. The separately preregistered 1/4/16/64/256
   campaign and the remaining T-0044 organizations/physical metrics stay open.
-  EXP-0008 now fixes the proposed nested-prefix and paired-latency analysis in
-  code, but remains pre-freeze and has no data. Its result can resolve only the
+  EXP-0008 now freezes the nested-prefix and paired-latency analysis before
+  data and is ready for its single 256-input session. Its result can resolve only the
   bounded latency/traffic slice; energy, timing, area, IP disposition, and the
   missing organizations remain open even if latency does not trigger no-go.
   The earlier
