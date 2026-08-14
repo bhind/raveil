@@ -24,12 +24,10 @@ resolves it.
   freezes the fresh-input inference rule, paired estimator, repetitions, 95%
   interval construction, and latency/traffic stop rules before pilot data.
   EXP-0008 now resolves the bounded 64/256-input latency/traffic campaign with
-  `advance-partial-latency-traffic`; ADR-0048 leaves its immutable remote
-  promotion pending rather than treating local summaries as raw evidence. A
-  local verifier now reproduces all 20 sealed file hashes and recovery lineage;
-  the real immutable copy, download check, marker readback, and receipt remain
-  pending. The matched synthesis/energy/area boundary and full T-0044
-  organization matrix remain unresolved.
+  `advance-partial-latency-traffic`; ADR-0048's immutable remote promotion is
+  now complete for both sealed RUNs, with download checks, marker readbacks,
+  and a tracked 20-file receipt. This durability result does not resolve the
+  matched synthesis/energy/area boundary or full T-0044 organization matrix.
 - Where is the measured boundary between static, elastic dataflow, stream, and
   hybrid Graph Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?

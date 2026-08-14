@@ -5,8 +5,7 @@ Evidence class: RTL simulation latency/traffic campaign
 Date: 2026-08-14
 Task: T-0044
 Authority: RFC-0004, RFC-0005, ADR-0039, ADR-0046, ADR-0047, EXP-0007
-Promotion status: locally sealed; immutable remote copy and download
-verification pending under ADR-0048
+Promotion status: remotely durable under ADR-0048; T-0044 remains open
 
 ## Falsifiable question
 
@@ -247,13 +246,16 @@ The report and seal are under ignored RUN-ID
 `artifacts/research/EXP-0008/20260814T153738Z-0203248-campaign256-recovery/`;
 raw and derived evidence remain separate.
 
-ADR-0048 classifies this as locally sealed evidence. The retained failed RUN
-and completed recovery RUN have not yet been immutably copied and
-download-verified at their durable remote locators. Until a tracked
-non-sensitive promotion receipt records those checks, the result is not called
-remotely durable or externally promoted. This missing durability step does not
-change the bounded `advance-partial-latency-traffic` interpretation and does
-not authorize a simulator rerun.
+ADR-0048 durable promotion is complete for the retained failed RUN and completed
+recovery RUN. Each exact sealed directory was copied immutably to its logical
+`Raveil/research-data/EXP-0008/<RUN-ID>/` locator, verified with a download-based
+one-way content check, and received its completion marker last. Both marker
+readbacks matched byte-for-byte. The canonical non-sensitive receipt is
+`docs/experiments/receipts/EXP-0008-evidence-promotion.json`, SHA-256
+`3ea8b815fb0c83c9563f19c22820f14130be6cc9af5bcfa20508d3eb87699392`.
+It binds verifier revision `f08701398c0b87f9cc75e909952c809488a50b22`,
+rclone 1.75.0, all command exit statuses, 20 checked files, and 738,617,303
+checked bytes.
 
 The dedicated `raveil.t0044_evidence_promotion` adapter now verifies the exact
 failed and recovery RUN-IDs, source seal hashes, all listed relative paths,
@@ -268,9 +270,26 @@ python3 -m raveil.t0044_evidence_promotion verify
 recomputed 20 files and 738,617,303 bytes without invoking a simulator. Its
 fake-rclone suite covers source mutation, missing file, symlink, wrong size,
 wrong hash, completed remote refusal, download-check failure, marker readback
-mismatch, immutable transfer flags, and receipt field/secret rejection. Real
-remote transfer and the canonical receipt remain pending at this verifier
-implementation point.
+mismatch, immutable transfer flags, and receipt field/secret rejection. The
+real promotion command was:
+
+```sh
+python3 -m raveil.t0044_evidence_promotion promote \
+  --remote-root <configured-remote>:Raveil/research-data \
+  --receipt docs/experiments/receipts/EXP-0008-evidence-promotion.json
+```
+
+Both remote preflights returned the expected missing-path exit 3. Both
+immutable copies, both `check --download --one-way` operations, both marker
+uploads, and both marker readbacks returned exit 0. Verification completed at
+`2026-08-14T21:12:44Z`. No simulator or derivation command ran, and no sealed
+byte changed.
+
+This establishes exactly remotely durable RTL-simulation evidence. It does not
+establish silicon or FPGA evidence, product readiness, RFC-0005 go, T-0044
+completion, or a general workload speedup. Energy, synthesis timing, area, IP
+disposition, and VLIW/CGRA, elastic, stream, and hybrid organizations remain
+unevaluated.
 
 Successful operations-only simulator times were 43.886987 seconds for Graph,
 2,051.982703 for Rocket, 2,722.331250 for BOOM, and 8,005.834626 for the

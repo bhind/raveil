@@ -339,22 +339,20 @@ Report SHA-256 is
 `1e52c4e213cb19cb2455cfef67077d3d3acb959bfb834c24e6b12e932d2f7a65`;
 raw-seal SHA-256 is
 `7c90f8a4a09291f5269e19d1425d1eac1a7915b8b3abcc4f16eb7206f438eeef`.
-ADR-0048 now fixes the promotion boundary for this result. The retained failed
-RUN and completed recovery RUN are locally sealed but have no recorded
-immutable remote copy, download-based verification, marker-last completion,
-or tracked promotion receipt. The latency/traffic result may support the next
-reversible preregistered T-0044 experiment, but it is not remotely durable,
-externally promoted, RFC-0005 go, or T-0044 completion. The owner packet is
-`docs/guides/T-0044-EXP-0008-EVIDENCE-PROMOTION.md`; promotion must reuse the
-sealed bytes and must not rerun simulation.
-The repository now has a dedicated fail-closed EXP-0008 promotion verifier. It
-accepts only the two frozen RUN-IDs and expected seal/report/manifest hashes,
-recomputes every sealed file size and SHA-256, verifies recovery lineage and
-the complete non-symlink file set, rechecks source identity across transfer
-steps, and tests immutable-copy/download-check/marker-last behavior through a
-fake rclone boundary. Local verification covers 20 files and 738,617,303
-bytes. No remote command or receipt has yet completed, so the evidence remains
-locally sealed rather than remotely durable.
+ADR-0048's EXP-0008 promotion boundary is now verified. The dedicated
+fail-closed verifier accepted only the two frozen RUN-IDs and expected
+seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
+verified recovery lineage and the complete non-symlink file set, and rechecked
+source identity across transfer steps. Immutable copies of both RUNs at their
+logical `Raveil/research-data/EXP-0008/<RUN-ID>/` locators passed
+download-based one-way checks; completion markers were transferred last and
+read back byte-for-byte. The tracked receipt covers 20 files and 738,617,303
+bytes at
+`docs/experiments/receipts/EXP-0008-evidence-promotion.json`, SHA-256
+`3ea8b815fb0c83c9563f19c22820f14130be6cc9af5bcfa20508d3eb87699392`.
+This is remotely durable RTL-simulation evidence. It is not silicon, product,
+RFC-0005 go, T-0044 completion, or a general workload speedup; energy,
+synthesis timing, area, IP disposition, and missing organizations remain open.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

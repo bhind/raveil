@@ -213,7 +213,10 @@ merely because a branch or partial implementation already exists.
    T-0044 closeout, not the next reversible preregistered local experiment; it
    never authorizes a deterministic simulator rerun as another sample. The
    campaign-specific verifier and fake-rclone failure suite are implemented;
-   real remote execution and its receipt remain the durability exit work.
+   both RUNs now pass immutable remote copy, download verification, and
+   marker-last readback with a tracked receipt. This closes the durability
+   sub-gate only; energy, timing, area, IP, and missing organizations still
+   prevent T-0044 closeout.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
