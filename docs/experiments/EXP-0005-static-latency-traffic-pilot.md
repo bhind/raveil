@@ -101,3 +101,15 @@ gets a new RUN-ID; raw evidence is never overwritten after sealing.
 No EXP-0005 data existed when this record and manifest were frozen. The
 experiment status is in progress only because implementation and collection
 follow the immutable preregistration; it is not an unfrozen plan.
+
+## Instrumentation implementation (after freeze, before collection)
+
+The clean-checkout collector is `python3 -m raveil.t0044_pilot collect`; its
+exact invocation is documented in `hardware/chisel/README.md`. It refuses an
+existing RUN-ID or dirty tracked tree, runs all four variants for seeds 1--4,
+captures per-command environment/exit/wall-clock metadata, separates raw and
+derived files, and seals raw sizes and SHA-256 hashes. The CPU workload now
+binds its deterministic seed at compile time; BOOM serialize-dispatch uses the
+same core configuration and explicit CSR diagnostic macro. Graph includes its
+one launch cycle in the frozen execution boundary. Owned-boundary request
+stall and response-backpressure cycles are explicit markers on both paths.

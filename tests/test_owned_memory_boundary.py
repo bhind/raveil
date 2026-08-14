@@ -1415,7 +1415,7 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
         self.assertIn("p(DCacheTLNodeTransformKey)(p)(dcache.node)", boom_patch)
         self.assertIn("BundleMap.setAlignedDefaults(in(i).a.bits.user)", xbar_patch)
         self.assertIn("BundleMap.setAlignedDefaults(in(i).c.bits.user)", xbar_patch)
-        self.assertIn("cache_key=$RAVEIL_SOURCE_SHA256", runner)
+        self.assertIn("cache_key=$RAVEIL_CACHE_SOURCE_SHA256", runner)
         self.assertIn("persistent simulator source cache is incomplete", runner)
         self.assertIn("RAVEIL_ROCKET_HOOK_PATCH_SHA256", runner)
         self.assertIn("RAVEIL_BOOM_HOOK_PATCH_SHA256", runner)

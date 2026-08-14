@@ -161,6 +161,13 @@ conditional 95% interval rule, raw/derived separation, and fail-closed stop
 conditions. The pilot deliberately omits VLIW/CGRA, elastic/stream/hybrid,
 energy, synthesis timing, and area; T-0044 remains open and no go or RFC-0005
 numerical no-go may follow from four inputs.
+The post-freeze EXP-0005 instrumentation now accepts fresh seeds without result
+reuse, includes the Graph launch edge in execution, emits owned-boundary stall/
+backpressure and useful-work/byte counters, and adds the BOOM
+serialize-dispatch diagnostic runner. A clean-worktree collector writes 16 raw
+logs, exact command exit/wall-clock metadata, derived observations, and a
+SHA-256 raw seal under one exclusive ignored RUN-ID. No pilot result is
+recorded until that clean descendant executes successfully.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

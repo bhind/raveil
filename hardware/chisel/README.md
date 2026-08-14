@@ -209,6 +209,35 @@ keeps `dynamic_memory_traffic_equal=false` and
 OoO, FPGA, ASIC, silicon, or semantic-initiator result. General token lifecycle
 hardening remains T-0106.
 
+## EXP-0005 static latency/traffic pilot
+
+After checking out the clean `research/t-0044-static-pilot` commit and making
+the pinned ignored Chipyard checkout available, collect the frozen 1/4-input
+pilot with a new RUN-ID:
+
+```sh
+python3 -m raveil.t0044_pilot collect \
+  --repo . \
+  --manifest benchmarks/manifests/t0044-static-latency-traffic-pilot-v1.json \
+  --chipyard-source /path/to/pinned/chipyard \
+  --run-dir artifacts/research/EXP-0005/<RUN-ID>
+```
+
+The collector refuses an existing RUN-ID or dirty tracked worktree, executes
+fresh seeds 1 through 4 for static Graph, Rocket, BOOM, and the BOOM
+serialize-dispatch diagnostic, and keeps raw logs separate from derived JSON.
+The diagnostic retains BOOM's OoO structures and is not an “OoO-disabled CPU”.
+The Graph launch cycle is inside the EXP-0005 execution window; the 3,072-cycle
+fixed schedule therefore occupies a 3,073-cycle measured window. CPU and Graph
+markers expose owned-boundary request stalls and response backpressure. Missing
+frontend or rename/ROB/issue/LSU counters are recorded as unavailable, never
+as zero. Host wall-clock in `commands.jsonl` is operations metadata only.
+
+The collector seals raw byte counts and SHA-256 values after all 16 runs and
+derivation pass. Re-derivation uses `python3 -m raveil.t0044_pilot derive` on a
+copy with no existing `derived/` directory. Do not modify a sealed RUN-ID; use
+a new one for any changed source, configuration, or command.
+
 ## Pinned BOOM control source
 
 ADR-0040 selects the BOOM control through Chipyard 1.11.0 rather than a moving

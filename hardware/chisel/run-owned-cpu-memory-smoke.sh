@@ -60,14 +60,29 @@ cpu_config_fq=${RAVEIL_OWNED_CPU_CONFIG_FQ:?owned CPU fully qualified config is 
 cpu_label=${RAVEIL_OWNED_CPU_LABEL:?owned CPU label is required}
 build_volume=${RAVEIL_OWNED_CPU_BUILD_VOLUME:?owned CPU build volume is required}
 cpu_mode=${RAVEIL_OWNED_CPU_MODE:-regular}
+controlled_seed=${RAVEIL_CONTROLLED_SEED:-1}
+controlled_invocation=${RAVEIL_CONTROLLED_INVOCATION:-$controlled_seed}
+controlled_serialize=${RAVEIL_CONTROLLED_SERIALIZE_DISPATCH:-0}
 lock_sha=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc21da3d
 chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
+
+case "$controlled_seed:$controlled_invocation" in
+    *[!0-9:]*|0:*|*:0)
+        echo 'error: controlled seed/invocation must be positive integers and serialize must be 0 or 1' >&2
+        exit 1
+        ;;
+esac
+case "$controlled_serialize" in
+    0|1) ;;
+    *) echo 'error: controlled serialize must be 0 or 1' >&2; exit 1 ;;
+esac
 
 case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     regular:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-sim-build-v1) ;;
     regular:RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-sim-build-v1) ;;
     controlled:RaveilMatchedRocketConfig:chipyard.raveil.RaveilMatchedRocketConfig:rocket:raveil-chipyard-matched-rocket-controlled-v1) ;;
     controlled:RaveilMatchedSmallBoomConfig:chipyard.raveil.RaveilMatchedSmallBoomConfig:boom:raveil-chipyard-matched-boom-controlled-v1) ;;
+    controlled:RaveilMatchedSmallBoomConfig:chipyard.raveil.RaveilMatchedSmallBoomConfig:boom-serialize:raveil-chipyard-matched-boom-controlled-v1) ;;
     debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
     debug-sba:RaveilOwnedDebugSBASmallBoomConfig:chipyard.raveil.RaveilOwnedDebugSBASmallBoomConfig:boom:raveil-chipyard-owned-debug-sba-boom-sim-build-v1) ;;
     rocket-request-retire:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-request-retire-build-v1) ;;
@@ -176,11 +191,13 @@ input_sha256=$(
             "$linker" "$runner" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$cpu_mode" "$applied_patch_manifest"
+        printf 'controlled_seed=%s\ncontrolled_invocation=%s\ncontrolled_serialize=%s\ncpu_label=%s\n' \
+            "$controlled_seed" "$controlled_invocation" "$controlled_serialize" "$cpu_label"
     } |
         shasum -a 256 |
         awk '{print $1}'
 )
-source_sha256=$(
+cache_source_sha256=$(
     {
         shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_redirect_patch" \
             "$xbar_request_patch" "$tl_token_patch" "$dockerfile" |
@@ -190,6 +207,21 @@ source_sha256=$(
         shasum -a 256 |
         awk '{print $1}'
 )
+source_sha256=$cache_source_sha256
+if [ "$cpu_mode" = controlled ]; then
+    source_sha256=$(
+        {
+            shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" \
+                "$boom_hook_patch" "$xbar_request_patch" "$tl_token_patch" \
+                "$controlled_workload_s" "$controlled_workload_c" \
+                "$controlled_linker" "$controlled_verifier" "$runner" \
+                "$dockerfile" | awk '{print $1}'
+            printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" \
+                "$cpu_mode" "$applied_patch_manifest" \
+                "controlled_serialize=$controlled_serialize" "cpu_label=$cpu_label"
+        } | shasum -a 256 | awk '{print $1}'
+    )
+fi
 
 docker build \
     --platform "$platform" \
@@ -229,12 +261,16 @@ docker run --rm \
     --env "RAVEIL_TL_TOKEN_PATCH_SHA256=$tl_token_patch_sha256" \
     --env "RAVEIL_INPUT_SHA256=$input_sha256" \
     --env "RAVEIL_SOURCE_SHA256=$source_sha256" \
+    --env "RAVEIL_CACHE_SOURCE_SHA256=$cache_source_sha256" \
     --env "RAVEIL_TOOLCHAIN_SHA256=$toolchain_sha256" \
     --env "RAVEIL_APPLIED_PATCH_MANIFEST=$applied_patch_manifest" \
     --env "RAVEIL_OWNED_CPU_CONFIG=$cpu_config" \
     --env "RAVEIL_OWNED_CPU_CONFIG_FQ=$cpu_config_fq" \
     --env "RAVEIL_OWNED_CPU_LABEL=$cpu_label" \
     --env "RAVEIL_OWNED_CPU_MODE=$cpu_mode" \
+    --env "RAVEIL_CONTROLLED_SEED=$controlled_seed" \
+    --env "RAVEIL_CONTROLLED_INVOCATION=$controlled_invocation" \
+    --env "RAVEIL_CONTROLLED_SERIALIZE_DISPATCH=$controlled_serialize" \
     "$image" \
     bash -lc 'set -euo pipefail
 export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
@@ -263,7 +299,7 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-default-invalid ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-postrequest-redirect ]; then
-  cache_key=$RAVEIL_SOURCE_SHA256
+  cache_key=$RAVEIL_CACHE_SOURCE_SHA256
 fi
 build_root=/build/$cache_key
 ready_marker="$build_root/.raveil-source-ready"
@@ -477,8 +513,17 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = controlled ]; then
   controlled_elf="$build_root/riscv_stencil_controlled.elf"
   controlled_signature="$build_root/riscv_stencil_controlled.signature"
   controlled_log="$build_root/riscv_stencil_controlled.log"
+  serialize_define=
+  if [ "$RAVEIL_CONTROLLED_SERIALIZE_DISPATCH" = 1 ]; then
+    [ "$RAVEIL_OWNED_CPU_LABEL" = boom-serialize ] || {
+      echo "error: serialize-dispatch is diagnostic BOOM-only" >&2
+      exit 1
+    }
+    serialize_define=-DBOOM_SERIALIZE_DISPATCH=1
+  fi
   riscv64-unknown-elf-gcc \
     -DRFC0005_SYSTEM_SCRATCHPAD=1 -O2 -fno-strict-aliasing \
+    -DRAVEIL_STENCIL_SEED="$RAVEIL_CONTROLLED_SEED" $serialize_define \
     -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
     -nostdlib -nostartfiles -static -Wl,--no-relax \
     -T /repo/hardware/chisel/riscv_stencil_system_scratchpad.ld \
@@ -492,27 +537,29 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = controlled ]; then
   timeout --foreground 600 "$sim" +permissive +verbose \
     +signature="$controlled_signature" +signature-granularity=4 +permissive-off \
     "$controlled_elf" 2>&1 | tee "$controlled_log"
-  python3 -m raveil.riscv_stencil_signature --signature "$controlled_signature"
+  python3 -m raveil.riscv_stencil_signature \
+    --signature "$controlled_signature" --seed "$RAVEIL_CONTROLLED_SEED"
   if [ "$RAVEIL_OWNED_CPU_LABEL" = rocket ]; then
     implementation=rocket-in-order
-    invocation=2
   else
     implementation=boom-ooo
-    invocation=3
   fi
   python3 -m raveil.controlled_run \
     --verify-cpu-log "$controlled_log" \
     --signature "$controlled_signature" \
     --implementation "$implementation" \
-    --invocation "$invocation" \
-    --source-sha256 "$RAVEIL_INPUT_SHA256" \
+    --invocation "$RAVEIL_CONTROLLED_INVOCATION" \
+    --seed "$RAVEIL_CONTROLLED_SEED" \
+    --source-sha256 "$RAVEIL_SOURCE_SHA256" \
     --artifact-sha256 "$artifact_sha256" \
     --toolchain-sha256 "$RAVEIL_TOOLCHAIN_SHA256" \
     --implementation-configuration "$RAVEIL_OWNED_CPU_CONFIG_FQ"
-  printf "CONTROLLED-CPU-STENCIL-HOST-V1 status=OK cpu=%s config=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s cache_source_sha256=%s resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 workload=frozen-rfc-0005 oracle=independent-host accounting=complete traffic_conservation=verified resource_contract_verified=1 resource_equality_verified=0 comparison_eligible=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+  printf "CONTROLLED-CPU-STENCIL-HOST-V1 status=OK cpu=%s config=%s seed=%s invocation=%s serialize_dispatch=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s cache_source_sha256=%s build_input_sha256=%s resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 workload=frozen-rfc-0005 oracle=independent-host accounting=complete traffic_conservation=verified resource_contract_verified=1 resource_equality_verified=0 comparison_eligible=0 evidence=rtl-simulation-functional performance=not-measured\n" \
     "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
-    "$RAVEIL_INPUT_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256" \
-    "$RAVEIL_SOURCE_SHA256"
+    "$RAVEIL_CONTROLLED_SEED" "$RAVEIL_CONTROLLED_INVOCATION" \
+    "$RAVEIL_CONTROLLED_SERIALIZE_DISPATCH" \
+    "$RAVEIL_SOURCE_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256" \
+    "$RAVEIL_CACHE_SOURCE_SHA256" "$RAVEIL_INPUT_SHA256"
   exit 0
 fi
 if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ]; then

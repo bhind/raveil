@@ -84,7 +84,7 @@ class ControlledRunTests(unittest.TestCase):
     def test_first_graph_slice_is_complete_but_peer_ineligible(self) -> None:
         record = self._graph_observation(1, 1)
         validate_controlled_observation(record)
-        self.assertEqual(record["total_cycles"], 4233)
+        self.assertEqual(record["total_cycles"], 4234)
         self.assertEqual(record["traffic_accepted"], 1536)
         self.assertEqual(record["traffic_completed"], 1536)
         self.assertEqual(

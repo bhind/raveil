@@ -208,7 +208,7 @@ def static_graph_controlled_observation(
     phase_cycles = {
         "installation": 0,
         "staging": 648,
-        "execution": 3072,
+        "execution": 3073,
         "completion": 1,
         "validation": 512,
         "publication": 0,
@@ -245,7 +245,7 @@ def static_graph_controlled_observation(
         "quiescence_after": True,
         "window_start": "after-staging-response-drain",
         "window_end": "after-final-execution-response",
-        "window_cycles": 3072,
+        "window_cycles": 3073,
         "traffic": traffic,
         "traffic_accepted": 1536,
         "traffic_completed": 1536,
@@ -466,6 +466,61 @@ def verify_static_graph_log(path: Path) -> list[dict[str, Any]]:
     return observations
 
 
+def verify_static_graph_pilot_log(path: Path, seed: int) -> dict[str, Any]:
+    """Bind one fresh-input Graph pilot window to the frozen boundary."""
+
+    text = path.read_text(encoding="utf-8")
+    identity_records = [
+        _parse_marker(line) for line in text.splitlines()
+        if line.startswith("CONTROLLED-GRAPH-IDENTITY-V1")
+    ]
+    if len(identity_records) != 1:
+        raise ControlledRunError("expected exactly one controlled Graph identity")
+    identity = identity_records[0]
+    if set(identity) != {"artifact_sha256", "toolchain_sha256"}:
+        raise ControlledRunError("controlled Graph identity marker changed")
+    _require_sha256("artifact_sha256", identity["artifact_sha256"])
+    _require_sha256("toolchain_sha256", identity["toolchain_sha256"])
+    records = [
+        _parse_marker(line) for line in text.splitlines()
+        if line.startswith("CONTROLLED-GRAPH-WINDOW-V1")
+    ]
+    if len(records) != 1:
+        raise ControlledRunError("expected exactly one controlled Graph pilot window")
+    observation = static_graph_controlled_observation(
+        seed, seed, identity["artifact_sha256"], identity["toolchain_sha256"]
+    )
+    fields = records[0]
+    expected = {
+        "status": "OK", "invocation": str(seed), "seed": str(seed),
+        **{
+            f"{phase}_cycles": str(observation["phase_cycles"][phase])
+            for phase in PHASES
+        },
+        "total_cycles": str(observation["total_cycles"]),
+        "quiescence_before": "1", "quiescence_after": "1",
+        "traffic_accepted": str(observation["traffic_accepted"]),
+        "traffic_completed": str(observation["traffic_completed"]),
+        "traffic_pending": "0",
+        "graph_traffic": str(observation["traffic"]["graph"]),
+        "unaccounted_window_traffic": "0",
+        "resource_sha256": observation["resource_sha256"],
+        "resource_contract_verified": "1",
+        "resource_equality_verified": "0",
+        "comparison_eligible": "0",
+        "performance": "not-measured",
+    }
+    if fields != expected:
+        raise ControlledRunError("controlled Graph pilot marker mismatch")
+    activity = [
+        line for line in text.splitlines()
+        if line.startswith("T0044-GRAPH-ACTIVITY-V1")
+    ]
+    if len(activity) != 1:
+        raise ControlledRunError("expected exactly one Graph pilot activity marker")
+    return observation
+
+
 def verify_cpu_log(
     path: Path,
     signature_path: Path,
@@ -475,6 +530,7 @@ def verify_cpu_log(
     artifact_sha256: str,
     toolchain_sha256: str,
     implementation_configuration: str,
+    seed: int = 1,
 ) -> dict[str, Any]:
     """Bind one frozen CPU ELF run to the strict controlled boundary."""
 
@@ -596,9 +652,9 @@ def verify_cpu_log(
         raise ControlledRunError("controlled CPU lifecycle total changed")
 
     observed_words = validate_signature(
-        signature_path.read_text(encoding="ascii"), seed=1
+        signature_path.read_text(encoding="ascii"), seed=seed
     )
-    inputs = _input_words(1)
+    inputs = _input_words(seed)
     oracle = static_stencil_oracle(inputs)
     observation = {
         "schema": SCHEMA,
@@ -792,6 +848,7 @@ def aggregate_controlled_logs(paths: list[Path]) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="verify ADR-0046 controlled records")
     parser.add_argument("--verify-static-graph-log", type=Path)
+    parser.add_argument("--verify-static-graph-pilot-log", type=Path)
     parser.add_argument("--verify-cpu-log", type=Path)
     parser.add_argument("--signature", type=Path)
     parser.add_argument("--implementation", choices=("rocket-in-order", "boom-ooo"))
@@ -807,6 +864,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.aggregate_logs is not None:
             if any(value is not None for value in (
                 args.verify_static_graph_log, args.verify_cpu_log,
+                args.verify_static_graph_pilot_log,
                 args.signature, args.implementation, args.invocation,
                 args.seed, args.source_sha256, args.artifact_sha256,
                 args.toolchain_sha256,
@@ -821,7 +879,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.verify_static_graph_log is not None:
             if any(value is not None for value in (
-                args.verify_cpu_log, args.signature, args.implementation,
+                args.verify_static_graph_pilot_log, args.verify_cpu_log,
+                args.signature, args.implementation,
                 args.invocation, args.seed, args.source_sha256,
                 args.artifact_sha256, args.toolchain_sha256,
                 args.implementation_configuration,
@@ -831,6 +890,21 @@ def main(argv: list[str] | None = None) -> int:
             for observation in observations:
                 print(json.dumps(observation, sort_keys=True, separators=(",", ":")))
             return 0
+        if args.verify_static_graph_pilot_log is not None:
+            if args.seed is None or any(value is not None for value in (
+                args.verify_static_graph_log, args.verify_cpu_log,
+                args.signature, args.implementation, args.invocation,
+                args.source_sha256, args.artifact_sha256,
+                args.toolchain_sha256, args.implementation_configuration,
+            )):
+                raise ControlledRunError(
+                    "Graph pilot log verification requires only seed"
+                )
+            observation = verify_static_graph_pilot_log(
+                args.verify_static_graph_pilot_log, args.seed
+            )
+            print(json.dumps(observation, sort_keys=True, separators=(",", ":")))
+            return 0
         if args.verify_cpu_log is not None:
             if any(value is None for value in (
                 args.signature, args.implementation, args.invocation,
@@ -838,13 +912,12 @@ def main(argv: list[str] | None = None) -> int:
                 args.toolchain_sha256, args.implementation_configuration,
             )):
                 raise ControlledRunError("CPU log verification requires signature, implementation, invocation, source, artifact, toolchain, and configuration")
-            if args.seed is not None or args.verify_static_graph_log is not None:
-                raise ControlledRunError("CPU log verification arguments changed")
             observation = verify_cpu_log(
                 args.verify_cpu_log, args.signature, args.implementation,
                 args.invocation, args.source_sha256,
                 args.artifact_sha256, args.toolchain_sha256,
                 args.implementation_configuration,
+                1 if args.seed is None else args.seed,
             )
             print(json.dumps(observation, sort_keys=True, separators=(",", ":")))
             return 0

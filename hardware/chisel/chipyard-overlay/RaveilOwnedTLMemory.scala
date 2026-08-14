@@ -180,6 +180,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val stagingStartCycle = RegInit(0.U(64.W))
     val completionStartCycle = RegInit(0.U(64.W))
     val validationStartCycle = RegInit(0.U(64.W))
+    val executionRequestStallCycles = RegInit(0.U(64.W))
+    val executionResponseBackpressureCycles = RegInit(0.U(64.W))
 
     globalCycle := globalCycle + 1.U
     phaseCycleCounts(phase) := phaseCycleCounts(phase) + 1.U
@@ -267,6 +269,12 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseControlData, freshReadData)
 
     tl.a.ready := !busy
+    if (params.controlledRun) {
+      when(phase === RaveilOwnedMemoryPhase.Execution.U &&
+          tl.a.valid && !tl.a.ready) {
+        executionRequestStallCycles := executionRequestStallCycles + 1.U
+      }
+    }
     when(tl.a.fire) {
       if (params.controlledRun) {
         when(phase === RaveilOwnedMemoryPhase.Execution.U) {
@@ -463,6 +471,13 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responseValid = responseDue || responseHeld
     val responseData = Mux(responseHeld, responseHeldData, freshResponseData)
     tl.d.valid := responseValid
+    if (params.controlledRun) {
+      when(responsePhase === RaveilOwnedMemoryPhase.Execution.U &&
+          responseValid && !tl.d.ready) {
+        executionResponseBackpressureCycles :=
+          executionResponseBackpressureCycles + 1.U
+      }
+    }
     tl.d.bits.opcode := Mux(responseRead, TLMessages.AccessAckData, TLMessages.AccessAck)
     tl.d.bits.param := 0.U
     tl.d.bits.size := responseSize
@@ -512,6 +527,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
             executionStartOriginCompleted := dcacheOriginCompletedCount + 1.U
             executionStartNonOriginAccepted := nonDcacheOriginAcceptedCount
             executionStartNonOriginCompleted := nonDcacheOriginCompletedCount
+            executionRequestStallCycles := 0.U
+            executionResponseBackpressureCycles := 0.U
             printf("RAVEIL-CONTROLLED-PHASE-V1 from=1 to=2 cycle=%d accepted=%d completed=%d busy_before=%d\n",
               globalCycle, acceptedCount, completedCount + 1.U, busy)
             printf("RAVEIL-CONTROLLED-RESOURCE-V1 resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 data_width_bits=32 operation_width_bytes=4 request_ports=1 response_ports=1 maximum_outstanding_requests=1 request_buffer_depth=0 response_buffer_depth=1 physical_banks=1 physical_words=1024 valid_words=580 arbitration=none-at-owned-contract-ingress accepted_operations=read,write-byte-mask response_rule=one-module-local-cycle-after-acceptance response_hold=stable-until-consumed\n")
@@ -540,6 +557,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
               dcacheOriginCompletedCount + 1.U - executionStartOriginCompleted,
               nonDcacheOriginAcceptedCount - executionStartNonOriginAccepted,
               nonDcacheOriginCompletedCount - executionStartNonOriginCompleted)
+            printf("T0044-CPU-ACTIVITY-V1 request_stall_cycles=%d response_backpressure_cycles=%d read_transactions=800 write_transactions=256 read_bytes=3200 write_bytes=1024 useful_loads=1280 useful_adds=1024 useful_stores=256 outputs=256 frontend_activity=unavailable rename_rob_issue_lsu=unavailable\n",
+              executionRequestStallCycles,
+              executionResponseBackpressureCycles)
           }
           when(responsePhase === RaveilOwnedMemoryPhase.Validation.U &&
               phaseReadCounts(RaveilOwnedMemoryPhase.Validation) === 256.U) {

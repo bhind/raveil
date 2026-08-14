@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 namespace {
 
@@ -16,6 +17,7 @@ constexpr std::uint32_t kExpectedOutputWrites = 256U;
 constexpr std::uint32_t kExpectedStagingCycles = 648U;
 constexpr std::uint32_t kExpectedValidationCycles = 512U;
 constexpr std::uint32_t kExpectedCompletionCycles = 1U;
+constexpr std::uint32_t kExpectedMeasuredExecutionCycles = kExpectedCycles + 1U;
 constexpr std::uint32_t kExpectedWindowTraffic = 1536U;
 constexpr const char* kAdapterContract =
     "56dbe3f2ab479233eb5e4fe1c79eb06e07458b42ea77acebb471a101afd24c1e";
@@ -106,11 +108,11 @@ bool run_to_completion(
         top.io_inputAcceptedCount + top.io_outputAcceptedCount;
     const std::uint32_t completed_before =
         top.io_inputCompletedCount + top.io_outputCompletedCount;
+    const std::uint64_t execution_start = simulation_cycles;
     top.io_start = 1;
     cycle(top);
     top.io_start = 0;
 
-    const std::uint64_t execution_start = simulation_cycles;
     std::uint32_t guard = 0;
     while (!top.io_done) {
         cycle(top);
@@ -260,7 +262,30 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    const auto first_input = make_input(1);
+    bool pilot_mode = false;
+    unsigned first_seed = 1;
+    if (argc == 2) {
+        const std::string argument(argv[1]);
+        const std::string prefix = "--pilot-seed=";
+        if (argument.rfind(prefix, 0) != 0) {
+            std::cerr << "unsupported argument\n";
+            return 1;
+        }
+        const std::string value = argument.substr(prefix.size());
+        char* end = nullptr;
+        const unsigned long parsed = std::strtoul(value.c_str(), &end, 10);
+        if (value.empty() || *end != '\0' || parsed == 0 || parsed > 0xffffffffUL) {
+            std::cerr << "pilot seed must be uint32 and nonzero\n";
+            return 1;
+        }
+        pilot_mode = true;
+        first_seed = static_cast<unsigned>(parsed);
+    } else if (argc != 1) {
+        std::cerr << "expected at most one pilot seed argument\n";
+        return 1;
+    }
+
+    const auto first_input = make_input(first_seed);
     const std::uint32_t first_staging_cycles = load_input(top, first_input);
     std::uint32_t first_execution_cycles = 0;
     std::uint32_t first_completion_cycles = 0;
@@ -279,7 +304,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     if (first_staging_cycles != kExpectedStagingCycles
-        || first_execution_cycles != kExpectedCycles
+        || first_execution_cycles != kExpectedMeasuredExecutionCycles
         || first_completion_cycles != kExpectedCompletionCycles
         || first_validation_cycles != kExpectedValidationCycles
         || first_accepted != kExpectedWindowTraffic
@@ -288,10 +313,23 @@ int main(int argc, char** argv) {
         return 1;
     }
     print_controlled_window(
-        1, 1, first_staging_cycles, first_execution_cycles,
+        first_seed, first_seed, first_staging_cycles, first_execution_cycles,
         first_completion_cycles, first_validation_cycles,
         first_accepted, first_completed
     );
+
+    if (pilot_mode) {
+        std::cout << "T0044-GRAPH-ACTIVITY-V1 seed=" << first_seed
+                  << " useful_loads=1280 useful_adds=1024 useful_stores=256"
+                  << " outputs=256 read_transactions=1280 write_transactions=256"
+                  << " read_bytes=5120 write_bytes=1024 request_stall_cycles=0"
+                  << " response_backpressure_cycles=0 schedule_active_cycles="
+                  << kExpectedCycles << " launch_cycles=1"
+                  << " frontend_activity=unavailable rename_rob_issue_lsu=not-applicable"
+                  << std::endl;
+        top.final();
+        return 0;
+    }
 
     const auto cancelled_input = make_input(2);
     load_input(top, cancelled_input);
@@ -339,7 +377,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     if (second_staging_cycles != kExpectedStagingCycles
-        || second_execution_cycles != kExpectedCycles
+        || second_execution_cycles != kExpectedMeasuredExecutionCycles
         || second_completion_cycles != kExpectedCompletionCycles
         || second_validation_cycles != kExpectedValidationCycles
         || second_accepted != kExpectedWindowTraffic

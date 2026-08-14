@@ -3,8 +3,12 @@
 extern uint32_t input_words[324];
 extern uint32_t output_words[256];
 
+#ifndef RAVEIL_STENCIL_SEED
+#define RAVEIL_STENCIL_SEED 1U
+#endif
+
 int stencil_main(void) {
-    const uint32_t seed = 1U;
+    const uint32_t seed = (uint32_t)RAVEIL_STENCIL_SEED;
     for (uint32_t index = 0; index < 324U; ++index) {
         input_words[index] = ((index + 1U) * (seed * 2654435761U))
             ^ (index << (seed & 7U)) ^ (seed * 17U);
