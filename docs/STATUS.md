@@ -285,8 +285,11 @@ four-input Graph run records exact
 execution transactions per input; one-input Rocket and BOOM runs each record
 the same 648-cycle provider window, 800 execution reads, 256 execution writes,
 no unexplained traffic, and matching output. This is pre-freeze functional evidence, not
-EXP-0007 commissioning data or a performance claim. The frozen manifest and
-complete Graph/Rocket/BOOM/diagnostic 1/4 runs remain required; EXP-0006's
+EXP-0007 commissioning data or a performance claim. Manifest
+`t0044-fixture-owned-staging-v1.json` is frozen at SHA-256
+`c9b0f9d307421cfd611978c4e221d84faeb939f0630c4b9818180630c5f26c57`
+against implementation authority `8e96d24188df9ab83eb7ed0f700b4db914174c33`.
+The complete frozen Graph/Rocket/BOOM/diagnostic 1/4 runs remain required; EXP-0006's
 `pause` and sealed evidence are unchanged.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042

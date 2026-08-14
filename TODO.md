@@ -699,8 +699,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   that performs the same 324 ordered writes through a phase-exclusive single
   ingress for every candidate, then releases execution once. EXP-0007 is
   allocated and the provider/held-request/release/rearm boundary plus
-  fail-closed parser tests are implemented. Freeze the machine-readable
-  manifest at the implementation commit, then rerun only the complete 1/4
+  fail-closed parser tests are implemented. The machine-readable manifest is
+  frozen against implementation commit `8e96d24`; run only the complete 1/4
   commissioning matrix. Do not promote the pre-freeze Graph or CPU debug runs.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate

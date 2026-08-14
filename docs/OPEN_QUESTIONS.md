@@ -58,8 +58,9 @@ resolves it.
   CPU's first input load with its complete TileLink payload stable, admits no
   candidate request before final provider response, and adds no port, request
   buffer, bank, or polling protocol. Focused negative tests and a Graph
-  four-input RTL run pass, but the question remains open until the frozen
-  EXP-0007 complete 1/4 matrix verifies Rocket and BOOM as well. The earlier
+  four-input RTL run pass, and the EXP-0007 manifest is frozen before data, but
+  the question remains open until its complete 1/4 matrix verifies Rocket and
+  BOOM as well. The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem

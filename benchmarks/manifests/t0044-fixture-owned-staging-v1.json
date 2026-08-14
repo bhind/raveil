@@ -1,0 +1,190 @@
+{
+  "schema": "raveil.t0044-fixture-manifest/v1",
+  "experiment_id": "EXP-0007",
+  "status": "frozen-before-data",
+  "authority": {
+    "implementation_commit": "8e96d24188df9ab83eb7ed0f700b4db914174c33",
+    "governance_ancestor": "ae606dea3f74d6694eecbe91fc368b097f03758c",
+    "t0042_commit": "528fbe28a0dcdfbab65d4ae2995c0876857e053a",
+    "architecture_decision": "ADR-0047",
+    "predecessor_experiment": "EXP-0006"
+  },
+  "scope": {
+    "stage": "commissioning-1-and-4-fresh-inputs",
+    "primary": [
+      "static-graph",
+      "rocket-in-order",
+      "boom-ooo"
+    ],
+    "diagnostic_only": [
+      "boom-serialize-dispatch"
+    ],
+    "secondary_ablation": "not-activated",
+    "performance_claim": false,
+    "rfc0005_go_no_go": false
+  },
+  "matrix": {
+    "complete_for_commissioning": [
+      "static-graph",
+      "rocket-in-order",
+      "boom-ooo",
+      "boom-serialize-dispatch"
+    ],
+    "configurations": {
+      "static-graph": "StaticStencilRegion:d4bf9395a510385f:fixture-v1",
+      "rocket-in-order": "chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig",
+      "boom-ooo": "chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig",
+      "boom-serialize-dispatch": "chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig"
+    }
+  },
+  "resource": {
+    "resource_sha256": "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7",
+    "fixture_contract_sha256": "64b14ad77baba722a0e9f5d6c7403783c07fcfd49c1b7c96cca1b7406be84861",
+    "single_ingress": true,
+    "maximum_outstanding_requests": 1,
+    "provider_request_buffer_depth": 0,
+    "release_edge": "response-consume-for-word-323",
+    "rearm_edge": "validation-response-consume-for-word-255"
+  },
+  "workload": {
+    "name": "rfc-0005-five-point-stencil-u32",
+    "input_shape": [18, 18],
+    "output_shape": [16, 16],
+    "input_words": 324,
+    "output_words": 256,
+    "formula": "u32(((index+1)*u32(seed*2654435761))^u32(index<<(seed&7))^u32(seed*17))",
+    "input_order": "seed-equals-invocation-ascending-1-through-256",
+    "oracle": "independent-host-static-stencil-oracle-v1",
+    "result_reuse": false,
+    "intermediate_reuse": false
+  },
+  "session": {
+    "processes_per_candidate": 1,
+    "resets_per_candidate": 1,
+    "installation_count": 1,
+    "artifact_reloads": 0,
+    "re_elaboration_or_reboot_between_invocations": false
+  },
+  "phases": {
+    "order": [
+      "installation",
+      "staging",
+      "execution",
+      "completion",
+      "validation",
+      "publication"
+    ],
+    "installation": "reset-through-first-fixture-trigger",
+    "staging": "initial-trigger-or-previous-rearm-through-word-323-response-consume",
+    "provider_window": "fixture-trigger-through-word-323-response-consume-exact-648",
+    "execution": "common-release-through-final-candidate-memory-response",
+    "completion": "execution-quiescence-through-validation-admission",
+    "validation": "256-ordered-output-read-responses",
+    "publication": "zero-cycle-marker-publication",
+    "total": "sum-of-six-disjoint-phases"
+  },
+  "metrics": {
+    "cycles": [
+      "installation",
+      "staging",
+      "execution",
+      "completion",
+      "validation",
+      "publication",
+      "end-to-end-total",
+      "execution-window",
+      "fixture-provider-window"
+    ],
+    "traffic": [
+      "accepted-read",
+      "accepted-write",
+      "completed-read",
+      "completed-write",
+      "bytes",
+      "stall",
+      "backpressure"
+    ],
+    "useful_operations": [
+      "load",
+      "add",
+      "store",
+      "output"
+    ],
+    "activity": [
+      "fetch-decode-register",
+      "rename-rob-issue-lsu",
+      "graph-schedule-control"
+    ],
+    "simulator_wall_clock_role": "operations-only"
+  },
+  "sampling": {
+    "inference_unit": "fresh-input-version",
+    "commissioning_accounts": [1, 4],
+    "campaign_prefixes_after-advance": [1, 4, 16, 64, 256],
+    "deterministic_rerun_role": "exact-cycle-reproduction-only",
+    "minimum_for_rfc0005_numerical_no_go": 64,
+    "run_ids": {
+      "1": "20260814T115314Z-8e96d24-commission1",
+      "4": "20260814T115314Z-8e96d24-commission4"
+    }
+  },
+  "estimator": {
+    "point": "median-across-fresh-input-versions",
+    "interval_95": "exact-if-observed-input-invariant-else-percentile-bootstrap-median",
+    "bootstrap_resamples": 100000,
+    "bootstrap_seed_base": 7007,
+    "commissioning_interval_claim_bearing": false
+  },
+  "environment": {
+    "path": "pinned-linux-amd64-docker-verilator",
+    "host": "apple-silicon-non-authoritative",
+    "chipyard_revision": "ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1",
+    "rocket_chip_revision": "749a3eae9678bc70b029c5b9091fae33fad539c4",
+    "toolchain_identity": "version-and-recipe-hash",
+    "toolchain_byte_identity_limitation": "floating-apt-and-unchecksummed-scala-cli-inherited"
+  },
+  "identity_policy": {
+    "required_per_session": [
+      "configuration_sha256",
+      "source_sha256",
+      "artifact_sha256",
+      "toolchain_sha256",
+      "resource_sha256",
+      "contract_sha256",
+      "input_sha256",
+      "oracle_output_sha256",
+      "observed_output_sha256"
+    ],
+    "stable_across-account-1-and-4": [
+      "configuration_sha256",
+      "source_sha256",
+      "toolchain_sha256",
+      "resource_sha256",
+      "contract_sha256"
+    ],
+    "artifact_difference_policy": "only-frozen-account-compile-parameter-may-differ",
+    "historical_exp0006": "sealed-evidence-immutable-no-byte-identity-claim-for-new-builds"
+  },
+  "stop_conditions": [
+    "oracle-mismatch",
+    "resource-equality-failure",
+    "unexplained-traffic",
+    "required-accounting-missing",
+    "source-config-toolchain-drift",
+    "artifact-or-session-drift",
+    "incomplete-matrix",
+    "execution-window-meaning-differs",
+    "restart-reset-reload-observed",
+    "fixture-overlap-or-early-candidate-acceptance",
+    "fixture-order-count-pending-or-release-failure",
+    "fixture-rearm-failure",
+    "input-byte-or-order-mismatch"
+  ],
+  "evidence": {
+    "raw": "append-once-command-logs-plus-frozen-manifest",
+    "derived": "separate-report-json",
+    "seal": "sha256-manifest-after-derived-report",
+    "evidence_class": "rtl-simulation-pilot",
+    "clean_checkout_replay": true
+  }
+}

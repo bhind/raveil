@@ -96,6 +96,21 @@ packages and a download without a byte checksum. EXP-0007 therefore calls it
 recipe/version identity, not complete toolchain byte identity. This limitation
 must remain explicit in the frozen manifest and final eligibility finding.
 
+## Frozen pre-registration
+
+Implementation authority is
+`8e96d24188df9ab83eb7ed0f700b4db914174c33`. Before any EXP-0007 commissioning
+data, `benchmarks/manifests/t0044-fixture-owned-staging-v1.json` was frozen at
+SHA-256
+`c9b0f9d307421cfd611978c4e221d84faeb939f0630c4b9818180630c5f26c57`.
+It fixes the complete primary plus diagnostic matrix, fresh input versions,
+one-process/one-reset/one-install session contract, all phase meanings,
+required traffic and activity fields, median estimator, exact-or-bootstrap 95%
+interval rule with 100,000 resamples and seed base 7007, stop conditions,
+identity drift rules, and the recipe-identity limitation. Frozen run IDs are
+`20260814T115314Z-8e96d24-commission1` and
+`20260814T115314Z-8e96d24-commission4`.
+
 ## Stop and transition rule
 
 Fail closed on any required-evidence failure, oracle/resource mismatch,
