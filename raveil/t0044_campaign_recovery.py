@@ -254,6 +254,19 @@ def collect_recovery(repo: Path, failed_run: Path, run_dir: Path,
         ["git", "merge-base", "--is-ancestor", implementation, commit], cwd=repo,
     ).returncode:
         raise ControlledRunError("recovery implementation is not an ancestor")
+    changed = subprocess.check_output(
+        ["git", "diff", "--name-only", f"{implementation}..{commit}"],
+        cwd=repo, text=True,
+    ).splitlines()
+    allowed = {
+        "benchmarks/manifests/t0044-fixture-campaign-recovery-v1.json",
+        "docs/STATUS.md", "TODO.md", "docs/ROADMAP.md",
+        "docs/OPEN_QUESTIONS.md", "docs/experiments/README.md",
+        "docs/experiments/EXP-0008-static-full-campaign.md",
+        "docs/log/2026-08-15.md", "tests/test_t0044_campaign_recovery.py",
+    }
+    if not set(changed).issubset(allowed):
+        raise ControlledRunError("source/config changed after recovery authority")
     commands = _verify_failed_evidence(failed_run, recovery)
     raw = run_dir / "raw"
     raw.mkdir(parents=True)
