@@ -136,6 +136,5 @@ class FullCampaignTests(unittest.TestCase):
         self.assertIn("EXP-0007 commissioning account must be 1 or 4", source)
         self.assertIn("choices=(1, 4)", source)
 
-
 if __name__ == "__main__":
     unittest.main()

@@ -54,8 +54,9 @@ of same-input Graph/CPU ratios with a paired-bootstrap interval.
 
 RFC-0005 correct latency is the ratio of cumulative six-phase Graph cycles to
 cumulative six-phase Rocket cycles at each prefix. Its paired bootstrap holds
-each candidate's one-time installation fixed once and resamples paired
-non-installation invocation vectors. Prefixes 1/4/16 are descriptive only;
+the first invocation, including each candidate's one-time installation and
+distinct initial staging boundary, fixed once and resamples paired later-
+invocation vectors. Prefixes 1/4/16 are descriptive only;
 64 and 256 are claim-bearing only for the bounded latency rule over this finite
 deterministic seed schedule, not an unbounded workload population.
 

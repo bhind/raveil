@@ -160,7 +160,7 @@ def load_manifest(path: Path) -> dict[str, Any]:
             "paired_execution_point": "median-of-same-input-graph-over-cpu-ratios",
             "paired_execution_interval_95": "percentile-bootstrap-paired-median",
             "correct_latency_point": "ratio-of-prefix-cumulative-six-phase-cycles",
-            "correct_latency_interval_95": "paired-bootstrap-ratio-with-installation-fixed-once",
+            "correct_latency_interval_95": "paired-bootstrap-ratio-with-first-invocation-fixed-once",
             "bootstrap_resamples": BOOTSTRAP_RESAMPLES,
             "candidate_seed_base": 27007,
             "paired_seed_base": 37007,
@@ -344,42 +344,36 @@ def _correct_latency_ratio(graph: list[dict[str, Any]],
                            seed: int) -> dict[str, Any]:
     graph_selected = graph[:prefix]
     peer_selected = peer[:prefix]
-    graph_install = graph_selected[0]["phase_cycles"]["installation"]
-    peer_install = peer_selected[0]["phase_cycles"]["installation"]
-    graph_variable = [
-        item["total_cycles"] - item["phase_cycles"]["installation"]
-        for item in graph_selected
-    ]
-    peer_variable = [
-        item["total_cycles"] - item["phase_cycles"]["installation"]
-        for item in peer_selected
-    ]
-    numerator = graph_install + sum(graph_variable)
-    denominator = peer_install + sum(peer_variable)
+    graph_first = graph_selected[0]["total_cycles"]
+    peer_first = peer_selected[0]["total_cycles"]
+    graph_later = [item["total_cycles"] for item in graph_selected[1:]]
+    peer_later = [item["total_cycles"] for item in peer_selected[1:]]
+    numerator = graph_first + sum(graph_later)
+    denominator = peer_first + sum(peer_later)
     point = numerator / denominator
     if prefix == 1:
         interval = {
             "method": "exact-single-fresh-input",
             "low": point, "high": point, "fresh_input_count": 1,
-            "installation_treatment": "fixed-once",
+            "lifecycle_treatment": "first-invocation-fixed-once",
             "claim_bearing": False,
         }
     else:
         generator = random.Random(seed)
         estimates = []
         for _ in range(BOOTSTRAP_RESAMPLES):
-            indices = [generator.randrange(prefix) for _ in range(prefix)]
-            graph_total = graph_install + sum(graph_variable[i] for i in indices)
-            peer_total = peer_install + sum(peer_variable[i] for i in indices)
+            indices = [generator.randrange(prefix - 1) for _ in range(prefix - 1)]
+            graph_total = graph_first + sum(graph_later[i] for i in indices)
+            peer_total = peer_first + sum(peer_later[i] for i in indices)
             estimates.append(graph_total / peer_total)
         estimates.sort()
         interval = {
-            "method": "paired-bootstrap-cumulative-ratio-installation-fixed-once",
+            "method": "paired-bootstrap-cumulative-ratio-first-invocation-fixed-once",
             "resamples": BOOTSTRAP_RESAMPLES, "seed": seed,
             "low": estimates[int(BOOTSTRAP_RESAMPLES * 0.025)],
             "high": estimates[int(BOOTSTRAP_RESAMPLES * 0.975) - 1],
             "fresh_input_count": prefix,
-            "installation_treatment": "fixed-once",
+            "lifecycle_treatment": "first-invocation-fixed-once",
             "claim_bearing": prefix >= 64,
         }
     return {
@@ -672,6 +666,7 @@ def collect(repo: Path, run_dir: Path, manifest_path: Path,
         "docs/OPEN_QUESTIONS.md", "docs/experiments/README.md",
         "docs/experiments/EXP-0008-static-full-campaign.md",
         "docs/log/2026-08-14.md",
+        "tests/test_t0044_campaign.py",
     }
     if not set(changed).issubset(allowed):
         raise ControlledRunError("source/config changed after EXP-0008 freeze authority")
