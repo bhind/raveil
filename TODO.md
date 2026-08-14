@@ -756,6 +756,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Recovery-v4 authority `fe7b9f6...3c046` and manifest
   `de396d4f...129d31` are frozen at `caa0983...5fd4c3`; run Graph only from its
   clean descendant.
+  Recovery-v4 Graph `run-005` reached mapping, then sealed a post-map integrity
+  failure with 212 undriven-wire reports and no candidate datum. Toy diagnostics
+  isolate the cause to missing mapped-cell Liberty definitions and unsupported
+  OpenSTA collection/report commands. Freeze the library-aware check plus
+  supported equivalent Tcl as recovery-v5 before another Graph RUN-ID; do not
+  relax `check -assert` or promote diagnostic output.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

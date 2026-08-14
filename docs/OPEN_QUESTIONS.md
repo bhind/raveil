@@ -83,6 +83,11 @@ resolves it.
   matrix has no area/timing datum. The valid
   whole-system dynamic-energy composition remains an
   open question.
+  Recovery-v4 Graph `run-005` preserved the named cut through mapping but
+  failed its library-unaware post-map integrity check before any report. Toy
+  probes isolate a collector-only Liberty/OpenSTA compatibility fix; until its
+  replacement freeze produces the complete Graph/Rocket matrix, both the
+  physical lower-bound and whole-system composition remain unresolved.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

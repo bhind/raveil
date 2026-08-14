@@ -413,6 +413,15 @@ Only a clean descendant of the manifest freeze may collect the next Graph
 RUN-ID.
 Recovery-v4 freeze commit is
 `caa09835116cce0baadd2a12596b10e2b25fd4c3`.
+Recovery-v4 Graph `run-005` passed partition selection and mapping but failed
+closed on 212 apparently undriven wires at the post-map check; sealed files
+digest is `74898373...16ee3` and no netlist/stat/STA datum was published. A toy
+reproduction proves the same failure is caused by omitting mapped-cell Liberty
+definitions from the integrity check: 32 warnings without `read_liberty -lib`,
+zero after it. Pinned OpenSTA diagnostics also reject
+`remove_from_collection` and `report_clocks`; supported Tcl iteration and
+`report_clock_properties` retain the intended clock and I/O-delay contract.
+The collector-only correction is pre-data and requires recovery-v5 freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

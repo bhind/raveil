@@ -1,7 +1,7 @@
 # EXP-0009: Static Graph physical-proxy screening
 
 Status: In progress
-Evidence class: synthesis-toolchain commissioning; synthesis-collector failure; candidate-independent partition-syntax probe
+Evidence class: synthesis-toolchain commissioning; synthesis-collector failure; candidate-independent collector probes
 Date: 2026-08-15
 Task: T-0044
 Authority: RFC-0005, ADR-0039, ADR-0043, ADR-0046, ADR-0047, ADR-0048, EXP-0008
@@ -323,3 +323,29 @@ Recovery-v4 implementation authority is
 chains recovery-v3 and adds only the verified collector policy. Candidate use
 is authorized only from recovery-v4 freeze commit
 `caa09835116cce0baadd2a12596b10e2b25fd4c3` or a clean descendant.
+
+The distinct recovery-v4 Graph `run-005` proved the common module boundary and
+reached technology mapping, then failed closed at the post-map
+`check -assert`: 212 wires were reported as used without a driver. It exited 1
+before netlist publication, statistics, or STA. Failed raw files digest is
+`74898373a89ee9262ab20c729f322a0c2b14b33f8665224fcbde853b72c16ee3`;
+failed-seal SHA-256 is
+`7ecf3a4192f38f4fb0b69aa71721168d27c907ddade3616770973eaa4a4d51d1`.
+No area or timing datum exists and Rocket remains unrun.
+
+A candidate-independent toy reproduction isolated the failure to the
+collector: the post-map check reports 32 equivalent undriven wires when mapped
+Sky130 cell definitions have not been loaded and passes after
+`read_liberty -lib -ignore_miss_func`. The same library-aware check passes on
+the Graph diagnostic path without publishing a report. Diagnostic continuation
+also showed that pinned OpenSTA 2.3.3 does not implement
+`remove_from_collection` or `report_clocks`; its supported equivalent is a Tcl
+`foreach [all_inputs]` plus port-name property test and
+`report_clock_properties`. These probes are not candidate data.
+
+The next collector-only authority adds the library-aware integrity check and
+the exact supported Tcl equivalents while keeping the 20.000 ns clock, 1.000 ns
+non-clock input/output delays, RTL, partition, Liberty, estimator, and decision
+rules unchanged. It must be bound in a recovery-v5 manifest before a new Graph
+RUN-ID. A wrapper remains unnecessary unless the complete frozen flow later
+fails to preserve the explicit cut.

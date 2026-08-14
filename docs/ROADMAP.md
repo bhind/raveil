@@ -216,6 +216,10 @@ merely because a branch or partial implementation already exists.
    partitions; its collector-only
    repair awaits a recovery-v4 freeze before Graph data, Rocket remains unrun,
    and the complete matrix is still open.
+   Recovery-v4 then reached mapping but sealed a library-unaware post-map check
+   failure before statistics/STA. Candidate-independent toy probes identify a
+   collector-only Liberty/OpenSTA compatibility correction, which requires a
+   new freeze; no physical datum or roadmap gate has advanced.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

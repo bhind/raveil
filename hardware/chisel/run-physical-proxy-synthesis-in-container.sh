@@ -43,6 +43,7 @@ find /rtl -type f \( -name '*.sv' -o -name '*.v' \) -print | LC_ALL=C sort > /tm
     printf 'dfflibmap -liberty %s\n' "$liberty"
     printf 'abc -liberty %s\n' "$liberty"
     printf 'clean\n'
+    printf 'read_liberty -lib -ignore_miss_func %s\n' "$liberty"
     printf 'check -assert\n'
     printf 'write_verilog -noattr /evidence/mapped.v\n'
     printf 'stat -liberty %s\n' "$liberty"
@@ -57,8 +58,13 @@ grep -q "Chip area for module" /evidence/yosys.log
 
 cat > /tmp/candidate.sdc <<EOF
 create_clock -name clock -period 20.000 [get_ports clock]
-set non_clock_inputs [remove_from_collection [all_inputs] [get_ports clock]]
-set_input_delay 1.000 -clock clock $non_clock_inputs
+set non_clock_inputs {}
+foreach port [all_inputs] {
+    if {[get_property -object_type port \$port name] ne "clock"} {
+        lappend non_clock_inputs \$port
+    }
+}
+set_input_delay 1.000 -clock clock \$non_clock_inputs
 set_output_delay 1.000 -clock clock [all_outputs]
 EOF
 cat > /tmp/candidate.tcl <<EOF
@@ -67,7 +73,7 @@ read_verilog /evidence/mapped.v
 link_design $RAVEIL_PHYSICAL_TOP
 read_sdc /tmp/candidate.sdc
 report_checks -path_delay max -fields {slew cap input_pin} -digits 6
-report_clocks
+report_clock_properties [get_clocks clock]
 EOF
 if ! sta -exit /tmp/candidate.tcl > /evidence/opensta.log 2>&1; then
     cat /evidence/opensta.log >&2
@@ -89,6 +95,8 @@ printf '%s\n' ${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-} | tr ',' '\n' | sed '/^$/d' 
     printf 'opensta_version=%s\n' "$(sta -version)"
     printf 'clock_port=clock\nclock_period_ns=20.000\ninput_delay_ns=1.000\noutput_delay_ns=1.000\n'
     printf 'blackbox_selection_mode=yosys-module-name-single-instance-v1\n'
+    printf 'mapped_check_mode=liberty-aware-v1\n'
+    printf 'sta_constraint_mode=foreach-non-clock-inputs-v1\n'
 } > /evidence/tool-identity.txt
 printf '%s\n' \
-    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"
+    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 mapped_check_mode=liberty-aware-v1 sta_constraint_mode=foreach-non-clock-inputs-v1 clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"

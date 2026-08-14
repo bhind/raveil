@@ -109,10 +109,19 @@ def load_manifest(path: pathlib.Path) -> dict[str, Any]:
     }:
         raise ValueError("partition policy drift")
     collector_policy = document.get("collector_policy")
-    if collector_policy is not None and collector_policy != {
-        "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
-        "blackbox_before_checked_hierarchy": True,
-    }:
+    admitted_collector_policies = (
+        {
+            "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+            "blackbox_before_checked_hierarchy": True,
+        },
+        {
+            "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+            "blackbox_before_checked_hierarchy": True,
+            "mapped_check_mode": "liberty-aware-v1",
+            "sta_constraint_mode": "foreach-non-clock-inputs-v1",
+        },
+    )
+    if collector_policy is not None and collector_policy not in admitted_collector_policies:
         raise ValueError("collector policy drift")
     toolchain = document.get("toolchain")
     if not isinstance(toolchain, dict):
@@ -440,6 +449,11 @@ def derive_one(
         "blackbox_selection_mode"
     ]:
         raise ValueError("runtime blackbox selection mode drift")
+    for policy_name in ("mapped_check_mode", "sta_constraint_mode"):
+        if policy_name in (collector_policy or {}) and identity.get(policy_name) != collector_policy[
+            policy_name
+        ]:
+            raise ValueError(f"runtime collector mode drift: {policy_name}")
     expected_rtl_files = sorted(
         f"/rtl/{item.relative_to(rtl_dir).as_posix()}"
         for item in rtl_dir.rglob("*")

@@ -171,6 +171,14 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertIn("select -assert-any =N:%s =A:blackbox=1", inner)
         self.assertIn("select -clear", inner)
         self.assertIn("blackbox_selection_mode=yosys-module-name-single-instance-v1", inner)
+        self.assertLess(inner.index("read_liberty -lib"), inner.index("check -assert"))
+        self.assertIn("get_property -object_type port", inner)
+        self.assertIn("foreach port [all_inputs]", inner)
+        self.assertNotIn("remove_from_collection", inner)
+        self.assertIn("report_clock_properties", inner)
+        self.assertNotIn("report_clocks\n", inner)
+        self.assertIn("mapped_check_mode=liberty-aware-v1", inner)
+        self.assertIn("sta_constraint_mode=foreach-non-clock-inputs-v1", inner)
         self.assertIn("stat -json", inner)
         self.assertIn("tool-identity.txt", inner)
         self.assertIn("set_input_delay 1.000", inner)
@@ -232,6 +240,8 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             "collector_policy": {
                 "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
                 "blackbox_before_checked_hierarchy": True,
+                "mapped_check_mode": "liberty-aware-v1",
+                "sta_constraint_mode": "foreach-non-clock-inputs-v1",
             },
             "toolchain": toolchain,
             "variants": variants,
@@ -282,6 +292,8 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             "clock_port=clock\nclock_period_ns=20.000\n"
             "input_delay_ns=1.000\noutput_delay_ns=1.000\n"
             "blackbox_selection_mode=yosys-module-name-single-instance-v1\n"
+            "mapped_check_mode=liberty-aware-v1\n"
+            "sta_constraint_mode=foreach-non-clock-inputs-v1\n"
         )
         t0044_physical.write_run_metadata(
             manifest, "static-graph", "Top", "CommonMemory", rtl, raw
