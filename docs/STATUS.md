@@ -226,6 +226,14 @@ now synchronizes the named-volume log before reopening it and reports observed
 versus expected cardinality; another re-freeze is required.
 The synchronization fix is now included in replacement manifest authority; no
 subsequent complete-matrix run existed at this re-freeze.
+The following attempt again produced all 1,024 diagnostic output markers in
+the completed outer raw log while the in-container immediate reader saw only
+215. The evidence boundary is therefore moved to the collector after the
+Docker command closes: the container emits source/artifact/config/toolchain
+identity with accounting pending, and the host collector strictly validates
+the completed immutable outer raw before derivation or sealing. This removes a
+redundant racing reader without weakening any oracle/accounting check and
+requires another re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

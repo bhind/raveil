@@ -97,7 +97,7 @@ class RepeatedBoundaryTests(unittest.TestCase):
         self.assertEqual(startup.count("sd      a0, 0(t0)"), 1)
         self.assertIn("li      sp, 0x80010000", startup)
         self.assertIn('timeout --foreground 3600 "$sim"', runner)
-        self.assertIn('sync "$repeated_log"', runner)
+        self.assertIn("pending-completed-outer-raw-verification", runner)
         self.assertNotIn("RAVEIL_STENCIL_SEED", source)
 
     def test_repeated_configs_preserve_owned_resource_shape(self) -> None:

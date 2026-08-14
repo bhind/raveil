@@ -547,7 +547,8 @@ def parse_variant_log(path: Path, variant: str, account: int) -> dict[str, Any]:
         "account": str(account), "simulator_processes": "1", "resets": "1",
         "artifact_reloads": "0", "resource_sha256": owned_resource_tuple_id(),
         "workload": "frozen-rfc-0005", "oracle": "independent-host",
-        "accounting": "complete", "evidence": "rtl-simulation-functional",
+        "accounting": "pending-completed-outer-raw-verification",
+        "evidence": "rtl-simulation-functional",
         "performance": "not-measured",
     }.items():
         if host.get(field) != expected:

@@ -567,27 +567,10 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = controlled-repeat ]; then
   rm -f "$repeated_log"
   timeout --foreground 3600 "$sim" +permissive +verbose +permissive-off \
     "$repeated_elf" 2>&1 | tee "$repeated_log"
-  # Force the verbose named-volume log visible before strict verification.
-  sync "$repeated_log"
-  if [ "$RAVEIL_OWNED_CPU_LABEL" = rocket ]; then
-    implementation=rocket-in-order
-  else
-    implementation=boom-ooo
-  fi
-  diagnostic_arg=
-  if [ "$RAVEIL_OWNED_CPU_LABEL" = boom-serialize ]; then
-    diagnostic_arg=--diagnostic-only
-  fi
-  python3 -m raveil.t0044_repeated verify-cpu \
-    --log "$repeated_log" \
-    --implementation "$implementation" \
-    --account "$RAVEIL_REPEAT_ACCOUNT" \
-    --source-sha256 "$RAVEIL_SOURCE_SHA256" \
-    --artifact-sha256 "$artifact_sha256" \
-    --toolchain-sha256 "$RAVEIL_TOOLCHAIN_SHA256" \
-    --implementation-configuration "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
-    $diagnostic_arg
-  printf "RAVEIL-REPEATED-CPU-HOST-V1 status=OK cpu=%s config=%s account=%s simulator_processes=1 resets=1 artifact_reloads=0 serialize_dispatch=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s cache_source_sha256=%s build_input_sha256=%s resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 workload=frozen-rfc-0005 oracle=independent-host accounting=complete evidence=rtl-simulation-functional performance=not-measured\n" \
+  # The authoritative collector validates the completed outer raw log after
+  # docker exits.  Reopening this high-volume tee file inside the running
+  # container raced output visibility on BOOM and is not an evidence boundary.
+  printf "RAVEIL-REPEATED-CPU-HOST-V1 status=OK cpu=%s config=%s account=%s simulator_processes=1 resets=1 artifact_reloads=0 serialize_dispatch=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s cache_source_sha256=%s build_input_sha256=%s resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 workload=frozen-rfc-0005 oracle=independent-host accounting=pending-completed-outer-raw-verification evidence=rtl-simulation-functional performance=not-measured\n" \
     "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
     "$RAVEIL_REPEAT_ACCOUNT" "$RAVEIL_CONTROLLED_SERIALIZE_DISPATCH" \
     "$RAVEIL_SOURCE_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256" \
