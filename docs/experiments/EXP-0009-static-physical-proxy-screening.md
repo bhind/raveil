@@ -509,3 +509,33 @@ reverified private snapshot. Graph/Rocket RTL, lowering provenance, toolchain,
 Liberty, partitions, 20 ns clock, 1 ns I/O delays, estimator, report contract,
 stop conditions, and decision rules are byte-equivalent to v7. Both partitions
 require new RUN-IDs from the v8 freeze commit or a clean descendant.
+
+Recovery-v8 Graph `run-010` passed both input preflights, container collection,
+raw sealing, and derivation. It is a `partition-complete` synthesis estimate of
+11,851.3664 um2, 1,592 mapped cells, and +11.45991 ns setup slack at the frozen
+20 ns clock. Raw-seal SHA-256 is
+`355aaea8b2c717b741ffc321aee97610c3d3d3e73a17d3c9498dd61f0b401e77`;
+derived-result SHA-256 is
+`5280a4d86d8c9f1a1a9606f91673f4ff3eac1c5a5080b229d93bd4b646500b91`.
+It has no performance, energy, or whole-system claim and cannot form a matrix
+without the paired Rocket partition.
+
+Rocket `run-011` also passed both input preflights and container collection,
+then sealed raw evidence under v8. Raw-seal SHA-256 is
+`103dc163a007017939680ccfcc513b66f34d0524ea6fdedd3c17059db9d84580` and
+raw file-map SHA-256 is
+`935b83dfbbc8c2104abed3540e2cf36f671de9c82c80c166f5dc7e6e52b42097`.
+Derivation failed closed before a result because the Yosys log has eight area
+rows--one frozen `Rocket` top and seven named submodules--while the checker
+required one area row globally. No Rocket datum or matrix is admitted.
+
+The bounded correction filters log area rows to the exact manifest top and
+still requires exactly one match; it also rejects simultaneous plain and
+escaped stat-top aliases and retains exact log/stat equality. Unrelated module
+rows are not candidates and cannot select the result. This is a report parser
+correction, not an RTL, tool, estimator, threshold, or physical-contract
+change. The measured end-to-end container work was under roughly two minutes
+for the pair on this host; with tests, records, freeze, and one fresh paired
+rerun, the updated estimate is 0.25--1 working day with medium-high confidence,
+assuming no further report-contract failure. Host duration is operational
+information only.

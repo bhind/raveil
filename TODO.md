@@ -799,6 +799,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   `50639f0...aad938` and manifest `3dfb0dd...dd0b1` freeze only this collector
   correction. Run fresh Graph and Rocket partitions under v8 and derive a
   matrix only if both seal complete.
+  Under v8, Graph `run-010` completed, while Rocket `run-011` raw evidence
+  sealed but derived reporting failed because the checker counted seven
+  unrelated module-area rows as ambiguity. Freeze the exact-frozen-top-only
+  parser correction under a new authority, retain both v8 runs, then allocate
+  fresh paired RUN-IDs. Do not derive a matrix across recovery manifests.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

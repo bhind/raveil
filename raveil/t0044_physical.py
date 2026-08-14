@@ -570,9 +570,10 @@ def _parse_stat(path: pathlib.Path, top: str) -> tuple[float, int]:
     modules = document.get("modules")
     if not isinstance(modules, dict):
         raise ValueError("Yosys stat modules are missing")
-    module = modules.get(top) or modules.get(f"\\{top}")
-    if not isinstance(module, dict):
+    matching_modules = [modules[name] for name in (top, f"\\{top}") if name in modules]
+    if len(matching_modules) != 1 or not isinstance(matching_modules[0], dict):
         raise ValueError("Yosys stat top is missing")
+    module = matching_modules[0]
     area = module.get("area")
     cells = module.get("num_cells")
     if not isinstance(area, (int, float)) or area <= 0:
@@ -611,13 +612,15 @@ def derive_one(
     for forbidden in ("ERROR:", "Error:", "unresolved", "not found"):
         if forbidden in yosys or forbidden in opensta:
             raise ValueError(f"forbidden report diagnostic: {forbidden}")
-    areas = AREA_RE.findall(yosys)
+    areas = [
+        match.groups()
+        for match in AREA_RE.finditer(yosys)
+        if match.group("top") == contract["top"]
+    ]
     slacks = SLACK_RE.findall(opensta)
     if len(areas) != 1 or len(slacks) != 1:
         raise ValueError("area or timing result is incomplete/ambiguous")
     top, area_text = areas[0]
-    if top != contract["top"]:
-        raise ValueError("reported synthesis top drift")
     slack_text, timing_status = slacks[0]
     slack = float(slack_text)
     if (timing_status == "MET") != (slack >= 0.0):

@@ -480,6 +480,17 @@ authority `50639f0...aad938` and frozen manifest SHA-256
 `3dfb0dd...dd0b1` preserve every RTL/tool/constraint/decision field from v7
 and change only the preflight/snapshot collector boundary. Fresh paired runs
 must use distinct RUN-IDs under v8.
+Under v8, Graph `run-010` sealed and derived a complete partition synthesis
+estimate: 11,851.3664 um2, 1,592 cells, and +11.45991 ns setup slack at 20 ns;
+raw-seal SHA-256 `355aaea...01e77`, result SHA-256
+`5280a4d...0b91`. Performance, energy, and whole-system claims are false.
+Rocket `run-011` sealed complete raw evidence, raw-seal SHA-256
+`103dc16...4580`, but derivation failed closed because the log contains eight
+module-area rows while the parser incorrectly required one row globally. There
+is exactly one frozen-top row; no Rocket result or matrix is eligible. The
+checker now requires exactly one frozen-top log row, exactly one plain/escaped
+stat top, and equality between them. A fresh recovery freeze and paired rerun
+remain required.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

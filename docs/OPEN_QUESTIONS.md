@@ -112,6 +112,9 @@ resolves it.
   and mounting only its independently reverified private snapshot.
   Recovery-v8 freezes that boundary; only its fresh paired outcome can answer
   the remaining physical-screen question.
+  Its Rocket raw run exposed a report-parser assumption rather than an RTL or
+  timing outcome. The question therefore remains open until the exact frozen
+  top is selected unambiguously and both partitions rerun under one recovery.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

@@ -484,6 +484,10 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = pathlib.Path(temporary)
             manifest, rtl, raw = self._fixture(root)
+            (raw / "yosys.log").write_text(
+                "Chip area for module '\\Helper': 1.000000\n"
+                "Chip area for module '\\Top': 12.500000\n"
+            )
             t0044_physical.seal_raw(manifest, "static-graph", raw)
             result = t0044_physical.derive_one(
                 manifest, "static-graph", rtl, raw, root / "derived"
@@ -493,6 +497,70 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             self.assertFalse(result["whole_system_claim"])
             self.assertTrue((root / "derived/result.json").is_file())
             self.assertFalse((raw / "result.json").exists())
+
+    def test_duplicate_exact_top_area_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(root)
+            (raw / "yosys.log").write_text(
+                "Chip area for module '\\Top': 12.500000\n"
+                "Chip area for module '\\Top': 12.500000\n"
+            )
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            with self.assertRaisesRegex(ValueError, "incomplete/ambiguous"):
+                t0044_physical.derive_one(
+                    manifest, "static-graph", rtl, raw, root / "derived"
+                )
+
+    def test_missing_exact_top_area_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(root)
+            (raw / "yosys.log").write_text(
+                "Chip area for module '\\Helper': 1.000000\n"
+            )
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            with self.assertRaisesRegex(ValueError, "incomplete/ambiguous"):
+                t0044_physical.derive_one(
+                    manifest, "static-graph", rtl, raw, root / "derived"
+                )
+
+    def test_duplicate_stat_top_aliases_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(root)
+            (raw / "stat.json").write_text(
+                json.dumps(
+                    {
+                        "modules": {
+                            "Top": {"area": 12.5, "num_cells": 5},
+                            "\\Top": {"area": 12.5, "num_cells": 5},
+                        }
+                    }
+                )
+                + "\n"
+            )
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            with self.assertRaisesRegex(ValueError, "stat top is missing"):
+                t0044_physical.derive_one(
+                    manifest, "static-graph", rtl, raw, root / "derived"
+                )
+
+    def test_yosys_log_and_stat_area_mismatch_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(root)
+            (raw / "stat.json").write_text(
+                json.dumps(
+                    {"modules": {"\\Top": {"area": 12.0, "num_cells": 5}}}
+                )
+                + "\n"
+            )
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            with self.assertRaisesRegex(ValueError, "area reports disagree"):
+                t0044_physical.derive_one(
+                    manifest, "static-graph", rtl, raw, root / "derived"
+                )
 
     def test_raw_mutation_after_seal_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
