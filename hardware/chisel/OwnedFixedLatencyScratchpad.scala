@@ -16,6 +16,7 @@ object OwnedMemoryContract {
   val InitiatorControl = 0
   val InitiatorCpu = 1
   val InitiatorGraph = 2
+  val InitiatorFixture = 3
 
   val PhaseInstallation = 0
   val PhaseStaging = 1

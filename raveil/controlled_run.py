@@ -109,6 +109,46 @@ def owned_resource_tuple_id() -> str:
     return hashlib.sha256(_canonical_bytes(owned_resource_tuple())).hexdigest()
 
 
+def fixture_owned_resource_tuple() -> dict[str, Any]:
+    """Return ADR-0047's common fixture-owned staging resource identity.
+
+    The physical memory tuple is unchanged.  This identity additionally binds
+    the single, phase-exclusive input provider and its sole release edge so an
+    EXP-0007 record cannot be confused with the earlier candidate-local/
+    testbench-local staging boundary.
+    """
+
+    return {
+        **owned_resource_tuple(),
+        "contract_version": 2,
+        "arbitration": "phase-exclusive-provider-or-candidate",
+        "staging_provider": {
+            "schema": "raveil.fixture-input-provider/v1",
+            "input_words": 324,
+            "address_order": "ascending-0-through-323",
+            "write_width_bytes": 4,
+            "write_mask": "0xf",
+            "maximum_outstanding_requests": 1,
+            "request_buffer_depth": 0,
+            "ownership": "candidate-external-common-fixture",
+            "initiator": "fixture",
+            "ingress_selection": "phase-exclusive-provider-or-candidate",
+            "release_edge": "response-consume-for-word-323",
+            "rearm_edge": "validation-response-consume-for-word-255",
+            "formula": (
+                "u32(((index+1)*u32(seed*2654435761))^"
+                "u32(index<<(seed&7))^u32(seed*17))"
+            ),
+        },
+    }
+
+
+def fixture_owned_resource_tuple_id() -> str:
+    return hashlib.sha256(
+        _canonical_bytes(fixture_owned_resource_tuple())
+    ).hexdigest()
+
+
 def controlled_run_contract() -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -153,6 +193,7 @@ def static_graph_source_id() -> str:
     relative_paths = (
         "hardware/chisel/StaticStencilRegion.scala",
         "hardware/chisel/OwnedFixedLatencyScratchpad.scala",
+        "hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala",
         "hardware/chisel/static_stencil_sim_main.cpp",
         "hardware/chisel/run-static-stencil-rtl.sh",
         "hardware/chisel/run-static-stencil.sh",
@@ -163,6 +204,28 @@ def static_graph_source_id() -> str:
     )
     digest = hashlib.sha256()
     for relative in relative_paths:
+        digest.update(relative.encode("utf-8") + b"\0")
+        digest.update((root / relative).read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def static_graph_fixture_source_id() -> str:
+    """Bind the Graph fixture provider in addition to the legacy source set."""
+
+    root = Path(__file__).resolve().parents[1]
+    digest = hashlib.sha256()
+    for relative in (
+        "hardware/chisel/StaticStencilRegion.scala",
+        "hardware/chisel/OwnedFixedLatencyScratchpad.scala",
+        "hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala",
+        "hardware/chisel/static_stencil_sim_main.cpp",
+        "hardware/chisel/run-static-stencil-rtl.sh",
+        "hardware/chisel/run-static-stencil.sh",
+        "hardware/chisel/Dockerfile",
+        "raveil/controlled_run.py",
+        "raveil/static_region.py",
+    ):
         digest.update(relative.encode("utf-8") + b"\0")
         digest.update((root / relative).read_bytes())
         digest.update(b"\0")

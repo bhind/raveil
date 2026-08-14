@@ -54,10 +54,13 @@ resolves it.
   candidate-local but Graph generation is testbench-side? Until that staging
   boundary is resolved, end-to-end amortization and the 256-input campaign are
   paused. ADR-0047 resolves the intended controlled-measurement architecture as
-  a fixture-owned, phase-exclusive provider. Whether the pinned CPU adapters
-  can hold and release their first request without adding a port, buffer,
-  polling protocol, or lost request remains unverified until EXP-0007
-  implementation and negative RTL evidence. The earlier source survey found
+  a fixture-owned, phase-exclusive provider. The implementation now holds the
+  CPU's first input load with its complete TileLink payload stable, admits no
+  candidate request before final provider response, and adds no port, request
+  buffer, bank, or polling protocol. Focused negative tests and a Graph
+  four-input RTL run pass, but the question remains open until the frozen
+  EXP-0007 complete 1/4 matrix verifies Rocket and BOOM as well. The earlier
+  source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
   TileLink banked scratchpad now passes the exact stencil on both controls but

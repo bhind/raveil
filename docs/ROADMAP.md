@@ -189,8 +189,10 @@ merely because a branch or partial implementation already exists.
    completed a four-input commissioning of all candidates under one
    installed configuration without simulator reboot. Its execution-window
    latency/traffic evidence is eligible, but CPU-local versus Graph-testbench
-   input generation leaves staging and end-to-end meaning unresolved, so the
-   frozen 256-input 1/4/16/64/256 campaign is paused. The pilot does not
+   input generation left staging and end-to-end meaning unresolved. ADR-0047's
+   common fixture provider is now implemented and awaiting an EXP-0007
+   pre-data manifest plus complete 1/4 commissioning; the 1/4/16/64/256
+   campaign remains paused. The pilot does not
    implement the remaining organizations or collect energy, synthesis timing, or area, so
    T-0044 remains open and no go/no-go follows.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival

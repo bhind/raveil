@@ -15,6 +15,7 @@ constexpr std::uint32_t kExpectedCycles = 256U * 12U;
 constexpr std::uint32_t kExpectedInputReads = 256U * 5U;
 constexpr std::uint32_t kExpectedOutputWrites = 256U;
 constexpr std::uint32_t kExpectedStagingCycles = 648U;
+constexpr std::uint32_t kExpectedFixtureStagingCycles = 648U;
 constexpr std::uint32_t kExpectedValidationCycles = 512U;
 constexpr std::uint32_t kExpectedCompletionCycles = 1U;
 constexpr std::uint32_t kExpectedMeasuredExecutionCycles = kExpectedCycles + 1U;
@@ -23,6 +24,8 @@ constexpr const char* kAdapterContract =
     "56dbe3f2ab479233eb5e4fe1c79eb06e07458b42ea77acebb471a101afd24c1e";
 constexpr const char* kResourceIdentity =
     "16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748";
+constexpr const char* kFixtureResourceIdentity =
+    "87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7";
 
 std::uint64_t simulation_cycles = 0;
 
@@ -93,15 +96,93 @@ std::uint32_t load_input(
     return static_cast<std::uint32_t>(simulation_cycles - first_cycle);
 }
 
+std::uint32_t stage_fixture_input(
+    VStaticStencilRegion& top,
+    std::uint32_t seed
+) {
+    const std::uint64_t first_cycle = simulation_cycles;
+    std::uint32_t traced_words = 0;
+    const auto trace_accepted_word = [&]() {
+        if (!top.io_fixtureStageAcceptedValid) {
+            return;
+        }
+        if (top.io_fixtureStageAcceptedAddress != traced_words
+            || traced_words >= 324U) {
+            std::cerr << "fixture accepted trace order mismatch seed="
+                      << seed << " expected=" << traced_words
+                      << " actual=" << top.io_fixtureStageAcceptedAddress
+                      << '\n';
+            std::exit(1);
+        }
+        std::cout << "RAVEIL-FIXTURE-INPUT-V1 invocation=" << seed
+                  << " seed=" << seed << " index=" << traced_words
+                  << " data=" << std::hex << std::setw(8)
+                  << std::setfill('0') << top.io_fixtureStageAcceptedData
+                  << std::dec << std::setfill(' ') << std::endl;
+        ++traced_words;
+    };
+    if (!top.io_fixtureStageReady || top.io_busy || top.io_memoryPending) {
+        std::cerr << "fixture staging boundary was not ready seed="
+                  << seed << '\n';
+        std::exit(1);
+    }
+    top.io_fixtureStageSeed = seed;
+    top.io_fixtureStageStart = 1;
+    std::cout << "RAVEIL-FIXTURE-PHASE-V1 invocation=" << seed
+              << " from=" << (seed == 1U ? 0 : 1)
+              << " to=1 cycle=" << (simulation_cycles + 1U)
+              << " accepted=0 completed=0 pending=0" << std::endl;
+    cycle(top);
+    trace_accepted_word();
+    top.io_fixtureStageStart = 0;
+    for (std::uint32_t guard = 0; !top.io_fixtureStageDone; ++guard) {
+        cycle(top);
+        trace_accepted_word();
+        if (guard > 1024U) {
+            std::cerr << "fixture staging exceeded max_cycles seed="
+                      << seed << '\n';
+            std::exit(1);
+        }
+    }
+    if (top.io_fixtureStageAcceptedCount != 324U
+        || top.io_fixtureStageCompletedCount != 324U
+        || top.io_memoryPending || !top.io_busy || traced_words != 324U) {
+        std::cerr << "fixture staging accounting or release mismatch seed="
+                  << seed << " accepted="
+                  << top.io_fixtureStageAcceptedCount << " completed="
+                  << top.io_fixtureStageCompletedCount << '\n';
+        std::exit(1);
+    }
+    std::cout << "RAVEIL-FIXTURE-PHASE-V1 invocation=" << seed
+              << " from=1 to=2 cycle=" << simulation_cycles
+              << " accepted=324 completed=324 pending=0" << std::endl;
+    std::cout << "RAVEIL-FIXTURE-STAGING-V1 invocation=" << seed
+              << " seed=" << seed
+              << " accepted=324 completed=324 writes=324"
+              << " first_word=0 last_word=323 pending=0"
+              << " candidate_accepted_before_release=0 release_count=1"
+              << std::endl;
+    // The accepted start edge is the staging boundary.  Count the half-open
+    // interval from that edge through the final response boundary, matching
+    // the CPU manager's timestamp subtraction rather than charging the
+    // upstream control-present cycle as candidate time.
+    return static_cast<std::uint32_t>(simulation_cycles - first_cycle - 1U);
+}
+
 bool run_to_completion(
     VStaticStencilRegion& top,
     std::uint32_t& execution_cycles,
     std::uint32_t& completion_cycles,
     std::uint32_t& accepted,
-    std::uint32_t& completed
+    std::uint32_t& completed,
+    bool launch = true
 ) {
-    if (top.io_busy || top.io_memoryPending) {
+    if (launch && (top.io_busy || top.io_memoryPending)) {
         std::cerr << "execution window was not quiescent before start\n";
+        return false;
+    }
+    if (!launch && (!top.io_busy || top.io_memoryPending)) {
+        std::cerr << "fixture did not release one quiescent execution\n";
         return false;
     }
     const std::uint32_t accepted_before =
@@ -109,9 +190,11 @@ bool run_to_completion(
     const std::uint32_t completed_before =
         top.io_inputCompletedCount + top.io_outputCompletedCount;
     const std::uint64_t execution_start = simulation_cycles;
-    top.io_start = 1;
-    cycle(top);
-    top.io_start = 0;
+    if (launch) {
+        top.io_start = 1;
+        cycle(top);
+        top.io_start = 0;
+    }
 
     std::uint32_t guard = 0;
     while (!top.io_done) {
@@ -213,6 +296,19 @@ bool check_output(
     return true;
 }
 
+bool verify_fixture_rearm(VStaticStencilRegion& top, unsigned invocation) {
+    if (!top.io_fixtureStageReady || top.io_busy || top.io_memoryPending) {
+        std::cerr << "fixture did not rearm after validation invocation="
+                  << invocation << '\n';
+        return false;
+    }
+    std::cout << "RAVEIL-FIXTURE-REARM-V1 invocation=" << invocation
+              << " from=4 to=1 cycle=" << simulation_cycles
+              << " pending=0 validation_responses=256 rearm_count=1"
+              << std::endl;
+    return true;
+}
+
 void print_controlled_window(
     unsigned invocation,
     unsigned seed,
@@ -222,13 +318,16 @@ void print_controlled_window(
     std::uint32_t validation_cycles,
     std::uint32_t accepted,
     std::uint32_t completed,
-    bool repeated = false
+    bool repeated = false,
+    bool fixture = false
 ) {
     const std::uint32_t total = staging_cycles + execution_cycles
         + completion_cycles + validation_cycles;
-    std::cout << (repeated
+    std::cout << (fixture
+        ? "RAVEIL-FIXTURE-GRAPH-COMPLETE-V1 status=OK"
+        : (repeated
         ? "RAVEIL-REPEATED-GRAPH-COMPLETE-V1 status=OK"
-        : "CONTROLLED-GRAPH-WINDOW-V1 status=OK")
+        : "CONTROLLED-GRAPH-WINDOW-V1 status=OK"))
               << " invocation=" << invocation
               << " seed=" << seed
               << " installation_cycles=0"
@@ -243,17 +342,40 @@ void print_controlled_window(
               << " traffic_completed=" << completed
               << " traffic_pending=0 graph_traffic=" << accepted
               << " unaccounted_window_traffic=0"
-              << " resource_sha256=" << kResourceIdentity
+              << " resource_sha256=" << (fixture
+                    ? kFixtureResourceIdentity : kResourceIdentity)
               << " resource_contract_verified=1"
               << " resource_equality_verified=0 comparison_eligible=0"
               << " performance=not-measured" << std::endl;
+    if (fixture) {
+        std::cout << "RAVEIL-FIXTURE-RESOURCE-V1 invocation=" << invocation
+                  << " resource_sha256=" << kFixtureResourceIdentity
+                  << " data_width_bits=32 operation_width_bytes=4"
+                  << " request_ports=1 response_ports=1"
+                  << " maximum_outstanding_requests=1 request_buffer_depth=0"
+                  << " response_buffer_depth=1 physical_banks=1"
+                  << " physical_words=1024 valid_words=580"
+                  << " arbitration=phase-exclusive-provider-or-candidate"
+                  << " accepted_operations=read,write-byte-mask"
+                  << " response_rule=one-module-local-cycle-after-acceptance"
+                  << " response_hold=stable-until-consumed"
+                  << " provider=input-words-324-ascending-full-word"
+                  << " provider_initiator=fixture"
+                  << " provider_request_buffer_depth=0"
+                  << " provider_release=response-consume-word-323"
+                  << " provider_rearm=validation-response-consume-word-255"
+                  << std::endl;
+    }
     if (repeated) {
-        std::cout << "T0044-REPEATED-GRAPH-ACTIVITY-V1 invocation=" << invocation
+        std::cout << (fixture
+            ? "T0044-FIXTURE-GRAPH-ACTIVITY-V1 invocation="
+            : "T0044-REPEATED-GRAPH-ACTIVITY-V1 invocation=") << invocation
                   << " request_stall_cycles=0 response_backpressure_cycles=0"
                   << " read_transactions=1280 write_transactions=256"
                   << " read_bytes=5120 write_bytes=1024 useful_loads=1280"
                   << " useful_adds=1024 useful_stores=256 outputs=256"
-                  << " schedule_active_cycles=3072 launch_cycles=1"
+                  << " schedule_active_cycles=3072 launch_cycles="
+                  << (fixture ? 0 : 1)
                   << " frontend_activity=unavailable"
                   << " rename_rob_issue_lsu=not-applicable" << std::endl;
     }
@@ -270,6 +392,8 @@ int main(int argc, char** argv) {
     top.io_inputStageAddress = 0;
     top.io_inputStageData = 0;
     top.io_inputStageResponseReady = 0;
+    top.io_fixtureStageStart = 0;
+    top.io_fixtureStageSeed = 0;
     top.io_start = 0;
     top.io_cancel = 0;
     top.io_outputValidationValid = 0;
@@ -285,34 +409,43 @@ int main(int argc, char** argv) {
 
     bool pilot_mode = false;
     bool repeated_mode = false;
+    bool fixture_mode = false;
     unsigned first_seed = 1;
     unsigned repeated_account = 1;
     if (argc == 2) {
         const std::string argument(argv[1]);
         const std::string pilot_prefix = "--pilot-seed=";
         const std::string repeated_prefix = "--repeat-account=";
+        const std::string fixture_prefix = "--fixture-repeat-account=";
         const bool pilot_argument = argument.rfind(pilot_prefix, 0) == 0;
         const bool repeated_argument = argument.rfind(repeated_prefix, 0) == 0;
-        if (!pilot_argument && !repeated_argument) {
+        const bool fixture_argument = argument.rfind(fixture_prefix, 0) == 0;
+        if (!pilot_argument && !repeated_argument && !fixture_argument) {
             std::cerr << "unsupported argument\n";
             return 1;
         }
         const std::string value = argument.substr(
-            pilot_argument ? pilot_prefix.size() : repeated_prefix.size()
+            pilot_argument ? pilot_prefix.size()
+                : (fixture_argument ? fixture_prefix.size()
+                                    : repeated_prefix.size())
         );
         char* end = nullptr;
         const unsigned long parsed = std::strtoul(value.c_str(), &end, 10);
         if (value.empty() || *end != '\0' || parsed == 0
             || (pilot_argument && parsed > 0xffffffffUL)
-            || (repeated_argument && parsed > 256UL)) {
+            || ((repeated_argument || fixture_argument) && parsed > 256UL)) {
             std::cerr << "pilot seed must be uint32 or repeat account in [1,256]\n";
             return 1;
         }
         if (pilot_argument) {
             pilot_mode = true;
             first_seed = static_cast<unsigned>(parsed);
+        } else if (repeated_argument) {
+            repeated_mode = true;
+            repeated_account = static_cast<unsigned>(parsed);
         } else {
             repeated_mode = true;
+            fixture_mode = true;
             repeated_account = static_cast<unsigned>(parsed);
         }
     } else if (argc != 1) {
@@ -321,7 +454,9 @@ int main(int argc, char** argv) {
     }
 
     const auto first_input = make_input(first_seed);
-    const std::uint32_t first_staging_cycles = load_input(top, first_input);
+    const std::uint32_t first_staging_cycles = fixture_mode
+        ? stage_fixture_input(top, first_seed)
+        : load_input(top, first_input);
     std::uint32_t first_execution_cycles = 0;
     std::uint32_t first_completion_cycles = 0;
     std::uint32_t first_validation_cycles = 0;
@@ -332,15 +467,21 @@ int main(int argc, char** argv) {
             first_execution_cycles,
             first_completion_cycles,
             first_accepted,
-            first_completed
+            first_completed,
+            !fixture_mode
         ) || !check_output(
             top, reference(first_input), first_validation_cycles,
             first_seed, repeated_mode
         )) {
         return 1;
     }
-    if (first_staging_cycles != kExpectedStagingCycles
-        || first_execution_cycles != kExpectedMeasuredExecutionCycles
+    if (fixture_mode && !verify_fixture_rearm(top, first_seed)) {
+        return 1;
+    }
+    if (first_staging_cycles != (fixture_mode
+            ? kExpectedFixtureStagingCycles : kExpectedStagingCycles)
+        || first_execution_cycles != (fixture_mode
+            ? kExpectedCycles : kExpectedMeasuredExecutionCycles)
         || first_completion_cycles != kExpectedCompletionCycles
         || first_validation_cycles != kExpectedValidationCycles
         || first_accepted != kExpectedWindowTraffic
@@ -351,7 +492,7 @@ int main(int argc, char** argv) {
     print_controlled_window(
         first_seed, first_seed, first_staging_cycles, first_execution_cycles,
         first_completion_cycles, first_validation_cycles,
-        first_accepted, first_completed, repeated_mode
+        first_accepted, first_completed, repeated_mode, fixture_mode
     );
 
     if (pilot_mode) {
@@ -373,7 +514,9 @@ int main(int argc, char** argv) {
             + first_validation_cycles;
         for (unsigned seed = 2; seed <= repeated_account; ++seed) {
             const auto input = make_input(seed);
-            const std::uint32_t staging_cycles = load_input(top, input);
+            const std::uint32_t staging_cycles = fixture_mode
+                ? stage_fixture_input(top, seed)
+                : load_input(top, input);
             std::uint32_t execution_cycles = 0;
             std::uint32_t completion_cycles = 0;
             std::uint32_t validation_cycles = 0;
@@ -381,14 +524,19 @@ int main(int argc, char** argv) {
             std::uint32_t completed = 0;
             if (!run_to_completion(
                     top, execution_cycles, completion_cycles,
-                    accepted, completed
+                    accepted, completed, !fixture_mode
                 ) || !check_output(
                     top, reference(input), validation_cycles, seed, true
                 )) {
                 return 1;
             }
-            if (staging_cycles != kExpectedStagingCycles
-                || execution_cycles != kExpectedMeasuredExecutionCycles
+            if (fixture_mode && !verify_fixture_rearm(top, seed)) {
+                return 1;
+            }
+            if (staging_cycles != (fixture_mode
+                    ? kExpectedFixtureStagingCycles : kExpectedStagingCycles)
+                || execution_cycles != (fixture_mode
+                    ? kExpectedCycles : kExpectedMeasuredExecutionCycles)
                 || completion_cycles != kExpectedCompletionCycles
                 || validation_cycles != kExpectedValidationCycles
                 || accepted != kExpectedWindowTraffic
@@ -399,12 +547,15 @@ int main(int argc, char** argv) {
             }
             print_controlled_window(
                 seed, seed, staging_cycles, execution_cycles,
-                completion_cycles, validation_cycles, accepted, completed, true
+                completion_cycles, validation_cycles, accepted, completed,
+                true, fixture_mode
             );
             repeated_total += staging_cycles + execution_cycles
                 + completion_cycles + validation_cycles;
         }
-        std::cout << "RAVEIL-REPEATED-GRAPH-ACCOUNT-V1 status=OK account="
+        std::cout << (fixture_mode
+            ? "RAVEIL-FIXTURE-GRAPH-ACCOUNT-V1 status=OK account="
+            : "RAVEIL-REPEATED-GRAPH-ACCOUNT-V1 status=OK account=")
                   << repeated_account << " installation_count=1"
                   << " simulator_processes=1 resets=1 artifact_reloads=0"
                   << " total_cycles=" << repeated_total

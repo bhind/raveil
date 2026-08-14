@@ -698,9 +698,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   ADR-0047 now accepts the only next implementation: a fixture-owned provider
   that performs the same 324 ordered writes through a phase-exclusive single
   ingress for every candidate, then releases execution once. EXP-0007 is
-  allocated pre-implementation; implement and negative-test this boundary,
-  bind its source/resource/contract identities, freeze before data, and rerun
-  only the complete 1/4 commissioning matrix.
+  allocated and the provider/held-request/release/rearm boundary plus
+  fail-closed parser tests are implemented. Freeze the machine-readable
+  manifest at the implementation commit, then rerun only the complete 1/4
+  commissioning matrix. Do not promote the pre-freeze Graph or CPU debug runs.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

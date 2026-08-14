@@ -3,7 +3,7 @@ set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 pin_file="$repo_root/hardware/chisel/boom-pin.env"
-chipyard="$repo_root/external/chipyard"
+chipyard=${RAVEIL_CHIPYARD_SOURCE:-"$repo_root/external/chipyard"}
 boom="$chipyard/generators/boom"
 
 # Repository-owned constant assignments only.
@@ -34,7 +34,8 @@ config="$chipyard/generators/chipyard/src/main/scala/config/BoomConfigs.scala"
 mixins="$boom/src/main/scala/common/config-mixins.scala"
 parameters="$boom/src/main/scala/common/parameters.scala"
 core="$boom/src/main/scala/exu/core.scala"
-custom_csrs="$repo_root/external/rocket-chip/src/main/scala/tile/CustomCSRs.scala"
+rocket_chip=${RAVEIL_ROCKET_CHIP_SOURCE:-"$repo_root/external/rocket-chip"}
+custom_csrs="$rocket_chip/src/main/scala/tile/CustomCSRs.scala"
 
 grep -q 'class SmallBoomConfig' "$config" || fail 'SmallBoomConfig is absent'
 grep -q 'new boom.common.WithNSmallBooms(1)' "$config" || fail 'SmallBoomConfig is not the pinned one-tile mixin'

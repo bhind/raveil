@@ -34,9 +34,25 @@ pilot_seed=${RAVEIL_PILOT_SEED:-}
 pilot_env=
 repeat_account=${RAVEIL_REPEAT_ACCOUNT:-}
 repeat_env=
-if [ -n "$pilot_seed" ] && [ -n "$repeat_account" ]; then
-    echo 'error: pilot seed and repeat account are mutually exclusive' >&2
+fixture_account=${RAVEIL_FIXTURE_REPEAT_ACCOUNT:-}
+fixture_env=
+mode_count=0
+[ -z "$pilot_seed" ] || mode_count=$((mode_count + 1))
+[ -z "$repeat_account" ] || mode_count=$((mode_count + 1))
+[ -z "$fixture_account" ] || mode_count=$((mode_count + 1))
+if [ "$mode_count" -gt 1 ]; then
+    echo 'error: pilot, repeat, and fixture account are mutually exclusive' >&2
     exit 1
+fi
+if [ -n "$fixture_account" ]; then
+    case "$fixture_account" in
+        *[!0-9]*|'') echo 'error: RAVEIL_FIXTURE_REPEAT_ACCOUNT must be in [1,256]' >&2; exit 1 ;;
+    esac
+    [ "$fixture_account" -ge 1 ] && [ "$fixture_account" -le 256 ] || {
+        echo 'error: RAVEIL_FIXTURE_REPEAT_ACCOUNT must be in [1,256]' >&2
+        exit 1
+    }
+    fixture_env="--env=RAVEIL_FIXTURE_REPEAT_ACCOUNT=$fixture_account"
 fi
 if [ -n "$pilot_seed" ]; then
     case "$pilot_seed" in
@@ -64,12 +80,13 @@ if ! docker run --rm \
     --env "RAVEIL_TOOLCHAIN_SHA256=$toolchain_sha256" \
     $pilot_env \
     $repeat_env \
+    $fixture_env \
     "$image" \
     ./run-static-stencil.sh >"$rtl_log" 2>&1; then
     sed -n '1,240p' "$rtl_log"
     exit 1
 fi
-if [ -n "$repeat_account" ]; then
+if [ -n "$repeat_account" ] || [ -n "$fixture_account" ]; then
     # EXP-0006 outer raw is the evidence boundary.  Do not apply the legacy
     # human-readable smoke-log preview cap to repeated output evidence.
     cat "$rtl_log"
@@ -81,6 +98,9 @@ cd "$repo_root"
 if [ -n "$repeat_account" ]; then
     python3 -m raveil.t0044_repeated verify-graph \
         --log "$rtl_log" --account "$repeat_account"
+    exit 0
+fi
+if [ -n "$fixture_account" ]; then
     exit 0
 fi
 if [ -n "$pilot_seed" ]; then

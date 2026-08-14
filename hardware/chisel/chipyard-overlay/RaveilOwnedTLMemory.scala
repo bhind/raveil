@@ -19,6 +19,7 @@ case class RaveilOwnedMemoryParams(
   validWords: Option[Int] = None,
   controlledRun: Boolean = false,
   repeatedControlledRun: Boolean = false,
+  fixtureOwnedInputStaging: Boolean = false,
   fateAuditAddress: Option[BigInt] = None,
   tokenAuditAddress: Option[BigInt] = None,
   // The first CPU adapter deliberately uses the uncached peripheral path so
@@ -69,6 +70,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
   require(params.expectedClientSourceStart >= 0)
   require(params.expectedClientSourceEnd > params.expectedClientSourceStart)
   require(!params.repeatedControlledRun || params.controlledRun)
+  require(!params.fixtureOwnedInputStaging || params.repeatedControlledRun)
   params.fateAuditAddress.foreach { address =>
     require(address >= params.base && address < params.base + params.size)
     require(address % beatBytes == 0)
@@ -115,7 +117,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val memory = SyncReadMem(words, Vec(beatBytes, UInt(8.W)))
 
     val busy = RegInit(false.B)
-    val responseDue = RegNext(tl.a.fire, false.B)
+    val fixtureRequestAccepted = WireDefault(false.B)
+    val responseDue = RegNext(tl.a.fire || fixtureRequestAccepted, false.B)
     val responseHeld = RegInit(false.B)
     val responseHeldData = RegInit(0.U(32.W))
     val responseControlData = RegInit(0.U(32.W))
@@ -135,6 +138,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responseTokenValid = RegInit(false.B)
     val responseTokenEpoch = RegInit(0.U(16.W))
     val responseTokenSequence = RegInit(0.U(32.W))
+    val responseFixture = RegInit(false.B)
 
     val phase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val globalCycle = RegInit(0.U(64.W))
@@ -204,6 +208,21 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       phaseWriteCounts
     }
 
+    val fixtureProvider = if (params.fixtureOwnedInputStaging) {
+      Some(Module(new RaveilFixtureInputProvider))
+    } else {
+      None
+    }
+    val fixtureStart = WireDefault(false.B)
+    val fixtureActive = WireDefault(false.B)
+    val fixtureRequestFire = WireDefault(false.B)
+    val fixtureResponseFire = WireDefault(false.B)
+    val fixtureRelease = WireDefault(false.B)
+    val fixtureResponseValid = WireDefault(false.B)
+    val fixtureResponseError = WireDefault(false.B)
+    val fixturePreReleaseCandidateAcceptedCount = RegInit(0.U(32.W))
+    val fixtureReleaseCount = RegInit(0.U(2.W))
+
     globalCycle := globalCycle + 1.U
     phaseCycleCounts(phase) := phaseCycleCounts(phase) + 1.U
 
@@ -250,6 +269,13 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val memoryRead = tl.a.fire && dataRequest && get && !requestError
     val readBytes = memory.read(wordIndex, memoryRead)
     val freshReadData = readBytes.asUInt
+    val memoryWriteValid = WireDefault(false.B)
+    val memoryWriteIndex = WireDefault(0.U(log2Ceil(words).W))
+    val memoryWriteData = WireDefault(VecInit(Seq.fill(beatBytes)(0.U(8.W))))
+    val memoryWriteMask = WireDefault(VecInit(Seq.fill(beatBytes)(false.B)))
+    when(memoryWriteValid) {
+      memory.write(memoryWriteIndex, memoryWriteData, memoryWriteMask)
+    }
 
     val controlReadData = WireDefault(0.U(32.W))
     when(controlOffset === 0.U) { controlReadData := phase }
@@ -289,7 +315,168 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val freshResponseData = Mux(responseRead && !responseIsData,
       responseControlData, freshReadData)
 
-    tl.a.ready := !busy
+    val fixturePreReleasePhase = if (params.fixtureOwnedInputStaging) {
+      phase === RaveilOwnedMemoryPhase.Installation.U ||
+        phase === RaveilOwnedMemoryPhase.Staging.U
+    } else {
+      false.B
+    }
+    val fixtureCandidateDataRequest = if (params.fixtureOwnedInputStaging) {
+      tl.a.valid && dataRequest && dcacheOriginRequest
+    } else {
+      false.B
+    }
+    val fixtureCandidateRequest = if (params.fixtureOwnedInputStaging) {
+      fixtureCandidateDataRequest && get && expectedClientRequest &&
+        wordIndex < 324.U && fixturePreReleasePhase
+    } else {
+      false.B
+    }
+    val fixtureBlocksCandidate = if (params.fixtureOwnedInputStaging) {
+      fixtureActive || (fixturePreReleasePhase && fixtureCandidateDataRequest)
+    } else {
+      false.B
+    }
+    tl.a.ready := !busy && !fixtureBlocksCandidate
+
+    if (params.fixtureOwnedInputStaging) {
+      when(!fixtureActive && fixturePreReleasePhase &&
+          fixtureCandidateDataRequest && !fixtureCandidateRequest) {
+        assert(false.B,
+          "unexpected candidate data request before fixture release")
+      }
+      when(tl.a.fire && fixturePreReleasePhase && dataRequest &&
+          dcacheOriginRequest) {
+        fixturePreReleaseCandidateAcceptedCount :=
+          fixturePreReleaseCandidateAcceptedCount + 1.U
+      }
+    }
+
+    fixtureProvider.foreach { provider =>
+      fixtureStart := fixtureCandidateRequest && provider.io.ready && !busy
+      provider.io.start := fixtureStart
+      provider.io.seed := controlledInvocation
+      provider.io.requestReady := !busy
+      provider.io.responseValid := fixtureResponseValid
+      provider.io.responseError := fixtureResponseError
+      fixtureActive := provider.io.active
+      fixtureRequestFire := provider.io.requestValid && provider.io.requestReady
+      fixtureRequestAccepted := fixtureRequestFire
+      fixtureResponseFire := fixtureResponseValid && provider.io.responseReady
+      fixtureRelease := provider.io.release
+
+      when(fixtureRequestFire) {
+        assert(!tl.a.fire, "fixture provider overlapped candidate ingress")
+        assert(phase === RaveilOwnedMemoryPhase.Staging.U,
+          "fixture provider issued outside staging")
+        assert(provider.io.requestAddress < 324.U,
+          "fixture provider accessed outside input")
+        printf("RAVEIL-FIXTURE-INPUT-V1 invocation=%d seed=%d index=%d data=%x\n",
+          controlledInvocation, controlledInvocation,
+          provider.io.requestAddress, provider.io.requestData)
+        val fixtureBytes = Wire(Vec(beatBytes, UInt(8.W)))
+        for (byte <- 0 until beatBytes) {
+          fixtureBytes(byte) := provider.io.requestData(8 * byte + 7, 8 * byte)
+        }
+        memoryWriteValid := true.B
+        memoryWriteIndex := provider.io.requestAddress
+        memoryWriteData := fixtureBytes
+        memoryWriteMask := VecInit(Seq.fill(beatBytes)(true.B))
+        busy := true.B
+        responseRead := false.B
+        responseError := false.B
+        responseSource := 0.U
+        responseSize := log2Ceil(beatBytes).U
+        responseWordIndex := provider.io.requestAddress
+        responseIsData := true.B
+        responsePhase := RaveilOwnedMemoryPhase.Staging.U
+        responseExpectedClient := false.B
+        responseDcacheOrigin := false.B
+        responseFixture := true.B
+        responseFateAudit := false.B
+        responseTokenAudit := false.B
+        acceptedCount := acceptedCount + 1.U
+        unexpectedAcceptedCount := unexpectedAcceptedCount + 1.U
+        nonDcacheOriginAcceptedCount := nonDcacheOriginAcceptedCount + 1.U
+        lastAcceptedSource := 0.U
+        lastAcceptedPhase := RaveilOwnedMemoryPhase.Staging.U
+        lastNonDcacheOriginAcceptedSource := 0.U
+        lastNonDcacheOriginAcceptedPhase := RaveilOwnedMemoryPhase.Staging.U
+        phaseWriteCounts(RaveilOwnedMemoryPhase.Staging) :=
+          phaseWriteCounts(RaveilOwnedMemoryPhase.Staging) + 1.U
+        invocationPhaseWriteCounts(RaveilOwnedMemoryPhase.Staging) :=
+          invocationPhaseWriteCounts(RaveilOwnedMemoryPhase.Staging) + 1.U
+      }
+      when(fixtureStart) {
+        phase := RaveilOwnedMemoryPhase.Staging.U
+        fixturePreReleaseCandidateAcceptedCount := 0.U
+        fixtureReleaseCount := 0.U
+        when(controlledInvocation === 1.U) {
+          stagingStartCycle := globalCycle
+        }
+        printf("RAVEIL-FIXTURE-PHASE-V1 invocation=%d from=%d to=1 cycle=%d accepted=%d completed=%d pending=0\n",
+          controlledInvocation, phase, globalCycle, acceptedCount, completedCount)
+      }
+      val heldAddress = RegEnable(tl.a.bits.address, fixtureStart)
+      val heldOpcode = RegEnable(tl.a.bits.opcode, fixtureStart)
+      val heldParam = RegEnable(tl.a.bits.param, fixtureStart)
+      val heldSize = RegEnable(tl.a.bits.size, fixtureStart)
+      val heldSource = RegEnable(tl.a.bits.source, fixtureStart)
+      val heldMask = RegEnable(tl.a.bits.mask, fixtureStart)
+      val heldData = RegEnable(tl.a.bits.data, fixtureStart)
+      val heldCorrupt = RegEnable(tl.a.bits.corrupt, fixtureStart)
+      val heldDcacheOrigin = RegEnable(dcacheOriginRequest, fixtureStart)
+      val heldUserFieldsStable = tl.a.bits.user.keydata.map {
+        case (_, field) =>
+          val held = RegEnable(field.asUInt, fixtureStart)
+          field.asUInt === held
+      }.foldLeft(true.B)(_ && _)
+      when(provider.io.active) {
+        assert(tl.a.valid, "held candidate request disappeared during staging")
+        assert(tl.a.bits.address === heldAddress &&
+          tl.a.bits.opcode === heldOpcode &&
+          tl.a.bits.param === heldParam &&
+          tl.a.bits.size === heldSize &&
+          tl.a.bits.source === heldSource &&
+          tl.a.bits.mask === heldMask &&
+          tl.a.bits.data === heldData &&
+          tl.a.bits.corrupt === heldCorrupt &&
+          dcacheOriginRequest === heldDcacheOrigin && heldUserFieldsStable,
+          "held candidate request changed during staging")
+        assert(!tl.a.ready && !tl.a.fire,
+          "candidate request was accepted before fixture release")
+      }
+      when(fixtureRelease) {
+        assert(provider.io.acceptedCount === 324.U)
+        assert(provider.io.completedCount === 323.U)
+        assert(acceptedCount === completedCount + 1.U,
+          "fixture release was not quiescent")
+        assert(fixturePreReleaseCandidateAcceptedCount === 0.U)
+        assert(fixtureReleaseCount === 0.U)
+        fixtureReleaseCount := fixtureReleaseCount + 1.U
+        phase := RaveilOwnedMemoryPhase.Execution.U
+        executionStartCycle := globalCycle
+        executionStartAccepted := acceptedCount
+        executionStartCompleted := completedCount + 1.U
+        executionStartExpectedAccepted := expectedAcceptedCount
+        executionStartExpectedCompleted := expectedCompletedCount
+        executionStartUnexpectedAccepted := unexpectedAcceptedCount
+        executionStartUnexpectedCompleted := unexpectedCompletedCount + 1.U
+        executionStartOriginAccepted := dcacheOriginAcceptedCount
+        executionStartOriginCompleted := dcacheOriginCompletedCount
+        executionStartNonOriginAccepted := nonDcacheOriginAcceptedCount
+        executionStartNonOriginCompleted := nonDcacheOriginCompletedCount + 1.U
+        executionRequestStallCycles := 0.U
+        executionResponseBackpressureCycles := 0.U
+        printf("RAVEIL-FIXTURE-PHASE-V1 invocation=%d from=1 to=2 cycle=%d accepted=%d completed=%d pending=0\n",
+          controlledInvocation, globalCycle, acceptedCount, completedCount + 1.U)
+        printf("RAVEIL-FIXTURE-STAGING-V1 invocation=%d seed=%d accepted=324 completed=324 writes=324 first_word=0 last_word=323 pending=0 candidate_accepted_before_release=%d release_count=%d\n",
+          controlledInvocation, controlledInvocation,
+          fixturePreReleaseCandidateAcceptedCount, fixtureReleaseCount + 1.U)
+        printf("RAVEIL-FIXTURE-RESOURCE-V1 invocation=%d resource_sha256=87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7 data_width_bits=32 operation_width_bytes=4 request_ports=1 response_ports=1 maximum_outstanding_requests=1 request_buffer_depth=0 response_buffer_depth=1 physical_banks=1 physical_words=1024 valid_words=580 arbitration=phase-exclusive-provider-or-candidate accepted_operations=read,write-byte-mask response_rule=one-module-local-cycle-after-acceptance response_hold=stable-until-consumed provider=input-words-324-ascending-full-word provider_initiator=fixture provider_request_buffer_depth=0 provider_release=response-consume-word-323 provider_rearm=validation-response-consume-word-255\n",
+          controlledInvocation)
+      }
+    }
     if (params.controlledRun) {
       when(phase === RaveilOwnedMemoryPhase.Execution.U &&
           tl.a.valid && !tl.a.ready) {
@@ -336,6 +523,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         }
       }
       busy := true.B
+      responseFixture := false.B
       responseRead := get
       responseError := requestError
       responseSource := tl.a.bits.source
@@ -468,7 +656,10 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           for (byte <- 0 until beatBytes) {
             writeBytes(byte) := tl.a.bits.data(8 * byte + 7, 8 * byte)
           }
-          memory.write(wordIndex, writeBytes, tl.a.bits.mask.asBools)
+          memoryWriteValid := true.B
+          memoryWriteIndex := wordIndex
+          memoryWriteData := writeBytes
+          memoryWriteMask := tl.a.bits.mask.asBools
         }
       }
       if (params.controlledRun) {
@@ -510,7 +701,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
 
     val responseValid = responseDue || responseHeld
     val responseData = Mux(responseHeld, responseHeldData, freshResponseData)
-    tl.d.valid := responseValid
+    fixtureResponseValid := responseValid && responseFixture
+    fixtureResponseError := responseError
+    tl.d.valid := responseValid && !responseFixture
     if (params.controlledRun) {
       when(responsePhase === RaveilOwnedMemoryPhase.Execution.U &&
           responseValid && !tl.d.ready) {
@@ -526,11 +719,15 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     tl.d.bits.denied := responseError
     tl.d.bits.data := Mux(responseRead, responseData, 0.U)
     tl.d.bits.corrupt := responseError && responseRead
-    when(responseDue && !tl.d.ready) {
+    when(responseDue && !responseFixture && !tl.d.ready) {
       responseHeld := true.B
       responseHeldData := freshResponseData
     }
-    when(tl.d.fire) {
+    val responseConsume = responseValid && Mux(
+      responseFixture,
+      fixtureProvider.map(_.io.responseReady).getOrElse(false.B),
+      tl.d.ready)
+    when(responseConsume) {
       when(responseTokenAudit) {
         printf("RAVEIL-OWNED-TL-TOKEN-V1 event=d valid=%d epoch=%d sequence=%d source=%d opcode=%d size=%d denied=%d corrupt=%d classification=%d\n",
           responseTokenValid, responseTokenEpoch, responseTokenSequence,
@@ -551,7 +748,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       busy := false.B
       when(responseIsData && !responseError) {
         if (params.controlledRun) {
-          when(responsePhase === RaveilOwnedMemoryPhase.Staging.U &&
+          when(!params.fixtureOwnedInputStaging.B &&
+              responsePhase === RaveilOwnedMemoryPhase.Staging.U &&
               activePhaseWriteCounts(RaveilOwnedMemoryPhase.Staging) === 324.U) {
             assert(acceptedCount === completedCount + 1.U,
               "Raveil controlled execution did not start quiescent")
@@ -647,6 +845,10 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
               activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation) === 256.U) {
             if (params.repeatedControlledRun) {
               phase := RaveilOwnedMemoryPhase.Staging.U
+              if (params.fixtureOwnedInputStaging) {
+                printf("RAVEIL-FIXTURE-REARM-V1 invocation=%d from=4 to=1 cycle=%d pending=0 validation_responses=256 rearm_count=1\n",
+                  controlledInvocation, globalCycle)
+              }
               printf("RAVEIL-REPEATED-PHASE-V1 invocation=%d from=4 to=1 cycle=%d accepted=%d completed=%d busy_before=%d publication_cycles=0\n",
                 controlledInvocation, globalCycle, acceptedCount,
                 completedCount + 1.U, busy)
@@ -794,6 +996,19 @@ class WithRaveilRepeatedMatchedMemorySourceRange(start: Int, end: Int)
     validWords = Some(580),
     controlledRun = true,
     repeatedControlledRun = true
+  ))
+})
+
+class WithRaveilFixtureRepeatedMatchedMemorySourceRange(start: Int, end: Int)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    size = 4 * 1024,
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    validWords = Some(580),
+    controlledRun = true,
+    repeatedControlledRun = true,
+    fixtureOwnedInputStaging = true
   ))
 })
 

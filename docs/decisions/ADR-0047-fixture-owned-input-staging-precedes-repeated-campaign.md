@@ -88,3 +88,15 @@ no longer runs on the core. That is an intended removal of measurement-harness
 asymmetry, not CPU weakening or a performance conclusion. All phase vectors
 must be reported anew. Energy, synthesis timing, area, other Graph
 organizations, and general initiator security remain out of scope.
+
+## Implementation note
+
+The accepted boundary is implemented for EXP-0007 with common resource identity
+`87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7`.
+Actual accepted input words, provider start/release, and validation rearm are
+raw evidence rather than verifier-generated assumptions. For invocations after
+the first, lifecycle staging includes the interval from the preceding rearm to
+release; the nested provider window is separately fixed at 648 cycles. This
+keeps candidate control progress in end-to-end accounting while preserving a
+common provider boundary. The implementation note is not commissioning data;
+EXP-0007 must still freeze and run the complete 1/4 matrix.

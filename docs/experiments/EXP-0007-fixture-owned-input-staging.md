@@ -1,6 +1,6 @@
 # EXP-0007: Fixture-owned input staging boundary
 
-Status: Planned
+Status: In progress
 Evidence class: RTL simulation pilot
 Date: 2026-08-14
 Task: T-0044
@@ -16,7 +16,7 @@ semantics and optimizations, and remove EXP-0006's staging-initiator asymmetry?
 
 ## Scope and pre-data state
 
-This record allocates EXP-0007 before implementation or data. It does not
+This record allocated EXP-0007 before implementation or data. It does not
 reuse, amend, or reinterpret EXP-0006 raw evidence. The implementation commit,
 machine-readable manifest, estimator, inference unit, exact accounts, interval
 rule, environment identity, and final manifest SHA-256 must be frozen here
@@ -46,6 +46,55 @@ selection is authorized.
 - negative tests fail on overlap, early candidate acceptance, missing or
   duplicate staging write, nonascending address, output access, pending at
   release, or identity drift.
+
+## Implemented boundary and pre-freeze evidence
+
+The shared provider is instantiated in both `StaticStencilRegion` and the
+Rocket/BOOM owned-memory manager. It owns no memory or oracle state, uses the
+existing single request/response ingress, permits one outstanding write, and
+emits the accepted address/data for all 324 words. Its final response-consume
+is the sole execution release, and the final ordered validation response is
+the sole rearm. The CPU fixture kernel contains neither the formula nor input
+stores; an empty compiler memory barrier prevents cross-invocation C
+optimization without adding a CPU runtime fence or disabling lawful
+within-invocation load reuse.
+
+The new resource SHA-256 is
+`87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7`.
+The verifier reconstructs input hashes from the accepted RTL trace and rejects
+bad bytes, order, count, overlap, release cycles, rearm, pending state, resource
+identity, lifecycle ordering, or inherited collector modes. The focused
+Python/source suite passed 74/74. A pre-freeze linux/amd64 Docker/Verilator
+Graph run passed four fresh inputs with 648 provider cycles, 3,072 execution
+cycles, one completion cycle, 512 validation cycles, 4,233 total cycles, and
+1,536 execution transactions each. These values establish implementation
+behavior only and are not commissioning data or a performance claim.
+
+The first CPU elaboration attempt failed before simulation because the held-A
+assertion directly named optional token fields that the standard fixture
+configs do not negotiate. The replacement implementation iterates every
+actually negotiated `BundleMap` user field and snapshots it generically; it
+therefore checks the complete present payload without inventing absent fields
+or weakening future metadata checks. After that correction, pre-freeze
+one-input Rocket, BOOM, and diagnostic BOOM runs each exited zero. Rocket and
+BOOM both observed the 648-cycle provider window, 800 execution reads, 256
+execution writes, zero pending or unexplained traffic, and oracle-matching
+output; BOOM's execution window was 22,170 cycles and the diagnostic
+serialize-dispatch window was 70,911 cycles. These qualification values are not
+EXP-0007 data. The failed builds are not data and their obsolete source hashes
+are not freeze authority.
+
+For later invocations, lifecycle staging begins at the preceding validation
+rearm and includes candidate-visible control progress until provider release;
+the nested provider window begins at its trigger and is exactly 648 cycles.
+This preserves all cycles instead of hiding CPU loop/control work. The final
+manifest must keep both meanings separate.
+
+The Graph toolchain SHA binds the pinned base image, version strings, and
+Dockerfile recipe, but the inherited Dockerfile still uses floating apt
+packages and a download without a byte checksum. EXP-0007 therefore calls it
+recipe/version identity, not complete toolchain byte identity. This limitation
+must remain explicit in the frozen manifest and final eligibility finding.
 
 ## Stop and transition rule
 

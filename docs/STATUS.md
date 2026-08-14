@@ -270,13 +270,24 @@ testbench input generation still prevents a same-meaning staging/end-to-end
 claim. EXP-0006 therefore ends `pause` at that single boundary; no 256-input
 campaign, go/no-go, energy, synthesis timing, or area conclusion follows, and
 T-0044 remains open.
-ADR-0047 now accepts the narrow successor architecture for the remaining
-staging fairness gap: one fixture-owned deterministic provider supplies all
-candidates through a phase-exclusive mux at their existing single owned
-ingress, and the final one of 324 ordered write responses is the sole execution
-release edge. EXP-0007 is allocated before implementation or data. No provider,
-new resource identity, negative RTL evidence, frozen manifest, or EXP-0007 run
-exists yet; the EXP-0006 `pause` and sealed evidence remain unchanged.
+ADR-0047's narrow successor boundary is now implemented but not yet frozen or
+measured. One shared `RaveilFixtureInputProvider` supplies Graph and CPU adapters
+through a phase-exclusive mux at their existing single owned ingress, records
+all 324 accepted input words, releases only on the final response, and rearms
+only on the 256th validation response. CPU input generation/stores are absent
+from the fixture ELF; its first load is held without acceptance or payload
+drift while staging completes. Resource identity
+`87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7`
+binds the provider, mux, release, and rearm rules. Seventy-four focused tests
+and pre-freeze Graph, Rocket, BOOM, and diagnostic BOOM RTL runs pass. The
+four-input Graph run records exact
+`648/3072/1/512` staging/execution/completion/validation cycles and 1,536
+execution transactions per input; one-input Rocket and BOOM runs each record
+the same 648-cycle provider window, 800 execution reads, 256 execution writes,
+no unexplained traffic, and matching output. This is pre-freeze functional evidence, not
+EXP-0007 commissioning data or a performance claim. The frozen manifest and
+complete Graph/Rocket/BOOM/diagnostic 1/4 runs remain required; EXP-0006's
+`pause` and sealed evidence are unchanged.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

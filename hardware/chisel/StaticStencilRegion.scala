@@ -5,6 +5,7 @@
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
+import chipyard.raveil.RaveilFixtureInputProvider
 
 object StaticStencilRegionContract {
   val ConfigurationTag = "d4bf9395a510385f"
@@ -33,6 +34,16 @@ class StaticStencilRegion extends Module {
     val inputStageResponseReady = Input(Bool())
     val inputStageResponseError = Output(Bool())
 
+    val fixtureStageStart = Input(Bool())
+    val fixtureStageSeed = Input(UInt(32.W))
+    val fixtureStageReady = Output(Bool())
+    val fixtureStageDone = Output(Bool())
+    val fixtureStageAcceptedCount = Output(UInt(10.W))
+    val fixtureStageCompletedCount = Output(UInt(10.W))
+    val fixtureStageAcceptedValid = Output(Bool())
+    val fixtureStageAcceptedAddress = Output(UInt(9.W))
+    val fixtureStageAcceptedData = Output(UInt(32.W))
+
     val start = Input(Bool())
     val cancel = Input(Bool())
 
@@ -60,6 +71,7 @@ class StaticStencilRegion extends Module {
   })
 
   val scratchpad = Module(new OwnedFixedLatencyScratchpad(1024, 580))
+  val fixtureProvider = Module(new RaveilFixtureInputProvider)
 
   val busyReg = RegInit(false.B)
   val outputValidReg = RegInit(false.B)
@@ -69,6 +81,13 @@ class StaticStencilRegion extends Module {
   val accumulator = RegInit(0.U(32.W))
   val cycleCountReg = RegInit(0.U(14.W))
   val checksumReg = RegInit(0.U(64.W))
+  val fixtureModeReg = RegInit(false.B)
+  val legacyModeReg = RegInit(false.B)
+  val fixtureCanStageReg = RegInit(true.B)
+  val fixtureValidationResponsesReg = RegInit(0.U(9.W))
+  val fixtureAcceptedValidReg = RegInit(false.B)
+  val fixtureAcceptedAddressReg = RegInit(0.U(9.W))
+  val fixtureAcceptedDataReg = RegInit(0.U(32.W))
   val graphInputReadsAcceptedReg = RegInit(0.U(16.W))
   val graphOutputWritesAcceptedReg = RegInit(0.U(16.W))
   val cancelRequestedReg = RegInit(false.B)
@@ -120,33 +139,42 @@ class StaticStencilRegion extends Module {
     state === loadCenterResponse || state === loadNorthResponse ||
     state === loadSouthResponse || state === loadWestResponse ||
     state === loadEastResponse)
-  val controlStageSelected = !busyReg && io.inputStageValid
-  val controlValidationSelected = !busyReg && !io.inputStageValid &&
+  val fixtureSelected = !busyReg && fixtureProvider.io.active
+  val controlStageSelected = !busyReg && !fixtureSelected && io.inputStageValid
+  val controlValidationSelected = !busyReg && !fixtureSelected &&
+    !io.inputStageValid &&
     io.outputValidationValid && outputValidReg
   val controlResponseIsValidation = RegInit(false.B)
 
   scratchpad.io.requestValid := Mux(
     busyReg,
     graphInputRequest || graphOutputRequest,
-    controlStageSelected || controlValidationSelected
+    fixtureProvider.io.requestValid || controlStageSelected ||
+      controlValidationSelected
   )
-  scratchpad.io.requestWrite := Mux(busyReg, graphOutputRequest, controlStageSelected)
+  scratchpad.io.requestWrite := Mux(
+    busyReg, graphOutputRequest, fixtureSelected || controlStageSelected)
   scratchpad.io.requestAddress := Mux(
     busyReg,
     Mux(graphOutputRequest, 324.U + outputIndex, inputAddress),
-    Mux(controlStageSelected, io.inputStageAddress, 324.U + io.outputValidationAddress)
+    Mux(fixtureSelected, fixtureProvider.io.requestAddress,
+      Mux(controlStageSelected, io.inputStageAddress,
+        324.U + io.outputValidationAddress))
   )
-  scratchpad.io.requestWriteData := Mux(busyReg, accumulator, io.inputStageData)
+  scratchpad.io.requestWriteData := Mux(
+    busyReg, accumulator,
+    Mux(fixtureSelected, fixtureProvider.io.requestData, io.inputStageData))
   scratchpad.io.requestWriteMask := Mux(scratchpad.io.requestWrite, "hf".U, 0.U)
   scratchpad.io.requestInitiator := Mux(
     busyReg,
     OwnedMemoryContract.InitiatorGraph.U,
-    OwnedMemoryContract.InitiatorControl.U
+    Mux(fixtureSelected, OwnedMemoryContract.InitiatorFixture.U,
+      OwnedMemoryContract.InitiatorControl.U)
   )
   scratchpad.io.requestPhase := Mux(
     busyReg,
     OwnedMemoryContract.PhaseExecution.U,
-    Mux(controlStageSelected,
+    Mux(fixtureSelected || controlStageSelected,
       OwnedMemoryContract.PhaseStaging.U,
       OwnedMemoryContract.PhaseValidation.U)
   )
@@ -156,21 +184,75 @@ class StaticStencilRegion extends Module {
   scratchpad.io.responseReady := Mux(
     busyReg,
     graphInputResponseState || state === storeResponse,
-    Mux(controlResponseIsValidation,
+    Mux(fixtureSelected,
+      fixtureProvider.io.responseReady,
+      Mux(controlResponseIsValidation,
       io.outputValidationResponseReady,
-      io.inputStageResponseReady)
+      io.inputStageResponseReady))
   )
 
-  io.inputStageReady := !busyReg && scratchpad.io.requestReady
-  io.inputStageResponseValid := !busyReg && scratchpad.io.responseValid &&
+  fixtureProvider.io.start := io.fixtureStageStart && io.fixtureStageReady
+  fixtureProvider.io.seed := io.fixtureStageSeed
+  fixtureProvider.io.requestReady := fixtureSelected && scratchpad.io.requestReady
+  fixtureProvider.io.responseValid := fixtureSelected && scratchpad.io.responseValid
+  fixtureProvider.io.responseError := scratchpad.io.responseError
+
+  io.inputStageReady := !fixtureModeReg && !busyReg &&
+    !fixtureProvider.io.active &&
+    scratchpad.io.requestReady
+  io.inputStageResponseValid := !busyReg && !fixtureProvider.io.active &&
+    scratchpad.io.responseValid &&
     !controlResponseIsValidation
   io.inputStageResponseError := scratchpad.io.responseError
-  io.outputValidationReady := !busyReg && !io.inputStageValid && outputValidReg &&
-    scratchpad.io.requestReady
-  io.outputValidationResponseValid := !busyReg && scratchpad.io.responseValid &&
-    controlResponseIsValidation
+  io.outputValidationReady := !busyReg && !fixtureProvider.io.active &&
+    !io.inputStageValid && outputValidReg && scratchpad.io.requestReady
+  io.outputValidationResponseValid := !busyReg && !fixtureProvider.io.active &&
+    scratchpad.io.responseValid && controlResponseIsValidation
   io.outputValidationReadData := scratchpad.io.responseReadData
   io.outputValidationResponseError := scratchpad.io.responseError
+  io.fixtureStageReady := !legacyModeReg && fixtureCanStageReg &&
+    !busyReg && !scratchpad.io.pending &&
+    fixtureProvider.io.ready && !io.inputStageValid &&
+    !io.outputValidationValid
+  io.fixtureStageDone := fixtureProvider.io.done
+  io.fixtureStageAcceptedCount := fixtureProvider.io.acceptedCount
+  io.fixtureStageCompletedCount := fixtureProvider.io.completedCount
+  io.fixtureStageAcceptedValid := fixtureAcceptedValidReg
+  io.fixtureStageAcceptedAddress := fixtureAcceptedAddressReg
+  io.fixtureStageAcceptedData := fixtureAcceptedDataReg
+
+  fixtureAcceptedValidReg := false.B
+  when(fixtureProvider.io.requestValid && fixtureProvider.io.requestReady) {
+    fixtureAcceptedValidReg := true.B
+    fixtureAcceptedAddressReg := fixtureProvider.io.requestAddress
+    fixtureAcceptedDataReg := fixtureProvider.io.requestData
+  }
+
+  when(io.inputStageValid && io.inputStageReady) {
+    legacyModeReg := true.B
+  }
+  when(io.start && !busyReg && !fixtureProvider.io.active) {
+    legacyModeReg := true.B
+  }
+  when(io.fixtureStageStart && io.fixtureStageReady) {
+    fixtureModeReg := true.B
+    fixtureCanStageReg := false.B
+    fixtureValidationResponsesReg := 0.U
+  }
+  when(fixtureModeReg && io.outputValidationValid &&
+      io.outputValidationReady) {
+    assert(io.outputValidationAddress === fixtureValidationResponsesReg)
+  }
+  when(fixtureModeReg && io.outputValidationResponseValid &&
+      io.outputValidationResponseReady) {
+    assert(fixtureValidationResponsesReg < 256.U)
+    when(fixtureValidationResponsesReg === 255.U) {
+      fixtureValidationResponsesReg := 0.U
+      fixtureCanStageReg := true.B
+    }.otherwise {
+      fixtureValidationResponsesReg := fixtureValidationResponsesReg + 1.U
+    }
+  }
 
   when(io.cancel && busyReg) {
     cancelRequestedReg := true.B
@@ -275,7 +357,19 @@ class StaticStencilRegion extends Module {
         }
       }
     }
-  }.elsewhen(io.start && !scratchpad.io.pending) {
+  }.elsewhen(fixtureProvider.io.release) {
+    assert(!scratchpad.io.responseError)
+    busyReg := true.B
+    outputValidReg := false.B
+    outputIndex := 0.U
+    state := loadCenterRequest
+    accumulator := 0.U
+    cycleCountReg := 0.U
+    checksumReg := 0.U
+    cancelRequestedReg := false.B
+    graphInputReadsAcceptedReg := 0.U
+    graphOutputWritesAcceptedReg := 0.U
+  }.elsewhen(io.start && !scratchpad.io.pending && !fixtureProvider.io.active) {
     busyReg := true.B
     outputValidReg := false.B
     outputIndex := 0.U
@@ -322,6 +416,31 @@ class StaticStencilRegion extends Module {
       assert(scratchpad.io.responseWrite)
       assert(scratchpad.io.responseInitiator === OwnedMemoryContract.InitiatorControl.U)
       assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseStaging.U)
+    }
+    when(fixtureProvider.io.active && scratchpad.io.requestValid) {
+      assert(!busyReg)
+      assert(scratchpad.io.requestWrite)
+      assert(scratchpad.io.requestAddress < 324.U)
+      assert(scratchpad.io.requestInitiator === OwnedMemoryContract.InitiatorFixture.U)
+      assert(scratchpad.io.requestPhase === OwnedMemoryContract.PhaseStaging.U)
+    }
+    when(fixtureProvider.io.active && scratchpad.io.responseValid) {
+      assert(scratchpad.io.responseInitiator ===
+        OwnedMemoryContract.InitiatorFixture.U)
+      assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseStaging.U)
+    }
+    when(fixtureProvider.io.release) {
+      assert(!busyReg)
+      assert(!io.inputStageReady)
+      assert(fixtureProvider.io.acceptedCount === 324.U)
+      assert(fixtureProvider.io.completedCount === 323.U)
+    }
+    when(fixtureModeReg) {
+      assert(!io.inputStageReady)
+      assert(!(io.start && !busyReg))
+      when(!fixtureCanStageReg && !busyReg && !fixtureProvider.io.active) {
+        assert(fixtureValidationResponsesReg =/= 0.U || outputValidReg)
+      }
     }
     when(io.outputValidationResponseValid) {
       assert(!scratchpad.io.responseWrite)
