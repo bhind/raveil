@@ -51,3 +51,4 @@ rewrite it.
 | [ADR-0044](ADR-0044-cpu-translation-adapter-starts-uncached-and-unmatched.md) | Accepted | The first CPU TileLink translation adapter uses an observable uncached path and remains resource-unmatched |
 | [ADR-0045](ADR-0045-semantic-attribution-is-commit-aware-and-cpu-owned.md) | Accepted | CPU semantic attribution uses implementation-owned tokens and requires memory completion plus architectural commit |
 | [ADR-0046](ADR-0046-controlled-run-matched-comparison-precedes-token-hardening.md) | Accepted | A controlled-run matched comparison precedes general CPU token-lifecycle hardening |
+| [ADR-0047](ADR-0047-fixture-owned-input-staging-precedes-repeated-campaign.md) | Accepted | A fixture-owned phase-exclusive input provider precedes repeated measurement |

@@ -270,6 +270,13 @@ testbench input generation still prevents a same-meaning staging/end-to-end
 claim. EXP-0006 therefore ends `pause` at that single boundary; no 256-input
 campaign, go/no-go, energy, synthesis timing, or area conclusion follows, and
 T-0044 remains open.
+ADR-0047 now accepts the narrow successor architecture for the remaining
+staging fairness gap: one fixture-owned deterministic provider supplies all
+candidates through a phase-exclusive mux at their existing single owned
+ingress, and the final one of 324 ordered write responses is the sole execution
+release edge. EXP-0007 is allocated before implementation or data. No provider,
+new resource identity, negative RTL evidence, frozen manifest, or EXP-0007 run
+exists yet; the EXP-0006 `pause` and sealed evidence remain unchanged.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

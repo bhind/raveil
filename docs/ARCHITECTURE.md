@@ -267,6 +267,17 @@ uses the same after-staging-response and after-final-execution-response
 quiescence convention. Only the three-record aggregate may promote resource
 equality and functional comparison eligibility.
 
+ADR-0047 adds a controlled-measurement fixture before any repeated campaign.
+A common deterministic provider, not Rocket, BOOM, or Graph execution,
+generates each fresh input and issues 324 ascending writes through a
+phase-exclusive mux at the existing single owned ingress. The provider and
+candidate cannot overlap; the final staging response is the sole candidate
+release edge. This adds neither a second memory port nor a candidate-specific
+DMA, buffer, bank, or arbitration policy. The provider formula, mux,
+exclusivity, counters, and release rule are part of the common resource and
+contract identities. This fixture is not yet implemented and is not a product
+data path or general semantic-initiator mechanism.
+
 ADR-0044 defines the first CPU translation adapter as an intentionally
 unmatched intermediate boundary. Dedicated Rocket and BOOM configurations
 remove the inherited subsystem scratchpad and add a Raveil-owned 32-bit

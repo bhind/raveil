@@ -53,8 +53,12 @@ resolves it.
   initiator should generate or admit each fresh input when CPU generation is
   candidate-local but Graph generation is testbench-side? Until that staging
   boundary is resolved, end-to-end amortization and the 256-input campaign are
-  paused. Source survey found no
-  existing upstream config that proves this boundary: Rocket's tile-internal
+  paused. ADR-0047 resolves the intended controlled-measurement architecture as
+  a fixture-owned, phase-exclusive provider. Whether the pinned CPU adapters
+  can hold and release their first request without adding a port, buffer,
+  polling protocol, or lost request remains unverified until EXP-0007
+  implementation and negative RTL evidence. The earlier source survey found
+  no existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
   TileLink banked scratchpad now passes the exact stencil on both controls but
   at that stage still needed an owned adapter and explicit proof of ports, buffering,

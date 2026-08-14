@@ -695,6 +695,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   testbench-side. **Pause at this one point:** define and prove a same-meaning
   input-staging initiator boundary before any 1/4/16/64/256 campaign. Do not
   start the 256-input run, secondary ablation, or unrelated T-0044 scope.
+  ADR-0047 now accepts the only next implementation: a fixture-owned provider
+  that performs the same 324 ordered writes through a phase-exclusive single
+  ingress for every candidate, then releases execution once. EXP-0007 is
+  allocated pre-implementation; implement and negative-test this boundary,
+  bind its source/resource/contract identities, freeze before data, and rerun
+  only the complete 1/4 commissioning matrix.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

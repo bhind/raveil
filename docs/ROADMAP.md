@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0042 complete; T-0044 EXP-0006 commissioning completed and paused at staging-initiator fairness**
+State: **T-0042 complete; T-0044 EXP-0007 common-staging boundary accepted before implementation**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
