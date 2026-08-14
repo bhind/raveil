@@ -110,6 +110,9 @@ toolchain and owns the exporters, runner, seals, parser, matrix derivation, and
 tests. The frozen manifest is
 `benchmarks/manifests/t0044-static-physical-screen-v1.json`, SHA-256
 `681fd43e6f38a4b65cba8698eacbbf3768edc93d633141274c74ce846d61d216`.
+Freeze commit is `d44c2e603ade69ceccb14ac0db2a77374d47ab7b`; all
+candidate RUN-IDs must be descendants of both that commit and the implementation
+authority.
 
 The implemented but not yet frozen collector has four explicit boundaries:
 

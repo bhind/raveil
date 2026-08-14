@@ -367,6 +367,7 @@ Stage-B implementation authority is now
 Rocket core top `Rocket`, exact RTL/tool/library/constraint identities, raw
 sealing, and fail-closed matrix rules. Manifest SHA-256 is
 `681fd43e6f38a4b65cba8698eacbbf3768edc93d633141274c74ce846d61d216`.
+Freeze commit is `d44c2e603ade69ceccb14ac0db2a77374d47ab7b`.
 This is still candidate pre-data: no Graph or Rocket physical estimate exists.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
