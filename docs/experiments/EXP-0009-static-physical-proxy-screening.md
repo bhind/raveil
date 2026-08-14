@@ -191,3 +191,20 @@ python3 -m raveil.t0044_physical derive-matrix \
 
 Any failed raw directory is retained and never reused. A deterministic rerun
 uses a distinct RUN-ID and is only a reproducibility check.
+
+## First Stage-B attempt and recovery boundary
+
+The first frozen Graph RUN-ID exited before Yosys because the host opened
+`container.log` before container launch while the container required a wholly
+empty raw directory. The runner retained `run-001-static-graph-raw` as an
+ineligible failed seal; its files digest is
+`080f3ac93706ff88a6df90c04b52d09992e24ad1c26b2a57a6fd859867edb6f3`.
+No RTL was read by Yosys, no area/timing report exists, and no candidate datum
+may be recovered from that RUN-ID.
+
+Recovery changes only that handoff: the container now requires exactly one
+empty, host-owned `container.log` and rejects every other preexisting entry.
+The original manifest remains immutable. A separately frozen recovery manifest
+must bind the corrective implementation authority before a new RUN-ID; all
+RTL, partitions, tools, constraints, estimators, and decision rules remain
+unchanged.

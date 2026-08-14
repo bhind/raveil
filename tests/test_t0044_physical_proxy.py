@@ -107,6 +107,9 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertIn("tool-identity.txt", inner)
         self.assertIn("set_input_delay 1.000", inner)
         self.assertIn("set_output_delay 1.000", inner)
+        self.assertIn("[ -f /evidence/container.log ]", inner)
+        self.assertIn("[ ! -s /evidence/container.log ]", inner)
+        self.assertIn("! -name container.log", inner)
 
 
 class PhysicalProxyEvidenceTests(unittest.TestCase):

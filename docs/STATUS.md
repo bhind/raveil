@@ -369,6 +369,11 @@ sealing, and fail-closed matrix rules. Manifest SHA-256 is
 `681fd43e6f38a4b65cba8698eacbbf3768edc93d633141274c74ce846d61d216`.
 Freeze commit is `d44c2e603ade69ceccb14ac0db2a77374d47ab7b`.
 This is still candidate pre-data: no Graph or Rocket physical estimate exists.
+The first frozen Graph RUN-ID stopped before Yosys because the host-created
+container log violated the container's empty-directory check. Failed raw files
+are sealed at `080f3ac9...b6f3` and are claim-ineligible. Recovery changes only
+the log handoff and requires a separately frozen descendant manifest; the
+scientific contract and generated RTL remain unchanged.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

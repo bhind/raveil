@@ -732,6 +732,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   energy paused until
   fallback, common-memory, integration, clock, and lifecycle activity are all
   included.
+  The first Graph RUN-ID is a sealed pre-Yosys operational failure; freeze the
+  log-handoff-only recovery authority/manifest before a distinct reattempt.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

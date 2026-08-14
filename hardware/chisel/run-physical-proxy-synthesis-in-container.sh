@@ -9,8 +9,10 @@ liberty=/home/mambauser/physical-mamba/envs/toolchain/share/pdk/sky130A/libs.ref
 [ -f "$liberty" ]
 [ -d /rtl ]
 [ -d /evidence ]
-[ -z "$(find /evidence -mindepth 1 -print -quit)" ] || {
-    echo 'error: evidence directory must be empty' >&2
+[ -f /evidence/container.log ]
+[ ! -s /evidence/container.log ]
+[ -z "$(find /evidence -mindepth 1 ! -name container.log -print -quit)" ] || {
+    echo 'error: evidence directory must contain only the empty host-owned container log' >&2
     exit 1
 }
 
