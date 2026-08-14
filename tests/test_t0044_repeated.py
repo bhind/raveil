@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import tempfile
 import unittest
 
@@ -116,6 +117,21 @@ class RepeatedBoundaryTests(unittest.TestCase):
                             '"experiment_id":"EXP-0005"}\n')
             with self.assertRaises(ControlledRunError):
                 load_manifest(path)
+
+    def test_frozen_manifest_is_exact(self) -> None:
+        path = (
+            ROOT / "benchmarks/manifests/t0044-static-repeated-invocation-v1.json"
+        )
+        manifest = load_manifest(path)
+        self.assertEqual(manifest["sampling"]["commissioning_accounts"], [1, 4])
+        self.assertEqual(
+            manifest["sampling"]["campaign_prefix_accounts"],
+            [1, 4, 16, 64, 256],
+        )
+        self.assertEqual(
+            hashlib.sha256(path.read_bytes()).hexdigest(),
+            "4a6ebd2c67c8d19f6589753966123fcec2a09c77798b29c45cdc6fdb3df1d740",
+        )
 
     def test_raw_seal_is_single_use_and_binds_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

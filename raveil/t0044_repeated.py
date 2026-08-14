@@ -70,6 +70,10 @@ def load_manifest(path: Path) -> dict[str, Any]:
         "10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d"
     ):
         raise ControlledRunError("EXP-0006 implementation authority changed")
+    if value["authority"]["collector_implementation_commit"] != (
+        "7575602e6651cc1e755e8d2f7b255aa8872db856"
+    ):
+        raise ControlledRunError("EXP-0006 collector authority changed")
     if value["workload"]["fresh_input_versions"] != list(range(1, 257)):
         raise ControlledRunError("EXP-0006 fresh-input order changed")
     if value["matrix"]["complete_for_commissioning"] != list(VARIANTS):

@@ -248,6 +248,45 @@ The seal command requires both raw evidence and `derived/report.json` and
 refuses an existing seal. Do not modify a sealed RUN-ID; use a new one for any
 changed source, configuration, or command.
 
+## EXP-0006 install-once repeated-input commissioning
+
+EXP-0006 is separate from completed EXP-0005. From its clean freeze commit,
+make the pinned ignored Chipyard checkout available and run exactly one
+four-input session per matrix member:
+
+```sh
+python3 -m raveil.t0044_repeated collect \
+  --repo . \
+  --manifest benchmarks/manifests/t0044-static-repeated-invocation-v1.json \
+  --chipyard-source /path/to/pinned/chipyard \
+  --account 4 \
+  --run-dir artifacts/research/EXP-0006/<RUN-ID>
+```
+
+The collector refuses dirty tracked state and an existing RUN-ID. It runs
+static Graph, Rocket, BOOM, and diagnostic-only BOOM serialize-dispatch once
+each. Each command holds one simulator process, one reset, and one installed
+artifact across ordered inputs 1--4. Actual 256-word outputs, phase/accounting
+markers, exact argv/environment/exit status, source/config/toolchain/artifact
+identities, and operations-only wall-clock are retained under `raw/`; the
+strict report is separate under `derived/` and the final seal is single-use.
+
+For a failed-after-commands run whose four raw logs and command records are
+complete, rederive into a fresh copied RUN-ID without `derived/` or a seal:
+
+```sh
+python3 -m raveil.t0044_repeated derive \
+  --manifest benchmarks/manifests/t0044-static-repeated-invocation-v1.json \
+  --account 4 \
+  --run-dir artifacts/research/EXP-0006/<RUN-ID>
+python3 -m raveil.t0044_repeated seal \
+  --run-dir artifacts/research/EXP-0006/<RUN-ID>
+```
+
+Do not run account 256 until commissioning and its fairness review pass. If
+authorized, use a new RUN-ID and `--account 256`; the report derives the frozen
+1/4/16/64/256 prefixes from that one session per candidate.
+
 ## Pinned BOOM control source
 
 ADR-0040 selects the BOOM control through Chipyard 1.11.0 rather than a moving

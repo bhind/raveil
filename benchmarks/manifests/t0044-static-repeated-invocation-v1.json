@@ -1,0 +1,212 @@
+{
+  "schema": "raveil.t0044-repeated-manifest/v1",
+  "experiment_id": "EXP-0006",
+  "task_id": "T-0044",
+  "status": "frozen-before-data",
+  "evidence_class": "rtl-simulation-pilot",
+  "authority": {
+    "governance_ancestor": "ae606dea3f74d6694eecbe91fc368b097f03758c",
+    "t0042_integration_commit": "528fbe28a0dcdfbab65d4ae2995c0876857e053a",
+    "boundary_implementation_commit": "10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d",
+    "collector_implementation_commit": "7575602e6651cc1e755e8d2f7b255aa8872db856",
+    "prior_experiment": "EXP-0005",
+    "rfc": ["RFC-0004", "RFC-0005"],
+    "adr": ["ADR-0039", "ADR-0046"]
+  },
+  "scope": {
+    "checkpoint": "install-once-repeated-input-latency-traffic-boundary",
+    "commissioning_is_claim_bearing": false,
+    "t0044_complete": false,
+    "full_t0044": false,
+    "excluded": [
+      "vliw-cgra-control",
+      "elastic-graph",
+      "stream-graph",
+      "hybrid-graph",
+      "energy",
+      "synthesis-timing",
+      "area",
+      "fpga",
+      "silicon",
+      "semantic-initiator-generalization",
+      "experience-candidate-selection"
+    ]
+  },
+  "workload": {
+    "name": "rfc0005-uint32-five-point-stencil",
+    "input_shape": [18, 18],
+    "output_shape": [16, 16],
+    "arithmetic": "uint32-modulo-2^32",
+    "order": "row-major",
+    "fresh_input_versions": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256],
+    "input_generator": "raveil.controlled_run._input_words",
+    "input_order_frozen": true,
+    "result_reuse": false,
+    "intermediate_reuse": false,
+    "scratchpad_input_and_output_overwritten_each_invocation": true,
+    "cpu_input_generation": "candidate-local-instructions-in-staging",
+    "graph_input_generation": "testbench-side-before-staging-requests"
+  },
+  "environment": {
+    "required_path": "pinned-linux-amd64-docker-verilator",
+    "network_during_simulation": false,
+    "host_wall_clock_role": "operations-only-not-cpu-performance-evidence",
+    "required_identities": [
+      "git-commit",
+      "source-sha256",
+      "artifact-sha256",
+      "toolchain-sha256",
+      "configuration-sha256",
+      "resource-sha256",
+      "contract-sha256",
+      "session-sha256",
+      "input-sha256",
+      "oracle-output-sha256",
+      "observed-output-sha256"
+    ]
+  },
+  "matrix": {
+    "primary": [
+      {"id": "static-graph", "role": "candidate"},
+      {"id": "rocket-in-order", "role": "primary-baseline"},
+      {"id": "boom-ooo", "role": "primary-baseline"}
+    ],
+    "diagnostic": [
+      {
+        "id": "boom-serialize-dispatch",
+        "role": "same-core-diagnostic-only",
+        "forbidden_label": "ooo-disabled-cpu"
+      }
+    ],
+    "complete_for_commissioning": [
+      "static-graph",
+      "rocket-in-order",
+      "boom-ooo",
+      "boom-serialize-dispatch"
+    ]
+  },
+  "comparison_contract": {
+    "primary": "same-high-level-semantics-memory-boundary-ports-latency-and-functional-resources-with-each-candidate-allowed-legal-optimizations",
+    "cpu_load_reuse": "visible-design-result",
+    "graph_extra_traffic": "visible-design-result",
+    "cpu_weakening": false,
+    "input_staging_asymmetry": "must-be-reported-and-makes-staging-end-to-end-claim-ineligible-unless-same-meaning-is-proved",
+    "secondary_ablation": {
+      "status": "not-activated",
+      "activation": "only-if-needed-to-decompose-primary-mechanism",
+      "rule": "match-operation-and-load-counts-without-replacing-primary-baseline"
+    }
+  },
+  "session_contract": {
+    "simulator_processes": 1,
+    "resets": 1,
+    "installation_count": 1,
+    "artifact_reloads": 0,
+    "reelaboration_between_invocations": false,
+    "program_or_descriptor_reload_between_invocations": false,
+    "source_configuration_toolchain_and_artifact_stable_within_session": true,
+    "commissioning_and_campaign_use_distinct_run_ids": true,
+    "campaign_artifact_may_differ_only_by_frozen-account-parameter": true,
+    "campaign_must_repass_prefix_one_and_four": true,
+    "any_other_source_configuration_or_toolchain_change_requires_new-freeze-and-commissioning": true
+  },
+  "phase_contract": {
+    "installation": "reset-release-through-first-owned-input-request-admission; configuration-or-program-is-resident-and-no-input-specific-owned-request-is-pending",
+    "staging": "installation-end-or-previous-validation-response-through-final-current-input-staging-response; candidate-local-preparation-is-included",
+    "execution": "immediately-after-final-staging-response-through-final-output-write-response; graph-launch-cycle-is-included",
+    "drain_completion": "final-output-write-response-through-first-validation-read-request",
+    "validation": "first-output-read-request-through-256th-output-read-response-and-independent-observation",
+    "publication": "zero-cycles; output-words-are-emitted-at-validation-responses",
+    "account_end": "final-invocation-validation-response; later-checksum-and-tohost-cycles-are-outside-account",
+    "inter_invocation": "previous-validation-response-is-next-staging-start-with-no-gap-or-overlap",
+    "total_formula": "installation-once-plus-sum-of-per-invocation-staging-execution-drain-completion-validation-publication",
+    "same_execution_meaning_required": true,
+    "same_staging_and_end_to_end_meaning_required_for_end_to_end_claim": true
+  },
+  "metrics": {
+    "required": [
+      "execution-window-cycles",
+      "phase-cycles",
+      "cumulative-end-to-end-total-cycles",
+      "useful-load-add-store-output-counts",
+      "admitted-completed-read-write-transactions",
+      "read-write-bytes",
+      "stall-cycles",
+      "backpressure-cycles",
+      "actual-output-word-bytes",
+      "semantic-and-identity-hashes"
+    ],
+    "activity_if_instrumented": [
+      "fetch-decode-register",
+      "rename-rob-issue-lsu",
+      "graph-schedule-control"
+    ],
+    "unavailable_rule": "emit-unavailable-plus-reason-never-zero-imputation",
+    "simulator_wall_clock": "operations-only"
+  },
+  "sampling": {
+    "commissioning_accounts": [1, 4],
+    "commissioning_session_account": 4,
+    "campaign_prefix_accounts": [1, 4, 16, 64, 256],
+    "campaign_session_account": 256,
+    "prefix_accounts_are_nested_not-independent_samples": true,
+    "inference_unit_if_input_dependent": "fresh-input-version-at-frozen-position",
+    "identical_deterministic_replay_is_independent_sample": false,
+    "replay_role": "exact-cycle-reproducibility-check-only"
+  },
+  "estimators": {
+    "per_candidate": [
+      "exact-per-invocation-cycle-vector",
+      "exact-per-invocation-traffic-vector",
+      "cumulative-total-at-frozen-prefix",
+      "amortized-total-per-invocation-at-frozen-prefix",
+      "median",
+      "minimum",
+      "maximum"
+    ],
+    "paired_ratios": "per-fresh-input-candidate-divided-by-rocket-then-median",
+    "confidence_interval": {
+      "level": 0.95,
+      "method_if_input_dependent": "paired-percentile-bootstrap-over-fresh-input-lifecycle-costs-with-installation-fixed-once-per-resampled-account",
+      "resamples": 100000,
+      "prng": "python-random-mt19937",
+      "seed": 6006,
+      "method_if_input_invariant": "exact-value-plus-distinct-input-reproducibility-count-no-inferential-interval"
+    },
+    "commissioning_intervals_are_claim_bearing": false
+  },
+  "stop_conditions": [
+    "oracle-mismatch",
+    "resource-equality-failure",
+    "unexplained-traffic",
+    "required-accounting-missing",
+    "source-config-toolchain-drift",
+    "artifact-or-session-drift",
+    "incomplete-matrix",
+    "execution-window-meaning-differs",
+    "restart-reset-reload-observed",
+    "duplicate-or-missing-input-output-version",
+    "pending-traffic-at-boundary"
+  ],
+  "traffic_difference_rule": "not-automatic-failure-record-cause-and-meaning-primary-is-claim-ineligible-if-fairness-cannot-be-explained",
+  "transition_rules": {
+    "commissioning_pass": "all-four-candidates-pass-ordered-inputs-one-through-four-under-one-session-each",
+    "campaign_start": "only-after-commissioning-pass-and-fairness-review-with-no-source-config-toolchain-change",
+    "campaign_failure": "retain-failed-run-and-do-not-substitute-commissioning-data",
+    "source_drift": "new-freeze-and-new-commissioning-run-id"
+  },
+  "decision_rules": {
+    "below_64_fresh_inputs": "no-rfc0005-numerical-no-go",
+    "latency-traffic-cannot-decide-go": true,
+    "missing-energy-timing-or-area": "result-must-be-partial-pilot",
+    "end_to_end_staging_asymmetry": "pause",
+    "terminal_labels": ["advance", "pause", "early-no-go"]
+  },
+  "evidence_layout": {
+    "raw": "artifacts/research/EXP-0006/<RUN-ID>/raw/",
+    "derived": "artifacts/research/EXP-0006/<RUN-ID>/derived/",
+    "immutable_after_seal": true,
+    "failed_runs_retained": true,
+    "exact_commands_environment_exit_codes_and_hashes_required": true
+  }
+}

@@ -665,8 +665,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   open for the full matrix, energy, synthesis timing, and area. A dedicated
   repeated-only implementation now loops ordered inputs in one Graph/CPU
   simulator process and emits actual output plus per-invocation accounting;
-  it is pre-data and must not be treated as evidence. Freeze EXP-0006, then run
-  only the 1/4 commissioning matrix. Fail closed or pause if CPU-local versus
+  it is pre-data and must not be treated as evidence. EXP-0006 is frozen; run
+  only its 1/4 commissioning matrix next. Fail closed or pause if CPU-local versus
   Graph-testbench input generation prevents a same-meaning staging/end-to-end
   boundary.
 

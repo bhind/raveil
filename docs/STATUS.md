@@ -191,8 +191,9 @@ repeated-session verifier/collector with exclusive raw/derived/seal paths,
 without changing EXP-0005. The repeated manager
 re-enters staging structurally after each drained validation response; it adds
 no candidate-visible port, buffer, bank, arbitration path, or software phase
-command. Static checks pass, but EXP-0006 must freeze its same-meaning
-installation/staging boundary before any RTL commissioning. In particular,
+command. Static checks pass, and EXP-0006 plus its machine-readable manifest
+now freeze the same-meaning installation/staging boundary before RTL
+commissioning. No EXP-0006 data existed at freeze. In particular,
 CPU staging currently includes candidate-local input-generation instructions
 while Graph input generation is testbench-side, so end-to-end eligibility is
 not inferred from the implementation alone.
