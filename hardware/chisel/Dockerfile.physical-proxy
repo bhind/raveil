@@ -1,0 +1,33 @@
+FROM mambaorg/micromamba:1.4.2@sha256:efb0733f0f06f78e79eb21a5795a6fb2eb6c91b8fc534329f692b685140fc8ad
+
+ENV MAMBA_ROOT_PREFIX=/home/mambauser/physical-mamba
+
+RUN micromamba config set use_lockfiles false \
+    && micromamba config set download_threads 1 \
+    && micromamba config set extract_threads 1 \
+    && micromamba create -y -n toolchain \
+      -c litex-hub -c defaults -c conda-forge \
+      yosys=0.27_4_gb58664d44 \
+      openroad=2.0_7070_g0264023b6 \
+      open_pdks.sky130a=1.0.457_0_g32e8f23 \
+    && micromamba clean --all --yes
+
+RUN micromamba install -y -n toolchain \
+      -c defaults -c conda-forge \
+      libgomp=15.2.0 \
+    && micromamba clean --all --yes
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgl1=1.3.2-1 \
+    && rm -rf /var/lib/apt/lists/*
+USER mambauser
+
+ENV PATH=/home/mambauser/physical-mamba/envs/toolchain/bin:$PATH
+
+WORKDIR /work
+COPY hardware/chisel/physical_proxy_smoke.sv /work/physical_proxy_smoke.sv
+COPY hardware/chisel/physical_proxy_smoke.sdc /work/physical_proxy_smoke.sdc
+COPY hardware/chisel/run-physical-proxy-smoke-in-container.sh /work/run-physical-proxy-smoke-in-container.sh
+
+CMD ["/bin/sh", "/work/run-physical-proxy-smoke-in-container.sh"]

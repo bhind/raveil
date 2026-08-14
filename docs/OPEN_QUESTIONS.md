@@ -70,6 +70,12 @@ resolves it.
   64-input upper correct-latency bound is 0.2086002 and break-even is input 1.
   Energy, timing, area, IP disposition, and the
   missing organizations remain open even if latency does not trigger no-go.
+  ADR-0048 resolves only the next measurement order: first run a same-library
+  partitioned Graph/Rocket area/timing lower-bound screen, then design an
+  integrated fallback/common-memory/activity boundary if it survives. EXP-0009
+  has commissioned the toy synthesis/STA toolchain, but its candidate matrix is
+  still pre-data. The valid whole-system dynamic-energy composition remains an
+  open question.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

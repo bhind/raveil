@@ -721,7 +721,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   rules do not fire. Keep T-0044 open. Next work must separately preregister
   the energy proxy, matched synthesis timing/area, IP disposition, and missing
   VLIW/CGRA, elastic, stream, and hybrid organization evidence; do not infer
-  those passes from latency/traffic.
+  those passes from latency/traffic. ADR-0048 now fixes the next bounded step
+  as partitioned Graph/Rocket area/timing screening before any whole-system
+  energy claim. EXP-0009's toy-only pinned Yosys/OpenSTA/Sky130 toolchain
+  commissioning passes without candidate data. Commit the implementation
+  authority, freeze its machine-readable Stage-B manifest, then collect only
+  the complete Graph/Rocket partition matrix. Keep dynamic energy paused until
+  fallback, common-memory, integration, clock, and lifecycle activity are all
+  included.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

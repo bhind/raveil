@@ -339,6 +339,14 @@ Report SHA-256 is
 `1e52c4e213cb19cb2455cfef67077d3d3acb959bfb834c24e6b12e932d2f7a65`;
 raw-seal SHA-256 is
 `7c90f8a4a09291f5269e19d1425d1eac1a7915b8b3abcc4f16eb7206f438eeef`.
+ADR-0048 and EXP-0009 now start the next T-0044 physical-proxy gate without
+promoting the standalone Graph island to a whole-system result. A pinned
+linux/amd64 Yosys 0.27+3/OpenSTA 2.3.3/Sky130 HD typical-corner toy flow
+successfully synthesizes, maps, and times repository-owned non-candidate RTL.
+Two cached reruns retain image ID `7a0db885...7169`, exact tool/library/
+environment hashes, and toy netlist `81aa8113...5a09`. This is synthesis-
+toolchain commissioning only. No Graph, Rocket, BOOM, energy, static-power,
+placement, routing, FPGA, or silicon datum exists in EXP-0009 yet.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

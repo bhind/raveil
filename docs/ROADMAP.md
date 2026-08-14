@@ -205,7 +205,11 @@ merely because a branch or partial implementation already exists.
    the 64-input correct-latency upper 95% bound is 0.2086002 versus the frozen
    1.05 threshold, and break-even is invocation 1. The bounded result is
    `advance-partial-latency-traffic`; matched energy/timing/area, IP, and the
-   other organizations remain the open T-0044 gates.
+   other organizations remain the open T-0044 gates. ADR-0048 selects a
+   partitioned Graph/Rocket area/timing lower-bound screen as the next gate and
+   forbids Graph-island energy promotion. EXP-0009 has passed only its
+   candidate-independent toolchain commissioning; candidate reports remain
+   pre-data until a separate manifest freezes the committed implementation.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
