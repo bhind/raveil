@@ -207,6 +207,14 @@ initializes a private main-RAM stack outside the owned RFC-0005 resource; the
 manifest must be re-frozen before another run.
 The stack fix is now hash-bound by the replacement EXP-0006 manifest; no
 replacement commissioning data existed at that re-freeze.
+The replacement Rocket run then completed all four inputs and actual-output
+oracle checks, but the strict parser rejected invocation one's 2,216 accepted
+operations: 580 additional writes are ELF-loader initialization of the owned
+valid words during installation, followed by 1,636 staging/execution/
+validation operations. Because the marker did not split installation reads
+and writes, this remains failed evidence rather than an inferred accounting
+result. Instrumentation now emits the split explicitly and requires another
+pre-data re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

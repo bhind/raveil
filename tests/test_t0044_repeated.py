@@ -108,6 +108,7 @@ class RepeatedBoundaryTests(unittest.TestCase):
         ).read_text()
         self.assertIn("validWords = Some(580)", overlay)
         self.assertIn("repeatedControlledRun = true", overlay)
+        self.assertIn("installation_writes=%d", overlay)
         self.assertIn("class RaveilRepeatedMatchedRocketConfig", configs)
         self.assertIn("class RaveilRepeatedMatchedSmallBoomConfig", configs)
 

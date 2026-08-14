@@ -439,9 +439,13 @@ def verify_cpu_log(
                 raise ControlledRunError(f"repeated CPU window {field} changed")
         if int(window["end_cycle"]) - int(window["start_cycle"]) != int(window["cycles"]):
             raise ControlledRunError("repeated CPU window boundary mismatch")
+        expected_lifecycle_traffic = "2216" if invocation == 1 else "1636"
         for field, expected in {
-            "publication_cycles": "0", "accepted": "1636",
-            "completed": "1636", "staging_writes": "324",
+            "publication_cycles": "0", "accepted": expected_lifecycle_traffic,
+            "completed": expected_lifecycle_traffic,
+            "installation_reads": "0",
+            "installation_writes": "580" if invocation == 1 else "0",
+            "staging_writes": "324",
             "execution_reads": "800", "execution_writes": "256",
             "validation_reads": "256",
         }.items():
@@ -450,7 +454,8 @@ def verify_cpu_log(
         expected_complete_fields = {
             "invocation", *{f"{phase}_cycles" for phase in PHASES},
             "total_cycles", "accepted", "completed", "staging_writes",
-            "execution_reads", "execution_writes", "validation_reads",
+            "installation_reads", "installation_writes", "execution_reads",
+            "execution_writes", "validation_reads",
         }
         if set(complete) != expected_complete_fields:
             raise ControlledRunError("repeated CPU complete schema changed")
