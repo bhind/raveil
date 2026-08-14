@@ -549,3 +549,69 @@ and one plain-or-escaped stat alias. It retains byte-equivalent RTL, lowering,
 toolchain, Liberty, partition, clock/I/O, estimator, stop-condition, report,
 and decision fields. V8 raw/result artifacts remain provenance only; the v9
 matrix requires two fresh RUN-IDs from the freeze commit or clean descendant.
+
+Recovery-v9 was frozen at commit
+`c9972af59cdb44892d1ee94f34ade684137a1fd9`. Fresh Graph `run-012` and Rocket
+`run-013` both passed exact input preflight, reverified snapshot collection,
+raw sealing, and exact-top derivation under manifest
+`d052987747c2a41920e8c1f39152b5a6257092454c9139ed4544bcaa9541fd63`.
+The paired results are:
+
+| partition | mapped area (um2) | cells | setup slack at 20 ns | timing | evidence |
+| --- | ---: | ---: | ---: | --- | --- |
+| static Graph incremental | 11,851.3664 | 1,592 | +11.45991 ns | met | partition synthesis estimate |
+| Rocket fallback denominator | 51,625.7632 | 6,549 | -12.768833 ns | missed | partition synthesis estimate |
+
+Run-012 raw-seal SHA-256 is
+`823926cc4e5fa0ded768436fba86b35af09f2d67370f62a07f3c803103caa05d`;
+its result SHA-256 is
+`00159e881e9931487c6f12d6c0507525cc5a87bbd257dbd6e0089b33ebe4900f`.
+Run-013 raw-seal SHA-256 is
+`41f437274dae7c6a5894280811398bd963f346ac78a0a58bc9b23d1b73139529`;
+its result SHA-256 is
+`73ae8857200ad749fd2a722d08e09fbdfa7d910e411b2473f1dcccb394f1dc3b`.
+
+The derived matrix SHA-256 is
+`692ce5088cc6d315bc49b8fe34c2c697710c87908966fb35e670efe24ac40739`.
+Graph incremental area / Rocket fallback area is 0.2295630256, below the frozen
+0.25 early-no-go threshold. The analytical sum is 63,477.1296 um2, but it is
+not a whole-system area because common memory, fixture, fallback integration,
+clock tree, and placement/routing are excluded. Graph meets the common 20 ns
+constraint while Rocket does not. Per the frozen rule, the matrix outcome is
+`pause-boundary`; it is neither `advance-to-integrated-physical` nor an
+early-no-go.
+
+This is deterministic synthesis-estimate evidence, not independent sampling.
+It supports no RTL-simulation performance, energy, or whole-system claim and
+does not authorize the full 1/4/16/64/256 latency campaign. The single next
+boundary is a preregistered timing comparison where the unchanged Rocket
+fallback partition also meets; until then the physical screen and T-0044 stay
+open.
+
+Exact successful commands (exit 0, macOS host driving pinned offline
+linux/amd64 container) were:
+
+```text
+./hardware/chisel/run-physical-proxy-synthesis.sh benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json static-graph artifacts/research/EXP-0009/static-graph-lowered-final/generated-src artifacts/research/EXP-0009/run-012-static-graph-raw artifacts/research/EXP-0009/run-012-static-graph-derived
+./hardware/chisel/run-physical-proxy-synthesis.sh benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json rocket-in-order artifacts/research/EXP-0009/rocket-in-order-yosys-v2/generated-src artifacts/research/EXP-0009/run-013-rocket-in-order-raw artifacts/research/EXP-0009/run-013-rocket-in-order-derived
+python3 -m raveil.t0044_physical derive-matrix --manifest benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json --graph-result artifacts/research/EXP-0009/run-012-static-graph-derived/result.json --rocket-result artifacts/research/EXP-0009/run-013-rocket-in-order-derived/result.json --derived-dir artifacts/research/EXP-0009/matrix-recovery-v9
+```
+
+Clean-checkout replay starts from the v9 freeze and must allocate new output
+paths; the sealed RUN-IDs above are never overwritten:
+
+```text
+git worktree add /private/tmp/raveil-exp0009-v9-replay c9972af59cdb44892d1ee94f34ade684137a1fd9
+cd /private/tmp/raveil-exp0009-v9-replay
+./hardware/chisel/export-physical-graph-rtl.sh artifacts/research/EXP-0009/replay-static-graph
+RAVEIL_CHIPYARD_SOURCE=<clean ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1 checkout> RAVEIL_ROCKET_CHIP_SOURCE=<clean 749a3eae9678bc70b029c5b9091fae33fad539c4 checkout> RAVEIL_PHYSICAL_CPU_BASELINE_CACHE_SOURCE_SHA256=cf06a739ecd56b592ae98056d63fceac844d73e727cba72a15bb98ad337ed103 ./hardware/chisel/export-physical-rocket-rtl.sh artifacts/research/EXP-0009/replay-rocket
+python3 -m raveil.t0044_physical verify-inputs --manifest benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json --variant static-graph --rtl-dir artifacts/research/EXP-0009/replay-static-graph/generated-src
+python3 -m raveil.t0044_physical verify-inputs --manifest benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json --variant rocket-in-order --rtl-dir artifacts/research/EXP-0009/replay-rocket/generated-src
+```
+
+The replay must use physical toolchain image ID
+`sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169`;
+the wrapper rejects any other image. After both `verify-inputs` commands pass,
+repeat the three successful collection/derivation commands above with new raw,
+derived, and matrix paths. A rebuilt image or regenerated RTL whose identity
+does not match the manifest is a failed replay, not substitute evidence.

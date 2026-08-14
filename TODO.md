@@ -807,6 +807,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Recovery-v9 authority `558c7c0...9c6df` and manifest
   `d052987...1fd63` freeze only that exact-top parser correction. Run new Graph
   and Rocket RUN-IDs under v9, then derive the matrix only from those results.
+  V9 fresh runs now complete: area ratio 0.229563 is below the 0.25 no-go, Graph
+  meets 20 ns, and Rocket misses it. Keep T-0044 open at `pause-boundary`.
+  Resolve one boundary only: define and freeze a timing comparison in which the
+  Rocket fallback partition also meets, without changing RTL/resources or
+  importing the current ratio as whole-system area. Do not expand latency
+  accounts or claim go/no-go from this physical proxy meanwhile.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

@@ -117,6 +117,10 @@ resolves it.
   top is selected unambiguously and both partitions rerun under one recovery.
   Recovery-v9 now freezes that selection; the unresolved fact is the fresh
   paired physical outcome, not parser behavior.
+  The v9 outcome resolves area-screen plumbing but not timing comparability:
+  Graph meets and Rocket misses the same 20 ns target. The one remaining
+  physical question is which frozen timing boundary can make the fallback
+  partition eligible without weakening either candidate or changing resources.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

@@ -247,6 +247,10 @@ merely because a branch or partial implementation already exists.
    manifest pair.
    Recovery-v9 freezes the parser-only correction; the gate awaits the fresh
    v9 pair and remains open.
+   The v9 pair is complete but yields `pause-boundary`: incremental area is
+   below the no-go threshold, while only Graph meets the common 20 ns target.
+   Gate 1 remains open pending one timing-boundary resolution; this is neither
+   an advance nor a candidate early-no-go.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

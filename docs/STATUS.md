@@ -495,6 +495,15 @@ Recovery-v9 implementation authority is `558c7c0...9c6df`; frozen manifest
 SHA-256 is `d052987...1fd63`. It changes only exact-top report selection and
 retains all v8 RTL, toolchain, physical, evidence, and decision fields. No v8
 result is imported into the v9 matrix; both partitions require fresh RUN-IDs.
+Recovery-v9 freeze commit is `c9972af...a1fd9`. Fresh Graph `run-012` and
+Rocket `run-013` both sealed and derived as `partition-complete` under manifest
+`d052987...1fd63`. Graph is 11,851.3664 um2 / 1,592 cells / +11.45991 ns
+slack; Rocket is 51,625.7632 um2 / 6,549 cells / -12.768833 ns slack at the
+frozen 20 ns clock. The Graph/Rocket incremental area ratio is 0.229563, below
+the preregistered 0.25 area no-go, but Rocket misses timing. The matrix outcome
+is therefore `pause-boundary`, not advance or early-no-go. It is partitioned
+synthesis-estimate evidence only; common memory, integration, clock tree,
+placement/routing, energy, performance, and whole-system claims remain absent.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
