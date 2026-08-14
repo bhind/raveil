@@ -434,6 +434,9 @@ raw files digest is `6df847ec...e435f1`, raw-seal SHA-256 is
 proves explicit Yosys black-box stubs remove the warnings while preserving the
 mapped core. The collector now asserts one declaration for each frozen common
 partition; this pre-data recovery requires a v6 freeze before Graph retry.
+Recovery-v6 authority is `d4990d9...4d8cf9`; manifest SHA-256 is
+`135f30d6...bc398a`, with all candidate RTL/tool/partition/decision fields
+unchanged. Only a clean descendant of its freeze may collect Graph.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

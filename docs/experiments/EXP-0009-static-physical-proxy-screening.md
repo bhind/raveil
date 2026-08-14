@@ -380,3 +380,11 @@ loading standard-cell Liberty definitions, concatenates them with the mapped
 core, asserts exactly one declaration per frozen black box, and makes that mode
 part of raw identity. This diagnostic is not a candidate result and requires a
 recovery-v6 freeze before a distinct Graph RUN-ID.
+
+Recovery-v6 implementation authority is
+`d4990d9265e37683a50fe61470e54481384d8cf9`. Frozen manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v6.json`, SHA-256
+`135f30d6899742eb769d67c8a8dc6929db105f03e54e284e7e81900acebc398a`,
+chains recovery-v5 and adds only the exact mapped black-box declaration mode.
+Candidate use is authorized only from the commit containing this manifest or a
+clean descendant.
