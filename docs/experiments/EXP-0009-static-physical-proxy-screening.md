@@ -252,3 +252,10 @@ the same operations as `read -> assert/blackbox -> hierarchy -check`; it changes
 neither admitted modules nor the black-box list. It requires another exact
 authority/manifest/RUN-ID. Failure after that ordering fix pauses the physical
 screen rather than opening another implementation loop.
+
+Final bounded recovery authority is
+`daa984f1e9f5aa350b79862977f189ac3aab226d`. Recovery-v3 manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v3.json`, SHA-256
+`efe1ec48a99c08766f4866d94179f160f3ca1f334161c06a63deefc8bf1806ed`,
+binds recovery-v2 and changes only the Yosys black-box/hierarchy ordering. It
+retains every RTL, partition, tool, clock, report, and decision field.

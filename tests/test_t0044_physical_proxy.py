@@ -58,6 +58,18 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
             recovery_v2["variants"]["static-graph"]["lowering_options"],
             ["disallowLocalVariables", "disallowPackedArrays"],
         )
+        recovery_v3_path = (
+            ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v3.json"
+        )
+        recovery_v3 = t0044_physical.load_manifest(recovery_v3_path)
+        self.assertEqual(
+            recovery_v3["recovery_of_manifest_sha256"],
+            t0044_physical.sha256_file(recovery_v2_path),
+        )
+        self.assertEqual(
+            recovery_v3["operational_change"],
+            "assert-and-blackbox-common-partitions-before-checked-hierarchy",
+        )
 
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()

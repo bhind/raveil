@@ -744,6 +744,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   The lowered RUN then failed before synthesis on black-box ordering. Freeze
   the `read -> blackbox -> hierarchy` collector-only recovery and retry once;
   pause if the complete report still cannot close.
+  Recovery-v3 is ready; commit it, run one distinct Graph RUN-ID, and pause on
+  any further incomplete report rather than adding another recovery loop.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

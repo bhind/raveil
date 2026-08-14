@@ -390,6 +390,8 @@ fields. Recovery-v2 freeze commit is
 Its Graph RUN-ID parsed RTL but exposed a black-box ordering error before
 synthesis; failed raw digest is `b4ed5c06...56c3d`. One final recovery moves
 black-box assertions before hierarchy pruning without changing the contract.
+Final bounded recovery authority is `daa984f...b226d`; recovery-v3 manifest
+SHA-256 is `efe1ec48...806ed` and changes ordering only.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
