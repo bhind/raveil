@@ -311,6 +311,15 @@ missing activity from zero. Seven campaign tests pass. Implementation authority
 `fb8e95aca23da021918ed22d8798134d5ca99c5e` and manifest SHA-256
 `2e2b71097bb88acf60904d17ce87ec6ec4399eaf1795a45c14542ee39f7d6359`
 are frozen before data. No EXP-0008 RTL measurement or claim exists yet.
+The first frozen collection completed all three 256-input primary sessions,
+then the diagnostic serialize-dispatch command hit the CPU runner's hardcoded
+3,600-second operational timeout during invocation 115 and exited 124. The
+collector failed closed, emitted no derived report, and sealed the raw attempt.
+This is not a semantic/resource/performance no-go. Recovery preserves that
+RUN-ID, imports every completed primary log by frozen hash without rerunning it,
+and will retry only the diagnostic under a separately frozen 10,800-second
+operational envelope. RTL, ELF, estimator, thresholds, and primary samples are
+unchanged.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

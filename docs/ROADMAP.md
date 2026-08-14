@@ -197,7 +197,11 @@ merely because a branch or partial implementation already exists.
    T-0044 remains open and no go/no-go follows.
    EXP-0008 now owns that campaign as one 256-input installed session with
    nested prefix reports and paired latency estimators. Its implementation,
-   manifest, and single RUN-ID are frozen before RTL collection.
+   manifest, and first RUN-ID were frozen before RTL collection. That attempt
+   sealed an operational timeout after all primary sessions completed; a
+   separately frozen recovery may import those exact primary raw hashes and
+   rerun only the diagnostic serialize session. It may not alter the estimator,
+   decision thresholds, RTL, ELF, or sample count.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

@@ -69,6 +69,7 @@ controlled_seed=${RAVEIL_CONTROLLED_SEED:-1}
 controlled_invocation=${RAVEIL_CONTROLLED_INVOCATION:-$controlled_seed}
 controlled_serialize=${RAVEIL_CONTROLLED_SERIALIZE_DISPATCH:-0}
 repeat_account=${RAVEIL_REPEAT_ACCOUNT:-1}
+repeat_timeout_seconds=${RAVEIL_REPEAT_TIMEOUT_SECONDS:-3600}
 build_only=${RAVEIL_BUILD_ONLY:-0}
 lock_sha=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc21da3d
 chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
@@ -92,6 +93,13 @@ case "$repeat_account" in
 esac
 [ "$repeat_account" -ge 1 ] && [ "$repeat_account" -le 256 ] || {
     echo 'error: repeat account must be in [1,256]' >&2
+    exit 1
+}
+case "$repeat_timeout_seconds" in
+    *[!0-9]*|'') echo 'error: repeat timeout must be a positive integer' >&2; exit 1 ;;
+esac
+[ "$repeat_timeout_seconds" -ge 1 ] || {
+    echo 'error: repeat timeout must be a positive integer' >&2
     exit 1
 }
 
@@ -328,6 +336,7 @@ docker run --rm \
     --env "RAVEIL_CONTROLLED_INVOCATION=$controlled_invocation" \
     --env "RAVEIL_CONTROLLED_SERIALIZE_DISPATCH=$controlled_serialize" \
     --env "RAVEIL_REPEAT_ACCOUNT=$repeat_account" \
+    --env "RAVEIL_REPEAT_TIMEOUT_SECONDS=$repeat_timeout_seconds" \
     --env "RAVEIL_BUILD_ONLY=$build_only" \
     "$image" \
     bash -lc 'set -euo pipefail
@@ -603,12 +612,13 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = controlled-repeat ] ||
   [ "$(riscv64-unknown-elf-nm "$repeated_elf" | awk '\''$3 == "output_words" { print $1 }'\'')" = 0000000008000510 ]
   artifact_sha256=$(sha256sum "$repeated_elf" | awk '\''{print $1}'\'')
   if [ "$RAVEIL_BUILD_ONLY" = 1 ]; then
-    printf "RAVEIL-FIXTURE-BUILD-V1 status=OK config=%s artifact_sha256=%s execution=not-run performance=not-measured\n" \
-      "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$artifact_sha256"
+    printf "RAVEIL-FIXTURE-BUILD-V1 status=OK cpu=%s config=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s resource_sha256=87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7 execution=not-run performance=not-measured\n" \
+      "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
+      "$RAVEIL_SOURCE_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256"
     exit 0
   fi
   rm -f "$repeated_log"
-  timeout --foreground 3600 "$sim" +permissive +verbose +permissive-off \
+  timeout --foreground "$RAVEIL_REPEAT_TIMEOUT_SECONDS" "$sim" +permissive +verbose +permissive-off \
     "$repeated_elf" 2>&1 | tee "$repeated_log"
   # The authoritative collector validates the completed outer raw log after
   # docker exits.  Reopening this high-volume tee file inside the running

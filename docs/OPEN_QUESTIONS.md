@@ -63,7 +63,9 @@ resolves it.
   staging-initiator question. The separately preregistered 1/4/16/64/256
   campaign and the remaining T-0044 organizations/physical metrics stay open.
   EXP-0008 now freezes the nested-prefix and paired-latency analysis before
-  data and is ready for its single 256-input session. Its result can resolve only the
+  data. Its first collection preserved all completed primary sessions but hit
+  a hardcoded operational timeout in the diagnostic column; a hash-bound retry
+  of that diagnostic is now the only campaign recovery step. Its result can resolve only the
   bounded latency/traffic slice; energy, timing, area, IP disposition, and the
   missing organizations remain open even if latency does not trigger no-go.
   The earlier

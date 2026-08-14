@@ -96,7 +96,14 @@ class RepeatedBoundaryTests(unittest.TestCase):
         self.assertIn("for (uint32_t seed = 1U", source)
         self.assertEqual(startup.count("sd      a0, 0(t0)"), 1)
         self.assertIn("li      sp, 0x80010000", startup)
-        self.assertIn('timeout --foreground 3600 "$sim"', runner)
+        self.assertIn(
+            'repeat_timeout_seconds=${RAVEIL_REPEAT_TIMEOUT_SECONDS:-3600}',
+            runner,
+        )
+        self.assertIn(
+            'timeout --foreground "$RAVEIL_REPEAT_TIMEOUT_SECONDS" "$sim"',
+            runner,
+        )
         self.assertIn("pending-completed-outer-raw-verification", runner)
         collector = (ROOT / "raveil/t0044_repeated.py").read_text()
         self.assertIn("completed command log did not drain required markers", collector)

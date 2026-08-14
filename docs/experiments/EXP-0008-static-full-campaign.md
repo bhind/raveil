@@ -128,3 +128,24 @@ The initial EXP-0008 estimate is 1--3 hours for implementation and freeze,
 and records, for 4--11 hours total at medium confidence. Cold cache rebuild may
 add 1--3 hours. BOOM serialize simulation and Rocket raw trace volume dominate
 the uncertainty; none of this wall-clock is CPU performance evidence.
+
+## First collection incident and recovery boundary
+
+The frozen RUN-ID completed the static Graph, Rocket, and primary BOOM
+256-input sessions. The diagnostic BOOM serialize-dispatch session then exited
+124 during invocation 115 because the shared CPU runner retained a hardcoded
+3,600-second simulator timeout. This is an operational abort, not an oracle,
+resource, traffic, accounting, or execution-window failure. The collector
+produced no derived performance report and sealed the failed raw directory.
+That RUN-ID will not be reused.
+
+Recovery changes only the operational timeout. The runner retains 3,600
+seconds as its default and accepts an explicit positive timeout; recovery fixes
+10,800 seconds before retry data. RTL, the ELF workload, account, inputs,
+estimator, intervals, thresholds, and decision rules do not change. A separate
+recovery manifest binds the failed seal and all three completed primary raw
+hashes. Those deterministic primary sessions are imported unconditionally and
+are not rerun or counted as new samples. Only the diagnostic-only serialize
+session is recollected under a new RUN-ID. The recovery implementation,
+manifest, expected diagnostic identity, and replay command must be committed
+and frozen before that session begins.

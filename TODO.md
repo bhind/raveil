@@ -710,7 +710,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   implementation authority, exact manifest, RUN-ID, identity expectations,
   100,000-resample estimator, RFC-0005 64-input latency/break-even rules, and
   operational limits are frozen before data. Run only that complete matrix;
-  EXP-0007 remains immutable.
+  EXP-0007 remains immutable. The first EXP-0008 attempt completed all primary
+  sessions but the diagnostic serialize command reached the runner's fixed
+  3,600-second timeout at invocation 115. Preserve its failed raw seal and do
+  not reuse its RUN-ID. Freeze the operational-only recovery implementation
+  and manifest, import all three completed primary logs by exact hash without
+  rerunning them, and recollect only the diagnostic with 10,800 seconds.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
