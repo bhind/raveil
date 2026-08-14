@@ -1,6 +1,6 @@
 # EXP-0010: Common 40 ns physical timing follow-up
 
-Status: Planned
+Status: In progress
 Evidence class: partitioned synthesis estimate
 Date: 2026-08-15
 Task: T-0044
@@ -113,3 +113,23 @@ derivation, and record closeout are estimated at 0.25--1 working day with
 medium-high confidence. The prior paired container work was under roughly two
 host minutes, but host duration is operational information only. The main
 uncertainty is contract/identity review, not expected tool runtime.
+
+## Frozen pre-data authority
+
+Implementation authority is
+`f662d6807336b2d7c727340d6f5f251c1791a9e3`. Frozen manifest
+`benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json` has SHA-256
+`a09a6412d2bd156a6d447b0421610bdf85ee956fac2ca17997824c6500bb76ef`.
+It validates as EXP-0010, chains the exact recovery-v9 hash, contains no
+recovery lineage, preserves all Graph/Rocket/RTL/tool/resource/report/decision
+fields, and changes only the common clock from 20.000 to 40.000 ns under the
+fixed follow-up policy. Candidate data may begin only from the commit that
+freezes this manifest or a clean descendant.
+
+Exact post-freeze commands are:
+
+```text
+./hardware/chisel/run-physical-proxy-synthesis.sh benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json static-graph artifacts/research/EXP-0009/static-graph-lowered-final/generated-src artifacts/research/EXP-0010/run-014-static-graph-raw artifacts/research/EXP-0010/run-014-static-graph-derived
+./hardware/chisel/run-physical-proxy-synthesis.sh benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json rocket-in-order artifacts/research/EXP-0009/rocket-in-order-yosys-v2/generated-src artifacts/research/EXP-0010/run-015-rocket-in-order-raw artifacts/research/EXP-0010/run-015-rocket-in-order-derived
+python3 -m raveil.t0044_physical derive-matrix --manifest benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json --graph-result artifacts/research/EXP-0010/run-014-static-graph-derived/result.json --rocket-result artifacts/research/EXP-0010/run-015-rocket-in-order-derived/result.json --derived-dir artifacts/research/EXP-0010/matrix-exp0010-v1
+```

@@ -817,6 +817,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   20/40 ns collector compatibility, freeze one 40 ns manifest chained to v9,
   then run only fresh `run-014` Graph and `run-015` Rocket partitions. Preserve
   EXP-0009 `pause-boundary`; do not sweep clock targets or reuse its results.
+  EXP-0010 authority `f662d68...1a9e3` and manifest `a09a641...b76ef` are
+  ready for the freeze commit. After it, execute only the preregistered fresh
+  pair and matrix; stop on any identity or timing-tuple drift.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

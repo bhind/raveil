@@ -254,6 +254,8 @@ merely because a branch or partial implementation already exists.
    EXP-0010 is the pre-data, single-40-ns follow-up for that point. It cannot
    change the EXP-0009 outcome and cannot advance the gate before a fresh,
    complete same-manifest pair.
+   The EXP-0010 40 ns manifest is now pre-data frozen in content; fresh paired
+   collection begins only after its commit and cannot reuse EXP-0009 results.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

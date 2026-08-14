@@ -274,6 +274,24 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertEqual(recovery_v9["variants"], recovery_v8["variants"])
         self.assertEqual(recovery_v9["toolchain"], recovery_v8["toolchain"])
         self.assertEqual(recovery_v9["decision_rules"], recovery_v8["decision_rules"])
+        followup_path = (
+            ROOT / "benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json"
+        )
+        followup = t0044_physical.load_manifest(followup_path)
+        self.assertEqual(followup["experiment_id"], "EXP-0010")
+        self.assertEqual(
+            followup["followup_of_manifest_sha256"],
+            t0044_physical.sha256_file(recovery_v9_path),
+        )
+        self.assertNotIn("recovery_of_manifest_sha256", followup)
+        self.assertEqual(followup["clock_period_ns"], 40.0)
+        self.assertEqual(
+            followup["timing_followup_policy"],
+            t0044_physical.TIMING_FOLLOWUP_POLICY,
+        )
+        self.assertEqual(followup["variants"], recovery_v9["variants"])
+        self.assertEqual(followup["toolchain"], recovery_v9["toolchain"])
+        self.assertEqual(followup["decision_rules"], recovery_v9["decision_rules"])
 
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()

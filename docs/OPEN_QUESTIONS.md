@@ -124,6 +124,8 @@ resolves it.
   EXP-0010 narrows the test to one fixed 40 ns follow-up selected after the
   20 ns pause. Whether both unchanged partitions meet that single common target
   remains unresolved until its manifest is frozen and fresh runs complete.
+  The manifest content is now frozen at `a09a641...b76ef`; only the fresh
+  same-manifest outcome remains unresolved.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

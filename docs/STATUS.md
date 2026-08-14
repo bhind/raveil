@@ -510,6 +510,11 @@ admitted timing tuples: legacy 20/1/1 ns and follow-up 40/1/1 ns. EXP-0010 is
 bound to recovery-v9, one fixed doubled period, fresh Graph/Rocket runs, and no
 prior result reuse. Candidate collection remains prohibited until its
 implementation authority and machine-readable manifest are committed.
+EXP-0010 implementation authority is `f662d68...1a9e3`; frozen manifest
+SHA-256 is `a09a641...b76ef`. It preserves every recovery-v9 identity and
+decision field while binding only the 40/1/1 ns follow-up tuple. Fresh
+`run-014` Graph and `run-015` Rocket collection is the next authorized action
+after the manifest freeze commit.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
