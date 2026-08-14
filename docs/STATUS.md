@@ -134,6 +134,13 @@ proposal for the correctly ordered Chisel RTL/simulation study. T-0105 now has
 unmodified Rocket functional execution. T-0042 separately has a bounded static
 Graph RTL smoke and a minimal BOOM RISC-V functional execution, but no matched
 CPU comparison or performance evidence exists.
+ADR-0046 now narrows T-0042's remaining implementation order without changing
+that fact: the next required slice is the controlled Rocket/BOOM/Graph
+connection to one proved-equal owned resource boundary with quiescent-window
+and complete lifecycle accounting. Exhaustive CPU token lifecycle hardening is
+deferred to T-0106 and no longer gates T-0042 or T-0044. Existing ADR-0045
+diagnostics remain bounded functional evidence; no general semantic-initiator,
+performance, CPU, ISA, FPGA, or silicon claim has been promoted.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
@@ -487,8 +494,9 @@ and `promotion=eligible`. Sequence is the identity; ROB/LDQ indices, branch
 mask, and lane remain context only. No token is carried through DCache or
 TileLink, and this does not prove target-ELF semantic initiator identity, store
 authorization, replay/kill/exception/reset behavior, complete BOOM lifecycle,
-resource matching, OoO effects, or performance. T-0042 remains open for those
-boundaries and the remaining Rocket lifecycle cases.
+resource matching, OoO effects, or performance. Those claim boundaries remain;
+ADR-0046 routes the general lifecycle cases to T-0106 while T-0042 remains open
+for the controlled common-resource and complete-accounting slice.
 
 A second pinned BOOM diagnostic now covers one deterministic but narrower
 negative ordering. At the exact `0x08000101` misaligned-load addrgen candidate,

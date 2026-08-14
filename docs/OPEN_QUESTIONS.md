@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -127,9 +127,11 @@ resolves it.
   consumption, and the boundary that may drive `InitiatorCpu`. One negotiated
   absent-producer negative now observes invalid/zero at manager A/D and blocks
   attribution without blocking the store; it does not answer those remaining
-  questions. Also open is how
-  the remaining Rocket cases obtain direct, non-synthetic signals before
-  normalization into the ADR-0043 bridge.
+  questions. ADR-0046 resolves the sequencing question: none of these remaining
+  general-attribution cases gates the controlled-run T-0042/T-0044 slice.
+  T-0106 retains the open design question of how Rocket and BOOM obtain direct,
+  non-synthetic signals before general semantic promotion into the ADR-0043
+  bridge, but it begins only after T-0044 survival or an accepted product need.
 - ADR-0040 fixes BOOM's source coordinate and proves its `disableOOO` mode only
   serializes dispatch while retaining ROB, rename, issue, and LSU structures.
   Which separately synthesized structural ablation, if any, is scientifically

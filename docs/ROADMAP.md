@@ -1,7 +1,7 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
@@ -38,7 +38,14 @@ The corrected critical path is:
    Graph executor now matches an independent oracle and survives
    cancel/restart in Verilator. A strict common functional adapter v2 now makes
    missing lifecycle accounting and unmatched memory/resources explicit and
-   refuses comparison readiness. Pinned BOOM, the
+   refuses comparison readiness. ADR-0046 resets the critical path to the
+   smallest controlled-run comparison boundary: equal owned ports, buffering,
+   request capacity, arbitration, width, and response rule for Rocket, BOOM,
+   and Graph; quiescent execution-window bracketing; rejection of unaccounted
+   traffic; and complete six-phase/total-cycle records. General per-operation
+   semantic attribution is not claimed. Further reset/stale/duplicate/replay/
+   rollback and arbitrary-initiator hardening moves to T-0106 and does not gate
+   T-0042 closure or T-0044 entry. Pinned BOOM, the
    same-core diagnostic semantics and licenses are source-verified through
    ADR-0040. `SmallBoomConfig` now elaborates to FIRRTL containing `BoomCore`
    and executes a minimal RV64 sum/store/load/check ELF to successful `tohost`
@@ -160,7 +167,11 @@ The corrected critical path is:
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,
    and correctness checks.
-6. **Transition only after survival:** evaluate an attached engine, custom
+6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
+   or an accepted untrusted/concurrent product requirement, complete the
+   general ADR-0045 token lifecycle matrix. It is not on the first-comparison
+   critical path.
+7. **Transition only after survival:** evaluate an attached engine, custom
    RISC-V extension, programmable fabric, or separate ASIC plane. ARM-hosted
    software is transition/product evidence, not evidence about hidden CPU
    internals.

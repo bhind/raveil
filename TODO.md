@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -408,7 +408,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.
 - [ ] **T-0042** Bootstrap an owned mapper/simulator adapter without leaking
-  upstream types. After T-0105 proves the substrate and T-0057 completes its
+  upstream types. **ADR-0046 small-start priority:** stop adding token-lifecycle
+  cases. Close T-0042 with the smallest controlled-run slice that (1) preserves
+  the frozen RFC-0005 workload and independent oracle across Rocket, BOOM, and
+  Graph, (2) connects all three through one owned contract with equal ports,
+  buffering, request capacity, arbitration, width, and response rule, (3)
+  brackets a quiescent execution window and rejects unaccounted traffic, and
+  (4) emits complete six-phase and total-cycle records with explicit resource
+  equality and comparison eligibility. General semantic-initiator attribution
+  is not a T-0042 claim. Use `docs/guides/T-0042-SMALL-START.md` as the active
+  execution packet. After T-0105 proves the substrate and T-0057 completes its
   direct-prior-art/IP review and freezes the minimal native graph/effect schema,
   use the pinned Chisel/Chipyard research environment with Rocket in-order,
   BOOM OoO and same-core OoO-disabled diagnostic configurations plus an owned
@@ -574,14 +583,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   candidate. One live negative now advertises the fields but omits the BOOM
   producer and observes explicit invalid/zero metadata at manager A/D while
   the store transaction and readback still complete; attribution remains
-  unknown and is not promoted. Next implement real epoch/reset/stale/duplicate/exhaustion and
-  stripped-after-valid or malformed-nonzero negatives,
-  replay/source-reuse/backpressure,
-  untagged loader/FESVR/Debug exclusion, BOOM load and Rocket parity, and
-  owned-path post-A rollback before any semantic promotion.
-  Do not connect either local sequence to the ADR-0043 common bridge until the
-  required CPU-specific negative, same-token store, and transport boundaries
-  pass.
+  unknown and is not promoted. ADR-0046 removes further epoch/reset/stale/
+  duplicate/exhaustion, stripped/malformed, replay/source-reuse/backpressure,
+  non-CPU exclusion, BOOM-load/Rocket token parity, and post-A rollback cases
+  from the T-0042 critical path. Retain the existing evidence without promoting
+  semantic initiator identity. T-0106 owns that hardening after T-0044 survival
+  or a separately accepted product requirement. Connect the controlled CPU
+  paths to the ADR-0043 resource boundary next; do not start another deferred
+  token case first.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits
   only the canonical owned compiler slate and fully bound proposal before any
@@ -595,6 +604,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   graph-ready/token/configuration, cycles, traffic, area, timing, and energy
   proxies separately. Admit only mechanisms that passed the T-0057 source and
   IP-risk review; retain an explicit no-go outcome.
+
+- [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
+  survives T-0044 or a separately accepted product requirement introduces
+  untrusted or concurrent initiators. Preserve ADR-0045's implementation-owned
+  token/epoch and fail-closed semantics; cover reset with outstanding work,
+  stale/duplicate/exhausted and multi-live tokens, replay/source reuse,
+  post-request exception and post-A rollback, arbitrary ELF identity, general
+  loader/FESVR/Debug exclusion, and Rocket/BOOM lifecycle parity. This task is
+  explicitly not a prerequisite for the controlled-run T-0042/T-0044 slice.
 
 ## Research backlog
 

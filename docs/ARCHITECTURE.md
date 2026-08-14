@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-08
+Last updated: 2026-08-14
 
 ## Four-plane adaptive Harvard model
 
@@ -323,8 +323,16 @@ architectural commit. Loads require response plus retirement, stores require
 retirement plus CPU-specific store authorization and actual completion, and killed, exceptional,
 rolled-back, stale, duplicated, loader, FESVR, Debug, or untagged traffic cannot
 be promoted. A post-A exception cannot cancel transport; a later side effect is
-an explicit lifecycle violation. These are accepted design invariants. A
-standalone repository-owned Chisel ledger now exercises them with synthetic
+an explicit lifecycle violation. These remain accepted invariants for any
+later general semantic-attribution claim. ADR-0046 changes their delivery
+order: the first T-0042/T-0044 controlled-run comparison may bracket a
+quiescent frozen workload, reject any unaccounted traffic, and leave
+per-operation initiator identity unknown. It must still prove equal owned
+ports, buffering, request capacity, arbitration, width, response rules,
+complete lifecycle accounting, and semantic output. General token lifecycle
+coverage is T-0106 and is not a prerequisite for connecting the controlled CPU
+paths to the ADR-0043 resource boundary. A standalone repository-owned Chisel
+ledger now exercises the general invariants with synthetic
 events, a single-live-token state machine, exact marker verification, and
 fail-closed invalid-transition tests. It is a contract harness, not a CPU
 boundary: it has no pinned Rocket input, performs no CPU execution, and cannot
