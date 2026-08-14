@@ -43,9 +43,10 @@ find /rtl -type f \( -name '*.sv' -o -name '*.v' \) -print | LC_ALL=C sort > /tm
     printf 'dfflibmap -liberty %s\n' "$liberty"
     printf 'abc -liberty %s\n' "$liberty"
     printf 'clean\n'
+    printf 'write_verilog -noattr -blackboxes /tmp/partition-blackboxes.v\n'
     printf 'read_liberty -lib -ignore_miss_func %s\n' "$liberty"
     printf 'check -assert\n'
-    printf 'write_verilog -noattr /evidence/mapped.v\n'
+    printf 'write_verilog -noattr /tmp/mapped-core.v\n'
     printf 'stat -liberty %s\n' "$liberty"
     printf 'tee -o /evidence/stat.json stat -json -liberty %s\n' "$liberty"
 } > /tmp/candidate.ys
@@ -55,6 +56,19 @@ if ! yosys -q -l /evidence/yosys.log /tmp/candidate.ys; then
     exit 1
 fi
 grep -q "Chip area for module" /evidence/yosys.log
+cat /tmp/partition-blackboxes.v /tmp/mapped-core.v > /evidence/mapped.v
+old_ifs=$IFS
+IFS=,
+for module in $RAVEIL_PHYSICAL_BLACKBOX_MODULES; do
+    if [ -n "$module" ]; then
+        count=$(grep -c "^module $module(" /evidence/mapped.v || true)
+        [ "$count" -eq 1 ] || {
+            echo "error: mapped netlist does not contain exactly one $module declaration" >&2
+            exit 1
+        }
+    fi
+done
+IFS=$old_ifs
 
 cat > /tmp/candidate.sdc <<EOF
 create_clock -name clock -period 20.000 [get_ports clock]
@@ -97,6 +111,7 @@ printf '%s\n' ${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-} | tr ',' '\n' | sed '/^$/d' 
     printf 'blackbox_selection_mode=yosys-module-name-single-instance-v1\n'
     printf 'mapped_check_mode=liberty-aware-v1\n'
     printf 'sta_constraint_mode=foreach-non-clock-inputs-v1\n'
+    printf 'mapped_blackbox_declarations=explicit-yosys-stubs-v1\n'
 } > /evidence/tool-identity.txt
 printf '%s\n' \
-    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 mapped_check_mode=liberty-aware-v1 sta_constraint_mode=foreach-non-clock-inputs-v1 clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"
+    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 mapped_check_mode=liberty-aware-v1 sta_constraint_mode=foreach-non-clock-inputs-v1 mapped_blackbox_declarations=explicit-yosys-stubs-v1 clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"

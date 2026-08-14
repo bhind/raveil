@@ -120,6 +120,13 @@ def load_manifest(path: pathlib.Path) -> dict[str, Any]:
             "mapped_check_mode": "liberty-aware-v1",
             "sta_constraint_mode": "foreach-non-clock-inputs-v1",
         },
+        {
+            "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+            "blackbox_before_checked_hierarchy": True,
+            "mapped_check_mode": "liberty-aware-v1",
+            "sta_constraint_mode": "foreach-non-clock-inputs-v1",
+            "mapped_blackbox_declarations": "explicit-yosys-stubs-v1",
+        },
     )
     if collector_policy is not None and collector_policy not in admitted_collector_policies:
         raise ValueError("collector policy drift")
@@ -430,8 +437,15 @@ def derive_one(
     stat_area, mapped_cells = _parse_stat(stat_path, top)
     if abs(stat_area - float(area_text)) > 0.000001:
         raise ValueError("Yosys area reports disagree")
-    if not re.search(rf"(?m)^module\s+\\?{re.escape(top)}(?:\s|\()", mapped_path.read_text()):
+    mapped_text = mapped_path.read_text()
+    if not re.search(rf"(?m)^module\s+\\?{re.escape(top)}(?:\s|\()", mapped_text):
         raise ValueError("mapped netlist top is missing")
+    for blackbox in contract["blackboxes"]:
+        declarations = re.findall(
+            rf"(?m)^module\s+\\?{re.escape(blackbox)}(?:\s|\()", mapped_text
+        )
+        if len(declarations) != 1:
+            raise ValueError("mapped netlist blackbox declaration drift")
     identity = _read_identity(raw_dir / "tool-identity.txt")
     for manifest_name, identity_name in (
         ("yosys_sha256", "yosys_sha256"),
@@ -449,7 +463,11 @@ def derive_one(
         "blackbox_selection_mode"
     ]:
         raise ValueError("runtime blackbox selection mode drift")
-    for policy_name in ("mapped_check_mode", "sta_constraint_mode"):
+    for policy_name in (
+        "mapped_check_mode",
+        "sta_constraint_mode",
+        "mapped_blackbox_declarations",
+    ):
         if policy_name in (collector_policy or {}) and identity.get(policy_name) != collector_policy[
             policy_name
         ]:

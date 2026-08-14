@@ -765,6 +765,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Recovery-v5 authority `104c603...bc7ef2` and manifest
   `6973030c...6d051e` are frozen at `f1d62e9...b8abf5`; retry only Graph from
   its clean descendant.
+  Recovery-v5 Graph `run-006` sealed Yosys/STA raw files, but derivation rejected
+  two implicit OpenSTA common-module black boxes. Do not reuse the contained
+  values. Freeze explicit, exactly-once Yosys black-box declarations as
+  recovery-v6, rerun Graph, and keep Rocket gated on a complete derived Graph
+  result.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

@@ -88,6 +88,10 @@ resolves it.
   probes isolate a collector-only Liberty/OpenSTA compatibility fix; until its
   replacement freeze produces the complete Graph/Rocket matrix, both the
   physical lower-bound and whole-system composition remain unresolved.
+  Recovery-v5 then produced sealed raw reports but no eligible derived result,
+  because OpenSTA inferred the two intentional common modules instead of
+  reading explicit declarations. Recovery-v6 must make those cut declarations
+  exact and visible before either physical question can advance.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

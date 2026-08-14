@@ -357,3 +357,26 @@ Recovery-v5 implementation authority is
 chains recovery-v4 and adds only the two collector compatibility identities.
 Candidate use is authorized only from recovery-v5 freeze commit
 `f1d62e95618d4a2107a1dfe20635098425b8abf5` or a clean descendant.
+
+Recovery-v5 Graph `run-006` completed Yosys, strict mapped checking, and
+OpenSTA, then sealed raw evidence before derivation. Derivation failed closed
+because the mapped netlist omitted the two intentional common-module
+declarations; OpenSTA reported each module `not found` and created an implicit
+black box. Raw files digest is
+`6df847ecd3c0c5047fad47e9422827add11d4cbd3499db83eadeef1019e435f1`;
+raw-seal SHA-256 is
+`14847d3fb84d103d222f4eb23d10bdadc5d62c38892ada024c0bd218593ad74c`.
+Although sealed raw files contain statistics and an STA path, the frozen parser
+correctly rejects the unresolved declarations. They are ineligible and must
+not be reused as candidate data; no derived result exists and Rocket remains
+unrun.
+
+Pinned-tool diagnostics show that Yosys
+`write_verilog -noattr -blackboxes` emits exactly the two declared common-module
+stubs. Reading those stubs before the sealed `run-006` mapped core removes both
+OpenSTA `not found` warnings and links a single clock path without changing its
+logic. The next collector-only authority writes the intentional stubs before
+loading standard-cell Liberty definitions, concatenates them with the mapped
+core, asserts exactly one declaration per frozen black box, and makes that mode
+part of raw identity. This diagnostic is not a candidate result and requires a
+recovery-v6 freeze before a distinct Graph RUN-ID.

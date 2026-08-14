@@ -196,6 +196,12 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertNotIn("report_clocks\n", inner)
         self.assertIn("mapped_check_mode=liberty-aware-v1", inner)
         self.assertIn("sta_constraint_mode=foreach-non-clock-inputs-v1", inner)
+        self.assertLess(
+            inner.index("write_verilog -noattr -blackboxes"),
+            inner.index("read_liberty -lib"),
+        )
+        self.assertIn("cat /tmp/partition-blackboxes.v /tmp/mapped-core.v", inner)
+        self.assertIn("mapped_blackbox_declarations=explicit-yosys-stubs-v1", inner)
         self.assertIn("stat -json", inner)
         self.assertIn("tool-identity.txt", inner)
         self.assertIn("set_input_delay 1.000", inner)
@@ -259,6 +265,7 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
                 "blackbox_before_checked_hierarchy": True,
                 "mapped_check_mode": "liberty-aware-v1",
                 "sta_constraint_mode": "foreach-non-clock-inputs-v1",
+                "mapped_blackbox_declarations": "explicit-yosys-stubs-v1",
             },
             "toolchain": toolchain,
             "variants": variants,
@@ -291,7 +298,10 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
         (raw / "opensta.log").write_text(
             "Startpoint: a\nEndpoint: b\nPath Group: clock\n0.250000 slack (MET)\n"
         )
-        (raw / "mapped.v").write_text("module Top(input clock); endmodule\n")
+        (raw / "mapped.v").write_text(
+            "module CommonMemory(input clock); endmodule\n"
+            "module Top(input clock); CommonMemory memory(clock); endmodule\n"
+        )
         (raw / "stat.json").write_text(
             json.dumps({"modules": {"\\Top": {"area": 12.5, "num_cells": 5}}}) + "\n"
         )
@@ -311,6 +321,7 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             "blackbox_selection_mode=yosys-module-name-single-instance-v1\n"
             "mapped_check_mode=liberty-aware-v1\n"
             "sta_constraint_mode=foreach-non-clock-inputs-v1\n"
+            "mapped_blackbox_declarations=explicit-yosys-stubs-v1\n"
         )
         t0044_physical.write_run_metadata(
             manifest, "static-graph", "Top", "CommonMemory", rtl, raw

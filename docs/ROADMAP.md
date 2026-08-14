@@ -220,6 +220,9 @@ merely because a branch or partial implementation already exists.
    failure before statistics/STA. Candidate-independent toy probes identify a
    collector-only Liberty/OpenSTA compatibility correction, which requires a
    new freeze; no physical datum or roadmap gate has advanced.
+   That correction reached sealed raw reports, but derivation rejected two
+   implicit OpenSTA common-module declarations. Explicit exactly-once stubs are
+   the remaining collector boundary; contained raw numbers remain ineligible.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

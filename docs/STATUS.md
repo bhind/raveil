@@ -427,6 +427,13 @@ Recovery-v5 authority is `104c603...bc7ef2`; manifest SHA-256 is
 remain unchanged. Only a clean descendant of its freeze may collect Graph.
 Recovery-v5 freeze commit is
 `f1d62e95618d4a2107a1dfe20635098425b8abf5`.
+Recovery-v5 Graph `run-006` sealed complete raw Yosys/STA files but the parser
+rejected OpenSTA's two implicit `module not found; creating black box` warnings;
+raw files digest is `6df847ec...e435f1`, raw-seal SHA-256 is
+`14847d3f...ad74c`, and no derived result is eligible. A pinned-tool diagnostic
+proves explicit Yosys black-box stubs remove the warnings while preserving the
+mapped core. The collector now asserts one declaration for each frozen common
+partition; this pre-data recovery requires a v6 freeze before Graph retry.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
