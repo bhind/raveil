@@ -339,6 +339,14 @@ Report SHA-256 is
 `1e52c4e213cb19cb2455cfef67077d3d3acb959bfb834c24e6b12e932d2f7a65`;
 raw-seal SHA-256 is
 `7c90f8a4a09291f5269e19d1425d1eac1a7915b8b3abcc4f16eb7206f438eeef`.
+ADR-0048 now fixes the promotion boundary for this result. The retained failed
+RUN and completed recovery RUN are locally sealed but have no recorded
+immutable remote copy, download-based verification, marker-last completion,
+or tracked promotion receipt. The latency/traffic result may support the next
+reversible preregistered T-0044 experiment, but it is not remotely durable,
+externally promoted, RFC-0005 go, or T-0044 completion. The owner packet is
+`docs/guides/T-0044-EXP-0008-EVIDENCE-PROMOTION.md`; promotion must reuse the
+sealed bytes and must not rerun simulation.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

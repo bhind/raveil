@@ -721,7 +721,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   rules do not fire. Keep T-0044 open. Next work must separately preregister
   the energy proxy, matched synthesis timing/area, IP disposition, and missing
   VLIW/CGRA, elastic, stream, and hybrid organization evidence; do not infer
-  those passes from latency/traffic.
+  those passes from latency/traffic. ADR-0048 also requires the retained failed
+  RUN and completed recovery RUN to receive immutable remote copies,
+  download-based verification, marker-last completion, and a tracked
+  non-sensitive receipt before EXP-0008 is called remotely durable or
+  externally promoted. Use
+  `docs/guides/T-0044-EXP-0008-EVIDENCE-PROMOTION.md`; do not rerun simulation
+  merely to close this durability gap. Local sealed evidence may support the
+  next reversible preregistered T-0044 experiment while promotion is pending.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

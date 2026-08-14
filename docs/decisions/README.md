@@ -52,3 +52,4 @@ rewrite it.
 | [ADR-0045](ADR-0045-semantic-attribution-is-commit-aware-and-cpu-owned.md) | Accepted | CPU semantic attribution uses implementation-owned tokens and requires memory completion plus architectural commit |
 | [ADR-0046](ADR-0046-controlled-run-matched-comparison-precedes-token-hardening.md) | Accepted | A controlled-run matched comparison precedes general CPU token-lifecycle hardening |
 | [ADR-0047](ADR-0047-fixture-owned-input-staging-precedes-repeated-campaign.md) | Accepted | A fixture-owned phase-exclusive input provider precedes repeated measurement |
+| [ADR-0048](ADR-0048-t0044-results-require-sealed-durable-evidence.md) | Accepted | T-0044 results require sealed, immutable, download-verified evidence before promotion |

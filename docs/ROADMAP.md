@@ -205,7 +205,13 @@ merely because a branch or partial implementation already exists.
    the 64-input correct-latency upper 95% bound is 0.2086002 versus the frozen
    1.05 threshold, and break-even is invocation 1. The bounded result is
    `advance-partial-latency-traffic`; matched energy/timing/area, IP, and the
-   other organizations remain the open T-0044 gates.
+   other organizations remain the open T-0044 gates. ADR-0048 additionally
+   separates the current locally sealed result from durable promotion: both
+   the retained failed RUN and completed recovery RUN need immutable remote
+   copies, download checks, completion markers transferred last, and a tracked
+   non-sensitive receipt. That durability step gates external promotion and
+   T-0044 closeout, not the next reversible preregistered local experiment; it
+   never authorizes a deterministic simulator rerun as another sample.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

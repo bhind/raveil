@@ -5,6 +5,8 @@ Evidence class: RTL simulation latency/traffic campaign
 Date: 2026-08-14
 Task: T-0044
 Authority: RFC-0004, RFC-0005, ADR-0039, ADR-0046, ADR-0047, EXP-0007
+Promotion status: locally sealed; immutable remote copy and download
+verification pending under ADR-0048
 
 ## Falsifiable question
 
@@ -244,6 +246,14 @@ Raw seal SHA-256 is
 The report and seal are under ignored RUN-ID
 `artifacts/research/EXP-0008/20260814T153738Z-0203248-campaign256-recovery/`;
 raw and derived evidence remain separate.
+
+ADR-0048 classifies this as locally sealed evidence. The retained failed RUN
+and completed recovery RUN have not yet been immutably copied and
+download-verified at their durable remote locators. Until a tracked
+non-sensitive promotion receipt records those checks, the result is not called
+remotely durable or externally promoted. This missing durability step does not
+change the bounded `advance-partial-latency-traffic` interpretation and does
+not authorize a simulator rerun.
 
 Successful operations-only simulator times were 43.886987 seconds for Graph,
 2,051.982703 for Rocket, 2,722.331250 for BOOM, and 8,005.834626 for the

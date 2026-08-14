@@ -23,8 +23,11 @@ resolves it.
   25% incremental Rocket-core area as later no-go thresholds. EXP-0005 now
   freezes the fresh-input inference rule, paired estimator, repetitions, 95%
   interval construction, and latency/traffic stop rules before pilot data.
-  The matched synthesis/energy/area boundary and full T-0044 matrix remain
-  unresolved, and no RFC-0005 numerical decision is allowed below 64 inputs.
+  EXP-0008 now resolves the bounded 64/256-input latency/traffic campaign with
+  `advance-partial-latency-traffic`; ADR-0048 leaves its immutable remote
+  promotion pending rather than treating local summaries as raw evidence. The
+  matched synthesis/energy/area boundary and full T-0044 organization matrix
+  remain unresolved.
 - Where is the measured boundary between static, elastic dataflow, stream, and
   hybrid Graph Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?
