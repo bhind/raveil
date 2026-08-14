@@ -95,6 +95,7 @@ class RepeatedBoundaryTests(unittest.TestCase):
         runner = (ROOT / "hardware/chisel/run-owned-cpu-memory-smoke.sh").read_text()
         self.assertIn("for (uint32_t seed = 1U", source)
         self.assertEqual(startup.count("sd      a0, 0(t0)"), 1)
+        self.assertIn("li      sp, 0x80010000", startup)
         self.assertIn('timeout --foreground 3600 "$sim"', runner)
         self.assertNotIn("RAVEIL_STENCIL_SEED", source)
 

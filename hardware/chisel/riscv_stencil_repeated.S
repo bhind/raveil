@@ -1,6 +1,11 @@
     .section .text.init
     .globl _start
 _start:
+    # The repeated C loop spills callee-saved state.  The earlier one-shot
+    # workload happened to remain a leaf after optimization and did not prove
+    # a stack boundary.  Keep this private stack in main RAM, outside the owned
+    # RFC-0005 input/output resource.
+    li      sp, 0x80010000
 #ifdef BOOM_SERIALIZE_DISPATCH
     li      t0, 8
     csrrs   zero, 0x7c1, t0

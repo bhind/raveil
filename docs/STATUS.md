@@ -197,6 +197,14 @@ commissioning. No EXP-0006 data existed at freeze. In particular,
 CPU staging currently includes candidate-local input-generation instructions
 while Graph input generation is testbench-side, so end-to-end eligibility is
 not inferred from the implementation alone.
+The first frozen EXP-0006 commissioning attempt retained two failed RUN-IDs.
+The first exposed only the already known ignored Chipyard locator requirement.
+The second completed Graph, cold-built Rocket, then entered a CPU trap/reboot
+loop before any owned-memory measurement marker because the new repeated C
+function used a stack while its bare-metal entry left `sp` uninitialized. No
+CPU observation or performance claim was produced. The minimal correction
+initializes a private main-RAM stack outside the owned RFC-0005 resource; the
+manifest must be re-frozen before another run.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

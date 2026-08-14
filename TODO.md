@@ -668,7 +668,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   it is pre-data and must not be treated as evidence. EXP-0006 is frozen; run
   only its 1/4 commissioning matrix next. Fail closed or pause if CPU-local versus
   Graph-testbench input generation prevents a same-meaning staging/end-to-end
-  boundary.
+  boundary. The first CPU attempt failed before measurement because repeated C
+  needed an initialized private stack; re-freeze the minimal main-RAM stack fix
+  and rerun commissioning under a new RUN-ID.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
