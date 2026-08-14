@@ -156,7 +156,7 @@ completed without RTL execution: diagnostic source SHA-256 is
 `f88406f8148fa70d0eb72757653c48476e17063dcc21967b20794b3b19228bfb`,
 configuration SHA-256 is
 `fa81ec09ac5d3c4f9a93a5fe08e8b8e9256e9fb86b1bf8b03351a79875c0a381`,
-and the ELF artifact remains
+and the build-only ELF artifact is
 `b0f152028d3543997c8e9508289c60f95cf73b166dc3115a032ca6c1a43a89d4`.
 The failed raw seal is
 `88fe79590c3ea98129d57363920686b084fb10b45e2a9c5fc0b53db3f3bc8726`.
@@ -164,3 +164,14 @@ Before retry data, recovery manifest
 `t0044-fixture-campaign-recovery-v1.json` is frozen at SHA-256
 `c9226d05f348c740801b7cbceb673514495c3f5fc15c1192629f31b2f58a1eb6`
 with RUN-ID `20260814T153738Z-0203248-campaign256-recovery`.
+
+The recovery simulator command subsequently completed all 256 inputs at exit
+zero, but the first post-processing attempt raised an `AttributeError` because
+the new recovery adapter passed `variant, path` to the existing
+`parse_variant_log(path, variant, account)` API. Raw collection was already
+complete and no log was rerun or modified. A focused regression fixes only this
+adapter argument order before deriving and sealing the same raw directory.
+The runtime session artifact is independently bound as
+`1b097009c39e773b0c567ceafded69be95be11d5b0210141d300423467edea4b`;
+the frozen policy never treats a separate build-only artifact as byte-equal
+session evidence.

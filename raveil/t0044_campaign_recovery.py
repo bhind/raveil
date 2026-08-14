@@ -198,10 +198,7 @@ def derive_recovery(run_dir: Path, base_manifest_path: Path,
             or (raw / "frozen-recovery-manifest.json").read_bytes()
             != recovery_manifest_path.read_bytes()):
         raise ControlledRunError("EXP-0008 recovery frozen manifest copy changed")
-    sessions = {
-        variant: parse_variant_log(variant, raw / f"{variant}.log", FULL_ACCOUNT)
-        for variant in VARIANTS
-    }
+    sessions = _parse_sessions(raw)
     expected = copy.deepcopy(base)
     expected["identity_policy"]["stable_expected_by_variant"][
         DIAGNOSTIC_VARIANT] = recovery["diagnostic_expected_identity"]
@@ -226,6 +223,13 @@ def derive_recovery(run_dir: Path, base_manifest_path: Path,
     derived.mkdir(exist_ok=False)
     (derived / "report.json").write_bytes(_canonical_bytes(report) + b"\n")
     return report
+
+
+def _parse_sessions(raw: Path) -> dict[str, dict[str, Any]]:
+    return {
+        variant: parse_variant_log(raw / f"{variant}.log", variant, FULL_ACCOUNT)
+        for variant in VARIANTS
+    }
 
 
 def collect_recovery(repo: Path, failed_run: Path, run_dir: Path,

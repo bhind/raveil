@@ -4,11 +4,13 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from raveil.controlled_run import ControlledRunError
 from raveil.t0044_campaign import _seal_failed_raw
 from raveil.t0044_campaign_recovery import (
     PRIMARY_VARIANTS,
+    _parse_sessions,
     _verify_failed_evidence,
     load_recovery_manifest,
 )
@@ -52,6 +54,20 @@ def _failed_attempt(root: Path) -> tuple[Path, dict]:
 
 
 class CampaignRecoveryTests(unittest.TestCase):
+    def test_session_parser_uses_path_then_variant(self) -> None:
+        with mock.patch(
+            "raveil.t0044_campaign_recovery.parse_variant_log",
+            side_effect=lambda path, variant, account: {
+                "path": path, "variant": variant, "account": account,
+            },
+        ) as parser:
+            sessions = _parse_sessions(Path("/raw"))
+        self.assertEqual(parser.call_count, 4)
+        self.assertEqual(sessions["static-graph"]["path"],
+                         Path("/raw/static-graph.log"))
+        self.assertEqual(sessions["static-graph"]["variant"], "static-graph")
+        self.assertEqual(sessions["static-graph"]["account"], 256)
+
     def test_frozen_recovery_manifest_binds_only_diagnostic_retry(self) -> None:
         manifest = load_recovery_manifest(
             ROOT / "benchmarks/manifests/t0044-fixture-campaign-recovery-v1.json")
