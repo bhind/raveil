@@ -34,6 +34,15 @@ resolves it.
 - If the fixed-latency RFC-0005 candidate fails, is that a no-go for the initial
   path or sufficient evidence to draft a separately reviewed variable-latency
   mechanism? Elastic token/readiness machinery is not authorized by RFC-0005.
+- ADR-0049 fixes that a loadable schedule, configurable route/FU array, or
+  token-ready successor is evaluated as existing VLIW/CGRA/dataflow mechanism,
+  not Raveil novelty. Which source-, revision-, license-, provenance-, and
+  IP-risk-reviewed public implementation is the smallest faithful T-0044
+  control and possible Daphnis adapter? Selection remains open; public access or
+  an OSS license alone is not patent clearance.
+- Which three semantically distinct operation graphs provide the smallest
+  no-RTL-regeneration test of temporal configurability, memory behavior, and
+  contract parity without expanding into a general OoO/dataflow engine?
 - Can one pinned Chisel/Chipyard environment support a fair matched comparison
   among Rocket in-order, BOOM OoO, BOOM's same-core serialize-dispatch diagnostic,
   and an owned explicit-graph tile without inheriting upstream authority or

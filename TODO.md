@@ -732,6 +732,20 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   energy paused until
   fallback, common-memory, integration, clock, and lifecycle activity are all
   included.
+  ADR-0049 adds a later categorical gate without changing either frozen
+  EXP-0008 or EXP-0009: no custom configurable Graph executor, RISC-V extension,
+  FPGA transition, or ASIC transition may advance until T-0044 includes a
+  source/revision/license/provenance-verified public VLIW/CGRA/dataflow control,
+  executes at least three semantically distinct graphs through one candidate
+  interface without Chisel/RTL regeneration, proves the same owned
+  effect/authority/fallback contract on CPU and configurable backends, and
+  accounts for compile/map/configure/install/PPA cost. Treat an adequate public
+  implementation as an adapter candidate, not an idea to rewrite. Custom
+  hardware is explicit no-go when only source-generated per-kernel FSMs work,
+  when matched configurability erases the claimed benefit, or when a new
+  Raveil-only frontend/toolchain is required without a recorded standard-IR
+  interoperability gap. Hardware no-go preserves the portable software
+  contract/runtime path.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

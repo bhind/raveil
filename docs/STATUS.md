@@ -369,6 +369,15 @@ sealing, and fail-closed matrix rules. Manifest SHA-256 is
 `681fd43e6f38a4b65cba8698eacbbf3768edc93d633141274c74ce846d61d216`.
 Freeze commit is `d44c2e603ade69ceccb14ac0db2a77374d47ab7b`.
 This is still candidate pre-data: no Graph or Rocket physical estimate exists.
+ADR-0049 now fixes the post-EXP-0009 architecture boundary without changing its
+frozen manifest. The current `StaticStencilRegion` remains a hardwired stencil
+FSM with a descriptor binding tag, not a configurable CGRA or general Graph
+executor. Any configurable successor must be compared as VLIW/CGRA/dataflow,
+reuse a reviewed public backend when adequate, accept at least three distinct
+graphs without RTL regeneration, and preserve the same CPU/backend
+effect/authority/fallback contract. No such configurable executor, public-CGRA
+adapter, three-graph proof, or compiler/configuration/PPA comparison is
+implemented; this is an accepted transition/no-go boundary, not new evidence.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
