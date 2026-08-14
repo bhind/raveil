@@ -182,6 +182,19 @@ installation while Graph is elaboration-installed. EXP-0005 therefore ends
 `pause` at exactly one required boundary: run repeated fresh inputs under one
 installed configuration without simulator reboot. T-0044 remains open; the
 pilot is partial and decides neither RFC-0005 go nor numerical no-go.
+The successor boundary implementation is now present on the dedicated
+`research/t-0044-repeated-invocation-boundary` line but has not produced
+experiment data. It adds separate repeated-only Rocket/BOOM configurations,
+one ELF process that consumes ordered runtime seed versions, per-invocation
+owned-memory lifecycle counters, actual 256-word output evidence, and a strict
+repeated-session verifier without changing EXP-0005. The repeated manager
+re-enters staging structurally after each drained validation response; it adds
+no candidate-visible port, buffer, bank, arbitration path, or software phase
+command. Static checks pass, but EXP-0006 must freeze its same-meaning
+installation/staging boundary before any RTL commissioning. In particular,
+CPU staging currently includes candidate-local input-generation instructions
+while Graph input generation is testbench-side, so end-to-end eligibility is
+not inferred from the implementation alone.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

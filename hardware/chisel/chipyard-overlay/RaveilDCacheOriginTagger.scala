@@ -110,6 +110,22 @@ class RaveilMatchedSmallBoomConfig extends Config(
   new chipyard.SmallBoomConfig
 )
 
+class RaveilRepeatedMatchedRocketConfig extends Config(
+  new WithRaveilOwnedBuildSystem ++
+  new WithRaveilRepeatedMatchedMemorySourceRange(8224, 8256) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.RocketConfig
+)
+
+class RaveilRepeatedMatchedSmallBoomConfig extends Config(
+  new WithRaveilOwnedBuildSystem ++
+  new WithRaveilRepeatedMatchedMemorySourceRange(8288, 8320) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.SmallBoomConfig
+)
+
 class RaveilOwnedSmallBoomFateConfig extends Config(
   new WithRaveilOwnedBuildSystem ++
   new WithRaveilOwnedMemorySourceRangeAndFateAudit(8288, 8320, 0x08000100L) ++

@@ -32,12 +32,28 @@ toolchain_sha256=$(
 
 pilot_seed=${RAVEIL_PILOT_SEED:-}
 pilot_env=
+repeat_account=${RAVEIL_REPEAT_ACCOUNT:-}
+repeat_env=
+if [ -n "$pilot_seed" ] && [ -n "$repeat_account" ]; then
+    echo 'error: pilot seed and repeat account are mutually exclusive' >&2
+    exit 1
+fi
 if [ -n "$pilot_seed" ]; then
     case "$pilot_seed" in
         *[!0-9]*|'') echo 'error: RAVEIL_PILOT_SEED must be a positive integer' >&2; exit 1 ;;
     esac
     [ "$pilot_seed" -gt 0 ] || { echo 'error: RAVEIL_PILOT_SEED must be positive' >&2; exit 1; }
     pilot_env="--env=RAVEIL_PILOT_SEED=$pilot_seed"
+fi
+if [ -n "$repeat_account" ]; then
+    case "$repeat_account" in
+        *[!0-9]*|'') echo 'error: RAVEIL_REPEAT_ACCOUNT must be in [1,256]' >&2; exit 1 ;;
+    esac
+    [ "$repeat_account" -ge 1 ] && [ "$repeat_account" -le 256 ] || {
+        echo 'error: RAVEIL_REPEAT_ACCOUNT must be in [1,256]' >&2
+        exit 1
+    }
+    repeat_env="--env=RAVEIL_REPEAT_ACCOUNT=$repeat_account"
 fi
 
 if ! docker run --rm \
@@ -47,6 +63,7 @@ if ! docker run --rm \
     --mount "type=volume,source=$scala_cache,target=/root/.cache" \
     --env "RAVEIL_TOOLCHAIN_SHA256=$toolchain_sha256" \
     $pilot_env \
+    $repeat_env \
     "$image" \
     ./run-static-stencil.sh >"$rtl_log" 2>&1; then
     sed -n '1,240p' "$rtl_log"
@@ -55,6 +72,11 @@ fi
 sed -n '1,240p' "$rtl_log"
 
 cd "$repo_root"
+if [ -n "$repeat_account" ]; then
+    python3 -m raveil.t0044_repeated verify-graph \
+        --log "$rtl_log" --account "$repeat_account"
+    exit 0
+fi
 if [ -n "$pilot_seed" ]; then
     python3 -m raveil.controlled_run \
         --verify-static-graph-pilot-log "$rtl_log" --seed "$pilot_seed"

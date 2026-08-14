@@ -160,7 +160,9 @@ bool run_to_completion(
 bool check_output(
     VStaticStencilRegion& top,
     const std::array<std::uint32_t, 256>& expected,
-    std::uint32_t& validation_cycles
+    std::uint32_t& validation_cycles,
+    unsigned invocation = 0,
+    bool emit_output_words = false
 ) {
     const std::uint64_t first_cycle = simulation_cycles;
     std::uint64_t checksum = 0;
@@ -182,6 +184,12 @@ bool check_output(
             return false;
         }
         const std::uint32_t actual = top.io_outputValidationReadData;
+        if (emit_output_words) {
+            std::cout << "RAVEIL-CONTROLLED-OUTPUT-V1 invocation="
+                      << invocation << " index=" << address << " value="
+                      << std::hex << std::setw(8) << std::setfill('0') << actual
+                      << std::dec << std::setfill(' ') << std::endl;
+        }
         if (actual != expected[address]) {
             std::cerr << "stencil mismatch address=" << address
                       << " expected=" << expected[address]
@@ -213,11 +221,14 @@ void print_controlled_window(
     std::uint32_t completion_cycles,
     std::uint32_t validation_cycles,
     std::uint32_t accepted,
-    std::uint32_t completed
+    std::uint32_t completed,
+    bool repeated = false
 ) {
     const std::uint32_t total = staging_cycles + execution_cycles
         + completion_cycles + validation_cycles;
-    std::cout << "CONTROLLED-GRAPH-WINDOW-V1 status=OK"
+    std::cout << (repeated
+        ? "RAVEIL-REPEATED-GRAPH-COMPLETE-V1 status=OK"
+        : "CONTROLLED-GRAPH-WINDOW-V1 status=OK")
               << " invocation=" << invocation
               << " seed=" << seed
               << " installation_cycles=0"
@@ -236,6 +247,16 @@ void print_controlled_window(
               << " resource_contract_verified=1"
               << " resource_equality_verified=0 comparison_eligible=0"
               << " performance=not-measured" << std::endl;
+    if (repeated) {
+        std::cout << "T0044-REPEATED-GRAPH-ACTIVITY-V1 invocation=" << invocation
+                  << " request_stall_cycles=0 response_backpressure_cycles=0"
+                  << " read_transactions=1280 write_transactions=256"
+                  << " read_bytes=5120 write_bytes=1024 useful_loads=1280"
+                  << " useful_adds=1024 useful_stores=256 outputs=256"
+                  << " schedule_active_cycles=3072 launch_cycles=1"
+                  << " frontend_activity=unavailable"
+                  << " rename_rob_issue_lsu=not-applicable" << std::endl;
+    }
 }
 
 }  // namespace
@@ -263,23 +284,37 @@ int main(int argc, char** argv) {
     }
 
     bool pilot_mode = false;
+    bool repeated_mode = false;
     unsigned first_seed = 1;
+    unsigned repeated_account = 1;
     if (argc == 2) {
         const std::string argument(argv[1]);
-        const std::string prefix = "--pilot-seed=";
-        if (argument.rfind(prefix, 0) != 0) {
+        const std::string pilot_prefix = "--pilot-seed=";
+        const std::string repeated_prefix = "--repeat-account=";
+        const bool pilot_argument = argument.rfind(pilot_prefix, 0) == 0;
+        const bool repeated_argument = argument.rfind(repeated_prefix, 0) == 0;
+        if (!pilot_argument && !repeated_argument) {
             std::cerr << "unsupported argument\n";
             return 1;
         }
-        const std::string value = argument.substr(prefix.size());
+        const std::string value = argument.substr(
+            pilot_argument ? pilot_prefix.size() : repeated_prefix.size()
+        );
         char* end = nullptr;
         const unsigned long parsed = std::strtoul(value.c_str(), &end, 10);
-        if (value.empty() || *end != '\0' || parsed == 0 || parsed > 0xffffffffUL) {
-            std::cerr << "pilot seed must be uint32 and nonzero\n";
+        if (value.empty() || *end != '\0' || parsed == 0
+            || (pilot_argument && parsed > 0xffffffffUL)
+            || (repeated_argument && parsed > 256UL)) {
+            std::cerr << "pilot seed must be uint32 or repeat account in [1,256]\n";
             return 1;
         }
-        pilot_mode = true;
-        first_seed = static_cast<unsigned>(parsed);
+        if (pilot_argument) {
+            pilot_mode = true;
+            first_seed = static_cast<unsigned>(parsed);
+        } else {
+            repeated_mode = true;
+            repeated_account = static_cast<unsigned>(parsed);
+        }
     } else if (argc != 1) {
         std::cerr << "expected at most one pilot seed argument\n";
         return 1;
@@ -299,7 +334,8 @@ int main(int argc, char** argv) {
             first_accepted,
             first_completed
         ) || !check_output(
-            top, reference(first_input), first_validation_cycles
+            top, reference(first_input), first_validation_cycles,
+            first_seed, repeated_mode
         )) {
         return 1;
     }
@@ -315,7 +351,7 @@ int main(int argc, char** argv) {
     print_controlled_window(
         first_seed, first_seed, first_staging_cycles, first_execution_cycles,
         first_completion_cycles, first_validation_cycles,
-        first_accepted, first_completed
+        first_accepted, first_completed, repeated_mode
     );
 
     if (pilot_mode) {
@@ -327,6 +363,52 @@ int main(int argc, char** argv) {
                   << kExpectedCycles << " launch_cycles=1"
                   << " frontend_activity=unavailable rename_rob_issue_lsu=not-applicable"
                   << std::endl;
+        top.final();
+        return 0;
+    }
+
+    if (repeated_mode) {
+        std::uint64_t repeated_total = first_staging_cycles
+            + first_execution_cycles + first_completion_cycles
+            + first_validation_cycles;
+        for (unsigned seed = 2; seed <= repeated_account; ++seed) {
+            const auto input = make_input(seed);
+            const std::uint32_t staging_cycles = load_input(top, input);
+            std::uint32_t execution_cycles = 0;
+            std::uint32_t completion_cycles = 0;
+            std::uint32_t validation_cycles = 0;
+            std::uint32_t accepted = 0;
+            std::uint32_t completed = 0;
+            if (!run_to_completion(
+                    top, execution_cycles, completion_cycles,
+                    accepted, completed
+                ) || !check_output(
+                    top, reference(input), validation_cycles, seed, true
+                )) {
+                return 1;
+            }
+            if (staging_cycles != kExpectedStagingCycles
+                || execution_cycles != kExpectedMeasuredExecutionCycles
+                || completion_cycles != kExpectedCompletionCycles
+                || validation_cycles != kExpectedValidationCycles
+                || accepted != kExpectedWindowTraffic
+                || completed != kExpectedWindowTraffic) {
+                std::cerr << "repeated controlled accounting mismatch seed="
+                          << seed << '\n';
+                return 1;
+            }
+            print_controlled_window(
+                seed, seed, staging_cycles, execution_cycles,
+                completion_cycles, validation_cycles, accepted, completed, true
+            );
+            repeated_total += staging_cycles + execution_cycles
+                + completion_cycles + validation_cycles;
+        }
+        std::cout << "RAVEIL-REPEATED-GRAPH-ACCOUNT-V1 status=OK account="
+                  << repeated_account << " installation_count=1"
+                  << " simulator_processes=1 resets=1 artifact_reloads=0"
+                  << " total_cycles=" << repeated_total
+                  << " performance=not-measured" << std::endl;
         top.final();
         return 0;
     }

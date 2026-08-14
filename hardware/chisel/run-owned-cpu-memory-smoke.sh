@@ -47,8 +47,11 @@ debug_sba_verifier="$repo_root/hardware/chisel/verify_owned_memory_debug_sba_sig
 debug_sba_source_map_verifier="$repo_root/hardware/chisel/verify_owned_debug_sba_source_map.py"
 controlled_workload_s="$repo_root/hardware/chisel/riscv_stencil_smoke.S"
 controlled_workload_c="$repo_root/hardware/chisel/riscv_stencil_smoke.c"
+repeated_workload_s="$repo_root/hardware/chisel/riscv_stencil_repeated.S"
+repeated_workload_c="$repo_root/hardware/chisel/riscv_stencil_repeated.c"
 controlled_linker="$repo_root/hardware/chisel/riscv_stencil_system_scratchpad.ld"
 controlled_verifier="$repo_root/raveil/controlled_run.py"
+repeated_verifier="$repo_root/raveil/t0044_repeated.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
 dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
@@ -63,6 +66,7 @@ cpu_mode=${RAVEIL_OWNED_CPU_MODE:-regular}
 controlled_seed=${RAVEIL_CONTROLLED_SEED:-1}
 controlled_invocation=${RAVEIL_CONTROLLED_INVOCATION:-$controlled_seed}
 controlled_serialize=${RAVEIL_CONTROLLED_SERIALIZE_DISPATCH:-0}
+repeat_account=${RAVEIL_REPEAT_ACCOUNT:-1}
 lock_sha=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc21da3d
 chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
 
@@ -76,6 +80,13 @@ case "$controlled_serialize" in
     0|1) ;;
     *) echo 'error: controlled serialize must be 0 or 1' >&2; exit 1 ;;
 esac
+case "$repeat_account" in
+    *[!0-9]*|'') echo 'error: repeat account must be in [1,256]' >&2; exit 1 ;;
+esac
+[ "$repeat_account" -ge 1 ] && [ "$repeat_account" -le 256 ] || {
+    echo 'error: repeat account must be in [1,256]' >&2
+    exit 1
+}
 
 case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     regular:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-sim-build-v1) ;;
@@ -83,6 +94,9 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     controlled:RaveilMatchedRocketConfig:chipyard.raveil.RaveilMatchedRocketConfig:rocket:raveil-chipyard-matched-rocket-controlled-v1) ;;
     controlled:RaveilMatchedSmallBoomConfig:chipyard.raveil.RaveilMatchedSmallBoomConfig:boom:raveil-chipyard-matched-boom-controlled-v1) ;;
     controlled:RaveilMatchedSmallBoomConfig:chipyard.raveil.RaveilMatchedSmallBoomConfig:boom-serialize:raveil-chipyard-matched-boom-controlled-v1) ;;
+    controlled-repeat:RaveilRepeatedMatchedRocketConfig:chipyard.raveil.RaveilRepeatedMatchedRocketConfig:rocket:raveil-chipyard-repeated-rocket-v1) ;;
+    controlled-repeat:RaveilRepeatedMatchedSmallBoomConfig:chipyard.raveil.RaveilRepeatedMatchedSmallBoomConfig:boom:raveil-chipyard-repeated-boom-v1) ;;
+    controlled-repeat:RaveilRepeatedMatchedSmallBoomConfig:chipyard.raveil.RaveilRepeatedMatchedSmallBoomConfig:boom-serialize:raveil-chipyard-repeated-boom-v1) ;;
     debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
     debug-sba:RaveilOwnedDebugSBASmallBoomConfig:chipyard.raveil.RaveilOwnedDebugSBASmallBoomConfig:boom:raveil-chipyard-owned-debug-sba-boom-sim-build-v1) ;;
     rocket-request-retire:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-request-retire-build-v1) ;;
@@ -187,12 +201,12 @@ input_sha256=$(
             "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
             "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
             "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
-            "$controlled_workload_s" "$controlled_workload_c" "$controlled_linker" "$controlled_verifier" \
+            "$controlled_workload_s" "$controlled_workload_c" "$repeated_workload_s" "$repeated_workload_c" "$controlled_linker" "$controlled_verifier" "$repeated_verifier" \
             "$linker" "$runner" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$cpu_mode" "$applied_patch_manifest"
-        printf 'controlled_seed=%s\ncontrolled_invocation=%s\ncontrolled_serialize=%s\ncpu_label=%s\n' \
-            "$controlled_seed" "$controlled_invocation" "$controlled_serialize" "$cpu_label"
+        printf 'controlled_seed=%s\ncontrolled_invocation=%s\ncontrolled_serialize=%s\nrepeat_account=%s\ncpu_label=%s\n' \
+            "$controlled_seed" "$controlled_invocation" "$controlled_serialize" "$repeat_account" "$cpu_label"
     } |
         shasum -a 256 |
         awk '{print $1}'
@@ -214,6 +228,21 @@ if [ "$cpu_mode" = controlled ]; then
             shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" \
                 "$boom_hook_patch" "$xbar_request_patch" "$tl_token_patch" \
                 "$controlled_workload_s" "$controlled_workload_c" \
+                "$controlled_linker" "$controlled_verifier" \
+                "$repeated_verifier" "$runner" \
+                "$dockerfile" | awk '{print $1}'
+            printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" \
+                "$cpu_mode" "$applied_patch_manifest" \
+                "controlled_serialize=$controlled_serialize" "cpu_label=$cpu_label"
+        } | shasum -a 256 | awk '{print $1}'
+    )
+fi
+if [ "$cpu_mode" = controlled-repeat ]; then
+    source_sha256=$(
+        {
+            shasum -a 256 "$overlay" "$origin_overlay" "$rocket_hook_patch" \
+                "$boom_hook_patch" "$xbar_request_patch" "$tl_token_patch" \
+                "$repeated_workload_s" "$repeated_workload_c" \
                 "$controlled_linker" "$controlled_verifier" "$runner" \
                 "$dockerfile" | awk '{print $1}'
             printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" \
@@ -271,6 +300,7 @@ docker run --rm \
     --env "RAVEIL_CONTROLLED_SEED=$controlled_seed" \
     --env "RAVEIL_CONTROLLED_INVOCATION=$controlled_invocation" \
     --env "RAVEIL_CONTROLLED_SERIALIZE_DISPATCH=$controlled_serialize" \
+    --env "RAVEIL_REPEAT_ACCOUNT=$repeat_account" \
     "$image" \
     bash -lc 'set -euo pipefail
 export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
@@ -289,6 +319,7 @@ riscv64-unknown-elf-gcc --version | grep -q "12.2.0"
 cache_key=$RAVEIL_INPUT_SHA256
 if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = controlled ] ||
+   [ "$RAVEIL_OWNED_CPU_MODE" = controlled-repeat ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = rocket-redirect-dcache-fate ] ||
@@ -509,6 +540,58 @@ sim="$build_root/chipyard/sims/verilator/simulator-chipyard.harness-$RAVEIL_OWNE
 test -x "$sim"
 graph="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG.graphml"
 test -f "$graph"
+if [ "$RAVEIL_OWNED_CPU_MODE" = controlled-repeat ]; then
+  repeated_elf="$build_root/riscv_stencil_repeated.elf"
+  repeated_log="$build_root/riscv_stencil_repeated.log"
+  serialize_define=
+  if [ "$RAVEIL_CONTROLLED_SERIALIZE_DISPATCH" = 1 ]; then
+    [ "$RAVEIL_OWNED_CPU_LABEL" = boom-serialize ] || {
+      echo "error: serialize-dispatch is diagnostic BOOM-only" >&2
+      exit 1
+    }
+    serialize_define=-DBOOM_SERIALIZE_DISPATCH=1
+  fi
+  riscv64-unknown-elf-gcc \
+    -DRFC0005_SYSTEM_SCRATCHPAD=1 \
+    -DRAVEIL_REPEAT_ACCOUNT="$RAVEIL_REPEAT_ACCOUNT" \
+    -O2 -fno-strict-aliasing $serialize_define \
+    -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+    -nostdlib -nostartfiles -static -Wl,--no-relax \
+    -T /repo/hardware/chisel/riscv_stencil_system_scratchpad.ld \
+    /repo/hardware/chisel/riscv_stencil_repeated.S \
+    /repo/hardware/chisel/riscv_stencil_repeated.c \
+    -o "$repeated_elf"
+  [ "$(riscv64-unknown-elf-nm "$repeated_elf" | awk '\''$3 == "input_words" { print $1 }'\'')" = 0000000008000000 ]
+  [ "$(riscv64-unknown-elf-nm "$repeated_elf" | awk '\''$3 == "output_words" { print $1 }'\'')" = 0000000008000510 ]
+  artifact_sha256=$(sha256sum "$repeated_elf" | awk '\''{print $1}'\'')
+  rm -f "$repeated_log"
+  timeout --foreground 3600 "$sim" +permissive +verbose +permissive-off \
+    "$repeated_elf" 2>&1 | tee "$repeated_log"
+  if [ "$RAVEIL_OWNED_CPU_LABEL" = rocket ]; then
+    implementation=rocket-in-order
+  else
+    implementation=boom-ooo
+  fi
+  diagnostic_arg=
+  if [ "$RAVEIL_OWNED_CPU_LABEL" = boom-serialize ]; then
+    diagnostic_arg=--diagnostic-only
+  fi
+  python3 -m raveil.t0044_repeated verify-cpu \
+    --log "$repeated_log" \
+    --implementation "$implementation" \
+    --account "$RAVEIL_REPEAT_ACCOUNT" \
+    --source-sha256 "$RAVEIL_SOURCE_SHA256" \
+    --artifact-sha256 "$artifact_sha256" \
+    --toolchain-sha256 "$RAVEIL_TOOLCHAIN_SHA256" \
+    --implementation-configuration "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
+    $diagnostic_arg
+  printf "RAVEIL-REPEATED-CPU-HOST-V1 status=OK cpu=%s config=%s account=%s simulator_processes=1 resets=1 artifact_reloads=0 serialize_dispatch=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s cache_source_sha256=%s build_input_sha256=%s resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 workload=frozen-rfc-0005 oracle=independent-host accounting=complete evidence=rtl-simulation-functional performance=not-measured\n" \
+    "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
+    "$RAVEIL_REPEAT_ACCOUNT" "$RAVEIL_CONTROLLED_SERIALIZE_DISPATCH" \
+    "$RAVEIL_SOURCE_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256" \
+    "$RAVEIL_CACHE_SOURCE_SHA256" "$RAVEIL_INPUT_SHA256"
+  exit 0
+fi
 if [ "$RAVEIL_OWNED_CPU_MODE" = controlled ]; then
   controlled_elf="$build_root/riscv_stencil_controlled.elf"
   controlled_signature="$build_root/riscv_stencil_controlled.signature"
