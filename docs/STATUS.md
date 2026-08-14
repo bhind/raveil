@@ -392,6 +392,12 @@ synthesis; failed raw digest is `b4ed5c06...56c3d`. One final recovery moves
 black-box assertions before hierarchy pruning without changing the contract.
 Final bounded recovery authority is `daa984f...b226d`; recovery-v3 manifest
 SHA-256 is `efe1ec48...806ed` and changes ordering only.
+The final Graph RUN-ID still selected zero black-box modules after successfully
+parsing all three RTL modules, exited 1 before synthesis, and sealed raw digest
+`f203b7c8...7aed9`. EXP-0009 is therefore `pause-boundary`: matrix incomplete,
+Rocket not started, candidate area/timing absent, and claim eligibility false.
+Resume requires exactly one proven Yosys-visible common-partition boundary;
+derived pause report SHA-256 is `340d0d0e...ce700`.
 Recovery-v3 freeze commit is `c238c9631f7e248960a2fa421e513764c60dcadd`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042

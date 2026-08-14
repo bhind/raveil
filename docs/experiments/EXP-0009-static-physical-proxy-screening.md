@@ -1,7 +1,7 @@
 # EXP-0009: Static Graph physical-proxy screening
 
 Status: In progress
-Evidence class: synthesis-toolchain commissioning; planned synthesis estimate
+Evidence class: synthesis-toolchain commissioning; synthesis-collector failure
 Date: 2026-08-15
 Task: T-0044
 Authority: RFC-0005, ADR-0039, ADR-0043, ADR-0046, ADR-0047, ADR-0048, EXP-0008
@@ -260,3 +260,37 @@ Final bounded recovery authority is
 binds recovery-v2 and changes only the Yosys black-box/hierarchy ordering. It
 retains every RTL, partition, tool, clock, report, and decision field.
 Recovery-v3 freeze commit is `c238c9631f7e248960a2fa421e513764c60dcadd`.
+
+## Result and disposition
+
+The final bounded Graph RUN-ID again parsed all three RTL modules, but Yosys
+0.27 selected zero modules for `m:OwnedFixedLatencyScratchpad`; the frozen
+common-partition black-box could not be established. It exited 1 before
+synthesis and sealed files digest
+`f203b7c8ab4130ecb78ea25cdb1726241834dc21f3c7a01ce27f0dbf0587aed9`
+and failed-seal SHA-256
+`c0178010cf01af04f7f3c63d8e7530788ded0d86c13cf6561d9437104b690382`.
+Rocket candidate synthesis was not started because the primary matrix was
+already incomplete.
+
+The machine-readable derived pause report is
+`artifacts/research/EXP-0009/derived/pause.json`, SHA-256
+`340d0d0e30b21d80a74f68d96b9d27887ee4614564364f78d716a03eef9ce700`.
+All four failed raw directories and the exact final Graph/Rocket export trees
+are retained separately under `artifacts/research/EXP-0009/`.
+
+Disposition is `pause-boundary`, not `early-no-go` and not `advance`. There is
+no mapped area, setup slack, critical path, energy, or whole-system candidate
+datum, so claim eligibility is false. The single resume condition is to prove
+an explicit Yosys-visible common fixture/memory partition boundary before
+synthesis without changing the frozen Graph/Rocket semantics or resource
+policy. That may be a verified module-selection form or an explicit physical
+wrapper; it requires new committed authority and a new frozen manifest rather
+than another EXP-0009 recovery loop.
+
+The initial 2--5 working-day Stage-B estimate reached toolchain commissioning,
+export, manifests, and the first end-to-end collector attempts, but not the
+matrix. Based on the observed parser/partition failures, the narrow resume item
+is now estimated at 1--3 working days with medium confidence; Rocket closure
+remains unestimated until Graph produces a complete report. This is a range,
+not a completion-date promise.

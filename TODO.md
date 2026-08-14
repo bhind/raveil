@@ -746,6 +746,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   pause if the complete report still cannot close.
   Recovery-v3 is ready; commit it, run one distinct Graph RUN-ID, and pause on
   any further incomplete report rather than adding another recovery loop.
+  That final RUN remained incomplete at Yosys module selection. T-0044 is now
+  paused on one point: prove the common fixture/memory partition boundary to
+  Yosys before synthesis, with new authority/manifest. Do not run Rocket or
+  interpret any failed log as area/timing evidence before that boundary closes.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
