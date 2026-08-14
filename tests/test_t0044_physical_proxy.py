@@ -182,7 +182,28 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertIn('filelist="$source_dir/', rocket_export)
         self.assertIn("generator_rootfs_sha256", rocket_export)
         self.assertIn("rtl_filelist_sha256", rocket_export)
+        self.assertIn("raveil-chipyard-physical-yosys-rocket-v1", rocket_export)
+        self.assertIn("RAVEIL-PHYSICAL-ROCKET-BUILD-V1", rocket_export)
+        self.assertIn("shared-elaboration-identical", rocket_export)
+        self.assertIn("physical lowering changed normalized $suffix", rocket_export)
+        self.assertIn("physical lowering changed module hierarchy", rocket_export)
+        self.assertIn("lowering-provenance.txt", rocket_export)
+        self.assertIn("compatibility_lowering=disallowPackedArrays", rocket_export)
         self.assertNotIn('cp -a "$source_dir"', rocket_export)
+        physical_build = (
+            ROOT / "hardware/chisel/run-physical-yosys-rocket-build.sh"
+        ).read_text()
+        self.assertIn("RAVEIL_PHYSICAL_YOSYS_FLOW=1", physical_build)
+        self.assertIn("RAVEIL_BUILD_ONLY=1", physical_build)
+        self.assertIn("raveil-chipyard-physical-yosys-rocket-v1", physical_build)
+        owned_runner = (
+            ROOT / "hardware/chisel/run-owned-cpu-memory-smoke.sh"
+        ).read_text()
+        self.assertIn('if [ "$RAVEIL_PHYSICAL_YOSYS_FLOW" = 1 ]; then', owned_runner)
+        self.assertIn("ENABLE_YOSYS_FLOW=1", owned_runner)
+        self.assertNotIn('ENABLE_YOSYS_FLOW="$RAVEIL_PHYSICAL_YOSYS_FLOW"', owned_runner)
+        self.assertIn("RAVEIL_CHIPYARD_COMMON_MK_SHA256", owned_runner)
+        self.assertIn("RAVEIL-PHYSICAL-ROCKET-BUILD-V1", owned_runner)
         wrapper = (
             ROOT / "hardware/chisel/run-physical-proxy-synthesis.sh"
         ).read_text()

@@ -223,6 +223,12 @@ merely because a branch or partial implementation already exists.
    That correction reached sealed raw reports, but derivation rejected two
    implicit OpenSTA common-module declarations. Explicit exactly-once stubs are
    the remaining collector boundary; contained raw numbers remain ineligible.
+   Recovery-v6 then produced one complete Graph-partition synthesis estimate,
+   while Rocket failed before synthesis on generated packed-array syntax. The
+   matrix and roadmap gate remain open. A hash-bound upstream physical-export
+   lowering with identical shared elaboration must be frozen, followed by fresh
+   Graph and Rocket runs under the same manifest; the prior Graph partition
+   result is not a reusable matrix sample.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

@@ -92,6 +92,13 @@ resolves it.
   because OpenSTA inferred the two intentional common modules instead of
   reading explicit declarations. Recovery-v6 must make those cut declarations
   exact and visible before either physical question can advance.
+  Recovery-v6 now yields a complete Graph-partition estimate, but Rocket
+  `run-008` fails before synthesis on Yosys-incompatible packed-array syntax.
+  The remaining narrow question is whether the pinned upstream
+  `ENABLE_YOSYS_FLOW=1` emission, with byte-identical shared elaboration and
+  only `disallowPackedArrays` added, can complete the Rocket partition under a
+  single fresh Graph/Rocket manifest. Until then no area ratio, timing
+  comparison, or whole-system composition is eligible.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

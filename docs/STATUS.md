@@ -439,6 +439,16 @@ Recovery-v6 authority is `d4990d9...4d8cf9`; manifest SHA-256 is
 unchanged. Only a clean descendant of its freeze may collect Graph.
 Recovery-v6 freeze commit is
 `474c1b5c10fecdef5de0fefc2c5ff7199c22587c`.
+Recovery-v6 Graph `run-007` is the first complete partition estimate:
+11,851.3664 um2, 1,592 cells, and +11.45991 ns setup slack at 20 ns; raw-seal
+SHA-256 is `634329f4...9fa1` and result SHA-256 is `c778d6fb...60d1`.
+It is not a whole-system, performance, or energy result. Rocket `run-008`
+failed before synthesis because Yosys 0.27 rejected a generated packed-array
+declaration; failed-seal SHA-256 is `639bf2cc...186d`, with no Rocket datum.
+The matrix and decision remain `pause-boundary`. A separate-volume,
+physical-export-only upstream `ENABLE_YOSYS_FLOW=1` path now binds
+`disallowPackedArrays` and exact shared-elaboration hashes; it requires a
+recovery-v7 freeze and fresh Graph/Rocket RUN-IDs.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

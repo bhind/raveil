@@ -773,6 +773,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Recovery-v6 authority `d4990d9...4d8cf9` and manifest
   `135f30d6...bc398a` are frozen at `474c1b5...22587c`; run the distinct Graph
   retry only from its clean descendant.
+  Graph `run-007` now has a complete sealed partition estimate, but Rocket
+  `run-008` failed before synthesis on Yosys 0.27 parsing generated packed
+  arrays. Keep the matrix and claims paused. Commit and freeze only the pinned
+  upstream `ENABLE_YOSYS_FLOW=1` physical-export path, prove byte-identical
+  pre-firtool/SFC inputs against the baseline export, then collect fresh Graph
+  and Rocket RUN-IDs under one recovery-v7 manifest. Do not reuse `run-007` in
+  that matrix or alter the runtime simulator cache/path.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

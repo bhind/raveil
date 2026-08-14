@@ -56,6 +56,7 @@ controlled_verifier="$repo_root/raveil/controlled_run.py"
 repeated_verifier="$repo_root/raveil/t0044_repeated.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
+physical_yosys_wrapper="$repo_root/hardware/chisel/run-physical-yosys-rocket-build.sh"
 dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
 image=raveil-boom-functional-sim:v1
 platform=linux/amd64
@@ -71,8 +72,11 @@ controlled_serialize=${RAVEIL_CONTROLLED_SERIALIZE_DISPATCH:-0}
 repeat_account=${RAVEIL_REPEAT_ACCOUNT:-1}
 repeat_timeout_seconds=${RAVEIL_REPEAT_TIMEOUT_SECONDS:-3600}
 build_only=${RAVEIL_BUILD_ONLY:-0}
+physical_yosys_flow=${RAVEIL_PHYSICAL_YOSYS_FLOW:-0}
 lock_sha=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc21da3d
 chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
+chipyard_common_mk_sha256=226e0a86f7ce79c8a3bb945b057530a583738c36b66fc167f79d208c2e318bc0
+physical_lowering_options=emittedLineLength=2048,noAlwaysComb,disallowLocalVariables,verifLabels,locationInfoStyle=wrapInAtSquareBracket,disallowPackedArrays
 
 case "$controlled_seed:$controlled_invocation" in
     *[!0-9:]*|0:*|*:0)
@@ -87,6 +91,10 @@ esac
 case "$build_only" in
     0|1) ;;
     *) echo 'error: RAVEIL_BUILD_ONLY must be 0 or 1' >&2; exit 1 ;;
+esac
+case "$physical_yosys_flow" in
+    0|1) ;;
+    *) echo 'error: RAVEIL_PHYSICAL_YOSYS_FLOW must be 0 or 1' >&2; exit 1 ;;
 esac
 case "$repeat_account" in
     *[!0-9]*|'') echo 'error: repeat account must be in [1,256]' >&2; exit 1 ;;
@@ -113,6 +121,7 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     controlled-repeat:RaveilRepeatedMatchedSmallBoomConfig:chipyard.raveil.RaveilRepeatedMatchedSmallBoomConfig:boom:raveil-chipyard-repeated-boom-v1) ;;
     controlled-repeat:RaveilRepeatedMatchedSmallBoomConfig:chipyard.raveil.RaveilRepeatedMatchedSmallBoomConfig:boom-serialize:raveil-chipyard-repeated-boom-v1) ;;
     controlled-fixture-repeat:RaveilFixtureRepeatedMatchedRocketConfig:chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig:rocket:raveil-chipyard-fixture-repeated-rocket-v1) ;;
+    controlled-fixture-repeat:RaveilFixtureRepeatedMatchedRocketConfig:chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig:rocket:raveil-chipyard-physical-yosys-rocket-v1) ;;
     controlled-fixture-repeat:RaveilFixtureRepeatedMatchedSmallBoomConfig:chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig:boom:raveil-chipyard-fixture-repeated-boom-v1) ;;
     controlled-fixture-repeat:RaveilFixtureRepeatedMatchedSmallBoomConfig:chipyard.raveil.RaveilFixtureRepeatedMatchedSmallBoomConfig:boom-serialize:raveil-chipyard-fixture-repeated-boom-v1) ;;
     debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
@@ -132,6 +141,17 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
         exit 1
         ;;
 esac
+
+if [ "$physical_yosys_flow" = 1 ]; then
+    [ "$cpu_mode:$cpu_config:$cpu_label:$build_volume:$build_only" = \
+        controlled-fixture-repeat:RaveilFixtureRepeatedMatchedRocketConfig:rocket:raveil-chipyard-physical-yosys-rocket-v1:1 ] || {
+        echo 'error: physical Yosys lowering is build-only and Rocket physical-export-only' >&2
+        exit 1
+    }
+elif [ "$build_volume" = raveil-chipyard-physical-yosys-rocket-v1 ]; then
+    echo 'error: physical Yosys build volume requires RAVEIL_PHYSICAL_YOSYS_FLOW=1' >&2
+    exit 1
+fi
 
 applied_patch_manifest=t-0042-tl-token-metadata.patch,t-0042-rocket-dcache-origin-hook.patch
 case "$cpu_mode" in
@@ -176,7 +196,7 @@ for input in "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
     "$controlled_workload_s" "$controlled_workload_c" "$repeated_workload_s" "$repeated_workload_c" "$fixture_repeated_workload_c" "$controlled_linker" "$controlled_verifier" \
-    "$linker" "$runner" "$dockerfile"; do
+    "$linker" "$runner" "$physical_yosys_wrapper" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
         exit 1
@@ -236,6 +256,11 @@ cache_source_sha256=$(
             "$xbar_request_patch" "$tl_token_patch" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" "$cpu_mode" "$applied_patch_manifest"
+        if [ "$physical_yosys_flow" = 1 ]; then
+            shasum -a 256 "$runner" "$physical_yosys_wrapper" | awk '{print $1}'
+            printf 'physical_yosys_flow=1\nchipyard_common_mk_sha256=%s\nlowering_options=%s\n' \
+                "$chipyard_common_mk_sha256" "$physical_lowering_options"
+        fi
     } |
         shasum -a 256 |
         awk '{print $1}'
@@ -279,9 +304,16 @@ if [ "$cpu_mode" = controlled-fixture-repeat ]; then
                 "$repeated_workload_s" "$fixture_repeated_workload_c" \
                 "$controlled_linker" "$controlled_verifier" "$runner" \
                 "$dockerfile" | awk '{print $1}'
+            if [ "$physical_yosys_flow" = 1 ]; then
+                shasum -a 256 "$physical_yosys_wrapper" | awk '{print $1}'
+            fi
             printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" \
                 "$cpu_mode" "$applied_patch_manifest" \
                 "controlled_serialize=$controlled_serialize" "cpu_label=$cpu_label"
+            if [ "$physical_yosys_flow" = 1 ]; then
+                printf 'physical_yosys_flow=1\nchipyard_common_mk_sha256=%s\nphysical_lowering_options=%s\n' \
+                    "$chipyard_common_mk_sha256" "$physical_lowering_options"
+            fi
         } | shasum -a 256 | awk '{print $1}'
     )
 fi
@@ -338,6 +370,9 @@ docker run --rm \
     --env "RAVEIL_REPEAT_ACCOUNT=$repeat_account" \
     --env "RAVEIL_REPEAT_TIMEOUT_SECONDS=$repeat_timeout_seconds" \
     --env "RAVEIL_BUILD_ONLY=$build_only" \
+    --env "RAVEIL_PHYSICAL_YOSYS_FLOW=$physical_yosys_flow" \
+    --env "RAVEIL_CHIPYARD_COMMON_MK_SHA256=$chipyard_common_mk_sha256" \
+    --env "RAVEIL_PHYSICAL_LOWERING_OPTIONS=$physical_lowering_options" \
     "$image" \
     bash -lc 'set -euo pipefail
 export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
@@ -577,7 +612,12 @@ git -C "$build_root/chipyard" submodule foreach --quiet --recursive '\''
 '\''
 
 cd "$build_root/chipyard/sims/verilator"
-make -j2 CONFIG="$RAVEIL_OWNED_CPU_CONFIG" CONFIG_PACKAGE=chipyard.raveil
+if [ "$RAVEIL_PHYSICAL_YOSYS_FLOW" = 1 ]; then
+  [ "$(sha256sum "$build_root/chipyard/common.mk" | awk "{print \$1}")" = "$RAVEIL_CHIPYARD_COMMON_MK_SHA256" ]
+  make -j2 CONFIG="$RAVEIL_OWNED_CPU_CONFIG" CONFIG_PACKAGE=chipyard.raveil ENABLE_YOSYS_FLOW=1
+else
+  make -j2 CONFIG="$RAVEIL_OWNED_CPU_CONFIG" CONFIG_PACKAGE=chipyard.raveil
+fi
 sim="$build_root/chipyard/sims/verilator/simulator-chipyard.harness-$RAVEIL_OWNED_CPU_CONFIG"
 test -x "$sim"
 graph="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG.graphml"
@@ -612,6 +652,36 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = controlled-repeat ] ||
   [ "$(riscv64-unknown-elf-nm "$repeated_elf" | awk '\''$3 == "output_words" { print $1 }'\'')" = 0000000008000510 ]
   artifact_sha256=$(sha256sum "$repeated_elf" | awk '\''{print $1}'\'')
   if [ "$RAVEIL_BUILD_ONLY" = 1 ]; then
+    if [ "$RAVEIL_PHYSICAL_YOSYS_FLOW" = 1 ]; then
+      generated="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG"
+      long_name=chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG
+      [ "$(cat "$generated/.mfc_lowering_options")" = "$RAVEIL_PHYSICAL_LOWERING_OPTIONS" ]
+      for input in \
+        "$generated/$long_name.fir" \
+        "$generated/$long_name.appended.anno.json" \
+        "$generated/.sfc_level" \
+        "$generated/.extra_firrtl_options" \
+        "$generated/$long_name.sfc.fir" \
+        "$generated/$long_name.sfc.anno.json"; do
+        [ -f "$input" ]
+      done
+      firrtl_sha256=$(sha256sum "$generated/$long_name.fir" | awk '\''{print $1}'\'')
+      final_anno_sha256=$(sha256sum "$generated/$long_name.appended.anno.json" | awk '\''{print $1}'\'')
+      sfc_level_sha256=$(sha256sum "$generated/.sfc_level" | awk '\''{print $1}'\'')
+      extra_firrtl_options_sha256=$(sha256sum "$generated/.extra_firrtl_options" | awk '\''{print $1}'\'')
+      sfc_firrtl_sha256=$(sha256sum "$generated/$long_name.sfc.fir" | awk '\''{print $1}'\'')
+      sfc_anno_sha256=$(sha256sum "$generated/$long_name.sfc.anno.json" | awk '\''{print $1}'\'')
+      lowering_options_sha256=$(sha256sum "$generated/.mfc_lowering_options" | awk '\''{print $1}'\'')
+      firtool_sha256=$(sha256sum "$(command -v firtool)" | awk '\''{print $1}'\'')
+      firtool_version_sha256=$(firtool --version | sha256sum | awk '\''{print $1}'\'')
+      printf "RAVEIL-PHYSICAL-ROCKET-BUILD-V1 status=OK cpu=%s config=%s source_sha256=%s cache_source_sha256=%s artifact_sha256=%s toolchain_sha256=%s common_mk_sha256=%s lowering_options_sha256=%s firrtl_sha256=%s final_anno_sha256=%s sfc_level_sha256=%s extra_firrtl_options_sha256=%s sfc_firrtl_sha256=%s sfc_anno_sha256=%s firtool_sha256=%s firtool_version_sha256=%s physical_yosys_flow=1 execution=not-run performance=not-measured\n" \
+        "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
+        "$RAVEIL_SOURCE_SHA256" "$RAVEIL_CACHE_SOURCE_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256" \
+        "$RAVEIL_CHIPYARD_COMMON_MK_SHA256" "$lowering_options_sha256" \
+        "$firrtl_sha256" "$final_anno_sha256" "$sfc_level_sha256" "$extra_firrtl_options_sha256" \
+        "$sfc_firrtl_sha256" "$sfc_anno_sha256" "$firtool_sha256" "$firtool_version_sha256"
+      exit 0
+    fi
     printf "RAVEIL-FIXTURE-BUILD-V1 status=OK cpu=%s config=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s resource_sha256=87be95fa8293da4b251675e9f81aea003e69e27ea6454a1d1db3c1611539e1f7 execution=not-run performance=not-measured\n" \
       "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
       "$RAVEIL_SOURCE_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256"

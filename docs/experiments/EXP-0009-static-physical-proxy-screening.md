@@ -388,3 +388,38 @@ Recovery-v6 implementation authority is
 chains recovery-v5 and adds only the exact mapped black-box declaration mode.
 Candidate use is authorized only from recovery-v6 freeze commit
 `474c1b5c10fecdef5de0fefc2c5ff7199c22587c` or a clean descendant.
+
+Recovery-v6 Graph `run-007` completed the frozen partition flow. Its sealed
+synthesis estimate is 11,851.3664 um2, 1,592 mapped cells, and +11.45991 ns
+setup slack at the frozen 20 ns clock. Raw files digest is
+`e30beb18ad377c7ee3d1ecb55dacd51e40b7b9a12fc54e2bb57053c80751c072`,
+raw-seal SHA-256 is
+`634329f49bd253161b046e0707093dca542b001f13445e26399c25514d479fa1`,
+and derived-result SHA-256 is
+`c778d6fbea328f9cc06bb6b5200c04535948b01e6a3303ae26bd21ae99bf60d1`.
+This is an eligible Graph-partition synthesis estimate only. It excludes the
+common fixture/memory, Rocket fallback, integration, clock tree, placement,
+and routing, and makes no performance, energy, or whole-system claim.
+
+The matching Rocket `run-008` then failed closed during Yosys parsing at
+`AXI4UserYanker.sv:255`: pinned Yosys 0.27 rejected a generated
+multi-dimensional packed array before synthesis. Files digest is
+`4065b750900e92053550fcdbe8b2cd0d70cedc316b8543d43d38566725c1a80c`,
+failed-seal SHA-256 is
+`639bf2cc414ead6faeeb0400cc6d29dc74c9e29aba811ac3f116a8562d35186d`,
+and no Rocket candidate datum exists. The matrix remains incomplete, so
+disposition stays `pause-boundary`; Graph `run-007` cannot be combined with a
+later manifest.
+
+The pinned Chipyard generator already defines a physical Yosys compatibility
+path: `ENABLE_YOSYS_FLOW=1` appends only `disallowPackedArrays` to its canonical
+firtool lowering options. The next recovery uses that upstream physical-export
+path in a separate Docker volume, leaves the runtime simulator path unchanged,
+and fails closed unless the baseline and physical exports have byte-identical
+FIRRTL, final annotations, SFC level/options, SFC FIRRTL, and SFC annotations.
+It records the common Makefile, firtool, lowering-options, source, cache, RTL,
+file-list, and provenance hashes. The same compatibility policy is already
+present in the Graph physical emitter. This changes neither ADR-0048's
+partition/resource boundary nor the estimator and therefore needs no new ADR,
+but it requires committed authority, a chained recovery-v7 manifest, and fresh
+Graph and Rocket RUN-IDs before any matrix decision.
