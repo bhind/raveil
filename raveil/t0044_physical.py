@@ -74,6 +74,23 @@ COMPATIBILITY_OPERATIONAL_CHANGE = (
 COMPATIBILITY_RECOVERY_PREDECESSOR_SHA256 = (
     "135f30d6899742eb769d67c8a8dc6929db105f03e54e284e7e81900acebc398a"
 )
+TIMING_FOLLOWUP_PREDECESSOR_SHA256 = (
+    "d052987747c2a41920e8c1f39152b5a6257092454c9139ed4544bcaa9541fd63"
+)
+TIMING_FOLLOWUP_POLICY = {
+    "schema": "raveil.physical-common-timing-followup/v1",
+    "prior_experiment": "EXP-0009",
+    "prior_manifest_sha256": TIMING_FOLLOWUP_PREDECESSOR_SHA256,
+    "prior_outcome": "pause-boundary",
+    "prior_clock_period_ns": 20.0,
+    "target_clock_period_ns": 40.0,
+    "selection": "one-fixed-doubled-period-no-sweep",
+    "selection_timing": "after-exp-0009-before-exp-0010-data",
+    "fresh_graph_and_rocket_runs_required": True,
+    "prior_candidate_results_reused": False,
+    "scientific_contract": "exploratory-followup-does-not-reinterpret-exp-0009",
+}
+TIMING_FOLLOWUP_OPERATIONAL_CHANGE = "fixed-common-40ns-timing-followup"
 RUN009_MANIFEST_SHA256 = (
     "5b16529903cc12ef594a5d1177b2620a3ab81da7d64cfdaeda6a7eb050ec1780"
 )
@@ -143,12 +160,14 @@ def _field(document: dict[str, Any], dotted: str) -> Any:
 def load_manifest(path: pathlib.Path) -> dict[str, Any]:
     document = json.loads(path.read_text())
     if document.get("schema") != SCHEMA or document.get("status") != "frozen":
-        raise ValueError("manifest is not the frozen EXP-0009 schema")
-    if document.get("experiment_id") != "EXP-0009" or document.get("task_id") != "T-0044":
+        raise ValueError("manifest is not the frozen T-0044 physical schema")
+    experiment_id = document.get("experiment_id")
+    if experiment_id not in {"EXP-0009", "EXP-0010"} or document.get("task_id") != "T-0044":
         raise ValueError("manifest authority IDs are wrong")
     if document.get("matrix") != ["static-graph", "rocket-in-order"]:
         raise ValueError("physical screening matrix drift")
-    if document.get("clock_period_ns") != 20.0:
+    expected_clock_period_ns = 20.0 if experiment_id == "EXP-0009" else 40.0
+    if document.get("clock_period_ns") != expected_clock_period_ns:
         raise ValueError("clock constraint drift")
     if document.get("constraints") != {
         "clock_port": "clock",
@@ -219,6 +238,18 @@ def load_manifest(path: pathlib.Path) -> dict[str, Any]:
         "evidence_class": "synthesis-estimate",
     }:
         raise ValueError("report contract drift")
+    timing_followup_policy = document.get("timing_followup_policy")
+    if experiment_id == "EXP-0010":
+        if "recovery_of_manifest_sha256" in document:
+            raise ValueError("timing followup has ambiguous recovery lineage")
+        if document.get("followup_of_manifest_sha256") != TIMING_FOLLOWUP_PREDECESSOR_SHA256:
+            raise ValueError("timing followup predecessor drift")
+        if document.get("operational_change") != TIMING_FOLLOWUP_OPERATIONAL_CHANGE:
+            raise ValueError("timing followup operational change drift")
+        if timing_followup_policy != TIMING_FOLLOWUP_POLICY:
+            raise ValueError("timing followup policy drift")
+    elif timing_followup_policy is not None or "followup_of_manifest_sha256" in document:
+        raise ValueError("unexpected timing followup policy")
     for variant in document["matrix"]:
         _variant_contract(document, variant)
     policy = document.get("compatibility_lowering_policy")
@@ -379,7 +410,7 @@ def write_run_metadata(
     rtl_sha256 = _verify_variant_inputs(manifest, variant, top, blackboxes, rtl_dir)
     metadata = {
         "schema": "raveil.t0044-physical-run/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "variant": variant,
         "top": top,
         "blackboxes": [] if not blackboxes else blackboxes.split(","),
@@ -415,7 +446,7 @@ def seal_raw(
     files = file_map_sha256(raw_dir)
     seal = {
         "schema": "raveil.t0044-physical-raw-seal/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "variant": variant,
         "manifest_sha256": sha256_file(manifest_path),
         "files": files,
@@ -446,7 +477,7 @@ def record_failure(
         raise ValueError("failed raw evidence is already sealed")
     metadata = {
         "schema": "raveil.t0044-physical-failure/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "variant": variant,
         "rtl_sha256": rtl_sha256,
         "manifest_sha256": sha256_file(manifest_path),
@@ -458,7 +489,7 @@ def record_failure(
     files = file_map_sha256(raw_dir)
     seal = {
         "schema": "raveil.t0044-physical-failed-seal/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "variant": variant,
         "files": files,
         "files_sha256": canonical_sha256(files),
@@ -509,7 +540,7 @@ def record_retrospective_host_failure(
         raise ValueError("retrospective incident container completion is missing")
     metadata = {
         "schema": "raveil.t0044-physical-host-failure/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "variant": variant,
         "expected_rtl_sha256": expected_rtl_sha256,
         "actual_rtl_sha256": actual_rtl_sha256,
@@ -525,7 +556,7 @@ def record_retrospective_host_failure(
     files = file_map_sha256(raw_dir)
     seal = {
         "schema": "raveil.t0044-physical-failed-seal/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "variant": variant,
         "files": files,
         "files_sha256": canonical_sha256(files),
@@ -543,8 +574,11 @@ def _load_verified_seal(
     seal = json.loads(seal_path.read_text())
     if seal.get("schema") != "raveil.t0044-physical-raw-seal/v1":
         raise ValueError("raw seal schema drift")
-    if seal.get("variant") != variant or seal.get("manifest_sha256") != sha256_file(
-        manifest_path
+    manifest = load_manifest(manifest_path)
+    if (
+        seal.get("experiment_id") != manifest["experiment_id"]
+        or seal.get("variant") != variant
+        or seal.get("manifest_sha256") != sha256_file(manifest_path)
     ):
         raise ValueError("raw seal authority drift")
     files = file_map_sha256(raw_dir, excluded={"raw-seal.json"})
@@ -650,9 +684,15 @@ def derive_one(
     ):
         if identity.get(identity_name) != manifest["toolchain"][manifest_name]:
             raise ValueError(f"runtime tool identity drift: {identity_name}")
-    if identity.get("clock_port") != "clock" or identity.get("clock_period_ns") != "20.000":
+    expected_clock = f"{manifest['clock_period_ns']:.3f}"
+    if identity.get("clock_port") != "clock" or identity.get("clock_period_ns") != expected_clock:
         raise ValueError("runtime clock identity drift")
-    if identity.get("input_delay_ns") != "1.000" or identity.get("output_delay_ns") != "1.000":
+    expected_input_delay = f"{manifest['constraints']['input_delay_ns']:.3f}"
+    expected_output_delay = f"{manifest['constraints']['output_delay_ns']:.3f}"
+    if (
+        identity.get("input_delay_ns") != expected_input_delay
+        or identity.get("output_delay_ns") != expected_output_delay
+    ):
         raise ValueError("runtime I/O delay drift")
     collector_policy = manifest.get("collector_policy")
     if collector_policy is not None and identity.get("blackbox_selection_mode") != collector_policy[
@@ -681,11 +721,16 @@ def derive_one(
     metadata = json.loads(metadata_path.read_text())
     if metadata.get("manifest_sha256") != sha256_file(manifest_path):
         raise ValueError("run metadata manifest drift")
+    if (
+        metadata.get("experiment_id") != manifest["experiment_id"]
+        or metadata.get("clock_period_ns") != manifest["clock_period_ns"]
+    ):
+        raise ValueError("run metadata experiment or clock drift")
     if metadata.get("variant") != variant or metadata.get("top") != top:
         raise ValueError("run metadata variant drift")
     result = {
         "schema": "raveil.t0044-physical-result/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "evidence_class": "synthesis-estimate",
         "variant": variant,
         "top": top,
@@ -734,6 +779,11 @@ def derive_matrix(
     for result, variant in expected:
         if result.get("schema") != "raveil.t0044-physical-result/v1":
             raise ValueError("partition result schema drift")
+        if (
+            result.get("experiment_id") != manifest["experiment_id"]
+            or result.get("clock_period_ns") != manifest["clock_period_ns"]
+        ):
+            raise ValueError("partition result experiment or clock drift")
         if result.get("variant") != variant or result.get("eligibility") != "partition-complete":
             raise ValueError("partition result is incomplete")
         if result.get("manifest_sha256") != sha256_file(manifest_path):
@@ -760,7 +810,7 @@ def derive_matrix(
         outcome = manifest["decision_rules"]["incomplete_label"]
     result = {
         "schema": "raveil.t0044-physical-matrix/v1",
-        "experiment_id": "EXP-0009",
+        "experiment_id": manifest["experiment_id"],
         "evidence_class": "synthesis-estimate",
         "manifest_sha256": sha256_file(manifest_path),
         "outcome": outcome,
@@ -851,7 +901,7 @@ def main() -> None:
     elif args.command == "verify-manifest":
         manifest = load_manifest(args.manifest)
         verify_authority(manifest)
-        print("EXP-0009 manifest verified")
+        print(f"{manifest['experiment_id']} manifest verified")
     elif args.command == "manifest-field":
         print(_field(load_manifest(args.manifest), args.field))
     elif args.command == "variant-field":

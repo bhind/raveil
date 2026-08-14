@@ -13,6 +13,38 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class PhysicalProxyToolchainTests(unittest.TestCase):
+    def test_40ns_timing_followup_policy_is_exact_and_fail_closed(self) -> None:
+        source = ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json"
+        manifest = json.loads(source.read_text())
+        manifest["experiment_id"] = "EXP-0010"
+        manifest["clock_period_ns"] = 40.0
+        manifest.pop("recovery_of_manifest_sha256")
+        manifest["followup_of_manifest_sha256"] = t0044_physical.sha256_file(source)
+        manifest["operational_change"] = t0044_physical.TIMING_FOLLOWUP_OPERATIONAL_CHANGE
+        manifest["timing_followup_policy"] = json.loads(
+            json.dumps(t0044_physical.TIMING_FOLLOWUP_POLICY)
+        )
+        manifest["implementation_authority"] = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "manifest.json"
+            path.write_text(json.dumps(manifest))
+            t0044_physical.load_manifest(path)
+            manifest["clock_period_ns"] = 39.0
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "clock constraint drift"):
+                t0044_physical.load_manifest(path)
+            manifest["clock_period_ns"] = 40.0
+            manifest["timing_followup_policy"]["selection"] = "adaptive-sweep"
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "timing followup policy drift"):
+                t0044_physical.load_manifest(path)
+
     def test_compatibility_lowering_policy_is_exact_and_fail_closed(self) -> None:
         source = ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v6.json"
         manifest = json.loads(source.read_text())
@@ -343,6 +375,8 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertIn('cp -R "$rtl_dir/." "$rtl_snapshot/"', wrapper)
         self.assertIn("source=$rtl_snapshot,target=/rtl,readonly", wrapper)
         self.assertNotIn("source=$rtl_dir,target=/rtl,readonly", wrapper)
+        self.assertIn("--field clock_period_ns", wrapper)
+        self.assertIn("RAVEIL_PHYSICAL_CLOCK_PERIOD_NS=$clock_period_ns", wrapper)
 
         inner = (
             ROOT / "hardware/chisel/run-physical-proxy-synthesis-in-container.sh"
@@ -371,15 +405,27 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertIn("mapped_blackbox_declarations=explicit-yosys-stubs-v1", inner)
         self.assertIn("stat -json", inner)
         self.assertIn("tool-identity.txt", inner)
-        self.assertIn("set_input_delay 1.000", inner)
-        self.assertIn("set_output_delay 1.000", inner)
+        self.assertIn("set_input_delay $RAVEIL_PHYSICAL_INPUT_DELAY_NS", inner)
+        self.assertIn("set_output_delay $RAVEIL_PHYSICAL_OUTPUT_DELAY_NS", inner)
+        self.assertIn(
+            "create_clock -name clock -period $RAVEIL_PHYSICAL_CLOCK_PERIOD_NS",
+            inner,
+        )
+        self.assertIn("40.000:1.000:1.000", inner)
+        self.assertNotIn("create_clock -name clock -period 20.000", inner)
         self.assertIn("[ -f /evidence/container.log ]", inner)
         self.assertIn("[ ! -s /evidence/container.log ]", inner)
         self.assertIn("! -name container.log", inner)
 
 
 class PhysicalProxyEvidenceTests(unittest.TestCase):
-    def _manifest(self, rtl_sha256: str) -> dict[str, object]:
+    def _manifest(
+        self,
+        rtl_sha256: str,
+        *,
+        experiment_id: str = "EXP-0009",
+        clock_period_ns: float = 20.0,
+    ) -> dict[str, object]:
         authority = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, text=True, capture_output=True
         ).stdout.strip()
@@ -407,14 +453,14 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
                 "clock_port": "clock",
                 "missing_components": ["placed-routing", "clock-tree"],
             }
-        return {
+        manifest = {
             "schema": t0044_physical.SCHEMA,
             "status": "frozen",
-            "experiment_id": "EXP-0009",
+            "experiment_id": experiment_id,
             "task_id": "T-0044",
             "implementation_authority": authority,
             "matrix": ["static-graph", "rocket-in-order"],
-            "clock_period_ns": 20.0,
+            "clock_period_ns": clock_period_ns,
             "constraints": {
                 "clock_port": "clock",
                 "input_delay_ns": 1.0,
@@ -450,8 +496,25 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
                 "evidence_class": "synthesis-estimate",
             },
         }
+        if experiment_id == "EXP-0010":
+            manifest["followup_of_manifest_sha256"] = (
+                t0044_physical.TIMING_FOLLOWUP_PREDECESSOR_SHA256
+            )
+            manifest["operational_change"] = (
+                t0044_physical.TIMING_FOLLOWUP_OPERATIONAL_CHANGE
+            )
+            manifest["timing_followup_policy"] = json.loads(
+                json.dumps(t0044_physical.TIMING_FOLLOWUP_POLICY)
+            )
+        return manifest
 
-    def _fixture(self, root: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path, pathlib.Path]:
+    def _fixture(
+        self,
+        root: pathlib.Path,
+        *,
+        experiment_id: str = "EXP-0009",
+        clock_period_ns: float = 20.0,
+    ) -> tuple[pathlib.Path, pathlib.Path, pathlib.Path]:
         rtl = root / "rtl"
         raw = root / "raw"
         rtl.mkdir()
@@ -459,7 +522,15 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
         (rtl / "top.v").write_text("module Top(input clock); endmodule\n")
         manifest = root / "manifest.json"
         manifest.write_text(
-            json.dumps(self._manifest(t0044_physical.tree_sha256(rtl)), sort_keys=True) + "\n"
+            json.dumps(
+                self._manifest(
+                    t0044_physical.tree_sha256(rtl),
+                    experiment_id=experiment_id,
+                    clock_period_ns=clock_period_ns,
+                ),
+                sort_keys=True,
+            )
+            + "\n"
         )
         (raw / "yosys.log").write_text("Chip area for module '\\Top': 12.500000\n")
         (raw / "opensta.log").write_text(
@@ -483,7 +554,7 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             "yosys_sha256=" + "2" * 64 + "\n"
             "opensta_sha256=" + "3" * 64 + "\n"
             "liberty_sha256=" + "4" * 64 + "\n"
-            "clock_port=clock\nclock_period_ns=20.000\n"
+            f"clock_port=clock\nclock_period_ns={clock_period_ns:.3f}\n"
             "input_delay_ns=1.000\noutput_delay_ns=1.000\n"
             "blackbox_selection_mode=yosys-module-name-single-instance-v1\n"
             "mapped_check_mode=liberty-aware-v1\n"
@@ -494,6 +565,19 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             manifest, "static-graph", "Top", "CommonMemory", rtl, raw
         )
         return manifest, rtl, raw
+
+    def test_40ns_followup_runtime_identity_derives(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(
+                root, experiment_id="EXP-0010", clock_period_ns=40.0
+            )
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            result = t0044_physical.derive_one(
+                manifest, "static-graph", rtl, raw, root / "derived"
+            )
+            self.assertEqual(result["experiment_id"], "EXP-0010")
+            self.assertEqual(result["clock_period_ns"], 40.0)
 
     def test_sealed_raw_derives_complete_partition(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -584,6 +668,34 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             t0044_physical.seal_raw(manifest, "static-graph", raw)
             (raw / "yosys.log").write_text("Chip area for module '\\Top': 1.0\n")
             with self.assertRaisesRegex(ValueError, "sealed raw evidence changed"):
+                t0044_physical.derive_one(
+                    manifest, "static-graph", rtl, raw, root / "derived"
+                )
+
+    def test_raw_seal_experiment_identity_drift_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(root)
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            seal_path = raw / "raw-seal.json"
+            seal = json.loads(seal_path.read_text())
+            seal["experiment_id"] = "EXP-0010"
+            seal_path.write_text(json.dumps(seal, sort_keys=True) + "\n")
+            with self.assertRaisesRegex(ValueError, "raw seal authority drift"):
+                t0044_physical.derive_one(
+                    manifest, "static-graph", rtl, raw, root / "derived"
+                )
+
+    def test_run_metadata_experiment_and_clock_drift_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, raw = self._fixture(root)
+            metadata_path = raw / "run-metadata.json"
+            metadata = json.loads(metadata_path.read_text())
+            metadata["clock_period_ns"] = 40.0
+            metadata_path.write_text(json.dumps(metadata, sort_keys=True) + "\n")
+            t0044_physical.seal_raw(manifest, "static-graph", raw)
+            with self.assertRaisesRegex(ValueError, "experiment or clock drift"):
                 t0044_physical.derive_one(
                     manifest, "static-graph", rtl, raw, root / "derived"
                 )
@@ -697,6 +809,8 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
                 contract = self._manifest(rtl_sha256)["variants"][variant]
                 result = {
                     "schema": "raveil.t0044-physical-result/v1",
+                    "experiment_id": "EXP-0009",
+                    "clock_period_ns": 20.0,
                     "variant": variant,
                     "eligibility": "partition-complete",
                     "manifest_sha256": manifest_sha256,

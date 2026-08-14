@@ -251,6 +251,9 @@ merely because a branch or partial implementation already exists.
    below the no-go threshold, while only Graph meets the common 20 ns target.
    Gate 1 remains open pending one timing-boundary resolution; this is neither
    an advance nor a candidate early-no-go.
+   EXP-0010 is the pre-data, single-40-ns follow-up for that point. It cannot
+   change the EXP-0009 outcome and cannot advance the gate before a fresh,
+   complete same-manifest pair.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

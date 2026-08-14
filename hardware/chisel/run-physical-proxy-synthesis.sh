@@ -39,6 +39,15 @@ top=$(python3 -m raveil.t0044_physical variant-field \
     --manifest "$manifest" --variant "$variant" --field top)
 blackboxes=$(python3 -m raveil.t0044_physical variant-field \
     --manifest "$manifest" --variant "$variant" --field blackboxes)
+clock_period_ns=$(python3 -m raveil.t0044_physical manifest-field \
+    --manifest "$manifest" --field clock_period_ns)
+input_delay_ns=$(python3 -m raveil.t0044_physical manifest-field \
+    --manifest "$manifest" --field constraints.input_delay_ns)
+output_delay_ns=$(python3 -m raveil.t0044_physical manifest-field \
+    --manifest "$manifest" --field constraints.output_delay_ns)
+clock_period_ns=$(printf '%.3f' "$clock_period_ns")
+input_delay_ns=$(printf '%.3f' "$input_delay_ns")
+output_delay_ns=$(printf '%.3f' "$output_delay_ns")
 actual_image_id=$(docker image inspect --format '{{.Id}}' "$image")
 [ "$actual_image_id" = "$expected_image_id" ] || {
     echo 'error: physical toolchain image drift' >&2
@@ -70,6 +79,9 @@ docker run --rm \
     --env "RAVEIL_PHYSICAL_VARIANT=$variant" \
     --env "RAVEIL_PHYSICAL_TOP=$top" \
     --env "RAVEIL_PHYSICAL_BLACKBOX_MODULES=$blackboxes" \
+    --env "RAVEIL_PHYSICAL_CLOCK_PERIOD_NS=$clock_period_ns" \
+    --env "RAVEIL_PHYSICAL_INPUT_DELAY_NS=$input_delay_ns" \
+    --env "RAVEIL_PHYSICAL_OUTPUT_DELAY_NS=$output_delay_ns" \
     --entrypoint /bin/sh \
     "$image" \
     /runner.sh > "$raw_dir/container.log" 2>&1

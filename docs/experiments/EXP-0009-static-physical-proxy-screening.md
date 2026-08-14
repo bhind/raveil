@@ -1,6 +1,6 @@
 # EXP-0009: Static Graph physical-proxy screening
 
-Status: In progress
+Status: Completed
 Evidence class: synthesis-toolchain commissioning; synthesis-collector failure; candidate-independent collector probes
 Date: 2026-08-15
 Task: T-0044

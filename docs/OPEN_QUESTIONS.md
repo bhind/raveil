@@ -121,6 +121,9 @@ resolves it.
   Graph meets and Rocket misses the same 20 ns target. The one remaining
   physical question is which frozen timing boundary can make the fallback
   partition eligible without weakening either candidate or changing resources.
+  EXP-0010 narrows the test to one fixed 40 ns follow-up selected after the
+  20 ns pause. Whether both unchanged partitions meet that single common target
+  remains unresolved until its manifest is frozen and fresh runs complete.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

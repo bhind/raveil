@@ -14,4 +14,5 @@ inconclusive, and superseded experiments remain available.
 | [EXP-0006](EXP-0006-static-repeated-invocation-boundary.md) | Completed commissioning; paused | RTL simulation pilot | Install-once 1/4 passes; staging initiator meaning blocks repeated-account campaign |
 | [EXP-0007](EXP-0007-fixture-owned-input-staging.md) | Completed commissioning; advance | RTL simulation pilot | Common fixture-owned staging passes; full repeated campaign may be separately frozen |
 | [EXP-0008](EXP-0008-static-full-campaign.md) | Completed; advance-partial-latency-traffic | RTL simulation latency/traffic campaign | 256-input matrix passes latency/traffic; energy, timing, area, IP, and other organizations remain open |
-| [EXP-0009](EXP-0009-static-physical-proxy-screening.md) | In progress; recovery-v6 frozen | Synthesis-toolchain commissioning; collector compatibility probes | Explicit exactly-once common black-box declarations are frozen; Graph rerun is next |
+| [EXP-0009](EXP-0009-static-physical-proxy-screening.md) | Completed; pause-boundary | partitioned synthesis estimate | 20 ns matrix complete; Graph meets, Rocket misses, area ratio below no-go |
+| [EXP-0010](EXP-0010-common-40ns-physical-timing-followup.md) | Pre-data implementation | partitioned synthesis estimate | Single fixed 40 ns follow-up; manifest not yet frozen |

@@ -504,6 +504,12 @@ the preregistered 0.25 area no-go, but Rocket misses timing. The matrix outcome
 is therefore `pause-boundary`, not advance or early-no-go. It is partitioned
 synthesis-estimate evidence only; common memory, integration, clock tree,
 placement/routing, energy, performance, and whole-system claims remain absent.
+EXP-0010 is the bounded follow-up implementation for that one pause point. It
+preserves EXP-0009 and parameterizes the existing collector for exactly two
+admitted timing tuples: legacy 20/1/1 ns and follow-up 40/1/1 ns. EXP-0010 is
+bound to recovery-v9, one fixed doubled period, fresh Graph/Rocket runs, and no
+prior result reuse. Candidate collection remains prohibited until its
+implementation authority and machine-readable manifest are committed.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

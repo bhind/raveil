@@ -813,6 +813,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Rocket fallback partition also meets, without changing RTL/resources or
   importing the current ratio as whole-system area. Do not expand latency
   accounts or claim go/no-go from this physical proxy meanwhile.
+  EXP-0010 now owns this single follow-up. Review and commit the manifest-driven
+  20/40 ns collector compatibility, freeze one 40 ns manifest chained to v9,
+  then run only fresh `run-014` Graph and `run-015` Rocket partitions. Preserve
+  EXP-0009 `pause-boundary`; do not sweep clock targets or reuse its results.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

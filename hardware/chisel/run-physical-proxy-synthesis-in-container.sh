@@ -4,6 +4,13 @@ set -eu
 : "${RAVEIL_PHYSICAL_VARIANT:?variant is required}"
 : "${RAVEIL_PHYSICAL_TOP:?top is required}"
 : "${RAVEIL_PHYSICAL_BLACKBOX_MODULES:=}"
+: "${RAVEIL_PHYSICAL_CLOCK_PERIOD_NS:?clock period is required}"
+: "${RAVEIL_PHYSICAL_INPUT_DELAY_NS:?input delay is required}"
+: "${RAVEIL_PHYSICAL_OUTPUT_DELAY_NS:?output delay is required}"
+case "$RAVEIL_PHYSICAL_CLOCK_PERIOD_NS:$RAVEIL_PHYSICAL_INPUT_DELAY_NS:$RAVEIL_PHYSICAL_OUTPUT_DELAY_NS" in
+    20.000:1.000:1.000|40.000:1.000:1.000) ;;
+    *) echo 'error: unsupported physical timing constraint tuple' >&2; exit 1 ;;
+esac
 
 liberty=/home/mambauser/physical-mamba/envs/toolchain/share/pdk/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 [ -f "$liberty" ]
@@ -71,15 +78,15 @@ done
 IFS=$old_ifs
 
 cat > /tmp/candidate.sdc <<EOF
-create_clock -name clock -period 20.000 [get_ports clock]
+create_clock -name clock -period $RAVEIL_PHYSICAL_CLOCK_PERIOD_NS [get_ports clock]
 set non_clock_inputs {}
 foreach port [all_inputs] {
     if {[get_property -object_type port \$port name] ne "clock"} {
         lappend non_clock_inputs \$port
     }
 }
-set_input_delay 1.000 -clock clock \$non_clock_inputs
-set_output_delay 1.000 -clock clock [all_outputs]
+set_input_delay $RAVEIL_PHYSICAL_INPUT_DELAY_NS -clock clock \$non_clock_inputs
+set_output_delay $RAVEIL_PHYSICAL_OUTPUT_DELAY_NS -clock clock [all_outputs]
 EOF
 cat > /tmp/candidate.tcl <<EOF
 read_liberty $liberty
@@ -107,11 +114,14 @@ printf '%s\n' ${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-} | tr ',' '\n' | sed '/^$/d' 
     printf 'liberty_sha256=%s\n' "$(sha256sum "$liberty" | awk '{print $1}')"
     printf 'yosys_version=%s\n' "$(yosys -V)"
     printf 'opensta_version=%s\n' "$(sta -version)"
-    printf 'clock_port=clock\nclock_period_ns=20.000\ninput_delay_ns=1.000\noutput_delay_ns=1.000\n'
+    printf 'clock_port=clock\nclock_period_ns=%s\ninput_delay_ns=%s\noutput_delay_ns=%s\n' \
+        "$RAVEIL_PHYSICAL_CLOCK_PERIOD_NS" \
+        "$RAVEIL_PHYSICAL_INPUT_DELAY_NS" \
+        "$RAVEIL_PHYSICAL_OUTPUT_DELAY_NS"
     printf 'blackbox_selection_mode=yosys-module-name-single-instance-v1\n'
     printf 'mapped_check_mode=liberty-aware-v1\n'
     printf 'sta_constraint_mode=foreach-non-clock-inputs-v1\n'
     printf 'mapped_blackbox_declarations=explicit-yosys-stubs-v1\n'
 } > /evidence/tool-identity.txt
 printf '%s\n' \
-    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 mapped_check_mode=liberty-aware-v1 sta_constraint_mode=foreach-non-clock-inputs-v1 mapped_blackbox_declarations=explicit-yosys-stubs-v1 clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"
+    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 mapped_check_mode=liberty-aware-v1 sta_constraint_mode=foreach-non-clock-inputs-v1 mapped_blackbox_declarations=explicit-yosys-stubs-v1 clock_period_ns=$RAVEIL_PHYSICAL_CLOCK_PERIOD_NS corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"
