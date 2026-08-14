@@ -102,8 +102,8 @@ def load_manifest(path: pathlib.Path) -> dict[str, Any]:
     if document.get("corner") != "sky130_fd_sc_hd__tt_025C_1v80":
         raise ValueError("physical corner drift")
     if document.get("partition_policy") != {
-        "common_fixture": "excluded-common-partition",
-        "common_memory": "identical-explicit-blackbox",
+        "common_fixture": "excluded-at-explicit-candidate-boundary",
+        "common_memory": "excluded-at-explicit-candidate-boundary",
         "fallback_composition": "rocket-fallback-plus-graph-incremental",
         "whole_system_claim": False,
     }:

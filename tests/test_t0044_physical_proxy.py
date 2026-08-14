@@ -12,6 +12,20 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class PhysicalProxyToolchainTests(unittest.TestCase):
+    def test_frozen_stage_b_manifest_is_exact(self) -> None:
+        path = ROOT / "benchmarks/manifests/t0044-static-physical-screen-v1.json"
+        manifest = t0044_physical.load_manifest(path)
+        self.assertEqual(
+            manifest["implementation_authority"],
+            "ca185a802e1180da45d050a430b8b322bec10391",
+        )
+        self.assertEqual(manifest["variants"]["rocket-in-order"]["top"], "Rocket")
+        self.assertEqual(
+            manifest["variants"]["static-graph"]["blackboxes"],
+            ["OwnedFixedLatencyScratchpad", "RaveilFixtureInputProvider"],
+        )
+        self.assertFalse(manifest["partition_policy"]["whole_system_claim"])
+
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()
         self.assertIn("mambaorg/micromamba:1.4.2", dockerfile)
@@ -131,8 +145,8 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             },
             "corner": "sky130_fd_sc_hd__tt_025C_1v80",
             "partition_policy": {
-                "common_fixture": "excluded-common-partition",
-                "common_memory": "identical-explicit-blackbox",
+                "common_fixture": "excluded-at-explicit-candidate-boundary",
+                "common_memory": "excluded-at-explicit-candidate-boundary",
                 "fallback_composition": "rocket-fallback-plus-graph-incremental",
                 "whole_system_claim": False,
             },
