@@ -1,0 +1,179 @@
+{
+  "clock_period_ns": 20.0,
+  "collector_policy": {
+    "blackbox_before_checked_hierarchy": true,
+    "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+    "mapped_blackbox_declarations": "explicit-yosys-stubs-v1",
+    "mapped_check_mode": "liberty-aware-v1",
+    "sta_constraint_mode": "foreach-non-clock-inputs-v1"
+  },
+  "compatibility_lowering_policy": {
+    "compatibility_option": "disallowPackedArrays",
+    "graph": {
+      "lowering_options": [
+        "disallowLocalVariables",
+        "disallowPackedArrays"
+      ],
+      "mode": "physical-emitter"
+    },
+    "rocket": {
+      "baseline_options": [
+        "emittedLineLength=2048",
+        "noAlwaysComb",
+        "disallowLocalVariables",
+        "verifLabels",
+        "locationInfoStyle=wrapInAtSquareBracket"
+      ],
+      "mode": "pinned-chipyard-enable-yosys-flow",
+      "physical_options": [
+        "emittedLineLength=2048",
+        "noAlwaysComb",
+        "disallowLocalVariables",
+        "verifLabels",
+        "locationInfoStyle=wrapInAtSquareBracket",
+        "disallowPackedArrays"
+      ]
+    },
+    "schema": "raveil.physical-common-lowering/v1",
+    "scientific_contract": "lowering-only-no-semantic-change"
+  },
+  "constraints": {
+    "clock_port": "clock",
+    "input_delay_ns": 1.0,
+    "output_delay_ns": 1.0
+  },
+  "corner": "sky130_fd_sc_hd__tt_025C_1v80",
+  "decision_rules": {
+    "graph_timing_miss_only_if_rocket_meets": true,
+    "incomplete_label": "pause-boundary",
+    "incremental_area_ratio_no_go_above": 0.25,
+    "pass_label": "advance-to-integrated-physical"
+  },
+  "experiment_id": "EXP-0009",
+  "implementation_authority": "0611b0431cf052fa1e30f1024f664dffbd1bee98",
+  "matrix": [
+    "static-graph",
+    "rocket-in-order"
+  ],
+  "operational_change": "physical-export-compatibility-lowering-with-shared-elaboration-proof",
+  "partition_policy": {
+    "common_fixture": "excluded-at-explicit-candidate-boundary",
+    "common_memory": "excluded-at-explicit-candidate-boundary",
+    "fallback_composition": "rocket-fallback-plus-graph-incremental",
+    "whole_system_claim": false
+  },
+  "recovery_of_manifest_sha256": "135f30d6899742eb769d67c8a8dc6929db105f03e54e284e7e81900acebc398a",
+  "report_contract": {
+    "deterministic_reruns_are_samples": false,
+    "evidence_class": "synthesis-estimate",
+    "matrix_schema": "raveil.t0044-physical-matrix/v1",
+    "raw_schema": "raveil.t0044-physical-run/v1",
+    "result_schema": "raveil.t0044-physical-result/v1"
+  },
+  "schema": "raveil.t0044-physical-screen/v1",
+  "status": "frozen",
+  "stop_conditions": [
+    "authority-or-worktree-drift",
+    "generated-rtl-hash-drift",
+    "top-or-blackbox-policy-drift",
+    "tool-binary-or-liberty-drift",
+    "missing-clock-or-constraint-drift",
+    "unresolved-or-hidden-cell",
+    "incomplete-or-ambiguous-area-report",
+    "incomplete-or-ambiguous-timing-report",
+    "raw-seal-or-report-schema-drift",
+    "incomplete-static-graph-or-rocket-matrix"
+  ],
+  "task_id": "T-0044",
+  "toolchain": {
+    "conda_environment_sha256": "ddcfd6e7c9f580feb5f236cce3294087a9db842c95c604239cf2506ecfc974ee",
+    "image_id": "sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169",
+    "image_size_bytes": 2178077591,
+    "liberty_sha256": "e66aab4e0a3eef8d0b13eb5b75aaadb725ba78b032203342eb1e419a2c111baf",
+    "opensta_sha256": "3f804b33123a68858cf668a1d2253af865e056413d92403351cd5343996e514f",
+    "opensta_version": "2.3.3",
+    "system_packages_sha256": "8cce2c230bf60e1da1fb177051c99448c00af28b42fcca10fdef6a2950dfdf1f",
+    "yosys_sha256": "a078aea6eafafcfe9ed4b1d343acdc612f74ad078efb7b930ed1333968ce7508",
+    "yosys_version": "0.27+3"
+  },
+  "variants": {
+    "rocket-in-order": {
+      "baseline_cache_source_sha256": "cf06a739ecd56b592ae98056d63fceac844d73e727cba72a15bb98ad337ed103",
+      "blackboxes": [],
+      "cache_source_sha256": "bdd35a347a3d57ecf5d00c80c0166236e87090a64f5d0f6bb02103ffc5b515f1",
+      "chipyard_revision": "ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1",
+      "clock_port": "clock",
+      "compatibility_lowering": "disallowPackedArrays",
+      "configuration_id": "chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig",
+      "export_command": "RAVEIL_CHIPYARD_SOURCE=<pinned-chipyard> RAVEIL_ROCKET_CHIP_SOURCE=<pinned-rocket-chip> RAVEIL_PHYSICAL_CPU_BASELINE_CACHE_SOURCE_SHA256=cf06a739ecd56b592ae98056d63fceac844d73e727cba72a15bb98ad337ed103 ./hardware/chisel/export-physical-rocket-rtl.sh <new-output-dir>",
+      "generator_image_id": "sha256:154dc63d7967ea4dce962f002ee10be12f598b5358f6b0ffc524a80d72bb8b9c",
+      "generator_provenance": {
+        "common_mk_sha256": "226e0a86f7ce79c8a3bb945b057530a583738c36b66fc167f79d208c2e318bc0",
+        "extra_firrtl_options_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "final_anno_sha256": "a68e9c2ed5495a36fbefe4d85b8781f385e9a0d12aff341072f3c3ebd1d60cb1",
+        "firrtl_sha256": "93455bf54122f7b7c6f6b96c7d4416c2c97065736ace2833ddcfb3814c51802c",
+        "firtool_sha256": "e09cfe2f50fb9d3ce301206bf48cc428b4d40960618e0552724203259dfc156b",
+        "firtool_version_sha256": "9fe3e4650abf6b6a0b6fea8d656bddd238fdc1d8679cc8c8bc269dfe5e4d666b",
+        "lowering_options_sha256": "ebcb708bcda337ea65b4a959256e4c9a55a37f03fa61d0d2fe0df166e64406a3",
+        "sfc_anno_sha256": "d203bbdfffb3ff57f03880ff9d496ff24abd026c7d2de878581583ad5c43fd66",
+        "sfc_firrtl_sha256": "93455bf54122f7b7c6f6b96c7d4416c2c97065736ace2833ddcfb3814c51802c",
+        "sfc_level_sha256": "fcf33dfbe13c2354bf0e1b063f9fb422747a46cee00b7420bceff2b81457b345"
+      },
+      "generator_toolchain_sha256": "ae2488b8904a8f6246a11df60be85bc08e965c3aee0518c976319bc34d448eee",
+      "lowering_provenance": {
+        "normalization": "exact-build-root-in-two-annotations-and-sorted-basename-filelists-v1",
+        "required_shared_groups": [
+          "firrtl-and-sfc-inputs",
+          "build-root-normalized-annotations",
+          "module-hierarchies",
+          "sorted-basename-filelists"
+        ],
+        "schema": "raveil.physical-rocket-lowering-provenance/v1",
+        "status": "shared-elaboration-identical"
+      },
+      "lowering_provenance_sha256": "fd91b3b9f5d4dd807195d809cd34ecaee5939aa1dc04953d84a7c1da6d2620da",
+      "missing_components": [
+        "common-owned-memory-area",
+        "tile-cache-and-interconnect-area",
+        "fallback-integration",
+        "clock-tree",
+        "placement-routing"
+      ],
+      "partition_role": "rocket-fallback-denominator",
+      "rocket_chip_revision": "749a3eae9678bc70b029c5b9091fae33fad539c4",
+      "rtl_file_count": 376,
+      "rtl_filelist_sha256": "d38af48c22bfbf8a88ca5da9b61c758112afd7d6f625759267a0be9c9011db46",
+      "rtl_sha256": "641735c13d371aff71f4856bdbb3a7a618d2600484a7f652e2f122c90d786d2f",
+      "source_sha256": "219b5c0db4c80a5c632ca95d51434bc8a44551a619c6cf62b7207bb20c167e4f",
+      "top": "Rocket"
+    },
+    "static-graph": {
+      "blackboxes": [
+        "OwnedFixedLatencyScratchpad",
+        "RaveilFixtureInputProvider"
+      ],
+      "clock_port": "clock",
+      "compatibility_lowering": "disallowPackedArrays",
+      "configuration_id": "StaticStencilRegion-physical-lowered-v1",
+      "export_command": "./hardware/chisel/export-physical-graph-rtl.sh <new-output-dir>",
+      "generator_image_id": "sha256:c0d90df9dc3e4fe2771cdfb87584a27d07d6c43b5c4ad14652f6527477214ce9",
+      "lowering_options": [
+        "disallowLocalVariables",
+        "disallowPackedArrays"
+      ],
+      "missing_components": [
+        "common-fixture-area",
+        "common-owned-memory-area",
+        "rocket-fallback-area",
+        "fallback-integration",
+        "clock-tree",
+        "placement-routing"
+      ],
+      "partition_role": "graph-candidate-local-incremental",
+      "rtl_file_count": 3,
+      "rtl_sha256": "e95e2e02b0e3c0460596c89b6dd324e7135208e0e1a097dcd689fdbef2f5a41d",
+      "source_sha256": "eebf3176c539a4fe6510433873b62b27038eb10baae42d0b9498a39aa45727c8",
+      "top": "StaticStencilRegion"
+    }
+  }
+}

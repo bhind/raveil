@@ -788,6 +788,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   provenance, generator, and common compatibility-policy hashes in recovery-v7
   before any Graph/Rocket synthesis; then rerun both partitions under that one
   manifest.
+  Recovery-v7 authority `0611b04...1bee98` and manifest
+  `5b165299...ec1780` are ready. Commit the freeze, then run fresh Graph and
+  Rocket partitions under v7 and derive a matrix only if both seal complete.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

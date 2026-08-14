@@ -105,6 +105,8 @@ resolves it.
   That normalized export now passes the packed-array inventory and pinned
   Yosys pre-synthesis checks. Whether the complete paired physical matrix
   passes remains open pending recovery-v7 freeze and fresh runs.
+  Recovery-v7 now freezes the exact policy and identities; the question moves
+  to the fresh paired synthesis outcome, with no prior result import allowed.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

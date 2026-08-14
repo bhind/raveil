@@ -460,6 +460,11 @@ Authority `c2842a0...d1035a` then exported the verified 376-file Rocket tree
 inventory is empty and pinned Yosys read/hierarchy/check passes. This is
 pre-data compatibility evidence. A parser-bound recovery-v7 manifest and fresh
 paired candidate runs remain required.
+Recovery-v7 implementation authority is `0611b04...1bee98`; frozen manifest
+SHA-256 is `5b165299...ec1780`. It binds unchanged Graph RTL, verified physical
+Rocket RTL, generator provenance, and one common compatibility-lowering
+policy. Fresh Graph and Rocket runs may begin only after the manifest freeze
+commit; no prior Graph result can enter the v7 matrix.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

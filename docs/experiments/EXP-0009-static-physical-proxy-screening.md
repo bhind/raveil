@@ -459,3 +459,14 @@ the remaining narrow freeze plus fresh paired Graph/Rocket physical run is
 estimated at 0.5--2 working days with medium confidence, assuming no later
 Yosys mapping/STA incompatibility. This is a range, not a completion-date
 promise.
+
+Recovery-v7 implementation authority is
+`0611b0431cf052fa1e30f1024f664dffbd1bee98`. Frozen manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v7.json`, SHA-256
+`5b16529903cc12ef594a5d1177b2620a3ab81da7d64cfdaeda6a7eb050ec1780`,
+chains recovery-v6 and binds the shared compatibility-lowering policy, exact
+Rocket generator/provenance identities, new Rocket RTL, and unchanged Graph
+RTL. It changes no partition, toolchain, Liberty, clock, I/O delay, estimator,
+or decision rule. Candidate collection is authorized only from the eventual
+recovery-v7 freeze commit or its clean descendants, and both Graph and Rocket
+must receive fresh RUN-IDs under this one manifest.
