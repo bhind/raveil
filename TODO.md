@@ -23,6 +23,20 @@ dependencies, owner, stop rule, and displaced or completed P0 task. P0 has a
 work-in-progress limit of one coherent implementation task. Read-only review
 and failure preservation do not consume that slot; new implementation does.
 
+## Project entry point
+
+- [x] **T-0108** Replace the stale root README with a current, evidence-bounded
+  project entry point. Explain Raveil as an Experience-guided Graph
+  compiler/runtime across replaceable CPU, CGRA, FPGA, NPU, and future ASIC
+  backends; separate the implemented Native, Experience, Sonatine, and RTL
+  slices from the intended integrated loop; state the fixed-C negative result
+  and current non-claims; and route readers to canonical records. Preserve
+  ADR-0049's CGRA non-reinvention boundary and make the Experience-driven
+  software/hardware feedback loop an unvalidated research hypothesis. The
+  draft received human review and push approval on 2026-08-15. This
+  documentation-only task does not displace T-0044 or authorize
+  implementation, measurement, or a new research claim.
+
 ## Delivery line — active GNU/Linux userspace MVP
 
 - [x] **T-0103** Release the synthetic Native Command Graph/Experience
