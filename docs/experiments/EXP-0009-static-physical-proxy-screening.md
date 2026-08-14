@@ -315,3 +315,11 @@ is needed because the accepted ADR-0048 physical/resource boundary is
 unchanged. A recovery-v4 manifest must bind the committed authority, preceding
 manifest hash, and selection mode before a new Graph RUN-ID. Rocket remains
 blocked until Graph produces a complete sealed partition result.
+
+Recovery-v4 implementation authority is
+`fe7b9f615c7ad7833fae00165297d0e7fc33c046`. Frozen manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v4.json`, SHA-256
+`de396d4f4d4bd81484c5a57b859ac59fdfca84a4cab7cc1a8834d3276c129d31`,
+chains recovery-v3 and adds only the verified collector policy. Candidate use
+is authorized only from the commit containing this manifest or a clean
+descendant.

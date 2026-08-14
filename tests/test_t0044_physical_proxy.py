@@ -70,6 +70,25 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
             recovery_v3["operational_change"],
             "assert-and-blackbox-common-partitions-before-checked-hierarchy",
         )
+        recovery_v4_path = (
+            ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v4.json"
+        )
+        recovery_v4 = t0044_physical.load_manifest(recovery_v4_path)
+        self.assertEqual(
+            recovery_v4["recovery_of_manifest_sha256"],
+            t0044_physical.sha256_file(recovery_v3_path),
+        )
+        self.assertEqual(
+            recovery_v4["operational_change"],
+            "verify-named-module-single-instance-blackbox-attributes",
+        )
+        self.assertEqual(
+            recovery_v4["collector_policy"],
+            {
+                "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+                "blackbox_before_checked_hierarchy": True,
+            },
+        )
 
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()

@@ -750,10 +750,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   resumed on that one point: a pinned-tool syntax probe proves named-module
   selection, exactly one instance, and verified black-box attributes for both
   common partitions, and the collector
-  binds that selection mode into raw identity. Freeze the new authority in a
-  recovery-v4 manifest before a distinct Graph RUN-ID. Do not run Rocket until
+  binds that selection mode into raw identity. Do not run Rocket until
   Graph yields a complete sealed partition report, and do not interpret the
   probe or any failed log as area/timing evidence.
+  Recovery-v4 authority `fe7b9f6...3c046` and manifest
+  `de396d4f...129d31` are now frozen; commit the freeze, then run Graph from its
+  clean descendant.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
