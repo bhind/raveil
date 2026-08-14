@@ -208,3 +208,10 @@ The original manifest remains immutable. A separately frozen recovery manifest
 must bind the corrective implementation authority before a new RUN-ID; all
 RTL, partitions, tools, constraints, estimators, and decision rules remain
 unchanged.
+
+Recovery implementation authority is
+`b6c3125f70dcd4f08343a961c8557088bae30e94`. Recovery manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v1.json`, SHA-256
+`14f5786f146543d3cf8035e9c4c1b561ed025789144fa3ad4e0b35a193a35786`,
+binds the original manifest hash and changes only the log handoff. Candidate
+reattempts remain prohibited until the commit carrying this recovery manifest.

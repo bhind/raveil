@@ -34,6 +34,19 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         )
         self.assertFalse(manifest["partition_policy"]["whole_system_claim"])
 
+        recovery_path = (
+            ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v1.json"
+        )
+        recovery = t0044_physical.load_manifest(recovery_path)
+        self.assertEqual(
+            recovery["recovery_of_manifest_sha256"],
+            t0044_physical.sha256_file(path),
+        )
+        self.assertEqual(
+            recovery["operational_change"],
+            "allow-only-empty-host-owned-container-log-before-container-launch",
+        )
+
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()
         self.assertIn("mambaorg/micromamba:1.4.2", dockerfile)

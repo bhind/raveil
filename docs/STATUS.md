@@ -374,6 +374,9 @@ container log violated the container's empty-directory check. Failed raw files
 are sealed at `080f3ac9...b6f3` and are claim-ineligible. Recovery changes only
 the log handoff and requires a separately frozen descendant manifest; the
 scientific contract and generated RTL remain unchanged.
+Recovery authority `b6c3125...0e94` and manifest SHA-256
+`14f5786f...5786` now bind that one operational change; candidate reattempt is
+still pre-data until the recovery freeze commit is recorded.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
