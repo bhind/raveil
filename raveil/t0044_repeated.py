@@ -679,7 +679,8 @@ def seal_raw(run_dir: Path) -> dict[str, Any]:
 
 
 def _run_command(
-    command: list[str], env: dict[str, str], log_path: Path, command_file: Path
+    command: list[str], env: dict[str, str], log_path: Path, command_file: Path,
+    required_prefix_counts: dict[str, int],
 ) -> None:
     start = time.time_ns()
     with log_path.open("wb") as output:
@@ -687,6 +688,26 @@ def _run_command(
             command, env=env, stdout=output, stderr=subprocess.STDOUT
         )
     end = time.time_ns()
+    # Docker Desktop can return from the CLI just before its stdout forwarding
+    # worker drains the final buffered simulator bytes into our inherited file
+    # descriptor.  Never hash or parse that transient prefix.  Required marker
+    # cardinalities are frozen and this bounded wait fails closed.
+    deadline = time.monotonic() + 30.0
+    observed: dict[str, int] = {}
+    while True:
+        lines = log_path.read_text(encoding="utf-8").splitlines()
+        observed = {
+            prefix: sum(line.startswith(prefix) for line in lines)
+            for prefix in required_prefix_counts
+        }
+        if observed == required_prefix_counts:
+            break
+        if time.monotonic() >= deadline:
+            raise ControlledRunError(
+                "completed command log did not drain required markers: "
+                f"observed={observed}, expected={required_prefix_counts}"
+            )
+        time.sleep(0.1)
     record = {
         "argv": command,
         "environment": {
@@ -754,9 +775,18 @@ def collect(
     base_env["RAVEIL_REPEAT_ACCOUNT"] = str(account)
     command_file = raw_dir / "commands.jsonl"
     for variant in VARIANTS:
+        required = {
+            "RAVEIL-CONTROLLED-OUTPUT-V1": 256 * account,
+        }
+        if variant == "static-graph":
+            required["RAVEIL-REPEATED-GRAPH-COMPLETE-V1"] = account
+            required["RAVEIL-REPEATED-GRAPH-ACCOUNT-V1"] = 1
+        else:
+            required["RAVEIL-REPEATED-CPU-COMPLETE-V1"] = account
+            required["RAVEIL-REPEATED-CPU-HOST-V1"] = 1
         _run_command(
             [str(scripts[variant])], dict(base_env),
-            raw_dir / f"{variant}.log", command_file,
+            raw_dir / f"{variant}.log", command_file, required,
         )
     report = derive(run_dir, manifest_path, account)
     seal_raw(run_dir)

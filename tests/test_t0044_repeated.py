@@ -98,6 +98,8 @@ class RepeatedBoundaryTests(unittest.TestCase):
         self.assertIn("li      sp, 0x80010000", startup)
         self.assertIn('timeout --foreground 3600 "$sim"', runner)
         self.assertIn("pending-completed-outer-raw-verification", runner)
+        collector = (ROOT / "raveil/t0044_repeated.py").read_text()
+        self.assertIn("completed command log did not drain required markers", collector)
         self.assertNotIn("RAVEIL_STENCIL_SEED", source)
 
     def test_repeated_configs_preserve_owned_resource_shape(self) -> None:
