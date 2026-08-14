@@ -12,11 +12,13 @@ commit `7575602e6651cc1e755e8d2f7b255aa8872db856`, runtime-fix commit
 commit `cf454e4cd847d43d223fe7166b20d75dae0c2ffe`, log-synchronization commit
 `988c25e615feaf711cb4d91f121d551bf88420ea`, completed-outer-log
 verification commit `4a3faefc4c37aeb02c642b37fb4d20827021fb34`
-and Docker-output-drain commit `45a453ce8ee61bd2aba67caf282d5b5de44ba99a`.
+Docker-output-drain commit `45a453ce8ee61bd2aba67caf282d5b5de44ba99a`,
+and Graph raw-transport commit
+`75d911c714458ddd5a747f1584641152c1a7fd15`.
 Prior evidence: EXP-0005 (preserved unchanged)
 Manifest: `benchmarks/manifests/t0044-static-repeated-invocation-v1.json`
 Frozen manifest SHA-256:
-`ce395548c48b269f72f82f9cc33c22b6fa2cddd29293aeb8b4c1c8bc47359968`
+`b979f7448a1f73485d7ed42d1e499dcd50f58ff80c6091d0ee11cb89cbb6121d`
 
 ## Falsifiable question
 
@@ -123,6 +125,8 @@ after the 30-second wait. The Graph wrapper was applying its legacy 240-line
 interactive preview to repeated evidence despite holding and internally
 verifying a complete temporary log. No value from this run is promoted. The
 repeated-only full-log transport correction requires a replacement freeze.
+That correction is now replacement manifest authority under the hash above;
+no subsequent complete-matrix data existed at this re-freeze.
 
 ## Estimate
 

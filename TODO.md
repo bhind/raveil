@@ -687,7 +687,7 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   complete. The next Graph run proved its wrapper was deterministically
   truncating repeated evidence to a 240-line smoke preview; emit the full log
   only in repeated mode, re-freeze that transport fix, and rerun under a new
-  RUN-ID.
+  RUN-ID. The replacement freeze is complete.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

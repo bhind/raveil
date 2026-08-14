@@ -14,6 +14,7 @@
     "log_synchronization_commit": "988c25e615feaf711cb4d91f121d551bf88420ea",
     "outer_log_verification_commit": "4a3faefc4c37aeb02c642b37fb4d20827021fb34",
     "docker_output_drain_commit": "45a453ce8ee61bd2aba67caf282d5b5de44ba99a",
+    "graph_raw_transport_commit": "75d911c714458ddd5a747f1584641152c1a7fd15",
     "prior_experiment": "EXP-0005",
     "rfc": ["RFC-0004", "RFC-0005"],
     "adr": ["ADR-0039", "ADR-0046"]

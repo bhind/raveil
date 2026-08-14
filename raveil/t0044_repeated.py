@@ -94,6 +94,10 @@ def load_manifest(path: Path) -> dict[str, Any]:
         "45a453ce8ee61bd2aba67caf282d5b5de44ba99a"
     ):
         raise ControlledRunError("EXP-0006 Docker-drain authority changed")
+    if value["authority"]["graph_raw_transport_commit"] != (
+        "75d911c714458ddd5a747f1584641152c1a7fd15"
+    ):
+        raise ControlledRunError("EXP-0006 Graph raw transport authority changed")
     if value["workload"]["fresh_input_versions"] != list(range(1, 257)):
         raise ControlledRunError("EXP-0006 fresh-input order changed")
     if value["matrix"]["complete_for_commissioning"] != list(VARIANTS):

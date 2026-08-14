@@ -252,6 +252,8 @@ truncation rather than Docker forwarding loss. Repeated mode now emits the
 complete verified internal log to the outer collector while non-repeated smoke
 output retains the preview cap. This evidence-transport correction requires a
 new manifest re-freeze and RUN-ID; the failed run is not promoted.
+The Graph raw-transport correction is now replacement manifest authority; no
+subsequent complete-matrix run existed at this re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
