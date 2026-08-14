@@ -107,7 +107,13 @@ def load_manifest(path: Path) -> dict[str, Any]:
         "architecture_decision", "predecessor_experiment",
     }:
         raise ControlledRunError("EXP-0007 authority schema changed")
-    _require_sha256("implementation_commit", authority["implementation_commit"])
+    implementation_commit = authority["implementation_commit"]
+    if (type(implementation_commit) is not str
+            or len(implementation_commit) != 40
+            or any(character not in "0123456789abcdef"
+                   for character in implementation_commit)):
+        raise ControlledRunError(
+            "implementation_commit must be a lowercase Git SHA-1")
     if authority != {
         **authority,
         "governance_ancestor": "ae606dea3f74d6694eecbe91fc368b097f03758c",

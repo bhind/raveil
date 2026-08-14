@@ -94,6 +94,11 @@ def _graph_log(account: int) -> str:
 
 
 class FixtureBoundaryTests(unittest.TestCase):
+    def test_manifest_implementation_commit_requires_git_sha1(self) -> None:
+        source = (ROOT / "raveil/t0044_fixture.py").read_text()
+        self.assertIn('len(implementation_commit) != 40', source)
+        self.assertIn('lowercase Git SHA-1', source)
+
     def _verify(self, text: str, account: int = 1) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "graph.log"
