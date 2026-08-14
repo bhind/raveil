@@ -110,6 +110,8 @@ resolves it.
   Wrong-directory `run-009` is explicitly ineligible; the outcome question is
   unchanged after moving exact RTL identity validation before Docker launch
   and mounting only its independently reverified private snapshot.
+  Recovery-v8 freezes that boundary; only its fresh paired outcome can answer
+  the remaining physical-screen question.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

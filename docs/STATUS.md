@@ -473,7 +473,13 @@ collector now verifies manifest authority and exact variant tree before raw
 directory creation, copies that verified tree to a private snapshot, verifies
 the snapshot again, and mounts only the snapshot into Docker. Retrospective
 sealing is hash-locked to the exact run-009 manifest, RTL trees, file set, and
-pre-seal evidence digest. A new recovery freeze is required.
+pre-seal evidence digest. A new recovery freeze was therefore required.
+Run-009 is now sealed as ineligible host-operational evidence: failure-metadata
+SHA-256 `5d242ee...d7162`, failed-seal SHA-256 `d5b7023...9d2af`. Recovery-v8
+authority `50639f0...aad938` and frozen manifest SHA-256
+`3dfb0dd...dd0b1` preserve every RTL/tool/constraint/decision field from v7
+and change only the preflight/snapshot collector boundary. Fresh paired runs
+must use distinct RUN-IDs under v8.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

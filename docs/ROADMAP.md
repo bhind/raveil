@@ -239,6 +239,8 @@ merely because a branch or partial implementation already exists.
    A wrong-directory `run-009` exposed post-container input validation; the
    pre-container preflight and verified private-snapshot recovery are mandatory
    before the paired run and do not advance the gate.
+   Recovery-v8 freezes that collector-only correction; the gate still awaits
+   two fresh, complete partition results under v8.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

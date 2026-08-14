@@ -789,13 +789,16 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   before any Graph/Rocket synthesis; then rerun both partitions under that one
   manifest.
   Recovery-v7 authority `0611b04...1bee98` and manifest
-  `5b165299...ec1780` are ready. Commit the freeze, then run fresh Graph and
-  Rocket partitions under v7 and derive a matrix only if both seal complete.
+  `5b165299...ec1780` were frozen; neither prior Graph result can be imported.
   `run-009` is an ineligible wrong-directory host failure and reveals that RTL
   hash verification occurred after Docker. Freeze the pre-container input
   preflight plus verified private snapshot as the sole recovery, seal `run-009`
   through its exact hash-locked retrospective path, then allocate a new Graph
-  RUN-ID with the exact `generated-src` tree.
+  RUN-ID with the exact `generated-src` tree. `run-009` is now sealed with
+  failed-seal `d5b7023...9d2af`; recovery-v8 authority
+  `50639f0...aad938` and manifest `3dfb0dd...dd0b1` freeze only this collector
+  correction. Run fresh Graph and Rocket partitions under v8 and derive a
+  matrix only if both seal complete.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

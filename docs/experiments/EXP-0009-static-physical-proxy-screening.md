@@ -490,3 +490,22 @@ RUN-ID, raw file set, pre-seal file-map digest, and successful container marker;
 it cannot authorize another drifted run. This changes no RTL, physical
 constraint, estimator, or decision rule, but requires another committed
 authority and recovery manifest before a new RUN-ID.
+
+Run-009 was retrospectively sealed only after matching every frozen incident
+fingerprint above. Failure-metadata SHA-256 is
+`5d242ee63992866611184897f3d9792b3afd500245ed9a3c575c457dd98d7162`;
+failed-seal SHA-256 is
+`d5b7023972488df52ebcc7aac2db7b1d070ed64a420dbd88e6ed80707d69d2af`.
+Its metadata records container exit 0, host exit 1, and
+`ineligible-host-operational-failure`; it is historical incident evidence, not
+a candidate result.
+
+Recovery-v8 implementation authority is
+`50639f08b68bf50ab919e0577a7a3614e9aad938`. Frozen manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v8.json`, SHA-256
+`3dfb0dd588017ed0722d2610cd1f7a76ad35274f8acb6f4133680f6bc52dd0b1`,
+chains v7 and changes only the collector operation to exact preflight plus a
+reverified private snapshot. Graph/Rocket RTL, lowering provenance, toolchain,
+Liberty, partitions, 20 ns clock, 1 ns I/O delays, estimator, report contract,
+stop conditions, and decision rules are byte-equivalent to v7. Both partitions
+require new RUN-IDs from the v8 freeze commit or a clean descendant.
