@@ -382,6 +382,10 @@ The recovery Graph RUN-ID reached Yosys but failed parsing CIRCT block-local
 `automatic logic`; sealed raw digest is `dcda0e56...094ec` and contains no area
 or timing datum. A physical-export-only CIRCT lowering mode is now the single
 bounded recovery candidate. It requires new RTL hashes and manifest before use.
+Recovery-v2 authority `cba6226...7e6bf` emits physical-only Graph RTL at
+`e95e2e02...5a41d` with incompatible local/packed forms removed. Manifest
+SHA-256 `293d83bf...1c04` binds it while preserving Rocket and all scientific
+fields; use waits for its freeze commit.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

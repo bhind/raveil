@@ -231,3 +231,13 @@ must be committed, exported, hash-bound, and frozen before another candidate
 RUN-ID. If that exact lowering still cannot close the complete Graph/Rocket
 matrix, EXP-0009 pauses at the generated-RTL boundary rather than weakening the
 tool or silently rewriting reports.
+
+Recovery-v2 implementation authority is
+`cba62261484d2946b9e3bcc39f05763408f7e6bf`. Its clean RTL-only export has
+source SHA-256 `eebf3176...27c8`, generator image ID `c0d90df9...14ce9`, and
+lowered Graph RTL SHA-256 `e95e2e02b0e3c0460596c89b6dd324e7135208e0e1a097dcd689fdbef2f5a41d`.
+No `automatic` local or packed-array declaration remains. Recovery-v2 manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v2.json`, SHA-256
+`293d83bfb884b7e0b3b8d7416f4438aa8be2968be1bfb109b801bd514b411c04`,
+binds those bytes and the unchanged Rocket/tool/decision contract. Candidate
+use remains prohibited until the commit carrying that manifest.

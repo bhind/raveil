@@ -46,6 +46,18 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
             recovery["operational_change"],
             "allow-only-empty-host-owned-container-log-before-container-launch",
         )
+        recovery_v2_path = (
+            ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v2.json"
+        )
+        recovery_v2 = t0044_physical.load_manifest(recovery_v2_path)
+        self.assertEqual(
+            recovery_v2["recovery_of_manifest_sha256"],
+            t0044_physical.sha256_file(recovery_path),
+        )
+        self.assertEqual(
+            recovery_v2["variants"]["static-graph"]["lowering_options"],
+            ["disallowLocalVariables", "disallowPackedArrays"],
+        )
 
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()
