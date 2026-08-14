@@ -229,6 +229,9 @@ merely because a branch or partial implementation already exists.
    lowering with identical shared elaboration must be frozen, followed by fresh
    Graph and Rocket runs under the same manifest; the prior Graph partition
    result is not a reusable matrix sample.
+   The first isolated lowering build completed but publication stopped on
+   non-semantic cache-root and file-list-order differences. A narrowly verified
+   normalization recovery remains pre-data and does not advance this gate.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

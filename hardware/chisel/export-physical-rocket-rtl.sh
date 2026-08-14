@@ -70,16 +70,30 @@ physical_options=$base_options,disallowPackedArrays
 [ "$(cat "$source_dir/.mfc_lowering_options")" = "$physical_options" ]
 for relative in \
     "$long_name.fir" \
-    "$long_name.appended.anno.json" \
     .sfc_level \
     .extra_firrtl_options \
-    "$long_name.sfc.fir" \
-    "$long_name.sfc.anno.json"; do
+    "$long_name.sfc.fir"; do
     [ -f "$baseline_dir/$relative" ]
     [ -f "$source_dir/$relative" ]
     [ "$(sha256sum "$baseline_dir/$relative" | awk "{print \$1}")" = \
       "$(sha256sum "$source_dir/$relative" | awk "{print \$1}")" ] || {
         echo "error: physical lowering changed shared elaboration input: $relative" >&2
+        exit 1
+    }
+done
+for relative in \
+    "$long_name.appended.anno.json" \
+    "$long_name.sfc.anno.json"; do
+    baseline_normalized=/tmp/baseline-$relative
+    physical_normalized=/tmp/physical-$relative
+    sed "s!/build/$RAVEIL_BASELINE_CACHE_SOURCE_SHA256!<build-root>!g" \
+        "$baseline_dir/$relative" > "$baseline_normalized"
+    sed "s!/build/$RAVEIL_CACHE_SOURCE_SHA256!<build-root>!g" \
+        "$source_dir/$relative" > "$physical_normalized"
+    ! grep -q "$RAVEIL_BASELINE_CACHE_SOURCE_SHA256" "$baseline_normalized"
+    ! grep -q "$RAVEIL_CACHE_SOURCE_SHA256" "$physical_normalized"
+    cmp "$baseline_normalized" "$physical_normalized" || {
+        echo "error: physical lowering changed normalized annotation: $relative" >&2
         exit 1
     }
 done
@@ -98,8 +112,8 @@ done
 for suffix in top.f model.f; do
     baseline_list=/tmp/baseline-$suffix
     physical_list=/tmp/physical-$suffix
-    sed 's!.*/!!' "$baseline_dir/$long_name.$suffix" > "$baseline_list"
-    sed 's!.*/!!' "$source_dir/$long_name.$suffix" > "$physical_list"
+    sed 's!.*/!!' "$baseline_dir/$long_name.$suffix" | LC_ALL=C sort > "$baseline_list"
+    sed 's!.*/!!' "$source_dir/$long_name.$suffix" | LC_ALL=C sort > "$physical_list"
     cmp "$baseline_list" "$physical_list" || {
         echo "error: physical lowering changed normalized $suffix" >&2
         exit 1
@@ -113,13 +127,17 @@ done
     printf "physical_lowering_options=%s\n" "$physical_options"
     for relative in \
         "$long_name.fir" \
-        "$long_name.appended.anno.json" \
         .sfc_level \
         .extra_firrtl_options \
-        "$long_name.sfc.fir" \
-        "$long_name.sfc.anno.json"; do
+        "$long_name.sfc.fir"; do
         digest=$(sha256sum "$source_dir/$relative" | awk "{print \$1}")
         printf "shared_file=%s sha256=%s\n" "$relative" "$digest"
+    done
+    for relative in \
+        "$long_name.appended.anno.json" \
+        "$long_name.sfc.anno.json"; do
+        digest=$(sha256sum "/tmp/physical-$relative" | awk "{print \$1}")
+        printf "shared_normalized_annotation=%s sha256=%s\n" "$relative" "$digest"
     done
     for relative in \
         model_module_hierarchy.json \

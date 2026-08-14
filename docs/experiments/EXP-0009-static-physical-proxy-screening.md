@@ -416,10 +416,24 @@ path: `ENABLE_YOSYS_FLOW=1` appends only `disallowPackedArrays` to its canonical
 firtool lowering options. The next recovery uses that upstream physical-export
 path in a separate Docker volume, leaves the runtime simulator path unchanged,
 and fails closed unless the baseline and physical exports have byte-identical
-FIRRTL, final annotations, SFC level/options, SFC FIRRTL, and SFC annotations.
+FIRRTL and SFC inputs, build-root-normalized identical annotations, identical
+module hierarchies, and identical normalized file-list sets.
 It records the common Makefile, firtool, lowering-options, source, cache, RTL,
 file-list, and provenance hashes. The same compatibility policy is already
 present in the Graph physical emitter. This changes neither ADR-0048's
 partition/resource boundary nor the estimator and therefore needs no new ADR,
 but it requires committed authority, a chained recovery-v7 manifest, and fresh
 Graph and Rocket RUN-IDs before any matrix decision.
+
+The first clean-authority physical build completed under isolated cache key
+`bdd35a347a3d57ecf5d00c80c0166236e87090a64f5d0f6bb02103ffc5b515f1`,
+but export failed closed because the initial checker compared annotation files
+byte-for-byte. Read-only comparison proved their only differences were the two
+absolute cache-root paths embedded in hierarchy annotations. FIRRTL, SFC
+level/options/FIRRTL, build-root-normalized annotations, and all three module
+hierarchy files match; the 376-entry top and 38-entry model file lists have
+identical filename sets but generator-dependent order. The checker correction
+normalizes only the two exact frozen cache roots and sorts basename-only file
+lists while still retaining each physical file-list hash. This operational
+recovery publishes no RTL or candidate datum and requires a new committed
+authority before another distinct export.

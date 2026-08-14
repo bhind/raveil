@@ -449,6 +449,12 @@ The matrix and decision remain `pause-boundary`. A separate-volume,
 physical-export-only upstream `ENABLE_YOSYS_FLOW=1` path now binds
 `disallowPackedArrays` and exact shared-elaboration hashes; it requires a
 recovery-v7 freeze and fresh Graph/Rocket RUN-IDs.
+The first isolated physical build completed, but the exporter stopped before
+publication on absolute build-root strings in otherwise identical annotation
+files. Diagnostics prove both normalized annotations, FIRRTL/SFC inputs,
+module hierarchies, and normalized file-list sets match. A checker-only
+normalization of the two exact cache roots and file-list ordering is required
+under a new authority; no Rocket RTL or physical datum was published.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

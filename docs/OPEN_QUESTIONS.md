@@ -99,6 +99,9 @@ resolves it.
   only `disallowPackedArrays` added, can complete the Rocket partition under a
   single fresh Graph/Rocket manifest. Until then no area ratio, timing
   comparison, or whole-system composition is eligible.
+  The first physical build shows identical normalized shared inputs and module
+  sets, but the export checker itself needs one exact-root/order normalization
+  recovery before this question can be tested by synthesis.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

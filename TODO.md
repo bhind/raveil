@@ -780,6 +780,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   pre-firtool/SFC inputs against the baseline export, then collect fresh Graph
   and Rocket RUN-IDs under one recovery-v7 manifest. Do not reuse `run-007` in
   that matrix or alter the runtime simulator cache/path.
+  The first isolated build completed but stopped before export on absolute
+  cache-root strings and nondeterministic file-list order. Freeze only the
+  verified exact-root annotation normalization plus sorted basename-set check,
+  then export to a new path; retain the failed cache/output attempt.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
