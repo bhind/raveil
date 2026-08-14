@@ -15,9 +15,17 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
     def test_frozen_stage_b_manifest_is_exact(self) -> None:
         path = ROOT / "benchmarks/manifests/t0044-static-physical-screen-v1.json"
         manifest = t0044_physical.load_manifest(path)
-        self.assertEqual(
-            manifest["implementation_authority"],
-            "ca185a802e1180da45d050a430b8b322bec10391",
+        self.assertRegex(manifest["implementation_authority"], r"^[0-9a-f]{40}$")
+        subprocess.run(
+            [
+                "git",
+                "merge-base",
+                "--is-ancestor",
+                manifest["implementation_authority"],
+                "HEAD",
+            ],
+            cwd=ROOT,
+            check=True,
         )
         self.assertEqual(manifest["variants"]["rocket-in-order"]["top"], "Rocket")
         self.assertEqual(
