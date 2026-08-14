@@ -133,6 +133,7 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
             ROOT / "hardware/chisel/run-physical-proxy-synthesis-in-container.sh"
         ).read_text()
         self.assertLess(inner.index("blackbox %s"), inner.index("hierarchy -check"))
+        self.assertNotIn("hierarchy -top %s", inner)
         self.assertIn("select -assert-count 1", inner)
         self.assertIn("stat -json", inner)
         self.assertIn("tool-identity.txt", inner)

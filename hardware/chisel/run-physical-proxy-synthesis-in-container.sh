@@ -26,7 +26,6 @@ find /rtl -type f \( -name '*.sv' -o -name '*.v' \) -print | LC_ALL=C sort > /tm
     while IFS= read -r file; do
         printf 'read_verilog -sv %s\n' "$file"
     done < /tmp/rtl-files
-    printf 'hierarchy -top %s\n' "$RAVEIL_PHYSICAL_TOP"
     old_ifs=$IFS
     IFS=,
     for module in $RAVEIL_PHYSICAL_BLACKBOX_MODULES; do

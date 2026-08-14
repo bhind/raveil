@@ -741,6 +741,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   physical screen if the complete matrix still cannot close.
   The lowered RTL-only export now succeeds and recovery-v2 manifest is ready;
   commit that freeze before a distinct candidate RUN-ID.
+  The lowered RUN then failed before synthesis on black-box ordering. Freeze
+  the `read -> blackbox -> hierarchy` collector-only recovery and retry once;
+  pause if the complete report still cannot close.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

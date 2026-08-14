@@ -242,3 +242,13 @@ No `automatic` local or packed-array declaration remains. Recovery-v2 manifest
 binds those bytes and the unchanged Rocket/tool/decision contract. Candidate
 use is authorized only from recovery-v2 freeze commit
 `ba8ee88863750be9137bd519af0102ed0560cbb5` or a clean descendant.
+
+The lowered Graph RUN-ID parsed all RTL, then stopped before synthesis because
+an initial `hierarchy -top` pruned the common modules before the frozen
+black-box existence assertions. Failed raw digest is
+`b4ed5c06050a1df8c3561cfab5590f1bd194ddfe90dcecd6e403ce7fe1056c3d`;
+there is still no area/timing result. A final bounded collector recovery orders
+the same operations as `read -> assert/blackbox -> hierarchy -check`; it changes
+neither admitted modules nor the black-box list. It requires another exact
+authority/manifest/RUN-ID. Failure after that ordering fix pauses the physical
+screen rather than opening another implementation loop.
