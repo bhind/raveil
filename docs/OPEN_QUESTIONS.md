@@ -20,9 +20,11 @@ resolves it.
   identity, reset recovery, and persistent multi-object atomicity work?
 - RFC-0005 fixes at least 10% total dynamic-energy-proxy improvement, no more
   than 5% correct-latency regression, break-even by 64 invocations, and at most
-  25% incremental Rocket-core area as later no-go thresholds. T-0044 must still
-  define the estimator, repetitions, interval construction, and matched
-  synthesis boundary before collecting data.
+  25% incremental Rocket-core area as later no-go thresholds. EXP-0005 now
+  freezes the fresh-input inference rule, paired estimator, repetitions, 95%
+  interval construction, and latency/traffic stop rules before pilot data.
+  The matched synthesis/energy/area boundary and full T-0044 matrix remain
+  unresolved, and no RFC-0005 numerical decision is allowed below 64 inputs.
 - Where is the measured boundary between static, elastic dataflow, stream, and
   hybrid Graph Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?

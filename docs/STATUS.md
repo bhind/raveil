@@ -153,6 +153,14 @@ must decide that fairness question before measurement. Exhaustive CPU token
 lifecycle hardening remains deferred to T-0106. Existing ADR-0045 diagnostics
 remain bounded functional evidence; no general semantic-initiator,
 performance, CPU/ISA advantage, FPGA, ASIC, or silicon claim is promoted.
+T-0044 has started only its preregistered EXP-0005 latency/traffic pilot.
+Before data collection, the machine-readable manifest freezes fresh seeds
+1--4, the primary static Graph/Rocket/BOOM matrix, BOOM serialize-dispatch as a
+diagnostic only, the same-meaning execution-window edges, paired estimators and
+conditional 95% interval rule, raw/derived separation, and fail-closed stop
+conditions. The pilot deliberately omits VLIW/CGRA, elastic/stream/hybrid,
+energy, synthesis timing, and area; T-0044 remains open and no go or RFC-0005
+numerical no-go may follow from four inputs.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

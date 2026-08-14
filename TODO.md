@@ -646,7 +646,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   correctness constant where possible; report frontend, rename/ROB/issue/LSU,
   graph-ready/token/configuration, cycles, traffic, area, timing, and energy
   proxies separately. Admit only mechanisms that passed the T-0057 source and
-  IP-risk review; retain an explicit no-go outcome.
+  IP-risk review; retain an explicit no-go outcome. The current P0 slice is
+  only EXP-0005's frozen 1/4-fresh-input latency/traffic pilot: static Graph,
+  Rocket in-order, BOOM OoO, plus BOOM serialize-dispatch as a diagnostic (not
+  an “OoO-disabled CPU”). Primary comparison preserves lawful CPU load reuse
+  and reports Graph's extra traffic. VLIW/CGRA, elastic, stream, hybrid,
+  energy, synthesis timing, and area remain outside this checkpoint, so pilot
+  success cannot close T-0044 or decide go. Fail closed on oracle/resource/
+  traffic/accounting/source/config/matrix/window-boundary failure and do not
+  decide the RFC-0005 numerical no-go below 64 fresh inputs.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

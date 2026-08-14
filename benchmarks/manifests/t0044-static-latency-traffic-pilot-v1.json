@@ -1,0 +1,169 @@
+{
+  "schema": "raveil.t0044-pilot-manifest/v1",
+  "experiment_id": "EXP-0005",
+  "task_id": "T-0044",
+  "status": "frozen-before-data",
+  "evidence_class": "rtl-simulation-pilot",
+  "authority": {
+    "integration_commit": "528fbe28a0dcdfbab65d4ae2995c0876857e053a",
+    "rfc": ["RFC-0004", "RFC-0005"],
+    "adr": ["ADR-0039", "ADR-0046"]
+  },
+  "scope": {
+    "checkpoint": "one-and-four-fresh-input-latency-traffic-pilot",
+    "t0044_complete": false,
+    "excluded": [
+      "vliw-cgra-control",
+      "elastic-graph",
+      "stream-graph",
+      "hybrid-graph",
+      "energy",
+      "synthesis-timing",
+      "area",
+      "fpga",
+      "silicon"
+    ]
+  },
+  "workload": {
+    "name": "rfc0005-uint32-five-point-stencil",
+    "input_shape": [18, 18],
+    "output_shape": [16, 16],
+    "arithmetic": "uint32-modulo-2^32",
+    "order": "row-major",
+    "fresh_input_seeds": [1, 2, 3, 4],
+    "result_reuse": false,
+    "intermediate_reuse": false,
+    "descriptor_reuse": true
+  },
+  "environment": {
+    "preferred_path": "pinned-linux-amd64-docker-verilator",
+    "host_wall_clock_role": "operations-only-not-cpu-performance-evidence",
+    "network_during_simulation": false,
+    "required_identities": [
+      "git-commit",
+      "source-sha256",
+      "artifact-sha256",
+      "toolchain-sha256",
+      "configuration-sha256",
+      "resource-sha256",
+      "contract-sha256",
+      "descriptor-sha256",
+      "input-sha256",
+      "oracle-output-sha256",
+      "observed-output-sha256"
+    ]
+  },
+  "matrix": {
+    "primary": [
+      {"id": "static-graph", "role": "candidate"},
+      {"id": "rocket-in-order", "role": "primary-baseline"},
+      {"id": "boom-ooo", "role": "primary-baseline"}
+    ],
+    "diagnostic": [
+      {
+        "id": "boom-serialize-dispatch",
+        "role": "same-core-diagnostic-only",
+        "forbidden_label": "ooo-disabled-cpu"
+      }
+    ],
+    "complete_for_this_pilot": [
+      "static-graph",
+      "rocket-in-order",
+      "boom-ooo",
+      "boom-serialize-dispatch"
+    ]
+  },
+  "comparison_contract": {
+    "primary": "same-high-level-semantics-memory-boundary-ports-latency-and-functional-resources-with-each-candidate-allowed-legal-optimizations",
+    "cpu_load_reuse": "visible-design-result",
+    "graph_extra_traffic": "visible-design-result",
+    "cpu_weakening": false,
+    "secondary_ablation": {
+      "status": "not-activated",
+      "activation": "only-if-needed-to-decompose-primary-traffic-finding",
+      "rule": "match-operation-and-load-counts-without-replacing-primary-baseline"
+    }
+  },
+  "window_contract": {
+    "start": "immediately-after-final-staging-response-drain-and-before-candidate-specific-launch-or-post-staging-execution-work",
+    "end": "immediately-after-final-execution-output-write-response-completes-and-before-completion-bookkeeping",
+    "graph_launch_cycle_in_execution": true,
+    "same_meaning_required": true
+  },
+  "phases": [
+    "installation",
+    "staging",
+    "execution",
+    "drain-completion",
+    "validation",
+    "publication"
+  ],
+  "metrics": {
+    "required": [
+      "execution-window-cycles",
+      "phase-cycles",
+      "end-to-end-total-cycles",
+      "useful-load-add-store-output-counts",
+      "admitted-completed-read-write-transactions",
+      "read-write-bytes",
+      "stall-cycles",
+      "backpressure-cycles",
+      "semantic-and-identity-hashes"
+    ],
+    "activity_if_instrumented": [
+      "fetch-decode-register",
+      "rename-rob-issue-lsu",
+      "graph-schedule-control"
+    ],
+    "unavailable_rule": "emit-null-plus-reason-never-zero-imputation",
+    "simulator_wall_clock": "operations-only"
+  },
+  "sampling": {
+    "pilot_accounts": [1, 4],
+    "inference_unit_if_input_dependent": "fresh-input-version",
+    "identical-deterministic-replay_is_independent_sample": false,
+    "replay_role": "exact-cycle-reproducibility-check-only",
+    "expansion_after_pilot_only": [1, 4, 16, 64, 256]
+  },
+  "estimators": {
+    "per_candidate": [
+      "exact-cycle-vector-by-fresh-input",
+      "traffic-count-vector-by-fresh-input",
+      "median",
+      "minimum",
+      "maximum"
+    ],
+    "paired_ratios": "per-fresh-input-candidate-divided-by-rocket-then-median",
+    "confidence_interval": {
+      "level": 0.95,
+      "method_if_input_dependent": "paired-percentile-bootstrap",
+      "resamples": 100000,
+      "prng": "python-random-mt19937",
+      "seed": 5005,
+      "method_if_input_invariant": "exact-value-plus-reproducibility-count-no-inferential-interval"
+    },
+    "pilot_intervals_are_claim_bearing": false
+  },
+  "stop_conditions": [
+    "oracle-mismatch",
+    "resource-equality-failure",
+    "unexplained-traffic",
+    "required-accounting-missing",
+    "source-or-configuration-drift",
+    "incomplete-pilot-matrix",
+    "execution-window-meaning-differs"
+  ],
+  "traffic_difference_rule": "not-automatic-failure-record-cause-and-meaning-primary-is-claim-ineligible-if-fairness-cannot-be-explained",
+  "decision_rules": {
+    "below_64_fresh_inputs": "no-rfc0005-numerical-no-go",
+    "pilot_cannot_decide_go": true,
+    "missing_energy_timing_or_area": "result-must-be-partial-pilot",
+    "terminal_labels": ["advance", "pause", "early-no-go"]
+  },
+  "evidence_layout": {
+    "raw": "artifacts/research/EXP-0005/<RUN-ID>/raw/",
+    "derived": "artifacts/research/EXP-0005/<RUN-ID>/derived/",
+    "immutable_after_seal": true,
+    "exact_commands_environment_exit_codes_and_hashes_required": true
+  }
+}
