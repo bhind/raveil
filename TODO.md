@@ -683,7 +683,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   freeze the completed-outer-raw collector boundary and rerun. Do not promote
   either externally replayed failed log. The replacement freeze is complete.
   The outer file then grew after Docker CLI return; freeze the bounded required-
-  marker drain wait and rerun the complete matrix.
+  marker drain wait and rerun the complete matrix. The replacement freeze is
+  complete.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

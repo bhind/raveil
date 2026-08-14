@@ -90,6 +90,10 @@ def load_manifest(path: Path) -> dict[str, Any]:
         "4a3faefc4c37aeb02c642b37fb4d20827021fb34"
     ):
         raise ControlledRunError("EXP-0006 outer-log authority changed")
+    if value["authority"]["docker_output_drain_commit"] != (
+        "45a453ce8ee61bd2aba67caf282d5b5de44ba99a"
+    ):
+        raise ControlledRunError("EXP-0006 Docker-drain authority changed")
     if value["workload"]["fresh_input_versions"] != list(range(1, 257)):
         raise ControlledRunError("EXP-0006 fresh-input order changed")
     if value["matrix"]["complete_for_commissioning"] != list(VARIANTS):

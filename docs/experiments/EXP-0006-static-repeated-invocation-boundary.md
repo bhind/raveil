@@ -12,10 +12,11 @@ commit `7575602e6651cc1e755e8d2f7b255aa8872db856`, runtime-fix commit
 commit `cf454e4cd847d43d223fe7166b20d75dae0c2ffe`, log-synchronization commit
 `988c25e615feaf711cb4d91f121d551bf88420ea`, completed-outer-log
 verification commit `4a3faefc4c37aeb02c642b37fb4d20827021fb34`
+and Docker-output-drain commit `45a453ce8ee61bd2aba67caf282d5b5de44ba99a`.
 Prior evidence: EXP-0005 (preserved unchanged)
 Manifest: `benchmarks/manifests/t0044-static-repeated-invocation-v1.json`
 Frozen manifest SHA-256:
-`1f152964dbfa60876c96ee209816857aa7481aa0133def5301fc1a5414d74ae1`
+`ce395548c48b269f72f82f9cc33c22b6fa2cddd29293aeb8b4c1c8bc47359968`
 
 ## Falsifiable question
 
@@ -113,9 +114,9 @@ python3 -m raveil.t0044_repeated collect \
 ```
 
 Earlier freezes produced only retained failed commissioning attempts. Stack,
-installation-accounting, and completed-outer-log verification corrections
-changed source, so the manifest was re-frozen with the hash above before any
-replacement run or complete-matrix observation.
+installation-accounting, completed-outer-log verification, and bounded Docker
+output-drain corrections changed source, so the manifest was re-frozen with
+the hash above before any replacement run or complete-matrix observation.
 
 ## Estimate
 

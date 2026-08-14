@@ -242,6 +242,8 @@ Thus Docker Desktop stdout forwarding, not the simulator or parser, is the
 remaining boundary. The collector now waits up to 30 operations-only seconds
 for frozen output/complete/host marker cardinalities before hashing, deriving,
 or sealing; timeout fails closed. Another re-freeze is required.
+The bounded Docker-output-drain wait is now replacement manifest authority; no
+subsequent complete-matrix run existed at this re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
