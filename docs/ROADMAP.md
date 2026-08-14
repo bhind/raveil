@@ -245,6 +245,8 @@ merely because a branch or partial implementation already exists.
    the Rocket derived checker failed on unrelated module-area rows. The gate
    remains unchanged pending an exact-top parser recovery and fresh same-
    manifest pair.
+   Recovery-v9 freezes the parser-only correction; the gate awaits the fresh
+   v9 pair and remains open.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

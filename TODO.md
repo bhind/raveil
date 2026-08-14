@@ -804,6 +804,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   unrelated module-area rows as ambiguity. Freeze the exact-frozen-top-only
   parser correction under a new authority, retain both v8 runs, then allocate
   fresh paired RUN-IDs. Do not derive a matrix across recovery manifests.
+  Recovery-v9 authority `558c7c0...9c6df` and manifest
+  `d052987...1fd63` freeze only that exact-top parser correction. Run new Graph
+  and Rocket RUN-IDs under v9, then derive the matrix only from those results.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

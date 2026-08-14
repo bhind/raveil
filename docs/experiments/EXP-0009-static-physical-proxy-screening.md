@@ -539,3 +539,13 @@ for the pair on this host; with tests, records, freeze, and one fresh paired
 rerun, the updated estimate is 0.25--1 working day with medium-high confidence,
 assuming no further report-contract failure. Host duration is operational
 information only.
+
+Recovery-v9 implementation authority is
+`558c7c0cf5d71acf2589746f78ff42fdfbb9c6df`. Frozen manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json`, SHA-256
+`d052987747c2a41920e8c1f39152b5a6257092454c9139ed4544bcaa9541fd63`,
+chains v8 and changes only the report operation to one exact frozen-top log row
+and one plain-or-escaped stat alias. It retains byte-equivalent RTL, lowering,
+toolchain, Liberty, partition, clock/I/O, estimator, stop-condition, report,
+and decision fields. V8 raw/result artifacts remain provenance only; the v9
+matrix requires two fresh RUN-IDs from the freeze commit or clean descendant.

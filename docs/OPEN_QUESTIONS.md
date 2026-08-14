@@ -115,6 +115,8 @@ resolves it.
   Its Rocket raw run exposed a report-parser assumption rather than an RTL or
   timing outcome. The question therefore remains open until the exact frozen
   top is selected unambiguously and both partitions rerun under one recovery.
+  Recovery-v9 now freezes that selection; the unresolved fact is the fresh
+  paired physical outcome, not parser behavior.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

@@ -491,6 +491,10 @@ is exactly one frozen-top row; no Rocket result or matrix is eligible. The
 checker now requires exactly one frozen-top log row, exactly one plain/escaped
 stat top, and equality between them. A fresh recovery freeze and paired rerun
 remain required.
+Recovery-v9 implementation authority is `558c7c0...9c6df`; frozen manifest
+SHA-256 is `d052987...1fd63`. It changes only exact-top report selection and
+retains all v8 RTL, toolchain, physical, evidence, and decision fields. No v8
+result is imported into the v9 matrix; both partitions require fresh RUN-IDs.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

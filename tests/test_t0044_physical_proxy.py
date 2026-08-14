@@ -227,6 +227,21 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         )
         self.assertEqual(recovery_v8["variants"], recovery_v7["variants"])
         self.assertEqual(recovery_v8["toolchain"], recovery_v7["toolchain"])
+        recovery_v9_path = (
+            ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v9.json"
+        )
+        recovery_v9 = t0044_physical.load_manifest(recovery_v9_path)
+        self.assertEqual(
+            recovery_v9["recovery_of_manifest_sha256"],
+            t0044_physical.sha256_file(recovery_v8_path),
+        )
+        self.assertEqual(
+            recovery_v9["operational_change"],
+            "select-one-exact-frozen-top-area-row-and-stat-alias",
+        )
+        self.assertEqual(recovery_v9["variants"], recovery_v8["variants"])
+        self.assertEqual(recovery_v9["toolchain"], recovery_v8["toolchain"])
+        self.assertEqual(recovery_v9["decision_rules"], recovery_v8["decision_rules"])
 
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()
