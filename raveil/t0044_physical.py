@@ -74,6 +74,19 @@ COMPATIBILITY_OPERATIONAL_CHANGE = (
 COMPATIBILITY_RECOVERY_PREDECESSOR_SHA256 = (
     "135f30d6899742eb769d67c8a8dc6929db105f03e54e284e7e81900acebc398a"
 )
+RUN009_MANIFEST_SHA256 = (
+    "5b16529903cc12ef594a5d1177b2620a3ab81da7d64cfdaeda6a7eb050ec1780"
+)
+RUN009_EXPECTED_RTL_SHA256 = (
+    "e95e2e02b0e3c0460596c89b6dd324e7135208e0e1a097dcd689fdbef2f5a41d"
+)
+RUN009_ACTUAL_RTL_SHA256 = (
+    "961002ee96be9185bbf77179362998320d59de63309124381290119ee79fbeca"
+)
+RUN009_PRESEAL_FILES_SHA256 = (
+    "238c0eca2d160d61bc8d22376ab2e9dda933988f4fb8139d3e7dd6720ab0fadf"
+)
+RUN009_PRESEAL_FILES = RAW_REQUIRED - {"run-metadata.json"}
 
 
 def sha256_file(path: pathlib.Path) -> str:
@@ -334,6 +347,23 @@ def _verify_variant_inputs(
     return rtl_sha256
 
 
+def verify_inputs(
+    manifest_path: pathlib.Path, variant: str, rtl_dir: pathlib.Path
+) -> dict[str, str]:
+    manifest = load_manifest(manifest_path)
+    verify_authority(manifest)
+    contract = _variant_contract(manifest, variant)
+    rtl_sha256 = _verify_variant_inputs(
+        manifest, variant, contract["top"], ",".join(contract["blackboxes"]), rtl_dir
+    )
+    return {
+        "status": "OK",
+        "variant": variant,
+        "rtl_sha256": rtl_sha256,
+        "manifest_sha256": sha256_file(manifest_path),
+    }
+
+
 def write_run_metadata(
     manifest_path: pathlib.Path,
     variant: str,
@@ -422,6 +452,73 @@ def record_failure(
         "manifest_sha256": sha256_file(manifest_path),
         "container_exit_code": container_exit_code,
         "eligibility": "ineligible-operational-failure",
+        "performance_claim": False,
+    }
+    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
+    files = file_map_sha256(raw_dir)
+    seal = {
+        "schema": "raveil.t0044-physical-failed-seal/v1",
+        "experiment_id": "EXP-0009",
+        "variant": variant,
+        "files": files,
+        "files_sha256": canonical_sha256(files),
+    }
+    seal_path.write_text(json.dumps(seal, indent=2, sort_keys=True) + "\n")
+    return seal
+
+
+def record_retrospective_host_failure(
+    manifest_path: pathlib.Path,
+    variant: str,
+    rtl_dir: pathlib.Path,
+    raw_dir: pathlib.Path,
+) -> dict[str, Any]:
+    manifest = load_manifest(manifest_path)
+    verify_authority(manifest)
+    contract = _variant_contract(manifest, variant)
+    if sha256_file(manifest_path) != RUN009_MANIFEST_SHA256:
+        raise ValueError("retrospective incident manifest drift")
+    if variant != "static-graph" or raw_dir.name != "run-009-static-graph-raw":
+        raise ValueError("retrospective incident identity drift")
+    actual_rtl_sha256 = tree_sha256(rtl_dir)
+    expected_rtl_sha256 = contract["rtl_sha256"]
+    if (
+        expected_rtl_sha256 != RUN009_EXPECTED_RTL_SHA256
+        or actual_rtl_sha256 != RUN009_ACTUAL_RTL_SHA256
+    ):
+        raise ValueError("retrospective incident RTL identity drift")
+    metadata_path = raw_dir / "failure-metadata.json"
+    seal_path = raw_dir / "failed-seal.json"
+    if metadata_path.exists() or seal_path.exists():
+        raise ValueError("failed raw evidence is already sealed")
+    names = {
+        item.relative_to(raw_dir).as_posix()
+        for item in raw_dir.rglob("*")
+        if item.is_file()
+    }
+    if names != RUN009_PRESEAL_FILES:
+        raise ValueError("retrospective incident file set drift")
+    preseal_files = file_map_sha256(raw_dir)
+    if canonical_sha256(preseal_files) != RUN009_PRESEAL_FILES_SHA256:
+        raise ValueError("retrospective incident raw evidence drift")
+    marker = (
+        "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=static-graph "
+        "top=StaticStencilRegion"
+    )
+    if marker not in (raw_dir / "container.log").read_text():
+        raise ValueError("retrospective incident container completion is missing")
+    metadata = {
+        "schema": "raveil.t0044-physical-host-failure/v1",
+        "experiment_id": "EXP-0009",
+        "variant": variant,
+        "expected_rtl_sha256": expected_rtl_sha256,
+        "actual_rtl_sha256": actual_rtl_sha256,
+        "manifest_sha256": sha256_file(manifest_path),
+        "container_exit_code": 0,
+        "host_exit_code": 1,
+        "failure_stage": "post-container-input-identity",
+        "incident": "run-009-wrong-export-parent",
+        "eligibility": "ineligible-host-operational-failure",
         "performance_claim": False,
     }
     metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
@@ -707,6 +804,10 @@ def main() -> None:
     variant_parser.add_argument("--manifest", type=pathlib.Path, required=True)
     variant_parser.add_argument("--variant", required=True)
     variant_parser.add_argument("--field", choices=("top", "blackboxes"), required=True)
+    inputs_parser = subparsers.add_parser("verify-inputs")
+    inputs_parser.add_argument("--manifest", type=pathlib.Path, required=True)
+    inputs_parser.add_argument("--variant", required=True)
+    inputs_parser.add_argument("--rtl-dir", type=pathlib.Path, required=True)
     derive_parser = subparsers.add_parser("derive-one")
     derive_parser.add_argument("--manifest", type=pathlib.Path, required=True)
     derive_parser.add_argument("--variant", required=True)
@@ -730,6 +831,11 @@ def main() -> None:
     failure_parser.add_argument("--rtl-dir", type=pathlib.Path, required=True)
     failure_parser.add_argument("--raw-dir", type=pathlib.Path, required=True)
     failure_parser.add_argument("--container-exit-code", type=int, required=True)
+    host_failure_parser = subparsers.add_parser("record-retrospective-host-failure")
+    host_failure_parser.add_argument("--manifest", type=pathlib.Path, required=True)
+    host_failure_parser.add_argument("--variant", required=True)
+    host_failure_parser.add_argument("--rtl-dir", type=pathlib.Path, required=True)
+    host_failure_parser.add_argument("--raw-dir", type=pathlib.Path, required=True)
     matrix_parser = subparsers.add_parser("derive-matrix")
     matrix_parser.add_argument("--manifest", type=pathlib.Path, required=True)
     matrix_parser.add_argument("--graph-result", type=pathlib.Path, required=True)
@@ -747,6 +853,12 @@ def main() -> None:
         print(_field(load_manifest(args.manifest), args.field))
     elif args.command == "variant-field":
         print(variant_field(load_manifest(args.manifest), args.variant, args.field))
+    elif args.command == "verify-inputs":
+        print(
+            json.dumps(
+                verify_inputs(args.manifest, args.variant, args.rtl_dir), sort_keys=True
+            )
+        )
     elif args.command == "derive-one":
         print(
             json.dumps(
@@ -781,6 +893,18 @@ def main() -> None:
                     args.rtl_dir,
                     args.raw_dir,
                     args.container_exit_code,
+                ),
+                sort_keys=True,
+            )
+        )
+    elif args.command == "record-retrospective-host-failure":
+        print(
+            json.dumps(
+                record_retrospective_host_failure(
+                    args.manifest,
+                    args.variant,
+                    args.rtl_dir,
+                    args.raw_dir,
                 ),
                 sort_keys=True,
             )

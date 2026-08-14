@@ -236,6 +236,9 @@ merely because a branch or partial implementation already exists.
    frozen shared-lowering identity and fresh paired synthesis can advance it.
    Recovery-v7 now freezes that identity; the gate still awaits both fresh
    partition results under the same manifest.
+   A wrong-directory `run-009` exposed post-container input validation; the
+   pre-container preflight and verified private-snapshot recovery are mandatory
+   before the paired run and do not advance the gate.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

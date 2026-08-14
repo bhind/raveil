@@ -4,6 +4,7 @@ import re
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 from raveil import t0044_physical
 
@@ -297,11 +298,18 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
             ROOT / "hardware/chisel/run-physical-proxy-synthesis.sh"
         ).read_text()
         self.assertIn("variant-field", wrapper)
+        self.assertIn("verify-inputs", wrapper)
         self.assertIn("seal-raw", wrapper)
         self.assertIn("--raw-dir", wrapper)
         self.assertIn("--derived-dir", wrapper)
         self.assertIn("target=/runner.sh,readonly", wrapper)
         self.assertNotIn("/work/run-physical-proxy-synthesis-in-container.sh", wrapper)
+        self.assertLess(wrapper.index("verify-inputs"), wrapper.index('mkdir -p "$raw_dir"'))
+        self.assertLess(wrapper.index("verify-inputs"), wrapper.index("docker run --rm"))
+        self.assertIn("rtl_snapshot=$(mktemp -d", wrapper)
+        self.assertIn('cp -R "$rtl_dir/." "$rtl_snapshot/"', wrapper)
+        self.assertIn("source=$rtl_snapshot,target=/rtl,readonly", wrapper)
+        self.assertNotIn("source=$rtl_dir,target=/rtl,readonly", wrapper)
 
         inner = (
             ROOT / "hardware/chisel/run-physical-proxy-synthesis-in-container.sh"
@@ -491,6 +499,71 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
                 t0044_physical.write_run_metadata(
                     manifest, "static-graph", "Top", "HiddenLogic", rtl, raw
                 )
+
+    def test_input_preflight_rejects_wrong_rtl_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            manifest, rtl, _raw = self._fixture(root)
+            result = t0044_physical.verify_inputs(manifest, "static-graph", rtl)
+            self.assertEqual(result["status"], "OK")
+            self.assertEqual(result["rtl_sha256"], t0044_physical.tree_sha256(rtl))
+
+            (root / "unrelated.txt").write_text("outside the frozen RTL tree\n")
+            with self.assertRaisesRegex(ValueError, "variant RTL identity drift"):
+                t0044_physical.verify_inputs(manifest, "static-graph", root)
+
+    def test_retrospective_host_failure_is_locked_and_claim_ineligible(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            expected_rtl = root / "expected-rtl"
+            actual_rtl = root / "actual-rtl"
+            expected_rtl.mkdir()
+            actual_rtl.mkdir()
+            (expected_rtl / "top.v").write_text("module Top; endmodule\n")
+            (actual_rtl / "top.v").write_text("module Wrong; endmodule\n")
+            manifest = root / "manifest.json"
+            manifest.write_text(
+                json.dumps(
+                    self._manifest(t0044_physical.tree_sha256(expected_rtl)),
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            raw = root / "run-009-static-graph-raw"
+            raw.mkdir()
+            for name in t0044_physical.RUN009_PRESEAL_FILES:
+                content = name + "\n"
+                if name == "container.log":
+                    content = (
+                        "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK "
+                        "variant=static-graph top=StaticStencilRegion\n"
+                    )
+                (raw / name).write_text(content)
+            preseal_sha256 = t0044_physical.canonical_sha256(
+                t0044_physical.file_map_sha256(raw)
+            )
+            with mock.patch.multiple(
+                t0044_physical,
+                RUN009_MANIFEST_SHA256=t0044_physical.sha256_file(manifest),
+                RUN009_EXPECTED_RTL_SHA256=t0044_physical.tree_sha256(expected_rtl),
+                RUN009_ACTUAL_RTL_SHA256=t0044_physical.tree_sha256(actual_rtl),
+                RUN009_PRESEAL_FILES_SHA256=preseal_sha256,
+            ):
+                seal = t0044_physical.record_retrospective_host_failure(
+                    manifest, "static-graph", actual_rtl, raw
+                )
+            metadata = json.loads((raw / "failure-metadata.json").read_text())
+            self.assertEqual(metadata["container_exit_code"], 0)
+            self.assertEqual(metadata["host_exit_code"], 1)
+            self.assertEqual(
+                metadata["eligibility"], "ineligible-host-operational-failure"
+            )
+            self.assertFalse(metadata["performance_claim"])
+            self.assertEqual(
+                seal["files_sha256"], t0044_physical.canonical_sha256(seal["files"])
+            )
+            self.assertIn("failure-metadata.json", seal["files"])
+            self.assertNotIn("failed-seal.json", seal["files"])
 
     def test_contradictory_timing_status_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

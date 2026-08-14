@@ -107,6 +107,9 @@ resolves it.
   passes remains open pending recovery-v7 freeze and fresh runs.
   Recovery-v7 now freezes the exact policy and identities; the question moves
   to the fresh paired synthesis outcome, with no prior result import allowed.
+  Wrong-directory `run-009` is explicitly ineligible; the outcome question is
+  unchanged after moving exact RTL identity validation before Docker launch
+  and mounting only its independently reverified private snapshot.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

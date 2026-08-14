@@ -31,9 +31,7 @@ git -C "$repo_root" diff --cached --quiet
     echo "error: derived result path already exists: $derived_dir" >&2
     exit 1
 }
-mkdir -p "$raw_dir"
 rtl_dir=$(CDPATH= cd -- "$rtl_dir" && pwd)
-raw_dir=$(CDPATH= cd -- "$raw_dir" && pwd)
 
 expected_image_id=$(python3 -m raveil.t0044_physical manifest-field \
     --manifest "$manifest" --field toolchain.image_id)
@@ -46,13 +44,27 @@ actual_image_id=$(docker image inspect --format '{{.Id}}' "$image")
     echo 'error: physical toolchain image drift' >&2
     exit 1
 }
+python3 -m raveil.t0044_physical verify-inputs \
+    --manifest "$manifest" --variant "$variant" --rtl-dir "$rtl_dir"
+
+rtl_snapshot=$(mktemp -d "${TMPDIR:-/tmp}/raveil-exp0009-rtl.XXXXXX")
+cleanup() {
+    rm -rf -- "$rtl_snapshot"
+}
+trap cleanup EXIT HUP INT TERM
+cp -R "$rtl_dir/." "$rtl_snapshot/"
+python3 -m raveil.t0044_physical verify-inputs \
+    --manifest "$manifest" --variant "$variant" --rtl-dir "$rtl_snapshot"
+
+mkdir -p "$raw_dir"
+raw_dir=$(CDPATH= cd -- "$raw_dir" && pwd)
 
 set +e
 docker run --rm \
     --platform "$platform" \
     --network none \
     --security-opt no-new-privileges=true \
-    --mount "type=bind,source=$rtl_dir,target=/rtl,readonly" \
+    --mount "type=bind,source=$rtl_snapshot,target=/rtl,readonly" \
     --mount "type=bind,source=$raw_dir,target=/evidence" \
     --mount "type=bind,source=$repo_root/hardware/chisel/run-physical-proxy-synthesis-in-container.sh,target=/runner.sh,readonly" \
     --env "RAVEIL_PHYSICAL_VARIANT=$variant" \
@@ -65,7 +77,7 @@ container_exit_code=$?
 set -e
 if [ "$container_exit_code" -ne 0 ]; then
     python3 -m raveil.t0044_physical record-failure \
-        --manifest "$manifest" --variant "$variant" --rtl-dir "$rtl_dir" \
+        --manifest "$manifest" --variant "$variant" --rtl-dir "$rtl_snapshot" \
         --raw-dir "$raw_dir" --container-exit-code "$container_exit_code"
     cat "$raw_dir/container.log" >&2
     exit "$container_exit_code"
@@ -74,10 +86,10 @@ cat "$raw_dir/container.log"
 
 python3 -m raveil.t0044_physical write-run-metadata \
     --manifest "$manifest" --variant "$variant" --top "$top" \
-    --blackboxes "$blackboxes" --rtl-dir "$rtl_dir" --raw-dir "$raw_dir"
+    --blackboxes "$blackboxes" --rtl-dir "$rtl_snapshot" --raw-dir "$raw_dir"
 python3 -m raveil.t0044_physical seal-raw \
     --manifest "$manifest" --variant "$variant" --raw-dir "$raw_dir"
 
 python3 -m raveil.t0044_physical derive-one \
-    --manifest "$manifest" --variant "$variant" --rtl-dir "$rtl_dir" \
+    --manifest "$manifest" --variant "$variant" --rtl-dir "$rtl_snapshot" \
     --raw-dir "$raw_dir" --derived-dir "$derived_dir"

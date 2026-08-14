@@ -465,6 +465,15 @@ SHA-256 is `5b165299...ec1780`. It binds unchanged Graph RTL, verified physical
 Rocket RTL, generator provenance, and one common compatibility-lowering
 policy. Fresh Graph and Rocket runs may begin only after the manifest freeze
 commit; no prior Graph result can enter the v7 matrix.
+The first v7 Graph command (`run-009`) supplied the export parent instead of
+`generated-src`; actual tree hash `961002ee...fbeca` differed from the frozen
+Graph hash. The host failed before sealing/derivation, but only after Docker
+completed, exposing a preflight-order defect. No value is eligible. The
+collector now verifies manifest authority and exact variant tree before raw
+directory creation, copies that verified tree to a private snapshot, verifies
+the snapshot again, and mounts only the snapshot into Docker. Retrospective
+sealing is hash-locked to the exact run-009 manifest, RTL trees, file set, and
+pre-seal evidence digest. A new recovery freeze is required.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -470,3 +470,23 @@ RTL. It changes no partition, toolchain, Liberty, clock, I/O delay, estimator,
 or decision rule. Candidate collection is authorized only from the eventual
 recovery-v7 freeze commit or its clean descendants, and both Graph and Rocket
 must receive fresh RUN-IDs under this one manifest.
+
+The first v7 command allocated Graph `run-009` but passed the export parent
+directory instead of its `generated-src` tree. The actual tree hash was
+`961002ee96be9185bbf77179362998320d59de63309124381290119ee79fbeca`,
+not the frozen Graph RTL hash. The host detected this only while writing
+post-container metadata, after the container had run, and exited 1 before raw
+sealing or derivation. No contained value was inspected or admitted. This is
+an ineligible host/operator operational failure, not a Graph candidate result.
+
+The incident exposes a collector ordering defect: variant RTL identity was
+verified after, not before, candidate synthesis. The correction adds an exact
+manifest/authority/variant/tree preflight before raw-directory creation. It
+then copies the verified tree to a private temporary snapshot, verifies that
+snapshot again, and mounts only the snapshot read-only into Docker. This closes
+the preflight-to-mount mutation window. Retrospective sealing is limited to
+this exact incident by the v7 manifest hash, expected and actual RTL hashes,
+RUN-ID, raw file set, pre-seal file-map digest, and successful container marker;
+it cannot authorize another drifted run. This changes no RTL, physical
+constraint, estimator, or decision rule, but requires another committed
+authority and recovery manifest before a new RUN-ID.
