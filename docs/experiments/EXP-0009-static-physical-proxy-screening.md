@@ -147,3 +147,8 @@ accepts only the exact `.sv`/`.v` entries in Chipyard's generated `.top.f`,
 flattens them into a collision-checked directory, and separately hashes the RTL
 tree and normalized file list. It records the stable generator RootFS-layer
 identity rather than the provenance-bearing local image-manifest ID.
+
+The first canonical-copy commissioning then failed closed because the `.top.f`
+locator was one directory too high. Read-only volume inspection found the file
+inside the configuration-specific generated-source directory; the locator is
+corrected before any canonical export or synthesis.

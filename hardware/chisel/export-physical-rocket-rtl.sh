@@ -57,7 +57,7 @@ build_root=/build/$RAVEIL_CACHE_SOURCE_SHA256
 [ "$(cat "$build_root/.raveil-source-ready")" = "$RAVEIL_CACHE_SOURCE_SHA256" ]
 source_dir="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_CPU_CONFIG"
 [ -d "$source_dir" ]
-filelist="$(dirname "$source_dir")/chipyard.harness.TestHarness.$RAVEIL_CPU_CONFIG.top.f"
+filelist="$source_dir/chipyard.harness.TestHarness.$RAVEIL_CPU_CONFIG.top.f"
 [ -f "$filelist" ]
 mkdir /export/generated-src
 while IFS= read -r source; do
