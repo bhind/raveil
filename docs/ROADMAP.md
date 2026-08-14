@@ -190,9 +190,9 @@ merely because a branch or partial implementation already exists.
    installed configuration without simulator reboot. Its execution-window
    latency/traffic evidence is eligible, but CPU-local versus Graph-testbench
    input generation left staging and end-to-end meaning unresolved. ADR-0047's
-   common fixture provider and EXP-0007 pre-data manifest are now frozen and
-   awaiting complete 1/4 commissioning; the 1/4/16/64/256
-   campaign remains paused. The pilot does not
+   common fixture provider and frozen EXP-0007 complete 1/4 commissioning now
+   pass the same-meaning staging boundary. The bounded decision is `advance`
+   to a separately preregistered 1/4/16/64/256 campaign. The pilot does not
    implement the remaining organizations or collect energy, synthesis timing, or area, so
    T-0044 remains open and no go/no-go follows.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival

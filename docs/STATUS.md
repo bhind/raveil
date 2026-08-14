@@ -289,8 +289,19 @@ EXP-0007 commissioning data or a performance claim. Manifest
 `t0044-fixture-owned-staging-v1.json` is frozen at SHA-256
 `c9b0f9d307421cfd611978c4e221d84faeb939f0630c4b9818180630c5f26c57`
 against implementation authority `8e96d24188df9ab83eb7ed0f700b4db914174c33`.
-The complete frozen Graph/Rocket/BOOM/diagnostic 1/4 runs remain required; EXP-0006's
-`pause` and sealed evidence are unchanged.
+Frozen EXP-0007 RUN-IDs
+`20260814T115314Z-8e96d24-commission1` and
+`20260814T115314Z-8e96d24-commission4` now complete with all eight commands at
+exit zero. Four distinct inputs match the independent oracle for every
+candidate; resource, lifecycle, traffic, identity, execution-window, one-
+process/reset/install, and no-reload checks pass. Median execution cycles are
+3,072 Graph, 14,539 Rocket, and 21,893 BOOM, with 1,536 versus 1,056
+transactions per input. The 480-transaction difference remains explained by
+lawful CPU load reuse. Common fixture staging is exactly 324 writes and a
+648-cycle provider window for all candidates. EXP-0007 therefore resolves the
+single EXP-0006 fairness pause and returns `advance` for a separately frozen
+1/4/16/64/256 campaign. The evidence remains partial RTL-simulation pilot:
+T-0044 is open and neither RFC-0005 go nor numerical no-go is decided.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
