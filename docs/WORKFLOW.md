@@ -34,6 +34,38 @@ Last updated: 2026-08-14
 - Exclude credentials, generated logs, build products, IDE-local state, and
   absolute machine paths.
 
+## Duration estimates and authority freshness
+
+Before giving a user or Project Manager a duration estimate:
+
+1. Name the exact T-ID, authority commit, exit conditions, and explicit
+   non-goals. A scope change invalidates every earlier estimate.
+2. Classify every exit condition as already verified, reusable with no code
+   change, configuration/wrapper work, new implementation, or unresolved.
+3. Inspect the actual working tree, relevant modules/tests, available warm and
+   cold build paths, and the observed delivery rate of the current execution
+   environment. Do not infer effort from the task title or superseded scope.
+4. Run the cheapest representative command that exposes build/cache state, or
+   state exactly why it was not run.
+5. Estimate edit, verification, and integration/review effort separately. Give
+   warm and cold wall-clock ranges, confidence, and invalidation conditions.
+6. Record the basis with `docs/templates/ESTIMATE-TEMPLATE.md`. Do not publish a
+   calendar estimate whose inventory or evidence fields are blank.
+
+After any accepted scope, dependency, base-commit, cache, owner, or execution-
+environment change, recompute the estimate before repeating it.
+
+Before declaring a branch complete, identify the latest named authority commit
+and run:
+
+```sh
+git merge-base --is-ancestor <authority-commit> HEAD
+```
+
+Exit 0 is necessary but not sufficient for completion. A nonzero exit makes the
+branch an implementation candidate pending integration and re-verification;
+do not mark TODO, STATUS, ROADMAP, ADR, or EXP complete from that branch.
+
 ## Codex agents and skills
 
 The repository provides narrow Codex agents in `.codex/agents/` and reusable

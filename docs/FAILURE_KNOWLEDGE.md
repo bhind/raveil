@@ -1,7 +1,7 @@
 # Failure knowledge
 
 Status: reusable operational guidance
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 This index captures short lessons that prevent repeated mistakes. It does not
 replace raw experiment bundles, EXP conclusions, regression tests, ADRs, TODO,
@@ -11,6 +11,32 @@ recur. Link to authoritative evidence instead of copying large logs.
 Each entry records the symptom, cause or current explanation, prevention,
 detection, evidence, and whether follow-up remains open. Unknown causes stay
 labelled unknown.
+
+## Recompute estimates from executable work after every scope change
+
+- Symptom: after ADR-0046 reduced T-0042 to a small-start slice, the Project
+  Manager estimated three to six working days. The implementation candidate
+  was committed 2 hours 48 minutes after the scope commit.
+- Cause: the estimate retained effort intuition from the superseded exhaustive
+  token-lifecycle scope. It did not inventory the already implemented Graph
+  scratchpad, CPU manager, frozen workload, oracle, wrappers, or persistent
+  Docker builds; it also did not separate edit, cached verification, and final
+  integration time. In parallel, the implementation branch started from
+  `793973e` and did not include the later authority commit `cb2d56b`.
+- Prevention: bind every estimate to one authority commit and exact exit
+  contract; classify each exit item as verified, reusable, configuration-only,
+  new, or unresolved; inspect warm/cold build state and current delivery-rate
+  evidence; estimate edit, verification, and integration separately; and
+  recompute immediately after scope or authority changes. Before completion,
+  require `git merge-base --is-ancestor <authority-commit> HEAD` to exit 0.
+- Detection: reject an estimate with an incomplete
+  `docs/templates/ESTIMATE-TEMPLATE.md`. Reject completion when the authority
+  ancestry check is nonzero, even if tests on the stale branch pass.
+- Evidence: T-0107; commits `793973e`, `cb2d56b`, and `0f4be3b`; the observed
+  `git merge-base --is-ancestor cb2d56b 0f4be3b` exit was 1.
+- State: workflow and PM-role prevention added. The `0f4be3b` implementation
+  remains an integration-pending candidate until reconciled with `cb2d56b` and
+  reverified.
 
 ## Powermetrics readiness is an event boundary, not elapsed time
 

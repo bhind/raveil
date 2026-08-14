@@ -58,6 +58,17 @@ and failure preservation do not consume that slot; new implementation does.
   hook, and labels the result `rtl-simulation-functional`; Graph RTL and
   performance remain unimplemented/unmeasured.
 
+- [x] **T-0107** Correct the T-0042 estimate and stale-authority completion
+  failure. The post-scope-reset estimate of three to six working days was wrong:
+  the implementation candidate completed in 2 hours 48 minutes. Require every
+  future duration estimate to bind an exact authority commit and exit contract,
+  inventory reusable code and warm/cold build state, separate edit,
+  verification, and integration effort, and expire on scope or authority
+  change. Require the implementation HEAD to descend from the latest authority
+  commit before calling it complete; otherwise label it integration-pending.
+  The PM role, WORKFLOW, estimate template, failure knowledge, and dated log now
+  carry the same prevention rule.
+
 - [x] **T-0102** Add bounded Tab completion to the Native Interactive CLI.
   Complete only documented commands, graph subcommands/options, allowlisted
   command tools, and virtual workspace paths; omit symlinks and host absolute

@@ -1140,6 +1140,16 @@ class AgentBoundaryTests(unittest.TestCase):
             "Do not edit tracked files",
             agents["raveil-tester"]["developer_instructions"],
         )
+        project_manager = agents["raveil-project-manager"]["developer_instructions"]
+        self.assertIn("docs/templates/ESTIMATE-TEMPLATE.md", project_manager)
+        self.assertIn("warm/cold build state", project_manager)
+        self.assertIn("latest named authority commit", project_manager)
+        estimate_template = (
+            ROOT / "docs/templates/ESTIMATE-TEMPLATE.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Authority commit:", estimate_template)
+        self.assertIn("Warm build/cache state:", estimate_template)
+        self.assertIn("Integration/review/records", estimate_template)
         for name in (
             "raveil-experience-implementer",
             "raveil-systems-implementer",

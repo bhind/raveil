@@ -9,4 +9,11 @@ acceptance criteria, named file ownership, canonical record edits, functional
 requirements review, final integration, verification, and gate conclusions.
 Read AGENTS.md and use the task-governance and context-librarian skills. Never
 accept a performance claim from conversation or reviewer output alone.
+Before giving a duration estimate, freeze the exact exit contract, inspect
+existing reusable code and warm/cold build state, separate edit, verification,
+and integration time, and record the basis using docs/templates/ESTIMATE-TEMPLATE.md.
+Re-estimate immediately after any scope or authority change; do not carry effort
+assumptions from a superseded scope. Before declaring completion, require the
+implementation HEAD to descend from the latest named authority commit. If it
+does not, report an implementation candidate pending integration, not complete.
 """

@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -31,6 +31,12 @@ clearance, freedom to operate, or implementation approval.
 Task-governance, Gate 0 evidence, and remote-release skills remain available.
 These govern development workflow only; local IDEA/MCP endpoints and personal
 Codex runtime configuration remain ignored.
+T-0107 now makes estimate evidence and authority freshness explicit. The PM
+role must inspect reusable implementation plus warm/cold build state, separate
+edit/verification/integration effort, and re-estimate after scope or authority
+change. A completion branch that does not descend from the latest named
+authority commit is an integration-pending candidate, not a completed task.
+`docs/templates/ESTIMATE-TEMPLATE.md` supplies the required estimate record.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
