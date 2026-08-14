@@ -160,7 +160,10 @@ def _observed_output_hashes(
 ) -> dict[int, str]:
     records = _markers(lines, "RAVEIL-CONTROLLED-OUTPUT-V1")
     if len(records) != 256 * account:
-        raise ControlledRunError("repeated output marker cardinality changed")
+        raise ControlledRunError(
+            "repeated output marker cardinality changed: "
+            f"observed {len(records)}, expected {256 * account}"
+        )
     words: dict[int, list[int | None]] = {
         invocation: [None] * 256 for invocation in range(1, account + 1)
     }

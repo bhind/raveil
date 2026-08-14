@@ -567,6 +567,8 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = controlled-repeat ]; then
   rm -f "$repeated_log"
   timeout --foreground 3600 "$sim" +permissive +verbose +permissive-off \
     "$repeated_elf" 2>&1 | tee "$repeated_log"
+  # Force the verbose named-volume log visible before strict verification.
+  sync "$repeated_log"
   if [ "$RAVEIL_OWNED_CPU_LABEL" = rocket ]; then
     implementation=rocket-in-order
   else

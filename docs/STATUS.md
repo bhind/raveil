@@ -217,6 +217,13 @@ result. Instrumentation now emits the split explicitly and requires another
 pre-data re-freeze.
 The installation-accounting fix is now included in replacement manifest
 authority; no subsequent commissioning data existed at this re-freeze.
+The next complete-matrix attempt passed Graph and Rocket. BOOM RTL also emitted
+exactly 1,024 output words, four complete lifecycle records, and passes the
+strict parser when the retained outer raw log is replayed, but the immediate
+in-container verifier observed an incomplete `tee` file and failed cardinality.
+This is a harness visibility failure, not promoted BOOM evidence. The runner
+now synchronizes the named-volume log before reopening it and reports observed
+versus expected cardinality; another re-freeze is required.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
