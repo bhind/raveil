@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0042 controlled equal-resource RTL slice complete; T-0044 EXP-0005 pilot preregistered before data**
+State: **T-0042 complete; T-0044 EXP-0005 pilot complete and paused at the repeated-installation boundary**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -20,7 +20,7 @@ or process-demo work would repeat that ordering error.
 The corrected critical path is:
 
 Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
-EXP-0005 latency/traffic pilot is the sole P0 immediate implementation, and
+install-once repeated-fresh-input boundary is the sole P0 immediate work, and
 T-0106 is P2 only after T-0044 survival or an accepted product trigger. P3
 future-planned and P4 optional/triggered work cannot interrupt this sequence
 merely because a branch or partial implementation already exists.
@@ -181,10 +181,15 @@ merely because a branch or partial implementation already exists.
 5. **T-0044 — matched comparison:** compare in-order RISC-V, conventional OoO,
    valid same-core diagnostic ablations, and static/elastic/stream/hybrid Graph
    organizations with matched semantics, cache/memory, functional resources,
-   and correctness checks. EXP-0005 freezes only the first 1/4-fresh-input
+   and correctness checks. EXP-0005 completed only the first 1/4-fresh-input
    static/Rocket/BOOM latency/traffic pilot plus BOOM serialize-dispatch
-   diagnostic. It does not implement the remaining organizations or collect
-   energy, synthesis timing, or area, so T-0044 remains open.
+   diagnostic. The primary execution window is eligible: Graph records exact
+   3,073 cycles versus Rocket 14,621 and BOOM 21,892, while its 1,536 versus
+   1,056 transactions is explained by lawful CPU load reuse. Full expansion is
+   paused until all candidates run repeated fresh inputs under one installed
+   configuration without simulator reboot. The pilot does not implement the
+   remaining organizations or collect energy, synthesis timing, or area, so
+   T-0044 remains open and no go/no-go follows.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

@@ -10,4 +10,4 @@ inconclusive, and superseded experiments remain available.
 | [EXP-0002](EXP-0002-sonatine-rv64-reproducibility.md) | Completed | emulation | RV64 build, QEMU smoke, and debugger |
 | [EXP-0003](EXP-0003-gate1-bounded-experience.md) | In progress | silicon | native C and TVM bounded-Experience validation |
 | [EXP-0004](EXP-0004-native-command-graph.md) | Planned | silicon | Native command-graph correctness, overhead, and crossover |
-| [EXP-0005](EXP-0005-static-latency-traffic-pilot.md) | In progress (manifest frozen) | RTL simulation pilot | T-0044 static Graph/Rocket/BOOM latency and traffic pilot |
+| [EXP-0005](EXP-0005-static-latency-traffic-pilot.md) | Completed pilot; paused | RTL simulation pilot | Execution/traffic eligible; repeated-installation lifecycle boundary remains |

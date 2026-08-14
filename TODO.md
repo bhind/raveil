@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0044 latency/traffic pilot |
+| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0044 install-once repeated-input boundary |
 | **P1 — next** | Start only after P0's recorded exit conditions pass. | — |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -654,7 +654,15 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   energy, synthesis timing, and area remain outside this checkpoint, so pilot
   success cannot close T-0044 or decide go. Fail closed on oracle/resource/
   traffic/accounting/source/config/matrix/window-boundary failure and do not
-  decide the RFC-0005 numerical no-go below 64 fresh inputs.
+  decide the RFC-0005 numerical no-go below 64 fresh inputs. EXP-0005's 4x4
+  matrix is now sealed and exact across four fresh inputs: Graph/Rocket/BOOM
+  execution is 3,073/14,621/21,892 cycles, with 1,536/1,056/1,056 admitted
+  transactions. Legal CPU load reuse explains the traffic difference, so the
+  bounded execution-latency/traffic pilot is eligible. **Pause before full
+  expansion:** implement one same-meaning install-once lifecycle that feeds
+  repeated fresh inputs to every candidate without simulator reboot; do not
+  start 16/64/256 collection until that single boundary passes. T-0044 stays
+  open for the full matrix, energy, synthesis timing, and area.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

@@ -235,8 +235,18 @@ as zero. Host wall-clock in `commands.jsonl` is operations metadata only.
 
 The collector seals raw byte counts and SHA-256 values after all 16 runs and
 derivation pass. Re-derivation uses `python3 -m raveil.t0044_pilot derive` on a
-copy with no existing `derived/` directory. Do not modify a sealed RUN-ID; use
-a new one for any changed source, configuration, or command.
+copy with no existing `derived/` directory. If all 16 commands exited zero and
+derivation succeeded but collection stopped before sealing, finish exactly
+once with:
+
+```sh
+python3 -m raveil.t0044_pilot seal \
+  --run-dir artifacts/research/EXP-0005/<RUN-ID>
+```
+
+The seal command requires both raw evidence and `derived/report.json` and
+refuses an existing seal. Do not modify a sealed RUN-ID; use a new one for any
+changed source, configuration, or command.
 
 ## Pinned BOOM control source
 

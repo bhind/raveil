@@ -149,25 +149,39 @@ verifier reports `resource_equality_verified=true` and bounded functional
 `dynamic_memory_traffic_equal=false` and
 `t0044_measurement_claim_ready=false`: Graph admits 1,280 reads plus 256 writes
 while each optimized CPU execution admits 800 reads plus 256 writes. T-0044
-must decide that fairness question before measurement. Exhaustive CPU token
+must explain that fairness boundary before a measurement claim. EXP-0005 now
+does so for the bounded execution window described below. Exhaustive CPU token
 lifecycle hardening remains deferred to T-0106. Existing ADR-0045 diagnostics
 remain bounded functional evidence; no general semantic-initiator,
 performance, CPU/ISA advantage, FPGA, ASIC, or silicon claim is promoted.
-T-0044 has started only its preregistered EXP-0005 latency/traffic pilot.
-Before data collection, the machine-readable manifest freezes fresh seeds
+T-0044 has completed only its preregistered EXP-0005 latency/traffic pilot.
+Before data collection, the machine-readable manifest froze fresh seeds
 1--4, the primary static Graph/Rocket/BOOM matrix, BOOM serialize-dispatch as a
 diagnostic only, the same-meaning execution-window edges, paired estimators and
 conditional 95% interval rule, raw/derived separation, and fail-closed stop
 conditions. The pilot deliberately omits VLIW/CGRA, elastic/stream/hybrid,
 energy, synthesis timing, and area; T-0044 remains open and no go or RFC-0005
 numerical no-go may follow from four inputs.
-The post-freeze EXP-0005 instrumentation now accepts fresh seeds without result
+The post-freeze EXP-0005 instrumentation accepts fresh seeds without result
 reuse, includes the Graph launch edge in execution, emits owned-boundary stall/
 backpressure and useful-work/byte counters, and adds the BOOM
 serialize-dispatch diagnostic runner. A clean-worktree collector writes 16 raw
 logs, exact command exit/wall-clock metadata, derived observations, and a
-SHA-256 raw seal under one exclusive ignored RUN-ID. No pilot result is
-recorded until that clean descendant executes successfully.
+SHA-256 raw seal under one exclusive ignored RUN-ID. The sealed 4x4 RTL matrix
+completed at collection commit `6733c44`: all commands exited zero, four
+distinct input and oracle/output hashes agree across candidates, the resource
+and execution-window meanings match, and all required accounting conserves.
+The exact execution cycles are 3,073 Graph, 14,621 Rocket, and 21,892 BOOM for
+each of four fresh inputs. The BOOM serialize-dispatch diagnostic is 70,898
+cycles and remains diagnostic only. Graph admits 1,536 transactions versus
+1,056 for either optimized CPU because CPU code legally reuses loads; that
+difference is explained and the bounded primary execution-latency/traffic
+pilot is claim-eligible without weakening either CPU. End-to-end reuse
+amortization is not eligible because current fresh-process runs repeat CPU
+installation while Graph is elaboration-installed. EXP-0005 therefore ends
+`pause` at exactly one required boundary: run repeated fresh inputs under one
+installed configuration without simulator reboot. T-0044 remains open; the
+pilot is partial and decides neither RFC-0005 go nor numerical no-go.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

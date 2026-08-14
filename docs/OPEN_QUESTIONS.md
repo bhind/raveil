@@ -35,15 +35,21 @@ resolves it.
   path or sufficient evidence to draft a separately reviewed variable-latency
   mechanism? Elastic token/readiness machinery is not authorized by RFC-0005.
 - Can one pinned Chisel/Chipyard environment support a fair matched comparison
-  among Rocket in-order, BOOM OoO, BOOM's same-core OoO-disabled diagnostic,
+  among Rocket in-order, BOOM OoO, BOOM's same-core serialize-dispatch diagnostic,
   and an owned explicit-graph tile without inheriting upstream authority or
   comparing unequal cache/memory/functional resources? ADR-0046 answers the
   bounded resource-connection part for Rocket, BOOM, and static Graph: the
   strict controlled run proves the canonical owned tuple equal, preserves the
   exact oracle, brackets quiescent windows, and conserves all admitted traffic.
-  The fairness question remains open for T-0044 because Graph admits 1,536
-  execution transactions while each optimized CPU admits 1,056; no measurement
-  claim is ready. Source survey found no
+  EXP-0005 resolves the bounded primary execution-window fairness question:
+  Graph admits 1,536 transactions because its fixed schedule issues five loads
+  per output, while each optimized CPU admits 1,056 because lawful software
+  load reuse reduces 1,280 useful loads to 800 manager reads. The difference
+  is visible, neither CPU is weakened, and the execution-latency/traffic pilot
+  is eligible. The remaining single measurement-boundary question is how one
+  installed configuration accepts repeated fresh inputs without simulator
+  reboot so installation and invocation amortization have the same meaning for
+  every candidate. Source survey found no
   existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
   TileLink banked scratchpad now passes the exact stencil on both controls but
