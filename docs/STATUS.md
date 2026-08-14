@@ -354,6 +354,10 @@ partition reports, and an analytical fallback-plus-Graph matrix report. Its
 top, black-box list, partition role, generated RTL, and constraints must all
 match the later frozen manifest. This implementation has not run candidate
 synthesis and is not yet the frozen Stage-B authority.
+Initial Rocket RTL-only export commissioning failed before RTL copy or
+synthesis because external-source locators were implicit and a new exporter
+assignment was malformed. The latter is corrected and regression checked;
+these are pre-data operational failures, not physical results.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

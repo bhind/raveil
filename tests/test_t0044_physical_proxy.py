@@ -56,6 +56,11 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertNotIn("Boom", smoke)
 
     def test_candidate_runner_is_manifest_driven_and_separates_evidence(self) -> None:
+        rocket_export = (
+            ROOT / "hardware/chisel/export-physical-rocket-rtl.sh"
+        ).read_text()
+        self.assertNotIn("+[ -d", rocket_export)
+        self.assertIn("[ -d \"$source_dir\" ]", rocket_export)
         wrapper = (
             ROOT / "hardware/chisel/run-physical-proxy-synthesis.sh"
         ).read_text()

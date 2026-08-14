@@ -130,3 +130,11 @@ including raw mutation, top/black-box drift, contradictory timing status, and
 fallback-composition negatives. Shell syntax, Python byte-compilation, and
 `git diff --check` also pass. These are implementation tests, not candidate
 measurements.
+
+The first Rocket RTL-only export commissioning attempts exited nonzero before
+copying generated RTL. The dedicated worktree needed explicit read-only
+Chipyard and Rocket-Chip locators, and then exposed a malformed shell
+assignment in the new exporter. No synthesis tool ran and no candidate report
+or performance datum was created. The assignment is corrected with a literal
+source-directory regression assertion; the corrected commit supersedes the
+earlier Stage-B implementation commit as authority.

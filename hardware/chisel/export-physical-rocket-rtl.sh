@@ -43,7 +43,6 @@ docker run --rm \
     bash -lc 'set -euo pipefail
 build_root=/build/$RAVEIL_CACHE_SOURCE_SHA256
 [ "$(cat "$build_root/.raveil-source-ready")" = "$RAVEIL_CACHE_SOURCE_SHA256" ]
-source_dir="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_CPU_CONFIG"+[ -d "$source_dir" ]
 source_dir="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_CPU_CONFIG"
 [ -d "$source_dir" ]
 mkdir /export/generated-src
