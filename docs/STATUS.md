@@ -347,6 +347,14 @@ reversible preregistered T-0044 experiment, but it is not remotely durable,
 externally promoted, RFC-0005 go, or T-0044 completion. The owner packet is
 `docs/guides/T-0044-EXP-0008-EVIDENCE-PROMOTION.md`; promotion must reuse the
 sealed bytes and must not rerun simulation.
+The repository now has a dedicated fail-closed EXP-0008 promotion verifier. It
+accepts only the two frozen RUN-IDs and expected seal/report/manifest hashes,
+recomputes every sealed file size and SHA-256, verifies recovery lineage and
+the complete non-symlink file set, rechecks source identity across transfer
+steps, and tests immutable-copy/download-check/marker-last behavior through a
+fake rclone boundary. Local verification covers 20 files and 738,617,303
+bytes. No remote command or receipt has yet completed, so the evidence remains
+locally sealed rather than remotely durable.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -727,8 +727,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   non-sensitive receipt before EXP-0008 is called remotely durable or
   externally promoted. Use
   `docs/guides/T-0044-EXP-0008-EVIDENCE-PROMOTION.md`; do not rerun simulation
-  merely to close this durability gap. Local sealed evidence may support the
-  next reversible preregistered T-0044 experiment while promotion is pending.
+  merely to close this durability gap. The dedicated verifier and fake-rclone
+  mutation/failure suite now pass and independently check 20 sealed files and
+  738,617,303 bytes; real immutable remote copy, download check, marker
+  readback, and the tracked receipt remain pending. Local sealed evidence may
+  support the next reversible preregistered T-0044 experiment while promotion
+  is pending.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

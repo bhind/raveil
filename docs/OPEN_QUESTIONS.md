@@ -25,9 +25,11 @@ resolves it.
   interval construction, and latency/traffic stop rules before pilot data.
   EXP-0008 now resolves the bounded 64/256-input latency/traffic campaign with
   `advance-partial-latency-traffic`; ADR-0048 leaves its immutable remote
-  promotion pending rather than treating local summaries as raw evidence. The
-  matched synthesis/energy/area boundary and full T-0044 organization matrix
-  remain unresolved.
+  promotion pending rather than treating local summaries as raw evidence. A
+  local verifier now reproduces all 20 sealed file hashes and recovery lineage;
+  the real immutable copy, download check, marker readback, and receipt remain
+  pending. The matched synthesis/energy/area boundary and full T-0044
+  organization matrix remain unresolved.
 - Where is the measured boundary between static, elastic dataflow, stream, and
   hybrid Graph Execution Subsystem organizations?
 - How large should the RISC-V core's OoO machinery be, if any?

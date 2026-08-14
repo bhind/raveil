@@ -255,6 +255,23 @@ remotely durable or externally promoted. This missing durability step does not
 change the bounded `advance-partial-latency-traffic` interpretation and does
 not authorize a simulator rerun.
 
+The dedicated `raveil.t0044_evidence_promotion` adapter now verifies the exact
+failed and recovery RUN-IDs, source seal hashes, all listed relative paths,
+sizes and SHA-256 values, frozen base and recovery manifests, derived report,
+failed-seal/import lineage, complete file sets, and absence of symlinks. The
+local command
+
+```sh
+python3 -m raveil.t0044_evidence_promotion verify
+```
+
+recomputed 20 files and 738,617,303 bytes without invoking a simulator. Its
+fake-rclone suite covers source mutation, missing file, symlink, wrong size,
+wrong hash, completed remote refusal, download-check failure, marker readback
+mismatch, immutable transfer flags, and receipt field/secret rejection. Real
+remote transfer and the canonical receipt remain pending at this verifier
+implementation point.
+
 Successful operations-only simulator times were 43.886987 seconds for Graph,
 2,051.982703 for Rocket, 2,722.331250 for BOOM, and 8,005.834626 for the
 diagnostic. The successful evidence sessions total 12,824.035566 seconds
