@@ -684,7 +684,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   either externally replayed failed log. The replacement freeze is complete.
   The outer file then grew after Docker CLI return; freeze the bounded required-
   marker drain wait and rerun the complete matrix. The replacement freeze is
-  complete.
+  complete. The next Graph run proved its wrapper was deterministically
+  truncating repeated evidence to a 240-line smoke preview; emit the full log
+  only in repeated mode, re-freeze that transport fix, and rerun under a new
+  RUN-ID.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

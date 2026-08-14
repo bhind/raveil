@@ -244,6 +244,14 @@ for frozen output/complete/host marker cardinalities before hashing, deriving,
 or sealing; timeout fails closed. Another re-freeze is required.
 The bounded Docker-output-drain wait is now replacement manifest authority; no
 subsequent complete-matrix run existed at this re-freeze.
+The next attempt failed closed on Graph at the same 215/1,024 outer-marker
+count even after the bounded wait. Inspection found that the Graph wrapper
+itself deliberately printed only the first 240 lines of its complete internal
+RTL log, a legacy interactive-smoke preview cap; this was deterministic
+truncation rather than Docker forwarding loss. Repeated mode now emits the
+complete verified internal log to the outer collector while non-repeated smoke
+output retains the preview cap. This evidence-transport correction requires a
+new manifest re-freeze and RUN-ID; the failed run is not promoted.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

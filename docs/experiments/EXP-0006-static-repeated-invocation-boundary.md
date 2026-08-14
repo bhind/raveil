@@ -117,6 +117,12 @@ Earlier freezes produced only retained failed commissioning attempts. Stack,
 installation-accounting, completed-outer-log verification, and bounded Docker
 output-drain corrections changed source, so the manifest was re-frozen with
 the hash above before any replacement run or complete-matrix observation.
+RUN-ID `20260814T093000Z-7d24062-commission7` then failed closed before any
+matrix result: Graph outer raw contained 215/1,024 required output markers
+after the 30-second wait. The Graph wrapper was applying its legacy 240-line
+interactive preview to repeated evidence despite holding and internally
+verifying a complete temporary log. No value from this run is promoted. The
+repeated-only full-log transport correction requires a replacement freeze.
 
 ## Estimate
 

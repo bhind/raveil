@@ -69,7 +69,13 @@ if ! docker run --rm \
     sed -n '1,240p' "$rtl_log"
     exit 1
 fi
-sed -n '1,240p' "$rtl_log"
+if [ -n "$repeat_account" ]; then
+    # EXP-0006 outer raw is the evidence boundary.  Do not apply the legacy
+    # human-readable smoke-log preview cap to repeated output evidence.
+    cat "$rtl_log"
+else
+    sed -n '1,240p' "$rtl_log"
+fi
 
 cd "$repo_root"
 if [ -n "$repeat_account" ]; then

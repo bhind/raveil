@@ -100,6 +100,11 @@ class RepeatedBoundaryTests(unittest.TestCase):
         self.assertIn("pending-completed-outer-raw-verification", runner)
         collector = (ROOT / "raveil/t0044_repeated.py").read_text()
         self.assertIn("completed command log did not drain required markers", collector)
+        graph_runner = (
+            ROOT / "hardware/chisel/run-static-stencil-rtl.sh"
+        ).read_text()
+        self.assertIn('if [ -n "$repeat_account" ]; then', graph_runner)
+        self.assertIn('cat "$rtl_log"', graph_runner)
         self.assertNotIn("RAVEIL_STENCIL_SEED", source)
 
     def test_repeated_configs_preserve_owned_resource_shape(self) -> None:
