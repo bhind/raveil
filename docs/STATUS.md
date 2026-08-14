@@ -385,7 +385,8 @@ bounded recovery candidate. It requires new RTL hashes and manifest before use.
 Recovery-v2 authority `cba6226...7e6bf` emits physical-only Graph RTL at
 `e95e2e02...5a41d` with incompatible local/packed forms removed. Manifest
 SHA-256 `293d83bf...1c04` binds it while preserving Rocket and all scientific
-fields; use waits for its freeze commit.
+fields. Recovery-v2 freeze commit is
+`ba8ee88863750be9137bd519af0102ed0560cbb5`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -240,4 +240,5 @@ No `automatic` local or packed-array declaration remains. Recovery-v2 manifest
 `benchmarks/manifests/t0044-static-physical-screen-recovery-v2.json`, SHA-256
 `293d83bfb884b7e0b3b8d7416f4438aa8be2968be1bfb109b801bd514b411c04`,
 binds those bytes and the unchanged Rocket/tool/decision contract. Candidate
-use remains prohibited until the commit carrying that manifest.
+use is authorized only from recovery-v2 freeze commit
+`ba8ee88863750be9137bd519af0102ed0560cbb5` or a clean descendant.
