@@ -234,6 +234,8 @@ identity with accounting pending, and the host collector strictly validates
 the completed immutable outer raw before derivation or sealing. This removes a
 redundant racing reader without weakening any oracle/accounting check and
 requires another re-freeze.
+The completed-outer-log collector boundary is now replacement manifest
+authority; no subsequent complete-matrix run existed at this re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

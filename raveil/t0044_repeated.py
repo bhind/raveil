@@ -86,6 +86,10 @@ def load_manifest(path: Path) -> dict[str, Any]:
         "988c25e615feaf711cb4d91f121d551bf88420ea"
     ):
         raise ControlledRunError("EXP-0006 log-synchronization authority changed")
+    if value["authority"]["outer_log_verification_commit"] != (
+        "4a3faefc4c37aeb02c642b37fb4d20827021fb34"
+    ):
+        raise ControlledRunError("EXP-0006 outer-log authority changed")
     if value["workload"]["fresh_input_versions"] != list(range(1, 257)):
         raise ControlledRunError("EXP-0006 fresh-input order changed")
     if value["matrix"]["complete_for_commissioning"] != list(VARIANTS):
