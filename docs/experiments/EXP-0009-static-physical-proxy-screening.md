@@ -259,3 +259,4 @@ Final bounded recovery authority is
 `efe1ec48a99c08766f4866d94179f160f3ca1f334161c06a63deefc8bf1806ed`,
 binds recovery-v2 and changes only the Yosys black-box/hierarchy ordering. It
 retains every RTL, partition, tool, clock, report, and decision field.
+Recovery-v3 freeze commit is `c238c9631f7e248960a2fa421e513764c60dcadd`.
