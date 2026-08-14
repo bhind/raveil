@@ -74,9 +74,13 @@ resolves it.
   partitioned Graph/Rocket area/timing lower-bound screen, then design an
   integrated fallback/common-memory/activity boundary if it survives. EXP-0009
   has commissioned the toy synthesis/STA toolchain and frozen its partitioned
-  Graph/Rocket manifest, but bounded Graph attempts pause before synthesis
-  because the common black-box partition is not Yosys-visible under the frozen
-  selection form. The candidate matrix has no area/timing datum. The valid
+  Graph/Rocket manifest, but bounded Graph attempts paused before synthesis
+  because the common black-box partition was not Yosys-visible under the frozen
+  `m:` selection form. A pinned-tool probe now establishes named-module
+  selection, single instances, and verified black-box attributes for both
+  common modules; this collector-only repair still
+  requires a recovery-v4 freeze and complete Graph/Rocket run. The candidate
+  matrix has no area/timing datum. The valid
   whole-system dynamic-energy composition remains an
   open question.
   The earlier

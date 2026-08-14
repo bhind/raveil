@@ -747,9 +747,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Recovery-v3 is ready; commit it, run one distinct Graph RUN-ID, and pause on
   any further incomplete report rather than adding another recovery loop.
   That final RUN remained incomplete at Yosys module selection. T-0044 is now
-  paused on one point: prove the common fixture/memory partition boundary to
-  Yosys before synthesis, with new authority/manifest. Do not run Rocket or
-  interpret any failed log as area/timing evidence before that boundary closes.
+  resumed on that one point: a pinned-tool syntax probe proves named-module
+  selection, exactly one instance, and verified black-box attributes for both
+  common partitions, and the collector
+  binds that selection mode into raw identity. Freeze the new authority in a
+  recovery-v4 manifest before a distinct Graph RUN-ID. Do not run Rocket until
+  Graph yields a complete sealed partition report, and do not interpret the
+  probe or any failed log as area/timing evidence.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

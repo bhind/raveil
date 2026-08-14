@@ -108,6 +108,12 @@ def load_manifest(path: pathlib.Path) -> dict[str, Any]:
         "whole_system_claim": False,
     }:
         raise ValueError("partition policy drift")
+    collector_policy = document.get("collector_policy")
+    if collector_policy is not None and collector_policy != {
+        "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+        "blackbox_before_checked_hierarchy": True,
+    }:
+        raise ValueError("collector policy drift")
     toolchain = document.get("toolchain")
     if not isinstance(toolchain, dict):
         raise ValueError("toolchain identity is missing")
@@ -429,6 +435,11 @@ def derive_one(
         raise ValueError("runtime clock identity drift")
     if identity.get("input_delay_ns") != "1.000" or identity.get("output_delay_ns") != "1.000":
         raise ValueError("runtime I/O delay drift")
+    collector_policy = manifest.get("collector_policy")
+    if collector_policy is not None and identity.get("blackbox_selection_mode") != collector_policy[
+        "blackbox_selection_mode"
+    ]:
+        raise ValueError("runtime blackbox selection mode drift")
     expected_rtl_files = sorted(
         f"/rtl/{item.relative_to(rtl_dir).as_posix()}"
         for item in rtl_dir.rglob("*")

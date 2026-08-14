@@ -144,9 +144,14 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         inner = (
             ROOT / "hardware/chisel/run-physical-proxy-synthesis-in-container.sh"
         ).read_text()
-        self.assertLess(inner.index("blackbox %s"), inner.index("hierarchy -check"))
+        self.assertLess(inner.index("blackbox N:%s"), inner.index("hierarchy -check"))
         self.assertNotIn("hierarchy -top %s", inner)
-        self.assertIn("select -assert-count 1", inner)
+        self.assertIn("select -assert-any N:%s", inner)
+        self.assertIn("select -assert-count 1 t:%s", inner)
+        self.assertNotIn("select -assert-count 1 m:%s", inner)
+        self.assertIn("select -assert-any =N:%s =A:blackbox=1", inner)
+        self.assertIn("select -clear", inner)
+        self.assertIn("blackbox_selection_mode=yosys-module-name-single-instance-v1", inner)
         self.assertIn("stat -json", inner)
         self.assertIn("tool-identity.txt", inner)
         self.assertIn("set_input_delay 1.000", inner)
@@ -205,6 +210,10 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
                 "fallback_composition": "rocket-fallback-plus-graph-incremental",
                 "whole_system_claim": False,
             },
+            "collector_policy": {
+                "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+                "blackbox_before_checked_hierarchy": True,
+            },
             "toolchain": toolchain,
             "variants": variants,
             "decision_rules": {
@@ -253,6 +262,7 @@ class PhysicalProxyEvidenceTests(unittest.TestCase):
             "liberty_sha256=" + "4" * 64 + "\n"
             "clock_port=clock\nclock_period_ns=20.000\n"
             "input_delay_ns=1.000\noutput_delay_ns=1.000\n"
+            "blackbox_selection_mode=yosys-module-name-single-instance-v1\n"
         )
         t0044_physical.write_run_metadata(
             manifest, "static-graph", "Top", "CommonMemory", rtl, raw

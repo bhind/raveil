@@ -399,6 +399,15 @@ Rocket not started, candidate area/timing absent, and claim eligibility false.
 Resume requires exactly one proven Yosys-visible common-partition boundary;
 derived pause report SHA-256 is `340d0d0e...ce700`.
 Recovery-v3 freeze commit is `c238c9631f7e248960a2fa421e513764c60dcadd`.
+The paused boundary has now been reproduced with a candidate-independent
+pinned-tool probe: Yosys `N:<module>` selects each common module definition,
+`t:<module>` verifies exactly one instance, and `blackbox N:<module>` sets a
+verified black-box attribute before checked hierarchy. The failed `m:` form was
+a memory-object selector, not a module selector.
+The collector now binds selection mode
+`yosys-module-name-single-instance-v1` into raw identity. This is pre-data boundary
+repair only; recovery-v4 must be frozen before a new Graph RUN-ID, and there is
+still no candidate area/timing datum.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

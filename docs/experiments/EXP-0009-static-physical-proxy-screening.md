@@ -1,7 +1,7 @@
 # EXP-0009: Static Graph physical-proxy screening
 
 Status: In progress
-Evidence class: synthesis-toolchain commissioning; synthesis-collector failure
+Evidence class: synthesis-toolchain commissioning; synthesis-collector failure; candidate-independent partition-syntax probe
 Date: 2026-08-15
 Task: T-0044
 Authority: RFC-0005, ADR-0039, ADR-0043, ADR-0046, ADR-0047, ADR-0048, EXP-0008
@@ -294,3 +294,24 @@ matrix. Based on the observed parser/partition failures, the narrow resume item
 is now estimated at 1--3 working days with medium confidence; Rocket closure
 remains unestimated until Graph produces a complete report. This is a range,
 not a completion-date promise.
+
+## Resume boundary proof (pre-data)
+
+The user resumed the single paused boundary on 2026-08-15. A read-only probe
+against the pinned Yosys 0.27+3 image and the already frozen lowered Graph RTL
+proved the correct distinction: `N:<module>` selects the module definition,
+while `t:<module>` selects its instance cell. For each common partition the
+probe asserts that the named module exists, exactly one instance exists, then
+applies `blackbox N:<module>` and verifies the module's `blackbox` attribute
+before `hierarchy -check`. This is
+candidate-independent collector-boundary evidence, not area or timing data.
+
+The recovery implementation therefore changes only the exact black-box
+selection form from the invalid memory-object `m:` pattern to verified named-
+module black-boxing, preserves the existing top, RTL, common
+partitions, library, constraints, parser, and decision rules, and records
+`yosys-module-name-single-instance-v1` in raw tool identity. No wrapper or new ADR
+is needed because the accepted ADR-0048 physical/resource boundary is
+unchanged. A recovery-v4 manifest must bind the committed authority, preceding
+manifest hash, and selection mode before a new Graph RUN-ID. Rocket remains
+blocked until Graph produces a complete sealed partition result.

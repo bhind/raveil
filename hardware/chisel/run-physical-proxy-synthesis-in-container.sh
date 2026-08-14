@@ -30,8 +30,11 @@ find /rtl -type f \( -name '*.sv' -o -name '*.v' \) -print | LC_ALL=C sort > /tm
     IFS=,
     for module in $RAVEIL_PHYSICAL_BLACKBOX_MODULES; do
         if [ -n "$module" ]; then
-            printf 'select -assert-count 1 m:%s\n' "$module"
-            printf 'blackbox %s\n' "$module"
+            printf 'select -assert-any N:%s\n' "$module"
+            printf 'select -assert-count 1 t:%s\n' "$module"
+            printf 'blackbox N:%s\n' "$module"
+            printf 'select -assert-any =N:%s =A:blackbox=1 %%i\n' "$module"
+            printf 'select -clear\n'
         fi
     done
     IFS=$old_ifs
@@ -85,6 +88,7 @@ printf '%s\n' ${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-} | tr ',' '\n' | sed '/^$/d' 
     printf 'yosys_version=%s\n' "$(yosys -V)"
     printf 'opensta_version=%s\n' "$(sta -version)"
     printf 'clock_port=clock\nclock_period_ns=20.000\ninput_delay_ns=1.000\noutput_delay_ns=1.000\n'
+    printf 'blackbox_selection_mode=yosys-module-name-single-instance-v1\n'
 } > /evidence/tool-identity.txt
 printf '%s\n' \
-    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"
+    "RAVEIL-PHYSICAL-SYNTHESIS-V1 status=OK variant=$RAVEIL_PHYSICAL_VARIANT top=$RAVEIL_PHYSICAL_TOP blackboxes=${RAVEIL_PHYSICAL_BLACKBOX_MODULES:-none} blackbox_selection_mode=yosys-module-name-single-instance-v1 clock_period_ns=20.000 corner=sky130_fd_sc_hd__tt_025C_1v80 evidence=synthesis-estimate performance=candidate-data"

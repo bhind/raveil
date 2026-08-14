@@ -210,8 +210,12 @@ merely because a branch or partial implementation already exists.
    forbids Graph-island energy promotion. EXP-0009 has passed only its
    candidate-independent toolchain commissioning and now freezes a separate
    Graph/Rocket Stage-B manifest from committed authority. Bounded attempts
-   produced no candidate datum and now pause at Yosys-visible common-partition
-   selection; Rocket remains unrun and the complete matrix is still open.
+   produced no candidate datum and paused at Yosys-visible common-partition
+   selection. A pinned-tool, candidate-independent probe now proves named-
+   module selection, single instances, and black-box attributes for both common
+   partitions; its collector-only
+   repair awaits a recovery-v4 freeze before Graph data, Rocket remains unrun,
+   and the complete matrix is still open.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
