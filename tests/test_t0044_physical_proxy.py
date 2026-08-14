@@ -89,6 +89,23 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
                 "blackbox_before_checked_hierarchy": True,
             },
         )
+        recovery_v5_path = (
+            ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v5.json"
+        )
+        recovery_v5 = t0044_physical.load_manifest(recovery_v5_path)
+        self.assertEqual(
+            recovery_v5["recovery_of_manifest_sha256"],
+            t0044_physical.sha256_file(recovery_v4_path),
+        )
+        self.assertEqual(
+            recovery_v5["operational_change"],
+            "load-mapped-cell-liberty-and-use-supported-opensta-tcl",
+        )
+        self.assertEqual(recovery_v5["collector_policy"]["mapped_check_mode"], "liberty-aware-v1")
+        self.assertEqual(
+            recovery_v5["collector_policy"]["sta_constraint_mode"],
+            "foreach-non-clock-inputs-v1",
+        )
 
     def test_toolchain_is_pinned_and_commissioning_only(self) -> None:
         dockerfile = (ROOT / "hardware/chisel/Dockerfile.physical-proxy").read_text()

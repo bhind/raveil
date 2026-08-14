@@ -1,0 +1,121 @@
+{
+  "clock_period_ns": 20.0,
+  "collector_policy": {
+    "blackbox_before_checked_hierarchy": true,
+    "blackbox_selection_mode": "yosys-module-name-single-instance-v1",
+    "mapped_check_mode": "liberty-aware-v1",
+    "sta_constraint_mode": "foreach-non-clock-inputs-v1"
+  },
+  "constraints": {
+    "clock_port": "clock",
+    "input_delay_ns": 1.0,
+    "output_delay_ns": 1.0
+  },
+  "corner": "sky130_fd_sc_hd__tt_025C_1v80",
+  "decision_rules": {
+    "graph_timing_miss_only_if_rocket_meets": true,
+    "incomplete_label": "pause-boundary",
+    "incremental_area_ratio_no_go_above": 0.25,
+    "pass_label": "advance-to-integrated-physical"
+  },
+  "experiment_id": "EXP-0009",
+  "implementation_authority": "104c6037fc13da99dbc73f07533488b3cebc7ef2",
+  "matrix": [
+    "static-graph",
+    "rocket-in-order"
+  ],
+  "operational_change": "load-mapped-cell-liberty-and-use-supported-opensta-tcl",
+  "partition_policy": {
+    "common_fixture": "excluded-at-explicit-candidate-boundary",
+    "common_memory": "excluded-at-explicit-candidate-boundary",
+    "fallback_composition": "rocket-fallback-plus-graph-incremental",
+    "whole_system_claim": false
+  },
+  "recovery_of_manifest_sha256": "de396d4f4d4bd81484c5a57b859ac59fdfca84a4cab7cc1a8834d3276c129d31",
+  "report_contract": {
+    "deterministic_reruns_are_samples": false,
+    "evidence_class": "synthesis-estimate",
+    "matrix_schema": "raveil.t0044-physical-matrix/v1",
+    "raw_schema": "raveil.t0044-physical-run/v1",
+    "result_schema": "raveil.t0044-physical-result/v1"
+  },
+  "schema": "raveil.t0044-physical-screen/v1",
+  "status": "frozen",
+  "stop_conditions": [
+    "authority-or-worktree-drift",
+    "generated-rtl-hash-drift",
+    "top-or-blackbox-policy-drift",
+    "tool-binary-or-liberty-drift",
+    "missing-clock-or-constraint-drift",
+    "unresolved-or-hidden-cell",
+    "incomplete-or-ambiguous-area-report",
+    "incomplete-or-ambiguous-timing-report",
+    "raw-seal-or-report-schema-drift",
+    "incomplete-static-graph-or-rocket-matrix"
+  ],
+  "task_id": "T-0044",
+  "toolchain": {
+    "conda_environment_sha256": "ddcfd6e7c9f580feb5f236cce3294087a9db842c95c604239cf2506ecfc974ee",
+    "image_id": "sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169",
+    "image_size_bytes": 2178077591,
+    "liberty_sha256": "e66aab4e0a3eef8d0b13eb5b75aaadb725ba78b032203342eb1e419a2c111baf",
+    "opensta_sha256": "3f804b33123a68858cf668a1d2253af865e056413d92403351cd5343996e514f",
+    "opensta_version": "2.3.3",
+    "system_packages_sha256": "8cce2c230bf60e1da1fb177051c99448c00af28b42fcca10fdef6a2950dfdf1f",
+    "yosys_sha256": "a078aea6eafafcfe9ed4b1d343acdc612f74ad078efb7b930ed1333968ce7508",
+    "yosys_version": "0.27+3"
+  },
+  "variants": {
+    "rocket-in-order": {
+      "blackboxes": [],
+      "cache_source_sha256": "cf06a739ecd56b592ae98056d63fceac844d73e727cba72a15bb98ad337ed103",
+      "chipyard_revision": "ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1",
+      "clock_port": "clock",
+      "configuration_id": "chipyard.raveil.RaveilFixtureRepeatedMatchedRocketConfig",
+      "export_command": "RAVEIL_CHIPYARD_SOURCE=<pinned-chipyard> RAVEIL_ROCKET_CHIP_SOURCE=<pinned-rocket-chip> RAVEIL_PHYSICAL_CPU_CACHE_SOURCE_SHA256=cf06a739ecd56b592ae98056d63fceac844d73e727cba72a15bb98ad337ed103 ./hardware/chisel/export-physical-rocket-rtl.sh <new-output-dir>",
+      "generator_image_id": "sha256:154dc63d7967ea4dce962f002ee10be12f598b5358f6b0ffc524a80d72bb8b9c",
+      "generator_toolchain_sha256": "ae2488b8904a8f6246a11df60be85bc08e965c3aee0518c976319bc34d448eee",
+      "missing_components": [
+        "common-owned-memory-area",
+        "tile-cache-and-interconnect-area",
+        "fallback-integration",
+        "clock-tree",
+        "placement-routing"
+      ],
+      "partition_role": "rocket-fallback-denominator",
+      "rocket_chip_revision": "749a3eae9678bc70b029c5b9091fae33fad539c4",
+      "rtl_file_count": 376,
+      "rtl_filelist_sha256": "d38af48c22bfbf8a88ca5da9b61c758112afd7d6f625759267a0be9c9011db46",
+      "rtl_sha256": "d98d3a7802d0ba1f99e4e3affab27c5ac66b306720563de507af079268791599",
+      "source_sha256": "29eca542ce0fe9c2224d1ca236da2366c5384a80e49a2d2f80940e3fb3906706",
+      "top": "Rocket"
+    },
+    "static-graph": {
+      "blackboxes": [
+        "OwnedFixedLatencyScratchpad",
+        "RaveilFixtureInputProvider"
+      ],
+      "clock_port": "clock",
+      "configuration_id": "StaticStencilRegion-physical-lowered-v1",
+      "export_command": "./hardware/chisel/export-physical-graph-rtl.sh <new-output-dir>",
+      "generator_image_id": "sha256:c0d90df9dc3e4fe2771cdfb87584a27d07d6c43b5c4ad14652f6527477214ce9",
+      "lowering_options": [
+        "disallowLocalVariables",
+        "disallowPackedArrays"
+      ],
+      "missing_components": [
+        "common-fixture-area",
+        "common-owned-memory-area",
+        "rocket-fallback-area",
+        "fallback-integration",
+        "clock-tree",
+        "placement-routing"
+      ],
+      "partition_role": "graph-candidate-local-incremental",
+      "rtl_file_count": 3,
+      "rtl_sha256": "e95e2e02b0e3c0460596c89b6dd324e7135208e0e1a097dcd689fdbef2f5a41d",
+      "source_sha256": "eebf3176c539a4fe6510433873b62b27038eb10baae42d0b9498a39aa45727c8",
+      "top": "StaticStencilRegion"
+    }
+  }
+}

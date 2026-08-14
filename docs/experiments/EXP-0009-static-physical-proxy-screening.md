@@ -349,3 +349,11 @@ non-clock input/output delays, RTL, partition, Liberty, estimator, and decision
 rules unchanged. It must be bound in a recovery-v5 manifest before a new Graph
 RUN-ID. A wrapper remains unnecessary unless the complete frozen flow later
 fails to preserve the explicit cut.
+
+Recovery-v5 implementation authority is
+`104c6037fc13da99dbc73f07533488b3cebc7ef2`. Frozen manifest
+`benchmarks/manifests/t0044-static-physical-screen-recovery-v5.json`, SHA-256
+`6973030c78c744fe5f59e37b4e7bce38735cc15358a10bd28a3c966fb76d051e`,
+chains recovery-v4 and adds only the two collector compatibility identities.
+Candidate use is authorized only from the commit containing this manifest or a
+clean descendant.

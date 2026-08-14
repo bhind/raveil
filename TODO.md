@@ -762,6 +762,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   OpenSTA collection/report commands. Freeze the library-aware check plus
   supported equivalent Tcl as recovery-v5 before another Graph RUN-ID; do not
   relax `check -assert` or promote diagnostic output.
+  Recovery-v5 authority `104c603...bc7ef2` and manifest
+  `6973030c...6d051e` are ready; commit the freeze and retry only Graph from its
+  clean descendant.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

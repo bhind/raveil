@@ -422,6 +422,9 @@ zero after it. Pinned OpenSTA diagnostics also reject
 `remove_from_collection` and `report_clocks`; supported Tcl iteration and
 `report_clock_properties` retain the intended clock and I/O-delay contract.
 The collector-only correction is pre-data and requires recovery-v5 freeze.
+Recovery-v5 authority is `104c603...bc7ef2`; manifest SHA-256 is
+`6973030c...6d051e` and all candidate RTL/tool/partition/decision identities
+remain unchanged. Only a clean descendant of its freeze may collect Graph.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
