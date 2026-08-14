@@ -12,6 +12,72 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class PhysicalProxyToolchainTests(unittest.TestCase):
+    def test_compatibility_lowering_policy_is_exact_and_fail_closed(self) -> None:
+        source = ROOT / "benchmarks/manifests/t0044-static-physical-screen-recovery-v6.json"
+        manifest = json.loads(source.read_text())
+        manifest["compatibility_lowering_policy"] = json.loads(
+            json.dumps(t0044_physical.COMPATIBILITY_LOWERING_POLICY)
+        )
+        manifest["operational_change"] = (
+            t0044_physical.COMPATIBILITY_OPERATIONAL_CHANGE
+        )
+        manifest["recovery_of_manifest_sha256"] = (
+            t0044_physical.COMPATIBILITY_RECOVERY_PREDECESSOR_SHA256
+        )
+        manifest["variants"]["static-graph"]["compatibility_lowering"] = (
+            "disallowPackedArrays"
+        )
+        rocket = manifest["variants"]["rocket-in-order"]
+        rocket["compatibility_lowering"] = "disallowPackedArrays"
+        rocket["lowering_provenance"] = t0044_physical.ROCKET_LOWERING_PROVENANCE
+        for name in (
+            "baseline_cache_source_sha256",
+            "lowering_provenance_sha256",
+        ):
+            rocket[name] = "a" * 64
+        rocket["generator_provenance"] = {
+            name: "b" * 64
+            for name in (
+                "common_mk_sha256",
+                "extra_firrtl_options_sha256",
+                "final_anno_sha256",
+                "firrtl_sha256",
+                "firtool_sha256",
+                "firtool_version_sha256",
+                "lowering_options_sha256",
+                "sfc_anno_sha256",
+                "sfc_firrtl_sha256",
+                "sfc_level_sha256",
+            )
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "manifest.json"
+            path.write_text(json.dumps(manifest))
+            t0044_physical.load_manifest(path)
+            manifest["operational_change"] += "-typo"
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "operational change drift"):
+                t0044_physical.load_manifest(path)
+            manifest["operational_change"] = (
+                t0044_physical.COMPATIBILITY_OPERATIONAL_CHANGE
+            )
+            policy = manifest.pop("compatibility_lowering_policy")
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "policy is missing"):
+                t0044_physical.load_manifest(path)
+            manifest["compatibility_lowering_policy"] = policy
+            rocket["lowering_provenance_sha256"] = "invalid"
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "lowering identity"):
+                t0044_physical.load_manifest(path)
+            rocket["lowering_provenance_sha256"] = "a" * 64
+            manifest["compatibility_lowering_policy"]["compatibility_option"] = (
+                "different"
+            )
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "compatibility lowering policy drift"):
+                t0044_physical.load_manifest(path)
+
     def test_frozen_stage_b_manifest_is_exact(self) -> None:
         path = ROOT / "benchmarks/manifests/t0044-static-physical-screen-v1.json"
         manifest = t0044_physical.load_manifest(path)

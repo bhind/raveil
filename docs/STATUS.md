@@ -455,6 +455,11 @@ files. Diagnostics prove both normalized annotations, FIRRTL/SFC inputs,
 module hierarchies, and normalized file-list sets match. A checker-only
 normalization of the two exact cache roots and file-list ordering is required
 under a new authority; no Rocket RTL or physical datum was published.
+Authority `c2842a0...d1035a` then exported the verified 376-file Rocket tree
+`641735c1...86d2f`; provenance SHA-256 is `fd91b3b9...620da`. The packed-array
+inventory is empty and pinned Yosys read/hierarchy/check passes. This is
+pre-data compatibility evidence. A parser-bound recovery-v7 manifest and fresh
+paired candidate runs remain required.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -784,6 +784,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   cache-root strings and nondeterministic file-list order. Freeze only the
   verified exact-root annotation normalization plus sorted basename-set check,
   then export to a new path; retain the failed cache/output attempt.
+  The `v2` export and pinned Yosys parse/hierarchy/check now pass. Bind its RTL,
+  provenance, generator, and common compatibility-policy hashes in recovery-v7
+  before any Graph/Rocket synthesis; then rerun both partitions under that one
+  manifest.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

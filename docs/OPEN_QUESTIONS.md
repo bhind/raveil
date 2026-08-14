@@ -102,6 +102,9 @@ resolves it.
   The first physical build shows identical normalized shared inputs and module
   sets, but the export checker itself needs one exact-root/order normalization
   recovery before this question can be tested by synthesis.
+  That normalized export now passes the packed-array inventory and pinned
+  Yosys pre-synthesis checks. Whether the complete paired physical matrix
+  passes remains open pending recovery-v7 freeze and fresh runs.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

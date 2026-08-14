@@ -232,6 +232,8 @@ merely because a branch or partial implementation already exists.
    The first isolated lowering build completed but publication stopped on
    non-semantic cache-root and file-list-order differences. A narrowly verified
    normalization recovery remains pre-data and does not advance this gate.
+   The normalized Rocket export and pre-synthesis Yosys probe now pass; only a
+   frozen shared-lowering identity and fresh paired synthesis can advance it.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

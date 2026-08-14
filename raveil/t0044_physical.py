@@ -30,6 +30,50 @@ RAW_REQUIRED = {
     "tool-identity.txt",
     "yosys.log",
 }
+COMPATIBILITY_LOWERING_POLICY = {
+    "schema": "raveil.physical-common-lowering/v1",
+    "compatibility_option": "disallowPackedArrays",
+    "graph": {
+        "mode": "physical-emitter",
+        "lowering_options": ["disallowLocalVariables", "disallowPackedArrays"],
+    },
+    "rocket": {
+        "mode": "pinned-chipyard-enable-yosys-flow",
+        "baseline_options": [
+            "emittedLineLength=2048",
+            "noAlwaysComb",
+            "disallowLocalVariables",
+            "verifLabels",
+            "locationInfoStyle=wrapInAtSquareBracket",
+        ],
+        "physical_options": [
+            "emittedLineLength=2048",
+            "noAlwaysComb",
+            "disallowLocalVariables",
+            "verifLabels",
+            "locationInfoStyle=wrapInAtSquareBracket",
+            "disallowPackedArrays",
+        ],
+    },
+    "scientific_contract": "lowering-only-no-semantic-change",
+}
+ROCKET_LOWERING_PROVENANCE = {
+    "schema": "raveil.physical-rocket-lowering-provenance/v1",
+    "status": "shared-elaboration-identical",
+    "normalization": "exact-build-root-in-two-annotations-and-sorted-basename-filelists-v1",
+    "required_shared_groups": [
+        "firrtl-and-sfc-inputs",
+        "build-root-normalized-annotations",
+        "module-hierarchies",
+        "sorted-basename-filelists",
+    ],
+}
+COMPATIBILITY_OPERATIONAL_CHANGE = (
+    "physical-export-compatibility-lowering-with-shared-elaboration-proof"
+)
+COMPATIBILITY_RECOVERY_PREDECESSOR_SHA256 = (
+    "135f30d6899742eb769d67c8a8dc6929db105f03e54e284e7e81900acebc398a"
+)
 
 
 def sha256_file(path: pathlib.Path) -> str:
@@ -164,6 +208,58 @@ def load_manifest(path: pathlib.Path) -> dict[str, Any]:
         raise ValueError("report contract drift")
     for variant in document["matrix"]:
         _variant_contract(document, variant)
+    policy = document.get("compatibility_lowering_policy")
+    is_compatibility_recovery = (
+        document.get("recovery_of_manifest_sha256")
+        == COMPATIBILITY_RECOVERY_PREDECESSOR_SHA256
+    )
+    if is_compatibility_recovery:
+        if document.get("operational_change") != COMPATIBILITY_OPERATIONAL_CHANGE:
+            raise ValueError("compatibility recovery operational change drift")
+        if policy is None:
+            raise ValueError("compatibility lowering policy is missing")
+    elif document.get("operational_change") == COMPATIBILITY_OPERATIONAL_CHANGE:
+        raise ValueError("compatibility recovery predecessor drift")
+    if policy is not None:
+        if policy != COMPATIBILITY_LOWERING_POLICY:
+            raise ValueError("compatibility lowering policy drift")
+        graph = document["variants"]["static-graph"]
+        rocket = document["variants"]["rocket-in-order"]
+        if graph.get("compatibility_lowering") != "disallowPackedArrays":
+            raise ValueError("Graph compatibility lowering drift")
+        if graph.get("lowering_options") != policy["graph"]["lowering_options"]:
+            raise ValueError("Graph lowering options drift")
+        if rocket.get("compatibility_lowering") != "disallowPackedArrays":
+            raise ValueError("Rocket compatibility lowering drift")
+        if rocket.get("lowering_provenance") != ROCKET_LOWERING_PROVENANCE:
+            raise ValueError("Rocket lowering provenance contract drift")
+        for name in (
+            "baseline_cache_source_sha256",
+            "cache_source_sha256",
+            "generator_toolchain_sha256",
+            "lowering_provenance_sha256",
+            "rtl_filelist_sha256",
+        ):
+            if not SHA256_RE.fullmatch(str(rocket.get(name, ""))):
+                raise ValueError(f"invalid Rocket lowering identity: {name}")
+        generator = rocket.get("generator_provenance")
+        required_generator_fields = {
+            "common_mk_sha256",
+            "extra_firrtl_options_sha256",
+            "final_anno_sha256",
+            "firrtl_sha256",
+            "firtool_sha256",
+            "firtool_version_sha256",
+            "lowering_options_sha256",
+            "sfc_anno_sha256",
+            "sfc_firrtl_sha256",
+            "sfc_level_sha256",
+        }
+        if not isinstance(generator, dict) or set(generator) != required_generator_fields:
+            raise ValueError("Rocket generator provenance fields drift")
+        for name, value in generator.items():
+            if not isinstance(value, str) or not SHA256_RE.fullmatch(value):
+                raise ValueError(f"invalid Rocket generator provenance: {name}")
     return document
 
 

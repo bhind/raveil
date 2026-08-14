@@ -437,3 +437,25 @@ normalizes only the two exact frozen cache roots and sorts basename-only file
 lists while still retaining each physical file-list hash. This operational
 recovery publishes no RTL or candidate datum and requires a new committed
 authority before another distinct export.
+
+From normalization-recovery authority
+`c2842a0deb51046a85798229ea559aae53d1035a`, the distinct `v2` export passed
+all shared-provenance gates. Rocket RTL tree SHA-256 is
+`641735c13d371aff71f4856bdbb3a7a618d2600484a7f652e2f122c90d786d2f`,
+its 376-file list SHA-256 is
+`d38af48c22bfbf8a88ca5da9b61c758112afd7d6f625759267a0be9c9011db46`,
+and lowering-provenance SHA-256 is
+`fd91b3b9f5d4dd807195d809cd34ecaee5939aa1dc04953d84a7c1da6d2620da`.
+The tree contains no remaining generated multi-dimensional packed-array
+declaration under the frozen inventory pattern. A pinned Yosys 0.27 parse,
+checked Rocket hierarchy, and strict pre-synthesis `check -assert` pass over all
+376 files. This is compatibility/provenance evidence only, not synthesis data.
+
+The measured operational cost of the first clean-cache generation was about
+12 minutes on this host; the cache-bound revalidation/export completed in about
+30 seconds. These are workflow observations, not CPU performance evidence or
+independent samples. With the parser/manifest identity addition now required,
+the remaining narrow freeze plus fresh paired Graph/Rocket physical run is
+estimated at 0.5--2 working days with medium confidence, assuming no later
+Yosys mapping/STA incompatibility. This is a range, not a completion-date
+promise.
