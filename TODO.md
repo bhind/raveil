@@ -754,7 +754,7 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Graph yields a complete sealed partition report, and do not interpret the
   probe or any failed log as area/timing evidence.
   Recovery-v4 authority `fe7b9f6...3c046` and manifest
-  `de396d4f...129d31` are now frozen; commit the freeze, then run Graph from its
+  `de396d4f...129d31` are frozen at `caa0983...5fd4c3`; run Graph only from its
   clean descendant.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate

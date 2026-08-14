@@ -321,5 +321,5 @@ Recovery-v4 implementation authority is
 `benchmarks/manifests/t0044-static-physical-screen-recovery-v4.json`, SHA-256
 `de396d4f4d4bd81484c5a57b859ac59fdfca84a4cab7cc1a8834d3276c129d31`,
 chains recovery-v3 and adds only the verified collector policy. Candidate use
-is authorized only from the commit containing this manifest or a clean
-descendant.
+is authorized only from recovery-v4 freeze commit
+`caa09835116cce0baadd2a12596b10e2b25fd4c3` or a clean descendant.

@@ -411,6 +411,8 @@ Recovery-v4 authority is `fe7b9f6...3c046`; manifest SHA-256 is
 `de396d4f...129d31` and retains all prior RTL/tool/partition/decision fields.
 Only a clean descendant of the manifest freeze may collect the next Graph
 RUN-ID.
+Recovery-v4 freeze commit is
+`caa09835116cce0baadd2a12596b10e2b25fd4c3`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
