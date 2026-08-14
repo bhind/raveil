@@ -256,6 +256,9 @@ merely because a branch or partial implementation already exists.
    complete same-manifest pair.
    The EXP-0010 40 ns manifest is now pre-data frozen in content; fresh paired
    collection begins only after its commit and cannot reuse EXP-0009 results.
+   EXP-0010's fresh pair now passes its bounded screen and advances only to the
+   integrated physical boundary. Gate 1 remains open until that complete
+   composition is implemented, closed, and measured without missing parts.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

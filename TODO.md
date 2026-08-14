@@ -820,6 +820,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   EXP-0010 authority `f662d68...1a9e3` and manifest `a09a641...b76ef` are
   ready for the freeze commit. After it, execute only the preregistered fresh
   pair and matrix; stop on any identity or timing-tuple drift.
+  EXP-0010 is complete: fresh 40 ns pair meets, area ratio 0.229563 is below
+  0.25, and outcome is `advance-to-integrated-physical`. Close the single-
+  target follow-up and move only to an integrated boundary that includes the
+  Rocket fallback, Graph incremental logic, common fixture/memory, adapters,
+  cache/interconnect, clocks, and placement/routing. Do not promote the
+  partition sum to whole-system area or reuse 40 ns as a performance claim.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

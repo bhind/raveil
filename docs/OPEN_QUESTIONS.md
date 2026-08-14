@@ -126,6 +126,10 @@ resolves it.
   remains unresolved until its manifest is frozen and fresh runs complete.
   The manifest content is now frozen at `a09a641...b76ef`; only the fresh
   same-manifest outcome remains unresolved.
+  EXP-0010 resolves the single 40 ns follow-up positively. The 20 ns outcome is
+  unchanged. The remaining physical question is the integrated composition:
+  fallback, Graph, common memory/fixture, adapters/interconnect, clocks, and
+  placement/routing must be present before any whole-system conclusion.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

@@ -515,6 +515,13 @@ SHA-256 is `a09a641...b76ef`. It preserves every recovery-v9 identity and
 decision field while binding only the 40/1/1 ns follow-up tuple. Fresh
 `run-014` Graph and `run-015` Rocket collection is the next authorized action
 after the manifest freeze commit.
+EXP-0010 freeze commit `993f394` produced fresh complete Graph `run-014` and
+Rocket `run-015` partitions at 40 ns. Graph is 11,851.3664 um2 / 1,592 cells /
++31.459913 ns slack; Rocket is 51,625.7632 um2 / 6,549 cells / +7.231165 ns
+slack. Area ratio is 0.229563 and both timing reports meet, so the frozen
+outcome is `advance-to-integrated-physical`. EXP-0009 remains paused at 20 ns.
+This is partition synthesis-estimate evidence only; every performance, energy,
+and whole-system claim remains false.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

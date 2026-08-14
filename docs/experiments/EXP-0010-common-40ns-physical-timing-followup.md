@@ -1,6 +1,6 @@
 # EXP-0010: Common 40 ns physical timing follow-up
 
-Status: In progress
+Status: Completed
 Evidence class: partitioned synthesis estimate
 Date: 2026-08-15
 Task: T-0044
@@ -133,3 +133,53 @@ Exact post-freeze commands are:
 ./hardware/chisel/run-physical-proxy-synthesis.sh benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json rocket-in-order artifacts/research/EXP-0009/rocket-in-order-yosys-v2/generated-src artifacts/research/EXP-0010/run-015-rocket-in-order-raw artifacts/research/EXP-0010/run-015-rocket-in-order-derived
 python3 -m raveil.t0044_physical derive-matrix --manifest benchmarks/manifests/t0044-common-40ns-physical-followup-v1.json --graph-result artifacts/research/EXP-0010/run-014-static-graph-derived/result.json --rocket-result artifacts/research/EXP-0010/run-015-rocket-in-order-derived/result.json --derived-dir artifacts/research/EXP-0010/matrix-exp0010-v1
 ```
+
+## Result
+
+The manifest freeze commit is `993f394`. Both preregistered fresh partitions
+passed exact input preflight, reverified snapshot collection, raw sealing, and
+derivation under manifest `a09a641...b76ef`:
+
+| partition | mapped area (um2) | cells | setup slack at 40 ns | timing | evidence |
+| --- | ---: | ---: | ---: | --- | --- |
+| static Graph incremental | 11,851.3664 | 1,592 | +31.459913 ns | met | partition synthesis estimate |
+| Rocket fallback denominator | 51,625.7632 | 6,549 | +7.231165 ns | met | partition synthesis estimate |
+
+Run-014 raw-seal SHA-256 is
+`7f5b43f9de13f33631b66f410131615680091a35cae64f54a263bc67c3af869e`;
+result SHA-256 is
+`39ec3b2a34cdcc496062869ecd6d5a33994417d0912cc5aa49a89d8274b3bc8c`.
+Run-015 raw-seal SHA-256 is
+`62416e43f635ce3a915a20c3b952f5b6b4839d2d02e46ca5a4d9554e6e8d5c13`;
+result SHA-256 is
+`9a1d13ee36659ad212e647e163c0cd004186de005c652ce3d6b65c60bca8fd14`.
+Both mapped-netlist hashes equal their recovery-v9 counterparts, consistent
+with SDC-only change: Graph `2e9ba3b...9d5c5`, Rocket
+`f47c2d3...bd36`.
+
+Matrix SHA-256 is
+`28a79a3b1df394f3f8527e1414fb5f63cdb7ebfad15166335d81576749185b48`.
+Graph/Rocket incremental area ratio is 0.2295630256, below 0.25, and both
+partitions meet the fixed common 40 ns constraint. The preregistered outcome is
+`advance-to-integrated-physical`.
+
+This advance applies only to the next integrated physical boundary. EXP-0009
+remains `pause-boundary` at 20 ns. The 63,477.1296 um2 analytical sum is not a
+whole-system area; common memory/fixture, fallback integration, cache and
+interconnect, clock tree, placement/routing, energy, and silicon remain absent.
+All performance, energy, and whole-system claim flags are false.
+
+The fresh pair and matrix completed within the 0.25--1 working-day estimate;
+container execution remained under roughly two host minutes. Host duration is
+operational information only. Deterministic agreement with prior mapped
+netlists is reproducibility evidence, not an independent sample.
+
+## Clean-checkout replay
+
+Use freeze commit `993f394` or a clean descendant, the exact image and pinned
+external-source revisions from the manifest, and new artifact paths. Re-export
+or reuse generated RTL only after both `verify-inputs` calls return the frozen
+hashes. Then run the three commands above with new raw/derived/matrix paths.
+Existing run-014/run-015 and matrix paths are append-only and must not be
+overwritten. Any rebuilt image, RTL, timing tuple, or seal drift is a failed
+replay rather than substitute evidence.
