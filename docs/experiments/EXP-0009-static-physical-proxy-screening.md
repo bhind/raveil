@@ -102,12 +102,14 @@ fallback activity are not yet proven. The successful cached end-to-end toy run
 takes about five operational seconds; simulator or host wall-clock is never a
 CPU performance fact.
 
-## Pre-data state
+## Stage-B frozen pre-data state
 
-No Stage-B candidate synthesis data exists. The next commit must become the
-implementation authority, after which a separate machine-readable manifest
-binds that authority and the exact Stage-B collector before any Graph or Rocket
-area/timing command runs.
+No Stage-B candidate synthesis data exists. Implementation authority
+`f487259fbadc5dc35548c15d7c8967b7065cd466` descends from the commissioned
+toolchain and owns the exporters, runner, seals, parser, matrix derivation, and
+tests. The frozen manifest is
+`benchmarks/manifests/t0044-static-physical-screen-v1.json`, SHA-256
+`681fd43e6f38a4b65cba8698eacbbf3768edc93d633141274c74ce846d61d216`.
 
 The implemented but not yet frozen collector has four explicit boundaries:
 
@@ -152,3 +154,37 @@ The first canonical-copy commissioning then failed closed because the `.top.f`
 locator was one directory too high. Read-only volume inspection found the file
 inside the configuration-specific generated-source directory; the locator is
 corrected before any canonical export or synthesis.
+
+The accepted frozen inputs are:
+
+- static Graph top `StaticStencilRegion`, generated-RTL SHA-256
+  `b7ee40467b904c0dfd3bf252de0312d60315bdd114f17fe367653d591d07778f`,
+  with `OwnedFixedLatencyScratchpad` and `RaveilFixtureInputProvider` as the
+  explicit common partitions excluded by black-box, while Rocket excludes
+  them at its core top boundary;
+- Rocket denominator top `Rocket`, 376 `.top.f` RTL files, generated-RTL
+  SHA-256
+  `d98d3a7802d0ba1f99e4e3affab27c5ac66b306720563de507af079268791599`,
+  with caches, common owned memory, and integration disclosed outside this
+  core-logic denominator; and
+- the same pinned synthesis image, Sky130 HD typical Liberty, `clock` port,
+  20.000 ns period, and 1.000 ns input/output delays for both partitions.
+
+Clean-checkout collection commands, each using a new RUN-ID directory, are:
+
+```sh
+./hardware/chisel/run-physical-proxy-synthesis.sh \
+  benchmarks/manifests/t0044-static-physical-screen-v1.json static-graph \
+  <graph-rtl-dir> <new-graph-raw-dir> <new-graph-derived-dir>
+./hardware/chisel/run-physical-proxy-synthesis.sh \
+  benchmarks/manifests/t0044-static-physical-screen-v1.json rocket-in-order \
+  <rocket-rtl-dir> <new-rocket-raw-dir> <new-rocket-derived-dir>
+python3 -m raveil.t0044_physical derive-matrix \
+  --manifest benchmarks/manifests/t0044-static-physical-screen-v1.json \
+  --graph-result <graph-derived-dir>/result.json \
+  --rocket-result <rocket-derived-dir>/result.json \
+  --derived-dir <new-matrix-derived-dir>
+```
+
+Any failed raw directory is retained and never reused. A deterministic rerun
+uses a distinct RUN-ID and is only a reproducibility check.

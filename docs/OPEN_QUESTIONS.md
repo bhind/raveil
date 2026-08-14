@@ -73,8 +73,9 @@ resolves it.
   ADR-0048 resolves only the next measurement order: first run a same-library
   partitioned Graph/Rocket area/timing lower-bound screen, then design an
   integrated fallback/common-memory/activity boundary if it survives. EXP-0009
-  has commissioned the toy synthesis/STA toolchain, but its candidate matrix is
-  still pre-data. The valid whole-system dynamic-energy composition remains an
+  has commissioned the toy synthesis/STA toolchain and frozen its partitioned
+  Graph/Rocket manifest, but its candidate matrix is still pre-data. The valid
+  whole-system dynamic-energy composition remains an
   open question.
   The earlier
   source survey found

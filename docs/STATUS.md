@@ -361,6 +361,13 @@ these are pre-data operational failures, not physical results.
 A subsequent broad Rocket copy included generated simulator collateral; it was
 rejected before freeze or synthesis. The corrected path admits only Chipyard's
 `.top.f` RTL entries and binds their tree and file-list hashes.
+Stage-B implementation authority is now
+`f487259fbadc5dc35548c15d7c8967b7065cd466`. Its manifest freezes Graph top
+`StaticStencilRegion` with the common provider/scratchpad black-boxed and
+Rocket core top `Rocket`, exact RTL/tool/library/constraint identities, raw
+sealing, and fail-closed matrix rules. Manifest SHA-256 is
+`681fd43e6f38a4b65cba8698eacbbf3768edc93d633141274c74ce846d61d216`.
+This is still candidate pre-data: no Graph or Rocket physical estimate exists.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

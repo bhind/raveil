@@ -208,8 +208,9 @@ merely because a branch or partial implementation already exists.
    other organizations remain the open T-0044 gates. ADR-0048 selects a
    partitioned Graph/Rocket area/timing lower-bound screen as the next gate and
    forbids Graph-island energy promotion. EXP-0009 has passed only its
-   candidate-independent toolchain commissioning; candidate reports remain
-   pre-data until a separate manifest freezes the committed implementation.
+   candidate-independent toolchain commissioning and now freezes a separate
+   Graph/Rocket Stage-B manifest from committed authority. Candidate reports
+   remain pre-data until the complete frozen partition matrix is executed.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
