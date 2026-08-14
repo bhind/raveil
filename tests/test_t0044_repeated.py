@@ -133,7 +133,7 @@ class RepeatedBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(
             hashlib.sha256(path.read_bytes()).hexdigest(),
-            "fa175cdb19e9e0933b58c220a61ba6418b7e967366b48f813c407ca9c4835684",
+            "9dcf89434ea75c1d2a75e146f1d242f26f465dcad82b833beb16c6ebadf8dc21",
         )
 
     def test_raw_seal_is_single_use_and_binds_report(self) -> None:

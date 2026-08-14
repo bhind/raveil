@@ -9,11 +9,12 @@ commit `528fbe28a0dcdfbab65d4ae2995c0876857e053a`, boundary implementation
 commit `10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d`, collector implementation
 commit `7575602e6651cc1e755e8d2f7b255aa8872db856`, runtime-fix commit
 `80a35e61881393ba9790b19719eb1f6dcb4ee415`, installation-accounting
-commit `cf454e4cd847d43d223fe7166b20d75dae0c2ffe`
+commit `cf454e4cd847d43d223fe7166b20d75dae0c2ffe`, log-synchronization commit
+`988c25e615feaf711cb4d91f121d551bf88420ea`
 Prior evidence: EXP-0005 (preserved unchanged)
 Manifest: `benchmarks/manifests/t0044-static-repeated-invocation-v1.json`
 Frozen manifest SHA-256:
-`fa175cdb19e9e0933b58c220a61ba6418b7e967366b48f813c407ca9c4835684`
+`9dcf89434ea75c1d2a75e146f1d242f26f465dcad82b833beb16c6ebadf8dc21`
 
 ## Falsifiable question
 
@@ -110,10 +111,10 @@ python3 -m raveil.t0044_repeated collect \
   --run-dir artifacts/research/EXP-0006/<RUN-ID>
 ```
 
-The first freeze produced only retained failed commissioning attempts. The
-stack and installation-accounting corrections changed source, so the manifest
-was re-frozen with the hash above before any replacement run or eligible CPU
-observation.
+Earlier freezes produced only retained failed commissioning attempts. Stack,
+installation-accounting, and log-synchronization corrections changed source,
+so the manifest was re-frozen with the hash above before any replacement run
+or complete-matrix observation.
 
 ## Estimate
 

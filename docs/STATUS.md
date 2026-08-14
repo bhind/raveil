@@ -224,6 +224,8 @@ in-container verifier observed an incomplete `tee` file and failed cardinality.
 This is a harness visibility failure, not promoted BOOM evidence. The runner
 now synchronizes the named-volume log before reopening it and reports observed
 versus expected cardinality; another re-freeze is required.
+The synchronization fix is now included in replacement manifest authority; no
+subsequent complete-matrix run existed at this re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

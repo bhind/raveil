@@ -677,7 +677,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   replacement freeze is complete; only the new RUN-ID remains.
   Commissioning then exposed a BOOM `tee`/immediate-read visibility race despite
   a complete outer raw log; freeze the explicit log synchronization and repeat
-  the full matrix rather than promoting the replayed log.
+  the full matrix rather than promoting the replayed log. The replacement
+  freeze is complete.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
