@@ -108,3 +108,25 @@ No Stage-B candidate synthesis data exists. The next commit must become the
 implementation authority, after which a separate machine-readable manifest
 binds that authority and the exact Stage-B collector before any Graph or Rocket
 area/timing command runs.
+
+The implemented but not yet frozen collector has four explicit boundaries:
+
+- Graph and Rocket exporters write generated RTL into new paths and report
+  source/configuration, generator-image, and complete RTL-tree identities;
+- the candidate runner obtains top and black-box policy only from the frozen
+  manifest, verifies a clean descendant checkout and the exact synthesis image,
+  and retains any nonzero container run as sealed ineligible failure evidence;
+- successful raw evidence includes the exact read-file list, black-box list,
+  Yosys script, SDC, OpenSTA script, mapped netlist, structured Yosys statistics,
+  runtime binary/Liberty hashes, logs, and run metadata under one append-once
+  seal; and
+- derived partition and matrix reports live outside raw evidence, reject any
+  seal/manifest/RTL/top/tool/clock/report mismatch, and always keep energy and
+  whole-system claims false.
+
+The pre-authority verification command
+`python3 -m unittest tests.test_t0044_physical_proxy -v` passes nine tests,
+including raw mutation, top/black-box drift, contradictory timing status, and
+fallback-composition negatives. Shell syntax, Python byte-compilation, and
+`git diff --check` also pass. These are implementation tests, not candidate
+measurements.
