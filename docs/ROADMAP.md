@@ -19,6 +19,12 @@ or process-demo work would repeat that ordering error.
 
 The corrected critical path is:
 
+Start timing is governed by the canonical phase table in `TODO.md`: T-0042 is
+the sole P0 immediate implementation, T-0044 is P1 after T-0042 closes, and
+T-0106 is P2 only after T-0044 survival or an accepted product trigger. P3
+future-planned and P4 optional/triggered work cannot interrupt this sequence
+merely because a branch or partial implementation already exists.
+
 1. **T-0105 — reproducible substrate (complete):** the owned counter and pinned
    unmodified Rocket reference now elaborate and execute under fixed
    Docker/Git/Nix inputs. All 16 `rv64mi-p` functional tests pass. This proves

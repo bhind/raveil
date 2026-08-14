@@ -1,25 +1,32 @@
 # Development and research workflow
 
-Last updated: 2026-08-11
+Last updated: 2026-08-14
 
 ## Before a change
 
 1. Read `AGENTS.md` and use `docs/README.md` to select relevant records.
 2. Inspect Git status and preserve unrelated user changes.
-3. For tracked work, create a dedicated branch named
+3. Check the canonical start-timing table in `TODO.md`. Do not start or resume
+   implementation outside P0 merely because a branch, patch, local change, or
+   unfinished milestone exists. Promotion follows
+   `docs/guides/TASK-START-PHASES.md` and requires a dated trigger record.
+4. For tracked work, create a dedicated branch named
    `<type>/<record-id>-<short-slug>` in lowercase kebab-case. Types are `feat`,
    `fix`, `research`, `docs`, `test`, `build`, and `chore`; use the primary
    lowercase `t-`, `exp-`, `adr-`, or `rfc-` ID. Example:
    `research/exp-0003-gate1-measurement`. Read-only review does not require a
    new branch.
-4. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
+5. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
    architecture, roadmap, EXP, question, or log records selected by the
    document router for this task.
-5. Classify the proposed work as an implementation fact, decision, hypothesis,
+6. Classify the proposed work as an implementation fact, decision, hypothesis,
    experiment, or environment observation.
 
 ## During a change
 
+- Keep the default implementation work-in-progress limit at one coherent P0
+  task. Read-only reviews and bounded evidence preservation may proceed without
+  promoting another implementation task.
 - Keep external types behind Raveil-owned versioned adapters.
 - Keep Experience outside authority and preserve a trusted baseline/rollback.
 - Allocate task, ADR, EXP, and RFC identifiers monotonically.

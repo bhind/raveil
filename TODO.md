@@ -4,6 +4,25 @@ Last updated: 2026-08-14
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+## Start timing phases
+
+This table, together with each task's own trigger text, governs when unfinished
+work may start. A branch, patch, local modification, or previously spent effort
+does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
+
+| Phase | Meaning and start rule | Unfinished tasks |
+|---|---|---|
+| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0042 |
+| **P1 — next** | Start only after P0's recorded exit conditions pass. | T-0044 |
+| **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
+| **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
+| **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
+
+Promotion into P0 requires a dated log entry naming the satisfied trigger,
+dependencies, owner, stop rule, and displaced or completed P0 task. P0 has a
+work-in-progress limit of one coherent implementation task. Read-only review
+and failure preservation do not consume that slot; new implementation does.
+
 ## Delivery line — active GNU/Linux userspace MVP
 
 - [x] **T-0103** Release the synthetic Native Command Graph/Experience

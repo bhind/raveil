@@ -3,6 +3,7 @@
 Status: active implementation guide
 Date: 2026-08-14
 Authority: T-0042, ADR-0041, ADR-0043, ADR-0046, RFC-0005
+Start phase: P0 — immediate; sole default implementation focus
 
 ## Outcome
 
@@ -58,4 +59,3 @@ Record exact commands, environment, source and artifact hashes, test exits,
 raw-log locators, and evidence class. Reconcile STATUS, TODO, ROADMAP,
 OPEN_QUESTIONS, ARCHITECTURE, the applicable ADRs, and the dated log. Passing
 T-0042 authorizes T-0044 preparation only; it is not a performance result.
-
