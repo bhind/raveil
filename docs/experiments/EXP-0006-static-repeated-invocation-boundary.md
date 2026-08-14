@@ -7,11 +7,12 @@ Task: T-0044
 Authority: RFC-0004, RFC-0005, ADR-0039, ADR-0046, T-0042 integration
 commit `528fbe28a0dcdfbab65d4ae2995c0876857e053a`, boundary implementation
 commit `10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d`, collector implementation
-commit `7575602e6651cc1e755e8d2f7b255aa8872db856`
+commit `7575602e6651cc1e755e8d2f7b255aa8872db856`, runtime-fix commit
+`80a35e61881393ba9790b19719eb1f6dcb4ee415`
 Prior evidence: EXP-0005 (preserved unchanged)
 Manifest: `benchmarks/manifests/t0044-static-repeated-invocation-v1.json`
 Frozen manifest SHA-256:
-`4a6ebd2c67c8d19f6589753966123fcec2a09c77798b29c45cdc6fdb3df1d740`
+`50cbb3c4d8769baff11e4d6961b3cc055d895471555a510f1c4a5b2e57015c6c`
 
 ## Falsifiable question
 
@@ -108,7 +109,9 @@ python3 -m raveil.t0044_repeated collect \
   --run-dir artifacts/research/EXP-0006/<RUN-ID>
 ```
 
-No EXP-0006 RTL data existed when this record and manifest were frozen.
+The first freeze produced only retained failed commissioning attempts. The
+stack correction changed source, so the manifest was re-frozen with the hash
+above before any replacement run or eligible CPU observation.
 
 ## Estimate
 

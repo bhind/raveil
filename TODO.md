@@ -669,8 +669,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   only its 1/4 commissioning matrix next. Fail closed or pause if CPU-local versus
   Graph-testbench input generation prevents a same-meaning staging/end-to-end
   boundary. The first CPU attempt failed before measurement because repeated C
-  needed an initialized private stack; re-freeze the minimal main-RAM stack fix
-  and rerun commissioning under a new RUN-ID.
+  needed an initialized private stack; the minimal main-RAM stack fix is now
+  re-frozen and commissioning must rerun under a new RUN-ID.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

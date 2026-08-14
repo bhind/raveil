@@ -9,6 +9,7 @@
     "t0042_integration_commit": "528fbe28a0dcdfbab65d4ae2995c0876857e053a",
     "boundary_implementation_commit": "10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d",
     "collector_implementation_commit": "7575602e6651cc1e755e8d2f7b255aa8872db856",
+    "runtime_fix_commit": "80a35e61881393ba9790b19719eb1f6dcb4ee415",
     "prior_experiment": "EXP-0005",
     "rfc": ["RFC-0004", "RFC-0005"],
     "adr": ["ADR-0039", "ADR-0046"]

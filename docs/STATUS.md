@@ -205,6 +205,8 @@ function used a stack while its bare-metal entry left `sp` uninitialized. No
 CPU observation or performance claim was produced. The minimal correction
 initializes a private main-RAM stack outside the owned RFC-0005 resource; the
 manifest must be re-frozen before another run.
+The stack fix is now hash-bound by the replacement EXP-0006 manifest; no
+replacement commissioning data existed at that re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
