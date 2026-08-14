@@ -137,16 +137,22 @@ operation/dependency/effect/object graph. It does not test dependency discovery,
 OoO replacement, cache hierarchy, pipeline, ISA encoding, area, or energy, and
 its memoization is not evidence that Graph is required. RFC-0004 is only a
 proposal for the correctly ordered Chisel RTL/simulation study. T-0105 now has
-unmodified Rocket functional execution. T-0042 separately has a bounded static
-Graph RTL smoke and a minimal BOOM RISC-V functional execution, but no matched
-CPU comparison or performance evidence exists.
-ADR-0046 now narrows T-0042's remaining implementation order without changing
-that fact: the next required slice is the controlled Rocket/BOOM/Graph
-connection to one proved-equal owned resource boundary with quiescent-window
-and complete lifecycle accounting. Exhaustive CPU token lifecycle hardening is
-deferred to T-0106 and no longer gates T-0042 or T-0044. Existing ADR-0045
-diagnostics remain bounded functional evidence; no general semantic-initiator,
-performance, CPU, ISA, FPGA, or silicon claim has been promoted.
+unmodified Rocket functional execution. T-0042 separately has bounded static
+Graph and CPU RTL simulation evidence. The ADR-0046 small-start exit slice is
+now complete: controlled Rocket, BOOM, and static Graph preserve the frozen
+RFC-0005 semantics and independent oracle, use the same canonical owned
+resource tuple, enter and leave execution quiescent, conserve all admitted
+execution traffic, and emit complete installation/staging/execution/
+completion/validation/publication plus total-cycle records. The three-way
+verifier reports `resource_equality_verified=true` and bounded functional
+`comparison_eligible=true`. It also reports
+`dynamic_memory_traffic_equal=false` and
+`t0044_measurement_claim_ready=false`: Graph admits 1,280 reads plus 256 writes
+while each optimized CPU execution admits 800 reads plus 256 writes. T-0044
+must decide that fairness question before measurement. Exhaustive CPU token
+lifecycle hardening remains deferred to T-0106. Existing ADR-0045 diagnostics
+remain bounded functional evidence; no general semantic-initiator,
+performance, CPU/ISA advantage, FPGA, ASIC, or silicon claim is promoted.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
@@ -224,9 +230,10 @@ kinds, and any dynamic-issue resource request rather than treating a different
 descriptor as compatible with the fixed RTL.
 
 The owned Chisel `StaticStencilRegion` binds the first 64 hash bits as a
-configuration tag and now reaches separate input and private-output instances
-of the ADR-0043 request/response scratchpad for staging, execution, and
-validation. It applies the fixed logical schedule over all 256 output points and has no
+configuration tag and now reaches one 1,024-word physical instance of the
+ADR-0043 request/response scratchpad for staging, execution, and validation.
+Input `[0,324)` and private output `[324,580)` remain disjoint logical regions.
+It applies the fixed logical schedule over all 256 output points and has no
 runtime dependency queue, token store, rename, ROB, general LSU, commit
 frontier, or issue-mode switch. Cancellation clears output validity; restart
 begins the fixed schedule from point zero.
@@ -266,18 +273,38 @@ anything other than the required fixed-latency banked scratchpad. Common v2
 adapter SHA-256 is
 `56dbe3f2ab479233eb5e4fe1c79eb06e07458b42ea77acebb471a101afd24c1e`.
 
-The Graph smoke now emits validated records for complete, cancelled, and
+The legacy Graph smoke still emits validated v2 records for complete, cancelled, and
 restart invocations. All are deliberately `accounting_complete=false` with
 `total_cycles=null`: installation, completion, and publication costs are not
 yet available. The reported 3,072 execution, 648 staging, and 512 validation
 cycles therefore cannot be added or compared as an end-to-end result.
 They also declare `memory_model=owned-private-scratchpads`,
-`resource_match_verified=false`, and `matched_comparison_ready=false`; this RTL
-has not yet been resource-matched to either CPU control.
+`resource_match_verified=false`, and `matched_comparison_ready=false`; this
+record class predates and remains separate from the ADR-0046 strict controlled
+record.
 T-0042 now has semantic stencil records for Rocket, BOOM normal, BOOM's
 serialize-dispatch diagnostic, and the Graph RTL behind this boundary. It
-remains open for a separately verified matched scratchpad adapter; T-0044
-remains the matched measurement task.
+also has the separately verified strict controlled three-way resource boundary;
+T-0044 remains the matched measurement task.
+
+The strict `raveil.controlled-run/v1` records bind contract
+`f95cc6dc896659a32f1407f0f5a8f74ec475d208632f9dd5ff4d43d9cb2f7978`,
+resource
+`16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748`,
+input
+`65b00605d894f4a6934862137c751e7f25e7c86a41077f6172cb7142c7ab9254`,
+and oracle/output
+`dd749f0f218c7389730bef5b97af4e9203b0501d5ec57fa48ffa643356f23582`.
+They also bind each admitted source set, built simulator or ELF artifact,
+pinned toolchain contract, and derived implementation configuration. The
+three-way aggregate records Graph/Rocket/BOOM configuration SHA-256 values
+`3ff3df8a...a33b` / `a7899b30...3a16` / `29659996...3e41`, so a changed
+workload, linker input, binary, simulator source, toolchain contract, or peer
+configuration fails closed instead of aliasing a prior run.
+Graph phases are `0/648/3072/1/512/0`, total 4,233; Rocket phases are
+`44630/3865/14621/410/16513/0`, total 80,039; and BOOM phases are
+`44761/4208/21892/425/16513/0`, total 87,799. These are lifecycle accounting
+observations for one pinned RTL simulation, not comparative timing results.
 
 ADR-0044 now adds the first CPU-side translation target without pretending it
 is that matched scratchpad. A repository-owned Chipyard overlay removes the
@@ -361,7 +388,10 @@ semantic agreement for this one workload only. The evidence does not implement
 ADR-0043 owned semantic initiator
 metadata, establish equal resources, isolate OoO, or support a performance,
 energy, area, OoO-removal, FPGA, or silicon claim.
-The ADR-0043 common-contract adapter remains open.
+These older topology and attribution diagnostics do not themselves implement
+the ADR-0043 common contract. The separate ADR-0046 controlled-run slice now
+implements the minimum common owned-resource boundary required to close
+T-0042; general semantic attribution remains outside that boundary.
 
 The shared CPU runner now also executes a dedicated loader-path negative probe
 in each pinned configuration. Its ELF contains one four-byte writable
@@ -501,8 +531,9 @@ mask, and lane remain context only. No token is carried through DCache or
 TileLink, and this does not prove target-ELF semantic initiator identity, store
 authorization, replay/kill/exception/reset behavior, complete BOOM lifecycle,
 resource matching, OoO effects, or performance. Those claim boundaries remain;
-ADR-0046 routes the general lifecycle cases to T-0106 while T-0042 remains open
-for the controlled common-resource and complete-accounting slice.
+ADR-0046 routes the general lifecycle cases to T-0106. The separate controlled
+common-resource and complete-accounting slice now closes T-0042 without
+promoting this diagnostic to general authority.
 
 A second pinned BOOM diagnostic now covers one deterministic but narrower
 negative ordering. At the exact `0x08000101` misaligned-load addrgen candidate,
@@ -716,12 +747,15 @@ backpressure, and accepted/completed/stall/pending counters. Its assert-enabled
 emitted RTL passed a standalone Verilator harness covering reads, writes,
 partial writes, request/response stalls, attribution, and rejection. A response
 is available one module-local cycle after acceptance and remains stable until
-consumed. The static Graph region is now connected through disjoint input and
-private-output instances: two full runs each accepted 1,280 execution reads and
-256 execution writes, matched all 512 host-oracle outputs in total, and passed
-cancel/drain/restart. The CPU controls remain unconnected, fixed end-to-end
-latency is not claimed, and resource matching plus comparison readiness remain
-false.
+consumed. Before the controlled CPU slice, the static Graph region was
+connected through disjoint input and private-output logical regions in one
+physical instance: two full runs each
+accepted 1,280 execution reads and 256 execution writes, matched all 512
+host-oracle outputs in total, and passed
+cancel/drain/restart. Those legacy records leave CPU controls unconnected and
+resource matching false. The later ADR-0046 strict records supersede only that
+open resource-connection status; fixed end-to-end CPU latency is still not a
+T-0042 claim.
 
 ADR-0025 implements one OS/ISA-neutral owned `GraphProgram` and
 `ExecutionContract` for bounded GEMM and GEMM+bias+ReLU graphs. A fixed

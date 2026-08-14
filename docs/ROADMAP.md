@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0057 complete; static Graph and BOOM functional smokes pass; matched CPU thesis remains untested**
+State: **T-0042 controlled equal-resource RTL slice complete; T-0044 matched measurement remains unstarted**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -40,7 +40,7 @@ merely because a branch or partial implementation already exists.
    private-output, fallback, oracle, accounting, and no-go rules. The
    mechanism-specific review authorizes only repository-owned functional RTL
    simulation and makes no patent/FTO conclusion.
-4. **T-0042 — owned RTL adapter (in progress):** the smallest admitted static
+4. **T-0042 — owned RTL adapter (complete):** the smallest admitted static
    Graph executor now matches an independent oracle and survives
    cancel/restart in Verilator. A strict common functional adapter v2 now makes
    missing lifecycle accounting and unmatched memory/resources explicit and
@@ -69,9 +69,17 @@ merely because a branch or partial implementation already exists.
    and verifies the first standalone owned local transaction target with
    read/write, backpressure, attribution, accounting, and a one-cycle
    module-local response property. The static Graph region now uses disjoint
-   input/private-output instances for staging, execution, validation, and
-   cancel/drain/restart. CPU adapters and proof of equal ports, buffering,
-   arbitration, and lifecycle accounting remain before T-0042 closes. ADR-0044
+   input/private-output logical regions in one physical owned instance for
+   staging, execution, validation, and cancel/drain/restart. The ADR-0046
+   controlled slice now connects dedicated Rocket and BOOM paths to the same
+   canonical one-bank, one-port, 32-bit, four-byte-operation,
+   maximum-one-outstanding contract with no request buffer, one held response,
+   no owned-ingress arbitration, and the same module-local response rule.
+   Exact oracle, quiescence, traffic conservation, and complete six-phase
+   records pass for all three. The aggregate verifies resource equality and
+   bounded functional comparison eligibility, but dynamic execution traffic
+   differs (Graph 1,536; each CPU 1,056), so T-0044 measurement readiness and
+   every performance claim remain false. ADR-0044
    defines the first CPU translation step as a repository-owned 32-bit
    TileLink manager on the uncached peripheral path in dedicated Rocket and
    BOOM configurations. It is observable by design but explicitly unmatched;
@@ -109,8 +117,9 @@ merely because a branch or partial implementation already exists.
    semantic identity. One repository-owned DMI sequence now also performs an
    8-bit Debug SBA write in both CPU configurations; exact topology and runtime
    accounting separate the Debug client class from the following tagged DCache
-   read at 1/1 each. Durable semantic attribution, remaining loader/debug
-   negatives, and matched resources remain open. A cross-workload audit now
+   read at 1/1 each. Durable semantic attribution and remaining loader/debug
+   negatives remain open in T-0106; those diagnostic paths are not the later
+   ADR-0046 controlled resource-equality proof. A cross-workload audit now
    demonstrates that two distinct ELFs reuse the same exact DCache source in
    each CPU configuration, so source/origin cannot be promoted to ELF identity.
    ADR-0045 fixes the next boundary as CPU-owned, commit-aware token correlation:

@@ -136,11 +136,13 @@ checksum for two different inputs, cancels a third invocation, requires the
 private output to become invalid, and then restarts successfully. Success emits:
 
 ```text
-STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512 cycles_per_run=3072 graph_input_reads_per_run=1280 graph_output_writes_per_run=256 configuration_tag=d4bf9395a510385f memory_model=owned-private-banked-scratchpads cpu_connected=0 fixed_end_to_end_latency_claim=0 resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured
+STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512 cycles_per_run=3072 graph_input_reads_per_run=1280 graph_output_writes_per_run=256 configuration_tag=d4bf9395a510385f memory_model=owned-single-bank-two-logical-regions cpu_connected=0 fixed_end_to_end_latency_claim=0 resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured
 ```
 
-The six logical load/store phases now traverse two disjoint instances of the
-owned request/response scratchpad. Its conservative one-outstanding protocol
+The six logical load/store phases now traverse one 1,024-word physical owned
+request/response scratchpad. Input `[0,324)` and private output `[324,580)` are
+disjoint logical regions; the remaining words are invalid. Its conservative
+one-outstanding protocol
 uses an acceptance cycle and a response-retirement cycle for each of five reads
 and one write, so the current functional FSM checks 3,072 execution cycles per
 run. Input staging takes 648 local cycles and independent output validation
@@ -168,9 +170,44 @@ python3 -m raveil.simulation_adapter --invocation 1 --status completed
 python3 -m raveil.simulation_adapter --invocation 2 --status cancelled
 ```
 
-Rocket, BOOM, and its OoO-disabled diagnostic must eventually emit this owned
-schema through wrappers; no upstream implementation type is part of the
-contract. T-0042 does not close until those functional records exist.
+The legacy v2 records remain unchanged evidence. ADR-0046 adds a separate
+strict controlled-run record for the matched small-start slice described next.
+
+## ADR-0046 controlled three-way small start
+
+The minimal executable slice keeps the frozen RFC-0005 C/assembly workload and
+independent oracle, and connects static Graph, Rocket, and BOOM to the same
+repository-owned resource tuple. Run the peers separately or run the cached
+three-way closeout:
+
+```sh
+./hardware/chisel/run-static-stencil-rtl.sh
+./hardware/chisel/run-controlled-rocket-stencil.sh
+./hardware/chisel/run-controlled-boom-stencil.sh
+./hardware/chisel/run-controlled-three-way-stencil.sh
+```
+
+The canonical resource identity is
+`16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748`.
+It binds one physical 1,024-word bank with 580 valid words, four-byte
+operations, 32 data bits and four byte-mask bits, one
+request port, one response port, maximum one outstanding request, no request
+buffer, one held response, no arbitration at the owned-contract ingress,
+read/byte-mask-write operations, and a response available one module-local
+cycle after acceptance and stable until consumed.
+
+Each peer record is individually ineligible. Only the aggregate verifier may
+set `resource_equality_verified=true` and `comparison_eligible=true`, after all
+three peers have the same resource, workload, descriptor, adapter, input, and
+oracle identities; exact oracle output; quiescent execution boundaries; zero
+pending or unaccounted execution traffic; and complete six-phase accounting.
+The optimized CPU ELF generates 800 manager reads and 256 writes while the
+fixed Graph schedule generates 1,280 reads and 256 writes, so the aggregate
+keeps `dynamic_memory_traffic_equal=false` and
+`t0044_measurement_claim_ready=false`. This is bounded
+`rtl-simulation-functional` eligibility only, not a performance, CPU/ISA,
+OoO, FPGA, ASIC, silicon, or semantic-initiator result. General token lifecycle
+hardening remains T-0106.
 
 ## Pinned BOOM control source
 

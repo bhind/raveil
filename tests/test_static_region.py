@@ -76,8 +76,8 @@ class StaticRegionContractTests(unittest.TestCase):
         expected_tag = configuration_id()[:16]
         self.assertIn(f'val ConfigurationTag = "{expected_tag}"', source)
         self.assertIn("runtime_ready_slots=0", source)
-        self.assertIn("new OwnedFixedLatencyScratchpad(512, 324)", source)
-        self.assertIn("new OwnedFixedLatencyScratchpad(256, 256)", source)
+        self.assertIn("new OwnedFixedLatencyScratchpad(1024, 580)", source)
+        self.assertEqual(source.count("new OwnedFixedLatencyScratchpad"), 1)
         self.assertIn("OwnedMemoryContract.InitiatorGraph", source)
         self.assertIn("OwnedMemoryContract.PhaseExecution", source)
         self.assertIn("graphInputReadsAccepted", source)

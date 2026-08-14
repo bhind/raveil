@@ -16,6 +16,8 @@ case class RaveilOwnedMemoryParams(
   controlSize: BigInt = 4 * 1024,
   expectedClientSourceStart: Int = 0,
   expectedClientSourceEnd: Int = 1,
+  validWords: Option[Int] = None,
+  controlledRun: Boolean = false,
   fateAuditAddress: Option[BigInt] = None,
   tokenAuditAddress: Option[BigInt] = None,
   // The first CPU adapter deliberately uses the uncached peripheral path so
@@ -75,6 +77,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
   }
 
   private val words = (params.size / beatBytes).toInt
+  private val validWords = params.validWords.getOrElse(words)
+  require(validWords > 0 && validWords <= words)
   private val device = new SimpleDevice(
     "raveil-owned-memory",
     Seq("raveil,owned-local-memory-v1")
@@ -130,6 +134,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responseTokenSequence = RegInit(0.U(32.W))
 
     val phase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
+    val globalCycle = RegInit(0.U(64.W))
+    val phaseCycleCounts = RegInit(
+      VecInit(Seq.fill(RaveilOwnedMemoryPhase.Count)(0.U(64.W))))
     val acceptedCount = RegInit(0.U(32.W))
     val completedCount = RegInit(0.U(32.W))
     val phaseReadCounts = RegInit(VecInit(Seq.fill(RaveilOwnedMemoryPhase.Count)(0.U(32.W))))
@@ -159,6 +166,23 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val lastAcceptedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val lastCompletedPhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val fateAuditNextSequence = RegInit(1.U(16.W))
+    val executionStartCycle = RegInit(0.U(64.W))
+    val executionStartAccepted = RegInit(0.U(32.W))
+    val executionStartCompleted = RegInit(0.U(32.W))
+    val executionStartExpectedAccepted = RegInit(0.U(32.W))
+    val executionStartExpectedCompleted = RegInit(0.U(32.W))
+    val executionStartUnexpectedAccepted = RegInit(0.U(32.W))
+    val executionStartUnexpectedCompleted = RegInit(0.U(32.W))
+    val executionStartOriginAccepted = RegInit(0.U(32.W))
+    val executionStartOriginCompleted = RegInit(0.U(32.W))
+    val executionStartNonOriginAccepted = RegInit(0.U(32.W))
+    val executionStartNonOriginCompleted = RegInit(0.U(32.W))
+    val stagingStartCycle = RegInit(0.U(64.W))
+    val completionStartCycle = RegInit(0.U(64.W))
+    val validationStartCycle = RegInit(0.U(64.W))
+
+    globalCycle := globalCycle + 1.U
+    phaseCycleCounts(phase) := phaseCycleCounts(phase) + 1.U
 
     val requestAddress = tl.a.bits.address
     val dataRequest = requestAddress >= params.base.U &&
@@ -170,17 +194,35 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val put = tl.a.bits.opcode === TLMessages.PutFullData ||
       tl.a.bits.opcode === TLMessages.PutPartialData
     val supported = (dataRequest || controlRequest) && (get || put)
+    val controlledWordRequest = if (params.controlledRun) {
+      tl.a.bits.size === log2Ceil(beatBytes).U
+    } else {
+      true.B
+    }
     val phaseWrite = controlRequest && put && controlOffset === 0.U
     val phaseValueValid = tl.a.bits.data(2, 0) < RaveilOwnedMemoryPhase.Count.U
     val phaseByteEnabled = tl.a.bits.mask(0)
+    val wordIndex = ((requestAddress - params.base.U) >> 2)(log2Ceil(words) - 1, 0)
     val requestError = !supported ||
+      (dataRequest && wordIndex >= validWords.U) ||
+      (dataRequest && !controlledWordRequest) ||
       (phaseWrite && (!phaseByteEnabled || !phaseValueValid))
     val expectedClientRequest =
       tl.a.bits.source >= params.expectedClientSourceStart.U &&
       tl.a.bits.source < params.expectedClientSourceEnd.U
     val dcacheOriginRequest =
       tl.a.bits.user.lift(RaveilDCacheOrigin).getOrElse(false.B)
-    val wordIndex = ((requestAddress - params.base.U) >> 2)(log2Ceil(words) - 1, 0)
+    val accountingPhase = WireDefault(phase)
+    if (params.controlledRun) {
+      when(dataRequest && dcacheOriginRequest &&
+          phase === RaveilOwnedMemoryPhase.Installation.U) {
+        accountingPhase := RaveilOwnedMemoryPhase.Staging.U
+      }
+      when(dataRequest && get && !requestError && wordIndex === 324.U &&
+          phase === RaveilOwnedMemoryPhase.Completion.U) {
+        accountingPhase := RaveilOwnedMemoryPhase.Validation.U
+      }
+    }
 
     val memoryRead = tl.a.fire && dataRequest && get && !requestError
     val readBytes = memory.read(wordIndex, memoryRead)
@@ -226,13 +268,51 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
 
     tl.a.ready := !busy
     when(tl.a.fire) {
+      if (params.controlledRun) {
+        when(phase === RaveilOwnedMemoryPhase.Execution.U) {
+          val admittedExecutionRequest = dataRequest && !requestError &&
+            dcacheOriginRequest && expectedClientRequest &&
+            ((get && wordIndex < 324.U) ||
+              (put && wordIndex >= 324.U && wordIndex < 580.U))
+          when(!admittedExecutionRequest) {
+            printf("RAVEIL-CONTROLLED-MIXED-TRAFFIC-V1 phase=%d cycle=%d address=0x%x source=%d opcode=%d dcache_origin=%d expected_source=%d request_error=%d data_request=%d execution_reads=%d execution_writes=%d accepted=%d completed=%d\n",
+              phase, globalCycle, requestAddress, tl.a.bits.source,
+              tl.a.bits.opcode, dcacheOriginRequest, expectedClientRequest,
+              requestError, dataRequest,
+              phaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+              phaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+              acceptedCount, completedCount)
+          }
+          assert(admittedExecutionRequest,
+            "Raveil controlled execution admitted unaccounted traffic")
+        }
+        when(phase === RaveilOwnedMemoryPhase.Validation.U) {
+          val admittedValidationRequest = dataRequest && !requestError && get &&
+            wordIndex === 324.U +
+              phaseReadCounts(RaveilOwnedMemoryPhase.Validation)
+          when(!admittedValidationRequest) {
+            printf("RAVEIL-CONTROLLED-VALIDATION-TRAFFIC-V1 phase=%d cycle=%d address=0x%x source=%d opcode=%d dcache_origin=%d expected_source=%d request_error=%d validation_reads=%d accepted=%d completed=%d\n",
+              phase, globalCycle, requestAddress, tl.a.bits.source,
+              tl.a.bits.opcode, dcacheOriginRequest, expectedClientRequest,
+              requestError,
+              phaseReadCounts(RaveilOwnedMemoryPhase.Validation),
+              acceptedCount, completedCount)
+          }
+          assert(admittedValidationRequest,
+            "Raveil controlled validation admitted unaccounted traffic")
+        }
+        when(phase === RaveilOwnedMemoryPhase.Publication.U) {
+          assert(false.B,
+            "Raveil controlled publication admitted request traffic")
+        }
+      }
       busy := true.B
       responseRead := get
       responseError := requestError
       responseSource := tl.a.bits.source
       responseSize := tl.a.bits.size
       responseIsData := dataRequest
-      responsePhase := phase
+      responsePhase := accountingPhase
       responseExpectedClient := expectedClientRequest
       responseDcacheOrigin := dcacheOriginRequest
       responseFateAudit := false.B
@@ -273,9 +353,61 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       }
 
       when(dataRequest && !requestError) {
+        if (params.controlledRun) {
+          when(accountingPhase === RaveilOwnedMemoryPhase.Staging.U) {
+            assert(dcacheOriginRequest && expectedClientRequest && put,
+              "Raveil controlled staging traffic changed")
+            assert(wordIndex === phaseWriteCounts(RaveilOwnedMemoryPhase.Staging),
+              "Raveil controlled staging address order changed")
+            assert(phaseWriteCounts(RaveilOwnedMemoryPhase.Staging) < 324.U,
+              "Raveil controlled staging traffic exceeded 324 words")
+          }
+          when(accountingPhase === RaveilOwnedMemoryPhase.Execution.U) {
+            when(!(dcacheOriginRequest && expectedClientRequest)) {
+              printf("RAVEIL-CONTROLLED-MIXED-TRAFFIC-V1 phase=%d cycle=%d address=0x%x source=%d opcode=%d dcache_origin=%d expected_source=%d execution_reads=%d execution_writes=%d accepted=%d completed=%d\n",
+                accountingPhase, globalCycle, requestAddress, tl.a.bits.source,
+                tl.a.bits.opcode, dcacheOriginRequest, expectedClientRequest,
+                phaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                phaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                acceptedCount, completedCount)
+            }
+            assert(dcacheOriginRequest && expectedClientRequest,
+              "Raveil controlled execution admitted mixed traffic")
+            assert(
+              (get && wordIndex < 324.U) ||
+              (put && wordIndex >= 324.U && wordIndex < 580.U),
+              "Raveil controlled execution operation or region changed")
+            assert(
+              phaseReadCounts(RaveilOwnedMemoryPhase.Execution) +
+                phaseWriteCounts(RaveilOwnedMemoryPhase.Execution) < 1056.U,
+              "Raveil controlled execution traffic exceeded the frozen workload")
+          }
+          when(accountingPhase === RaveilOwnedMemoryPhase.Validation.U) {
+            when(!get) {
+              printf("RAVEIL-CONTROLLED-VALIDATION-TRAFFIC-V1 phase=%d cycle=%d address=0x%x source=%d opcode=%d dcache_origin=%d expected_source=%d request_error=%d validation_reads=%d accepted=%d completed=%d\n",
+                accountingPhase, globalCycle, requestAddress, tl.a.bits.source,
+                tl.a.bits.opcode, dcacheOriginRequest, expectedClientRequest,
+                requestError,
+                phaseReadCounts(RaveilOwnedMemoryPhase.Validation),
+                acceptedCount, completedCount)
+            }
+            assert(get,
+              "Raveil controlled validation traffic changed")
+            assert(
+              wordIndex === 324.U +
+                phaseReadCounts(RaveilOwnedMemoryPhase.Validation),
+              "Raveil controlled validation address order changed")
+            assert(phaseReadCounts(RaveilOwnedMemoryPhase.Validation) < 256.U,
+              "Raveil controlled validation traffic exceeded 256 words")
+          }
+          when(phase === RaveilOwnedMemoryPhase.Publication.U) {
+            assert(false.B,
+              "Raveil controlled publication admitted data traffic")
+          }
+        }
         acceptedCount := acceptedCount + 1.U
         lastAcceptedSource := tl.a.bits.source
-        lastAcceptedPhase := phase
+        lastAcceptedPhase := accountingPhase
         when(expectedClientRequest) {
           expectedAcceptedCount := expectedAcceptedCount + 1.U
         }.otherwise {
@@ -284,21 +416,43 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         when(dcacheOriginRequest) {
           dcacheOriginAcceptedCount := dcacheOriginAcceptedCount + 1.U
           lastDcacheOriginAcceptedSource := tl.a.bits.source
-          lastDcacheOriginAcceptedPhase := phase
+          lastDcacheOriginAcceptedPhase := accountingPhase
         }.otherwise {
           nonDcacheOriginAcceptedCount := nonDcacheOriginAcceptedCount + 1.U
           lastNonDcacheOriginAcceptedSource := tl.a.bits.source
-          lastNonDcacheOriginAcceptedPhase := phase
+          lastNonDcacheOriginAcceptedPhase := accountingPhase
         }
         when(get) {
-          phaseReadCounts(phase) := phaseReadCounts(phase) + 1.U
+          phaseReadCounts(accountingPhase) := phaseReadCounts(accountingPhase) + 1.U
         }.otherwise {
-          phaseWriteCounts(phase) := phaseWriteCounts(phase) + 1.U
+          phaseWriteCounts(accountingPhase) := phaseWriteCounts(accountingPhase) + 1.U
           val writeBytes = Wire(Vec(beatBytes, UInt(8.W)))
           for (byte <- 0 until beatBytes) {
             writeBytes(byte) := tl.a.bits.data(8 * byte + 7, 8 * byte)
           }
           memory.write(wordIndex, writeBytes, tl.a.bits.mask.asBools)
+        }
+      }
+      if (params.controlledRun) {
+        assert(!phaseWrite,
+          "Raveil controlled run uses structural boundaries, not software phase writes")
+        when(dataRequest && !requestError && dcacheOriginRequest &&
+            phase === RaveilOwnedMemoryPhase.Installation.U) {
+          phase := RaveilOwnedMemoryPhase.Staging.U
+          stagingStartCycle := globalCycle
+          printf("RAVEIL-CONTROLLED-PHASE-V1 from=0 to=1 cycle=%d accepted=%d completed=%d busy_before=%d\n",
+            globalCycle, acceptedCount, completedCount, busy)
+        }
+        when(phase === RaveilOwnedMemoryPhase.Completion.U) {
+          assert(dataRequest && !requestError && get && wordIndex === 324.U,
+            "Raveil controlled validation did not start at the exact output base")
+        }
+        when(dataRequest && !requestError && get && wordIndex === 324.U &&
+            phase === RaveilOwnedMemoryPhase.Completion.U) {
+          phase := RaveilOwnedMemoryPhase.Validation.U
+          validationStartCycle := globalCycle
+          printf("RAVEIL-CONTROLLED-PHASE-V1 from=3 to=4 cycle=%d accepted=%d completed=%d busy_before=%d\n",
+            globalCycle, acceptedCount, completedCount, busy)
         }
       }
       when(phaseWrite && phaseByteEnabled && phaseValueValid) {
@@ -341,6 +495,71 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responseHeld := false.B
       busy := false.B
       when(responseIsData && !responseError) {
+        if (params.controlledRun) {
+          when(responsePhase === RaveilOwnedMemoryPhase.Staging.U &&
+              phaseWriteCounts(RaveilOwnedMemoryPhase.Staging) === 324.U) {
+            assert(acceptedCount === completedCount + 1.U,
+              "Raveil controlled execution did not start quiescent")
+            phase := RaveilOwnedMemoryPhase.Execution.U
+            executionStartCycle := globalCycle
+            executionStartAccepted := acceptedCount
+            executionStartCompleted := completedCount + 1.U
+            executionStartExpectedAccepted := expectedAcceptedCount
+            executionStartExpectedCompleted := expectedCompletedCount + 1.U
+            executionStartUnexpectedAccepted := unexpectedAcceptedCount
+            executionStartUnexpectedCompleted := unexpectedCompletedCount
+            executionStartOriginAccepted := dcacheOriginAcceptedCount
+            executionStartOriginCompleted := dcacheOriginCompletedCount + 1.U
+            executionStartNonOriginAccepted := nonDcacheOriginAcceptedCount
+            executionStartNonOriginCompleted := nonDcacheOriginCompletedCount
+            printf("RAVEIL-CONTROLLED-PHASE-V1 from=1 to=2 cycle=%d accepted=%d completed=%d busy_before=%d\n",
+              globalCycle, acceptedCount, completedCount + 1.U, busy)
+            printf("RAVEIL-CONTROLLED-RESOURCE-V1 resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 data_width_bits=32 operation_width_bytes=4 request_ports=1 response_ports=1 maximum_outstanding_requests=1 request_buffer_depth=0 response_buffer_depth=1 physical_banks=1 physical_words=1024 valid_words=580 arbitration=none-at-owned-contract-ingress accepted_operations=read,write-byte-mask response_rule=one-module-local-cycle-after-acceptance response_hold=stable-until-consumed\n")
+          }
+          when(responsePhase === RaveilOwnedMemoryPhase.Execution.U &&
+              phaseReadCounts(RaveilOwnedMemoryPhase.Execution) === 800.U &&
+              phaseWriteCounts(RaveilOwnedMemoryPhase.Execution) === 256.U) {
+            assert(acceptedCount === completedCount + 1.U,
+              "Raveil controlled execution did not end quiescent")
+            phase := RaveilOwnedMemoryPhase.Completion.U
+            completionStartCycle := globalCycle
+            printf("RAVEIL-CONTROLLED-PHASE-V1 from=2 to=3 cycle=%d accepted=%d completed=%d busy_before=%d\n",
+              globalCycle, acceptedCount, completedCount + 1.U, busy)
+            printf("RAVEIL-CONTROLLED-WINDOW-V1 start_cycle=%d end_cycle=%d cycles=%d accepted=%d completed=%d reads=%d writes=%d expected_accepted=%d expected_completed=%d unexpected_accepted=%d unexpected_completed=%d origin_accepted=%d origin_completed=%d nonorigin_accepted=%d nonorigin_completed=%d pending=0 quiescence_before=1 quiescence_after=1\n",
+              executionStartCycle, globalCycle,
+              globalCycle - executionStartCycle,
+              acceptedCount - executionStartAccepted,
+              completedCount + 1.U - executionStartCompleted,
+              phaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+              phaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+              expectedAcceptedCount - executionStartExpectedAccepted,
+              expectedCompletedCount + 1.U - executionStartExpectedCompleted,
+              unexpectedAcceptedCount - executionStartUnexpectedAccepted,
+              unexpectedCompletedCount - executionStartUnexpectedCompleted,
+              dcacheOriginAcceptedCount - executionStartOriginAccepted,
+              dcacheOriginCompletedCount + 1.U - executionStartOriginCompleted,
+              nonDcacheOriginAcceptedCount - executionStartNonOriginAccepted,
+              nonDcacheOriginCompletedCount - executionStartNonOriginCompleted)
+          }
+          when(responsePhase === RaveilOwnedMemoryPhase.Validation.U &&
+              phaseReadCounts(RaveilOwnedMemoryPhase.Validation) === 256.U) {
+            phase := RaveilOwnedMemoryPhase.Publication.U
+            printf("RAVEIL-CONTROLLED-PHASE-V1 from=4 to=5 cycle=%d accepted=%d completed=%d busy_before=%d\n",
+              globalCycle, acceptedCount, completedCount + 1.U, busy)
+            printf("RAVEIL-CONTROLLED-CPU-COMPLETE-V1 installation_cycles=%d staging_cycles=%d execution_cycles=%d completion_cycles=%d validation_cycles=%d publication_cycles=0 total_cycles=%d accepted=%d completed=%d staging_writes=%d execution_reads=%d execution_writes=%d validation_reads=%d\n",
+              stagingStartCycle,
+              executionStartCycle - stagingStartCycle,
+              completionStartCycle - executionStartCycle,
+              validationStartCycle - completionStartCycle,
+              globalCycle - validationStartCycle,
+              globalCycle,
+              acceptedCount, completedCount + 1.U,
+              phaseWriteCounts(RaveilOwnedMemoryPhase.Staging),
+              phaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+              phaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+              phaseReadCounts(RaveilOwnedMemoryPhase.Validation))
+          }
+        }
         completedCount := completedCount + 1.U
         lastCompletedSource := responseSource
         lastCompletedPhase := responsePhase
@@ -416,6 +635,17 @@ class WithRaveilOwnedMemorySourceRange(start: Int, end: Int)
   case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
     expectedClientSourceStart = start,
     expectedClientSourceEnd = end
+  ))
+})
+
+class WithRaveilMatchedMemorySourceRange(start: Int, end: Int)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    size = 4 * 1024,
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    validWords = Some(580),
+    controlledRun = true
   ))
 })
 

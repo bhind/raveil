@@ -35,22 +35,29 @@ resolves it.
 - Can one pinned Chisel/Chipyard environment support a fair matched comparison
   among Rocket in-order, BOOM OoO, BOOM's same-core OoO-disabled diagnostic,
   and an owned explicit-graph tile without inheriting upstream authority or
-  comparing unequal cache/memory/functional resources? Source survey found no
+  comparing unequal cache/memory/functional resources? ADR-0046 answers the
+  bounded resource-connection part for Rocket, BOOM, and static Graph: the
+  strict controlled run proves the canonical owned tuple equal, preserves the
+  exact oracle, brackets quiescent windows, and conserves all admitted traffic.
+  The fairness question remains open for T-0044 because Graph admits 1,536
+  execution transactions while each optimized CPU admits 1,056; no measurement
+  claim is ready. Source survey found no
   existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
   TileLink banked scratchpad now passes the exact stencil on both controls but
-  still needs an owned adapter and explicit proof of ports, buffering,
+  at that stage still needed an owned adapter and explicit proof of ports, buffering,
   arbitration, fixed latency, and equivalence to the Graph storage boundary.
   The passive TLRAM observer found one-cycle bank-local intervals for all 296
   read beats in each pinned control run, but no write beat and no initiator or
   lifecycle attribution. Which owned boundary can expose those missing facts
   without altering the compared machines? ADR-0043 answers only the local
   protocol half with an owned one-outstanding attributed scratchpad target.
-  The Graph side now reaches disjoint instances for functional staging,
-  execution, validation, and cancel/drain/restart. The unresolved part is how
-  each pinned CPU adapter reaches the boundary with provably equal ports,
-  buffering, arbitration, staging, and phase accounting without silently
-  changing the machines under comparison. ADR-0044 answers only the preceding
+  The Graph side now reaches disjoint logical regions in one physical owned
+  instance for functional staging, execution, validation, and
+  cancel/drain/restart. The strict controlled adapters now reach that boundary
+  with equal ports, buffering, arbitration, staging, operation width, and phase
+  accounting without changing the frozen workload or core microarchitectures.
+  ADR-0044 answers the preceding
   translation step: an observable, uncached peripheral-bus manager can be
   added to dedicated Rocket and BOOM configurations, but it is deliberately
   resource-unmatched. Its direct monitor-enabled TileLink harness now verifies

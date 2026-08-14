@@ -2,7 +2,7 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-chipyard="$repo_root/external/chipyard"
+chipyard=${RAVEIL_CHIPYARD_SOURCE:-"$repo_root/external/chipyard"}
 overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala"
 origin_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilDCacheOriginTagger.scala"
 rocket_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch"
@@ -45,6 +45,10 @@ source_map_verifier="$repo_root/hardware/chisel/verify_owned_cpu_source_map.py"
 debug_sba_workload="$repo_root/hardware/chisel/owned_memory_debug_sba_smoke.S"
 debug_sba_verifier="$repo_root/hardware/chisel/verify_owned_memory_debug_sba_signature.py"
 debug_sba_source_map_verifier="$repo_root/hardware/chisel/verify_owned_debug_sba_source_map.py"
+controlled_workload_s="$repo_root/hardware/chisel/riscv_stencil_smoke.S"
+controlled_workload_c="$repo_root/hardware/chisel/riscv_stencil_smoke.c"
+controlled_linker="$repo_root/hardware/chisel/riscv_stencil_system_scratchpad.ld"
+controlled_verifier="$repo_root/raveil/controlled_run.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
 dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
@@ -62,6 +66,8 @@ chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
 case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     regular:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-sim-build-v1) ;;
     regular:RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-sim-build-v1) ;;
+    controlled:RaveilMatchedRocketConfig:chipyard.raveil.RaveilMatchedRocketConfig:rocket:raveil-chipyard-matched-rocket-controlled-v1) ;;
+    controlled:RaveilMatchedSmallBoomConfig:chipyard.raveil.RaveilMatchedSmallBoomConfig:boom:raveil-chipyard-matched-boom-controlled-v1) ;;
     debug-sba:RaveilOwnedDebugSBARocketConfig:chipyard.raveil.RaveilOwnedDebugSBARocketConfig:rocket:raveil-chipyard-owned-debug-sba-rocket-sim-build-v1) ;;
     debug-sba:RaveilOwnedDebugSBASmallBoomConfig:chipyard.raveil.RaveilOwnedDebugSBASmallBoomConfig:boom:raveil-chipyard-owned-debug-sba-boom-sim-build-v1) ;;
     rocket-request-retire:RaveilOwnedRocketConfig:chipyard.raveil.RaveilOwnedRocketConfig:rocket:raveil-chipyard-owned-rocket-request-retire-build-v1) ;;
@@ -122,6 +128,7 @@ for input in "$overlay" "$origin_overlay" "$rocket_hook_patch" "$rocket_witness_
     "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
+    "$controlled_workload_s" "$controlled_workload_c" "$controlled_linker" "$controlled_verifier" \
     "$linker" "$runner" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
@@ -165,6 +172,7 @@ input_sha256=$(
             "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
             "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
             "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
+            "$controlled_workload_s" "$controlled_workload_c" "$controlled_linker" "$controlled_verifier" \
             "$linker" "$runner" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$cpu_mode" "$applied_patch_manifest"
@@ -188,6 +196,14 @@ docker build \
     --file "$repo_root/hardware/chisel/Dockerfile.boom-sim" \
     --tag "$image" \
     "$repo_root"
+
+dockerfile_sha256=$(shasum -a 256 "$dockerfile" | awk '{print $1}')
+toolchain_sha256=$(
+    printf '%s\n' "$platform" "$dockerfile_sha256" "$lock_sha" \
+        'verilator=5.020' 'riscv64-unknown-elf-gcc=12.2.0' |
+        shasum -a 256 |
+        awk '{print $1}'
+)
 
 docker run --rm \
     --platform "$platform" \
@@ -213,6 +229,7 @@ docker run --rm \
     --env "RAVEIL_TL_TOKEN_PATCH_SHA256=$tl_token_patch_sha256" \
     --env "RAVEIL_INPUT_SHA256=$input_sha256" \
     --env "RAVEIL_SOURCE_SHA256=$source_sha256" \
+    --env "RAVEIL_TOOLCHAIN_SHA256=$toolchain_sha256" \
     --env "RAVEIL_APPLIED_PATCH_MANIFEST=$applied_patch_manifest" \
     --env "RAVEIL_OWNED_CPU_CONFIG=$cpu_config" \
     --env "RAVEIL_OWNED_CPU_CONFIG_FQ=$cpu_config_fq" \
@@ -222,6 +239,7 @@ docker run --rm \
     bash -lc 'set -euo pipefail
 export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
 export RISCV=/locked/env/riscv-tools
+export PYTHONPATH=/repo
 expected_chipyard='"$chipyard_revision"'
 expected_lock='"$lock_sha"'
 [ -x /locked/env/bin/verilator ] || {
@@ -234,6 +252,7 @@ riscv64-unknown-elf-gcc --version | grep -q "12.2.0"
 
 cache_key=$RAVEIL_INPUT_SHA256
 if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ] ||
+   [ "$RAVEIL_OWNED_CPU_MODE" = controlled ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = rocket-request-retire ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-redirect ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = rocket-redirect-dcache-fate ] ||
@@ -454,6 +473,48 @@ sim="$build_root/chipyard/sims/verilator/simulator-chipyard.harness-$RAVEIL_OWNE
 test -x "$sim"
 graph="$build_root/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG/chipyard.harness.TestHarness.$RAVEIL_OWNED_CPU_CONFIG.graphml"
 test -f "$graph"
+if [ "$RAVEIL_OWNED_CPU_MODE" = controlled ]; then
+  controlled_elf="$build_root/riscv_stencil_controlled.elf"
+  controlled_signature="$build_root/riscv_stencil_controlled.signature"
+  controlled_log="$build_root/riscv_stencil_controlled.log"
+  riscv64-unknown-elf-gcc \
+    -DRFC0005_SYSTEM_SCRATCHPAD=1 -O2 -fno-strict-aliasing \
+    -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+    -nostdlib -nostartfiles -static -Wl,--no-relax \
+    -T /repo/hardware/chisel/riscv_stencil_system_scratchpad.ld \
+    /repo/hardware/chisel/riscv_stencil_smoke.S \
+    /repo/hardware/chisel/riscv_stencil_smoke.c \
+    -o "$controlled_elf"
+  [ "$(riscv64-unknown-elf-nm "$controlled_elf" | awk '\''$3 == "input_words" { print $1 }'\'')" = 0000000008000000 ]
+  [ "$(riscv64-unknown-elf-nm "$controlled_elf" | awk '\''$3 == "begin_signature" { print $1 }'\'')" = 0000000008000510 ]
+  artifact_sha256=$(sha256sum "$controlled_elf" | awk '\''{print $1}'\'')
+  rm -f "$controlled_signature" "$controlled_log"
+  timeout --foreground 600 "$sim" +permissive +verbose \
+    +signature="$controlled_signature" +signature-granularity=4 +permissive-off \
+    "$controlled_elf" 2>&1 | tee "$controlled_log"
+  python3 -m raveil.riscv_stencil_signature --signature "$controlled_signature"
+  if [ "$RAVEIL_OWNED_CPU_LABEL" = rocket ]; then
+    implementation=rocket-in-order
+    invocation=2
+  else
+    implementation=boom-ooo
+    invocation=3
+  fi
+  python3 -m raveil.controlled_run \
+    --verify-cpu-log "$controlled_log" \
+    --signature "$controlled_signature" \
+    --implementation "$implementation" \
+    --invocation "$invocation" \
+    --source-sha256 "$RAVEIL_INPUT_SHA256" \
+    --artifact-sha256 "$artifact_sha256" \
+    --toolchain-sha256 "$RAVEIL_TOOLCHAIN_SHA256" \
+    --implementation-configuration "$RAVEIL_OWNED_CPU_CONFIG_FQ"
+  printf "CONTROLLED-CPU-STENCIL-HOST-V1 status=OK cpu=%s config=%s source_sha256=%s artifact_sha256=%s toolchain_sha256=%s cache_source_sha256=%s resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 workload=frozen-rfc-0005 oracle=independent-host accounting=complete traffic_conservation=verified resource_contract_verified=1 resource_equality_verified=0 comparison_eligible=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+    "$RAVEIL_OWNED_CPU_LABEL" "$RAVEIL_OWNED_CPU_CONFIG_FQ" \
+    "$RAVEIL_INPUT_SHA256" "$artifact_sha256" "$RAVEIL_TOOLCHAIN_SHA256" \
+    "$RAVEIL_SOURCE_SHA256"
+  exit 0
+fi
 if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ]; then
   python3 /repo/hardware/chisel/verify_owned_debug_sba_source_map.py \
     "$RAVEIL_OWNED_CPU_LABEL" "$graph"

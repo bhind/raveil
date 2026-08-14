@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0042 |
-| **P1 — next** | Start only after P0's recorded exit conditions pass. | T-0044 |
+| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0044 latency/traffic pilot |
+| **P1 — next** | Start only after P0's recorded exit conditions pass. | — |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -437,17 +437,24 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [x] **T-0041** Define strict, versioned Raveil-owned `GraphVariant`,
   `MemoryPlan`, and `OptimizationProposal` schemas and bind every proposal to
   the exact program, execution contract, and candidate set before execution.
-- [ ] **T-0042** Bootstrap an owned mapper/simulator adapter without leaking
+- [x] **T-0042** Bootstrap an owned mapper/simulator adapter without leaking
   upstream types. **ADR-0046 small-start priority:** stop adding token-lifecycle
-  cases. Close T-0042 with the smallest controlled-run slice that (1) preserves
+  cases. T-0042 closes with the smallest controlled-run slice that (1) preserves
   the frozen RFC-0005 workload and independent oracle across Rocket, BOOM, and
   Graph, (2) connects all three through one owned contract with equal ports,
   buffering, request capacity, arbitration, width, and response rule, (3)
   brackets a quiescent execution window and rejects unaccounted traffic, and
   (4) emits complete six-phase and total-cycle records with explicit resource
   equality and comparison eligibility. General semantic-initiator attribution
-  is not a T-0042 claim. Use `docs/guides/T-0042-SMALL-START.md` as the active
-  execution packet. After T-0105 proves the substrate and T-0057 completes its
+  is not a T-0042 claim. The strict three-way RTL run passed with resource hash
+  `16664d8...27748`, exact common input/oracle output, quiescence before and
+  after each execution window, conserved traffic, and complete phase totals.
+  The aggregate sets `resource_equality_verified=true` and functional
+  `comparison_eligible=true`, but keeps `dynamic_memory_traffic_equal=false`,
+  `t0044_measurement_claim_ready=false`, and `performance_claim=false` because
+  Graph admits 1,536 execution transactions while each CPU admits 1,056. Use
+  `docs/guides/T-0042-SMALL-START.md` as the replay packet. After T-0105 proves
+  the substrate and T-0057 completes its
   direct-prior-art/IP review and freezes the minimal native graph/effect schema,
   use the pinned Chisel/Chipyard research environment with Rocket in-order,
   BOOM OoO and same-core OoO-disabled diagnostic configurations plus an owned
@@ -461,10 +468,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   output state, and six lifecycle accounting phases without leaking upstream
   types. ADR-0041 makes actual memory model, resource-match verification, and
   matched-comparison readiness explicit; semantic success cannot imply matched
-  resources. The Graph record intentionally remains `accounting_complete=false`,
+  resources. The legacy Graph v2 record intentionally remains `accounting_complete=false`,
   `resource_match_verified=false`, and has no total until installation,
-  completion, validation, and publication phases are implemented. Keep T-0042
-  open for pinned BOOM, its same-core
+  completion, validation, and publication phases are implemented. That record
+  remains provenance; the later strict controlled record supplies complete
+  accounting. The earlier work then continued with pinned BOOM, its same-core
   diagnostic, and Rocket/BOOM records behind this boundary. ADR-0040 now fixes
   Chipyard 1.11.0/BOOM `9459af0...10847c`, `SmallBoomConfig`, the retained-
   structure serialize-dispatch diagnostic, and exact license hashes; source
@@ -482,15 +490,17 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   host signature validation passes and emits honest cache-backed/unmatched v2
   records. The pinned Rocket control now executes the same fallback and matches
   the same 256-word signature/checksum while emitting an honest cache-backed/
-  unmatched v2 record. All four semantic identities are present; the verified
-  common fixed-latency scratchpad/resource boundary remains open. ADR-0042 now
+  unmatched v2 record. All four semantic identities are present; those legacy
+  records still leave the common fixed-latency scratchpad/resource boundary
+  open. ADR-0042 now
   places all three CPU control buffers in their inherited common 64 KiB Mbus
   TLRAM and validates the same signatures, but labels its latency unverified
   and keeps resource matching false. A passive observer now validates the
   bank-local, post-fragmenter single-beat request/response correspondence in all
   three CPU modes. It observed the same one-cycle endpoint interval for 296
   read beats per run but no write beat and cannot distinguish CPU execution
-  from cache refill or FESVR recovery phases. Next replace this run-local
+  from cache refill or FESVR recovery phases. The ADR-0046 strict slice later
+  replaces this run-local
   diagnostic with an owned CPU/Graph request adapter that exposes initiator,
   phase, read/write coverage, buffering, arbitration, ports, and invariant
   latency under one interface before closing T-0042. ADR-0043 now adds the
@@ -499,12 +509,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   response is available one cycle after acceptance and whose initiator, phase,
   read/write, byte-mask, backpressure, range-error, and transaction-accounting
   paths pass Verilator. The static Graph region now uses disjoint input and
-  private-output instances of this contract for control staging, Graph
-  execution, and control validation. Two full runs each passed 1,280 execution
+  private-output logical regions in one physical instance of this contract for
+  control staging, Graph execution, and control validation. Two full runs each
+  passed 1,280 execution
   reads, 256 execution writes, every oracle output, and cancel/drain/restart.
-  The CPU path is not connected and fixed end-to-end latency, resource matching,
-  comparison readiness, and performance claims remain false. Next build and
-  verify the pinned CPU adapters under the same interface. ADR-0044 adds the
+  In those legacy records the CPU path is not connected and resource matching
+  remains false. The strict controlled slice now builds and verifies the pinned
+  CPU adapters under the same interface; fixed end-to-end latency and
+  performance remain unclaimed. ADR-0044 adds the
   first repository-owned CPU TileLink translation target in dedicated Rocket
   and BOOM configurations. It intentionally uses the uncached peripheral bus
   so accesses to its mapped region are intended to traverse the manager. A
@@ -618,8 +630,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   non-CPU exclusion, BOOM-load/Rocket token parity, and post-A rollback cases
   from the T-0042 critical path. Retain the existing evidence without promoting
   semantic initiator identity. T-0106 owns that hardening after T-0044 survival
-  or a separately accepted product requirement. Connect the controlled CPU
-  paths to the ADR-0043 resource boundary next; do not start another deferred
+  or a separately accepted product requirement. The controlled CPU paths are
+  now connected to the ADR-0043 resource boundary for the bounded small-start
+  slice. T-0044 fairness preregistration is next; do not start another deferred
   token case first.
 - [x] **T-0043** Implement Miroirs Graph Compiler structural validation and
   Pavane Semantic Oracle differential semantic checking. Miroirs now admits

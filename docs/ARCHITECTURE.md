@@ -222,12 +222,50 @@ maximum-one-outstanding request/response module with explicit operation,
 address, data, byte mask, initiator, lifecycle phase, error, backpressure, and
 transaction accounting. It makes a response available one module-local cycle
 after acceptance and holds it until consumption. The emitted RTL and functional
-Verilator harness assert this local protocol only. The static Graph region is
-connected, but CPU controls are not, so this module remains an unmatched
-adapter target rather than the RFC-0005 common memory implementation. The static Graph
-adapter now uses disjoint input and private-output bank instances; later
-CPU adapters must prove equivalent ports, arbitration, buffering, and lifecycle
-accounting before any resource-match promotion.
+Verilator harness assert this local protocol only. Under ADR-0046 the static
+Graph region now uses one physical 1024-word bank with two logical regions:
+input `[0,324)` and private output `[324,580)`. Words `[580,1024)` are
+physically present but invalid. The controlled Rocket and BOOM configurations
+use the same executable owned resource tuple at their manager boundary. The
+implementations are separate RTL modules, not shared storage; equality is
+admitted only when all exact tuple fields and the canonical resource hash
+match.
+
+The minimal controlled path is:
+
+```text
+Rocket core -> DCache -> origin tagger -> TL translation --+
+                                                          +-> RaveilOwnedTLMemory
+BOOM core   -> DCache -> origin tagger -> TL translation --+   (one owned ingress)
+
+StaticStencilRegion -> OwnedFixedLatencyScratchpad             (one owned ingress)
+```
+
+Both owned ingresses expose four-byte operations over 32-bit data plus four
+byte-mask bits, one request port, one response port, at most one outstanding transaction, no request
+buffer, one held-response slot, read and byte-mask write operations, no arbitration inside the
+owned-contract ingress, and a response available one module-local cycle after
+acceptance and stable until consumed. TileLink transfer-size negotiation is
+adapter-specific; the controlled CPU manager rejects non-four-byte data
+operations, and the compared owned resource is the normalized 32-bit word read
+or byte-mask write below that translation. DCache,
+TileLink crossbar, fragmenter, and width translation remain adapter-specific
+and outside the compared owned resource. The structural origin bit and the
+six-phase state are bounded controlled-run membership classifiers only; they
+do not establish semantic initiator identity.
+
+For the CPU records, the execution window opens only after the 324th staging
+write response drains and closes on the response for the exact 800-read,
+256-write optimized-ELF traffic ledger. Every accepted request in that window
+must be an expected DCache-origin four-byte request in the frozen input/output
+regions; unsupported, denied, control, loader, FESVR, Debug, setup, recovery,
+or unknown traffic fails the run before aggregation. Validation then starts at
+private-output word 324 and admits exactly 256 sequential four-byte reads. It
+does not use the request origin bit or TileLink source as authority: the pinned
+FESVR signature dump can change structural origin between fragments. Graph
+uses the same after-staging-response and after-final-execution-response
+quiescence convention. Only the three-record aggregate may promote resource
+equality and functional comparison eligibility.
 
 ADR-0044 defines the first CPU translation adapter as an intentionally
 unmatched intermediate boundary. Dedicated Rocket and BOOM configurations
