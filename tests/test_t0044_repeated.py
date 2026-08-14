@@ -11,6 +11,7 @@ from raveil.controlled_run import (
 )
 from raveil.static_region import static_stencil_oracle
 from raveil.t0044_repeated import verify_graph_log
+from raveil.t0044_repeated import load_manifest, seal_raw
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -107,6 +108,29 @@ class RepeatedBoundaryTests(unittest.TestCase):
         self.assertIn("repeatedControlledRun = true", overlay)
         self.assertIn("class RaveilRepeatedMatchedRocketConfig", configs)
         self.assertIn("class RaveilRepeatedMatchedSmallBoomConfig", configs)
+
+    def test_manifest_loader_rejects_wrong_experiment(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.json"
+            path.write_text('{"schema":"raveil.t0044-repeated-manifest/v1",'
+                            '"experiment_id":"EXP-0005"}\n')
+            with self.assertRaises(ControlledRunError):
+                load_manifest(path)
+
+    def test_raw_seal_is_single_use_and_binds_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            run_dir = Path(directory) / "run"
+            raw = run_dir / "raw"
+            derived = run_dir / "derived"
+            raw.mkdir(parents=True)
+            derived.mkdir()
+            (raw / "sample.log").write_text("raw\n")
+            (derived / "report.json").write_text("{}\n")
+            seal = seal_raw(run_dir)
+            self.assertEqual(len(seal["files"]), 1)
+            self.assertEqual(len(seal["derived_report_sha256"]), 64)
+            with self.assertRaises(ControlledRunError):
+                seal_raw(run_dir)
 
 
 if __name__ == "__main__":

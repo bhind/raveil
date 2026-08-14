@@ -12,8 +12,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
+import time
 from typing import Any
 
 from .controlled_run import (
@@ -30,6 +33,12 @@ from .static_region import static_stencil_oracle
 
 SCHEMA = "raveil.t0044-repeated-observation/v1"
 SESSION_SCHEMA = "raveil.t0044-repeated-session/v1"
+MANIFEST_SCHEMA = "raveil.t0044-repeated-manifest/v1"
+REPORT_SCHEMA = "raveil.t0044-repeated-report/v1"
+VARIANTS = (
+    "static-graph", "rocket-in-order", "boom-ooo",
+    "boom-serialize-dispatch",
+)
 IMPLEMENTATIONS = {"static-graph", "rocket-in-order", "boom-ooo"}
 PHASES = (
     "installation", "staging", "execution", "completion", "validation",
@@ -41,6 +50,49 @@ def _canonical_bytes(value: Any) -> bytes:
     return json.dumps(
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     ).encode("ascii")
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def load_manifest(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if value.get("schema") != MANIFEST_SCHEMA or value.get("experiment_id") != "EXP-0006":
+        raise ControlledRunError("EXP-0006 manifest identity changed")
+    if value.get("status") != "frozen-before-data":
+        raise ControlledRunError("EXP-0006 manifest is not frozen")
+    if value["authority"]["boundary_implementation_commit"] != (
+        "10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d"
+    ):
+        raise ControlledRunError("EXP-0006 implementation authority changed")
+    if value["workload"]["fresh_input_versions"] != list(range(1, 257)):
+        raise ControlledRunError("EXP-0006 fresh-input order changed")
+    if value["matrix"]["complete_for_commissioning"] != list(VARIANTS):
+        raise ControlledRunError("EXP-0006 commissioning matrix changed")
+    if value["sampling"]["commissioning_accounts"] != [1, 4] or value[
+        "sampling"
+    ]["campaign_prefix_accounts"] != [1, 4, 16, 64, 256]:
+        raise ControlledRunError("EXP-0006 accounts changed")
+    session = value["session_contract"]
+    if any(session[key] != expected for key, expected in {
+        "simulator_processes": 1, "resets": 1, "installation_count": 1,
+        "artifact_reloads": 0,
+    }.items()):
+        raise ControlledRunError("EXP-0006 install-once session changed")
+    required_stops = {
+        "oracle-mismatch", "resource-equality-failure", "unexplained-traffic",
+        "required-accounting-missing", "source-config-toolchain-drift",
+        "artifact-or-session-drift", "incomplete-matrix",
+        "execution-window-meaning-differs", "restart-reset-reload-observed",
+    }
+    if not required_stops.issubset(value["stop_conditions"]):
+        raise ControlledRunError("EXP-0006 stop conditions are incomplete")
+    return value
 
 
 def repeated_contract() -> dict[str, Any]:
@@ -446,6 +498,242 @@ def verify_cpu_log(
     )
 
 
+def _one_marker(lines: list[str], prefix: str) -> dict[str, str]:
+    matches = _markers(lines, prefix)
+    if len(matches) != 1:
+        raise ControlledRunError(f"expected exactly one {prefix} marker")
+    return matches[0]
+
+
+def parse_variant_log(path: Path, variant: str, account: int) -> dict[str, Any]:
+    if variant not in VARIANTS:
+        raise ControlledRunError("repeated variant changed")
+    if variant == "static-graph":
+        return verify_graph_log(path, account)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    host = _one_marker(lines, "RAVEIL-REPEATED-CPU-HOST-V1")
+    expected_label = {
+        "rocket-in-order": "rocket",
+        "boom-ooo": "boom",
+        "boom-serialize-dispatch": "boom-serialize",
+    }[variant]
+    if host.get("status") != "OK" or host.get("cpu") != expected_label:
+        raise ControlledRunError(f"{variant} host identity changed")
+    for field, expected in {
+        "account": str(account), "simulator_processes": "1", "resets": "1",
+        "artifact_reloads": "0", "resource_sha256": owned_resource_tuple_id(),
+        "workload": "frozen-rfc-0005", "oracle": "independent-host",
+        "accounting": "complete", "evidence": "rtl-simulation-functional",
+        "performance": "not-measured",
+    }.items():
+        if host.get(field) != expected:
+            raise ControlledRunError(f"{variant} host {field} changed")
+    implementation = "rocket-in-order" if variant == "rocket-in-order" else "boom-ooo"
+    return verify_cpu_log(
+        path, implementation, account, host["source_sha256"],
+        host["artifact_sha256"], host["toolchain_sha256"], host["config"],
+        diagnostic=variant == "boom-serialize-dispatch",
+    )
+
+
+def derive(run_dir: Path, manifest_path: Path, account: int) -> dict[str, Any]:
+    manifest = load_manifest(manifest_path)
+    _positive_account(account)
+    allowed = {4, 256}
+    if account not in allowed:
+        raise ControlledRunError("collection account must be commissioning 4 or campaign 256")
+    raw_dir = run_dir / "raw"
+    derived_dir = run_dir / "derived"
+    derived_dir.mkdir(exist_ok=False)
+    sessions = {
+        variant: parse_variant_log(raw_dir / f"{variant}.log", variant, account)
+        for variant in VARIANTS
+    }
+    if set(sessions) != set(VARIANTS):
+        raise ControlledRunError("repeated matrix is incomplete")
+    primary = [sessions[name] for name in VARIANTS[:3]]
+    for invocation in range(account):
+        peers = [session["observations"][invocation] for session in primary]
+        for field in (
+            "contract_sha256", "resource_sha256", "input_sha256",
+            "oracle_output_sha256", "observed_output_sha256",
+        ):
+            if len({peer[field] for peer in peers}) != 1:
+                raise ControlledRunError(
+                    f"invocation {invocation + 1} primary {field} differs"
+                )
+    if len({session["identity"]["resource_sha256"] for session in primary}) != 1:
+        raise ControlledRunError("repeated primary resource equality failed")
+    prefixes = [
+        prefix for prefix in manifest["sampling"]["campaign_prefix_accounts"]
+        if prefix <= account
+    ]
+    accounts: dict[str, Any] = {}
+    for prefix in prefixes:
+        variants: dict[str, Any] = {}
+        for variant, session in sessions.items():
+            chosen = session["observations"][:prefix]
+            variants[variant] = {
+                "execution_cycles": [item["window_cycles"] for item in chosen],
+                "execution_transactions": [
+                    item["execution_traffic_accepted"] for item in chosen
+                ],
+                "phase_cycles": [item["phase_cycles"] for item in chosen],
+                "cumulative_total_cycles": sum(
+                    item["total_cycles"] for item in chosen
+                ),
+                "installation_count": 1,
+            }
+        accounts[str(prefix)] = variants
+    report = {
+        "schema": REPORT_SCHEMA,
+        "experiment_id": "EXP-0006",
+        "stage": "commissioning" if account == 4 else "campaign",
+        "account": account,
+        "manifest_sha256": _sha256(manifest_path),
+        "matrix_complete": True,
+        "semantic_valid": True,
+        "resource_equality_verified": True,
+        "execution_window_meaning_equal": True,
+        "single_process_reset_installation_verified": True,
+        "fresh_input_versions": list(range(1, account + 1)),
+        "accounts": accounts,
+        "sessions": sessions,
+        "primary_fairness_finding": (
+            "execution preserves lawful CPU load reuse and visible Graph extra "
+            "traffic; staging/end-to-end remains claim-ineligible because CPU "
+            "input generation is candidate-local while Graph input generation "
+            "is testbench-side"
+        ),
+        "secondary_ablation": "not-activated",
+        "claim_eligibility": {
+            "execution_latency_traffic": True,
+            "end_to_end_reuse_amortization": False,
+            "rfc0005_go": False,
+            "rfc0005_numerical_no_go": False,
+        },
+        "decision": "pause",
+        "pause_point": "same-meaning-input-staging-initiator-boundary",
+        "evidence_class": "rtl-simulation-pilot",
+        "limitations": [
+            "staging initiator differs between Graph and CPU",
+            "simulator wall clock is operations-only",
+            "no energy, synthesis timing, or area",
+            "no VLIW/CGRA, elastic, stream, or hybrid candidates",
+        ],
+    }
+    (derived_dir / "report.json").write_bytes(_canonical_bytes(report) + b"\n")
+    return report
+
+
+def seal_raw(run_dir: Path) -> dict[str, Any]:
+    raw_dir = run_dir / "raw"
+    report_path = run_dir / "derived/report.json"
+    seal_path = run_dir / "raw-seal.json"
+    if not raw_dir.is_dir() or not report_path.is_file():
+        raise ControlledRunError("raw evidence and derived report are required")
+    if seal_path.exists():
+        raise ControlledRunError("raw evidence is already sealed")
+    raw_files = sorted(path for path in raw_dir.iterdir() if path.is_file())
+    if not raw_files:
+        raise ControlledRunError("raw evidence is empty")
+    seal = {
+        "schema": "raveil.research-raw-seal/v1",
+        "files": [
+            {"path": path.name, "bytes": path.stat().st_size, "sha256": _sha256(path)}
+            for path in raw_files
+        ],
+        "derived_report_sha256": _sha256(report_path),
+    }
+    seal_path.write_bytes(_canonical_bytes(seal) + b"\n")
+    return seal
+
+
+def _run_command(
+    command: list[str], env: dict[str, str], log_path: Path, command_file: Path
+) -> None:
+    start = time.time_ns()
+    with log_path.open("wb") as output:
+        result = subprocess.run(
+            command, env=env, stdout=output, stderr=subprocess.STDOUT
+        )
+    end = time.time_ns()
+    record = {
+        "argv": command,
+        "environment": {
+            key: env[key] for key in sorted(env)
+            if key.startswith("RAVEIL_") and key != "RAVEIL_CHIPYARD_SOURCE"
+        },
+        "start_unix_ns": start,
+        "end_unix_ns": end,
+        "simulator_wall_clock_ns_operations_only": end - start,
+        "exit_code": result.returncode,
+        "log": log_path.name,
+        "log_bytes": log_path.stat().st_size,
+        "log_sha256": _sha256(log_path),
+    }
+    with command_file.open("ab") as target:
+        target.write(_canonical_bytes(record) + b"\n")
+    if result.returncode != 0:
+        raise ControlledRunError(
+            f"command failed with exit {result.returncode}: {command}"
+        )
+
+
+def collect(
+    repo: Path, run_dir: Path, manifest_path: Path, chipyard: Path, account: int,
+) -> dict[str, Any]:
+    load_manifest(manifest_path)
+    if account not in {4, 256}:
+        raise ControlledRunError("collection account must be 4 or 256")
+    if run_dir.exists():
+        raise ControlledRunError("RUN-ID directory already exists")
+    if subprocess.run(["git", "diff", "--quiet"], cwd=repo).returncode != 0 or subprocess.run(
+        ["git", "diff", "--cached", "--quiet"], cwd=repo
+    ).returncode != 0:
+        raise ControlledRunError("collection requires a clean tracked worktree")
+    if not chipyard.is_dir():
+        raise ControlledRunError("pinned Chipyard source directory is missing")
+    raw_dir = run_dir / "raw"
+    raw_dir.mkdir(parents=True)
+    (raw_dir / "frozen-manifest.json").write_bytes(manifest_path.read_bytes())
+    git_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=repo, text=True
+    ).strip()
+    metadata = {
+        "schema": "raveil.t0044-repeated-run-metadata/v1",
+        "experiment_id": "EXP-0006",
+        "stage": "commissioning" if account == 4 else "campaign",
+        "account": account,
+        "git_commit": git_commit,
+        "manifest_sha256": _sha256(manifest_path),
+        "platform": subprocess.check_output(["uname", "-s"], text=True).strip(),
+        "architecture": subprocess.check_output(["uname", "-m"], text=True).strip(),
+        "host_wall_clock_role": "operations-only-not-cpu-performance-evidence",
+    }
+    (raw_dir / "run-metadata.json").write_bytes(_canonical_bytes(metadata) + b"\n")
+    scripts = {
+        "static-graph": repo / "hardware/chisel/run-static-stencil-rtl.sh",
+        "rocket-in-order": repo / "hardware/chisel/run-repeated-rocket-stencil.sh",
+        "boom-ooo": repo / "hardware/chisel/run-repeated-boom-stencil.sh",
+        "boom-serialize-dispatch": (
+            repo / "hardware/chisel/run-repeated-boom-serialize-stencil.sh"
+        ),
+    }
+    base_env = dict(os.environ)
+    base_env["RAVEIL_CHIPYARD_SOURCE"] = str(chipyard)
+    base_env["RAVEIL_REPEAT_ACCOUNT"] = str(account)
+    command_file = raw_dir / "commands.jsonl"
+    for variant in VARIANTS:
+        _run_command(
+            [str(scripts[variant])], dict(base_env),
+            raw_dir / f"{variant}.log", command_file,
+        )
+    report = derive(run_dir, manifest_path, account)
+    seal_raw(run_dir)
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="verify T-0044 repeated RTL logs")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -461,17 +749,41 @@ def main(argv: list[str] | None = None) -> int:
     cpu.add_argument("--toolchain-sha256", required=True)
     cpu.add_argument("--implementation-configuration", required=True)
     cpu.add_argument("--diagnostic-only", action="store_true")
+    collect_parser = subparsers.add_parser("collect")
+    collect_parser.add_argument("--repo", type=Path, required=True)
+    collect_parser.add_argument("--run-dir", type=Path, required=True)
+    collect_parser.add_argument("--manifest", type=Path, required=True)
+    collect_parser.add_argument("--chipyard-source", type=Path, required=True)
+    collect_parser.add_argument("--account", type=int, choices=(4, 256), required=True)
+    derive_parser = subparsers.add_parser("derive")
+    derive_parser.add_argument("--run-dir", type=Path, required=True)
+    derive_parser.add_argument("--manifest", type=Path, required=True)
+    derive_parser.add_argument("--account", type=int, choices=(4, 256), required=True)
+    seal_parser = subparsers.add_parser("seal")
+    seal_parser.add_argument("--run-dir", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "verify-graph":
             result = verify_graph_log(args.log, args.account)
-        else:
+        elif args.command == "verify-cpu":
             result = verify_cpu_log(
                 args.log, args.implementation, args.account,
                 args.source_sha256, args.artifact_sha256,
                 args.toolchain_sha256, args.implementation_configuration,
                 diagnostic=args.diagnostic_only,
             )
+        elif args.command == "collect":
+            result = collect(
+                args.repo.resolve(), args.run_dir.resolve(),
+                args.manifest.resolve(), args.chipyard_source.resolve(),
+                args.account,
+            )
+        elif args.command == "derive":
+            result = derive(
+                args.run_dir.resolve(), args.manifest.resolve(), args.account
+            )
+        else:
+            result = seal_raw(args.run_dir.resolve())
     except (ControlledRunError, OSError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
