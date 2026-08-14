@@ -705,6 +705,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   full 1/4/16/64/256 campaign separately before collecting more data. Do not
   reuse pre-freeze debug values, count deterministic replays as fresh samples,
   or close T-0044 before the remaining organizations and physical metrics.
+  EXP-0008 is now allocated and its separate full-campaign collector implements
+  one 256-input session with nested 1/4/16/64/256 paired analysis. Freeze the
+  implementation authority, exact manifest, RUN-ID, identity expectations,
+  100,000-resample estimator, RFC-0005 64-input latency/break-even rules, and
+  operational limits before starting the campaign. EXP-0007 remains immutable.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

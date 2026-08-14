@@ -302,6 +302,13 @@ lawful CPU load reuse. Common fixture staging is exactly 324 writes and a
 single EXP-0006 fairness pause and returns `advance` for a separately frozen
 1/4/16/64/256 campaign. The evidence remains partial RTL-simulation pilot:
 T-0044 is open and neither RFC-0005 go nor numerical no-go is decided.
+EXP-0008 is allocated for the authorized full latency/traffic campaign. Its
+new collector keeps EXP-0007 immutable, runs one 256-input session per matrix
+member, derives nested 1/4/16/64/256 prefixes, and adds paired execution plus
+six-phase correct-latency intervals with installation fixed once. It also
+records failed raw evidence, bounds disk/log/drain operations, and distinguishes
+missing activity from zero. Six campaign tests pass. This is pre-freeze
+implementation state only; no EXP-0008 RTL measurement or claim exists.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

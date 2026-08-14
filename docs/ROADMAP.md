@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0042 complete; T-0044 EXP-0007 common-staging boundary accepted before implementation**
+State: **T-0042 complete; T-0044 EXP-0008 full latency/traffic campaign pre-freeze**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -195,6 +195,9 @@ merely because a branch or partial implementation already exists.
    to a separately preregistered 1/4/16/64/256 campaign. The pilot does not
    implement the remaining organizations or collect energy, synthesis timing, or area, so
    T-0044 remains open and no go/no-go follows.
+   EXP-0008 now owns that campaign as one 256-input installed session with
+   nested prefix reports and paired latency estimators. Its implementation is
+   present but must be committed and manifest-frozen before RTL collection.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
