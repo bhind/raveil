@@ -437,6 +437,8 @@ partition; this pre-data recovery requires a v6 freeze before Graph retry.
 Recovery-v6 authority is `d4990d9...4d8cf9`; manifest SHA-256 is
 `135f30d6...bc398a`, with all candidate RTL/tool/partition/decision fields
 unchanged. Only a clean descendant of its freeze may collect Graph.
+Recovery-v6 freeze commit is
+`474c1b5c10fecdef5de0fefc2c5ff7199c22587c`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

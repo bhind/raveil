@@ -771,8 +771,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   recovery-v6, rerun Graph, and keep Rocket gated on a complete derived Graph
   result.
   Recovery-v6 authority `d4990d9...4d8cf9` and manifest
-  `135f30d6...bc398a` are ready; commit the freeze before the distinct Graph
-  rerun.
+  `135f30d6...bc398a` are frozen at `474c1b5...22587c`; run the distinct Graph
+  retry only from its clean descendant.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

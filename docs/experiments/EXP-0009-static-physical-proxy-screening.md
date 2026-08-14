@@ -386,5 +386,5 @@ Recovery-v6 implementation authority is
 `benchmarks/manifests/t0044-static-physical-screen-recovery-v6.json`, SHA-256
 `135f30d6899742eb769d67c8a8dc6929db105f03e54e284e7e81900acebc398a`,
 chains recovery-v5 and adds only the exact mapped black-box declaration mode.
-Candidate use is authorized only from the commit containing this manifest or a
-clean descendant.
+Candidate use is authorized only from recovery-v6 freeze commit
+`474c1b5c10fecdef5de0fefc2c5ff7199c22587c` or a clean descendant.
