@@ -214,4 +214,5 @@ Recovery implementation authority is
 `benchmarks/manifests/t0044-static-physical-screen-recovery-v1.json`, SHA-256
 `14f5786f146543d3cf8035e9c4c1b561ed025789144fa3ad4e0b35a193a35786`,
 binds the original manifest hash and changes only the log handoff. Candidate
-reattempts remain prohibited until the commit carrying this recovery manifest.
+reattempts are authorized only from recovery freeze commit
+`64ffcc498c49ff30c7e282efbbe66616270adb39` or its clean descendants.
