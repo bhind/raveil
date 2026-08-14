@@ -425,6 +425,8 @@ The collector-only correction is pre-data and requires recovery-v5 freeze.
 Recovery-v5 authority is `104c603...bc7ef2`; manifest SHA-256 is
 `6973030c...6d051e` and all candidate RTL/tool/partition/decision identities
 remain unchanged. Only a clean descendant of its freeze may collect Graph.
+Recovery-v5 freeze commit is
+`f1d62e95618d4a2107a1dfe20635098425b8abf5`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

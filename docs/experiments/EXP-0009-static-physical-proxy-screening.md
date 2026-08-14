@@ -355,5 +355,5 @@ Recovery-v5 implementation authority is
 `benchmarks/manifests/t0044-static-physical-screen-recovery-v5.json`, SHA-256
 `6973030c78c744fe5f59e37b4e7bce38735cc15358a10bd28a3c966fb76d051e`,
 chains recovery-v4 and adds only the two collector compatibility identities.
-Candidate use is authorized only from the commit containing this manifest or a
-clean descendant.
+Candidate use is authorized only from recovery-v5 freeze commit
+`f1d62e95618d4a2107a1dfe20635098425b8abf5` or a clean descendant.
