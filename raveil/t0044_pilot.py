@@ -255,6 +255,28 @@ def derive(run_dir: Path, manifest_path: Path) -> dict[str, Any]:
     return report
 
 
+def seal_raw(run_dir: Path) -> dict[str, Any]:
+    raw_dir = run_dir / "raw"
+    report_path = run_dir / "derived/report.json"
+    seal_path = run_dir / "raw-seal.json"
+    if not raw_dir.is_dir() or not report_path.is_file():
+        raise PilotError("raw evidence and a derived report are required before sealing")
+    if seal_path.exists():
+        raise PilotError("raw evidence is already sealed")
+    raw_files = sorted(path for path in raw_dir.iterdir() if path.is_file())
+    if not raw_files:
+        raise PilotError("raw evidence directory is empty")
+    seal = {
+        "schema": "raveil.research-raw-seal/v1",
+        "files": [
+            {"path": path.name, "bytes": path.stat().st_size, "sha256": _sha256(path)}
+            for path in raw_files
+        ],
+    }
+    seal_path.write_text(_canonical(seal) + "\n", encoding="utf-8")
+    return seal
+
+
 def _run_command(
     command: list[str], env: dict[str, str], log_path: Path, command_file: Path
 ) -> None:
@@ -328,15 +350,7 @@ def collect(repo: Path, run_dir: Path, manifest_path: Path, chipyard: Path) -> d
                 raw_dir / f"{variant}-seed-{seed}.log", command_file,
             )
     report = derive(run_dir, manifest_path)
-    raw_files = sorted(path for path in raw_dir.iterdir() if path.is_file())
-    seal = {
-        "schema": "raveil.research-raw-seal/v1",
-        "files": [
-            {"path": path.name, "bytes": path.stat().st_size, "sha256": _sha256(path)}
-            for path in raw_files
-        ],
-    }
-    (run_dir / "raw-seal.json").write_text(_canonical(seal) + "\n", encoding="utf-8")
+    seal_raw(run_dir)
     return report
 
 
@@ -351,6 +365,8 @@ def main(argv: list[str] | None = None) -> int:
     derive_parser = subparsers.add_parser("derive")
     derive_parser.add_argument("--run-dir", type=Path, required=True)
     derive_parser.add_argument("--manifest", type=Path, required=True)
+    seal_parser = subparsers.add_parser("seal")
+    seal_parser.add_argument("--run-dir", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "collect":
@@ -358,8 +374,10 @@ def main(argv: list[str] | None = None) -> int:
                 args.repo.resolve(), args.run_dir.resolve(),
                 args.manifest.resolve(), args.chipyard_source.resolve(),
             )
-        else:
+        elif args.command == "derive":
             result = derive(args.run_dir.resolve(), args.manifest.resolve())
+        else:
+            result = seal_raw(args.run_dir.resolve())
         print(_canonical(result))
         return 0
     except (OSError, json.JSONDecodeError, PilotError, KeyError, ValueError) as error:
