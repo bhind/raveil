@@ -458,3 +458,15 @@ object EmitStaticStencilRegion extends App {
     firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info")
   )
 }
+
+object EmitPhysicalStaticStencilRegion extends App {
+  ChiselStage.emitSystemVerilogFile(
+    new StaticStencilRegion,
+    args = Array("--target-dir", "generated_physical_static"),
+    firtoolOpts = Array(
+      "-disable-all-randomization",
+      "-strip-debug-info",
+      "--lowering-options=disallowLocalVariables,disallowPackedArrays"
+    )
+  )
+}

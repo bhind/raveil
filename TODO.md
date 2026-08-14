@@ -735,6 +735,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   The first Graph RUN-ID is a sealed pre-Yosys operational failure; the
   log-handoff-only recovery authority/manifest is ready and must be committed
   before a distinct reattempt.
+  That reattempt reached Yosys and failed on CIRCT block-local variables.
+  Commission the physical-only `disallowLocalVariables,disallowPackedArrays`
+  emitter without changing runtime RTL, then freeze its exact RTL or pause the
+  physical screen if the complete matrix still cannot close.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

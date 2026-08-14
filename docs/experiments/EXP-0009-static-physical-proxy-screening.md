@@ -216,3 +216,18 @@ Recovery implementation authority is
 binds the original manifest hash and changes only the log handoff. Candidate
 reattempts are authorized only from recovery freeze commit
 `64ffcc498c49ff30c7e282efbbe66616270adb39` or its clean descendants.
+
+The recovery Graph RUN-ID passed the log handoff but stopped in Yosys parsing
+at CIRCT-emitted block-local `automatic logic`. Failed raw files are sealed at
+`dcda0e56c135b72be5d194680df2d0fe201a3ba2cc4a5d34037ac499c48094ec`;
+no mapped area or timing report exists. The pinned Yosys 0.27 coordinate does
+not accept that Chisel 7 output form.
+
+A second recovery may add a physical-export-only CIRCT lowering mode with
+`disallowLocalVariables,disallowPackedArrays`. The runtime emitter and design
+semantics remain unchanged. Because emitted RTL bytes and lowering identity do
+change, this is not covered by either prior manifest: the new source and RTL
+must be committed, exported, hash-bound, and frozen before another candidate
+RUN-ID. If that exact lowering still cannot close the complete Graph/Rocket
+matrix, EXP-0009 pauses at the generated-RTL boundary rather than weakening the
+tool or silently rewriting reports.

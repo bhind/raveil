@@ -91,6 +91,12 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         self.assertNotIn("Boom", smoke)
 
     def test_candidate_runner_is_manifest_driven_and_separates_evidence(self) -> None:
+        graph_source = (ROOT / "hardware/chisel/StaticStencilRegion.scala").read_text()
+        graph_export = (ROOT / "hardware/chisel/export-physical-graph-rtl.sh").read_text()
+        self.assertIn("object EmitPhysicalStaticStencilRegion", graph_source)
+        self.assertIn("disallowLocalVariables,disallowPackedArrays", graph_source)
+        self.assertIn("--main-class EmitPhysicalStaticStencilRegion", graph_export)
+        self.assertIn("generated_physical_static", graph_export)
         rocket_export = (
             ROOT / "hardware/chisel/export-physical-rocket-rtl.sh"
         ).read_text()

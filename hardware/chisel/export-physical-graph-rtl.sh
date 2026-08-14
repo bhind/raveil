@@ -37,9 +37,9 @@ docker run --rm \
 rm -rf generated_static
 scala-cli run OwnedFixedLatencyScratchpad.scala \
   chipyard-overlay/RaveilFixtureInputProvider.scala StaticStencilRegion.scala \
-  --server=false --main-class EmitStaticStencilRegion
+  --server=false --main-class EmitPhysicalStaticStencilRegion
 mkdir /export/generated-src
-cp generated_static/*.sv /export/generated-src/
+cp generated_physical_static/*.sv /export/generated-src/
 test -n "$(find /export/generated-src -type f -name "*.sv" -print -quit)"'
 
 source_sha256=$(
