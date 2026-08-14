@@ -320,6 +320,11 @@ RUN-ID, imports every completed primary log by frozen hash without rerunning it,
 and will retry only the diagnostic under a separately frozen 10,800-second
 operational envelope. RTL, ELF, estimator, thresholds, and primary samples are
 unchanged.
+Recovery authority `1c6160bda7325f039ef88ca1efcc50eb3a572916` and
+manifest SHA-256
+`c9226d05f348c740801b7cbceb673514495c3f5fc15c1192629f31b2f58a1eb6`
+are frozen before retry data. The new RUN-ID is
+`20260814T153738Z-0203248-campaign256-recovery`.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -149,3 +149,18 @@ are not rerun or counted as new samples. Only the diagnostic-only serialize
 session is recollected under a new RUN-ID. The recovery implementation,
 manifest, expected diagnostic identity, and replay command must be committed
 and frozen before that session begins.
+
+Recovery implementation authority is
+`1c6160bda7325f039ef88ca1efcc50eb3a572916`. Build-only identity collection
+completed without RTL execution: diagnostic source SHA-256 is
+`f88406f8148fa70d0eb72757653c48476e17063dcc21967b20794b3b19228bfb`,
+configuration SHA-256 is
+`fa81ec09ac5d3c4f9a93a5fe08e8b8e9256e9fb86b1bf8b03351a79875c0a381`,
+and the ELF artifact remains
+`b0f152028d3543997c8e9508289c60f95cf73b166dc3115a032ca6c1a43a89d4`.
+The failed raw seal is
+`88fe79590c3ea98129d57363920686b084fb10b45e2a9c5fc0b53db3f3bc8726`.
+Before retry data, recovery manifest
+`t0044-fixture-campaign-recovery-v1.json` is frozen at SHA-256
+`c9226d05f348c740801b7cbceb673514495c3f5fc15c1192629f31b2f58a1eb6`
+with RUN-ID `20260814T153738Z-0203248-campaign256-recovery`.

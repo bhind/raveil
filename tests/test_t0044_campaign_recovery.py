@@ -10,6 +10,7 @@ from raveil.t0044_campaign import _seal_failed_raw
 from raveil.t0044_campaign_recovery import (
     PRIMARY_VARIANTS,
     _verify_failed_evidence,
+    load_recovery_manifest,
 )
 from raveil.t0044_repeated import _canonical_bytes, _sha256
 
@@ -51,6 +52,16 @@ def _failed_attempt(root: Path) -> tuple[Path, dict]:
 
 
 class CampaignRecoveryTests(unittest.TestCase):
+    def test_frozen_recovery_manifest_binds_only_diagnostic_retry(self) -> None:
+        manifest = load_recovery_manifest(
+            ROOT / "benchmarks/manifests/t0044-fixture-campaign-recovery-v1.json")
+        self.assertEqual(manifest["recovery"]["variant"],
+                         "boom-serialize-dispatch")
+        self.assertEqual(manifest["recovery"]["simulator_timeout_seconds"],
+                         10800)
+        self.assertFalse(manifest["claim_boundary"]["rtl_or_elf_change"])
+        self.assertEqual(set(manifest["primary_raw"]), set(PRIMARY_VARIANTS))
+
     def test_sealed_primary_is_imported_without_deterministic_rerun(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             failed, recovery = _failed_attempt(Path(directory))

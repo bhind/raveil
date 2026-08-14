@@ -713,8 +713,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   EXP-0007 remains immutable. The first EXP-0008 attempt completed all primary
   sessions but the diagnostic serialize command reached the runner's fixed
   3,600-second timeout at invocation 115. Preserve its failed raw seal and do
-  not reuse its RUN-ID. Freeze the operational-only recovery implementation
-  and manifest, import all three completed primary logs by exact hash without
+  not reuse its RUN-ID. The operational-only recovery authority and manifest
+  are now frozen; import all three completed primary logs by exact hash without
   rerunning them, and recollect only the diagnostic with 10,800 seconds.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
