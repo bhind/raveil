@@ -8,11 +8,12 @@ Authority: RFC-0004, RFC-0005, ADR-0039, ADR-0046, T-0042 integration
 commit `528fbe28a0dcdfbab65d4ae2995c0876857e053a`, boundary implementation
 commit `10b4f0fc2efe1e0b7f3d6a8722c5c766a23a6c2d`, collector implementation
 commit `7575602e6651cc1e755e8d2f7b255aa8872db856`, runtime-fix commit
-`80a35e61881393ba9790b19719eb1f6dcb4ee415`
+`80a35e61881393ba9790b19719eb1f6dcb4ee415`, installation-accounting
+commit `cf454e4cd847d43d223fe7166b20d75dae0c2ffe`
 Prior evidence: EXP-0005 (preserved unchanged)
 Manifest: `benchmarks/manifests/t0044-static-repeated-invocation-v1.json`
 Frozen manifest SHA-256:
-`50cbb3c4d8769baff11e4d6961b3cc055d895471555a510f1c4a5b2e57015c6c`
+`fa175cdb19e9e0933b58c220a61ba6418b7e967366b48f813c407ca9c4835684`
 
 ## Falsifiable question
 
@@ -110,8 +111,9 @@ python3 -m raveil.t0044_repeated collect \
 ```
 
 The first freeze produced only retained failed commissioning attempts. The
-stack correction changed source, so the manifest was re-frozen with the hash
-above before any replacement run or eligible CPU observation.
+stack and installation-accounting corrections changed source, so the manifest
+was re-frozen with the hash above before any replacement run or eligible CPU
+observation.
 
 ## Estimate
 

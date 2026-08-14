@@ -673,7 +673,8 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   re-frozen and commissioning must rerun under a new RUN-ID.
   The rerun exposed 580 owned-word loader writes in the first installation;
   bind the new explicit installation read/write fields in a replacement freeze
-  rather than subtracting them implicitly, then rerun the complete matrix.
+  rather than subtracting them implicitly, then rerun the complete matrix. The
+  replacement freeze is complete; only the new RUN-ID remains.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

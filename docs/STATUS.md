@@ -215,6 +215,8 @@ validation operations. Because the marker did not split installation reads
 and writes, this remains failed evidence rather than an inferred accounting
 result. Instrumentation now emits the split explicitly and requires another
 pre-data re-freeze.
+The installation-accounting fix is now included in replacement manifest
+authority; no subsequent commissioning data existed at this re-freeze.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
