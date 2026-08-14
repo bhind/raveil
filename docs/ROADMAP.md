@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0042 complete; T-0044 EXP-0006 repeated-input commissioning frozen before data**
+State: **T-0042 complete; T-0044 EXP-0006 commissioning completed and paused at staging-initiator fairness**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -185,12 +185,13 @@ merely because a branch or partial implementation already exists.
    static/Rocket/BOOM latency/traffic pilot plus BOOM serialize-dispatch
    diagnostic. The primary execution window is eligible: Graph records exact
    3,073 cycles versus Rocket 14,621 and BOOM 21,892, while its 1,536 versus
-   1,056 transactions is explained by lawful CPU load reuse. Full expansion is
-   EXP-0006 now freezes a four-input commissioning of all candidates under one
-   installed configuration without simulator reboot, followed only on pass by
-   a distinct 256-input session with 1/4/16/64/256 prefix accounts. No EXP-0006
-   RTL data existed at freeze. The pilot does not implement the
-   remaining organizations or collect energy, synthesis timing, or area, so
+   1,056 transactions is explained by lawful CPU load reuse. EXP-0006
+   completed a four-input commissioning of all candidates under one
+   installed configuration without simulator reboot. Its execution-window
+   latency/traffic evidence is eligible, but CPU-local versus Graph-testbench
+   input generation leaves staging and end-to-end meaning unresolved, so the
+   frozen 256-input 1/4/16/64/256 campaign is paused. The pilot does not
+   implement the remaining organizations or collect energy, synthesis timing, or area, so
    T-0044 remains open and no go/no-go follows.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the

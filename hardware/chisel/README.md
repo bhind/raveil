@@ -287,6 +287,15 @@ Do not run account 256 until commissioning and its fairness review pass. If
 authorized, use a new RUN-ID and `--account 256`; the report derives the frozen
 1/4/16/64/256 prefixes from that one session per candidate.
 
+The completed commissioning RUN-ID is
+`20260814T100000Z-7b6e5df-commission8`. It passes oracle, resource, traffic,
+accounting, identity, complete-matrix, and equal execution-window checks in one
+process/reset/installation per candidate. The sealed report ends `pause`:
+CPU-local versus Graph-testbench fresh-input generation does not yet give
+staging and end-to-end cycles the same meaning. Do not run account 256 until
+that one boundary is resolved and re-frozen. BOOM serialize-dispatch remains
+diagnostic only.
+
 ## Pinned BOOM control source
 
 ADR-0040 selects the BOOM control through Chipyard 1.11.0 rather than a moving

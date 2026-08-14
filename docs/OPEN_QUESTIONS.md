@@ -46,12 +46,14 @@ resolves it.
   per output, while each optimized CPU admits 1,056 because lawful software
   load reuse reduces 1,280 useful loads to 800 manager reads. The difference
   is visible, neither CPU is weakened, and the execution-latency/traffic pilot
-  is eligible. The remaining single measurement-boundary question is how one
-  installed configuration accepts repeated fresh inputs without simulator
-  reboot so installation and invocation amortization have the same meaning for
-  every candidate. EXP-0006 freezes the one-process/one-reset commissioning,
-  but the question remains open until actual 1/4 RTL evidence also resolves or
-  isolates CPU-local versus Graph-testbench input staging. Source survey found no
+  is eligible. EXP-0006 now proves that one installed configuration accepts
+  four repeated fresh inputs without simulator reboot for every candidate,
+  including exact installation and invocation accounting. The remaining
+  single measurement-boundary question is narrower: what same-meaning
+  initiator should generate or admit each fresh input when CPU generation is
+  candidate-local but Graph generation is testbench-side? Until that staging
+  boundary is resolved, end-to-end amortization and the 256-input campaign are
+  paused. Source survey found no
   existing upstream config that proves this boundary: Rocket's tile-internal
   `WithScratchpadsOnly` does not match BOOM, while the shared subsystem
   TileLink banked scratchpad now passes the exact stencil on both controls but

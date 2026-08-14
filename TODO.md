@@ -647,7 +647,7 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   graph-ready/token/configuration, cycles, traffic, area, timing, and energy
   proxies separately. Admit only mechanisms that passed the T-0057 source and
   IP-risk review; retain an explicit no-go outcome. The current P0 slice is
-  only EXP-0005's frozen 1/4-fresh-input latency/traffic pilot: static Graph,
+  only EXP-0005/EXP-0006's frozen 1/4-fresh-input latency/traffic pilots: static Graph,
   Rocket in-order, BOOM OoO, plus BOOM serialize-dispatch as a diagnostic (not
   an “OoO-disabled CPU”). Primary comparison preserves lawful CPU load reuse
   and reports Graph's extra traffic. VLIW/CGRA, elastic, stream, hybrid,
@@ -688,6 +688,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   truncating repeated evidence to a 240-line smoke preview; emit the full log
   only in repeated mode, re-freeze that transport fix, and rerun under a new
   RUN-ID. The replacement freeze is complete.
+  EXP-0006 RUN-ID `20260814T100000Z-7b6e5df-commission8` now passes the full
+  install-once four-member matrix and seals exact 1/4 evidence. Execution
+  latency/traffic is eligible, but staging/end-to-end remains ineligible
+  because CPU input generation is candidate-local while Graph generation is
+  testbench-side. **Pause at this one point:** define and prove a same-meaning
+  input-staging initiator boundary before any 1/4/16/64/256 campaign. Do not
+  start the 256-input run, secondary ablation, or unrelated T-0044 scope.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

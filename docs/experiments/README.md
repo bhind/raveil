@@ -11,4 +11,4 @@ inconclusive, and superseded experiments remain available.
 | [EXP-0003](EXP-0003-gate1-bounded-experience.md) | In progress | silicon | native C and TVM bounded-Experience validation |
 | [EXP-0004](EXP-0004-native-command-graph.md) | Planned | silicon | Native command-graph correctness, overhead, and crossover |
 | [EXP-0005](EXP-0005-static-latency-traffic-pilot.md) | Completed pilot; paused | RTL simulation pilot | Execution/traffic eligible; repeated-installation lifecycle boundary remains |
-| [EXP-0006](EXP-0006-static-repeated-invocation-boundary.md) | Planned; frozen before data | RTL simulation pilot | Install-once 1/4 commissioning, then conditional repeated-account campaign |
+| [EXP-0006](EXP-0006-static-repeated-invocation-boundary.md) | Completed commissioning; paused | RTL simulation pilot | Install-once 1/4 passes; staging initiator meaning blocks repeated-account campaign |

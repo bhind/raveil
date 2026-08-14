@@ -183,17 +183,18 @@ installation while Graph is elaboration-installed. EXP-0005 therefore ends
 installed configuration without simulator reboot. T-0044 remains open; the
 pilot is partial and decides neither RFC-0005 go nor numerical no-go.
 The successor boundary implementation is now present on the dedicated
-`research/t-0044-repeated-invocation-boundary` line but has not produced
-experiment data. It adds separate repeated-only Rocket/BOOM configurations,
+`research/t-0044-repeated-invocation-boundary` line and has produced the
+completed EXP-0006 commissioning evidence described below. It adds separate
+repeated-only Rocket/BOOM configurations,
 one ELF process that consumes ordered runtime seed versions, per-invocation
 owned-memory lifecycle counters, actual 256-word output evidence, and a strict
 repeated-session verifier/collector with exclusive raw/derived/seal paths,
 without changing EXP-0005. The repeated manager
 re-enters staging structurally after each drained validation response; it adds
 no candidate-visible port, buffer, bank, arbitration path, or software phase
-command. Static checks pass, and EXP-0006 plus its machine-readable manifest
-now freeze the same-meaning installation/staging boundary before RTL
-commissioning. No EXP-0006 data existed at freeze. In particular,
+command. Static checks passed, and EXP-0006 plus its machine-readable manifest
+froze the installation/staging boundary before RTL commissioning. No EXP-0006
+data existed at freeze. In particular,
 CPU staging currently includes candidate-local input-generation instructions
 while Graph input generation is testbench-side, so end-to-end eligibility is
 not inferred from the implementation alone.
@@ -254,6 +255,21 @@ output retains the preview cap. This evidence-transport correction requires a
 new manifest re-freeze and RUN-ID; the failed run is not promoted.
 The Graph raw-transport correction is now replacement manifest authority; no
 subsequent complete-matrix run existed at this re-freeze.
+EXP-0006 RUN-ID `20260814T100000Z-7b6e5df-commission8` then completed and
+sealed the full four-member, four-input matrix. Every command exited zero;
+all outputs match the independent oracle; contract/resource/output identities
+agree across the primary candidates; and traffic, phase, quiescence, one-
+process/one-reset/one-installation, and no-reload accounting pass. Static Graph
+execution is 3,073 cycles per input with 1,536 transactions; Rocket is
+14,592/14,548/14,548/14,548 with 1,056 each; BOOM OoO is
+21,904/21,900/21,902/21,903 with 1,056 each. BOOM serialize-dispatch is
+70,871/70,862/70,862/70,862 and remains diagnostic only. Execution preserves
+lawful CPU load reuse and exposes Graph's extra traffic, so the bounded
+execution latency/traffic view is pilot-eligible. CPU-local versus Graph-
+testbench input generation still prevents a same-meaning staging/end-to-end
+claim. EXP-0006 therefore ends `pause` at that single boundary; no 256-input
+campaign, go/no-go, energy, synthesis timing, or area conclusion follows, and
+T-0044 remains open.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,
