@@ -138,3 +138,12 @@ assignment in the new exporter. No synthesis tool ran and no candidate report
 or performance datum was created. The assignment is corrected with a literal
 source-directory regression assertion; the corrected commit supersedes the
 earlier Stage-B implementation commit as authority.
+
+A later successful copy attempt exposed a second pre-freeze issue: copying the
+whole Chipyard generated-source directory admitted Verilator objects and other
+build collateral (993 files, about 358 MB) rather than only synthesis RTL. That
+export is rejected and will not enter the manifest. The corrected exporter
+accepts only the exact `.sv`/`.v` entries in Chipyard's generated `.top.f`,
+flattens them into a collision-checked directory, and separately hashes the RTL
+tree and normalized file list. It records the stable generator RootFS-layer
+identity rather than the provenance-bearing local image-manifest ID.

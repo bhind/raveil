@@ -358,6 +358,9 @@ Initial Rocket RTL-only export commissioning failed before RTL copy or
 synthesis because external-source locators were implicit and a new exporter
 assignment was malformed. The latter is corrected and regression checked;
 these are pre-data operational failures, not physical results.
+A subsequent broad Rocket copy included generated simulator collateral; it was
+rejected before freeze or synthesis. The corrected path admits only Chipyard's
+`.top.f` RTL entries and binds their tree and file-list hashes.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

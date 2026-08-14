@@ -61,6 +61,10 @@ class PhysicalProxyToolchainTests(unittest.TestCase):
         ).read_text()
         self.assertNotIn("+[ -d", rocket_export)
         self.assertIn("[ -d \"$source_dir\" ]", rocket_export)
+        self.assertIn(".top.f", rocket_export)
+        self.assertIn("generator_rootfs_sha256", rocket_export)
+        self.assertIn("rtl_filelist_sha256", rocket_export)
+        self.assertNotIn('cp -a "$source_dir"', rocket_export)
         wrapper = (
             ROOT / "hardware/chisel/run-physical-proxy-synthesis.sh"
         ).read_text()
