@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import statistics
 import subprocess
 import sys
@@ -65,14 +66,19 @@ def _marker(text: str, prefix: str) -> dict[str, str]:
     matches = [line for line in text.splitlines() if line.startswith(prefix)]
     if len(matches) != 1:
         raise PilotError(f"expected exactly one {prefix} marker")
+    payload = matches[0][len(prefix):]
     fields: dict[str, str] = {}
-    for item in matches[0].split()[1:]:
-        if item.count("=") != 1:
+    end = 0
+    for match in re.finditer(r"([A-Za-z0-9_]+)=\s*([^\s]+)", payload):
+        if payload[end:match.start()].strip():
             raise PilotError(f"malformed {prefix} marker")
-        key, value = item.split("=", 1)
-        if not key or not value or key in fields:
+        key, value = match.groups()
+        if key in fields:
             raise PilotError(f"invalid {prefix} marker")
         fields[key] = value
+        end = match.end()
+    if not fields or payload[end:].strip():
+        raise PilotError(f"malformed {prefix} marker")
     return fields
 
 

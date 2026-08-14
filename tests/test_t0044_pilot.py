@@ -31,6 +31,22 @@ class T0044PilotTests(unittest.TestCase):
                 "T0044-CPU-ACTIVITY-V1",
             )
 
+    def test_marker_accepts_rtl_fixed_width_decimal_spacing(self) -> None:
+        self.assertEqual(
+            t0044_pilot._marker(
+                "T0044-CPU-ACTIVITY-V1 stalls=          0 reads=800\n",
+                "T0044-CPU-ACTIVITY-V1",
+            ),
+            {"stalls": "0", "reads": "800"},
+        )
+
+    def test_marker_rejects_unparsed_payload(self) -> None:
+        with self.assertRaises(t0044_pilot.PilotError):
+            t0044_pilot._marker(
+                "T0044-CPU-ACTIVITY-V1 stalls=0 stray reads=800\n",
+                "T0044-CPU-ACTIVITY-V1",
+            )
+
     def test_manifest_is_canonical_json_object(self) -> None:
         value = json.loads(MANIFEST.read_text(encoding="utf-8"))
         self.assertEqual(value["schema"], t0044_pilot.SCHEMA)
