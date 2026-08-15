@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 
 ## Four-plane adaptive Harvard model
 
@@ -562,18 +562,60 @@ sticky and multi-output metadata publication is all-or-nothing. ADR-0031 and
 T-0043 subsequently add the bounded data-byte and semantic boundaries without
 changing this metadata lifecycle.
 
-## Named components
+## Component model and executable boundaries
 
-| Formal component name | Short name | Responsibility |
-|---|---|---|
-| Sonatine Microkernel | Sonatine | RISC-V microkernel and execution authority |
-| Daphnis Execution Subsystem | Daphnis | adaptive implementation/execution plane |
-| Miroirs Graph Compiler | Miroirs | graph IR, legal transforms, structural verification |
-| Pavane Semantic Oracle | Pavane | deterministic reference execution and semantic oracle |
-| Ondine Object Memory Subsystem | Ondine | object residency, spill, stream, and rematerialization |
-| La Valse Optimization Subsystem | La Valse | search, mapping, and proposal generation |
-| Boléro Experience Runtime | Boléro | persistent runtime, retrieval, and variant selection |
-| Scarbo Verification Subsystem | Scarbo | adversarial testing, fuzzing, and fault injection |
+The formal names below describe intended responsibility domains, not a claim
+that every domain is already implemented as one process, library, device, or
+trusted component. The portable architectural boundary is the owned artifact
+and authority lifecycle across them: identity, effects, object versions,
+resources, provenance, admission, semantic comparison, private output,
+publication or rollback, fallback, and replayable evidence.
+
+| Responsibility domain | Formal name | Current executable realization | Boundary that must remain explicit |
+|---|---|---|---|
+| Graph construction and structural verification | Miroirs Graph Compiler | the tensor `GraphCompiler` emits one fixed candidate slate; `MiroirsStructuralValidator` independently checks its exact lineage; `CommandGraphCompiler` is a separate bounded command frontend | Miroirs is not yet a general compiler, and the tensor and Command Graph schemas are not one shared IR |
+| Semantic reference | Pavane Semantic Oracle | deterministic owned reference execution and exact comparison for the bounded integer tensor families | Pavane supplies semantic evidence only; it does not select candidates, certify resources, measure performance, or publish results |
+| Search, mapping, and proposals | La Valse Optimization Subsystem | `AnalyticalPredictor` ranks the fixed Native tensor slate and may abstain | proposal code is fallible advice and has no admission, execution, measurement, or publication authority |
+| Experience retention and advice | Boléro Experience Runtime | append-only JSONL, a bounded active index, and replayable policy experiments | raw measurement, completion telemetry, and Command Graph demo caching remain separate; no current Command Graph or hardware-selection loop consumes Boléro advice |
+| Guarded implementation and execution | Daphnis Execution Subsystem | no general Daphnis exists; the current replaceable adapters are `NativeCBackend` and correctness-only `SonatineQEMUBackend`, coordinated by bounded executors | Daphnis names the intended backend plane, not the guarded executor, Sonatine, a simulator, or the current hardwired RTL region |
+| Object residency and movement | Ondine Object Memory Subsystem | a descriptive Native `MemoryPlan` plus bounded Sonatine single-hart object/version and publication slices | no general allocator, coherent heterogeneous memory, DMA, spill/rematerialization runtime, or persistent object service exists |
+| Privileged capabilities and publication | Sonatine Microkernel | RV64 single-hart kernel, job/object lifecycle, cancellation, and guarded publication under QEMU | Sonatine is one privileged execution-authority profile; the Native host MVP remains valid without it, and emulation is not physical evidence |
+| Adversarial assurance | Scarbo Verification Subsystem | ordinary repository tests currently cover many malformed, stale, fault, rollback, and fail-closed cases | there is no integrated Scarbo subsystem, complete fuzzing program, or production security assurance |
+
+### Portable orchestration versus backend execution
+
+The current tensor `GraphExecutor` owns the lifecycle ordering for the Native
+vertical slice: validate the exact admitted slate and proposal, execute the
+trusted baseline first, invoke a replaceable backend, ask Pavane for a semantic
+verdict, and record selection, abstention, failure, or rollback. It does not
+implement native instructions, device transport, Graph hardware, prediction,
+or Experience retrieval.
+
+The Command Graph surface is intentionally separate. Its compiler emits a
+`CommandGraphProgram`; `DirectCommandExecutor` and `CommandGraphExecutor` run
+the same allowlisted host tools under the same workspace and resource policy;
+publication requires exact outcome agreement. It does not pass through the
+tensor `GraphCompiler`, `MiroirsStructuralValidator`, `PavaneSemanticOracle`,
+or Boléro.
+
+### Deployment profiles
+
+- **Native host profile:** owned schemas, Miroirs/Pavane checks, guarded host
+  orchestration, and `NativeCBackend`; runs on GNU/Linux and macOS without
+  Sonatine.
+- **Sonatine emulation profile:** a bounded adapter carries owned requests into
+  Sonatine's capability, object-version, cancellation, and publication path
+  under QEMU; this is correctness evidence only.
+- **RTL research profile:** `StaticStencilRegion`, Rocket, and BOOM are isolated
+  experiment candidates or controls. They are not installed Daphnis backends,
+  and their simulation results grant no Program, Data, publication, or
+  Experience authority.
+
+The Linux module remains outside these authority domains as a non-authoritative
+transport harness. No real MMIO, DMA, IRQ, shared-memory, cache-coherency, or
+device-reset contract exists. A future reviewed CPU, CGRA, FPGA, NPU, RISC-V
+extension, or ASIC implementation must remain behind the same owned thin waist
+and cannot import backend types or learned decisions into public authority.
 
 ## Variant and memory lineage
 

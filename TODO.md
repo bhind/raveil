@@ -25,6 +25,18 @@ and failure preservation do not consume that slot; new implementation does.
 
 ## Project entry point
 
+- [x] **T-0109** Reorganize the root `Components and boundaries` summary and
+  the canonical architecture component map after read-only comparison with the
+  executable tree. Separate the portable owned contract/authority thin waist,
+  tensor and Command Graph frontends, advisory proposal/Experience paths,
+  guarded orchestration, execution adapters, Sonatine's optional privileged
+  profile, host transport, and RTL research controls. State explicitly which
+  named components are intended responsibility domains rather than complete
+  implementations. This documentation-only clarification preserves ADR-0025,
+  ADR-0027, ADR-0049, all experiment outcomes, and the current roadmap gates;
+  it does not displace T-0044 or create a performance, hardware, or security
+  claim.
+
 - [x] **T-0108** Replace the stale root README with a current, evidence-bounded
   project entry point. Explain Raveil as an Experience-guided Graph
   compiler/runtime across replaceable CPU, CGRA, FPGA, NPU, and future ASIC

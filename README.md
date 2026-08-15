@@ -116,22 +116,45 @@ validated project result.
 
 ## Components and boundaries
 
-| Component | Role | Current boundary |
-|---|---|---|
-| Miroirs Graph Compiler | owned Graph IR, legal transforms, structural validation | bounded Graph contracts and checks exist; arbitrary C/program compilation does not |
-| La Valse Optimization Subsystem | search, mapping, and candidate proposal | current predictor is analytical and narrow |
-| Boléro Experience Runtime | persistent evidence, retrieval, retention, and variant advice | append-only JSONL plus bounded nearest-neighbor baseline exists; it is not connected to the Command Graph surface |
-| Daphnis Execution Subsystem | replaceable implementation and execution plane | Native C and bounded Sonatine/QEMU adapters exist; no general Daphnis or production CGRA exists |
-| Pavane Semantic Oracle | independent reference execution and semantic comparison | bounded deterministic checks exist |
-| Ondine Object Memory Subsystem | object residency, spill, stream, and rematerialization | only narrow owned object/memory slices exist |
-| Sonatine Microkernel | capability, execution-authority, and publication research substrate | RV64/QEMU correctness seed; not required for the Native MVP |
-| GNU/Linux host and driver boundary | current userspace integration and bounded device-transport development | userspace is the primary MVP; the driver is only a non-authoritative harness and has no DMA/MMIO/IRQ or Experience authority |
-| Scarbo Verification Subsystem | adversarial testing, fuzzing, and fault injection | named direction, not a complete subsystem |
+Raveil's portable core is not any one named subsystem. It is the owned contract
+and authority lifecycle that remains stable while frontends, predictors,
+operating environments, and execution backends change. The current repository
+contains several narrow vertical slices of that intended system; it does not
+yet contain one integrated implementation of every named component.
 
-The current Native MVP keeps these public artifact types independent of any
-backend: `GraphProgram`, `ExecutionContract`, `GraphVariant`, `MemoryPlan`,
-`OptimizationProposal`, and result records. Upstream compiler or accelerator
-types remain private adapter state.
+| Layer | Intended component or boundary | Executable today | Explicit boundary |
+|---|---|---|---|
+| Portable thin waist | owned Program, Graph, contract, candidate, memory-plan, proposal, result, and lineage records | strict bounded schemas exist for the Native tensor Graph and related job/object paths | upstream compiler, OS, ISA, and accelerator types remain private adapter state |
+| Graph construction | Miroirs is the intended Graph compiler and structural-verification umbrella | `GraphCompiler` emits a fixed tensor candidate slate; `CommandGraphCompiler` separately parses a bounded command language; one pinned MLIR fixture imports through an adapter | these are separate graph surfaces, not a general C/C++ compiler or one shared general-purpose IR |
+| Proposal and optimization | La Valse is the intended search, mapping, and proposal subsystem | `AnalyticalPredictor` ranks a small fixed slate and may abstain | it is not Experience-backed, a general mapper, or an execution authority |
+| Structural and semantic checks | Miroirs validation plus the Pavane Semantic Oracle | `MiroirsStructuralValidator` checks exact artifact lineage; Pavane independently checks the bounded integer tensor families | neither proves arbitrary-program semantics, resource safety, or backend correctness in general |
+| Guarded orchestration | backend-neutral admission, baseline-first execution, private failure, selection, and rollback | the Native `GraphExecutor` performs the bounded tensor flow; the Command Graph path separately compares direct and DAG outcomes before publication | an executor coordinates policy and checks; it is not the CPU, device, simulator, or learned predictor |
+| Execution adapters | Daphnis is the intended replaceable implementation/execution plane | `NativeCBackend` runs ordinary host code; `SonatineQEMUBackend` is a correctness-only emulation adapter | no general Daphnis device, installed Graph ISA, production CGRA, or physical RISC-V backend exists |
+| Objects and publication | Ondine is the intended object residency, movement, spill, stream, and rematerialization subsystem | Native `MemoryPlan` is descriptive; Sonatine has narrow single-hart object/version and atomic-publication slices | there is no general allocator, coherent heterogeneous memory runtime, DMA path, or production persistence layer |
+| Evidence and Experience | measurement records remain separate from Boléro's intended retrieval, retention, and variant-advice runtime | append-only JSONL, a bounded active index, replayable policies, and segregated measurement/telemetry records exist | measurements, completion telemetry, and the Command Graph demo cache do not automatically become active Experience; Experience remains advice-only |
+| Privileged runtime | Sonatine provides a future capability and publication authority profile for attached execution | an RV64 single-hart seed and bounded Graph lifecycle run under QEMU | Sonatine is not required by the Native host MVP and QEMU correctness is not physical-hardware evidence |
+| Host and transport | GNU/Linux and macOS host the current software paths; Linux may later host device transport | userspace Native paths run on both; the Linux module is a non-authoritative test harness | there is no real Daphnis MMIO, DMA, IRQ, shared-memory, or Experience-authority driver path |
+| Hardware research | static Graph hardware and conventional CPU controls test backend hypotheses | the hardwired `StaticStencilRegion`, Rocket, and BOOM have bounded RTL-simulation evidence | they are experiment candidates and controls, not installed production backends or proof of a general Graph machine |
+| Adversarial assurance | Scarbo is the intended fuzzing, fault-injection, and hostile-case subsystem | repository tests exercise many fail-closed cases | no integrated Scarbo subsystem or production security claim exists |
+
+Three separations are especially important:
+
+1. **Proposal is not authority.** La Valse or Boléro may recommend a candidate;
+   Miroirs, Pavane, resource checks, and the guarded executor decide whether it
+   may run or publish.
+2. **The executor is not the backend.** The executor enforces lifecycle rules;
+   Native C, Sonatine/QEMU, a reviewed CGRA, or future hardware performs the
+   backend-specific work.
+3. **Evidence is not automatically Experience.** Raw measurement, completion
+   telemetry, development timing, and demo caches stay segregated until an
+   explicit admission rule promotes eligible evidence.
+
+The Native profile therefore works without Sonatine: owned contracts,
+Miroirs/Pavane checks, guarded host orchestration, and `NativeCBackend` form its
+current bounded path. The Sonatine profile exercises stronger capability,
+object-version, cancellation, and publication mechanisms under QEMU. The RTL
+profile remains a separate research comparison. None of these profiles alone
+is the complete intended Raveil architecture.
 
 ## Relationship to CGRA, VLIW, and specialized hardware
 

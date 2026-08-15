@@ -19,6 +19,15 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
+T-0109 reorganizes the root component summary and the canonical architecture
+map without changing executable behavior or an accepted boundary. The records
+now distinguish the portable owned thin waist, the two separate Graph surfaces,
+guarded orchestration, replaceable execution adapters, Experience admission,
+Sonatine's optional privileged profile, and isolated RTL research controls.
+Formal names such as Miroirs, Daphnis, Ondine, La Valse, Boléro, and Scarbo are
+responsibility domains; their presence in a table no longer implies that a
+complete integrated subsystem exists.
+
 ## Development workflow support
 
 Repository-scoped Project Manager, three Implementer, Tester, Performance
