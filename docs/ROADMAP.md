@@ -259,6 +259,18 @@ merely because a branch or partial implementation already exists.
    EXP-0010's fresh pair now passes its bounded screen and advances only to the
    integrated physical boundary. Gate 1 remains open until that complete
    composition is implemented, closed, and measured without missing parts.
+   Separately, ADR-0050 separates the locally sealed EXP-0008 result from
+   durable promotion: both
+   the retained failed RUN and completed recovery RUN need immutable remote
+   copies, download checks, completion markers transferred last, and a tracked
+   non-sensitive receipt. That durability step gates external promotion and
+   T-0044 closeout, not the next reversible preregistered local experiment; it
+   never authorizes a deterministic simulator rerun as another sample. The
+   campaign-specific verifier and fake-rclone failure suite are implemented;
+   both RUNs now pass immutable remote copy, download verification, and
+   marker-last readback with a tracked receipt. This closes the durability
+   sub-gate only; energy, timing, area, IP, and missing organizations still
+   prevent T-0044 closeout.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

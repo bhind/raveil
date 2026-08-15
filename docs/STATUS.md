@@ -522,6 +522,20 @@ slack. Area ratio is 0.229563 and both timing reports meet, so the frozen
 outcome is `advance-to-integrated-physical`. EXP-0009 remains paused at 20 ns.
 This is partition synthesis-estimate evidence only; every performance, energy,
 and whole-system claim remains false.
+ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
+fail-closed verifier accepted only the two frozen RUN-IDs and expected
+seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
+verified recovery lineage and the complete non-symlink file set, and rechecked
+source identity across transfer steps. Immutable copies of both RUNs at their
+logical `Raveil/research-data/EXP-0008/<RUN-ID>/` locators passed
+download-based one-way checks; completion markers were transferred last and
+read back byte-for-byte. The tracked receipt covers 20 files and 738,617,303
+bytes at
+`docs/experiments/receipts/EXP-0008-evidence-promotion.json`, SHA-256
+`3ea8b815fb0c83c9563f19c22820f14130be6cc9af5bcfa20508d3eb87699392`.
+This is remotely durable RTL-simulation evidence. It is not silicon, product,
+RFC-0005 go, T-0044 completion, or a general workload speedup; energy,
+synthesis timing, area, IP disposition, and missing organizations remain open.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

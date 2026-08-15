@@ -53,3 +53,4 @@ rewrite it.
 | [ADR-0046](ADR-0046-controlled-run-matched-comparison-precedes-token-hardening.md) | Accepted | A controlled-run matched comparison precedes general CPU token-lifecycle hardening |
 | [ADR-0047](ADR-0047-fixture-owned-input-staging-precedes-repeated-campaign.md) | Accepted | A fixture-owned phase-exclusive input provider precedes repeated measurement |
 | [ADR-0048](ADR-0048-physical-proxy-starts-with-partitioned-screening.md) | Accepted | Physical proxy starts with partitioned screening |
+| [ADR-0050](ADR-0050-t0044-results-require-sealed-durable-evidence.md) | Accepted | T-0044 results require sealed, immutable, download-verified evidence before promotion |

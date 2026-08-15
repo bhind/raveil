@@ -826,6 +826,20 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Rocket fallback, Graph incremental logic, common fixture/memory, adapters,
   cache/interconnect, clocks, and placement/routing. Do not promote the
   partition sum to whole-system area or reuse 40 ns as a performance claim.
+  Separately, ADR-0050 requires the retained failed
+  RUN and completed recovery RUN to receive immutable remote copies,
+  download-based verification, marker-last completion, and a tracked
+  non-sensitive receipt before EXP-0008 is called remotely durable or
+  externally promoted. Use
+  `docs/guides/T-0044-EXP-0008-EVIDENCE-PROMOTION.md`; do not rerun simulation
+  merely to close this durability gap. The dedicated verifier and fake-rclone
+  mutation/failure suite pass, and both RUNs now have immutable remote copies,
+  successful download checks, marker-last byte-for-byte readback, and tracked
+  receipt SHA-256
+  `3ea8b815fb0c83c9563f19c22820f14130be6cc9af5bcfa20508d3eb87699392`
+  covering 20 files and 738,617,303 bytes. This closes only EXP-0008 durable
+  promotion. Continue the separately preregistered energy, timing, area, IP,
+  and missing-organization work; T-0044 and RFC-0005 remain open.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces
