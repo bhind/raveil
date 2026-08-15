@@ -32,7 +32,12 @@ and failure preservation do not consume that slot; new implementation does.
   guarded orchestration, execution adapters, Sonatine's optional privileged
   profile, host transport, and RTL research controls. State explicitly which
   named components are intended responsibility domains rather than complete
-  implementations. This documentation-only clarification preserves ADR-0025,
+  implementations. Use the formal `code name + general function` form for all
+  project components and register Couperin Contract Core, Chloé Graph
+  Orchestrator, Alborada Measurement Observatory, Rapsodie Host Bridge, and
+  Tzigane Hardware Research Laboratory for previously unnamed domains. The
+  owner reviewed the exact English table and approved direct push on
+  2026-08-15. This documentation-only clarification preserves ADR-0025,
   ADR-0027, ADR-0049, all experiment outcomes, and the current roadmap gates;
   it does not displace T-0044 or create a performance, hardware, or security
   claim.

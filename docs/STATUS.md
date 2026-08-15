@@ -24,9 +24,14 @@ map without changing executable behavior or an accepted boundary. The records
 now distinguish the portable owned thin waist, the two separate Graph surfaces,
 guarded orchestration, replaceable execution adapters, Experience admission,
 Sonatine's optional privileged profile, and isolated RTL research controls.
-Formal names such as Miroirs, Daphnis, Ondine, La Valse, Boléro, and Scarbo are
-responsibility domains; their presence in a table no longer implies that a
-complete integrated subsystem exists.
+Every component table now uses a Ravel-derived code name followed by its plain
+general function. The previously unnamed responsibility domains are Couperin
+Contract Core, Chloé Graph Orchestrator, Alborada Measurement Observatory,
+Rapsodie Host Bridge, and Tzigane Hardware Research Laboratory. These and the
+existing Miroirs, Pavane, La Valse, Boléro, Daphnis, Ondine, Sonatine, and
+Scarbo names remain documentation responsibility domains; their presence in a
+table does not imply that a complete integrated subsystem exists or rename an
+executable identifier.
 
 ## Development workflow support
 

@@ -1,17 +1,22 @@
 # Glossary
 
-Last updated: 2026-08-08
+Last updated: 2026-08-15
 
 | Formal name | Short name | Meaning |
 |---|---|
 | Raveil | — | the complete adaptive computing research project |
-| Sonatine Microkernel | Sonatine | RISC-V microkernel and trusted execution authority |
-| Daphnis Execution Subsystem | Daphnis | adaptive graph/dataflow implementation plane |
+| Couperin Contract Core | Couperin | portable cross-backend contracts, identity, lineage, and authority lifecycle |
 | Miroirs Graph Compiler | Miroirs | graph IR, transformations, and structural verifier |
 | Pavane Semantic Oracle | Pavane | deterministic semantic reference executor/oracle |
-| Ondine Object Memory Subsystem | Ondine | object memory, residency, spill, stream, rematerialization |
 | La Valse Optimization Subsystem | La Valse | proposal generation, search, placement, and mapping |
 | Boléro Experience Runtime | Boléro | persistent runtime, retrieval, and variant selection |
+| Chloé Graph Orchestrator | Chloé | guarded admission sequencing, baseline-first execution, fallback, and rollback |
+| Daphnis Execution Subsystem | Daphnis | adaptive graph/dataflow implementation plane |
+| Ondine Object Memory Subsystem | Ondine | object memory, residency, spill, stream, rematerialization |
+| Sonatine Microkernel | Sonatine | RISC-V microkernel and trusted execution authority |
+| Alborada Measurement Observatory | Alborada | segregated measurement, telemetry, environment, and policy-evaluation evidence |
+| Rapsodie Host Bridge | Rapsodie | userspace host integration and future device transport |
+| Tzigane Hardware Research Laboratory | Tzigane | RTL architecture comparison and backend-hypothesis experiments |
 | Scarbo Verification Subsystem | Scarbo | adversarial tests, fuzzing, and fault injection |
 | ProgramIdentity | — | stable identity of immutable program semantics |
 | ExecutionContract | — | accepted effects, resources, numerical rules, and authority bounds |
