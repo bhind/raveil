@@ -173,6 +173,15 @@ dependency-ready issue, rename, ROB, general LSU, commit frontier, or issue-mode
 switching. A later timing-dynamic organization requires a new contract and IP
 review; it is not implied by this first RTL.
 
+ADR-0049 classifies the current Chisel implementation more narrowly still: its
+source fixes the stencil states, address offsets, and iteration control, while
+the descriptor hash is only a binding tag. It is a hardwired specialized
+accelerator reference, not a configurable CGRA and not a general Graph
+executor. A successor with loadable schedules, configurable functional units
+or routes, or token readiness belongs to the established VLIW/CGRA/dataflow
+comparison class and must pass the T-0044 non-reinvention gate. Strong results
+from the fixed FSM cannot by themselves authorize that successor.
+
 ## RISC-V and Graph Execution Subsystem
 
 RISC-V/Sonatine is a preserved semantic/control/fallback and specialized
@@ -186,6 +195,14 @@ contracts. Static,
 elastic dataflow, stream, and hybrid organizations remain comparison
 candidates. Dynamic islands or RISC-V fallback handle pointer chasing,
 interpreters, unpredictable traversal, and other graph-hostile regions.
+
+The execution substrate is replaceable. An ordinary CPU, reviewed CGRA/VLIW or
+NPU, FPGA experiment, and later ASIC may implement the same bounded contract,
+but no backend configuration or completion grants authority. Sonatine retains
+admission, capability, object/version, cancellation, publication, rollback,
+fallback, and evidence boundaries. This hardware-independent contract lifetime
+is the architectural thin waist; owning a novel processing-element array is not
+a Raveil requirement.
 
 T-0042 now supplies the first owned operation-level RTL slice. A deterministic
 Python compiler emits the RFC-0005 stencil descriptor; an independent validator
@@ -603,6 +620,14 @@ may be used behind adapters. Raveil owns ProgramIdentity, ExecutionContract,
 GraphVariant, ObjectManifest, MemoryPlan, OptimizationProposal,
 ResourceCertificate, ExperienceRecord, JobDescriptor, and CompletionRecord.
 Upstream types do not become Raveil's public contract.
+
+Existing language frontends and interchange/compiler infrastructure are the
+default. Raveil-specific compilation is a thin set of import, identity,
+effect/object/version, resource, provenance, admission, validation, and backend-
+lowering passes. A new Raveil source language, forked general optimizer, or
+closed end-to-end toolchain requires a demonstrated interoperability gap and a
+separate accepted decision; it is not the default consequence of adding a new
+backend.
 
 The first executable IREE boundary is deliberately narrower: a pinned compiler
 validates one digest-bound, repository-authored MLIR fixture and the adapter

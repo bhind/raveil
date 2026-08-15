@@ -536,6 +536,15 @@ bytes at
 This is remotely durable RTL-simulation evidence. It is not silicon, product,
 RFC-0005 go, T-0044 completion, or a general workload speedup; energy,
 synthesis timing, area, IP disposition, and missing organizations remain open.
+ADR-0049 now fixes the post-EXP-0010 transition boundary without changing the
+frozen EXP-0009 or EXP-0010 manifests. The current `StaticStencilRegion` remains a hardwired stencil
+FSM with a descriptor binding tag, not a configurable CGRA or general Graph
+executor. Any configurable successor must be compared as VLIW/CGRA/dataflow,
+reuse a reviewed public backend when adequate, accept at least three distinct
+graphs without RTL regeneration, and preserve the same CPU/backend
+effect/authority/fallback contract. No such configurable executor, public-CGRA
+adapter, three-graph proof, or compiler/configuration/PPA comparison is
+implemented; this is an accepted transition/no-go boundary, not new evidence.
 The roadmap now separates the completed T-0105 generic Chisel/RISC-V substrate
 from T-0057 prior-art/IP boundary plus Graph-contract definition and T-0042
 Graph RTL implementation. T-0057 phase A now has a non-authoritative,

@@ -23,6 +23,20 @@ dependencies, owner, stop rule, and displaced or completed P0 task. P0 has a
 work-in-progress limit of one coherent implementation task. Read-only review
 and failure preservation do not consume that slot; new implementation does.
 
+## Project entry point
+
+- [x] **T-0108** Replace the stale root README with a current, evidence-bounded
+  project entry point. Explain Raveil as an Experience-guided Graph
+  compiler/runtime across replaceable CPU, CGRA, FPGA, NPU, and future ASIC
+  backends; separate the implemented Native, Experience, Sonatine, and RTL
+  slices from the intended integrated loop; state the fixed-C negative result
+  and current non-claims; and route readers to canonical records. Preserve
+  ADR-0049's CGRA non-reinvention boundary and make the Experience-driven
+  software/hardware feedback loop an unvalidated research hypothesis. The
+  draft received human review and push approval on 2026-08-15. This
+  documentation-only task does not displace T-0044 or authorize
+  implementation, measurement, or a new research claim.
+
 ## Delivery line — active GNU/Linux userspace MVP
 
 - [x] **T-0103** Release the synthetic Native Command Graph/Experience
@@ -840,6 +854,20 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   covering 20 files and 738,617,303 bytes. This closes only EXP-0008 durable
   promotion. Continue the separately preregistered energy, timing, area, IP,
   and missing-organization work; T-0044 and RFC-0005 remain open.
+  ADR-0049 adds a later categorical gate without changing frozen EXP-0008,
+  EXP-0009, or EXP-0010: no custom configurable Graph executor, RISC-V extension,
+  FPGA transition, or ASIC transition may advance until T-0044 includes a
+  source/revision/license/provenance-verified public VLIW/CGRA/dataflow control,
+  executes at least three semantically distinct graphs through one candidate
+  interface without Chisel/RTL regeneration, proves the same owned
+  effect/authority/fallback contract on CPU and configurable backends, and
+  accounts for compile/map/configure/install/PPA cost. Treat an adequate public
+  implementation as an adapter candidate, not an idea to rewrite. Custom
+  hardware is explicit no-go when only source-generated per-kernel FSMs work,
+  when matched configurability erases the claimed benefit, or when a new
+  Raveil-only frontend/toolchain is required without a recorded standard-IR
+  interoperability gap. Hardware no-go preserves the portable software
+  contract/runtime path.
 
 - [ ] **T-0106** Harden CPU-owned semantic attribution only after the candidate
   survives T-0044 or a separately accepted product requirement introduces

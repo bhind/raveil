@@ -1,352 +1,289 @@
-# Raveil v0.0000000000007
+# Raveil
 
-> This is the local candidate for the next feature pre-release; the latest
-> immutable feature release is `v0.0000000000006`. Current development
-> is unreleased. The manufacturing line is active after the GNU/Linux graph MVP
-> and failure-governance milestones. Current work preserves those artifacts
-> while prioritizing the Native userspace interactive MVP. See
-> `docs/STATUS.md` and `docs/ROADMAP.md` for current state.
+> Experience-guided, authority-bounded Graph execution across replaceable
+> software and hardware backends.
 
-This is the smallest executable Raveil seed with two connected bootstrap tracks:
+Raveil is an experimental compiler/runtime architecture. It investigates
+whether structured computation can preserve and reuse execution knowledge
+instead of rediscovering every decision from scratch, while retaining a safe
+ordinary-CPU fallback.
 
-1. a bootable Sonatine Microkernel (Sonatine) authority on QEMU/RISC-V `virt`;
-2. a host-side bounded Experience experiment.
+The intended system imports or constructs a versioned operation/dependency/
+effect/object Graph, generates bounded implementation candidates, and uses
+accumulated **Experience** to rank them or abstain. A proposal becomes usable
+only after independent contract, resource, structural, semantic, measurement,
+and rollback checks.
 
-It deliberately contains no production LLM, neural network, RTL, or real
-accelerator backend. A pinned TVM MetaSchedule adapter and completed negative
-Gate 1 evidence now exist; no latency or energy improvement is claimed.
+Raveil is not a new CGRA name. CPU, VLIW, CGRA, NPU, FPGA, and future ASIC
+implementations are replaceable backends. The portable part of Raveil is the
+contract and evidence lifecycle around them.
 
-## Native Interactive CLI
+## Status at a glance
 
-From the repository root on macOS or GNU/Linux:
+Raveil is research software, not a production compiler, operating system, or
+accelerator. The latest immutable pre-release is `v0.0000000000007`; current
+development is unreleased.
+
+- A bounded Native userspace Graph loop runs on GNU/Linux and macOS.
+- A separate Command Graph CLI runs allowlisted host tools inside a bounded
+  workspace and checks direct/Graph result agreement.
+- A Sonatine RV64 microkernel seed boots and runs under QEMU.
+- A hardwired static Graph region plus Rocket and BOOM controls have bounded
+  RTL-simulation evidence.
+- Append-only and bounded Experience infrastructure is executable.
+- The preregistered fixed-C Experience hypothesis closed negative: it did not
+  improve median latency or estimated energy by the required 5%. This does not
+  prove that Experience is universally ineffective.
+- There is no general Graph compiler, production CGRA backend, FPGA/silicon
+  result, or established general performance, energy, area, security, or
+  commercial advantage.
+
+See [STATUS](docs/STATUS.md) for exact implemented facts and evidence classes,
+and [ROADMAP](docs/ROADMAP.md) for the current gates.
+
+## The system Raveil is trying to build
+
+```text
+existing program / standard IR / bounded command input
+                         |
+                         v
+               immutable Program + contract
+                         |
+                         v
+             Graph compiler and legal transforms
+                         |
+                         v
+        software, schedule, memory, and backend candidates
+                         |
+                         v
+         predictor + Experience: propose or abstain
+                         |
+                         v
+       admission + resource + semantic verification
+                         |
+                         v
+       CPU / CGRA / FPGA / NPU / future ASIC backend
+                         |
+                         v
+             private output + target measurement
+                    /                 \
+             publish                  rollback
+                    \                 /
+                         v
+        append success, failure, context, and lineage
+                    to Experience
+```
+
+The predictor is never the authority. Experience may retrieve, rank, and
+propose; it cannot approve its own candidate, publish output, or suppress the
+trusted baseline. When evidence is weak, the correct result is abstention and
+fallback rather than forced specialization.
+
+## What may be distinctive
+
+Profiling, PGO, JIT translation, autotuning, learned cost models, CGRA mapping,
+and hardware design-space exploration already exist. Raveil does not claim any
+of them individually as new. Its narrower research question is whether their
+combination can form a reusable and auditable software-hardware loop:
+
+1. use standard compiler inputs and thin backend adapters instead of requiring
+   programmers to hand-write pipelines or adopt a closed Raveil language;
+2. compare software transforms, memory plans, schedules, and backend mappings
+   under one versioned identity and resource contract;
+3. retain failures, negative transfer, uncertainty, environment identity, and
+   candidate lineage—not only winning configurations—as Experience;
+4. rank candidates with calibrated abstention while keeping learned systems
+   outside the authority path;
+5. validate semantics and effects independently, execute into private output,
+   and publish only after approval, with explicit fallback and rollback; and
+6. reuse measured outcomes at two different time scales.
+
+The fast loop selects software transformations and existing backend
+configurations for a current workload. The slower, future loop may use
+accumulated evidence to propose different PE, memory, interconnect, RISC-V
+extension, FPGA, or ASIC designs. The slow loop remains offline and separately
+verified; Experience never reconfigures or manufactures hardware by authority.
+
+```text
+fast loop: Graph -> candidate -> configure -> verify/measure -> Experience
+
+slow loop: accumulated Experience -> hardware proposal -> simulate/synthesize
+           -> separate evidence -> possible next hardware generation
+```
+
+This integrated Experience-driven loop is a hypothesis, not an implemented or
+validated project result.
+
+## Components and boundaries
+
+| Component | Role | Current boundary |
+|---|---|---|
+| Miroirs Graph Compiler | owned Graph IR, legal transforms, structural validation | bounded Graph contracts and checks exist; arbitrary C/program compilation does not |
+| La Valse Optimization Subsystem | search, mapping, and candidate proposal | current predictor is analytical and narrow |
+| Boléro Experience Runtime | persistent evidence, retrieval, retention, and variant advice | append-only JSONL plus bounded nearest-neighbor baseline exists; it is not connected to the Command Graph surface |
+| Daphnis Execution Subsystem | replaceable implementation and execution plane | Native C and bounded Sonatine/QEMU adapters exist; no general Daphnis or production CGRA exists |
+| Pavane Semantic Oracle | independent reference execution and semantic comparison | bounded deterministic checks exist |
+| Ondine Object Memory Subsystem | object residency, spill, stream, and rematerialization | only narrow owned object/memory slices exist |
+| Sonatine Microkernel | capability, execution-authority, and publication research substrate | RV64/QEMU correctness seed; not required for the Native MVP |
+| GNU/Linux host and driver boundary | current userspace integration and bounded device-transport development | userspace is the primary MVP; the driver is only a non-authoritative harness and has no DMA/MMIO/IRQ or Experience authority |
+| Scarbo Verification Subsystem | adversarial testing, fuzzing, and fault injection | named direction, not a complete subsystem |
+
+The current Native MVP keeps these public artifact types independent of any
+backend: `GraphProgram`, `ExecutionContract`, `GraphVariant`, `MemoryPlan`,
+`OptimizationProposal`, and result records. Upstream compiler or accelerator
+types remain private adapter state.
+
+## Relationship to CGRA, VLIW, and specialized hardware
+
+The current Chisel `StaticStencilRegion` is a source-coded five-point-stencil
+FSM. It fixes the operations, addresses, iteration structure, and state
+transitions in RTL. It is a specialized accelerator reference, not a
+configurable CGRA and not a general installed Graph executor.
+
+If schedules, functional units, routes, or token readiness become loadable,
+the result enters established VLIW/CGRA/dataflow mechanism classes and must be
+named and evaluated as such. Raveil will prefer reviewed public implementations
+and standard IR/toolchain adapters before creating equivalents.
+
+Any custom configurable backend must pass the
+[CGRA non-reinvention gate](docs/decisions/ADR-0049-cgra-substrates-are-replaceable-backends.md):
+
+- compare directly with a reproducible public configurable control;
+- load at least three semantically distinct Graphs without editing or
+  regenerating RTL;
+- preserve the same CPU/backend contract, rejection, cancellation, private
+  failure, fallback, and publication behavior;
+- account for compilation, mapping, configuration, installation, execution,
+  memory traffic, PPA proxies, and fallback crossings; and
+- demonstrate a contract-lifetime or authority property beyond renaming an
+  existing mapper/runtime.
+
+A custom-hardware no-go does not kill Raveil. The project can remain a portable
+compiler/runtime and evidence layer over ordinary CPUs and reviewed existing
+accelerators.
+
+## Evidence, not aspiration
+
+Raveil keeps analytical, host, native-silicon, QEMU-emulation, RTL-simulation,
+synthesis-proxy, FPGA, and silicon evidence separate.
+
+| Surface | What the repository currently establishes | What it does not establish |
+|---|---|---|
+| Native Graph MVP | bounded baseline-first execution, proposal or abstention, semantic comparison, commit/rollback result | general compiler support or benchmark speedup |
+| Command Graph | deterministic compilation of an allowlisted shell subset and exact direct/Graph output agreement | ISA-level Graph execution or production incremental reuse |
+| Experience | persistent evidence, bounded retrieval, replayable policy experiments | useful transfer to CGRA mapping or hardware design |
+| EXP-0003 | independently reproduced negative result for the registered fixed-C policy | universal failure of Experience |
+| Sonatine | RV64 microkernel and guarded Graph correctness paths under QEMU | production isolation or physical-hardware performance |
+| Static Graph/Rocket/BOOM | bounded functional and cycle evidence under frozen RTL-simulation contracts | general CPU superiority, custom-ISA go, FPGA/ASIC benefit, or silicon performance |
+
+Read the relevant [experiment record](docs/experiments/README.md) before quoting
+any number. Conversation, a single timing printout, analytical output, or one
+backend's self-report is not a performance claim.
+
+## Quick start
+
+Python 3.11 or newer is required. The core Python runtime has no third-party
+dependency.
+
+Open the Native interactive session:
 
 ```sh
 mkdir -p /tmp/raveil-demo
 python3 -m raveil shell --workspace /tmp/raveil-demo
 ```
 
-Then run `help`, `graph create gemm --m 128 --n 128 --k 128`, `graph show`,
-`variants`, `propose`, `execute`, `result`, `history`, `reset`, and `exit`.
-The host Python line editor supplies ordinary Backspace, cursor-key, and input
-history behavior. The selected host directory appears as virtual `/`; `pwd`,
-`cd`, `ls`, `cat`, `stat`, `mkdir`, and bounded exclusive `write` operate only
-there. `result PATH` exclusively creates the existing strict JSON result inside
-that workspace and never overwrites an existing path. See
-[`docs/guides/NATIVE_CLI_WORKSPACE.md`](docs/guides/NATIVE_CLI_WORKSPACE.md)
-for the full walkthrough and limits. This is application-level workspace
-containment, not an OS security boundary.
+At the prompt, use `help`. The session includes a bounded workspace plus the
+`graph create`, `graph show`, `variants`, `propose`, `execute`, `result`, and
+`history` flow. Workspace containment is an application boundary, not an OS
+sandbox.
 
-The T-0101 Command Graph path additionally compiles allowlisted file
-processing into a separate owned DAG. See
-[`docs/guides/NATIVE_COMMAND_GRAPH.md`](docs/guides/NATIVE_COMMAND_GRAPH.md)
-for `run`, `graph compile`, `graph execute --compare`, balanced benchmark smoke,
-and strict result instructions. It does not reuse tensor nodes as shell work.
-T-0102 adds Tab completion for documented commands, graph options, allowlisted
-tools, and virtual workspace paths. It is a readline/libedit usability adapter,
-not shell expansion or new authority.
+Run one owned Graph through the guarded Native backend:
 
-## ~~CPU/ISA Graph showcase~~ Synthetic tool/process concept demo
+```sh
+python3 -m raveil graph-mvp --backend native \
+  --family gemm --m 8 --n 8 --k 8 \
+  --output /tmp/raveil-native-result.json
+```
 
-> ⛔ **NOT A CPU/ISA GRAPH EXPERIMENT.**
-
-T-0103 adds a short, visibly baseline-first Native walkthrough for independent
-ordinary file sorting. It is intentionally synthetic and is development smoke,
-not EXP-0004 evidence or a speed claim.
-
-Its nodes are whole host tools/processes. This is a conceptual UI/control
-illustration, not the intended native operation/dependency/effect graph and not
-an ISA, OoO, cache, pipeline, area, energy, or CPU-microarchitecture evaluation.
+Explore the synthetic Command Graph walkthrough:
 
 ```sh
 mkdir -p /tmp/raveil-showcase
-python3 -m raveil showcase list
-python3 -m raveil showcase prepare --workspace /tmp/raveil-showcase \
+python3 -m raveil showcase prepare \
+  --workspace /tmp/raveil-showcase \
   --scenario showcase-incremental --nodes 16
-python3 -m raveil showcase run --workspace /tmp/raveil-showcase \
-  --scenario showcase-incremental --nodes 16
-python3 -m raveil showcase mutate --workspace /tmp/raveil-showcase \
-  --scenario showcase-incremental --nodes 16 --node 0
-python3 -m raveil showcase run --workspace /tmp/raveil-showcase \
+python3 -m raveil showcase run \
+  --workspace /tmp/raveil-showcase \
   --scenario showcase-incremental --nodes 16
 ```
 
-It reports graph topology, hash-bound admission, exact semantic hashes,
-sequential and equal-concurrency baselines, candidate timing components,
-observed parallelism, and the verified demo-only cache state. The current
-CommandGraphExecutor has no production reuse fast path; Experience is not
-connected to this command surface and remains advice-only. See
-[`docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md`](docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md).
+This showcase uses whole host processes as conceptual nodes. It is not the
+intended operation-level Graph and makes no CPU, ISA, or hardware claim.
 
-## Sonatine Microkernel boot target
+Run the Experience seed and repository tests:
 
-```text
-QEMU / RISC-V virt
-        ↓
-Raveil boot
-        ↓
-Sonatine Microkernel
-        ├─ physical memory
-        ├─ capability
-        ├─ task
-        ├─ IPC
-        ├─ timer
-        └─ console
-        ↓
-init task
-        ↓
-U-mode command shell
-        ↓
-raveil-u>
+```sh
+python3 -m raveil demo --reset
+python3 -m raveil bench
+python3 -m unittest discover -s tests -v
 ```
 
-The subsystems are small but executable: the shell can inspect tasks and
-capabilities, allocate/release a physical page, read timer ticks, and exercise
-a capability-checked IPC loopback.
+Build and run Sonatine on QEMU with a local RISC-V cross-toolchain:
 
-### Build and run the RV64 kernel
-
-Prerequisites: `riscv64-unknown-elf-gcc`, GNU Make, and
-`qemu-system-riscv64`.
-
-```bash
-cd sonatine
-make
-make run
+```sh
+make -C sonatine
+make -C sonatine run
 ```
 
-The normal boot path now enters the persistent U-mode command shell:
+Or use Docker:
 
-```text
-raveil-u> help
-help info ticks ipc fs ls cat echo write stat jobs run cancel result exit
-raveil-u> info
-u-cmd info=ok
-```
-
-Input is line-oriented. CR, LF, and CRLF are accepted; backspace and delete
-erase one character. Commands are bounded to eight ASCII bytes. An overlong or
-unknown command reports an error and returns to the prompt without stopping the
-kernel. `help`, `info`, `ticks`, `ipc`, `fs`, `ls`, `cat`, `echo`, `write`,
-`stat`, `jobs`, `run`, `cancel`, `result`, and `exit` are available. `cat`,
-`echo`, and `write` deliberately use fixed documented values rather than
-general paths or arguments. Their
-kernel operations derive caller identity from the current U-mode task and
-resolve the corresponding capabilities; the line buffer never crosses as a
-user pointer.
-
-Pressing `Ctrl+C` at the U-mode prompt follows the same checked shutdown path
-as `exit`. Routine timer preemption is intentionally silent; the `selftest`
-command verifies that real preemption occurred before reporting register-frame
-success.
-
-Or run it without installing the cross-toolchain on the host:
-
-```bash
-cd sonatine
-docker build -t raveil-sonatine .
+```sh
+docker build -t raveil-sonatine sonatine
 docker run --rm -it raveil-sonatine
 ```
 
-`make smoke` boots QEMU non-interactively, exercises CR/LF handling, editing,
-overflow recovery, all public U-mode commands, timer preemption, capability
-denials and IPC, and exits through the QEMU test finisher.
+The QEMU path is emulation correctness only. See the
+[Native CLI guide](docs/guides/NATIVE_CLI_WORKSPACE.md),
+[Command Graph guide](docs/guides/NATIVE_COMMAND_GRAPH.md), and
+[showcase guide](docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md) for complete
+instructions and limits.
 
-Expected interactive prompt:
+## Current research path
 
-```text
-raveil-u> help
-help info ticks ipc fs ls cat echo write stat jobs run cancel result exit
-```
+The immediate research task is T-0044: finish matched comparisons among
+ordinary CPU controls, the hardwired static Graph reference, and—only after the
+non-reinvention gate—reviewed configurable controls. Full configuration,
+compiler, memory, verification, and amortization costs remain in scope.
 
-The retained M-mode diagnostic shell separately provides `help`, `info`,
-`mem`, `ps`, `caps`, `ticks`, `ipc`, `alloc`, and `reboot`, but it is not the
-normal boot path.
+Separately, a future Experience experiment must test whether prior evidence
+reduces search or target measurements at equal or better final quality, with
+new Graphs, shapes, memory regimes, and hardware revisions held out. It must
+report negative-transfer rate and abstention calibration. It cannot reinterpret
+the closed-negative EXP-0003 result.
 
-The published tag began as a one-hart machine-mode seed. Current unreleased
-development adds Sv39 construction, a persistent U-mode task, timer-driven
-preemption, capability IPC, a bounded VFS/RamFS, job authority, telemetry, and
-metadata-shadow finalization. These are QEMU correctness results, not physical
-hardware or production-isolation claims.
+The project advances custom hardware only if the complete comparison shows a
+material, reproducible advantage. Otherwise it deliberately pivots to the
+software contract/runtime over existing CPU and accelerator backends.
 
-## Experience experiment
+## Repository guide
 
-```text
-Context
-  -> retrieve bounded nearby Experience
-  -> rank typed candidates
-  -> measure with ToyDaphnis
-  -> append immutable JSONL evidence
-  -> consolidate active memory to a fixed limit
-```
+- [Documentation router](docs/README.md): where each kind of project fact lives
+- [Current status](docs/STATUS.md): implemented and verified facts
+- [Vision](docs/VISION.md): research thesis and success conditions
+- [Architecture](docs/ARCHITECTURE.md): components, contracts, and authority
+- [Experience model](docs/EXPERIENCE.md): storage, policies, risks, and metrics
+- [Roadmap](docs/ROADMAP.md): gates and exit conditions
+- [TODO](TODO.md): stable-ID actionable work
+- [Decisions](docs/decisions/README.md): accepted and rejected ADRs
+- [Experiments](docs/experiments/README.md): registered evidence and claims
+- [Failure knowledge](docs/FAILURE_KNOWLEDGE.md): retained failures and prevention
 
-All cold evidence remains in the JSONL log. Only a fixed number of consolidated records participate in online retrieval. Invalid variants and performance-tail records receive higher retention priority.
-
-## Quick start
-
-Requires Python 3.11 or newer. There are no third-party runtime dependencies.
-
-```bash
-python -m raveil demo --reset
-python -m raveil bench
-python -m unittest discover -s tests -v
-```
-
-The demo trains on four shapes, then tunes a held-out shape with a two-measurement budget. It prints cold-start and warm-transfer Headroom Capture Rate (HCR).
-
-The owned graph MVP selects its backend explicitly. Native POSIX C remains the
-default; the bounded Sonatine/QEMU correctness path currently accepts only the
-8-or-smaller GEMM seed:
-
-```bash
-python3 -m raveil graph-mvp --backend native \
-  --family gemm --m 8 --n 8 --k 8 --output /tmp/raveil-native.json
-python3 -m raveil graph-mvp --backend sonatine-qemu \
-  --family gemm --m 8 --n 8 --k 8 \
-  --sonatine-kernel sonatine/build/sonatine.elf \
-  --output /tmp/raveil-sonatine-result.json
-```
-
-The latter is QEMU emulation correctness only. It deliberately reports no
-latency or energy and cannot establish a hardware-performance result.
-
-The bounded interactive operator demo can also be captured as one strict,
-exclusive evidence record after building Sonatine:
-
-```bash
-make -C sonatine
-python3 -m raveil sonatine-demo \
-  --sonatine-kernel sonatine/build/sonatine.elf \
-  --output sonatine/build/raveil-sonatine-demo.json
-```
-
-The command drives the fixed VFS and completed/cancelled job transcript. Its
-result is `qemu-emulation-correctness`, not Experience, measurement, latency,
-energy, or hardware-performance evidence.
-
-The optional pinned IREE adapter validates one repository-owned MLIR fixture
-before running the same native guarded loop. Install the compiler in an
-isolated environment using `tools/iree/requirements.lock`, then run:
-
-```bash
-python3 -m raveil graph-mvp --backend native \
-  --import-manifest benchmarks/iree/gemm-8x8x8-i32-i64.import.json \
-  --iree-compile /path/to/iree-compile \
-  --output /tmp/raveil-iree-import.json
-```
-
-The graph result keeps the exact `raveil.graph-mvp-result/v1` schema; import
-provenance is written separately as `<output>.import.json`. This is import/host
-correctness, not IREE runtime or performance evidence.
-
-The persistent log defaults to `experience/local.jsonl`.
-
-## Commands
-
-```bash
-python -m raveil --version
-python -m raveil demo --reset --budget 2 --active-limit 64
-python -m raveil bench --budget 2 --active-limit 64
-python -m raveil inspect --experience experience/local.jsonl
-python -m raveil experiment preflight --manifest benchmarks/manifests/gate1-powermetrics-pilot-v1.json
-```
-
-Gate 1 research runs use a committed manifest and an immutable lifecycle:
-
-```bash
-python -m raveil experiment run --manifest benchmarks/manifests/gate1-powermetrics-pilot-v1.json
-python -m raveil experiment analyze --run RUN_ID
-python -m raveil experiment seal --run RUN_ID
-python -m raveil experiment sync --run RUN_ID
-```
-
-First collect, analyze, and seal the registered disjoint-workload history run.
-It is source evidence and cannot produce a Gate conclusion by itself:
-
-```bash
-python -m raveil experiment run \
-  --manifest benchmarks/manifests/gate1-fixed-c-history-v1.json
-python -m raveil experiment analyze --run SOURCE_RUN_ID
-python -m raveil experiment seal --run SOURCE_RUN_ID
-```
-
-Then pre-register the six equal-budget policy slates before starting the target
-run:
-
-```bash
-python -m raveil experiment plan \
-  --manifest benchmarks/manifests/gate1-fixed-c-v1.json \
-  --source-run SOURCE_RUN_ID \
-  --output /tmp/gate1-policy-selections.jsonl
-
-python -m raveil experiment run \
-  --manifest benchmarks/manifests/gate1-fixed-c-v1.json \
-  --policy-selections /tmp/gate1-policy-selections.jsonl
-```
-
-`experiment analyze` derives outcomes only from each pre-registered candidate
-slate and keeps the exhaustive target matrix as offline oracle evidence.
-
-The pilot validates power-sampling and thermal stability but cannot produce a
-Gate conclusion. Use `gate1-fixed-c-v1.json` only after the pilot is remotely
-verified. Run requires a clean Git worktree. After the one-time
-[least-privilege helper setup](docs/guides/POWERMETRICS_HELPER.md), the runner
-uses passwordless `sudo -n` only for the fixed root-owned powermetrics helper.
-Missing helper authority, insufficient power samples, or
-unstable thermal state fail closed. Raw bundles remain ignored under
-`artifacts/research/`; rclone configuration and Google credentials stay outside
-the repository. A run is incomplete until remote content verification passes
-and the completion marker is copied last. Seal immediately, but sync successful
-stage milestones and selected unique failures rather than every redundant
-retry; queued local bundles remain incomplete until later batch verification.
-
-## Repository map
-
-```text
-raveil/model.py       Context, hardware, candidate and metric contracts
-raveil/backend.py     deterministic ToyDaphnis measurement model
-raveil/experience.py  append-only evidence and bounded consolidation
-raveil/policy.py      nearest-Experience ranking and tuning loop
-raveil/cli.py         demo, benchmark and inspection commands
-benchmarks/            Gate 1 native C source and committed manifests
-sonatine/             freestanding RV64 Sonatine Microkernel and shell
-tests/                executable acceptance tests
-docs/SCOPE.md         explicit boundary and next experiment
-```
-
-## Project knowledge base
-
-Raveil is treated as a research program, not only as a source tree. The
-repository records the concept, current implementation, open work, experiments,
-and architectural decisions in Markdown.
-
-- [`docs/README.md`](docs/README.md) — documentation index and recording rules
-- [`docs/VISION.md`](docs/VISION.md) — research thesis and intended end state
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Four-plane architecture and component boundaries
-- [`docs/EXPERIENCE.md`](docs/EXPERIENCE.md) — persistent Experience model and evaluation metrics
-- [`docs/STATUS.md`](docs/STATUS.md) — what is actually implemented now
-- [`TODO.md`](TODO.md) — actionable work queue
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — gated long-term roadmap
-- [`docs/decisions/`](docs/decisions/README.md) — Architecture Decision Records
-- [`docs/experiments/`](docs/experiments/README.md) — experiment plans and results
-
-The repository rule is simple: architectural changes require a decision record;
-performance claims require an experiment record; implementation changes update
-the status and TODO documents in the same commit.
-
-## Important limitation
-
-ToyDaphnis is deterministic analytical scaffolding. Its results prove the
-software loop and metrics, not an architecture speedup. Native C checksum and
-unit-test results prove harness behavior, not a Gate 1 latency/energy outcome.
-The Sonatine Microkernel proves the boot/control skeleton, not isolation or
-scheduling completeness.
-
-## Versioning
-
-The runtime release candidate is `0.0000000000006`. The Experience schema deliberately
-remains `raveil.experience/v0.0000000000001` for compatibility; a release
-number does not silently migrate stored evidence.
+Executable code and tests outrank prose when records disagree. Failed
+experiments and rejected decisions remain part of project memory.
 
 ## License
 
-Apache-2.0. See `LICENSE`.
+Raveil is licensed under the [Apache License 2.0](LICENSE). Third-party tools,
+source trees, papers, and hardware designs retain their own licenses and IP
+status. Public availability or an open-source license is not a patent or
+freedom-to-operate conclusion.

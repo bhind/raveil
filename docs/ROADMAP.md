@@ -271,12 +271,23 @@ merely because a branch or partial implementation already exists.
    marker-last readback with a tracked receipt. This closes the durability
    sub-gate only; energy, timing, area, IP, and missing organizations still
    prevent T-0044 closeout.
+   ADR-0049 does not modify frozen EXP-0008, EXP-0009, or EXP-0010. Even after
+   EXP-0010's bounded advance to the integrated physical boundary, transition
+   remains closed until a separately frozen CGRA
+   non-reinvention gate compares a reviewed public configurable control, runs
+   three distinct graphs without RTL regeneration, proves CPU/backend contract
+   parity, and accounts for compilation/configuration/PPA cost. Failure stops
+   custom Graph hardware but preserves Raveil as a portable contract/runtime
+   over existing CPU and reviewed configurable backends.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
    critical path.
-7. **Transition only after survival:** evaluate an attached engine, custom
-   RISC-V extension, programmable fabric, or separate ASIC plane. ARM-hosted
+7. **Transition only after physical and non-reinvention survival:** prefer a
+   thin adapter to an adequate reviewed CGRA/VLIW/NPU implementation. Build an
+   attached engine, custom RISC-V extension, programmable fabric, or separate
+   ASIC plane only if the recorded gap cannot be closed by that adapter and the
+   custom backend earns its measured or enforcement difference. ARM-hosted
    software is transition/product evidence, not evidence about hidden CPU
    internals.
 
