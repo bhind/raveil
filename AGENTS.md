@@ -108,3 +108,34 @@ claim.
 - A progress review is read-only until the primary agent verifies each finding.
   Newly discovered work is de-duplicated against TODO before a new monotonic ID
   is allocated.
+
+## Continuous execution and human confirmation
+
+Within an owner-authorized task, agents continue through investigation, local
+editing, local commits, tests, review, record reconciliation, and the next
+accepted slice without waiting for acknowledgement. A progress update is
+informational and does not pause work. ADR-0051 defines the exhaustive classes
+of **Human-confirmation incident** (HCI) that require a stop:
+
+- new scope, authority, P0, architecture, or gate direction outside the
+  accepted task;
+- the first claim-bearing experiment freeze or collection, a post-data change
+  to scientific fields, or a gate/EXP conclusion;
+- destructive work, user-work overlap, remote push/merge/publication, or use of
+  credentials and paid resources not already authorized;
+- evidence identity, oracle, resource, raw/derived, seal, or evidence-class
+  ambiguity that cannot be resolved without weakening the frozen boundary;
+- adoption with unresolved material license, redistribution, provenance, or
+  IP-risk implications;
+- a material design fork, more than two recoveries at one boundary, the same
+  root-cause class failing twice, or an unapproved resource/estimate overrun.
+
+Ordinary build and test failures, bounded fixes inside assigned files,
+regression tests, local branches/worktrees/commits, candidate-independent
+smokes, required record updates, and read-only reviews are not HCIs. Preserve a
+failed artifact when required, fix the bounded defect, and continue. When an
+HCI occurs, stop only the affected mutation or collection, continue safe
+read-only diagnosis, and ask one concrete question with the incident ID,
+authority, preserved evidence, options, recommendation, and exact approval
+needed. Never use this rule to bypass sandbox approval, repository authority,
+or an explicit owner instruction.

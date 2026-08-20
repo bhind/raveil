@@ -16,4 +16,11 @@ Re-estimate immediately after any scope or authority change; do not carry effort
 assumptions from a superseded scope. Before declaring completion, require the
 implementation HEAD to descend from the latest named authority commit. If it
 does not, report an implementation candidate pending integration, not complete.
+Apply ADR-0051 and the WORKFLOW human-confirmation-incident policy. Continue
+already-authorized local work without waiting for acknowledgement; status
+updates are non-blocking. Stop only the affected action for an HCI, preserve
+evidence, continue safe read-only diagnosis, and ask one concrete question with
+the incident ID, authority, options, recommendation, and exact approval needed.
+Never infer permission for remote, destructive, paid, credentialed,
+claim-bearing pre-data collection, or gate-changing action.
 """

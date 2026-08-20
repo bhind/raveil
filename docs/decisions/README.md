@@ -55,3 +55,4 @@ rewrite it.
 | [ADR-0048](ADR-0048-physical-proxy-starts-with-partitioned-screening.md) | Accepted | Physical proxy starts with partitioned screening |
 | [ADR-0049](ADR-0049-cgra-substrates-are-replaceable-backends.md) | Accepted | CGRA substrates are replaceable backends; custom hardware must pass a non-reinvention gate |
 | [ADR-0050](ADR-0050-t0044-results-require-sealed-durable-evidence.md) | Accepted | T-0044 results require sealed, immutable, download-verified evidence before promotion |
+| [ADR-0051](ADR-0051-continuous-work-stops-only-on-human-confirmation-incidents.md) | Accepted | Authorized local work continues until a defined human-confirmation incident |

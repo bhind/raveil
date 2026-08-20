@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-14
+Last updated: 2026-08-20
 
 ## Before a change
 
@@ -33,6 +33,125 @@ Last updated: 2026-08-14
 - Do not erase rejected approaches or failed results.
 - Exclude credentials, generated logs, build products, IDE-local state, and
   absolute machine paths.
+
+## Continuous execution and human-confirmation incidents
+
+ADR-0051 makes continuous local execution the default after the owner has
+authorized a bounded task. Investigation, assigned edits, local atomic commits,
+tests, candidate-independent smokes, reviews, required record reconciliation,
+and the next accepted slice proceed without an acknowledgement checkpoint. A
+status report is non-blocking. This default does not enlarge task scope,
+authority, external access, or scientific claims.
+
+An agent pauses only the affected mutation or evidence collection when one of
+the following exhaustive Human-confirmation incident classes occurs. Safe
+read-only diagnosis and already-authorized non-overlapping verification may
+continue while the incident is reported.
+
+### HCI-01: scope or authority expansion
+
+Confirmation is required before changing the authorized goal, promoting or
+replacing P0, starting a second implementation P0, changing a trusted contract
+or authority invariant, introducing a new top-level subsystem, or moving to a
+new ISA, FPGA, ASIC, silicon, product-deployment, or other unapproved project
+line. A learned system, retrieved result, LLM, backend, or subagent never gains
+admission, semantic, publication, evidence, or gate authority through this
+workflow.
+
+### HCI-02: irreversible experiment or gate boundary
+
+Confirmation is required immediately before the first claim-bearing manifest
+freeze or candidate-data collection for a new experiment; before changing a
+scientific field after candidate data exists; and before declaring an EXP or
+roadmap `advance`, `pause`, `pivot`, `falsified`, `go`, `no-go`, or gate-state
+change. Drafting the experiment, implementing its harness, and
+running candidate-independent toolchain or functional smokes may continue.
+
+An operational-only correction that preserves every frozen scientific field
+may continue after the failed attempt is retained, unless HCI-07 applies.
+
+### HCI-03: destructive or remote action
+
+Confirmation is required before deleting, overwriting, resetting, force-
+checking-out, force-pushing, rewriting history, moving tags, discarding or
+stashing user work, or replacing immutable evidence. It is also required before
+remote push, PR creation or merge, issue-state mutation, tag or Release
+publication, package publication, or external benchmark publication unless the
+owner already authorized that exact remote action and target.
+
+Creating an isolated local worktree, local branch, local atomic commit, ignored
+build product, or new append-only local artifact is not an HCI.
+
+### HCI-04: evidence-integrity ambiguity
+
+Confirmation is required when source, authority, toolchain, manifest, resource,
+oracle, matrix, raw seal, result seal, or evidence-class identity cannot be
+reconciled without changing the frozen boundary; valid and invalid evidence can
+no longer be separated; a raw artifact would need editing or selective
+omission; or a pass would require weakening a fail-closed check. Preserve the
+failed material and do not reinterpret it.
+
+An ordinary fail-closed test with an identified implementation defect is not an
+HCI. Correct it inside the assigned files, add a regression where appropriate,
+and continue.
+
+### HCI-05: user-work overlap
+
+Confirmation is required when the authorized change would edit, move, rebase,
+merge, resolve, stash, or discard uncommitted work owned by the user or another
+agent. The mere existence of such work is not an HCI: create a clean isolated
+worktree and continue. Unexpected modifications in that clean worktree become
+an HCI when their ownership cannot be established.
+
+### HCI-06: cost, credentials, publication, or legal-risk expansion
+
+Confirmation is required before purchasing hardware, cloud capacity, API
+credits, software, or licenses; exceeding an approved service plan; using
+personal credentials, secrets, private endpoints, or owner accounts; uploading
+unpublished material outside an approved immutable destination; or adopting an
+external dependency with unresolved material source, license, redistribution,
+provenance, patent, or standards risk. Read-only inventory may continue. No
+agent declares patent clearance, freedom to operate, production security, or
+commercial readiness.
+
+### HCI-07: repeated blocker or resource overrun
+
+The first bounded operational failure is not an HCI. Retain it when required,
+diagnose it, add the narrow correction and regression, and retry if the
+scientific boundary is unchanged. Confirmation is required when the same root-
+cause class fails twice consecutively, two recovery attempts have already been
+made at one boundary, a third recovery manifest would be required, no bounded
+fix remains inside assigned files, the current estimate exceeds twice its last
+evidence-backed value, or an unapproved attempt is expected to exceed six host
+hours or 20 GiB of new local artifacts.
+
+### HCI-08: material design fork
+
+Confirmation is required when viable alternatives materially change a public
+contract, physical-resource denominator, comparison fairness, specialization
+versus generality, existing-backend versus custom-hardware dependency, cost by
+approximately twofold or more, or reversibility. Naming, refactoring, internal
+helper structure, equivalent tool-compatibility corrections, and other
+reversible choices are not HCIs; select the simplest adequate option and
+continue.
+
+### Incident report and progress cadence
+
+An HCI report contains:
+
+1. incident ID and one-sentence trigger;
+2. authority commit, branch, and affected files or artifacts;
+3. completed work and preserved evidence, including hashes when relevant;
+4. why current authority is insufficient;
+5. two or at most three mutually exclusive options;
+6. a recommendation with scope, evidence, cost, and schedule impact; and
+7. one exact authorization question.
+
+Do not ask an open-ended status question. Stop only the affected action and do
+not begin a different implementation P0 while waiting. In the absence of an
+HCI, continue and send concise non-blocking updates after an atomic commit or
+acceptance boundary and at least hourly during an interactive long-running
+operation. Do not invent work merely to keep an agent active.
 
 ## Duration estimates and authority freshness
 

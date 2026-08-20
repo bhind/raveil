@@ -1144,6 +1144,21 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("docs/templates/ESTIMATE-TEMPLATE.md", project_manager)
         self.assertIn("warm/cold build state", project_manager)
         self.assertIn("latest named authority commit", project_manager)
+        self.assertIn("ADR-0051", project_manager)
+        self.assertIn("updates are non-blocking", project_manager)
+        self.assertIn("exact approval needed", project_manager)
+        workflow = (ROOT / "docs/WORKFLOW.md").read_text(encoding="utf-8")
+        repository_rules = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        for marker in (
+            "HCI-01", "HCI-02", "HCI-03", "HCI-04",
+            "HCI-05", "HCI-06", "HCI-07", "HCI-08",
+        ):
+            self.assertIn(marker, workflow)
+        self.assertIn(
+            "Continuous execution and human confirmation", repository_rules
+        )
+        self.assertIn("A progress update is", repository_rules)
+        self.assertIn("informational and does not pause work", repository_rules)
         estimate_template = (
             ROOT / "docs/templates/ESTIMATE-TEMPLATE.md"
         ).read_text(encoding="utf-8")

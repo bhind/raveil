@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-15
+Last updated: 2026-08-20
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -24,6 +24,17 @@ work-in-progress limit of one coherent implementation task. Read-only review
 and failure preservation do not consume that slot; new implementation does.
 
 ## Project entry point
+
+- [x] **T-0110** Define continuous execution and Human-confirmation incidents
+  as repository-wide agent workflow. Once an owner authorizes a bounded task,
+  local investigation, assigned edits, atomic commits, tests, review, record
+  reconciliation, and the next accepted slice continue without ceremonial
+  acknowledgement. Require human confirmation only for ADR-0051's exhaustive
+  authority/scope, irreversible experiment/gate, destructive/remote, evidence-
+  ambiguity, user-work, cost/credential/legal-risk, repeated-blocker/resource,
+  and material-design-fork incidents. Add executable assertions for the PM and
+  workflow markers. This operational rule changes no implementation P0,
+  experiment result, performance claim, or remote-publication authority.
 
 - [x] **T-0109** Reorganize the root `Components and boundaries` summary and
   the canonical architecture component map after read-only comparison with the

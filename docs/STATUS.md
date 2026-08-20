@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-15
+Last updated: 2026-08-20
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -51,6 +51,17 @@ edit/verification/integration effort, and re-estimate after scope or authority
 change. A completion branch that does not descend from the latest named
 authority commit is an integration-pending candidate, not a completed task.
 `docs/templates/ESTIMATE-TEMPLATE.md` supplies the required estimate record.
+T-0110 and ADR-0051 now make continuous execution the repository default after
+an owner authorizes a bounded task. Progress reports, local edits and commits,
+tests, bounded corrections, and the next accepted slice do not create approval
+checkpoints. Eight exhaustive Human-confirmation incident classes retain human
+authority over scope or gate expansion, first claim-bearing experiment
+collection, destructive or remote action, unresolved evidence ambiguity,
+user-work overlap, external cost/credentials/legal risk, repeated recovery or
+resource overrun, and material design forks. The PM role and an executable
+agent-boundary regression carry the same rule. No implementation P0,
+experiment, evidence, performance claim, or remote-publication authority
+changes.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
