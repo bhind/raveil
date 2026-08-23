@@ -21,6 +21,14 @@ already-authorized local work without waiting for acknowledgement; status
 updates are non-blocking. Stop only the affected action for an HCI, preserve
 evidence, continue safe read-only diagnosis, and ask one concrete question with
 the incident ID, authority, options, recommendation, and exact approval needed.
+Apply ADR-0060 before every new task, subagent, long-running job, and next-task
+boundary. For current weekly telemetry with windowDurationMins 10080, compute
+remaining as 100 minus usedPercent. At remaining below five percent, preserve
+the safe state, start no new work, and notify the owner. Exactly five percent
+may continue cautiously. If weekly telemetry is unavailable or unverifiable,
+do not claim monitoring and fail closed for new costly work. Never use reset
+credits, purchase capacity, change a service plan, or bypass the guard without
+separate explicit owner authority.
 Never infer permission for remote, destructive, paid, credentialed,
 claim-bearing pre-data collection, or gate-changing action.
 """

@@ -35,7 +35,9 @@ Last updated: 2026-08-24
   reached; at the upper range re-check WIP, lane load, and token/resource
   budget before pulling more work.
   ADR-0059 treats SP as relative AI delivery risk and schedules actual work by
-  dependency, two-item delivery WIP, and role-lane availability.
+  dependency, two-item delivery WIP, and role-lane availability. ADR-0060
+  independently forbids starting new costly work when verified weekly Codex
+  usage remaining is below five percent.
 - Keep external types behind Raveil-owned versioned adapters.
 - Keep Experience outside authority and preserve a trusted baseline/rollback.
 - Allocate task, ADR, EXP, and RFC identifiers monotonically.
@@ -159,6 +161,39 @@ approximately twofold or more, or reversibility. Naming, refactoring, internal
 helper structure, equivalent tool-compatibility corrections, and other
 reversible choices are not HCIs; select the simplest adequate option and
 continue.
+
+### HCI-09: weekly Codex usage guard
+
+The weekly cost guard uses a current Codex account rate-limit reading only when
+its weekly `windowDurationMins == 10080`. Calculate
+`remaining = 100 - usedPercent`; never substitute Sprint SP, daily limits,
+reset credits, account balances, or an estimate.
+
+When `remaining < 5`, pause before starting a new task, spawning or assigning a
+subagent, starting a long-running build or verification, updating a remote
+work item or pull request, or merging. Exactly five percent remaining is not
+below the threshold and may continue cautiously, with another reading before
+each new costly boundary. Work already running may proceed only far enough to
+retain the smallest safe receipt when immediate interruption would lose
+evidence. Start no downstream work and notify the owner of the observed weekly
+window, used percentage, remaining percentage, and preserved state.
+
+Check the guard before every new task, subagent, or long-running job, and again
+after completing a task before pulling the next item. If telemetry is
+unavailable, stale, malformed, or cannot be verified as the 10,080-minute
+weekly window, do not claim active monitoring and do not begin a new costly
+action; fail closed until visibility is restored or the owner supplies a
+current UI reading. A current reading with `remaining >= 5` clears this
+incident without a ceremonial acknowledgement. Consuming reset credits,
+purchasing capacity,
+changing a service plan, or bypassing the threshold remains HCI-06 and requires
+separate explicit owner authority. Project records may retain observation time,
+window, used percentage, and remaining percentage, but never account IDs,
+credentials, secrets, or reset-credit identifiers.
+
+This guard controls service cost and continuation only. It does not change SP,
+WIP, task status, evidence class, experiment state, or a research or hardware
+gate.
 
 ### Incident report and progress cadence
 

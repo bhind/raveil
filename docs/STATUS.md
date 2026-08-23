@@ -54,11 +54,17 @@ authority commit is an integration-pending candidate, not a completed task.
 T-0110 and ADR-0051 now make continuous execution the repository default after
 an owner authorizes a bounded task. Progress reports, local edits and commits,
 tests, bounded corrections, and the next accepted slice do not create approval
-checkpoints. Eight exhaustive Human-confirmation incident classes retain human
+checkpoints. Nine exhaustive Human-confirmation incident classes retain human
 authority over scope or gate expansion, first claim-bearing experiment
 collection, destructive or remote action, unresolved evidence ambiguity,
 user-work overlap, external cost/credentials/legal risk, repeated recovery or
-resource overrun, and material design forks. The PM role and an executable
+resource overrun, material design forks, and the weekly Codex usage cost guard.
+ADR-0060 and T-0119 require a current 10,080-minute weekly reading, compute
+remaining as 100 minus used percentage, and stop new costly work below five
+percent. Exactly five percent may continue cautiously. Missing or unverifiable
+weekly telemetry fails closed for new costly work, and reset-credit use,
+capacity purchases, service-plan changes, or bypass require separate owner
+authority. The PM role and an executable
 agent-boundary regression carry the same rule. No implementation P0,
 experiment, evidence, performance claim, or remote-publication authority
 changes.
@@ -68,7 +74,8 @@ Fibonacci estimates, seven-day Iterations, WIP limit two, executable review
 demo, and retrospective. ADR-0059 and T-0118 supersede only the assumption that
 eight SP is the full weekly capacity. Eight SP remains an under-utilization
 lower-bound check, 13 SP is the provisional committed capacity, and 13--21 SP
-is the warm stretch range. These are planning bands, not stop conditions.
+is the warm stretch range. These are planning bands, not stop conditions; the
+ADR-0060 weekly usage guard is an independent service-cost stop.
 Execution uses one serial high-reasoning PM integration lane,
 one coherent low-reasoning mutation lane, one low-reasoning Tester, at most two
 read-only risk reviewers, a medium Librarian, and a milestone-only
@@ -92,9 +99,9 @@ subsequently moved into S-0001 as T-0044/S08 at the 21-SP warm ceiling. Sprint s
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
 Post-correction Project readback remains 33 items and now has 37 fields. After
-T-0118 acceptance and T-0044/S08 activation it has 26 Backlog, one Ready, one
-In Progress, one Review, and four Done items; delivery WIP is two of two with
-T-0044/S08 in progress and T-0106/S01 in review. Current SP totals are
+T-0118 acceptance and T-0044/S08 completion it has 26 Backlog, one Ready, no
+In Progress, one Review, and five Done items; delivery WIP is one of two with
+T-0106/S01 in review. Current SP totals are
 S-0001=21 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use

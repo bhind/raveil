@@ -61,3 +61,4 @@ rewrite it.
 | [ADR-0057](ADR-0057-main-integration-requires-pull-requests.md) | Accepted | Main integration requires a pull request with no direct-push bypass |
 | [ADR-0058](ADR-0058-incident-free-pull-requests-merge-immediately.md) | Accepted | Verified pull requests merge immediately when no Human-confirmation incident applies |
 | [ADR-0059](ADR-0059-ai-role-lanes-govern-execution-capacity.md) | Accepted | AI role lanes and observed cycle time govern execution capacity; SP remains relative risk |
+| [ADR-0060](ADR-0060-weekly-codex-usage-has-a-hard-cost-stop.md) | Accepted | New costly work stops when verified weekly Codex usage remaining is below five percent |

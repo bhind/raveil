@@ -68,6 +68,15 @@ upper range, re-estimate WIP, lane load, and token/resource budget before
 pulling more work. Carry-over is explicitly recommitted without rewriting
 Initial SP.
 
+ADR-0060 adds a separate service-cost guard that is not expressed in SP. Check
+current weekly Codex usage before pulling a new task, assigning a subagent, or
+starting a long-running job, and at the next task boundary. A verified weekly
+remaining value below five percent stops new work; exactly five percent may
+continue cautiously. Missing or unverifiable weekly telemetry fails closed for
+new costly work. `Resource Use` may record the observation time, 10,080-minute
+window, used percentage, and remaining percentage, but never account IDs,
+credentials, secrets, or reset-credit identifiers.
+
 ## Product Backlog and refinement
 
 The Product Backlog is not an inventory of aspirations. Order it by dependency,
