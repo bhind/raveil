@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-20
+Last updated: 2026-08-23
 
 ## Before a change
 
@@ -264,6 +264,14 @@ progress and require a runnable increment. Reference stable T-IDs, calculate
 initial story points at planning, and retain every estimate revision with a
 dated reason. Run planning on Monday, correction review on Wednesday, and the
 executable review plus retrospective on Sunday.
+
+Maintain an ordered Product Backlog, not only the current Sprint. Refine at
+least the next two sprints into independently acceptable slices with one owner
+role, support roles, dependencies, priority, evidence class, initial SP, and a
+demo or evidence command. Apply the Definition of Ready and Definition of Done
+in `SPRINTS.md`. Do not assign SP to both an epic and its children, and do not
+treat the configured agent roles as additional human FTE. Committed Iterations
+and low-confidence forecast dates remain visibly separate.
 
 The sprint board is a coordination view, not task or evidence authority.
 `TODO.md` still owns task scope and execution state, and research review remains

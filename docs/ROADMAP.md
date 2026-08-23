@@ -1,7 +1,7 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-15
+Last updated: 2026-08-23
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
@@ -301,6 +301,23 @@ The Native CLI, T-0103 synthetic tool/process showcase, Sonatine, and EXP-0003
 remain preserved artifacts. T-0104 production tool-cache work and further
 shell growth are deferred while the critical path above is tested. Sonatine
 remains a later OS/capability backend unless evidence makes it necessary.
+
+## Playable pillar — Raveil Garden TUI
+
+State: **T-0117 planned; S-0002 forecast**
+
+T-0117 creates a host-native, read-only TUI over one strictly validated graph
+snapshot so the Playable pillar has a visible object a hobbyist can run and
+inspect. The first slice shows topology, dependencies, variants, evidence
+labels, and demo commands with deterministic terminal behavior. It reuses the
+owned schemas and guarded graph state, but has no execution, mutation,
+approval, Experience-promotion, task, or gate authority.
+
+Garden is distinct from T-0093's static graph directory projection and from
+T-0103's synthetic timing showcase. Its host-functional evidence cannot imply
+Graph hardware performance, OoO effects, FPGA behavior, or silicon behavior.
+The TUI may later consume T-0093 output if that task completes, but neither is
+an acceptance dependency of the other unless a later decision records it.
 
 ## High-priority demo extension — Sonatine native operator shell
 

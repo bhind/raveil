@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-20
+Last updated: 2026-08-23
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -66,12 +66,28 @@ ADR-0056 and T-0116 add a repository-linked, private GitHub Project weekly
 sprint workflow with a stable-T-ID Kanban board, retained initial and revised
 Fibonacci estimates, seven-day Iterations, an eight-point pilot capacity, WIP
 limit two, executable review demo, and retrospective. The Project has an
-explicit `Sprint Board` view and six seeded weekly Iterations. Sprint state
+explicit `Sprint Board` Kanban plus a filtered `Product Backlog` table and six
+seeded weekly Iterations. Its corrected
+Product Backlog contains 30 decomposed planning items plus the three original
+S-0001 items. Each executable slice records an owner role, support roles,
+parent T-ID, dependencies, initial/current SP, priority, evidence class, demo
+or evidence command, forecast sprint/date, and confidence. S-0002 commits the
+first eight-point Playable increment under T-0117 as a read-only Garden TUI
+slice plus clean terminal acceptance; S-0003 through S-0006 reserve bounded
+T-0042 research slices. Later dates through the conditional KV260 feasibility
+packet are low-confidence forecasts rather than commitments. Parent epics have
+no SP, and specialist agents are not counted as independent FTE: one human
+integration and acceptance lane remains the capacity bottleneck. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
+
+T-0117 is planned, not implemented. It owns the Garden TUI and is deliberately
+separate from T-0093's static read-only directory snapshot. Its intended first
+slice observes strictly validated graph state on an ordinary host and has no
+execution, mutation, approval, evidence-promotion, or gate authority.
 
 ADR-0026 adds lightweight defect governance. Existing experiment failures,
 negative results, regression tests, and logs remain authoritative evidence;

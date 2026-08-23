@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-20
+Last updated: 2026-08-23
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -74,7 +74,25 @@ and failure preservation do not consume that slot; new implementation does.
   ADR, RFC, EXP, and executable evidence authoritative; the private Project
   coordinates but cannot promote claims or gates. Provide seven-day
   Iterations and review fields, and seed S-0001 with the current bounded T-0042
-  slice plus an unpointed review/retro item.
+  slice plus an unpointed review/retro item. The corrective closeout also
+  populates an ordered Product Backlog with independently accepted work slices,
+  owner and support roles, dependencies, initial/current SP, priority, committed
+  or forecast sprint, forecast date and confidence, Definition of Ready/Done,
+  and an explicit one-human integration-capacity assumption. Parent epics carry
+  no SP so child work is not counted twice.
+
+## Playable pillar — Raveil Garden TUI
+
+- [ ] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host
+  ARM64/x86-64. Render one strictly validated graph snapshot, node/dependency
+  structure, variants, evidence labels, and runnable demo commands with bounded
+  keyboard navigation plus explicit empty/error states. Reuse existing owned
+  schemas and authority boundaries; the TUI may observe but never execute,
+  approve, mutate, promote Experience, close a task, or change a gate. Provide
+  a deterministic fixture, host-functional tests, clean terminal acceptance,
+  and one command that a hobbyist can run and understand. This is a Playable
+  interface task, not T-0093's static directory snapshot and not performance,
+  FPGA, ASIC, or silicon evidence.
 
 ## Delivery line — active GNU/Linux userspace MVP
 

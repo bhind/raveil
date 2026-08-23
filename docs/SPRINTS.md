@@ -31,7 +31,9 @@ promote an EXP, close a Gate, or turn simulation into FPGA or silicon evidence.
 
 ## Board and WIP
 
-The GitHub Project's `Sprint Board` view is the task board. Its states are:
+The GitHub Project's `Sprint Board` view is the execution Kanban. The filtered
+`Product Backlog` table shows only Backlog items with priority, forecast,
+points, owner/support roles, parent, and dependencies. The Kanban states are:
 
 ```text
 Backlog -> Ready -> In Progress -> Review -> Done
@@ -45,14 +47,83 @@ one active Research item; Operations is temporary supporting work, not a third
 pillar. A task retains its stable T-ID and remains authoritative in `TODO.md`.
 The sprint board may describe a smaller acceptance slice but never redefine
 the task or silently mark it complete. The Project also records seven-day
-`Sprint` Iterations, `Initial SP`, current `Story Points`, `Pillar`,
-`Demo Command`, `Evidence Class`, `Estimate Review`,
-`Estimate Change Reason`, `Review Outcome`, and `Retro Action`.
+`Sprint` Iterations, `Initial SP`, current `Story Points`, `Pillar`, `Owner
+Role`, `Support Roles`, `Parent T-ID`, `Depends On`, `Priority`, `Work Type`,
+`Demo Command`, `Evidence Class`, `Estimate Review`, `Estimate Change Reason`,
+`Forecast Sprint`, `Forecast Date`, `Forecast Confidence`, `Review Outcome`,
+and `Retro Action`.
 
 Capacity is empirical. Keep eight points for the first three closed sprints,
 then set the next capacity from the median completed points of those sprints.
 Do not inflate capacity to absorb unfinished work. Carry-over is re-estimated
 and explicitly recommitted.
+
+## Product Backlog and refinement
+
+The Product Backlog is not an inventory of aspirations. Order it by dependency,
+priority, expected user or research value, and risk reduction. Keep at least the
+next two sprints decomposed into independently acceptable slices. Further work
+may remain an unpointed epic until refinement makes its outcome, boundary, and
+entry conditions concrete.
+
+A Project slice keeps its parent stable T-ID and uses a `/SNN` suffix only as a
+coordination label. It does not allocate a new canonical record identifier or
+silently narrow the parent task. Parent epics receive no story points. Count SP
+only on child slices that can be accepted independently, preventing duplicate
+velocity when implementation, testing, and review appear under one parent.
+
+Refinement happens before Monday planning and whenever a newly discovered
+dependency invalidates the next two sprints. A refined item records:
+
+- one observable outcome and bounded non-goals;
+- one owner role and the support roles needed for completion;
+- parent T-ID, predecessors, evidence class, and priority;
+- initial SP and the factors that dominate the estimate;
+- a runnable demo or evidence command, even when the command is a planned path;
+- committed Sprint or forecast Sprint/date plus confidence.
+
+## Definition of Ready and Done
+
+An item may move from `Backlog` to `Ready` only when its parent T-ID, outcome,
+dependencies, owner/support roles, initial SP, evidence class, acceptance
+boundary, demo/evidence command, and relevant non-claims are explicit. A
+blocked external approval or hardware dependency must also be visible.
+
+An item moves to `Done` only when the increment or evidence command ran at a
+recorded revision and environment, acceptance was reviewed, failures and
+non-claims remain visible, and required canonical records were reconciled.
+Reviewer advice, prose, partial SP, and a green subagent report are insufficient.
+
+## Role and capacity plan
+
+Raveil currently has one human integration and acceptance lane. Project
+Manager, Systems, Experience, Measurement, Tester, Performance, Security,
+Researcher, and Librarian are responsibility boundaries, not nine independent
+full-time people. Specialist work may overlap only when file ownership and
+evidence boundaries are independent; final integration remains serial.
+
+Allocate the weekly eight-point pilot capacity across accepted delivery slices,
+not across every role that touches them. Review and ceremony work receives SP
+only when it produces an independently accepted artifact required by the
+parent. After three closed sprints, use median completed SP as the next planning
+capacity and retain a range rather than a single-date promise for low-confidence
+research.
+
+Committed `Sprint` Iterations currently cover S-0001 through S-0006. Later work
+uses `Forecast Sprint`, `Forecast Date`, and `Forecast Confidence`; this avoids
+presenting an uncommitted research sequence as an Iteration promise. At the
+initial eight-point assumption, the dependency forecast is:
+
+| Window | Intended outcome | Confidence |
+|---|---|---|
+| S-0002, through 2026-09-06 | T-0117 first read-only Garden TUI and terminal acceptance | medium |
+| S-0003 to S-0006, through 2026-10-04 | BOOM negative matrix, replay/backpressure, Rocket parity, BOOM load/post-A rollback | medium, then low |
+| S-0007 to S-0008, through 2026-10-18 | common CPU/Graph adapter, resource review, T-0042 readiness, prior-art delta, comparison contract | low |
+| S-0009 to S-0011, through 2026-11-08 | T-0044 runner, clean pilot, matched execution, reviews, and gate decision | low |
+| S-0012, through 2026-11-15 | KV260 feasibility only after an explicit continue decision | conditional, low |
+
+Custom RISC-V remains Icebox until FPGA evidence identifies a concrete residual
+problem. It has neither SP nor a calendar date.
 
 ## Story-point calculation
 
