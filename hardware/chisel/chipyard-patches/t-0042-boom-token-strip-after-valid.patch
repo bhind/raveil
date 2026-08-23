@@ -1,0 +1,36 @@
+diff --git a/src/main/scala/lsu/mshrs.scala b/src/main/scala/lsu/mshrs.scala
+index 43c5ef1..0000000 100644
+--- a/src/main/scala/lsu/mshrs.scala
++++ b/src/main/scala/lsu/mshrs.scala
+@@ -464,6 +464,30 @@ class BoomIOMSHR(id: Int)(implicit edge: TLEdgeOut, p: Parameters) extends BoomM
+   io.mem_access.bits.user(RaveilCpuTokenEpoch) := req.raveilTokenEpoch
+   io.mem_access.bits.user(RaveilCpuTokenSequence) := req.raveilTokenSequence
+-
++
++  // Raveil T-0042 / ADR-0045 test-only negative. Prove a well-formed CPU
++  // token reached the I/O MSHR, then deliberately clear only the negotiated
++  // TileLink metadata before A acceptance. The ordinary request, data, source,
++  // and DCache-origin field remain unchanged.
++  when (io.mem_access.fire && req.raveilTokenValid) {
++    assert(req.raveilTokenEpoch =/= 0.U && req.raveilTokenSequence =/= 0.U,
++      "Raveil BOOM strip input token is malformed")
++    printf("RAVEIL-BOOM-TOKEN-STRIP-V1 event=before valid=%d epoch=%d sequence=%d address=0x%x source=%d\n",
++      req.raveilTokenValid, req.raveilTokenEpoch, req.raveilTokenSequence,
++      req.addr, io.mem_access.bits.source)
++  }
++  when (io.mem_access.valid && req.raveilTokenValid) {
++    io.mem_access.bits.user(RaveilCpuTokenValid) := false.B
++    io.mem_access.bits.user(RaveilCpuTokenEpoch) := 0.U
++    io.mem_access.bits.user(RaveilCpuTokenSequence) := 0.U
++  }
++  when (io.mem_access.fire && req.raveilTokenValid) {
++    printf("RAVEIL-BOOM-TOKEN-STRIP-V1 event=after valid=%d epoch=%d sequence=%d address=0x%x source=%d\n",
++      io.mem_access.bits.user(RaveilCpuTokenValid),
++      io.mem_access.bits.user(RaveilCpuTokenEpoch),
++      io.mem_access.bits.user(RaveilCpuTokenSequence), req.addr,
++      io.mem_access.bits.source)
++  }
++
+   when (state =/= s_idle && req.raveilTokenValid) {
+     assert(req.raveilTokenEpoch =/= 0.U && req.raveilTokenSequence =/= 0.U,
+       "Raveil BOOM token metadata is malformed")

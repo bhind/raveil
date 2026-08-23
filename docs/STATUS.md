@@ -86,6 +86,14 @@ Post-correction Project readback remains 33 items and 32 fields: 27 Backlog,
 four Ready, one In Progress, and one Done. WIP is one of two after T-0116's
 repository integration and acceptance; S-0001, S-0002, and S-0003 each total
 eight SP. No Project slice retains T-0042 as its parent.
+The bounded T-0106/S01 carry-in now has a verified local implementation
+candidate at `32aab73`. Its exact pinned BOOM Verilator run completes after
+10,916 simulation cycles while a test-only boundary patch changes the positive
+producer's token from `{valid=1, epoch=1, sequence=1}` to invalid/zero before
+TileLink A. The owned manager classifies the request and response unknown,
+completes the Put A/D transaction, and the independent store verifier confirms
+readback. This is `rtl-simulation-functional` negative evidence only and awaits
+Sprint review; it neither reopens T-0042 nor activates later T-0106 slices.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
@@ -1063,6 +1071,18 @@ tokens, reset with work outstanding, replay/source reuse/backpressure, untagged
 loader/FESVR/Debug traffic, BOOM loads, Rocket parity, CPU-side D consumption,
 common-bridge promotion, semantic initiator identity, resources, OoO effects,
 or performance.
+
+A seventh bounded diagnostic distinguishes absent production from metadata
+loss after a valid producer. It first observes the exact BOOM token
+`{valid=1, epoch=1, sequence=1}` at I/O-MSHR source 3, then a test-only patch
+clears the token values before the request reaches manager source 8304. The
+manager observes invalid/zero on both A and D, classifies the token unknown,
+completes the Put, and preserves the verified store readback. The two source
+numbers remain transport coordinates, not token identity. This closes only the
+fixed value-clearing stripped-after-valid negative. Field removal, malformed
+nonzero metadata, epoch/reset/stale/duplicate behavior, replay/source reuse,
+multi-live operation, semantic promotion, resource matching, OoO effects, and
+performance remain unproven.
 
 T-0042 now also has a standalone post-fragmenter TileLink-to-owned-contract
 bridge before CPU integration. The bridge accepts negotiated `Get`, `PutFull`,
