@@ -817,6 +817,23 @@ producer, malformed nonzero handling, epoch/reset/stale/duplicate behavior,
 replay/source reuse/backpressure, non-CPU exclusion, semantic promotion,
 resource matching, OoO effects, or performance.
 
+Run the bounded valid-producer/value-clearing BOOM store-token negative with:
+
+```sh
+./hardware/chisel/run-owned-boom-store-token-stripped-after-valid.sh
+```
+
+This mode first uses the positive producer to establish fixed token
+`{valid=1, epoch=1, sequence=1}` at the BOOM I/O MSHR, then a test-only patch
+clears only those request metadata values before TileLink A acceptance. The
+verifier requires exact before/after witnesses, manager invalid/zero token A/D,
+unknown classification, completed Put A/D, and the independent store verifier's
+successful readback. I/O-MSHR source 3 and manager source 8304 are checked in
+their separate transport namespaces and are never used as token identity. This
+closes one value-clearing stripped-after-valid case only; it does not prove
+general field removal, malformed nonzero handling, epoch/reset/stale/replay,
+semantic promotion, resource matching, OoO effects, or performance.
+
 Run the bounded pinned BOOM post-request redirect diagnostic with:
 
 ```sh
