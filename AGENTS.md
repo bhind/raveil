@@ -89,6 +89,14 @@ lowercase kebab-case. Allowed types are `feat`, `fix`, `research`, `docs`,
 `research/exp-0003-gate1-measurement`). Keep one coherent change per branch and
 do not discard unrelated uncommitted work when creating or switching branches.
 
+Push only dedicated change branches. Every change to `main` must arrive through
+a GitHub pull request; never push directly to `refs/heads/main`. The active
+repository ruleset applies this requirement without an owner or agent bypass,
+blocks branch deletion and non-fast-forward updates, and requires review threads
+to be resolved. Creating or updating the pull request for an already authorized
+bounded change is the normal integration step. Merging it still requires the
+human authority defined in `docs/WORKFLOW.md`.
+
 ## Agent orchestration
 
 The primary agent owns task classification, tracked-file integration, final

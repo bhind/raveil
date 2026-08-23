@@ -85,6 +85,9 @@ and failure preservation do not consume that slot; new implementation does.
   conditional T-0106, and later token-hardening slices remain unscheduled.
   S-0003 instead refines the accepted T-0044 integrated-physical boundary into
   a five-point implementation slice and a three-point clean functional review.
+  ADR-0057 later hardens integration operations: dedicated branches may be
+  pushed and opened as PRs for already authorized bounded work, but `main`
+  accepts changes only through a PR and PR merge remains human-authorized.
 
 ## Playable pillar — Raveil Garden TUI
 
