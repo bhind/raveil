@@ -98,7 +98,7 @@ T-0044's accepted integrated-physical boundary instead. That refined slice was
 subsequently moved into S-0001 as T-0044/S08 at the 21-SP warm ceiling. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
-Post-correction Project readback remains 33 items and now has 37 fields. After
+The pre-closeout Project readback remains 33 items and now has 37 fields. After
 T-0118 acceptance and T-0044/S08 completion it has 26 Backlog, one Ready, no
 In Progress, one Review, and five Done items; delivery WIP is one of two with
 T-0106/S01 in review. Current SP totals are
@@ -108,14 +108,22 @@ an under-utilization alarm. The Project records role packets and resource use
 separately; existing slices state when token usage was not instrumented. These
 are planning facts, not measured productivity claims. No Project slice retains
 T-0042 as its parent.
-The bounded T-0106/S01 carry-in now has a verified local implementation
-candidate at `32aab73`. Its exact pinned BOOM Verilator run completes after
-10,916 simulation cycles while a test-only boundary patch changes the positive
-producer's token from `{valid=1, epoch=1, sequence=1}` to invalid/zero before
-TileLink A. The owned manager classifies the request and response unknown,
-completes the Put A/D transaction, and the independent store verifier confirms
-readback. This is `rtl-simulation-functional` negative evidence only and awaits
-Sprint review; it neither reopens T-0042 nor activates later T-0106 slices.
+The bounded T-0106/S01 carry-in is repository-accepted. On the current-main
+descendant, the owned CPU runner now includes the complete five-file Scala
+source closure required by `RaveilDCacheOriginTagger.scala`; the added Static
+Stencil sources satisfy compile-time type references and are not instantiated
+by `RaveilOwnedSmallBoomTokenConfig`. A fresh versioned `build-v3` run and one
+independent cached replay both complete after 10,916 simulation cycles. The
+test-only boundary patch changes the positive producer's token from
+`{valid=1, epoch=1, sequence=1}` to invalid/zero before TileLink A. The owned
+manager classifies request and response unknown, completes the Put A/D
+transaction, and the independent store verifier confirms readback. Both runs
+bind input SHA-256 `63454ac39c7043f4cee9c1c98da033c193804935f12f9cb5b8f1dcb2af9f4aff`,
+source SHA-256 `0c6c0bbc25f7f2300d1c9c6acfeae3d26ea9fdfabf6e657b949dc8028c5cca46`,
+and graph SHA-256 `8fbee170f393e6ed777484c9fbb3f6e0d6adddbf1802525fa5a1bb680756a948`.
+This closes only the five-point S01 carry-in as `rtl-simulation-functional`
+negative evidence; T-0106 remains open and conditional, T-0042 remains
+complete, and no performance or resource-match claim follows.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

@@ -21,9 +21,9 @@ The corrected critical path is:
 
 The 2026-08-23 Sprint coordination audit does not reopen T-0042 or alter this
 critical path. One already-active BOOM stripped-token negative is retained as
-bounded T-0106 carry-in evidence. Its local implementation candidate now passes
-the exact RTL simulation and scoped regressions, but awaits Sprint review and
-does not satisfy the trigger for further T-0106 implementation. The active
+bounded T-0106 carry-in evidence. S01 now passes current-main RTL acceptance
+and independent replay and is complete, but it does not satisfy the trigger
+for further T-0106 implementation. The active
 Research delivery remains T-0044's post-EXP-0010 integrated physical boundary.
 The first S08 implementation now elaborates and functionally verifies the
 Static Graph/Rocket/common-owned-memory hierarchy and passes a matched RTL

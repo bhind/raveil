@@ -1288,9 +1288,24 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
             "RAVEIL_OWNED_CPU_MODE=boom-store-token-stripped-after-valid", runner
         )
         self.assertIn(
+            "RAVEIL_OWNED_CPU_BUILD_VOLUME="
+            "raveil-chipyard-owned-boom-store-token-stripped-after-valid-build-v3",
+            runner,
+        )
+        self.assertIn(
             "boom-store-token-stripped-after-valid:RaveilOwnedSmallBoomTokenConfig",
             shared_runner,
         )
+        self.assertIn(
+            "boom-store-token-stripped-after-valid:RaveilOwnedSmallBoomTokenConfig:"
+            "chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:"
+            "raveil-chipyard-owned-boom-store-token-stripped-after-valid-build-v3",
+            shared_runner,
+        )
+        self.assertIn("RaveilStaticStencilCore.scala", shared_runner)
+        self.assertIn("RaveilStaticStencilTLClient.scala", shared_runner)
+        self.assertIn("RAVEIL_STATIC_CORE_OVERLAY_SHA256", shared_runner)
+        self.assertIn("RAVEIL_STATIC_CLIENT_OVERLAY_SHA256", shared_runner)
         self.assertIn("t-0042-boom-store-token-handoff.patch", shared_runner)
         self.assertIn("t-0042-boom-token-strip-after-valid.patch", shared_runner)
         self.assertIn("producer=valid-before-strip", shared_runner)

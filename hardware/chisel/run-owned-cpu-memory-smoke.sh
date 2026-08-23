@@ -6,6 +6,8 @@ chipyard=${RAVEIL_CHIPYARD_SOURCE:-"$repo_root/external/chipyard"}
 overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilOwnedTLMemory.scala"
 origin_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilDCacheOriginTagger.scala"
 fixture_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala"
+static_core_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala"
+static_client_overlay="$repo_root/hardware/chisel/chipyard-overlay/RaveilStaticStencilTLClient.scala"
 rocket_hook_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-dcache-origin-hook.patch"
 rocket_witness_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-request-retire-witness.patch"
 rocket_fate_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-rocket-redirect-dcache-fate.patch"
@@ -137,7 +139,7 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     boom-store-authorization:RaveilOwnedSmallBoomFateConfig:chipyard.raveil.RaveilOwnedSmallBoomFateConfig:boom:raveil-chipyard-owned-boom-store-authorization-build-v1) ;;
     boom-store-token-handoff:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-handoff-build-v4) ;;
     boom-store-token-default-invalid:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-default-invalid-build-v1) ;;
-    boom-store-token-stripped-after-valid:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-stripped-after-valid-build-v2) ;;
+    boom-store-token-stripped-after-valid:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-stripped-after-valid-build-v3) ;;
     boom-postrequest-redirect:RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-postrequest-redirect-build-v1) ;;
     *)
         echo 'error: unsupported owned CPU smoke configuration' >&2
@@ -196,7 +198,7 @@ case "$cpu_mode" in
 esac
 applied_patch_manifest="$applied_patch_manifest,t-0042-tlxbar-request-defaults.patch"
 
-for input in "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" "$verifier" \
+for input in "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overlay" "$static_client_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" "$verifier" \
     "$rocket_witness_workload" "$rocket_witness_verifier" "$rocket_redirect_workload" "$rocket_redirect_verifier" "$rocket_redirect_fate_verifier" \
     "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_store_token_stripped_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
@@ -226,6 +228,8 @@ command -v docker >/dev/null 2>&1 || {
 overlay_sha256=$(shasum -a 256 "$overlay" | awk '{print $1}')
 origin_overlay_sha256=$(shasum -a 256 "$origin_overlay" | awk '{print $1}')
 fixture_overlay_sha256=$(shasum -a 256 "$fixture_overlay" | awk '{print $1}')
+static_core_overlay_sha256=$(shasum -a 256 "$static_core_overlay" | awk '{print $1}')
+static_client_overlay_sha256=$(shasum -a 256 "$static_client_overlay" | awk '{print $1}')
 rocket_hook_patch_sha256=$(shasum -a 256 "$rocket_hook_patch" | awk '{print $1}')
 rocket_witness_patch_sha256=$(shasum -a 256 "$rocket_witness_patch" | awk '{print $1}')
 rocket_fate_patch_sha256=$(shasum -a 256 "$rocket_fate_patch" | awk '{print $1}')
@@ -242,7 +246,7 @@ xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1
 tl_token_patch_sha256=$(shasum -a 256 "$tl_token_patch" | awk '{print $1}')
 input_sha256=$(
     {
-        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" \
+        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overlay" "$static_client_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" \
             "$rocket_witness_workload" "$rocket_witness_verifier" "$rocket_redirect_workload" "$rocket_redirect_verifier" "$rocket_redirect_fate_verifier" \
             "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_store_token_stripped_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
             "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
@@ -259,7 +263,7 @@ input_sha256=$(
 )
 cache_source_sha256=$(
     {
-        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" \
+        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overlay" "$static_client_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" \
             "$xbar_request_patch" "$tl_token_patch" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" "$cpu_mode" "$applied_patch_manifest"
@@ -276,7 +280,7 @@ source_sha256=$cache_source_sha256
 if [ "$cpu_mode" = controlled ]; then
     source_sha256=$(
         {
-            shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" \
+            shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overlay" "$static_client_overlay" "$rocket_hook_patch" \
                 "$boom_hook_patch" "$xbar_request_patch" "$tl_token_patch" \
                 "$controlled_workload_s" "$controlled_workload_c" \
                 "$controlled_linker" "$controlled_verifier" \
@@ -291,7 +295,7 @@ fi
 if [ "$cpu_mode" = controlled-repeat ]; then
     source_sha256=$(
         {
-            shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" \
+            shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overlay" "$static_client_overlay" "$rocket_hook_patch" \
                 "$boom_hook_patch" "$xbar_request_patch" "$tl_token_patch" \
                 "$repeated_workload_s" "$repeated_workload_c" \
                 "$controlled_linker" "$controlled_verifier" "$runner" \
@@ -305,7 +309,7 @@ fi
 if [ "$cpu_mode" = controlled-fixture-repeat ]; then
     source_sha256=$(
         {
-            shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" \
+            shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overlay" "$static_client_overlay" \
                 "$rocket_hook_patch" "$boom_hook_patch" \
                 "$xbar_request_patch" "$tl_token_patch" \
                 "$repeated_workload_s" "$fixture_repeated_workload_c" \
@@ -349,6 +353,8 @@ docker run --rm \
     --env "RAVEIL_OVERLAY_SHA256=$overlay_sha256" \
     --env "RAVEIL_ORIGIN_OVERLAY_SHA256=$origin_overlay_sha256" \
     --env "RAVEIL_FIXTURE_OVERLAY_SHA256=$fixture_overlay_sha256" \
+    --env "RAVEIL_STATIC_CORE_OVERLAY_SHA256=$static_core_overlay_sha256" \
+    --env "RAVEIL_STATIC_CLIENT_OVERLAY_SHA256=$static_client_overlay_sha256" \
     --env "RAVEIL_ROCKET_HOOK_PATCH_SHA256=$rocket_hook_patch_sha256" \
     --env "RAVEIL_ROCKET_WITNESS_PATCH_SHA256=$rocket_witness_patch_sha256" \
     --env "RAVEIL_ROCKET_FATE_PATCH_SHA256=$rocket_fate_patch_sha256" \
@@ -571,6 +577,10 @@ if [ ! -e "$build_root" ]; then
     "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala"
   install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala \
     "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilFixtureInputProvider.scala"
+  install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala \
+    "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilStaticStencilCore.scala"
+  install -D -m 0444 /repo/hardware/chisel/chipyard-overlay/RaveilStaticStencilTLClient.scala \
+    "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilStaticStencilTLClient.scala"
   printf "%s\n" "$cache_key" > "$ready_marker"
 fi
 [ -d "$build_root/chipyard/.git" ]
@@ -579,6 +589,8 @@ fi
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala" | awk "{print \$1}")" = "$RAVEIL_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala" | awk "{print \$1}")" = "$RAVEIL_ORIGIN_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilFixtureInputProvider.scala" | awk "{print \$1}")" = "$RAVEIL_FIXTURE_OVERLAY_SHA256" ]
+[ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilStaticStencilCore.scala" | awk "{print \$1}")" = "$RAVEIL_STATIC_CORE_OVERLAY_SHA256" ]
+[ "$(sha256sum "$build_root/chipyard/generators/chipyard/src/main/scala/raveil/RaveilStaticStencilTLClient.scala" | awk "{print \$1}")" = "$RAVEIL_STATIC_CLIENT_OVERLAY_SHA256" ]
 [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/rocket/HellaCache.scala" | awk "{print \$1}")" = "1672c56ad0cdaad15ac0184bf17193a5417bd949662793dec9cd1b8671cd8ad3" ]
 [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Bundles.scala" | awk "{print \$1}")" = "f1f8190de5064a50ac184749c965b09259748f7e20954fe2566cdfced9c41586" ]
 if [ "$RAVEIL_OWNED_CPU_MODE" = rocket-postrequest-exception ]; then
@@ -622,7 +634,9 @@ fi
 [ "$(sha256sum "$build_root/chipyard/generators/rocket-chip/src/main/scala/tilelink/Xbar.scala" | awk "{print \$1}")" = "4867e293671c4df061637b01f358772595c0ec0efff359deeacb8572dde4cbe2" ]
 expected_overlay_status="?? generators/chipyard/src/main/scala/raveil/RaveilDCacheOriginTagger.scala
 ?? generators/chipyard/src/main/scala/raveil/RaveilFixtureInputProvider.scala
-?? generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala"
+?? generators/chipyard/src/main/scala/raveil/RaveilOwnedTLMemory.scala
+?? generators/chipyard/src/main/scala/raveil/RaveilStaticStencilCore.scala
+?? generators/chipyard/src/main/scala/raveil/RaveilStaticStencilTLClient.scala"
 [ "$(git -C "$build_root/chipyard" status --porcelain --untracked-files=all --ignore-submodules=dirty)" = "$expected_overlay_status" ] || {
   echo "error: persistent simulator source cache contains an unexpected top-level change" >&2
   exit 1
