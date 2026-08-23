@@ -108,6 +108,17 @@ and failure preservation do not consume that slot; new implementation does.
   treating agent lanes as additive FTE. This changes no implementation P0,
   evidence class, EXP conclusion, or research/hardware gate.
 
+- [x] **T-0119** Enforce a strict weekly Codex usage cost guard independently
+  of Sprint SP. Accept only current telemetry for the 10,080-minute weekly
+  window, calculate remaining as 100 minus used percentage, permit exactly
+  five percent cautiously, and pause new tasks, subagents, long jobs, remote
+  updates, and merges below five percent. Fail closed for new costly work when
+  telemetry is unavailable or unverifiable, preserve the smallest safe receipt,
+  and notify the owner. Do not consume reset credits, purchase capacity, change
+  service plans, or bypass the guard without separate explicit authority. This
+  operational invariant changes no P0, evidence class, EXP conclusion,
+  performance claim, or research/hardware gate.
+
 ## Playable pillar — Raveil Garden TUI
 
 - [x] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host

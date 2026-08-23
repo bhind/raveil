@@ -1152,7 +1152,7 @@ class AgentBoundaryTests(unittest.TestCase):
         repository_rules = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         for marker in (
             "HCI-01", "HCI-02", "HCI-03", "HCI-04",
-            "HCI-05", "HCI-06", "HCI-07", "HCI-08",
+            "HCI-05", "HCI-06", "HCI-07", "HCI-08", "HCI-09",
         ):
             self.assertIn(marker, workflow)
         self.assertIn(
@@ -1160,6 +1160,7 @@ class AgentBoundaryTests(unittest.TestCase):
         )
         self.assertIn("A progress update is", repository_rules)
         self.assertIn("informational and does not pause work", repository_rules)
+
         estimate_template = (
             ROOT / "docs/templates/ESTIMATE-TEMPLATE.md"
         ).read_text(encoding="utf-8")
@@ -1193,6 +1194,29 @@ class AgentBoundaryTests(unittest.TestCase):
             "raveil-researcher",
         ):
             self.assertEqual(reasoning_effort[name], "high")
+
+    def test_weekly_usage_guard_is_exact_and_fail_closed(self) -> None:
+        workflow = (ROOT / "docs/WORKFLOW.md").read_text(encoding="utf-8")
+        repository_rules = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        project_manager = tomllib.loads(
+            (ROOT / ".codex/agents/raveil-project-manager.toml").read_text(
+                encoding="utf-8"
+            )
+        )["developer_instructions"]
+        adr = (
+            ROOT
+            / "docs/decisions/ADR-0060-weekly-codex-usage-has-a-hard-cost-stop.md"
+        ).read_text(encoding="utf-8")
+        for text in (workflow, repository_rules, adr):
+            self.assertIn("remaining = 100 - usedPercent", text)
+            self.assertIn("below five percent", text)
+            self.assertIn("Exactly five percent", text)
+            self.assertIn("10,080", text)
+            self.assertIn("reset credits", text)
+        self.assertIn("remaining below five percent", project_manager)
+        self.assertIn("telemetry is unavailable or unverifiable", project_manager)
+        self.assertIn("fail closed", workflow)
+        self.assertIn("stale, malformed", workflow)
 
 
 if __name__ == "__main__":
