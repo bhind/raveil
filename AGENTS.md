@@ -122,9 +122,12 @@ claim.
   one low-reasoning Tester after the slice, and at most two read-only reviewers
   in parallel. Reserve high reasoning for Project Manager authority, security
   or performance risk review, and evidence-milestone research synthesis.
-- Story points are relative AI delivery risk, not hours or a weekly stop
-  condition. Authorized work continues while its dependency, WIP, and
-  ADR-0051 Human-confirmation boundaries remain satisfied.
+- Story points are relative AI delivery risk, not hours. Use eight SP as the
+  under-utilization lower-bound check, 13 SP as the provisional committed
+  weekly capacity, and 13--21 SP as the warm stretch range. These planning
+  bands are not hard stops: authorized work continues while its dependency,
+  WIP, resource-budget, and ADR-0051 Human-confirmation boundaries remain
+  satisfied. Record role-packet counts and resource use separately from SP.
 
 ## Continuous execution and human confirmation
 

@@ -28,6 +28,9 @@ Estimate valid until:
 - Parallelism and resource limits:
 - Dominant role lane and model/reasoning tier:
 - Observed accepted-slice cycle time, or why unavailable:
+- Role packets consumed or forecast by lane:
+- Token/resource consumption, or why unavailable:
+- Blocked or idle time and cause:
 
 ## Estimate
 

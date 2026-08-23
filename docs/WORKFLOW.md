@@ -29,7 +29,11 @@ Last updated: 2026-08-24
 - Keep the default implementation work-in-progress limit at one coherent P0
   task. Read-only reviews and bounded evidence preservation may proceed without
   promoting another implementation task.
-- Do not stop authorized work because a Sprint's forecast SP total was reached.
+- Treat eight SP as an under-utilization lower-bound check, 13 SP as the
+  provisional committed weekly capacity, and 13--21 SP as the warm stretch
+  range. Do not stop authorized work merely because a forecast SP total was
+  reached; at the upper range re-check WIP, lane load, and token/resource
+  budget before pulling more work.
   ADR-0059 treats SP as relative AI delivery risk and schedules actual work by
   dependency, two-item delivery WIP, and role-lane availability.
 - Keep external types behind Raveil-owned versioned adapters.

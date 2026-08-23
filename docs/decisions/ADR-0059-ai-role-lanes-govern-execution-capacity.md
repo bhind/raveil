@@ -3,7 +3,7 @@
 Status: Accepted
 Date: 2026-08-24
 Task: T-0118
-Supersedes: ADR-0056 only for the fixed eight-SP capacity and post-sprint capacity calculation
+Supersedes: ADR-0056 only for treating eight SP as the full weekly capacity and for post-sprint capacity calculation
 
 ## Context
 
@@ -22,10 +22,18 @@ inspectable.
 ## Decision
 
 Keep the GitHub Project as the sole live sprint board and retain the two-item
-delivery WIP limit. Retain Fibonacci story points, but use them only as an
-AI-relative delivery-risk index. Story points do not represent hours, a weekly
-execution quota, agent count, or permission to stop. Preserve every Initial SP;
-change Current SP only with a dated, evidence-backed reason.
+delivery WIP limit. Retain Fibonacci story points as an AI-relative
+delivery-risk index. They do not represent hours or additive agent FTE.
+Preserve every Initial SP; change Current SP only with a dated,
+evidence-backed reason.
+
+Retain eight SP as an initial lower-bound planning reference. A Sprint closing
+at or below eight SP triggers an under-utilization review unless a dependency,
+HCI, or external blocker explains the unused lanes. Set 13 SP as the
+provisional committed weekly capacity and 13--21 SP as the warm stretch range.
+Reaching 13 SP does not stop work when WIP and role lanes remain available.
+At 21 SP, re-estimate lane load and token/resource budget before pulling more
+work; SP alone still does not authorize a pause.
 
 Use these execution lanes:
 
@@ -47,11 +55,29 @@ only; no model output gains build, selection, evidence, task, or gate authority.
 
 Each estimate separates AI edit/implementation, verification/reproduction,
 and PM integration/review/records. It records warm and cold ranges, the
-dominant role lane, observed cycle time when available, and invalidation
-conditions. Weekly forecasts use completed accepted-slice cycle time by lane
-and current dependency/WIP state. Reaching a forecast SP total never stops
-otherwise authorized work; only dependencies, the WIP lane, or an ADR-0051 HCI
-does.
+dominant role lane, observed cycle time when available, role-packet counts,
+blocked time, token/resource consumption, and invalidation conditions. Weekly
+forecasts use completed accepted-slice observations by lane and current
+dependency/WIP state.
+
+Use this first resource-allocation forecast until two closed Sprints provide a
+larger sample:
+
+| Lane | Warm weekly forecast |
+|---|---:|
+| coherent tracked-file mutation | 3--5 packets |
+| Tester | 5--8 acceptance packets |
+| serial PM integration, records, PR, and merge | 5--8 PR packets |
+| at most two parallel read-only reviewers | 4--8 bounded reviews collectively |
+| Librarian | demand-triggered |
+| Researcher | evidence-milestone only |
+
+The current calibration is deliberately provisional. S-0001 carries 13
+Current SP and completed T-0117 carries five corrected Current SP across two
+accepted slices. T-0117 completed within one agent session per slice, but its
+exact elapsed and token consumption were not sealed. That evidence supports
+raising the planning commitment above eight SP; it does not support claiming
+an exact productivity rate or extrapolating beyond the 21-SP warm range.
 
 The first evidence-backed correction preserves Initial SP and changes Current
 SP for T-0117/S01 from 5 to 3 and T-0117/S02 from 3 to 2. S01 required one
@@ -61,8 +87,11 @@ until a comparable item-level execution record justifies correction.
 
 ## Consequences
 
-- The historical eight-SP Sprint assignments remain provenance, not an
-  execution ceiling or a reason to idle an available lane.
+- Eight SP remains a useful minimum-planning and under-utilization reference,
+  but not the full execution capacity or a reason to idle an available lane.
+- The first committed/range forecast is 13 SP / 13--21 SP and is recalibrated
+  after two closed Sprints from SP, role packets, cycle time, blocked time, and
+  token/resource use.
 - WIP remains two delivery items, normally one mutation and one review or
   acceptance item.
 - Low-cost agents perform bounded implementation, parsing, test, and mechanical

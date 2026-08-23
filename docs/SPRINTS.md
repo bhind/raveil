@@ -41,7 +41,9 @@ Backlog -> Ready -> In Progress -> Review -> Done
                          +-> Blocked <-+
 ```
 
-ADR-0059 retires eight story points as an execution ceiling. At most two items
+ADR-0059 retains eight story points as a lower-bound planning reference rather
+than an execution ceiling. The provisional committed capacity is 13 SP per
+week and the warm stretch range is 13--21 SP. At most two items
 may be in `IN_PROGRESS` or `REVIEW` combined. Prefer one active mutation item
 and one independent review or acceptance item; a Playable and Research item may
 overlap only when ownership and evidence paths are independent. Operations is
@@ -53,13 +55,18 @@ the task or silently mark it complete. The Project also records seven-day
 Role`, `Support Roles`, `Parent T-ID`, `Depends On`, `Priority`, `Work Type`,
 `Demo Command`, `Evidence Class`, `Estimate Review`, `Estimate Change Reason`,
 `Forecast Sprint`, `Forecast Date`, `Forecast Confidence`, `Review Outcome`,
-`Retro Action`, `AI Estimate`, `Observed Cycle`, and `Agent Tier`.
+`Retro Action`, `AI Estimate`, `Observed Cycle`, `Agent Tier`, `Role Packets`,
+and `Resource Use`.
 
 Capacity is empirical and lane-based. Forecast from accepted-slice cycle time
 for the mutation, test, review, and serial PM-integration lanes, plus current
-dependencies and warm/cold environment state. SP remains relative AI delivery
-risk and never stops otherwise authorized work. Carry-over is re-estimated and
-explicitly recommitted without rewriting Initial SP.
+dependencies and warm/cold environment state. Eight SP is an under-utilization
+alarm when a week closes at or below it without a dependency, HCI, or external
+blocker; 13 SP is the provisional committed load; 13--21 SP is a warm stretch
+range. Reaching either forecast never stops otherwise authorized work. At the
+upper range, re-estimate WIP, lane load, and token/resource budget before
+pulling more work. Carry-over is explicitly recommitted without rewriting
+Initial SP.
 
 ## Product Backlog and refinement
 
@@ -114,6 +121,23 @@ accepted-slice cycle time by lane and remain ranges rather than single-date
 promises for low-confidence research. Reaching a Sprint's forecast SP total is
 not a pause condition.
 
+The first provisional weekly service forecast is:
+
+| Role lane | Warm weekly forecast | Scheduling meaning |
+|---|---:|---|
+| coherent tracked-file mutation | 3--5 packets | one low-reasoning owner at a time |
+| Tester | 5--8 acceptance packets | clean replay after each accepted mutation slice |
+| PM integration, records, PR, merge | 5--8 PR packets | serial acceptance bottleneck |
+| read-only review | 4--8 bounded reviews collectively | at most two parallel; tier follows risk |
+| Librarian | demand-triggered | bounded authority/provenance packet, not continuous load |
+| Researcher | evidence-milestone only | non-authoritative synthesis, not Sprint FTE |
+
+These are resource-allocation forecasts, not measured productivity claims.
+Record accepted SP, packets by role, observed cycle time, warm/cold state,
+blocked time, and token/resource consumption separately. Recalibrate the
+13--21 SP band after two closed Sprints. Do not sum specialist lanes as FTE;
+the largest required lane load and the serial PM lane bound the forecast.
+
 Committed `Sprint` Iterations currently cover S-0001 through S-0006. Later work
 uses `Forecast Sprint`, `Forecast Date`, and `Forecast Confidence`; this avoids
 presenting an uncommitted research sequence as an Iteration promise. The
@@ -137,8 +161,9 @@ problem. It has neither SP nor a calendar date.
 
 ## Story-point calculation
 
-Points express relative AI delivery risk, not hours, weekly capacity, agent
-count, individual productivity, or research value. Calculate a raw score at
+Points express relative AI delivery risk, not hours, agent count, individual
+productivity, or research value. Weekly capacity uses a separately calibrated
+SP band plus role-packet and resource observations. Calculate a raw score at
 planning:
 
 ```text

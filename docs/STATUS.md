@@ -65,9 +65,11 @@ changes.
 ADR-0056 and T-0116 add a repository-linked, private GitHub Project weekly
 sprint workflow with a stable-T-ID Kanban board, retained initial and revised
 Fibonacci estimates, seven-day Iterations, WIP limit two, executable review
-demo, and retrospective. ADR-0059 and T-0118 supersede only the original fixed
-eight-SP capacity rule: SP is now relative AI delivery risk and never a weekly
-stop condition. Execution uses one serial high-reasoning PM integration lane,
+demo, and retrospective. ADR-0059 and T-0118 supersede only the assumption that
+eight SP is the full weekly capacity. Eight SP remains an under-utilization
+lower-bound check, 13 SP is the provisional committed capacity, and 13--21 SP
+is the warm stretch range. These are planning bands, not stop conditions.
+Execution uses one serial high-reasoning PM integration lane,
 one coherent low-reasoning mutation lane, one low-reasoning Tester, at most two
 read-only risk reviewers, a medium Librarian, and a milestone-only
 high-reasoning Researcher. The Project has an
@@ -77,7 +79,8 @@ decomposed planning items plus the three original S-0001 items. Each executable
 slice records an owner role, support roles,
 parent T-ID, dependencies, initial/current SP, priority, evidence class, demo
 or evidence command, forecast sprint/date, confidence, AI estimate, observed
-cycle, and agent tier. T-0117's preserved Initial SP is 5+3 while its first
+cycle, agent tier, role packets, and resource use. T-0117's preserved Initial
+SP is 5+3 while its first
 AI-evidence correction sets Current SP to 3+2. Parent epics have no SP, and
 specialist agents are not counted as independent FTE: final integration and
 acceptance remain serial. The subsequent authority audit found that
@@ -87,11 +90,15 @@ carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
 T-0044's accepted integrated-physical boundary instead. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
-Post-correction Project readback remains 33 items and now has 35 fields. After
+Post-correction Project readback remains 33 items and now has 37 fields. After
 T-0118 acceptance it has 27 Backlog, one Ready, one Review, and four Done items;
 delivery WIP is one of two with only T-0106/S01 in Review. Current SP totals are
-S-0001=13, S-0002=5, and S-0003=8; these are risk inventories rather than
-execution ceilings. No Project slice retains T-0042 as its parent.
+S-0001=13, S-0002=5, and S-0003=8. The capacity calibration uses 13 SP as the
+committed weekly load and 13--21 SP as a warm range while retaining eight SP as
+an under-utilization alarm. The Project records role packets and resource use
+separately; existing slices state when token usage was not instrumented. These
+are planning facts, not measured productivity claims. No Project slice retains
+T-0042 as its parent.
 The bounded T-0106/S01 carry-in now has a verified local implementation
 candidate at `32aab73`. Its exact pinned BOOM Verilator run completes after
 10,916 simulation cycles while a test-only boundary patch changes the positive
