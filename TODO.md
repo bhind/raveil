@@ -73,13 +73,18 @@ and failure preservation do not consume that slot; new implementation does.
   runnable increment and demo, and a weekly retrospective. Keep TODO, ROADMAP,
   ADR, RFC, EXP, and executable evidence authoritative; the private Project
   coordinates but cannot promote claims or gates. Provide seven-day
-  Iterations and review fields, and seed S-0001 with the current bounded T-0042
-  slice plus an unpointed review/retro item. The corrective closeout also
+  Iterations and review fields, and seed S-0001 with the already-active bounded
+  BOOM negative plus an unpointed review/retro item. The corrective closeout also
   populates an ordered Product Backlog with independently accepted work slices,
   owner and support roles, dependencies, initial/current SP, priority, committed
   or forecast sprint, forecast date and confidence, Definition of Ready/Done,
   and an explicit one-human integration-capacity assumption. Parent epics carry
-  no SP so child work is not counted twice.
+  no SP so child work is not counted twice. A canonical-authority audit then
+  corrected the BOOM item from `T-0042/S01` to a bounded `T-0106/S01` evidence
+  carry-in: T-0042 remains complete, the carry-in does not activate the rest of
+  conditional T-0106, and later token-hardening slices remain unscheduled.
+  S-0003 instead refines the accepted T-0044 integrated-physical boundary into
+  a five-point implementation slice and a three-point clean functional review.
 
 ## Playable pillar — Raveil Garden TUI
 

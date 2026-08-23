@@ -117,10 +117,15 @@ initial eight-point assumption, the dependency forecast is:
 | Window | Intended outcome | Confidence |
 |---|---|---|
 | S-0002, through 2026-09-06 | T-0117 first read-only Garden TUI and terminal acceptance | medium |
-| S-0003 to S-0006, through 2026-10-04 | BOOM negative matrix, replay/backpressure, Rocket parity, BOOM load/post-A rollback | medium, then low |
-| S-0007 to S-0008, through 2026-10-18 | common CPU/Graph adapter, resource review, T-0042 readiness, prior-art delta, comparison contract | low |
-| S-0009 to S-0011, through 2026-11-08 | T-0044 runner, clean pilot, matched execution, reviews, and gate decision | low |
-| S-0012, through 2026-11-15 | KV260 feasibility only after an explicit continue decision | conditional, low |
+| S-0003, through 2026-09-13 | T-0044 minimal integrated Static Graph/Rocket/common-boundary elaboration and clean structural/oracle verification | low |
+
+The original Project forecast incorrectly attached deferred token-lifecycle
+hardening to completed T-0042 and also replanned T-0044 latency/traffic work
+already covered by EXP-0005 through EXP-0010. The bounded stripped-token work
+already active in S-0001 is retained as T-0106 evidence carry-in, but it does
+not satisfy T-0106's start trigger. All later token-hardening and stale T-0044
+planning items return to `Unscheduled` until refinement against canonical
+authority. No later forecast date is inferred from the removed sequence.
 
 Custom RISC-V remains Icebox until FPGA evidence identifies a concrete residual
 problem. It has neither SP nor a calendar date.

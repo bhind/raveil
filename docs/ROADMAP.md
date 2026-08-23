@@ -19,8 +19,18 @@ or process-demo work would repeat that ordering error.
 
 The corrected critical path is:
 
+The 2026-08-23 Sprint coordination audit does not reopen T-0042 or alter this
+critical path. One already-active BOOM stripped-token negative is retained as
+bounded T-0106 carry-in evidence, without satisfying the trigger for further
+T-0106 implementation. The next refined Research delivery remains T-0044's
+post-EXP-0010 integrated physical boundary: first elaborate and functionally
+verify the complete Static Graph/Rocket/common-boundary hierarchy, without
+collecting or claiming whole-system area, timing, energy, FPGA, or silicon
+results. Later Sprint dates remain unset until that slice is reviewed.
+
 Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
-install-once repeated-fresh-input boundary is the sole P0 immediate work, and
+remaining matched physical gates, beginning with the post-EXP-0010 integrated
+physical boundary, are the sole P0 immediate work, and
 T-0106 is P2 only after T-0044 survival or an accepted product trigger. P3
 future-planned and P4 optional/triggered work cannot interrupt this sequence
 merely because a branch or partial implementation already exists.

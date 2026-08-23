@@ -1,7 +1,7 @@
 # Failure knowledge
 
 Status: reusable operational guidance
-Last updated: 2026-08-14
+Last updated: 2026-08-23
 
 This index captures short lessons that prevent repeated mistakes. It does not
 replace raw experiment bundles, EXP conclusions, regression tests, ADRs, TODO,
@@ -11,6 +11,27 @@ recur. Link to authoritative evidence instead of copying large logs.
 Each entry records the symptom, cause or current explanation, prevention,
 detection, evidence, and whether follow-up remains open. Unknown causes stay
 labelled unknown.
+
+## Sprint slices must not reopen a completed parent task
+
+- Symptom: the initial Weekly Sprint backlog attached BOOM token-lifecycle
+  negatives to `T-0042/S01` through `/S10` and forecast another T-0042 closeout,
+  although canonical TODO, STATUS, ADR-0046, and ROADMAP already close T-0042
+  and assign conditional attribution hardening to T-0106.
+- Cause: Project decomposition reused the identity of visible work-in-progress
+  without first reconciling the current parent-task exit and superseding ADR.
+- Prevention: before creating a `/SNN` coordination label, verify the parent
+  checkbox, current STATUS statement, accepted ADR owner, start phase, and
+  latest experiment outcome. A Project slice may narrow accepted work but may
+  not reopen or redefine its parent.
+- Detection: fail refinement when a planned child depends on closing an already
+  completed parent, or when its acceptance language matches another task's
+  explicit ownership. Record checker success is insufficient because this is
+  semantic governance consistency.
+- Evidence: T-0116 integration review against `origin/main` `648eea4`,
+  ADR-0046, completed T-0042, conditional T-0106, and EXP-0010.
+- State: classification corrected locally; GitHub Project synchronization and
+  human review remain pending.
 
 ## Recompute estimates from executable work after every scope change
 

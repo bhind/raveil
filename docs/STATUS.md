@@ -67,17 +67,19 @@ sprint workflow with a stable-T-ID Kanban board, retained initial and revised
 Fibonacci estimates, seven-day Iterations, an eight-point pilot capacity, WIP
 limit two, executable review demo, and retrospective. The Project has an
 explicit `Sprint Board` Kanban plus a filtered `Product Backlog` table and six
-seeded weekly Iterations. Its corrected
-Product Backlog contains 30 decomposed planning items plus the three original
-S-0001 items. Each executable slice records an owner role, support roles,
+seeded weekly Iterations. Its corrected Product Backlog initially contained 30
+decomposed planning items plus the three original S-0001 items. Each executable
+slice records an owner role, support roles,
 parent T-ID, dependencies, initial/current SP, priority, evidence class, demo
 or evidence command, forecast sprint/date, and confidence. S-0002 commits the
 first eight-point Playable increment under T-0117 as a read-only Garden TUI
-slice plus clean terminal acceptance; S-0003 through S-0006 reserve bounded
-T-0042 research slices. Later dates through the conditional KV260 feasibility
-packet are low-confidence forecasts rather than commitments. Parent epics have
-no SP, and specialist agents are not counted as independent FTE: one human
-integration and acceptance lane remains the capacity bottleneck. Sprint state
+slice plus clean terminal acceptance. Parent epics have no SP, and specialist
+agents are not counted as independent FTE: one human integration and acceptance
+lane remains the capacity bottleneck. The subsequent authority audit found that
+its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
+already-active stripped-token slice is therefore a bounded T-0106 evidence
+carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
+T-0044's accepted integrated-physical boundary instead. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
