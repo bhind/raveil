@@ -117,7 +117,9 @@ actor, requires a pull request with zero mandatory approvals for the current
 single-owner workflow, requires review-thread resolution, and blocks deletion
 and non-fast-forward updates. Dedicated task-branch push and PR creation are
 normal integration steps for already authorized bounded work; PR merge remains
-human-authorized. No direct `main` push is permitted.
+subject to the incident-free audit in ADR-0058. A verified PR now merges
+immediately when that audit finds no HCI; an HCI still pauses the affected
+merge. No direct `main` push is permitted.
 
 ## Delivery-line state
 

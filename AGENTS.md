@@ -95,7 +95,9 @@ repository ruleset applies this requirement without an owner or agent bypass,
 blocks branch deletion and non-fast-forward updates, and requires review threads
 to be resolved. Creating or updating the pull request for an already authorized
 bounded change is the normal integration step. Merging it still requires the
-human authority defined in `docs/WORKFLOW.md`.
+incident-free merge audit defined in `docs/WORKFLOW.md`. ADR-0058 gives standing
+authority to merge a verified PR immediately when that audit finds no
+Human-confirmation incident. Direct `main` push remains prohibited.
 
 ## Agent orchestration
 
