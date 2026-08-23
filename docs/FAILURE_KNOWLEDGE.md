@@ -1004,6 +1004,25 @@ labelled unknown.
 - State: corrected for the exact workload; general replay, stale context, and
   durable transport identity remain open.
 
+## A valid token that is cleared in transport must not promote attribution
+
+- Symptom: a BOOM store has a valid producer-side token, but a test-only
+  boundary fault clears `{valid, epoch, sequence}` before TileLink A.
+- Cause: the transport metadata no longer carries the producer identity even
+  though the underlying memory request remains legal and can complete.
+- Prevention: require the manager to derive attribution only from the received
+  token values. Invalid/zero must classify unknown without reconstructing
+  identity from DCache, I/O-MSHR, or manager source numbers.
+- Detection: observe exact valid-before and invalid/zero-after witnesses,
+  require invalid/zero on manager A and D, and independently require Put
+  completion plus store readback. Mutation-test cardinality, ordering, values,
+  source namespaces, and promotion fields.
+- Evidence: T-0106/S01 candidate `32aab73`; exact pinned BOOM RTL log SHA-256
+  `3769c3c621132a9e2e396ae9040c63ad69de3ef509119f32fcbcd88047413e0a`.
+- State: corrected for one fixed value-clearing negative. Physical field
+  removal, malformed nonzero metadata, and general lifecycle handling remain
+  open.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

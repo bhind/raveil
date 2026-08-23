@@ -230,14 +230,17 @@ resolves it.
   `{valid, epoch, sequence}` through DCache/TileLink and retains the same token
   from owned-manager Put A to D without promoting ROB/STQ/source context. Still
   open are stale/duplicate/exhausted token rejection, reset with outstanding
-  work, replay/source reuse/backpressure, stripping after a valid producer,
-  malformed nonzero metadata,
+  work, replay/source reuse/backpressure, malformed nonzero metadata,
   untagged loader/FESVR/Debug traffic, BOOM load and Rocket parity, CPU-side D
   consumption, and the boundary that may drive `InitiatorCpu`. One negotiated
   absent-producer negative now observes invalid/zero at manager A/D and blocks
   attribution without blocking the store; it does not answer those remaining
   questions. ADR-0046 resolves the sequencing question: none of these remaining
   general-attribution cases gates the controlled-run T-0042/T-0044 slice.
+  One bounded T-0106 carry-in now clears a known-valid token to invalid/zero
+  before TileLink A and verifies unknown classification, transaction completion,
+  and store readback. It answers only value-clearing after one fixed producer;
+  physical field removal and the other lifecycle cases remain open.
   T-0106 retains the open design question of how Rocket and BOOM obtain direct,
   non-synthetic signals before general semantic promotion into the ADR-0043
   bridge, but it begins only after T-0044 survival or an accepted product need.
