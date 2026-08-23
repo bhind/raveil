@@ -1,0 +1,83 @@
+{
+  "demo_commands": [
+    "python3 -m raveil garden --fixture tests/fixtures/garden/minimal.json",
+    "python3 -m raveil graph-mvp --family gemm_bias_relu --m 8 --n 8 --k 8"
+  ],
+  "evidence": {
+    "claim_status": "development-non-claim",
+    "class": "host-functional",
+    "statement": "Validated fixture for read-only Garden rendering; no execution or performance claim."
+  },
+  "program": {
+    "family": "gemm_bias_relu",
+    "k": 8,
+    "m": 8,
+    "n": 8,
+    "nodes": [
+      {
+        "inputs": ["a", "b"],
+        "node_id": "matmul",
+        "op": "matmul",
+        "output": "mm"
+      },
+      {
+        "inputs": ["mm", "bias"],
+        "node_id": "bias",
+        "op": "bias_add",
+        "output": "biased"
+      },
+      {
+        "inputs": ["biased"],
+        "node_id": "relu",
+        "op": "relu",
+        "output": "output"
+      }
+    ],
+    "program_id": "gemm_bias_relu-8x8x8",
+    "schema": "raveil.graph-program/v1"
+  },
+  "schema": "raveil.garden-snapshot/v1",
+  "title": "Bounded GEMM bias ReLU",
+  "variants": [
+    {
+      "candidate": {"candidate_id": "baseline-ijk", "cold_priority": 0, "loop_order": "ijk", "materialization": "materialized", "tile": 0, "trusted_baseline": true},
+      "contract_sha256": "c3318c6ff0ef5fb336ab23dfef6a7af74ffa03a1f21c5706d4e48f98a3ec3929",
+      "memory_plan": {"materialization": "materialized", "maximum_intermediate_bytes": 512, "plan_id": "host-baseline-ijk", "schema": "raveil.memory-plan/v1", "storage": "host-memory"},
+      "program_sha256": "11a8a050a3e794b34f1b01f90341513421bf18d3b8d0202deca8aad406f71ab2",
+      "schema": "raveil.graph-variant/v1",
+      "transforms": ["trusted-baseline"]
+    },
+    {
+      "candidate": {"candidate_id": "loop-ikj", "cold_priority": 1, "loop_order": "ikj", "materialization": "materialized", "tile": 0, "trusted_baseline": false},
+      "contract_sha256": "c3318c6ff0ef5fb336ab23dfef6a7af74ffa03a1f21c5706d4e48f98a3ec3929",
+      "memory_plan": {"materialization": "materialized", "maximum_intermediate_bytes": 512, "plan_id": "host-loop-ikj", "schema": "raveil.memory-plan/v1", "storage": "host-memory"},
+      "program_sha256": "11a8a050a3e794b34f1b01f90341513421bf18d3b8d0202deca8aad406f71ab2",
+      "schema": "raveil.graph-variant/v1",
+      "transforms": ["loop-interchange"]
+    },
+    {
+      "candidate": {"candidate_id": "tile32", "cold_priority": 2, "loop_order": "tiled", "materialization": "materialized", "tile": 32, "trusted_baseline": false},
+      "contract_sha256": "c3318c6ff0ef5fb336ab23dfef6a7af74ffa03a1f21c5706d4e48f98a3ec3929",
+      "memory_plan": {"materialization": "materialized", "maximum_intermediate_bytes": 512, "plan_id": "host-tile32", "schema": "raveil.memory-plan/v1", "storage": "host-memory"},
+      "program_sha256": "11a8a050a3e794b34f1b01f90341513421bf18d3b8d0202deca8aad406f71ab2",
+      "schema": "raveil.graph-variant/v1",
+      "transforms": ["loop-tiling:32"]
+    },
+    {
+      "candidate": {"candidate_id": "loop-ikj-fused", "cold_priority": 3, "loop_order": "ikj", "materialization": "fused", "tile": 0, "trusted_baseline": false},
+      "contract_sha256": "c3318c6ff0ef5fb336ab23dfef6a7af74ffa03a1f21c5706d4e48f98a3ec3929",
+      "memory_plan": {"materialization": "fused", "maximum_intermediate_bytes": 0, "plan_id": "host-loop-ikj-fused", "schema": "raveil.memory-plan/v1", "storage": "host-memory"},
+      "program_sha256": "11a8a050a3e794b34f1b01f90341513421bf18d3b8d0202deca8aad406f71ab2",
+      "schema": "raveil.graph-variant/v1",
+      "transforms": ["loop-interchange", "fuse:bias_add+relu"]
+    },
+    {
+      "candidate": {"candidate_id": "tile32-fused", "cold_priority": 4, "loop_order": "tiled", "materialization": "fused", "tile": 32, "trusted_baseline": false},
+      "contract_sha256": "c3318c6ff0ef5fb336ab23dfef6a7af74ffa03a1f21c5706d4e48f98a3ec3929",
+      "memory_plan": {"materialization": "fused", "maximum_intermediate_bytes": 0, "plan_id": "host-tile32-fused", "schema": "raveil.memory-plan/v1", "storage": "host-memory"},
+      "program_sha256": "11a8a050a3e794b34f1b01f90341513421bf18d3b8d0202deca8aad406f71ab2",
+      "schema": "raveil.graph-variant/v1",
+      "transforms": ["loop-tiling:32", "fuse:bias_add+relu"]
+    }
+  ]
+}

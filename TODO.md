@@ -102,7 +102,9 @@ and failure preservation do not consume that slot; new implementation does.
   a deterministic fixture, host-functional tests, clean terminal acceptance,
   and one command that a hobbyist can run and understand. This is a Playable
   interface task, not T-0093's static directory snapshot and not performance,
-  FPGA, ASIC, or silicon evidence.
+  FPGA, ASIC, or silicon evidence. S01 is implemented and locally verified at
+  `412f70d`; keep T-0117 open until S02 independently reproduces the terminal
+  demo from a clean revision and records the acceptance transcript.
 
 ## Delivery line — active GNU/Linux userspace MVP
 
