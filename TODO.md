@@ -87,7 +87,9 @@ and failure preservation do not consume that slot; new implementation does.
   a five-point implementation slice and a three-point clean functional review.
   ADR-0057 later hardens integration operations: dedicated branches may be
   pushed and opened as PRs for already authorized bounded work, but `main`
-  accepts changes only through a PR and PR merge remains human-authorized.
+  accepts changes only through a PR. ADR-0058 adds standing authority to merge
+  immediately after the PM verifies that the PR is complete, mergeable, and
+  free of every ADR-0051 Human-confirmation incident.
 
 ## Playable pillar — Raveil Garden TUI
 

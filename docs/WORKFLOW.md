@@ -77,7 +77,7 @@ may continue after the failed attempt is retained, unless HCI-07 applies.
 Confirmation is required before deleting, overwriting, resetting, force-
 checking-out, force-pushing, rewriting history, moving tags, discarding or
 stashing user work, or replacing immutable evidence. It is also required before
-PR merge, issue-state mutation, tag or Release publication, package
+issue-state mutation, tag or Release publication, package
 publication, or external benchmark publication unless the owner already
 authorized that exact remote action and target.
 
@@ -86,8 +86,16 @@ creating or updating its pull request are the required integration path and do
 not create a separate HCI. Direct push to `main` is prohibited even when the
 change is otherwise authorized. The repository ruleset has no bypass actor,
 requires a pull request, blocks deletion and non-fast-forward updates, and
-requires review threads to be resolved. PR merge remains a human-authority
-remote action under this section.
+requires review threads to be resolved.
+
+ADR-0058 provides standing authority to merge an incident-free PR immediately.
+Before merge, the primary must verify the intended diff, current authority
+ancestry, recorded acceptance commands, required record reconciliation, clean
+GitHub mergeability, required checks, and resolved review threads. The merge
+must not change a gate or EXP conclusion, publish a release or benchmark, hide
+an evidence ambiguity, overlap user work, delete the remote branch, or trigger
+any other HCI class. Any such condition pauses the merge; absence of a condition
+allows it without a separate acknowledgement checkpoint.
 
 Creating an isolated local worktree, local branch, local atomic commit, ignored
 build product, or new append-only local artifact is not an HCI.
