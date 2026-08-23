@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 from typing import Any, Iterable
@@ -97,6 +98,233 @@ MEMORY_MACRO_CLOCK_PORTS = {
     name: ({"R0_clk", "W0_clk"} if name == "memory_ext" else {"RW0_clk"})
     for name in MEMORY_MACRO_CONTRACT
 }
+
+# S10 is deliberately a document-only gate.  Keeping this validator here (next
+# to the S08 structural checks) makes the boundary explicit: it consumes a
+# proposed contract, never an export or physical result.
+_READINESS_KEYS = frozenset({
+    "schema", "experiment_id", "freeze_state", "estimand_overhead",
+    "connectivity", "clock_reset", "memory_macro_views", "repetitions",
+    "append_only_controls",
+})
+_REQUIRED_READINESS_KEYS = _READINESS_KEYS - {"experiment_id"}
+_HEX_SHA256 = re.compile(r"[0-9a-f]{64}")
+_REQUIRED_STOP_RULES = frozenset({
+    "oracle_mismatch",
+    "resource_inequality",
+    "unexplained_traffic",
+    "accounting_missing",
+    "source_config_drift",
+    "incomplete_matrix",
+    "execution_window_mismatch",
+})
+_ALLOWED_PAUSE_RULES = frozenset({
+    "fairness_unresolved",
+    "measurement_boundary_unresolved",
+    "toolchain_unavailable",
+})
+_REQUIRED_NO_GO_RULES = frozenset({
+    "fair_common_conditions_impossible",
+    "integrated_hierarchy_not_closed",
+    "candidate_only_condition_required",
+    "evidence_integrity_failure",
+})
+_ALLOWED_ADVANCE_RULES = frozenset({"contract_review_passed"})
+_RAW_SEAL_STEPS = [
+    "write_raw_once",
+    "hash_raw_sha256",
+    "seal_raw",
+    "verify_raw_immutable",
+]
+_DERIVED_SEAL_STEPS = [
+    "read_sealed_raw",
+    "write_derived_once",
+    "hash_derived_sha256",
+    "seal_derived",
+    "verify_derived_immutable",
+]
+
+
+def validate_readiness_contract(document: dict[str, Any]) -> dict[str, Any]:
+    """Validate the fail-closed, pre-data integrated-physical readiness contract."""
+    require(isinstance(document, dict), "readiness contract must be an object")
+    require(
+        _REQUIRED_READINESS_KEYS <= set(document) <= _READINESS_KEYS,
+        "missing or unknown readiness contract field",
+    )
+    require(document.get("schema") == "raveil.t0044-integrated-physical-readiness/v1", "invalid readiness schema")
+    require("experiment_id" not in document or document["experiment_id"] is None, "experiment_id must be absent or null")
+    require(document.get("freeze_state") == "unfrozen", "freeze_state must be unfrozen")
+    for forbidden in ("results", "measurements", "thresholds", "data", "claims"):
+        require(forbidden not in document, f"claim-bearing field prohibited: {forbidden}")
+
+    def obj(name: str) -> dict[str, Any]:
+        value = document.get(name)
+        require(isinstance(value, dict), f"missing or invalid readiness category: {name}")
+        return value
+
+    def fields(value: dict[str, Any], allowed: set[str], name: str) -> None:
+        require(set(value) == allowed, f"missing or unknown field in {name}")
+
+    overhead = obj("estimand_overhead")
+    fields(overhead, {"estimand", "components", "dynamic_traffic_difference"}, "estimand_overhead")
+    require(isinstance(overhead.get("estimand"), str) and overhead["estimand"].strip(), "complete estimand required")
+    components = overhead.get("components")
+    require(isinstance(components, dict), "overhead components required")
+    require(
+        set(components) == {"graph_candidate", "rocket_candidate", "common"},
+        "missing or unknown overhead component bucket",
+    )
+    ledger_names: list[str] = []
+    for key, value in components.items():
+        require(
+            isinstance(value, list)
+            and value
+            and all(isinstance(item, str) and item.strip() for item in value),
+            f"overhead ledger component incomplete: {key}",
+        )
+        ledger_names.extend(value)
+    require(
+        len(ledger_names) == len(set(ledger_names)),
+        "overhead component must have one accounting owner",
+    )
+    traffic = overhead.get("dynamic_traffic_difference")
+    require(isinstance(traffic, dict), "dynamic traffic difference required")
+    fields(traffic, {"represented", "asserted_equal"}, "dynamic_traffic_difference")
+    require(traffic.get("represented") is True and traffic.get("asserted_equal") is False, "dynamic traffic must be represented and not asserted equal")
+
+    connectivity = obj("connectivity")
+    fields(connectivity, {"common_modules", "deltas", "ownership"}, "connectivity")
+    for key in ("common_modules", "deltas"):
+        require(isinstance(connectivity.get(key), list) and connectivity[key], f"{key} connectivity required")
+        names = [x.get("name") if isinstance(x, dict) else None for x in connectivity[key]]
+        require(
+            all(
+                isinstance(item, dict)
+                and set(item) == {"name"}
+                and isinstance(name, str)
+                and name.strip()
+                for item, name in zip(connectivity[key], names)
+            ),
+            f"named {key} components required",
+        )
+        require(len(names) == len(set(names)), f"duplicate {key} component")
+    ownership = connectivity.get("ownership")
+    require(isinstance(ownership, dict), "component ownership required")
+    all_names = [x["name"] for key in ("common_modules", "deltas") for x in connectivity[key]]
+    require(len(all_names) == len(set(all_names)), "duplicate connectivity component")
+    require(
+        set(ownership) == set(all_names)
+        and all(v in {"common", "graph", "rocket"} for v in ownership.values()),
+        "component ownership is missing or invalid",
+    )
+    common_names = {item["name"] for item in connectivity["common_modules"]}
+    require(
+        all(ownership[name] == "common" for name in common_names),
+        "common component ownership is invalid",
+    )
+
+    clock = obj("clock_reset")
+    fields(clock, {"clock_endpoints", "period", "waveform", "reset"}, "clock_reset")
+    require(isinstance(clock.get("clock_endpoints"), list) and clock["clock_endpoints"] and all(isinstance(x, str) and x.strip() for x in clock["clock_endpoints"]) and len(set(clock["clock_endpoints"])) == len(clock["clock_endpoints"]), "normalized clock endpoints required")
+    require(
+        isinstance(clock.get("period"), (int, float))
+        and not isinstance(clock["period"], bool)
+        and math.isfinite(clock["period"])
+        and clock["period"] > 0,
+        "normalized clock period required",
+    )
+    waveform = clock.get("waveform")
+    require(
+        isinstance(waveform, dict)
+        and set(waveform) == {"rising_edge", "duty_cycle"}
+        and all(
+            isinstance(waveform[key], (int, float))
+            and not isinstance(waveform[key], bool)
+            and math.isfinite(waveform[key])
+            for key in waveform
+        )
+        and 0 <= waveform["rising_edge"] < clock["period"]
+        and 0 < waveform["duty_cycle"] < 1,
+        "normalized waveform required",
+    )
+    reset = clock.get("reset")
+    require(
+        isinstance(reset, dict)
+        and set(reset) == {"polarity", "synchrony", "coverage"}
+        and reset["polarity"] in {"active_high", "active_low"}
+        and reset["synchrony"] in {"synchronous", "asynchronous"}
+        and reset["coverage"] == "all_sequential_state",
+        "reset polarity, synchrony, and coverage required",
+    )
+
+    views = obj("memory_macro_views")
+    fields(views, {"macros"}, "memory_macro_views")
+    require(isinstance(views["macros"], list) and views["macros"], "memory macro views required")
+    required_view = {"name", "liberty_sha256", "lef_sha256", "pvt", "rc_corner"}
+    names = set()
+    for view in views["macros"]:
+        require(isinstance(view, dict) and required_view <= set(view), "incomplete memory macro view")
+        fields(view, required_view, "memory macro view")
+        require(
+            all(
+                isinstance(view[k], str)
+                and view[k].strip()
+                and view[k].lower() not in {"tbd", "todo", "placeholder", "unknown"}
+                for k in required_view
+            )
+            and _HEX_SHA256.fullmatch(view["liberty_sha256"]) is not None
+            and _HEX_SHA256.fullmatch(view["lef_sha256"]) is not None,
+            "missing or placeholder memory macro identity",
+        )
+        require(view["name"] not in names, "duplicate memory macro view")
+        names.add(view["name"])
+    require(
+        names == set(MEMORY_MACRO_CONTRACT),
+        "memory macro view set does not cover the integrated hierarchy",
+    )
+
+    reps = obj("repetitions")
+    fields(reps, {"count", "seeds", "inference_unit", "uncertainty_policy", "interval_95_policy", "campaign_policy"}, "repetitions")
+    require(isinstance(reps.get("count"), int) and reps["count"] > 0 and isinstance(reps.get("seeds"), list) and len(reps["seeds"]) == reps["count"] and len(set(reps["seeds"])) == reps["count"] and all(isinstance(x, int) and not isinstance(x, bool) for x in reps["seeds"]), "repetitions and seeds required")
+    require(isinstance(reps.get("inference_unit"), str) and reps["inference_unit"].strip(), "inference unit required")
+    require(isinstance(reps.get("uncertainty_policy"), str) and reps["uncertainty_policy"].strip() and isinstance(reps.get("interval_95_policy"), str) and reps["interval_95_policy"].strip(), "uncertainty and 95% interval policy required")
+    require(isinstance(reps.get("campaign_policy"), str) and reps["campaign_policy"].strip() and reps["campaign_policy"] != "EXP-0008", "explicit non-EXP-0008 campaign policy required")
+
+    controls = obj("append_only_controls")
+    fields(controls, {"raw_derived_separation", "hashes", "append_before_seal", "immutable_after_seal", "raw_seal_steps", "derived_seal_steps", "stop", "pause", "no_go", "advance"}, "append_only_controls")
+    require(
+        controls.get("raw_derived_separation") is True
+        and controls.get("hashes") == ["sha256"],
+        "hash algorithm identities required",
+    )
+    require(
+        controls.get("append_before_seal") is True
+        and controls.get("immutable_after_seal") is True
+        and controls.get("raw_seal_steps") == _RAW_SEAL_STEPS
+        and controls.get("derived_seal_steps") == _DERIVED_SEAL_STEPS,
+        "mutable or incomplete append-once seal",
+    )
+
+    def rules(name: str, allowed: frozenset[str], required: frozenset[str]) -> None:
+        values = controls.get(name)
+        require(
+            isinstance(values, list)
+            and values
+            and len(values) == len(set(values))
+            and all(isinstance(value, str) and value in allowed for value in values)
+            and required <= set(values),
+            f"incomplete or unknown {name} rule",
+        )
+
+    rules("stop", _REQUIRED_STOP_RULES, _REQUIRED_STOP_RULES)
+    rules("pause", _ALLOWED_PAUSE_RULES, frozenset())
+    rules("no_go", _REQUIRED_NO_GO_RULES, _REQUIRED_NO_GO_RULES)
+    rules("advance", _ALLOWED_ADVANCE_RULES, _ALLOWED_ADVANCE_RULES)
+    return {"schema": document["schema"], "status": "ready-for-review", "experiment_id": None, "freeze_state": "unfrozen"}
+
+
+validate_integrated_physical_readiness = validate_readiness_contract
 
 
 def require(condition: bool, message: str) -> None:

@@ -95,14 +95,16 @@ its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
 T-0044's accepted integrated-physical boundary instead. That refined slice was
-subsequently moved into S-0001 as T-0044/S08 at the 21-SP warm ceiling. Sprint state
-remains a coordination view and cannot promote task, gate, decision,
-experiment, or evidence status.
-The pre-closeout Project readback remains 33 items and now has 37 fields. After
-T-0118 acceptance and T-0044/S08 completion it has 26 Backlog, one Ready, no
-In Progress, one Review, and five Done items; delivery WIP is one of two with
-T-0106/S01 in review. Current SP totals are
-S-0001=21 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
+subsequently moved into S-0001 as T-0044/S08 at the 21-SP warm ceiling. Its
+already-performed independent clean replay absorbs the stale T-0044/S09
+planning item: Initial SP 3 is retained and Current SP is zero so one evidence
+packet is not counted twice. T-0044/S10 adds a five-SP contract-readiness
+validator slice, bringing S-0001 to 26 Current SP. This is an observed
+owner-authorized over-band Sprint, not a new capacity promise or stop
+condition. Sprint state remains a coordination view and cannot promote task,
+gate, decision, experiment, or evidence status.
+The Project retains 33 items and 37 fields. Current SP totals are S-0001=26
+and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
 separately; existing slices state when token usage was not instrumented. These
@@ -691,6 +693,23 @@ raw-manifest, and derived-manifest SHA-256 values are respectively
 and `bc184ea0368c0ff3138b9b2e8359e1eb069a99de1592e77307f8db66000bc0ab`.
 This verifies only the S08 functional/structural prerequisite. It neither
 freezes EXP-0011 nor supports a physical or performance claim.
+T-0044/S10 now supplies a pure fail-closed validator for the next integrated-
+physical contract. It requires an explicit estimand and non-overlapping
+Graph/Rocket/common overhead ledger, unequal-traffic disclosure, complete
+common/delta connectivity and ownership, normalized clock and reset semantics,
+all seven integrated memory-macro Liberty/LEF/PVT/RC identities, unique
+repetition seeds and independent uncertainty policy, ordered append-once raw
+and derived seals, and complete stop, pause, no-go, and advance rule sets. It
+accepts no allocated experiment identity, requires `freeze_state=unfrozen`,
+rejects result-bearing or unknown fields, and creates no tracked manifest.
+Primary and independent clean-environment verification passed 31 integrated-
+RTL tests, 21 physical-proxy tests, and all 102 T-0044 tests. Independent raw
+logs are retained at SHA-256
+`5f24f7545e80b7dc766c80b83eeb3c2436f3ead1f67ed37ff82a2ce17b05d94d`
+and `e25ba501f7eebf1b722f0f46aa7d478129374885bfedbc126acb84d3d8dc8d9b`.
+This is host contract-validation evidence only. EXP-0011 remains unallocated
+and unfrozen; no synthesis, timing, area, energy, FPGA, ASIC, silicon, or
+performance datum or conclusion follows.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
