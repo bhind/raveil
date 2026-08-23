@@ -105,8 +105,10 @@ existing owned `GraphProgram`, requires its complete variant list to equal a
 fresh canonical `GraphCompiler` slate, and renders nodes, dependencies,
 variants, evidence labels, and runnable commands. Deterministic `j/k/g/G/q`
 navigation plus explicit empty and fail-closed error states are covered by
-host tests. Garden is deliberately separate from T-0093's static read-only
-directory snapshot and imports no execution backend. Its evidence is
+host tests; duplicate JSON fields and non-printable terminal controls are
+rejected before rendering. Garden is deliberately separate from T-0093's
+static read-only directory snapshot and imports no execution backend. Its
+evidence is
 `host-functional` and `development-non-claim`; it has no execution, mutation,
 approval, evidence-promotion, performance, or gate authority. T-0117 remains
 open pending the independent clean-terminal acceptance in S02.

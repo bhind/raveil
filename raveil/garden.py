@@ -18,16 +18,28 @@ MAX_DEMO_COMMANDS = 8
 MAX_NAVIGATION_STEPS = 64
 
 
+def _reject_duplicate_object_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"garden JSON contains duplicate field: {key}")
+        result[key] = value
+    return result
+
+
 def _require_exact_keys(value: dict[str, object], expected: set[str], kind: str) -> None:
     if set(value) != expected:
         raise ValueError(f"{kind} fields do not match schema")
 
 
 def _require_text(value: object, kind: str, *, maximum: int = 256) -> str:
-    if type(value) is not str or not value or len(value) > maximum or any(
-        character in value for character in "\r\n\x00"
+    if (
+        type(value) is not str
+        or not value
+        or len(value) > maximum
+        or not value.isprintable()
     ):
-        raise ValueError(f"{kind} must be bounded single-line text")
+        raise ValueError(f"{kind} must be bounded printable single-line text")
     return value
 
 
@@ -112,7 +124,10 @@ class GardenSnapshot:
             raise ValueError("garden fixture must be a regular file")
         if path.stat().st_size > MAX_FIXTURE_BYTES:
             raise ValueError("garden fixture exceeds the bounded size")
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_object_pairs,
+        )
         if type(raw) is not dict:
             raise ValueError("garden snapshot must be an object")
         _require_exact_keys(

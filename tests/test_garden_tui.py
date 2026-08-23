@@ -98,6 +98,36 @@ class GardenTUITests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, message):
                     GardenSnapshot.load(path)
 
+    def test_terminal_control_characters_are_rejected(self) -> None:
+        for field, value in (
+            ("title", "trusted\x1b[2Jforged"),
+            ("demo_commands", ["python3 -m raveil garden\x07"]),
+            ("program_id", "graph\u202epng"),
+        ):
+            malformed = json.loads(FIXTURE.read_text(encoding="utf-8"))
+            if field == "program_id":
+                malformed["program"][field] = value
+            else:
+                malformed[field] = value
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "malformed.json"
+                path.write_text(json.dumps(malformed), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "printable single-line"):
+                    GardenSnapshot.load(path)
+
+    def test_duplicate_json_fields_are_rejected(self) -> None:
+        source = FIXTURE.read_text(encoding="utf-8")
+        duplicates = (
+            source.replace('"title": ', '"title": "forged", "title": ', 1),
+            source.replace('"family": ', '"family": "gemm", "family": ', 1),
+        )
+        for duplicate in duplicates:
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "duplicate.json"
+                path.write_text(duplicate, encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "duplicate field"):
+                    GardenSnapshot.load(path)
+
     def test_garden_module_has_no_execution_backend(self) -> None:
         source = (ROOT / "raveil/garden.py").read_text(encoding="utf-8")
         self.assertNotIn("subprocess", source)
