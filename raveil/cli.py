@@ -35,6 +35,7 @@ from .iree_import import PinnedIreeImporter
 from .interactive_shell import NativeInteractiveSession, run_interactive_shell
 from .workspace import NativeWorkspace
 from .command_showcase import list_showcases, mutate_showcase, prepare_showcase, run_showcase
+from .garden import GardenSnapshot, render_empty, render_error, render_key_session, run_interactive
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -331,10 +332,38 @@ def command_showcase_mutate(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_garden(args: argparse.Namespace) -> int:
+    if args.empty:
+        if args.keys is not None:
+            print(render_error("--keys cannot be used with --empty"), file=sys.stderr)
+            return 2
+        print(render_empty())
+        return 0
+    try:
+        snapshot = GardenSnapshot.load(Path(args.fixture))
+        if args.keys is not None:
+            print(render_key_session(snapshot, args.keys))
+            return 0
+        return run_interactive(snapshot, sys.stdin, sys.stdout)
+    except (FileNotFoundError, OSError, ValueError) as error:
+        print(render_error(str(error)), file=sys.stderr)
+        return 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    garden = subparsers.add_parser("garden", help="browse one validated graph snapshot read-only")
+    garden_source = garden.add_mutually_exclusive_group(required=True)
+    garden_source.add_argument("--fixture", help="strict versioned Garden snapshot JSON")
+    garden_source.add_argument("--empty", action="store_true", help="render the explicit empty state")
+    garden.add_argument(
+        "--keys",
+        help="deterministic bounded navigation transcript using j, k, g, G, q",
+    )
+    garden.set_defaults(handler=command_garden)
 
     shell = subparsers.add_parser("shell", help="open the Native userspace graph session")
     shell.add_argument(
