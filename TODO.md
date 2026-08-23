@@ -955,14 +955,20 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   independent statements; local re-analysis of that retained raw pair passes.
   A fresh clean replay at `bad871d...6e87` passes 63 tests, G1b through G1e,
   both exports, the full Yosys preflight, and all raw/derived re-hashes.
-  Integrate this bounded prerequisite through PR review. After integration,
-  freeze a machine-readable estimand and overhead ledger, approved common-
-  module/delta connectivity, clock/reset semantics, macro physical views and
-  PVT/RC constraints, repetition/seed and uncertainty policy, raw/derived seal,
-  and stop rules. Keep Graph's 1,280 reads plus 256 writes distinct from
-  Rocket's lawful 800 reads plus 256 writes. Do not collect synthesis,
-  timing, area, energy, FPGA, ASIC, silicon, or performance data in S08, and do
-  not close T-0044 from this structural prerequisite.
+  The bounded S08 prerequisite is integrated through PR review. Its independent
+  clean replay absorbs T-0044/S09 at Current SP zero while preserving Initial
+  SP 3. T-0044/S10 now implements the repository-only, fail-closed readiness
+  validator for the estimand/overhead ledger, common/delta connectivity,
+  clock/reset semantics, all integrated macro physical-view identities,
+  repetition/seed and uncertainty policy, append-once raw/derived seal, and
+  decision rules. It preserves Graph's 1,280 reads plus 256 writes as unequal
+  to Rocket's lawful 800 reads plus 256 writes. The validator passes 31 focused
+  tests and all 102 T-0044 tests in primary and independent clean-environment
+  verification. It allocates or freezes no experiment and stores no result.
+  **Next HCI-02 boundary:** separately review and authorize the first actual
+  EXP-0011 allocation/freeze package before any claim-bearing integrated
+  physical collection. Do not collect synthesis, timing, area, energy, FPGA,
+  ASIC, silicon, or performance data from S08/S10, and do not close T-0044.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked

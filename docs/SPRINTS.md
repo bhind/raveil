@@ -155,7 +155,7 @@ retained dependency forecast is:
 | Window | Intended outcome | Confidence |
 |---|---|---|
 | S-0002, through 2026-09-06 | T-0117 first read-only Garden TUI and terminal acceptance | medium |
-| S-0001, through 2026-08-30 | T-0044 minimal integrated Static Graph/Rocket/common-boundary elaboration and clean structural/oracle verification; accepted as the 21-SP warm-range ceiling | low |
+| S-0001, through 2026-08-30 | T-0044 integrated prerequisite plus fail-closed physical-contract readiness validation; 26 Current SP after absorbed S09 is counted as zero | low |
 
 The original Project forecast incorrectly attached deferred token-lifecycle
 hardening to completed T-0042 and also replanned T-0044 latency/traffic work
@@ -164,10 +164,12 @@ already active in S-0001 is retained as T-0106 evidence carry-in, but it does
 not satisfy T-0106's start trigger. All later token-hardening and stale T-0044
 planning items return to `Unscheduled` until refinement against canonical
 authority. The newly refined T-0044/S08 integrated prerequisite moved from its
-low-confidence S-0003 forecast into S-0001 under the calibrated 21-SP warm
-ceiling; this is an observed scheduling change, not evidence that later T-0044
-work also fits the Sprint. No later forecast date is inferred from the removed
-sequence.
+low-confidence S-0003 forecast into S-0001. Its already-performed clean replay
+absorbs S09 at Current SP zero, and S10 adds five Current SP for the readiness
+validator. The resulting 26-SP Sprint is above the 13--21 warm planning band;
+it is an observed owner-authorized over-band delivery, not evidence that later
+T-0044 work fits the Sprint or a new capacity forecast. No later forecast date
+is inferred from the removed sequence.
 
 Custom RISC-V remains Icebox until FPGA evidence identifies a concrete residual
 problem. It has neither SP nor a calendar date.

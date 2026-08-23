@@ -17,6 +17,7 @@ from raveil.t0044_integrated_rtl import (
     compare_reports,
     load_rtlil_hierarchy,
     validate_export,
+    validate_readiness_contract,
 )
 from raveil.t0044_physical import tree_sha256
 
@@ -146,7 +147,272 @@ def write_export(root: Path, variant: str, *, rocket_text: str = "module Rocket;
     (root / "export-metadata.json").write_text(json.dumps(metadata))
 
 
+def readiness_contract():
+    macro_views = [
+        {
+            "name": name,
+            "liberty_sha256": HEX,
+            "lef_sha256": "b" * 64,
+            "pvt": "ss_0p72v_125c",
+            "rc_corner": "rcworst",
+        }
+        for name in sorted(MEMORY_MACRO_CONTRACT)
+    ]
+    return {
+        "schema": "raveil.t0044-integrated-physical-readiness/v1",
+        "experiment_id": None,
+        "freeze_state": "unfrozen",
+        "estimand_overhead": {
+            "estimand": "area and slack under one normalized boundary",
+            "components": {
+                "graph_candidate": ["graph_core"],
+                "rocket_candidate": ["rocket_core"],
+                "common": ["clock_reset", "owned_memory", "interconnect"],
+            },
+            "dynamic_traffic_difference": {
+                "represented": True,
+                "asserted_equal": False,
+            },
+        },
+        "connectivity": {
+            "common_modules": [
+                {"name": "clock_reset"},
+                {"name": "owned_memory"},
+                {"name": "interconnect"},
+            ],
+            "deltas": [{"name": "graph_core"}, {"name": "rocket_core"}],
+            "ownership": {
+                "clock_reset": "common",
+                "owned_memory": "common",
+                "interconnect": "common",
+                "graph_core": "graph",
+                "rocket_core": "rocket",
+            },
+        },
+        "clock_reset": {
+            "clock_endpoints": ["integrated.clock_uncore", "matched.clock_uncore"],
+            "period": 40.0,
+            "waveform": {"rising_edge": 0.0, "duty_cycle": 0.5},
+            "reset": {
+                "polarity": "active_high",
+                "synchrony": "synchronous",
+                "coverage": "all_sequential_state",
+            },
+        },
+        "memory_macro_views": {"macros": macro_views},
+        "repetitions": {
+            "count": 2,
+            "seeds": [101, 202],
+            "inference_unit": "fresh implementation seed",
+            "uncertainty_policy": "report all observations and estimator",
+            "interval_95_policy": "predeclared percentile interval",
+            "campaign_policy": "new integrated physical campaign",
+        },
+        "append_only_controls": {
+            "raw_derived_separation": True,
+            "hashes": ["sha256"],
+            "append_before_seal": True,
+            "immutable_after_seal": True,
+            "raw_seal_steps": [
+                "write_raw_once",
+                "hash_raw_sha256",
+                "seal_raw",
+                "verify_raw_immutable",
+            ],
+            "derived_seal_steps": [
+                "read_sealed_raw",
+                "write_derived_once",
+                "hash_derived_sha256",
+                "seal_derived",
+                "verify_derived_immutable",
+            ],
+            "stop": [
+                "oracle_mismatch",
+                "resource_inequality",
+                "unexplained_traffic",
+                "accounting_missing",
+                "source_config_drift",
+                "incomplete_matrix",
+                "execution_window_mismatch",
+            ],
+            "pause": ["fairness_unresolved"],
+            "no_go": [
+                "fair_common_conditions_impossible",
+                "integrated_hierarchy_not_closed",
+                "candidate_only_condition_required",
+                "evidence_integrity_failure",
+            ],
+            "advance": ["contract_review_passed"],
+        },
+    }
+
+
 class TestIntegratedRTL(unittest.TestCase):
+    def test_s10_readiness_contract_valid(self):
+        contract = readiness_contract()
+        self.assertEqual(validate_readiness_contract(contract)["status"], "ready-for-review")
+        contract.pop("experiment_id")
+        self.assertEqual(validate_readiness_contract(contract)["experiment_id"], None)
+
+    def test_s10_readiness_rejects_top_level_drift_and_claim_data(self):
+        mutations = []
+        for field in ("clock_reset", "repetitions"):
+            document = readiness_contract()
+            document.pop(field)
+            mutations.append((f"missing-{field}", document))
+        for field in ("unknown", "results", "measurements", "claims"):
+            document = readiness_contract()
+            document[field] = {}
+            mutations.append((f"forbidden-{field}", document))
+        document = readiness_contract()
+        document["experiment_id"] = ""
+        mutations.append(("empty-experiment-id", document))
+        document = readiness_contract()
+        document["freeze_state"] = "frozen"
+        mutations.append(("premature-freeze", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_overhead_and_traffic_drift(self):
+        mutations = []
+        document = readiness_contract()
+        document["estimand_overhead"].pop("estimand")
+        mutations.append(("missing-estimand", document))
+        document = readiness_contract()
+        document["estimand_overhead"]["extra"] = True
+        mutations.append(("unknown-overhead-field", document))
+        document = readiness_contract()
+        document["estimand_overhead"]["components"].pop("common")
+        mutations.append(("missing-common-ledger", document))
+        document = readiness_contract()
+        document["estimand_overhead"]["components"]["common"].append("graph_core")
+        mutations.append(("duplicate-ledger-owner", document))
+        for field, value in (("represented", False), ("asserted_equal", True)):
+            document = readiness_contract()
+            document["estimand_overhead"]["dynamic_traffic_difference"][field] = value
+            mutations.append((f"traffic-{field}", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_connectivity_drift(self):
+        mutations = []
+        document = readiness_contract()
+        document["connectivity"]["deltas"].append({"name": "graph_core"})
+        mutations.append(("duplicate-within-delta", document))
+        document = readiness_contract()
+        document["connectivity"]["deltas"].append({"name": "owned_memory"})
+        mutations.append(("duplicate-across-boundaries", document))
+        document = readiness_contract()
+        document["connectivity"]["common_modules"][0]["kind"] = "clock"
+        mutations.append(("unknown-component-field", document))
+        document = readiness_contract()
+        document["connectivity"]["ownership"].pop("graph_core")
+        mutations.append(("missing-owner", document))
+        document = readiness_contract()
+        document["connectivity"]["ownership"]["owned_memory"] = "graph"
+        mutations.append(("common-owned-by-candidate", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_clock_and_reset_drift(self):
+        mutations = []
+        document = readiness_contract()
+        document["clock_reset"]["period"] = True
+        mutations.append(("boolean-period", document))
+        document = readiness_contract()
+        document["clock_reset"]["period"] = float("inf")
+        mutations.append(("infinite-period", document))
+        document = readiness_contract()
+        document["clock_reset"]["clock_endpoints"].append("integrated.clock_uncore")
+        mutations.append(("duplicate-endpoint", document))
+        document = readiness_contract()
+        document["clock_reset"]["waveform"]["falling_edge"] = 20.0
+        mutations.append(("unknown-waveform-field", document))
+        document = readiness_contract()
+        document["clock_reset"]["reset"]["coverage"] = "unknown"
+        mutations.append(("unknown-reset-coverage", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_incomplete_macro_identity(self):
+        mutations = []
+        document = readiness_contract()
+        document["memory_macro_views"]["macros"].pop()
+        mutations.append(("missing-macro", document))
+        document = readiness_contract()
+        document["memory_macro_views"]["macros"][0]["liberty_sha256"] = "TBD"
+        mutations.append(("placeholder-liberty", document))
+        document = readiness_contract()
+        document["memory_macro_views"]["macros"][0].pop("lef_sha256")
+        mutations.append(("missing-lef", document))
+        document = readiness_contract()
+        document["memory_macro_views"]["macros"][1]["name"] = document["memory_macro_views"]["macros"][0]["name"]
+        mutations.append(("duplicate-macro", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_weak_repetition_policy(self):
+        mutations = []
+        document = readiness_contract()
+        document["repetitions"]["seeds"] = [101, 101]
+        mutations.append(("duplicate-seed", document))
+        document = readiness_contract()
+        document["repetitions"]["seeds"] = [101, "202"]
+        mutations.append(("non-integer-seed", document))
+        document = readiness_contract()
+        document["repetitions"]["campaign_policy"] = "EXP-0008"
+        mutations.append(("reused-exp-0008", document))
+        document = readiness_contract()
+        document["repetitions"].pop("interval_95_policy")
+        mutations.append(("missing-interval", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_mutable_or_incomplete_seals(self):
+        mutations = []
+        document = readiness_contract()
+        document["append_only_controls"]["immutable_after_seal"] = False
+        mutations.append(("mutable-after-seal", document))
+        document = readiness_contract()
+        document["append_only_controls"]["raw_seal_steps"].append("append_after_seal")
+        mutations.append(("post-seal-append", document))
+        document = readiness_contract()
+        document["append_only_controls"]["derived_seal_steps"].reverse()
+        mutations.append(("reordered-derived-seal", document))
+        document = readiness_contract()
+        document["append_only_controls"]["hashes"] = ["sha512"]
+        mutations.append(("wrong-hash", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
+    def test_s10_readiness_rejects_incomplete_or_unknown_decision_rules(self):
+        mutations = []
+        document = readiness_contract()
+        document["append_only_controls"]["stop"].remove("oracle_mismatch")
+        mutations.append(("incomplete-stop", document))
+        document = readiness_contract()
+        document["append_only_controls"]["stop"].append("ignore_oracle")
+        mutations.append(("unknown-stop", document))
+        document = readiness_contract()
+        document["append_only_controls"]["pause"] = []
+        mutations.append(("empty-pause", document))
+        document = readiness_contract()
+        document["append_only_controls"]["no_go"].pop()
+        mutations.append(("incomplete-no-go", document))
+        document = readiness_contract()
+        document["append_only_controls"]["advance"].append("contract_review_passed")
+        mutations.append(("duplicate-advance", document))
+        for label, document in mutations:
+            with self.subTest(label=label), self.assertRaises(ValueError):
+                validate_readiness_contract(document)
+
     def test_recursive_integrated_hierarchy(self):
         report = analyze_hierarchy(hierarchy_document(graph=True), "integrated-static-graph-rocket")
         self.assertEqual(report["rocket_instance_path"], "system/rocket")
