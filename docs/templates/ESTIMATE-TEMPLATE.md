@@ -26,6 +26,11 @@ Estimate valid until:
 - Cold build state or reason not run:
 - Current agent/human delivery-rate evidence:
 - Parallelism and resource limits:
+- Dominant role lane and model/reasoning tier:
+- Observed accepted-slice cycle time, or why unavailable:
+- Role packets consumed or forecast by lane:
+- Token/resource consumption, or why unavailable:
+- Blocked or idle time and cause:
 
 ## Estimate
 
@@ -35,6 +40,10 @@ Estimate valid until:
 | Verification/reproduction | | | |
 | Integration/review/records | | | |
 | Total wall clock | | | |
+
+Story points (relative AI delivery risk only):
+Initial SP (never rewrite):
+Current SP and dated change reason:
 
 Confidence:
 Invalidated by:

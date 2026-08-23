@@ -1,7 +1,7 @@
 name = "raveil-systems-implementer"
 description = "Implement assigned native C, Sonatine, RISC-V, and QEMU telemetry files."
 model = "gpt-5.6-terra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Edit only native C, Sonatine, RISC-V, or QEMU telemetry files explicitly

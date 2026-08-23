@@ -91,6 +91,22 @@ and failure preservation do not consume that slot; new implementation does.
   immediately after the PM verifies that the PR is complete, mergeable, and
   free of every ADR-0051 Human-confirmation incident.
 
+- [x] **T-0118** Recalibrate weekly execution around AI role lanes rather than
+  treating eight SP as the full capacity. Preserve eight SP as an
+  under-utilization lower-bound check, set a provisional committed capacity of
+  13 SP and a warm stretch range of 13--21 SP, and preserve Initial SP while
+  using Current SP only as relative AI delivery risk. Forecast from observed
+  accepted-slice cycle time, role packets, resource use, and warm/cold edit,
+  verification, and serial PM integration ranges. Keep delivery WIP two with
+  one coherent low-reasoning
+  mutation owner, one low-reasoning Tester, at most two read-only reviewers,
+  medium Librarian routing, high PM/risk review, and milestone-only high
+  Researcher work. Add a dedicated low-reasoning Chisel implementer, executable
+  role-tier tests, Project AI estimate/cycle/tier/packet/resource fields, and
+  ADR-0059. Recalibrate the 13--21 SP band after two closed Sprints without
+  treating agent lanes as additive FTE. This changes no implementation P0,
+  evidence class, EXP conclusion, or research/hardware gate.
+
 ## Playable pillar — Raveil Garden TUI
 
 - [x] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host

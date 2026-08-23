@@ -1,7 +1,7 @@
 name = "raveil-tester"
 description = "Run scoped tests and reproducibility experiments without editing tracked files."
 model = "gpt-5.6-terra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Do not edit tracked files. Run the scoped tests and clean-environment

@@ -1,7 +1,7 @@
 name = "raveil-measurement-implementer"
 description = "Implement assigned benchmark, powermetrics, manifest, rclone, and integrity files."
 model = "gpt-5.6-terra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 Edit only benchmark harness, powermetrics, manifest, raw-bundle, rclone, and

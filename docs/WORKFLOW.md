@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 ## Before a change
 
@@ -29,6 +29,13 @@ Last updated: 2026-08-23
 - Keep the default implementation work-in-progress limit at one coherent P0
   task. Read-only reviews and bounded evidence preservation may proceed without
   promoting another implementation task.
+- Treat eight SP as an under-utilization lower-bound check, 13 SP as the
+  provisional committed weekly capacity, and 13--21 SP as the warm stretch
+  range. Do not stop authorized work merely because a forecast SP total was
+  reached; at the upper range re-check WIP, lane load, and token/resource
+  budget before pulling more work.
+  ADR-0059 treats SP as relative AI delivery risk and schedules actual work by
+  dependency, two-item delivery WIP, and role-lane availability.
 - Keep external types behind Raveil-owned versioned adapters.
 - Keep Experience outside authority and preserve a trusted baseline/rollback.
 - Allocate task, ADR, EXP, and RFC identifiers monotonically.
@@ -229,6 +236,12 @@ reads the selected authoritative sections before editing.
   legal clearance, freedom to operate, or implementation approval.
 - Do not allow concurrent changes to one coherent file set. The Project
   Manager performs final integration and canonical record reconciliation.
+- Use one low-reasoning implementer for a coherent mutation packet, then one
+  low-reasoning Tester. Up to two read-only high-reasoning reviewers may run in
+  parallel only when the security, performance, or final-PR risk warrants it.
+  The Librarian is medium read-only, and the high-reasoning Researcher runs only
+  after an evidence milestone. Chisel work uses its dedicated implementer and
+  does not silently expand the Systems role.
 - `raveil-task-governance` applies the record and evidence checklist to any
   material Raveil change. `raveil-gate0-evidence` applies the specific
   Sonatine Microkernel Gate 0 collection procedure.
