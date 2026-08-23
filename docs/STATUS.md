@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -87,13 +87,15 @@ acceptance remain serial. The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
-T-0044's accepted integrated-physical boundary instead. Sprint state
+T-0044's accepted integrated-physical boundary instead. That refined slice was
+subsequently moved into S-0001 as T-0044/S08 at the 21-SP warm ceiling. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
 Post-correction Project readback remains 33 items and now has 37 fields. After
-T-0118 acceptance it has 27 Backlog, one Ready, one Review, and four Done items;
-delivery WIP is one of two with only T-0106/S01 in Review. Current SP totals are
-S-0001=13, S-0002=5, and S-0003=8. The capacity calibration uses 13 SP as the
+T-0118 acceptance and T-0044/S08 activation it has 26 Backlog, one Ready, one
+In Progress, one Review, and four Done items; delivery WIP is two of two with
+T-0044/S08 in progress and T-0106/S01 in review. Current SP totals are
+S-0001=21 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
 separately; existing slices state when token usage was not instrumented. These
@@ -619,6 +621,28 @@ slack. Area ratio is 0.229563 and both timing reports meet, so the frozen
 outcome is `advance-to-integrated-physical`. EXP-0009 remains paused at 20 ns.
 This is partition synthesis-estimate evidence only; every performance, energy,
 and whole-system claim remains false.
+T-0044/S08 now implements the smallest integrated functional prerequisite after
+that bounded advance. One generated ChipTop contains the fixed
+`RaveilStaticStencilCore`, its TileLink client, the unchanged Rocket fallback,
+the common fixture/input provider, one common owned TileLink memory, and a
+runtime Graph/Rocket selector. Focused RTL simulation verifies Graph-active,
+Rocket-active, inactive-origin-zero, reset, private-output, oracle, and traffic
+accounting paths. Separate integrated and matched-Rocket RTL exports pass a
+Yosys structural preflight with equal external ports, one Rocket instance in
+each closure, equal canonical Rocket-module identity, the same eleven admitted
+memory-macro instances, and the same three external clock roots. The successful
+comparison report SHA-256 is
+`30ffeb2652ae459b33aca2f2b0ccee93d2380e23f871cdf6d437e5a6a2ba9fe2`;
+the raw and derived manifest hashes are respectively
+`14f1abb186e2f3592bb046ef133db96ebfbb2c633254fd81a53131c41647d54a`
+and `617803e806e3a01bbf6ef4a27650144c6ae09b57d9e103efb169e827d87af97f`.
+This is development-only `rtl-simulation-functional` and
+`rtl-structural-preflight` evidence. No synthesis, mapping, timing, area,
+energy, FPGA, ASIC, silicon, or performance result was collected. The ignored
+artifact directories are operational local evidence, not an append-once EXP
+seal. T-0044 remains open, and EXP-0011 has not been allocated or frozen; the
+next gate is independent pre-data fairness and identity review before any
+claim-bearing integrated physical collection.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

@@ -421,6 +421,32 @@ source revision, lock identity, tracked source cleanliness, and tool versions,
 and disables container networking; T-0044 still requires a separately frozen
 measurement environment.
 
+Exercise the bounded T-0044/S08 integrated prerequisite with:
+
+```sh
+./hardware/chisel/run-g1b-common-owned-memory-elaboration.sh
+./hardware/chisel/run-g1c-active-common-owned-memory.sh
+./hardware/chisel/run-g1d-rocket-fallback-owned-memory.sh
+./hardware/chisel/run-g1e-runtime-selector.sh
+```
+
+The first command elaborates the shared hierarchy. The next two separately
+exercise Graph-active and Rocket-active access to the same owned TileLink
+memory, and the final command selects both modes within one generated RTL
+closure while requiring the inactive origin to remain at zero. These are
+bounded RTL functional smokes. They do not collect cycles for comparison or
+make a performance, synthesis, timing, area, energy, FPGA, ASIC, or silicon
+claim.
+
+For structural pre-data review, create fresh integrated and matched-Rocket
+exports with `run-exp0011-rtl-export.sh`, then pass their append-only output
+paths to `run-exp0011-rtl-preflight.sh` with a third fresh output path. The
+preflight parses both full ChipTop closures in pinned Yosys, verifies external
+ports, hierarchy, one Rocket instance, canonical Rocket identity, admitted
+memory macros, and clock roots, and emits separate raw and derived manifests.
+Its success status is only `eligible-for-pre-data-freeze-review`; EXP-0011 is
+not frozen and no physical result is collected by these commands.
+
 Exercise the first Raveil-owned local scratchpad transaction boundary with:
 
 ```sh
