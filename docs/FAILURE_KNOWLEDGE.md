@@ -1004,6 +1004,32 @@ labelled unknown.
 - State: corrected for the exact workload; general replay, stale context, and
   durable transport identity remain open.
 
+## Overlay files must carry their complete compile-time source closure
+
+- Symptom: a fresh current-main BOOM diagnostic build compiled
+  `RaveilDCacheOriginTagger.scala` and stopped because four integrated-Graph
+  configuration classes referenced types that were absent from the runner's
+  three-file overlay source set.
+- Cause: T-0044 added integrated configuration classes to the shared origin
+  overlay, but the older CPU-only runner continued installing only owned
+  memory, origin tagging, and fixture sources. The missing types live in the
+  Static Stencil client, which in turn requires the Static Stencil core.
+- Prevention: treat the installed Scala files as one explicit source closure.
+  Include every closure member in required-file checks, source and cache
+  identities, container environment hashes, post-install hash checks, and the
+  expected untracked-file inventory.
+- Detection: run the exact current-main elaboration from a newly versioned
+  build volume after shared overlay dependencies change; source-text tests
+  alone cannot prove that the external SBT compilation unit is closed.
+- Evidence: the retained failing T-0106/S01 `build-v3` log has SHA-256
+  `6f9fe15a229c7a720ef14e0b9bd4afab1b04f9a98d2bd5ff6157c7928de45f00`;
+  the corrected fresh run and independent replay have SHA-256 values
+  `16096756d0ab0a79c63c3ecb31da426c6c9111d5e756de9fc3587e12d6a2cbdf`
+  and `e285807b317fd8214f6f30853251924affa2bf3678eaa7215558741bd69ba7b6`.
+- State: corrected by carrying the five-file closure in the shared runner.
+  The Static Stencil modules are compile-time dependencies only in the bounded
+  BOOM configuration and do not create Graph execution evidence there.
+
 ## A valid token that is cleared in transport must not promote attribution
 
 - Symptom: a BOOM store has a valid producer-side token, but a test-only

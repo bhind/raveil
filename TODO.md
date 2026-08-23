@@ -1000,12 +1000,14 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   post-request exception and post-A rollback, arbitrary ELF identity, general
   loader/FESVR/Debug exclusion, and Rocket/BOOM lifecycle parity. This task is
   explicitly not a prerequisite for the controlled-run T-0042/T-0044 slice.
-  The separately admitted five-point S-0001 carry-in now has a verified local
-  implementation candidate at `32aab73`: one valid BOOM store token is cleared
-  to invalid/zero before TileLink A, remains unknown at manager A/D, completes
-  without hanging, and preserves readback. This is bounded
-  `rtl-simulation-functional` negative evidence pending Sprint review. It does
-  not start the remaining conditional T-0106 matrix or reopen T-0042.
+  The separately admitted five-point S-0001 carry-in is complete: one valid
+  BOOM store token is cleared to invalid/zero before TileLink A, remains
+  unknown at manager A/D, completes without hanging, and preserves readback.
+  A current-main source-closure correction and independent replay both pass in
+  the pinned BOOM/Verilator environment. This is bounded
+  `rtl-simulation-functional` negative evidence only. It does not start the
+  remaining conditional T-0106 matrix, reopen T-0042, establish resource
+  matching, or support a performance claim.
 
 ## Research backlog
 
