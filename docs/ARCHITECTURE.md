@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-15
+Last updated: 2026-08-23
 
 ## Four-plane adaptive Harvard model
 
@@ -44,6 +44,22 @@ installer, and the Daphnis Execution Subsystem plane firewall. Learned models, L
 mappers, external solvers, and unadmitted candidate graphs are fallible.
 
 ## Native execution contract
+
+### Garden read-only projection
+
+T-0117/S01 adds `raveil.garden-snapshot/v1` as a bounded host presentation
+envelope. Garden reconstructs the existing owned `GraphProgram` and accepts a
+snapshot only when its full `GraphVariant` list exactly equals a fresh
+`GraphCompiler` result. The terminal view derives topology and dependencies
+from that accepted state and displays its explicit evidence class, non-claim
+status, and module-CLI demo commands.
+
+Garden is an observe-only adapter. It imports no execution backend and has no
+authority to run a graph, mutate state, approve or rank a candidate, publish a
+result, promote evidence, close a task, or change a gate. Its deterministic
+line rendering and bounded navigation avoid a terminal-library dependency;
+this is a host-functional Playable boundary, not T-0093's directory projection
+and not simulation, FPGA, ASIC, silicon, or performance evidence.
 
 ADR-0034 places a thin Native Interactive Session above the existing owned
 frontend. The Session stores workflow state and command history but has no
