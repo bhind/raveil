@@ -151,6 +151,14 @@ resolves it.
   preserve fair memory/interconnect/fallback and I/O constraints, close the
   hierarchy, and retain any area/timing advantage. Placement/routing and energy
   remain unmeasured.
+  The S08 fairness review makes that question executable: the future manifest
+  must normalize common clock endpoints and reset semantics, enumerate the
+  identical common subgraph and every allowed Graph/selector delta, bind macro
+  Liberty/LEF plus PVT/RC treatment, and freeze the estimand, overhead ledger,
+  seeds/repetitions, uncertainty, and raw seal. Equal port names and macro
+  counts alone are insufficient. The unequal but explained Graph/Rocket
+  dynamic traffic must remain a reported design result rather than an equality
+  assertion.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

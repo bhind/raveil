@@ -936,10 +936,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   integrated/Rocket export pair also passes structural preflight with equal
   external ports, canonical Rocket identity, memory-macro inventory, and clock
   roots. Keep the local exports and preflight receipts as development evidence
-  only. Before allocating or freezing EXP-0011, obtain independent clean
-  replay plus performance/fairness review of source identity, included and
-  excluded components, memory/interconnect/fallback accounting, clock/reset
-  meaning, raw/derived separation, and stop rules. Do not collect synthesis,
+  only. The independent performance/fairness review passes the bounded S08
+  classification but blocks EXP-0011 freeze. Complete the clean replay, then
+  freeze a machine-readable estimand and overhead ledger, approved common-
+  module/delta connectivity, clock/reset semantics, macro physical views and
+  PVT/RC constraints, repetition/seed and uncertainty policy, raw/derived seal,
+  and stop rules. Keep Graph's 1,280 reads plus 256 writes distinct from
+  Rocket's lawful 800 reads plus 256 writes. Do not collect synthesis,
   timing, area, energy, FPGA, ASIC, silicon, or performance data in S08, and do
   not close T-0044 from this structural prerequisite.
   Separately, ADR-0050 requires the retained failed

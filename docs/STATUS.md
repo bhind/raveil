@@ -643,6 +643,15 @@ artifact directories are operational local evidence, not an append-once EXP
 seal. T-0044 remains open, and EXP-0011 has not been allocated or frozen; the
 next gate is independent pre-data fairness and identity review before any
 claim-bearing integrated physical collection.
+An independent high-reasoning fairness review at candidate `1602e53` passed 41
+focused source/checker tests and found no basis for a stronger S08 evidence
+class. It blocks EXP-0011 pre-data freeze until a hash-bound contract fixes the
+estimand and overhead ledger, common-module/delta connectivity, clock and reset
+semantics, macro physical views and PVT/RC constraints, repetition/seed and
+uncertainty policy, and append-once raw/derived rules. The existing Graph 1,280
+reads plus 256 writes and Rocket 800 reads plus 256 writes remain lawful but
+unequal dynamic traffic; no later record may describe them as equal traffic or
+equal execution work.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
