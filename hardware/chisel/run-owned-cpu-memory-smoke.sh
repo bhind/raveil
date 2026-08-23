@@ -16,6 +16,7 @@ boom_misaligned_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-m
 boom_store_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-store-authorization.patch"
 boom_store_token_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-store-token-handoff.patch"
 boom_token_fields_only_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-token-fields-only.patch"
+boom_token_strip_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-token-strip-after-valid.patch"
 boom_redirect_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-boom-postrequest-redirect.patch"
 xbar_request_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch"
 tl_token_patch="$repo_root/hardware/chisel/chipyard-patches/t-0042-tl-token-metadata.patch"
@@ -36,6 +37,7 @@ boom_store_workload="$repo_root/hardware/chisel/owned_memory_boom_store_authoriz
 boom_store_verifier="$repo_root/hardware/chisel/verify_owned_boom_store_authorization.py"
 boom_store_token_verifier="$repo_root/hardware/chisel/verify_owned_boom_store_token_handoff.py"
 boom_store_token_default_invalid_verifier="$repo_root/hardware/chisel/verify_owned_boom_store_token_default_invalid.py"
+boom_store_token_stripped_verifier="$repo_root/hardware/chisel/verify_owned_boom_store_token_stripped_after_valid.py"
 boom_redirect_workload="$repo_root/hardware/chisel/owned_memory_boom_postrequest_redirect.S"
 boom_redirect_verifier="$repo_root/hardware/chisel/verify_owned_boom_postrequest_redirect.py"
 loader_probe="$repo_root/hardware/chisel/owned_memory_loader_probe.S"
@@ -135,6 +137,7 @@ case "$cpu_mode:$cpu_config:$cpu_config_fq:$cpu_label:$build_volume" in
     boom-store-authorization:RaveilOwnedSmallBoomFateConfig:chipyard.raveil.RaveilOwnedSmallBoomFateConfig:boom:raveil-chipyard-owned-boom-store-authorization-build-v1) ;;
     boom-store-token-handoff:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-handoff-build-v4) ;;
     boom-store-token-default-invalid:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-default-invalid-build-v1) ;;
+    boom-store-token-stripped-after-valid:RaveilOwnedSmallBoomTokenConfig:chipyard.raveil.RaveilOwnedSmallBoomTokenConfig:boom:raveil-chipyard-owned-boom-store-token-stripped-after-valid-build-v2) ;;
     boom-postrequest-redirect:RaveilOwnedSmallBoomConfig:chipyard.raveil.RaveilOwnedSmallBoomConfig:boom:raveil-chipyard-owned-boom-postrequest-redirect-build-v1) ;;
     *)
         echo 'error: unsupported owned CPU smoke configuration' >&2
@@ -184,15 +187,18 @@ case "$cpu_mode" in
     boom-store-token-default-invalid)
         applied_patch_manifest="$applied_patch_manifest,t-0042-boom-store-authorization.patch,t-0042-boom-token-fields-only.patch"
         ;;
+    boom-store-token-stripped-after-valid)
+        applied_patch_manifest="$applied_patch_manifest,t-0042-boom-store-authorization.patch,t-0042-boom-store-token-handoff.patch,t-0042-boom-token-strip-after-valid.patch"
+        ;;
     boom-postrequest-redirect)
         applied_patch_manifest="$applied_patch_manifest,t-0042-boom-postrequest-redirect.patch"
         ;;
 esac
 applied_patch_manifest="$applied_patch_manifest,t-0042-tlxbar-request-defaults.patch"
 
-for input in "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" "$verifier" \
+for input in "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" "$verifier" \
     "$rocket_witness_workload" "$rocket_witness_verifier" "$rocket_redirect_workload" "$rocket_redirect_verifier" "$rocket_redirect_fate_verifier" \
-    "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
+    "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_store_token_stripped_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
     "$controlled_workload_s" "$controlled_workload_c" "$repeated_workload_s" "$repeated_workload_c" "$fixture_repeated_workload_c" "$controlled_linker" "$controlled_verifier" \
@@ -230,14 +236,15 @@ boom_misaligned_patch_sha256=$(shasum -a 256 "$boom_misaligned_patch" | awk '{pr
 boom_store_patch_sha256=$(shasum -a 256 "$boom_store_patch" | awk '{print $1}')
 boom_store_token_patch_sha256=$(shasum -a 256 "$boom_store_token_patch" | awk '{print $1}')
 boom_token_fields_only_patch_sha256=$(shasum -a 256 "$boom_token_fields_only_patch" | awk '{print $1}')
+boom_token_strip_patch_sha256=$(shasum -a 256 "$boom_token_strip_patch" | awk '{print $1}')
 boom_redirect_patch_sha256=$(shasum -a 256 "$boom_redirect_patch" | awk '{print $1}')
 xbar_request_patch_sha256=$(shasum -a 256 "$xbar_request_patch" | awk '{print $1}')
 tl_token_patch_sha256=$(shasum -a 256 "$tl_token_patch" | awk '{print $1}')
 input_sha256=$(
     {
-        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" \
+        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" "$xbar_request_patch" "$tl_token_patch" "$workload" \
             "$rocket_witness_workload" "$rocket_witness_verifier" "$rocket_redirect_workload" "$rocket_redirect_verifier" "$rocket_redirect_fate_verifier" \
-            "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
+            "$rocket_exception_workload" "$rocket_exception_verifier" "$boom_lifecycle_workload" "$boom_lifecycle_verifier" "$boom_misaligned_workload" "$boom_misaligned_verifier" "$boom_store_workload" "$boom_store_verifier" "$boom_store_token_verifier" "$boom_store_token_default_invalid_verifier" "$boom_store_token_stripped_verifier" "$boom_redirect_workload" "$boom_redirect_verifier" \
             "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
             "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
             "$controlled_workload_s" "$controlled_workload_c" "$repeated_workload_s" "$repeated_workload_c" "$fixture_repeated_workload_c" "$controlled_linker" "$controlled_verifier" "$repeated_verifier" \
@@ -252,7 +259,7 @@ input_sha256=$(
 )
 cache_source_sha256=$(
     {
-        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_redirect_patch" \
+        shasum -a 256 "$overlay" "$origin_overlay" "$fixture_overlay" "$rocket_hook_patch" "$rocket_witness_patch" "$rocket_fate_patch" "$rocket_exception_patch" "$boom_hook_patch" "$boom_lifecycle_patch" "$boom_misaligned_patch" "$boom_store_patch" "$boom_store_token_patch" "$boom_token_fields_only_patch" "$boom_token_strip_patch" "$boom_redirect_patch" \
             "$xbar_request_patch" "$tl_token_patch" "$dockerfile" |
             awk '{print $1}'
         printf '%s\n' "$chipyard_revision" "$lock_sha" "$platform" "$cpu_mode" "$applied_patch_manifest"
@@ -352,6 +359,7 @@ docker run --rm \
     --env "RAVEIL_BOOM_STORE_PATCH_SHA256=$boom_store_patch_sha256" \
     --env "RAVEIL_BOOM_STORE_TOKEN_PATCH_SHA256=$boom_store_token_patch_sha256" \
     --env "RAVEIL_BOOM_TOKEN_FIELDS_ONLY_PATCH_SHA256=$boom_token_fields_only_patch_sha256" \
+    --env "RAVEIL_BOOM_TOKEN_STRIP_PATCH_SHA256=$boom_token_strip_patch_sha256" \
     --env "RAVEIL_BOOM_REDIRECT_PATCH_SHA256=$boom_redirect_patch_sha256" \
     --env "RAVEIL_XBAR_REQUEST_PATCH_SHA256=$xbar_request_patch_sha256" \
     --env "RAVEIL_TL_TOKEN_PATCH_SHA256=$tl_token_patch_sha256" \
@@ -402,6 +410,7 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = debug-sba ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-authorization ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-default-invalid ] ||
+   [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ] ||
    [ "$RAVEIL_OWNED_CPU_MODE" = boom-postrequest-redirect ]; then
   cache_key=$RAVEIL_CACHE_SOURCE_SHA256
 fi
@@ -432,6 +441,7 @@ if [ ! -e "$build_root" ]; then
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-store-authorization.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_STORE_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-store-token-handoff.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_STORE_TOKEN_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-token-fields-only.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_TOKEN_FIELDS_ONLY_PATCH_SHA256" ]
+  [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-token-strip-after-valid.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_TOKEN_STRIP_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-boom-postrequest-redirect.patch | awk "{print \$1}")" = "$RAVEIL_BOOM_REDIRECT_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-tlxbar-request-defaults.patch | awk "{print \$1}")" = "$RAVEIL_XBAR_REQUEST_PATCH_SHA256" ]
   [ "$(sha256sum /repo/hardware/chisel/chipyard-patches/t-0042-tl-token-metadata.patch | awk "{print \$1}")" = "$RAVEIL_TL_TOKEN_PATCH_SHA256" ]
@@ -480,16 +490,24 @@ if [ ! -e "$build_root" ]; then
       /repo/hardware/chisel/chipyard-patches/t-0042-boom-misaligned-rollback.patch
   elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-authorization ] ||
        [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ] ||
-       [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-default-invalid ]; then
+       [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-default-invalid ] ||
+       [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
     git -C "$build_root/chipyard/generators/boom" apply --check \
       /repo/hardware/chisel/chipyard-patches/t-0042-boom-store-authorization.patch
     git -C "$build_root/chipyard/generators/boom" apply \
       /repo/hardware/chisel/chipyard-patches/t-0042-boom-store-authorization.patch
-    if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ]; then
+    if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ] ||
+       [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
       git -C "$build_root/chipyard/generators/boom" apply --check --unidiff-zero \
         /repo/hardware/chisel/chipyard-patches/t-0042-boom-store-token-handoff.patch
       git -C "$build_root/chipyard/generators/boom" apply --unidiff-zero \
         /repo/hardware/chisel/chipyard-patches/t-0042-boom-store-token-handoff.patch
+      if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
+        git -C "$build_root/chipyard/generators/boom" apply --check --unidiff-zero \
+          /repo/hardware/chisel/chipyard-patches/t-0042-boom-token-strip-after-valid.patch
+        git -C "$build_root/chipyard/generators/boom" apply --unidiff-zero \
+          /repo/hardware/chisel/chipyard-patches/t-0042-boom-token-strip-after-valid.patch
+      fi
     elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-default-invalid ]; then
       git -C "$build_root/chipyard/generators/boom" apply --check --unidiff-zero \
         /repo/hardware/chisel/chipyard-patches/t-0042-boom-token-fields-only.patch
@@ -532,10 +550,15 @@ if [ ! -e "$build_root" ]; then
       ! grep -q 'raveilTokenValid' "$build_root/chipyard/generators/boom/src/main/scala/lsu/lsu.scala"
       ! grep -q 'raveilTokenValid' "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala"
     fi
-  elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ]; then
+  elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ] ||
+       [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
     [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/lsu.scala" | awk "{print \$1}")" = "fd57219554cea6be5c30dceed6b590f864cabdd4bf2d5a8db1729f362a258815" ]
     [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/dcache.scala" | awk "{print \$1}")" = "bb2f712f941368e7be57049fb99378520646054ce47ac31e45bda2ebc01a2f49" ]
-    [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala" | awk "{print \$1}")" = "92210ec6fca1699c9083c5726363e7ec48dd4d995b6238c664ddb704a2a8c755" ]
+    if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
+      [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala" | awk "{print \$1}")" = "2272df204127a91c175622fb7b7f1425854a8866e7f412913bcb897183fc8d3b" ]
+    else
+      [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala" | awk "{print \$1}")" = "92210ec6fca1699c9083c5726363e7ec48dd4d995b6238c664ddb704a2a8c755" ]
+    fi
   elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-postrequest-redirect ]; then
     [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/lsu.scala" | awk "{print \$1}")" = "d4a331e3d69e62f22b72326b893a0b5f151ff16b153161f7a71b4f1493bb2165" ]
   else
@@ -582,10 +605,15 @@ elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-authorization ] ||
     ! grep -q 'raveilTokenValid' "$build_root/chipyard/generators/boom/src/main/scala/lsu/lsu.scala"
     ! grep -q 'raveilTokenValid' "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala"
   fi
-elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ]; then
+elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ] ||
+     [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
   [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/lsu.scala" | awk "{print \$1}")" = "fd57219554cea6be5c30dceed6b590f864cabdd4bf2d5a8db1729f362a258815" ]
   [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/dcache.scala" | awk "{print \$1}")" = "bb2f712f941368e7be57049fb99378520646054ce47ac31e45bda2ebc01a2f49" ]
-  [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala" | awk "{print \$1}")" = "92210ec6fca1699c9083c5726363e7ec48dd4d995b6238c664ddb704a2a8c755" ]
+  if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
+    [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala" | awk "{print \$1}")" = "2272df204127a91c175622fb7b7f1425854a8866e7f412913bcb897183fc8d3b" ]
+  else
+    [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/mshrs.scala" | awk "{print \$1}")" = "92210ec6fca1699c9083c5726363e7ec48dd4d995b6238c664ddb704a2a8c755" ]
+  fi
 elif [ "$RAVEIL_OWNED_CPU_MODE" = boom-postrequest-redirect ]; then
   [ "$(sha256sum "$build_root/chipyard/generators/boom/src/main/scala/lsu/lsu.scala" | awk "{print \$1}")" = "d4a331e3d69e62f22b72326b893a0b5f151ff16b153161f7a71b4f1493bb2165" ]
 else
@@ -929,6 +957,29 @@ if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-handoff ]; then
   printf "OWNED-BOOM-STORE-TOKEN-HANDOFF-HOST-V1 status=OK cpu=boom config=%s input_sha256=%s source_sha256=%s graph_sha256=%s event_source=boom-pinned cpu_execution=rtl-simulation store_authorization=observed boom_local_request_response_clear=observed manager_put_a_d=observed transport_token_correlation=same-token-observed store_attribution=bounded-same-token-observed malformed_metadata=fail-closed semantic_initiator=not-promoted general_store_lifecycle=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
     "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" "$RAVEIL_SOURCE_SHA256" \
     "$(sha256sum "$graph" | cut -c1-64)"
+  exit 0
+fi
+
+if [ "$RAVEIL_OWNED_CPU_MODE" = boom-store-token-stripped-after-valid ]; then
+  riscv64-unknown-elf-gcc \
+    -march=rv64imafd_zicsr -mabi=lp64d -mcmodel=medany \
+    -nostdlib -nostartfiles -static -Wl,--no-relax \
+    -T /repo/hardware/chisel/boom_functional_smoke.ld \
+    /repo/hardware/chisel/owned_memory_boom_store_authorization.S \
+    -o "$build_root/owned_memory_boom_store_token_stripped_after_valid.elf"
+  boom_store_stripped_signature="$build_root/owned_memory_boom_store_token_stripped_after_valid.signature"
+  boom_store_stripped_log="$build_root/owned_memory_boom_store_token_stripped_after_valid.log"
+  rm -f "$boom_store_stripped_signature" "$boom_store_stripped_log"
+  timeout --foreground 180 "$sim" +permissive +verbose \
+    +signature="$boom_store_stripped_signature" +signature-granularity=4 +permissive-off \
+    "$build_root/owned_memory_boom_store_token_stripped_after_valid.elf" 2>&1 | tee "$boom_store_stripped_log"
+  python3 /repo/hardware/chisel/verify_owned_boom_store_authorization.py \
+    "$boom_store_stripped_log" "$boom_store_stripped_signature"
+  python3 /repo/hardware/chisel/verify_owned_boom_store_token_stripped_after_valid.py \
+    "$boom_store_stripped_log"
+  printf "OWNED-BOOM-STORE-TOKEN-STRIPPED-AFTER-VALID-HOST-V1 status=OK cpu=boom config=%s input_sha256=%s source_sha256=%s graph_sha256=%s patch_manifest=%s event_source=boom-pinned cpu_execution=rtl-simulation store_authorization=observed producer=valid-before-strip pre_strip_token=valid-epoch1-sequence1 post_strip_token=invalid-zero stripped_after_valid=observed token_classification=unknown-stripped semantic_attribution=not-promoted manager_put_a_d=observed manager_transaction=completed store_side_effect_readback=observed semantic_initiator=not-promoted general_stripped_metadata=not-proven malformed_nonzero=not-proven resource_match_verified=0 matched_comparison_ready=0 evidence=rtl-simulation-functional performance=not-measured\n" \
+    "$RAVEIL_OWNED_CPU_CONFIG_FQ" "$RAVEIL_INPUT_SHA256" "$RAVEIL_SOURCE_SHA256" \
+    "$(sha256sum "$graph" | cut -c1-64)" "$RAVEIL_APPLIED_PATCH_MANIFEST"
   exit 0
 fi
 

@@ -129,6 +129,25 @@ BOOM_STORE_TOKEN_DEFAULT_INVALID_RUNNER = (
     / "chisel"
     / "run-owned-boom-store-token-default-invalid.sh"
 )
+BOOM_TOKEN_STRIP_AFTER_VALID_PATCH = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "chipyard-patches"
+    / "t-0042-boom-token-strip-after-valid.patch"
+)
+BOOM_STORE_TOKEN_STRIPPED_VERIFIER = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "verify_owned_boom_store_token_stripped_after_valid.py"
+)
+BOOM_STORE_TOKEN_STRIPPED_RUNNER = (
+    ROOT
+    / "hardware"
+    / "chisel"
+    / "run-owned-boom-store-token-stripped-after-valid.sh"
+)
 BOOM_POSTREQUEST_REDIRECT_PATCH = (
     ROOT
     / "hardware"
@@ -1242,6 +1261,83 @@ class OwnedMemoryBoundaryTests(unittest.TestCase):
                         str(BOOM_STORE_TOKEN_DEFAULT_INVALID_VERIFIER),
                         str(log),
                     ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(result.returncode, expected_returncode, result.stderr)
+
+    def test_boom_store_token_strip_is_post_producer_and_fail_closed(self) -> None:
+        patch = BOOM_TOKEN_STRIP_AFTER_VALID_PATCH.read_text(encoding="utf-8")
+        verifier = BOOM_STORE_TOKEN_STRIPPED_VERIFIER.read_text(encoding="utf-8")
+        runner = BOOM_STORE_TOKEN_STRIPPED_RUNNER.read_text(encoding="utf-8")
+        shared_runner = CPU_MEMORY_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("req.raveilTokenValid", patch)
+        self.assertIn("RAVEIL-BOOM-TOKEN-STRIP-V1 event=before", patch)
+        self.assertIn("RAVEIL-BOOM-TOKEN-STRIP-V1 event=after", patch)
+        self.assertIn("RaveilCpuTokenValid) := false.B", patch)
+        self.assertIn("RaveilCpuTokenEpoch) := 0.U", patch)
+        self.assertIn("RaveilCpuTokenSequence) := 0.U", patch)
+        self.assertIn("req.addr, io.mem_access.bits.source", patch)
+        self.assertNotIn("req.addr, id.U", patch)
+        self.assertIn("producer=valid-before-strip", verifier)
+        self.assertIn("stripped_after_valid=observed", verifier)
+        self.assertIn("token_classification=unknown-stripped", verifier)
+        self.assertIn("semantic_attribution=not-promoted", verifier)
+        self.assertIn(
+            "RAVEIL_OWNED_CPU_MODE=boom-store-token-stripped-after-valid", runner
+        )
+        self.assertIn(
+            "boom-store-token-stripped-after-valid:RaveilOwnedSmallBoomTokenConfig",
+            shared_runner,
+        )
+        self.assertIn("t-0042-boom-store-token-handoff.patch", shared_runner)
+        self.assertIn("t-0042-boom-token-strip-after-valid.patch", shared_runner)
+        self.assertIn("producer=valid-before-strip", shared_runner)
+        self.assertIn("stripped_after_valid=observed", shared_runner)
+        self.assertIn("malformed_nonzero=not-proven", shared_runner)
+        self.assertNotEqual(BOOM_STORE_TOKEN_STRIPPED_RUNNER.stat().st_mode & 0o111, 0)
+        self.assertNotEqual(BOOM_STORE_TOKEN_STRIPPED_VERIFIER.stat().st_mode & 0o111, 0)
+
+    def test_boom_store_token_stripped_verifier_rejects_mutation(self) -> None:
+        records = "\n".join(
+            (
+                "RAVEIL-BOOM-TOKEN-STRIP-V1 event=before valid=1 epoch=1 sequence=1 address=0x08000100 source=3",
+                "RAVEIL-BOOM-TOKEN-STRIP-V1 event=after valid=0 epoch=0 sequence=0 address=0x08000100 source=3",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=1 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-TOKEN-V1 event=a valid=0 epoch=0 sequence=0 address=0x08000100 source=8304 opcode=0 size=2 dcache_origin=1 classification=0",
+                "RAVEIL-OWNED-TL-TOKEN-V1 event=d valid=0 epoch=0 sequence=0 source=8304 opcode=0 size=2 denied=0 corrupt=0 classification=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=1 source=8304 opcode=0 size=2 denied=0 corrupt=0 request_opcode=0 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=a manager_sequence=2 address=0x08000100 source=8288 opcode=4 size=2 dcache_origin=1 expected_source=1 phase=0",
+                "RAVEIL-OWNED-TL-FATE-V1 event=d manager_sequence=2 source=8288 opcode=1 size=2 denied=0 corrupt=0 request_opcode=4 phase=0",
+            )
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "boom-store-token-stripped.log"
+            for text, expected_returncode in (
+                (records, 0),
+                (records.replace("event=before valid=1", "event=before valid=0"), 1),
+                (records.replace("event=after valid=0", "event=after valid=1"), 1),
+                (records.replace("event=before valid=1 epoch=1", "event=before valid=1 epoch=0"), 1),
+                (records.replace("event=before valid=1 epoch=1 sequence=1", "event=before valid=1 epoch=1 sequence=2"), 1),
+                (records.replace("RAVEIL-BOOM-TOKEN-STRIP-V1 event=before", "RAVEIL-REMOVED event=before"), 1),
+                (records.replace("RAVEIL-BOOM-TOKEN-STRIP-V1 event=after", "RAVEIL-REMOVED event=after"), 1),
+                (records.replace("source=3", "source=4", 1), 1),
+                ("\n".join((records.splitlines()[1], records.splitlines()[0], *records.splitlines()[2:])) + "\n", 1),
+                ("\n".join((*records.splitlines()[2:4], *records.splitlines()[:2], *records.splitlines()[4:])) + "\n", 1),
+                (records.replace("event=a valid=0", "event=a valid=1"), 1),
+                (records.replace("event=d valid=0", "event=d valid=1"), 1),
+                (records.replace("classification=0", "classification=1", 1), 1),
+                (records.replace("address=0x08000100 source=8304", "address=0x08000104 source=8304", 1), 1),
+                (records.replace("source=8304 opcode=0", "source=8320 opcode=0", 1), 1),
+                (records.replace("dcache_origin=1", "dcache_origin=0", 1), 1),
+                (records.replace("denied=0", "denied=1", 1), 1),
+                (records.replace("corrupt=0 classification=0", "corrupt=1 classification=0"), 1),
+                (records + records.splitlines()[3] + "\n", 1),
+            ):
+                log.write_text(text, encoding="utf-8")
+                result = subprocess.run(
+                    ["python3", str(BOOM_STORE_TOKEN_STRIPPED_VERIFIER), str(log)],
                     check=False,
                     capture_output=True,
                     text=True,
