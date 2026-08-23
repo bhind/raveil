@@ -30,8 +30,8 @@ labelled unknown.
   semantic governance consistency.
 - Evidence: T-0116 integration review against `origin/main` `648eea4`,
   ADR-0046, completed T-0042, conditional T-0106, and EXP-0010.
-- State: classification corrected in the local integration record and private
-  GitHub Project; human Sprint review and repository integration remain pending.
+- State: classification corrected in the canonical repository and private
+  GitHub Project; the S-0001 functional carry-in still awaits Sprint acceptance.
 
 ## Recompute estimates from executable work after every scope change
 

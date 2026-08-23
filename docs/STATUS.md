@@ -83,10 +83,9 @@ T-0044's accepted integrated-physical boundary instead. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
 Post-correction Project readback remains 33 items and 32 fields: 27 Backlog,
-four Ready, one In Progress, and one Review. WIP is two of two because T-0116
-remains integration-pending until its local repository candidate is accepted;
-S-0001, S-0002, and S-0003 each total eight SP. No Project slice retains
-T-0042 as its parent.
+four Ready, one In Progress, and one Done. WIP is one of two after T-0116's
+repository integration and acceptance; S-0001, S-0002, and S-0003 each total
+eight SP. No Project slice retains T-0042 as its parent.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
