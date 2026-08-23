@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -87,13 +87,15 @@ acceptance remain serial. The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
-T-0044's accepted integrated-physical boundary instead. Sprint state
+T-0044's accepted integrated-physical boundary instead. That refined slice was
+subsequently moved into S-0001 as T-0044/S08 at the 21-SP warm ceiling. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
 Post-correction Project readback remains 33 items and now has 37 fields. After
-T-0118 acceptance it has 27 Backlog, one Ready, one Review, and four Done items;
-delivery WIP is one of two with only T-0106/S01 in Review. Current SP totals are
-S-0001=13, S-0002=5, and S-0003=8. The capacity calibration uses 13 SP as the
+T-0118 acceptance and T-0044/S08 activation it has 26 Backlog, one Ready, one
+In Progress, one Review, and four Done items; delivery WIP is two of two with
+T-0044/S08 in progress and T-0106/S01 in review. Current SP totals are
+S-0001=21 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
 separately; existing slices state when token usage was not instrumented. These
@@ -619,6 +621,61 @@ slack. Area ratio is 0.229563 and both timing reports meet, so the frozen
 outcome is `advance-to-integrated-physical`. EXP-0009 remains paused at 20 ns.
 This is partition synthesis-estimate evidence only; every performance, energy,
 and whole-system claim remains false.
+T-0044/S08 now implements the smallest integrated functional prerequisite after
+that bounded advance. One generated ChipTop contains the fixed
+`RaveilStaticStencilCore`, its TileLink client, the unchanged Rocket fallback,
+the common fixture/input provider, one common owned TileLink memory, and a
+runtime Graph/Rocket selector. Focused RTL simulation verifies Graph-active,
+Rocket-active, inactive-origin-zero, reset, private-output, oracle, and traffic
+accounting paths. Separate integrated and matched-Rocket RTL exports pass a
+Yosys structural preflight with equal external ports, one Rocket instance in
+each closure, equal canonical Rocket-module identity, the same eleven admitted
+memory-macro instances, and the same three external clock roots. The successful
+comparison report SHA-256 is
+`30ffeb2652ae459b33aca2f2b0ccee93d2380e23f871cdf6d437e5a6a2ba9fe2`;
+the raw and derived manifest hashes are respectively
+`14f1abb186e2f3592bb046ef133db96ebfbb2c633254fd81a53131c41647d54a`
+and `617803e806e3a01bbf6ef4a27650144c6ae09b57d9e103efb169e827d87af97f`.
+This is development-only `rtl-simulation-functional` and
+`rtl-structural-preflight` evidence. No synthesis, mapping, timing, area,
+energy, FPGA, ASIC, silicon, or performance result was collected. The ignored
+artifact directories are operational local evidence, not an append-once EXP
+seal. T-0044 remains open, and EXP-0011 has not been allocated or frozen; the
+next gate is independent pre-data fairness and identity review before any
+claim-bearing integrated physical collection.
+An independent high-reasoning fairness review at candidate `1602e53` passed 41
+focused source/checker tests and found no basis for a stronger S08 evidence
+class. It blocks EXP-0011 pre-data freeze until a hash-bound contract fixes the
+estimand and overhead ledger, common-module/delta connectivity, clock and reset
+semantics, macro physical views and PVT/RC constraints, repetition/seed and
+uncertainty policy, and append-once raw/derived rules. The existing Graph 1,280
+reads plus 256 writes and Rocket 800 reads plus 256 writes remain lawful but
+unequal dynamic traffic; no later record may describe them as equal traffic or
+equal execution work.
+The first independent clean replay passed all 62 then-current focused tests,
+all four G1 functional runners, and both deterministic exports, but failed the
+final structural comparison because Yosys emitted byte-identical Rocket source
+with a different order for independent default assignments and synchronous
+updates inside one RTLIL process. The failed preflight log is retained at
+SHA-256 `21ade950f7077be6393aaaeb7262018126c2636165f945c6a2c2f0a2b24eda1d`.
+The checker correction preserves every dependency and control
+boundary while canonicalizing only independent statements within a contiguous
+default-assignment run or one synchronous-update run. Sixty-three focused
+tests pass, including dependency, duplicate-write, clock, switch, and case
+negative tests. Re-analysis of the retained clean raw RTLIL now gives equal
+Rocket canonical SHA-256
+`09a5cb7cc8214f4fd933eacc6343943b7eba41ab9c3a520075fbf2fa10c43713` and
+comparison-report SHA-256
+`5f1cc0685bb8d73b7949412fe59fa81b074d5e5ed6e97247a3f3d474290cae6d`.
+A fresh independent replay at candidate `bad871d95abcaed9d5589bf24ce40f4fa9666e87`
+then passed all 63 tests, G1b through G1e, both exports, the complete Yosys
+preflight, and every raw and derived manifest re-hash. Its preflight-log,
+raw-manifest, and derived-manifest SHA-256 values are respectively
+`59370e6a39cffeeff902f1a7833fe3815aab1ed0967870b121abed29a84b0354`,
+`9901949fc321d4a2a77f31c2113f54171cf0406e6533ed3750f34c329eff205f`,
+and `bc184ea0368c0ff3138b9b2e8359e1eb069a99de1592e77307f8db66000bc0ab`.
+This verifies only the S08 functional/structural prerequisite. It neither
+freezes EXP-0011 nor supports a physical or performance claim.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

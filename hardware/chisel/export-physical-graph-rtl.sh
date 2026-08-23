@@ -36,7 +36,8 @@ docker run --rm \
     sh -lc 'set -eu
 rm -rf generated_static
 scala-cli run OwnedFixedLatencyScratchpad.scala \
-  chipyard-overlay/RaveilFixtureInputProvider.scala StaticStencilRegion.scala \
+  chipyard-overlay/RaveilFixtureInputProvider.scala \
+  chipyard-overlay/RaveilStaticStencilCore.scala StaticStencilRegion.scala \
   --server=false --main-class EmitPhysicalStaticStencilRegion
 mkdir /export/generated-src
 cp generated_physical_static/*.sv /export/generated-src/
@@ -46,6 +47,7 @@ source_sha256=$(
     shasum -a 256 \
         "$repo_root/hardware/chisel/OwnedFixedLatencyScratchpad.scala" \
         "$repo_root/hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala" \
+        "$repo_root/hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala" \
         "$repo_root/hardware/chisel/StaticStencilRegion.scala" |
         awk '{print $1}' | shasum -a 256 | awk '{print $1}'
 )

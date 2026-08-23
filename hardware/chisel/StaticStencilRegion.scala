@@ -5,7 +5,7 @@
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
-import chipyard.raveil.RaveilFixtureInputProvider
+import chipyard.raveil.{RaveilFixtureInputProvider, RaveilStaticStencilCore}
 
 object StaticStencilRegionContract {
   val ConfigurationTag = "d4bf9395a510385f"
@@ -72,15 +72,11 @@ class StaticStencilRegion extends Module {
 
   val scratchpad = Module(new OwnedFixedLatencyScratchpad(1024, 580))
   val fixtureProvider = Module(new RaveilFixtureInputProvider)
+  val core = Module(new RaveilStaticStencilCore)
 
-  val busyReg = RegInit(false.B)
   val outputValidReg = RegInit(false.B)
   val doneReg = RegInit(false.B)
   val cancelledReg = RegInit(false.B)
-  val outputIndex = RegInit(0.U(8.W))
-  val accumulator = RegInit(0.U(32.W))
-  val cycleCountReg = RegInit(0.U(14.W))
-  val checksumReg = RegInit(0.U(64.W))
   val fixtureModeReg = RegInit(false.B)
   val legacyModeReg = RegInit(false.B)
   val fixtureCanStageReg = RegInit(true.B)
@@ -88,102 +84,67 @@ class StaticStencilRegion extends Module {
   val fixtureAcceptedValidReg = RegInit(false.B)
   val fixtureAcceptedAddressReg = RegInit(0.U(9.W))
   val fixtureAcceptedDataReg = RegInit(0.U(32.W))
-  val graphInputReadsAcceptedReg = RegInit(0.U(16.W))
-  val graphOutputWritesAcceptedReg = RegInit(0.U(16.W))
-  val cancelRequestedReg = RegInit(false.B)
-
-  val Seq(
-    idle,
-    loadCenterRequest,
-    loadCenterResponse,
-    loadNorthRequest,
-    loadNorthResponse,
-    loadSouthRequest,
-    loadSouthResponse,
-    loadWestRequest,
-    loadWestResponse,
-    loadEastRequest,
-    loadEastResponse,
-    storeRequest,
-    storeResponse
-  ) = Enum(13)
-  val state = RegInit(idle)
-
-  val y = Wire(UInt(5.W))
-  val x = Wire(UInt(5.W))
-  val scaledY = Wire(UInt(9.W))
-  val center = Wire(UInt(9.W))
-  y := outputIndex(7, 4).pad(5) + 1.U(5.W)
-  x := outputIndex(3, 0).pad(5) + 1.U(5.W)
-  scaledY := y * 18.U
-  center := scaledY + x
 
   doneReg := false.B
   cancelledReg := false.B
 
-  val cancelling = io.cancel || cancelRequestedReg
-  val graphInputRequest = busyReg && !cancelling && (
-    state === loadCenterRequest || state === loadNorthRequest ||
-    state === loadSouthRequest || state === loadWestRequest ||
-    state === loadEastRequest)
-  val graphOutputRequest = busyReg && !cancelling && state === storeRequest
-
-  val inputAddress = Wire(UInt(9.W))
-  inputAddress := center
-  when(state === loadNorthRequest) { inputAddress := center - 18.U }
-  when(state === loadSouthRequest) { inputAddress := center + 18.U }
-  when(state === loadWestRequest) { inputAddress := center - 1.U }
-  when(state === loadEastRequest) { inputAddress := center + 1.U }
-
-  val graphInputResponseState = busyReg && (
-    state === loadCenterResponse || state === loadNorthResponse ||
-    state === loadSouthResponse || state === loadWestResponse ||
-    state === loadEastResponse)
-  val fixtureSelected = !busyReg && fixtureProvider.io.active
-  val controlStageSelected = !busyReg && !fixtureSelected && io.inputStageValid
-  val controlValidationSelected = !busyReg && !fixtureSelected &&
+  val fixtureSelected = !core.io.busy && fixtureProvider.io.active
+  val controlStageSelected = !core.io.busy && !fixtureSelected && io.inputStageValid
+  val controlValidationSelected = !core.io.busy && !fixtureSelected &&
     !io.inputStageValid &&
     io.outputValidationValid && outputValidReg
   val controlResponseIsValidation = RegInit(false.B)
 
+  val directStart = io.start && !core.io.busy && !scratchpad.io.pending &&
+    !fixtureProvider.io.active
+  val graphStart = fixtureProvider.io.release || directStart
+  core.io.start := graphStart
+  core.io.cancel := io.cancel
+  core.io.memory.pending := scratchpad.io.pending
+
   scratchpad.io.requestValid := Mux(
-    busyReg,
-    graphInputRequest || graphOutputRequest,
+    core.io.busy,
+    core.io.memory.request.valid,
     fixtureProvider.io.requestValid || controlStageSelected ||
       controlValidationSelected
   )
   scratchpad.io.requestWrite := Mux(
-    busyReg, graphOutputRequest, fixtureSelected || controlStageSelected)
+    core.io.busy, core.io.memory.request.bits.write,
+    fixtureSelected || controlStageSelected)
   scratchpad.io.requestAddress := Mux(
-    busyReg,
-    Mux(graphOutputRequest, 324.U + outputIndex, inputAddress),
-    Mux(fixtureSelected, fixtureProvider.io.requestAddress,
+    core.io.busy, core.io.memory.request.bits.address,
+      Mux(fixtureSelected, fixtureProvider.io.requestAddress,
       Mux(controlStageSelected, io.inputStageAddress,
-        324.U + io.outputValidationAddress))
-  )
+        324.U(10.W) + io.outputValidationAddress.pad(10))))
   scratchpad.io.requestWriteData := Mux(
-    busyReg, accumulator,
+    core.io.busy, core.io.memory.request.bits.writeData,
     Mux(fixtureSelected, fixtureProvider.io.requestData, io.inputStageData))
-  scratchpad.io.requestWriteMask := Mux(scratchpad.io.requestWrite, "hf".U, 0.U)
+  scratchpad.io.requestWriteMask := Mux(
+    core.io.busy, core.io.memory.request.bits.writeMask,
+    Mux(scratchpad.io.requestWrite, "hf".U, 0.U))
   scratchpad.io.requestInitiator := Mux(
-    busyReg,
-    OwnedMemoryContract.InitiatorGraph.U,
+    core.io.busy, core.io.memory.request.bits.initiator,
     Mux(fixtureSelected, OwnedMemoryContract.InitiatorFixture.U,
-      OwnedMemoryContract.InitiatorControl.U)
-  )
+      OwnedMemoryContract.InitiatorControl.U))
   scratchpad.io.requestPhase := Mux(
-    busyReg,
-    OwnedMemoryContract.PhaseExecution.U,
+    core.io.busy, core.io.memory.request.bits.phase,
     Mux(fixtureSelected || controlStageSelected,
       OwnedMemoryContract.PhaseStaging.U,
-      OwnedMemoryContract.PhaseValidation.U)
-  )
-  when(!busyReg && scratchpad.io.requestValid && scratchpad.io.requestReady) {
+      OwnedMemoryContract.PhaseValidation.U))
+  core.io.memory.request.ready := scratchpad.io.requestReady
+  core.io.memory.response.valid := scratchpad.io.responseValid
+  core.io.memory.response.bits.readData := scratchpad.io.responseReadData
+  core.io.memory.response.bits.error := scratchpad.io.responseError
+  core.io.memory.response.bits.write := scratchpad.io.responseWrite
+  core.io.memory.response.bits.initiator := scratchpad.io.responseInitiator
+  core.io.memory.response.bits.phase := scratchpad.io.responsePhase
+
+  when(!core.io.busy && scratchpad.io.requestValid && scratchpad.io.requestReady) {
     controlResponseIsValidation := controlValidationSelected
   }
   scratchpad.io.responseReady := Mux(
-    busyReg,
-    graphInputResponseState || state === storeResponse,
+    core.io.busy,
+    core.io.memory.response.ready,
     Mux(fixtureSelected,
       fixtureProvider.io.responseReady,
       Mux(controlResponseIsValidation,
@@ -197,21 +158,21 @@ class StaticStencilRegion extends Module {
   fixtureProvider.io.responseValid := fixtureSelected && scratchpad.io.responseValid
   fixtureProvider.io.responseError := scratchpad.io.responseError
 
-  io.inputStageReady := !fixtureModeReg && !busyReg &&
+  io.inputStageReady := !fixtureModeReg && !core.io.busy &&
     !fixtureProvider.io.active &&
     scratchpad.io.requestReady
-  io.inputStageResponseValid := !busyReg && !fixtureProvider.io.active &&
+  io.inputStageResponseValid := !core.io.busy && !fixtureProvider.io.active &&
     scratchpad.io.responseValid &&
     !controlResponseIsValidation
   io.inputStageResponseError := scratchpad.io.responseError
-  io.outputValidationReady := !busyReg && !fixtureProvider.io.active &&
+  io.outputValidationReady := !core.io.busy && !fixtureProvider.io.active &&
     !io.inputStageValid && outputValidReg && scratchpad.io.requestReady
-  io.outputValidationResponseValid := !busyReg && !fixtureProvider.io.active &&
+  io.outputValidationResponseValid := !core.io.busy && !fixtureProvider.io.active &&
     scratchpad.io.responseValid && controlResponseIsValidation
   io.outputValidationReadData := scratchpad.io.responseReadData
   io.outputValidationResponseError := scratchpad.io.responseError
   io.fixtureStageReady := !legacyModeReg && fixtureCanStageReg &&
-    !busyReg && !scratchpad.io.pending &&
+    !core.io.busy && !scratchpad.io.pending &&
     fixtureProvider.io.ready && !io.inputStageValid &&
     !io.outputValidationValid
   io.fixtureStageDone := fixtureProvider.io.done
@@ -231,7 +192,7 @@ class StaticStencilRegion extends Module {
   when(io.inputStageValid && io.inputStageReady) {
     legacyModeReg := true.B
   }
-  when(io.start && !busyReg && !fixtureProvider.io.active) {
+  when(io.start && !core.io.busy && !fixtureProvider.io.active) {
     legacyModeReg := true.B
   }
   when(io.fixtureStageStart && io.fixtureStageReady) {
@@ -254,161 +215,41 @@ class StaticStencilRegion extends Module {
     }
   }
 
-  when(io.cancel && busyReg) {
-    cancelRequestedReg := true.B
-  }
-
-  when(cancelling && busyReg) {
+  when(graphStart) {
     outputValidReg := false.B
-    when(!scratchpad.io.pending) {
-      busyReg := false.B
-      cancelledReg := true.B
-      cancelRequestedReg := false.B
-      state := idle
-    }
-  }.elsewhen(busyReg) {
-    cycleCountReg := cycleCountReg + 1.U
-    switch(state) {
-      is(loadCenterRequest) {
-        when(scratchpad.io.requestReady) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadCenterResponse
-        }
-      }
-      is(loadCenterResponse) {
-        when(scratchpad.io.responseValid) {
-          accumulator := scratchpad.io.responseReadData
-          state := loadNorthRequest
-        }
-      }
-      is(loadNorthRequest) {
-        when(scratchpad.io.requestReady) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadNorthResponse
-        }
-      }
-      is(loadNorthResponse) {
-        when(scratchpad.io.responseValid) {
-          accumulator := accumulator + scratchpad.io.responseReadData
-          state := loadSouthRequest
-        }
-      }
-      is(loadSouthRequest) {
-        when(scratchpad.io.requestReady) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadSouthResponse
-        }
-      }
-      is(loadSouthResponse) {
-        when(scratchpad.io.responseValid) {
-          accumulator := accumulator + scratchpad.io.responseReadData
-          state := loadWestRequest
-        }
-      }
-      is(loadWestRequest) {
-        when(scratchpad.io.requestReady) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadWestResponse
-        }
-      }
-      is(loadWestResponse) {
-        when(scratchpad.io.responseValid) {
-          accumulator := accumulator + scratchpad.io.responseReadData
-          state := loadEastRequest
-        }
-      }
-      is(loadEastRequest) {
-        when(scratchpad.io.requestReady) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadEastResponse
-        }
-      }
-      is(loadEastResponse) {
-        when(scratchpad.io.responseValid) {
-          accumulator := accumulator + scratchpad.io.responseReadData
-          state := storeRequest
-        }
-      }
-      is(storeRequest) {
-        when(scratchpad.io.requestReady) {
-          graphOutputWritesAcceptedReg := graphOutputWritesAcceptedReg + 1.U
-          state := storeResponse
-        }
-      }
-      is(storeResponse) {
-        when(scratchpad.io.responseValid) {
-          when(scratchpad.io.responseError) {
-            busyReg := false.B
-            outputValidReg := false.B
-            cancelledReg := true.B
-            state := idle
-          }.otherwise {
-            checksumReg := checksumReg + accumulator
-            when(outputIndex === 255.U) {
-              busyReg := false.B
-              outputValidReg := true.B
-              doneReg := true.B
-              state := idle
-            }.otherwise {
-              outputIndex := outputIndex + 1.U
-              state := loadCenterRequest
-            }
-          }
-        }
-      }
-    }
-  }.elsewhen(fixtureProvider.io.release) {
-    assert(!scratchpad.io.responseError)
-    busyReg := true.B
-    outputValidReg := false.B
-    outputIndex := 0.U
-    state := loadCenterRequest
-    accumulator := 0.U
-    cycleCountReg := 0.U
-    checksumReg := 0.U
-    cancelRequestedReg := false.B
-    graphInputReadsAcceptedReg := 0.U
-    graphOutputWritesAcceptedReg := 0.U
-  }.elsewhen(io.start && !scratchpad.io.pending && !fixtureProvider.io.active) {
-    busyReg := true.B
-    outputValidReg := false.B
-    outputIndex := 0.U
-    state := loadCenterRequest
-    accumulator := 0.U
-    cycleCountReg := 0.U
-    checksumReg := 0.U
-    cancelRequestedReg := false.B
-    graphInputReadsAcceptedReg := 0.U
-    graphOutputWritesAcceptedReg := 0.U
   }.elsewhen(io.inputStageValid && io.inputStageReady) {
     outputValidReg := false.B
   }
+  when(core.io.completion) {
+    outputValidReg := true.B
+    doneReg := true.B
+  }
+  when(core.io.cancellation) {
+    outputValidReg := false.B
+    cancelledReg := true.B
+  }
 
   io.outputValid := outputValidReg
-  io.busy := busyReg
+  io.busy := core.io.busy
   io.done := doneReg
   io.cancelled := cancelledReg
-  io.cycleCount := cycleCountReg
-  io.checksum := checksumReg
+  io.cycleCount := core.io.cycleCount
+  io.checksum := core.io.checksum
   io.configurationTag := StaticStencilRegionContract.ConfigurationTagValue.U(64.W)
   io.inputAcceptedCount := scratchpad.io.acceptedCount
   io.inputCompletedCount := scratchpad.io.completedCount
   io.outputAcceptedCount := 0.U
   io.outputCompletedCount := 0.U
-  io.graphInputReadsAccepted := graphInputReadsAcceptedReg
-  io.graphOutputWritesAccepted := graphOutputWritesAcceptedReg
+  io.graphInputReadsAccepted := core.io.graphInputReadsAccepted
+  io.graphOutputWritesAccepted := core.io.graphOutputWritesAccepted
   io.memoryPending := scratchpad.io.pending
 
   when(!reset.asBool) {
-    when(graphInputResponseState && scratchpad.io.responseValid) {
-      assert(!scratchpad.io.responseError)
-      assert(!scratchpad.io.responseWrite)
-      assert(scratchpad.io.responseInitiator === OwnedMemoryContract.InitiatorGraph.U)
-      assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseExecution.U)
+    when(core.io.busy && scratchpad.io.requestValid) {
+      assert(scratchpad.io.requestInitiator === OwnedMemoryContract.InitiatorGraph.U)
+      assert(scratchpad.io.requestPhase === OwnedMemoryContract.PhaseExecution.U)
     }
-    when(busyReg && state === storeResponse && scratchpad.io.responseValid) {
-      assert(!scratchpad.io.responseError)
-      assert(scratchpad.io.responseWrite)
+    when(core.io.busy && scratchpad.io.responseValid) {
       assert(scratchpad.io.responseInitiator === OwnedMemoryContract.InitiatorGraph.U)
       assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseExecution.U)
     }
@@ -418,7 +259,7 @@ class StaticStencilRegion extends Module {
       assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseStaging.U)
     }
     when(fixtureProvider.io.active && scratchpad.io.requestValid) {
-      assert(!busyReg)
+      assert(!core.io.busy)
       assert(scratchpad.io.requestWrite)
       assert(scratchpad.io.requestAddress < 324.U)
       assert(scratchpad.io.requestInitiator === OwnedMemoryContract.InitiatorFixture.U)
@@ -430,15 +271,15 @@ class StaticStencilRegion extends Module {
       assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseStaging.U)
     }
     when(fixtureProvider.io.release) {
-      assert(!busyReg)
+      assert(!core.io.busy)
       assert(!io.inputStageReady)
       assert(fixtureProvider.io.acceptedCount === 324.U)
       assert(fixtureProvider.io.completedCount === 323.U)
     }
     when(fixtureModeReg) {
       assert(!io.inputStageReady)
-      assert(!(io.start && !busyReg))
-      when(!fixtureCanStageReg && !busyReg && !fixtureProvider.io.active) {
+      assert(!(io.start && !core.io.busy))
+      when(!fixtureCanStageReg && !core.io.busy && !fixtureProvider.io.active) {
         assert(fixtureValidationResponsesReg =/= 0.U || outputValidReg)
       }
     }
@@ -447,7 +288,7 @@ class StaticStencilRegion extends Module {
       assert(scratchpad.io.responseInitiator === OwnedMemoryContract.InitiatorControl.U)
       assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseValidation.U)
     }
-    assert(!(outputValidReg && busyReg))
+    assert(!(outputValidReg && core.io.busy))
   }
 }
 

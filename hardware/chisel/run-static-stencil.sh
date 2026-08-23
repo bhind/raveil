@@ -5,7 +5,8 @@ set -eu
 
 rm -rf generated_static obj_static
 scala-cli run OwnedFixedLatencyScratchpad.scala \
-  chipyard-overlay/RaveilFixtureInputProvider.scala StaticStencilRegion.scala \
+  chipyard-overlay/RaveilFixtureInputProvider.scala \
+  chipyard-overlay/RaveilStaticStencilCore.scala StaticStencilRegion.scala \
   --server=false --main-class EmitStaticStencilRegion
 verilator --assert --cc generated_static/*.sv \
   --exe static_stencil_sim_main.cpp \

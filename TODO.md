@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -83,8 +83,9 @@ and failure preservation do not consume that slot; new implementation does.
   corrected the BOOM item from `T-0042/S01` to a bounded `T-0106/S01` evidence
   carry-in: T-0042 remains complete, the carry-in does not activate the rest of
   conditional T-0106, and later token-hardening slices remain unscheduled.
-  S-0003 instead refines the accepted T-0044 integrated-physical boundary into
-  a five-point implementation slice and a three-point clean functional review.
+  The replacement plan instead refines the accepted T-0044 integrated-physical
+  boundary into T-0044/S08. It was initially forecast for S-0003, then moved as
+  one eight-point slice into S-0001 at the calibrated 21-SP warm ceiling.
   ADR-0057 later hardens integration operations: dedicated branches may be
   pushed and opened as PRs for already authorized bounded work, but `main`
   accepts changes only through a PR. ADR-0058 adds standing authority to merge
@@ -926,6 +927,31 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Rocket fallback, Graph incremental logic, common fixture/memory, adapters,
   cache/interconnect, clocks, and placement/routing. Do not promote the
   partition sum to whole-system area or reuse 40 ns as a performance claim.
+  T-0044/S08 implements and functionally verifies the first bounded part of
+  that boundary: one elaborated ChipTop now includes the fixed Graph core,
+  Rocket fallback, common fixture provider, common owned TileLink memory,
+  selector/adapter path, cache/interconnect, and common external clock/reset
+  boundary. Graph-active, Rocket-active, runtime selection, inactive-origin,
+  private-output, oracle, reset, and accounting smokes pass. A matched
+  integrated/Rocket export pair also passes structural preflight with equal
+  external ports, canonical Rocket identity, memory-macro inventory, and clock
+  roots. Keep the local exports and preflight receipts as development evidence
+  only. The independent performance/fairness review passes the bounded S08
+  classification but blocks EXP-0011 freeze. The first independent clean
+  replay retained a fail-closed canonical-Rocket mismatch even though the two
+  exported `Rocket.sv` files were byte-identical. The bounded checker
+  correction now preserves dependency/control order and normalizes only
+  independent statements; local re-analysis of that retained raw pair passes.
+  A fresh clean replay at `bad871d...6e87` passes 63 tests, G1b through G1e,
+  both exports, the full Yosys preflight, and all raw/derived re-hashes.
+  Integrate this bounded prerequisite through PR review. After integration,
+  freeze a machine-readable estimand and overhead ledger, approved common-
+  module/delta connectivity, clock/reset semantics, macro physical views and
+  PVT/RC constraints, repetition/seed and uncertainty policy, raw/derived seal,
+  and stop rules. Keep Graph's 1,280 reads plus 256 writes distinct from
+  Rocket's lawful 800 reads plus 256 writes. Do not collect synthesis,
+  timing, area, energy, FPGA, ASIC, silicon, or performance data in S08, and do
+  not close T-0044 from this structural prerequisite.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked

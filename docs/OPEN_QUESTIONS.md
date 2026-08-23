@@ -142,6 +142,23 @@ resolves it.
   unchanged. The remaining physical question is the integrated composition:
   fallback, Graph, common memory/fixture, adapters/interconnect, clocks, and
   placement/routing must be present before any whole-system conclusion.
+  T-0044/S08 now answers only the elaboration and functional-structure part:
+  one top contains the fixed Graph core, Rocket fallback, common fixture and
+  owned memory, selector, cache/interconnect, and common clock/reset boundary;
+  a matched Rocket-only closure passes the same structural checks. The open
+  question is whether an independently reviewed, pre-data-frozen integrated
+  physical experiment can account for every included and excluded component,
+  preserve fair memory/interconnect/fallback and I/O constraints, close the
+  hierarchy, and retain any area/timing advantage. Placement/routing and energy
+  remain unmeasured.
+  The S08 fairness review makes that question executable: the future manifest
+  must normalize common clock endpoints and reset semantics, enumerate the
+  identical common subgraph and every allowed Graph/selector delta, bind macro
+  Liberty/LEF plus PVT/RC treatment, and freeze the estimand, overhead ledger,
+  seeds/repetitions, uncertainty, and raw seal. Equal port names and macro
+  counts alone are insufficient. The unequal but explained Graph/Rocket
+  dynamic traffic must remain a reported design result rather than an equality
+  assertion.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

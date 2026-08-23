@@ -1,7 +1,7 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
@@ -23,12 +23,14 @@ The 2026-08-23 Sprint coordination audit does not reopen T-0042 or alter this
 critical path. One already-active BOOM stripped-token negative is retained as
 bounded T-0106 carry-in evidence. Its local implementation candidate now passes
 the exact RTL simulation and scoped regressions, but awaits Sprint review and
-does not satisfy the trigger for further T-0106 implementation. The next
-refined Research delivery remains T-0044's
-post-EXP-0010 integrated physical boundary: first elaborate and functionally
-verify the complete Static Graph/Rocket/common-boundary hierarchy, without
-collecting or claiming whole-system area, timing, energy, FPGA, or silicon
-results. Later Sprint dates remain unset until that slice is reviewed.
+does not satisfy the trigger for further T-0106 implementation. The active
+Research delivery remains T-0044's post-EXP-0010 integrated physical boundary.
+The first S08 implementation now elaborates and functionally verifies the
+Static Graph/Rocket/common-owned-memory hierarchy and passes a matched RTL
+structural preflight. This does not collect or claim whole-system area, timing,
+energy, FPGA, ASIC, silicon, or performance results. The next boundary is an
+independent clean replay and pre-data fairness review before EXP-0011 is
+allocated or frozen. Later Sprint dates remain unset until that review closes.
 
 Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
 remaining matched physical gates, beginning with the post-EXP-0010 integrated
@@ -271,6 +273,15 @@ merely because a branch or partial implementation already exists.
    EXP-0010's fresh pair now passes its bounded screen and advances only to the
    integrated physical boundary. Gate 1 remains open until that complete
    composition is implemented, closed, and measured without missing parts.
+   T-0044/S08 now supplies the first integrated implementation prerequisite:
+   one generated top contains Graph incremental logic, Rocket fallback, the
+   common fixture/provider and owned memory, selector/adapter,
+   cache/interconnect, and common external clocks/reset. Candidate-mode RTL
+   smokes and a matched integrated/Rocket structural preflight pass. Gate 1
+   remains open because this is functional and structural development evidence,
+   not a frozen integrated physical experiment. Independent replay and
+   fairness review must close before EXP-0011 pre-data freeze or any physical
+   collection.
    Separately, ADR-0050 separates the locally sealed EXP-0008 result from
    durable promotion: both
    the retained failed RUN and completed recovery RUN need immutable remote

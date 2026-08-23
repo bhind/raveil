@@ -149,6 +149,19 @@ class ControlledRunTests(unittest.TestCase):
             "tl.a.bits.size === log2Ceil(beatBytes).U", cpu_source
         )
 
+    def test_graph_source_identity_binds_external_memory_core(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        identity_source = (root / "raveil/controlled_run.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            identity_source.count(
+                '"hardware/chisel/chipyard-overlay/'
+                'RaveilStaticStencilCore.scala"'
+            ),
+            2,
+        )
+
     def test_exact_rtl_markers_bind_to_records(self) -> None:
         records = []
         for invocation, seed in ((1, 1), (3, 3)):

@@ -231,6 +231,19 @@ normal completion grants only a private result for independent host-oracle
 checking. This is RTL functional simulation, not a product ISA, general Graph
 executor, matched CPU comparison, or hardware-performance result.
 
+The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
+that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
+`RaveilStaticStencilTLClient` translates its bounded word requests onto the
+shared TileLink fabric. The generated system retains one Rocket tile and its
+cache, one fixture provider, and one owned TileLink memory. A runtime selector
+admits either Graph or Rocket activity while the inactive candidate must remain
+quiescent. The Graph result remains private until its validation path completes.
+The matched Rocket-only top shares the external port, generator/toolchain,
+Rocket module, memory-macro, and clock-root contracts and exists only as the
+future integrated physical denominator. This structural composition does not
+make the fixed executor configurable and does not establish physical or
+performance advantage.
+
 ADR-0042 uses the pinned subsystem TileLink RAM inherited by Rocket and BOOM as
 an intermediate functional bridge. Only the fallback's input and private output
 are linked there; code and completion control remain in normal memory. This
