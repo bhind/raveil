@@ -134,6 +134,46 @@ class RaveilFixtureRepeatedMatchedRocketConfig extends Config(
   new chipyard.RocketConfig
 )
 
+/** G1b elaboration-only topology: dormant Graph client plus real Rocket. */
+class RaveilIntegratedGraphRocketConfig extends Config(
+  new WithRaveilStaticStencilAttachment ++
+  new WithRaveilIntegratedGraphBuildSystem ++
+  new WithRaveilIntegratedGraphMemorySourceRange(8224, 8256) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.RocketConfig
+)
+
+/** G1c functional-smoke topology: one active Graph invocation plus real Rocket. */
+class RaveilActiveIntegratedGraphRocketConfig extends Config(
+  new WithRaveilActiveStaticStencilAttachment ++
+  new WithRaveilIntegratedGraphBuildSystem ++
+  new WithRaveilIntegratedGraphMemorySourceRange(8224, 8256) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.RocketConfig
+)
+
+/** G1d fallback: the same integrated graph topology with Rocket DCache selected. */
+class RaveilFallbackIntegratedGraphRocketConfig extends Config(
+  new WithRaveilStaticStencilAttachment ++
+  new WithRaveilIntegratedGraphBuildSystem ++
+  new WithRaveilFallbackIntegratedGraphMemorySourceRange(8224, 8256) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.RocketConfig
+)
+
+/** G1e: one generated topology with software-selected Graph or Rocket execution. */
+class RaveilRuntimeIntegratedGraphRocketConfig extends Config(
+  new WithRaveilRuntimeStaticStencilAttachment ++
+  new WithRaveilIntegratedGraphBuildSystem ++
+  new WithRaveilRuntimeIntegratedGraphMemorySourceRange(8224, 8256) ++
+  new WithRaveilDCacheOriginTagger ++
+  new testchipip.soc.WithNoScratchpads ++
+  new chipyard.RocketConfig
+)
+
 class RaveilFixtureRepeatedMatchedSmallBoomConfig extends Config(
   new WithRaveilOwnedBuildSystem ++
   new WithRaveilFixtureRepeatedMatchedMemorySourceRange(8288, 8320) ++

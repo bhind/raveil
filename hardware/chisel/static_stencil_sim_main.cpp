@@ -591,6 +591,42 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // Preserve cancel-wins at the narrowest publication race: accept the
+    // final output write, then assert cancel while its response is pending.
+    // The private output word may be written, but completion/publication must
+    // never become visible.
+    const auto final_cancel_input = make_input(4);
+    load_input(top, final_cancel_input);
+    top.io_start = 1;
+    cycle(top);
+    top.io_start = 0;
+    for (unsigned guard = 0;
+         !(top.io_graphOutputWritesAccepted == kExpectedOutputWrites
+           && top.io_memoryPending);
+         ++guard) {
+        cycle(top);
+        if (guard > 8192U) {
+            std::cerr << "final-store cancel did not reach pending response\n";
+            return 1;
+        }
+    }
+    top.io_cancel = 1;
+    cycle(top);
+    if (top.io_done || top.io_outputValid) {
+        std::cerr << "final-store cancel exposed completion or publication\n";
+        return 1;
+    }
+    cycle(top);
+    top.io_cancel = 0;
+    top.eval();
+    if (!top.io_cancelled || top.io_busy || top.io_outputValid
+        || top.io_memoryPending || top.io_done
+        || top.io_graphInputReadsAccepted != kExpectedInputReads
+        || top.io_graphOutputWritesAccepted != kExpectedOutputWrites) {
+        std::cerr << "final-store cancel did not win publication race\n";
+        return 1;
+    }
+
     const auto second_input = make_input(3);
     const std::uint32_t second_staging_cycles = load_input(top, second_input);
     std::uint32_t second_execution_cycles = 0;
@@ -624,7 +660,7 @@ int main(int argc, char** argv) {
         second_accepted, second_completed
     );
 
-    std::cout << "STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=1 outputs=512"
+    std::cout << "STATIC-STENCIL-RTL-V1 status=OK runs=2 cancelled=2 outputs=512"
               << " cycles_per_run=" << kExpectedCycles
               << " graph_input_reads_per_run=" << kExpectedInputReads
               << " graph_output_writes_per_run=" << kExpectedOutputWrites

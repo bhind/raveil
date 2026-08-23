@@ -20,6 +20,11 @@ case class RaveilOwnedMemoryParams(
   controlledRun: Boolean = false,
   repeatedControlledRun: Boolean = false,
   fixtureOwnedInputStaging: Boolean = false,
+  integratedGraph: Boolean = false,
+  graphSelected: Boolean = false,
+  runtimeSelectable: Boolean = false,
+  graphExpectedClientSourceStart: Int = 0,
+  graphExpectedClientSourceEnd: Int = 0,
   fateAuditAddress: Option[BigInt] = None,
   tokenAuditAddress: Option[BigInt] = None,
   // The first CPU adapter deliberately uses the uncached peripheral path so
@@ -28,7 +33,6 @@ case class RaveilOwnedMemoryParams(
   // is later work and must not be inferred from functional elaboration.
   busWhere: TLBusWrapperLocation = PBUS
 )
-
 case object RaveilOwnedMemoryKey
   extends Field[Option[RaveilOwnedMemoryParams]](None)
 
@@ -48,6 +52,12 @@ case object RaveilDCacheOrigin extends DataKey[Bool]("raveil_dcache_origin")
 case class RaveilDCacheOriginField()
     extends SimpleBundleField[Bool](RaveilDCacheOrigin)(Output(Bool()), false.B)
 
+/** Integrated-only Graph classifier; absent clients negotiate its false default. */
+case object RaveilGraphOrigin extends DataKey[Bool]("raveil_graph_origin")
+
+case class RaveilGraphOriginField()
+    extends SimpleBundleField[Bool](RaveilGraphOrigin)(Output(Bool()), false.B)
+
 /**
   * Owned 32-bit, maximum-one-outstanding TileLink manager.
   *
@@ -60,6 +70,10 @@ case class RaveilDCacheOriginField()
   */
 class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameters)
     extends LazyModule {
+  require(!params.graphSelected || params.integratedGraph)
+  require(!params.runtimeSelectable ||
+    (params.integratedGraph && params.fixtureOwnedInputStaging))
+  require(!(params.runtimeSelectable && params.graphSelected))
   private val beatBytes = 4
 
   require(isPow2(params.size))
@@ -70,7 +84,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
   require(params.expectedClientSourceStart >= 0)
   require(params.expectedClientSourceEnd > params.expectedClientSourceStart)
   require(!params.repeatedControlledRun || params.controlledRun)
-  require(!params.fixtureOwnedInputStaging || params.repeatedControlledRun)
+  require(!params.fixtureOwnedInputStaging ||
+    params.repeatedControlledRun || params.integratedGraph)
   params.fateAuditAddress.foreach { address =>
     require(address >= params.base && address < params.base + params.size)
     require(address % beatBytes == 0)
@@ -109,7 +124,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       RaveilDCacheOrigin,
       RaveilCpuTokenValid,
       RaveilCpuTokenEpoch,
-      RaveilCpuTokenSequence)
+      RaveilCpuTokenSequence) ++
+      (if (params.integratedGraph) Seq(RaveilGraphOrigin) else Seq.empty)
   )))
 
   lazy val module = new LazyModuleImp(this) {
@@ -131,6 +147,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val responsePhase = RegInit(RaveilOwnedMemoryPhase.Installation.U(3.W))
     val responseExpectedClient = RegInit(false.B)
     val responseDcacheOrigin = RegInit(false.B)
+    val responseGraphOrigin = RegInit(false.B)
     val responseFateAudit = RegInit(false.B)
     val responseFateAuditSequence = RegInit(0.U(16.W))
     val responseFateAuditOpcode = RegInit(0.U(tl.a.bits.opcode.getWidth.W))
@@ -154,6 +171,14 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
     val unexpectedCompletedCount = RegInit(0.U(32.W))
     val dcacheOriginAcceptedCount = RegInit(0.U(32.W))
     val dcacheOriginCompletedCount = RegInit(0.U(32.W))
+    val graphOriginAcceptedCount = RegInit(0.U(32.W))
+    val graphOriginCompletedCount = RegInit(0.U(32.W))
+    val runtimeSelectionLocked = if (params.runtimeSelectable) {
+      Some(RegInit(false.B))
+    } else None
+    val runtimeGraphSelected = if (params.runtimeSelectable) {
+      Some(RegInit(false.B))
+    } else None
     val nonDcacheOriginAcceptedCount = RegInit(0.U(32.W))
     val nonDcacheOriginCompletedCount = RegInit(0.U(32.W))
     val lastDcacheOriginAcceptedSource = RegInit(0.U(32.W))
@@ -249,11 +274,45 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       (dataRequest && wordIndex >= validWords.U) ||
       (dataRequest && !controlledWordRequest) ||
       (phaseWrite && (!phaseByteEnabled || !phaseValueValid))
-    val expectedClientRequest =
+    val rocketExpectedClientRequest =
       tl.a.bits.source >= params.expectedClientSourceStart.U &&
       tl.a.bits.source < params.expectedClientSourceEnd.U
     val dcacheOriginRequest =
       tl.a.bits.user.lift(RaveilDCacheOrigin).getOrElse(false.B)
+    val graphOriginRequest = if (params.integratedGraph) {
+      tl.a.bits.user.lift(RaveilGraphOrigin).getOrElse(false.B)
+    } else {
+      false.B
+    }
+    val graphExpectedClientRequest = if (params.integratedGraph) {
+      graphOriginRequest &&
+        tl.a.bits.source >= params.graphExpectedClientSourceStart.U &&
+        tl.a.bits.source < params.graphExpectedClientSourceEnd.U
+    } else false.B
+    val candidateOriginRequest = if (params.integratedGraph) {
+      dcacheOriginRequest || graphOriginRequest
+    } else dcacheOriginRequest
+    val expectedClientRequest = rocketExpectedClientRequest || graphExpectedClientRequest
+    val effectiveGraphSelected = if (params.runtimeSelectable) {
+      runtimeGraphSelected.get
+    } else {
+      params.graphSelected.B
+    }
+    val selectedExpectedCandidateRequest =
+      if (params.runtimeSelectable) {
+        Mux(runtimeSelectionLocked.get,
+          Mux(effectiveGraphSelected,
+            graphOriginRequest && graphExpectedClientRequest,
+            dcacheOriginRequest && rocketExpectedClientRequest),
+          (graphOriginRequest && graphExpectedClientRequest) ||
+            (dcacheOriginRequest && rocketExpectedClientRequest))
+      } else if (params.graphSelected) {
+        graphOriginRequest && graphExpectedClientRequest
+      } else if (params.integratedGraph) {
+        dcacheOriginRequest && rocketExpectedClientRequest
+      } else {
+        dcacheOriginRequest && expectedClientRequest
+      }
     val accountingPhase = WireDefault(phase)
     if (params.controlledRun) {
       when(dataRequest && dcacheOriginRequest &&
@@ -322,7 +381,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       false.B
     }
     val fixtureCandidateDataRequest = if (params.fixtureOwnedInputStaging) {
-      tl.a.valid && dataRequest && dcacheOriginRequest
+      tl.a.valid && dataRequest && candidateOriginRequest
     } else {
       false.B
     }
@@ -346,7 +405,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           "unexpected candidate data request before fixture release")
       }
       when(tl.a.fire && fixturePreReleasePhase && dataRequest &&
-          dcacheOriginRequest) {
+          candidateOriginRequest) {
         fixturePreReleaseCandidateAcceptedCount :=
           fixturePreReleaseCandidateAcceptedCount + 1.U
       }
@@ -392,6 +451,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         responsePhase := RaveilOwnedMemoryPhase.Staging.U
         responseExpectedClient := false.B
         responseDcacheOrigin := false.B
+        responseGraphOrigin := false.B
         responseFixture := true.B
         responseFateAudit := false.B
         responseTokenAudit := false.B
@@ -408,6 +468,19 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           invocationPhaseWriteCounts(RaveilOwnedMemoryPhase.Staging) + 1.U
       }
       when(fixtureStart) {
+        if (params.runtimeSelectable) {
+          assert(!runtimeSelectionLocked.get,
+            "Raveil runtime selector changed after selection")
+          assert(graphOriginRequest =/= dcacheOriginRequest,
+            "Raveil runtime selector did not receive exactly one candidate origin")
+          runtimeSelectionLocked.get := true.B
+          runtimeGraphSelected.get := graphOriginRequest
+          when(graphOriginRequest) {
+            printf("RAVEIL-G1E-SELECT-V1 mode=graph locked=1 graph_origin=1 dcache_origin=0 performance=not-measured\n")
+          }.otherwise {
+            printf("RAVEIL-G1E-SELECT-V1 mode=rocket locked=1 graph_origin=0 dcache_origin=1 performance=not-measured\n")
+          }
+        }
         phase := RaveilOwnedMemoryPhase.Staging.U
         fixturePreReleaseCandidateAcceptedCount := 0.U
         fixtureReleaseCount := 0.U
@@ -484,10 +557,14 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       }
     }
     when(tl.a.fire) {
+      if (params.integratedGraph) {
+        assert(!(dcacheOriginRequest && graphOriginRequest),
+          "Raveil Graph request impersonated DCache origin")
+      }
       if (params.controlledRun) {
         when(phase === RaveilOwnedMemoryPhase.Execution.U) {
           val admittedExecutionRequest = dataRequest && !requestError &&
-            dcacheOriginRequest && expectedClientRequest &&
+            selectedExpectedCandidateRequest &&
             ((get && wordIndex < 324.U) ||
               (put && wordIndex >= 324.U && wordIndex < 580.U))
           when(!admittedExecutionRequest) {
@@ -504,6 +581,13 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         }
         when(phase === RaveilOwnedMemoryPhase.Validation.U) {
           val admittedValidationRequest = dataRequest && !requestError && get &&
+            (if (params.runtimeSelectable) {
+              selectedExpectedCandidateRequest
+            } else if (params.graphSelected) {
+              graphOriginRequest && graphExpectedClientRequest
+            } else if (params.integratedGraph) {
+              dcacheOriginRequest && rocketExpectedClientRequest
+            } else true.B) &&
             wordIndex === 324.U +
               activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation)
           when(!admittedValidationRequest) {
@@ -533,6 +617,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       responsePhase := accountingPhase
       responseExpectedClient := expectedClientRequest
       responseDcacheOrigin := dcacheOriginRequest
+      responseGraphOrigin := graphOriginRequest
       responseFateAudit := false.B
       responseTokenAudit := false.B
       params.fateAuditAddress.foreach { address =>
@@ -573,7 +658,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
       when(dataRequest && !requestError) {
         if (params.controlledRun) {
           when(accountingPhase === RaveilOwnedMemoryPhase.Staging.U) {
-            assert(dcacheOriginRequest && expectedClientRequest && put,
+            assert(selectedExpectedCandidateRequest && put,
               "Raveil controlled staging traffic changed")
             assert(wordIndex === activePhaseWriteCounts(RaveilOwnedMemoryPhase.Staging),
               "Raveil controlled staging address order changed")
@@ -581,7 +666,7 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
               "Raveil controlled staging traffic exceeded 324 words")
           }
           when(accountingPhase === RaveilOwnedMemoryPhase.Execution.U) {
-            when(!(dcacheOriginRequest && expectedClientRequest)) {
+            when(!selectedExpectedCandidateRequest) {
               printf("RAVEIL-CONTROLLED-MIXED-TRAFFIC-V1 phase=%d cycle=%d address=0x%x source=%d opcode=%d dcache_origin=%d expected_source=%d execution_reads=%d execution_writes=%d accepted=%d completed=%d\n",
                 accountingPhase, globalCycle, requestAddress, tl.a.bits.source,
                 tl.a.bits.opcode, dcacheOriginRequest, expectedClientRequest,
@@ -589,15 +674,18 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
                 activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
                 acceptedCount, completedCount)
             }
-            assert(dcacheOriginRequest && expectedClientRequest,
+            assert(selectedExpectedCandidateRequest,
               "Raveil controlled execution admitted mixed traffic")
             assert(
               (get && wordIndex < 324.U) ||
               (put && wordIndex >= 324.U && wordIndex < 580.U),
               "Raveil controlled execution operation or region changed")
             assert(
-              activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution) +
-                activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution) < 1056.U,
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution) +
+                activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution) <
+                  (if (params.runtimeSelectable) {
+                    Mux(effectiveGraphSelected, 1536.U, 1056.U)
+                  } else if (params.graphSelected) 1536.U else 1056.U),
               "Raveil controlled execution traffic exceeded the frozen workload")
           }
           when(accountingPhase === RaveilOwnedMemoryPhase.Validation.U) {
@@ -611,6 +699,16 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
             }
             assert(get,
               "Raveil controlled validation traffic changed")
+            if (params.runtimeSelectable) {
+              assert(selectedExpectedCandidateRequest,
+                "Raveil runtime-selected validation lost selected origin/source")
+            } else if (params.graphSelected) {
+              assert(graphOriginRequest && graphExpectedClientRequest,
+                "Raveil integrated validation lost Graph origin/source")
+            } else if (params.integratedGraph) {
+              assert(dcacheOriginRequest && expectedClientRequest,
+                "Raveil fallback validation lost DCache origin/source")
+            }
             assert(
               wordIndex === 324.U +
                 activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation),
@@ -639,6 +737,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           nonDcacheOriginAcceptedCount := nonDcacheOriginAcceptedCount + 1.U
           lastNonDcacheOriginAcceptedSource := tl.a.bits.source
           lastNonDcacheOriginAcceptedPhase := accountingPhase
+        }
+        when(graphOriginRequest) {
+          graphOriginAcceptedCount := graphOriginAcceptedCount + 1.U
         }
         when(get) {
           phaseReadCounts(accountingPhase) := phaseReadCounts(accountingPhase) + 1.U
@@ -779,14 +880,43 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
               printf("RAVEIL-CONTROLLED-RESOURCE-V1 resource_sha256=16664d8ed96865c60ea41c91452b5e6748b055e0dfef3f786b13bd6f90127748 data_width_bits=32 operation_width_bytes=4 request_ports=1 response_ports=1 maximum_outstanding_requests=1 request_buffer_depth=0 response_buffer_depth=1 physical_banks=1 physical_words=1024 valid_words=580 arbitration=none-at-owned-contract-ingress accepted_operations=read,write-byte-mask response_rule=one-module-local-cycle-after-acceptance response_hold=stable-until-consumed\n")
             }
           }
+          val expectedExecutionReads =
+            (if (params.runtimeSelectable) {
+              Mux(effectiveGraphSelected, 1280.U, 800.U)
+            } else if (params.graphSelected) 1280.U else 800.U)
           when(responsePhase === RaveilOwnedMemoryPhase.Execution.U &&
-              activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution) === 800.U &&
+              activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution) ===
+                expectedExecutionReads &&
               activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution) === 256.U) {
             assert(acceptedCount === completedCount + 1.U,
               "Raveil controlled execution did not end quiescent")
             phase := RaveilOwnedMemoryPhase.Completion.U
             completionStartCycle := globalCycle
-            if (params.repeatedControlledRun) {
+            if (params.runtimeSelectable) {
+              when(effectiveGraphSelected) {
+                printf("RAVEIL-G1C-EXECUTION-COMPLETE-V1 graph_reads=%d graph_writes=%d dcache_origin_accepted=%d dcache_origin_completed=%d pending=0 performance=not-measured\n",
+                  activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                  activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                  dcacheOriginAcceptedCount, dcacheOriginCompletedCount)
+              }.otherwise {
+                printf("RAVEIL-G1D-EXECUTION-COMPLETE-V1 dcache_reads=%d dcache_writes=%d dcache_origin_accepted=%d dcache_origin_completed=%d graph_origin_accepted=%d graph_origin_completed=%d pending=0 performance=not-measured\n",
+                  activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                  activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                  dcacheOriginAcceptedCount, dcacheOriginCompletedCount + 1.U,
+                  graphOriginAcceptedCount, graphOriginCompletedCount)
+              }
+            } else if (params.integratedGraph && !params.graphSelected) {
+              printf("RAVEIL-G1D-EXECUTION-COMPLETE-V1 dcache_reads=%d dcache_writes=%d dcache_origin_accepted=%d dcache_origin_completed=%d graph_origin_accepted=%d graph_origin_completed=%d pending=0 performance=not-measured\n",
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                dcacheOriginAcceptedCount, dcacheOriginCompletedCount + 1.U,
+                graphOriginAcceptedCount, graphOriginCompletedCount)
+            } else if (params.graphSelected) {
+              printf("RAVEIL-G1C-EXECUTION-COMPLETE-V1 graph_reads=%d graph_writes=%d dcache_origin_accepted=%d dcache_origin_completed=%d pending=0 performance=not-measured\n",
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                dcacheOriginAcceptedCount, dcacheOriginCompletedCount)
+            } else if (params.repeatedControlledRun) {
               printf("RAVEIL-REPEATED-PHASE-V1 invocation=%d from=2 to=3 cycle=%d accepted=%d completed=%d busy_before=%d publication_cycles=0\n",
                 controlledInvocation, globalCycle, acceptedCount,
                 completedCount + 1.U, busy)
@@ -841,9 +971,54 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
                 controlledInvocation, responseWordIndex - 324.U, responseData)
             }
           }
+          if (params.runtimeSelectable) {
+            when(responsePhase === RaveilOwnedMemoryPhase.Validation.U &&
+                !effectiveGraphSelected) {
+              printf("RAVEIL-G1D-VALIDATION-V1 address=%d index=%d data=0x%x error=%d\n",
+                responseWordIndex, responseWordIndex - 324.U, responseData,
+                responseError)
+            }
+          } else if (params.integratedGraph && !params.graphSelected) {
+            when(responsePhase === RaveilOwnedMemoryPhase.Validation.U) {
+              printf("RAVEIL-G1D-VALIDATION-V1 address=%d index=%d data=0x%x error=%d\n",
+                responseWordIndex, responseWordIndex - 324.U, responseData,
+                responseError)
+            }
+          }
           when(responsePhase === RaveilOwnedMemoryPhase.Validation.U &&
               activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation) === 256.U) {
-            if (params.repeatedControlledRun) {
+            if (params.runtimeSelectable) {
+              phase := RaveilOwnedMemoryPhase.Publication.U
+              when(effectiveGraphSelected) {
+                printf("RAVEIL-G1C-COMPLETE-V1 fixture_writes=324 graph_execution_reads=%d graph_execution_writes=%d validation_reads=%d graph_origin_accepted=%d graph_origin_completed=%d dcache_origin_accepted=%d dcache_origin_completed=%d publication=private pending=0 performance=not-measured\n",
+                  activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                  activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                  activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation),
+                  graphOriginAcceptedCount, graphOriginCompletedCount + 1.U,
+                  dcacheOriginAcceptedCount, dcacheOriginCompletedCount)
+              }.otherwise {
+                printf("RAVEIL-G1D-COMPLETE-V1 fixture_writes=324 dcache_execution_reads=%d dcache_execution_writes=%d validation_reads=%d dcache_origin_accepted=%d dcache_origin_completed=%d graph_origin_accepted=%d graph_origin_completed=%d publication=private pending=0 performance=not-measured\n",
+                  activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                  activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                  activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation),
+                  dcacheOriginAcceptedCount, dcacheOriginCompletedCount + 1.U,
+                  graphOriginAcceptedCount, graphOriginCompletedCount)
+              }
+            } else if (params.integratedGraph && !params.graphSelected) {
+              phase := RaveilOwnedMemoryPhase.Publication.U
+              printf("RAVEIL-G1D-COMPLETE-V1 fixture_writes=324 dcache_execution_reads=%d dcache_execution_writes=%d validation_reads=%d dcache_origin_accepted=%d dcache_origin_completed=%d graph_origin_accepted=%d graph_origin_completed=%d publication=private pending=0 performance=not-measured\n",
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution), activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation), dcacheOriginAcceptedCount, dcacheOriginCompletedCount + 1.U,
+                graphOriginAcceptedCount, graphOriginCompletedCount)
+            } else if (params.graphSelected) {
+              phase := RaveilOwnedMemoryPhase.Publication.U
+              printf("RAVEIL-G1C-COMPLETE-V1 fixture_writes=324 graph_execution_reads=%d graph_execution_writes=%d validation_reads=%d graph_origin_accepted=%d graph_origin_completed=%d dcache_origin_accepted=%d dcache_origin_completed=%d publication=private pending=0 performance=not-measured\n",
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Execution),
+                activePhaseWriteCounts(RaveilOwnedMemoryPhase.Execution),
+                activePhaseReadCounts(RaveilOwnedMemoryPhase.Validation),
+                graphOriginAcceptedCount, graphOriginCompletedCount + 1.U,
+                dcacheOriginAcceptedCount, dcacheOriginCompletedCount)
+            } else if (params.repeatedControlledRun) {
               phase := RaveilOwnedMemoryPhase.Staging.U
               if (params.fixtureOwnedInputStaging) {
                 printf("RAVEIL-FIXTURE-REARM-V1 invocation=%d from=4 to=1 cycle=%d pending=0 validation_responses=256 rearm_count=1\n",
@@ -915,6 +1090,9 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
           lastNonDcacheOriginCompletedSource := responseSource
           lastNonDcacheOriginCompletedPhase := responsePhase
         }
+        when(responseGraphOrigin) {
+          graphOriginCompletedCount := graphOriginCompletedCount + 1.U
+        }
       }
     }
 
@@ -927,6 +1105,8 @@ class RaveilOwnedTLMemory(params: RaveilOwnedMemoryParams)(implicit p: Parameter
         (busy && responseIsData && !responseError && !responseExpectedClient).asUInt)
       assert(dcacheOriginAcceptedCount === dcacheOriginCompletedCount +
         (busy && responseIsData && !responseError && responseDcacheOrigin).asUInt)
+      assert(graphOriginAcceptedCount === graphOriginCompletedCount +
+        (busy && responseIsData && !responseError && responseGraphOrigin).asUInt)
       assert(nonDcacheOriginAcceptedCount === nonDcacheOriginCompletedCount +
         (busy && responseIsData && !responseError && !responseDcacheOrigin).asUInt)
       when(responseHeld) {
@@ -1009,6 +1189,55 @@ class WithRaveilFixtureRepeatedMatchedMemorySourceRange(start: Int, end: Int)
     controlledRun = true,
     repeatedControlledRun = true,
     fixtureOwnedInputStaging = true
+  ))
+})
+
+class WithRaveilIntegratedGraphMemorySourceRange(start: Int, end: Int)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    size = 4 * 1024,
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    validWords = Some(580),
+    controlledRun = true,
+    fixtureOwnedInputStaging = true,
+    integratedGraph = true,
+    graphSelected = true,
+    graphExpectedClientSourceStart = 32768,
+    graphExpectedClientSourceEnd = 32800
+  ))
+})
+
+class WithRaveilFallbackIntegratedGraphMemorySourceRange(start: Int, end: Int)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    size = 4 * 1024,
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    validWords = Some(580),
+    controlledRun = true,
+    fixtureOwnedInputStaging = true,
+    integratedGraph = true,
+    graphSelected = false,
+    graphExpectedClientSourceStart = 32768,
+    graphExpectedClientSourceEnd = 32800
+  ))
+})
+
+class WithRaveilRuntimeIntegratedGraphMemorySourceRange(start: Int, end: Int)
+    extends Config((site, here, up) => {
+  case RaveilOwnedMemoryKey => Some(RaveilOwnedMemoryParams(
+    size = 4 * 1024,
+    expectedClientSourceStart = start,
+    expectedClientSourceEnd = end,
+    validWords = Some(580),
+    controlledRun = true,
+    fixtureOwnedInputStaging = true,
+    integratedGraph = true,
+    graphSelected = false,
+    runtimeSelectable = true,
+    graphExpectedClientSourceStart = 32768,
+    graphExpectedClientSourceEnd = 32800
   ))
 })
 

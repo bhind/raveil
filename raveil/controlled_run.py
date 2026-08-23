@@ -193,6 +193,7 @@ def static_graph_source_id() -> str:
     relative_paths = (
         "hardware/chisel/StaticStencilRegion.scala",
         "hardware/chisel/OwnedFixedLatencyScratchpad.scala",
+        "hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala",
         "hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala",
         "hardware/chisel/static_stencil_sim_main.cpp",
         "hardware/chisel/run-static-stencil-rtl.sh",
@@ -218,6 +219,7 @@ def static_graph_fixture_source_id() -> str:
     for relative in (
         "hardware/chisel/StaticStencilRegion.scala",
         "hardware/chisel/OwnedFixedLatencyScratchpad.scala",
+        "hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala",
         "hardware/chisel/chipyard-overlay/RaveilFixtureInputProvider.scala",
         "hardware/chisel/static_stencil_sim_main.cpp",
         "hardware/chisel/run-static-stencil-rtl.sh",
