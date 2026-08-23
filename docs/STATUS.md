@@ -658,7 +658,7 @@ final structural comparison because Yosys emitted byte-identical Rocket source
 with a different order for independent default assignments and synchronous
 updates inside one RTLIL process. The failed preflight log is retained at
 SHA-256 `21ade950f7077be6393aaaeb7262018126c2636165f945c6a2c2f0a2b24eda1d`.
-The checker correction candidate preserves every dependency and control
+The checker correction preserves every dependency and control
 boundary while canonicalizing only independent statements within a contiguous
 default-assignment run or one synchronous-update run. Sixty-three focused
 tests pass, including dependency, duplicate-write, clock, switch, and case
@@ -667,8 +667,15 @@ Rocket canonical SHA-256
 `09a5cb7cc8214f4fd933eacc6343943b7eba41ab9c3a520075fbf2fa10c43713` and
 comparison-report SHA-256
 `5f1cc0685bb8d73b7949412fe59fa81b074d5e5ed6e97247a3f3d474290cae6d`.
-This is a local checker-correction candidate, not independent acceptance; a
-fresh clean replay remains required before S08 integration.
+A fresh independent replay at candidate `bad871d95abcaed9d5589bf24ce40f4fa9666e87`
+then passed all 63 tests, G1b through G1e, both exports, the complete Yosys
+preflight, and every raw and derived manifest re-hash. Its preflight-log,
+raw-manifest, and derived-manifest SHA-256 values are respectively
+`59370e6a39cffeeff902f1a7833fe3815aab1ed0967870b121abed29a84b0354`,
+`9901949fc321d4a2a77f31c2113f54171cf0406e6533ed3750f34c329eff205f`,
+and `bc184ea0368c0ff3138b9b2e8359e1eb069a99de1592e77307f8db66000bc0ab`.
+This verifies only the S08 functional/structural prerequisite. It neither
+freezes EXP-0011 nor supports a physical or performance claim.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

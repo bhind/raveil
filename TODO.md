@@ -942,7 +942,9 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   exported `Rocket.sv` files were byte-identical. The bounded checker
   correction now preserves dependency/control order and normalizes only
   independent statements; local re-analysis of that retained raw pair passes.
-  Repeat the complete clean replay before integration. Only after it passes,
+  A fresh clean replay at `bad871d...6e87` passes 63 tests, G1b through G1e,
+  both exports, the full Yosys preflight, and all raw/derived re-hashes.
+  Integrate this bounded prerequisite through PR review. After integration,
   freeze a machine-readable estimand and overhead ledger, approved common-
   module/delta connectivity, clock/reset semantics, macro physical views and
   PVT/RC constraints, repetition/seed and uncertainty policy, raw/derived seal,
