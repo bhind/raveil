@@ -937,7 +937,12 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   external ports, canonical Rocket identity, memory-macro inventory, and clock
   roots. Keep the local exports and preflight receipts as development evidence
   only. The independent performance/fairness review passes the bounded S08
-  classification but blocks EXP-0011 freeze. Complete the clean replay, then
+  classification but blocks EXP-0011 freeze. The first independent clean
+  replay retained a fail-closed canonical-Rocket mismatch even though the two
+  exported `Rocket.sv` files were byte-identical. The bounded checker
+  correction now preserves dependency/control order and normalizes only
+  independent statements; local re-analysis of that retained raw pair passes.
+  Repeat the complete clean replay before integration. Only after it passes,
   freeze a machine-readable estimand and overhead ledger, approved common-
   module/delta connectivity, clock/reset semantics, macro physical views and
   PVT/RC constraints, repetition/seed and uncertainty policy, raw/derived seal,

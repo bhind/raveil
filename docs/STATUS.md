@@ -652,6 +652,23 @@ uncertainty policy, and append-once raw/derived rules. The existing Graph 1,280
 reads plus 256 writes and Rocket 800 reads plus 256 writes remain lawful but
 unequal dynamic traffic; no later record may describe them as equal traffic or
 equal execution work.
+The first independent clean replay passed all 62 then-current focused tests,
+all four G1 functional runners, and both deterministic exports, but failed the
+final structural comparison because Yosys emitted byte-identical Rocket source
+with a different order for independent default assignments and synchronous
+updates inside one RTLIL process. The failed preflight log is retained at
+SHA-256 `21ade950f7077be6393aaaeb7262018126c2636165f945c6a2c2f0a2b24eda1d`.
+The checker correction candidate preserves every dependency and control
+boundary while canonicalizing only independent statements within a contiguous
+default-assignment run or one synchronous-update run. Sixty-three focused
+tests pass, including dependency, duplicate-write, clock, switch, and case
+negative tests. Re-analysis of the retained clean raw RTLIL now gives equal
+Rocket canonical SHA-256
+`09a5cb7cc8214f4fd933eacc6343943b7eba41ab9c3a520075fbf2fa10c43713` and
+comparison-report SHA-256
+`5f1cc0685bb8d73b7949412fe59fa81b074d5e5ed6e97247a3f3d474290cae6d`.
+This is a local checker-correction candidate, not independent acceptance; a
+fresh clean replay remains required before S08 integration.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

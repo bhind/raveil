@@ -133,7 +133,8 @@ def canonical_rtlil_module_sha256(
     renumber an otherwise byte-identical Rocket module and reorder its RTLIL
     declarations.  The canonical form changes only those numeric components,
     keeps attributes, source locations, types, parameters, and connections,
-    and sorts complete top-level RTLIL units whose order has no semantics.
+    sorts complete top-level RTLIL units, and canonicalizes only proven-
+    independent statements inside process runs whose order has no semantics.
     """
     require(
         len(module_lines) >= 2
@@ -144,6 +145,98 @@ def canonical_rtlil_module_sha256(
 
     def normalize(line: str) -> str:
         return YOSYS_AUTO_ID.sub("<yosys-auto-id>", line)
+
+    def signal_base(token: str) -> str | None:
+        if not token.startswith(("\\", "$")):
+            return None
+        return token.split("[", 1)[0]
+
+    def process_statement_access(
+        line: str, operation: str
+    ) -> tuple[set[str], set[str]] | None:
+        """Return conservative signal accesses for one flat RTLIL statement."""
+        statement = line.strip()
+        if operation == "assign" and statement == "assign { } { }":
+            return set(), set()
+        fields = statement.split(maxsplit=2)
+        if len(fields) != 3 or fields[0] != operation:
+            return None
+        target = signal_base(fields[1])
+        if target is None:
+            return None
+        reads = {
+            base
+            for token in re.findall(r"(?:\\|\$)[^\s{}]+", fields[2])
+            if (base := signal_base(token)) is not None
+        }
+        return {target}, reads
+
+    def normalize_partial_order_run(
+        run: list[str], operation: str, *, reads_conflict: bool
+    ) -> list[str]:
+        """Sort independent statements while preserving every dependency edge."""
+        accesses = [process_statement_access(line, operation) for line in run]
+        if any(access is None for access in accesses):
+            return run
+        concrete = [access for access in accesses if access is not None]
+        edges = [set() for _ in run]
+        indegree = [0 for _ in run]
+        for index, (writes, reads) in enumerate(concrete):
+            for other_index in range(index + 1, len(concrete)):
+                other_writes, other_reads = concrete[other_index]
+                conflict = bool(writes & other_writes)
+                if reads_conflict:
+                    conflict = conflict or bool(
+                        writes & other_reads or other_writes & reads
+                    )
+                if conflict:
+                    edges[index].add(other_index)
+                    indegree[other_index] += 1
+        ready = {index for index, degree in enumerate(indegree) if degree == 0}
+        ordered: list[str] = []
+        while ready:
+            index = min(ready, key=lambda item: (run[item], item))
+            ready.remove(index)
+            ordered.append(run[index])
+            for successor in edges[index]:
+                indegree[successor] -= 1
+                if indegree[successor] == 0:
+                    ready.add(successor)
+        return ordered if len(ordered) == len(run) else run
+
+    def normalize_process(block: list[str]) -> list[str]:
+        lines = list(block)
+        # Defaults before a switch are priority-sensitive, so never move an
+        # assign across a control boundary.  Only sort one contiguous flat run
+        # after proving that its reads and writes are independent.
+        index = 1
+        while index < len(lines) - 1:
+            if lines[index].startswith("    assign "):
+                end = index + 1
+                while end < len(lines) - 1 and lines[end].startswith("    assign "):
+                    end += 1
+                lines[index:end] = normalize_partial_order_run(
+                    lines[index:end], "assign", reads_conflict=True
+                )
+                index = end
+                continue
+            if lines[index].startswith("    sync "):
+                update_index = index + 1
+                update_end = update_index
+                while (
+                    update_end < len(lines) - 1
+                    and lines[update_end].startswith("      update ")
+                ):
+                    update_end += 1
+                lines[update_index:update_end] = normalize_partial_order_run(
+                    lines[update_index:update_end],
+                    "update",
+                    reads_conflict=False,
+                )
+                index = update_end
+                continue
+            index += 1
+        return lines
 
     units: list[tuple[str, ...]] = []
     pending_attributes: list[str] = []
@@ -172,6 +265,16 @@ def canonical_rtlil_module_sha256(
                     break
             else:
                 raise ValueError("unterminated RTLIL cell or process")
+            process_index = next(
+                (
+                    position
+                    for position, block_line in enumerate(block)
+                    if block_line.startswith("  process ")
+                ),
+                None,
+            )
+            if process_index is not None:
+                block[process_index:] = normalize_process(block[process_index:])
             units.append(tuple(block))
             continue
         raise ValueError(f"unsupported RTLIL top-level unit: {line}")

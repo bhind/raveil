@@ -280,6 +280,150 @@ end
                 a["rtlil_canonical_sha256"], drift["rtlil_canonical_sha256"]
             )
 
+    def test_rtlil_canonical_hash_reorders_only_safe_process_runs(self):
+        def process_rtlil(*, reverse: bool = False, clock: str = r"\clock") -> str:
+            assigns = [
+                "    assign $0\\a[0:0] \\a\n",
+                "    assign $0\\b[0:0] \\b\n",
+            ]
+            updates = [
+                "      update \\a $0\\a[0:0]\n",
+                "      update \\b $0\\b[0:0]\n",
+            ]
+            if reverse:
+                assigns.reverse()
+                updates.reverse()
+            return (
+                "module \\Rocket\n  wire \\a\n  wire \\b\n"
+                "  attribute \\src \"generated-src/Rocket.sv:1\"\n"
+                "  process $proc\n"
+                + "".join(assigns)
+                + "    switch \\sel\n      case 1'1\n"
+                + "        assign $0\\guard \\guarded\n      end\n    end\n"
+                + f"    sync posedge {clock}\n"
+                + "".join(updates)
+                + "  end\nend\n"
+            )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            same_a = root / "same-a.rtlil"
+            same_b = root / "same-b.rtlil"
+            same_a.write_text(process_rtlil())
+            same_b.write_text(process_rtlil(reverse=True))
+            base = load_rtlil_hierarchy(same_a)["modules"]["Rocket"]
+            reordered = load_rtlil_hierarchy(same_b)["modules"]["Rocket"]
+            self.assertEqual(
+                base["rtlil_canonical_sha256"], reordered["rtlil_canonical_sha256"]
+            )
+            clock_drift = root / "clock-drift.rtlil"
+            clock_drift.write_text(process_rtlil(clock=r"\other_clock"))
+            self.assertNotEqual(
+                base["rtlil_canonical_sha256"],
+                load_rtlil_hierarchy(clock_drift)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+            )
+
+            duplicate_a = root / "duplicate-a.rtlil"
+            duplicate_b = root / "duplicate-b.rtlil"
+            duplicate_prefix = "module \\Rocket\n  process $proc\n"
+            duplicate_suffix = "  end\nend\n"
+            first = "    assign $0\\a[0:0] \\x\n"
+            second = "    assign $0\\a[0:0] \\y\n"
+            duplicate_a.write_text(
+                duplicate_prefix + first + second + duplicate_suffix
+            )
+            duplicate_b.write_text(
+                duplicate_prefix + second + first + duplicate_suffix
+            )
+            self.assertNotEqual(
+                load_rtlil_hierarchy(duplicate_a)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+                load_rtlil_hierarchy(duplicate_b)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+            )
+
+            dependent_a = root / "dependent-a.rtlil"
+            dependent_b = root / "dependent-b.rtlil"
+            dependent = "    assign $0\\b[0:0] $0\\a[0:0]\n"
+            dependent_a.write_text(
+                duplicate_prefix + first + dependent + duplicate_suffix
+            )
+            dependent_b.write_text(
+                duplicate_prefix + dependent + first + duplicate_suffix
+            )
+            self.assertNotEqual(
+                load_rtlil_hierarchy(dependent_a)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+                load_rtlil_hierarchy(dependent_b)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+            )
+
+            update_a = root / "update-a.rtlil"
+            update_b = root / "update-b.rtlil"
+            update_prefix = duplicate_prefix + "    sync posedge \\clock\n"
+            update_first = "      update \\a \\x\n"
+            update_second = "      update \\a \\y\n"
+            update_a.write_text(
+                update_prefix + update_first + update_second + duplicate_suffix
+            )
+            update_b.write_text(
+                update_prefix + update_second + update_first + duplicate_suffix
+            )
+            self.assertNotEqual(
+                load_rtlil_hierarchy(update_a)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+                load_rtlil_hierarchy(update_b)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+            )
+
+            boundary_a = root / "boundary-a.rtlil"
+            boundary_b = root / "boundary-b.rtlil"
+            boundary = "    switch \\sel\n      case 1'1\n      end\n    end\n"
+            boundary_a.write_text(
+                duplicate_prefix + "    assign $0\\a \\x\n" + boundary
+                + "    assign $0\\b \\y\n" + duplicate_suffix
+            )
+            boundary_b.write_text(
+                duplicate_prefix + "    assign $0\\b \\y\n" + boundary
+                + "    assign $0\\a \\x\n" + duplicate_suffix
+            )
+            self.assertNotEqual(
+                load_rtlil_hierarchy(boundary_a)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+                load_rtlil_hierarchy(boundary_b)["modules"]["Rocket"][
+                    "rtlil_canonical_sha256"
+                ],
+            )
+
+            def switch_rtlil(selector: str, case_value: str) -> str:
+                return (
+                    "module \\Rocket\n  wire \\q\n  process $proc\n"
+                    f"    switch {selector}\n      case {case_value}\n"
+                    "        assign $0\\q \\d\n      end\n    end\n  end\nend\n"
+                )
+
+            switch_a = root / "switch-a.rtlil"
+            switch_a.write_text(switch_rtlil(r"\sel", "1'1"))
+            switch_base = load_rtlil_hierarchy(switch_a)["modules"]["Rocket"]
+            for index, args in enumerate(((r"\other", "1'1"), (r"\sel", "1'0"))):
+                switch_drift = root / f"switch-drift-{index}.rtlil"
+                switch_drift.write_text(switch_rtlil(*args))
+                self.assertNotEqual(
+                    switch_base["rtlil_canonical_sha256"],
+                    load_rtlil_hierarchy(switch_drift)["modules"]["Rocket"][
+                        "rtlil_canonical_sha256"
+                    ],
+                )
+
     def test_gated_clock_traces_only_approved_clock_root(self):
         document = flat_document()
         document["modules"]["ChipTop"]["cells"]["gate"] = {
