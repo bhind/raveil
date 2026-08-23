@@ -21,8 +21,10 @@ The corrected critical path is:
 
 The 2026-08-23 Sprint coordination audit does not reopen T-0042 or alter this
 critical path. One already-active BOOM stripped-token negative is retained as
-bounded T-0106 carry-in evidence, without satisfying the trigger for further
-T-0106 implementation. The next refined Research delivery remains T-0044's
+bounded T-0106 carry-in evidence. Its local implementation candidate now passes
+the exact RTL simulation and scoped regressions, but awaits Sprint review and
+does not satisfy the trigger for further T-0106 implementation. The next
+refined Research delivery remains T-0044's
 post-EXP-0010 integrated physical boundary: first elaborate and functionally
 verify the complete Static Graph/Rocket/common-boundary hierarchy, without
 collecting or claiming whole-system area, timing, energy, FPGA, or silicon
