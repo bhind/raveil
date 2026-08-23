@@ -62,6 +62,13 @@ resource overrun, and material design forks. The PM role and an executable
 agent-boundary regression carry the same rule. No implementation P0,
 experiment, evidence, performance claim, or remote-publication authority
 changes.
+ADR-0056 and T-0116 add a repository-linked, private GitHub Project weekly
+sprint workflow with a stable-T-ID Kanban board, retained initial and revised
+Fibonacci estimates, seven-day Iterations, an eight-point pilot capacity, WIP
+limit two, executable review demo, and retrospective. The Project has an
+explicit `Sprint Board` view and six seeded weekly Iterations. Sprint state
+remains a coordination view and cannot promote task, gate, decision,
+experiment, or evidence status.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

@@ -56,3 +56,5 @@ rewrite it.
 | [ADR-0049](ADR-0049-cgra-substrates-are-replaceable-backends.md) | Accepted | CGRA substrates are replaceable backends; custom hardware must pass a non-reinvention gate |
 | [ADR-0050](ADR-0050-t0044-results-require-sealed-durable-evidence.md) | Accepted | T-0044 results require sealed, immutable, download-verified evidence before promotion |
 | [ADR-0051](ADR-0051-continuous-work-stops-only-on-human-confirmation-incidents.md) | Accepted | Authorized local work continues until a defined human-confirmation incident |
+| [ADR-0055](ADR-0055-weekly-sprints-coordinate-but-do-not-promote-evidence.md) | Superseded | Markdown sprint board superseded by the GitHub Project coordination view |
+| [ADR-0056](ADR-0056-github-project-is-the-sprint-coordination-view.md) | Accepted | GitHub Project supersedes the Markdown sprint board as the sole live coordination view |

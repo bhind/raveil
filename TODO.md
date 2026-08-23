@@ -65,6 +65,17 @@ and failure preservation do not consume that slot; new implementation does.
   documentation-only task does not displace T-0044 or authorize
   implementation, measurement, or a new research claim.
 
+## Project operations
+
+- [x] **T-0116** Establish a repository-linked GitHub Project weekly sprint
+  loop with a stable-T-ID Kanban board, calculated and reviewable Fibonacci
+  story points, an eight-point solo pilot capacity, WIP limit two, a required
+  runnable increment and demo, and a weekly retrospective. Keep TODO, ROADMAP,
+  ADR, RFC, EXP, and executable evidence authoritative; the private Project
+  coordinates but cannot promote claims or gates. Provide seven-day
+  Iterations and review fields, and seed S-0001 with the current bounded T-0042
+  slice plus an unpointed review/retro item.
+
 ## Delivery line — active GNU/Linux userspace MVP
 
 - [x] **T-0103** Release the synthetic Native Command Graph/Experience

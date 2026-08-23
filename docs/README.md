@@ -41,6 +41,7 @@ When records disagree, fix the weaker record using this order:
 | [OPEN_QUESTIONS](OPEN_QUESTIONS.md) | unresolved decisions | a question appears or is resolved |
 | [GLOSSARY](GLOSSARY.md) | canonical terminology | introducing or renaming a concept |
 | [WORKFLOW](WORKFLOW.md) | record, review, and agent process | changing project operations |
+| [SPRINTS](SPRINTS.md) | weekly task board, story points, runnable review, and retrospective | planning or closing a weekly sprint |
 | [failure knowledge](FAILURE_KNOWLEDGE.md) | reusable observed failure lessons and prevention | debugging, recurrence, and milestone review |
 | [ADRs](decisions/README.md) | accepted or rejected decisions | changing an invariant, boundary, or dependency strategy |
 | [RFCs](rfcs/README.md) | substantial proposals without authority | developing an unresolved architecture proposal |
@@ -65,7 +66,9 @@ When records disagree, fix the weaker record using this order:
 Identifiers are monotonic: `T-0001`, `ADR-0001`, `EXP-0001`,
 `RFC-0001`. Do not reuse abandoned identifiers.
 
-Templates live in [`templates/`](templates/).
+Record templates live in [`templates/`](templates/). The weekly task board is
+the GitHub Project routed through [`SPRINTS`](SPRINTS.md), not a second
+Markdown source of task truth.
 
 ## Progress and agent workflow
 

@@ -257,6 +257,28 @@ evidence class, findings, and unresolved risks; the Project Manager owns all
 completion decisions and identifiers. There is no always-running progress
 agent and no automatic external issue-tracker write.
 
+### Weekly sprints
+
+Use the GitHub Project cadence in [`SPRINTS.md`](SPRINTS.md) to cap work in
+progress and require a runnable increment. Reference stable T-IDs, calculate
+initial story points at planning, and retain every estimate revision with a
+dated reason. Run planning on Monday, correction review on Wednesday, and the
+executable review plus retrospective on Sunday.
+
+The sprint board is a coordination view, not task or evidence authority.
+`TODO.md` still owns task scope and execution state, and research review remains
+milestone-driven. A sprint demo, completed points, or retrospective cannot by
+itself close a T-ID, pass a ROADMAP gate, accept an ADR/RFC, conclude an EXP, or
+promote analytical, simulated, emulated, FPGA, or silicon evidence.
+
+Read back the current board before review:
+
+```sh
+gh project view 1 --owner @me --format json
+gh project field-list 1 --owner @me --format json
+gh project item-list 1 --owner @me --format json
+```
+
 Project agent files are shared. Local `.codex/config.toml` remains ignored so
 IDE endpoints, personal approvals, and per-user concurrency limits never enter
 the repository. Users may set `agents.max_concurrent_threads_per_session = 2`
