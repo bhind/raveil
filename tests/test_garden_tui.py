@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 from raveil.cli import main
-from raveil.garden import GardenBrowser, GardenSnapshot, render_key_session
+from raveil.garden import GardenBrowser, GardenSnapshot, render_error, render_key_session
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -127,6 +127,13 @@ class GardenTUITests(unittest.TestCase):
                 path.write_text(duplicate, encoding="utf-8")
                 with self.assertRaisesRegex(ValueError, "duplicate field"):
                     GardenSnapshot.load(path)
+
+    def test_error_rendering_removes_terminal_controls(self) -> None:
+        rendered = render_error("bad\x1b[2J\x07\u202evalue")
+        self.assertNotIn("\x1b", rendered)
+        self.assertNotIn("\x07", rendered)
+        self.assertNotIn("\u202e", rendered)
+        self.assertIn("bad [2J value", rendered)
 
     def test_garden_module_has_no_execution_backend(self) -> None:
         source = (ROOT / "raveil/garden.py").read_text(encoding="utf-8")

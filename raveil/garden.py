@@ -250,7 +250,8 @@ def render_empty() -> str:
 
 
 def render_error(message: str) -> str:
-    bounded = " ".join(message.split())[:512]
+    printable = "".join(character if character.isprintable() else " " for character in message)
+    bounded = " ".join(printable.split())[:512]
     return "\n".join((
         "Raveil Garden | error",
         bounded or "unknown snapshot error",
