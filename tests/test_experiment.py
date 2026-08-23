@@ -1126,6 +1126,7 @@ class AgentBoundaryTests(unittest.TestCase):
         expected = {
             "raveil-project-manager", "raveil-experience-implementer",
             "raveil-systems-implementer", "raveil-measurement-implementer",
+            "raveil-chisel-implementer",
             "raveil-performance-reviewer", "raveil-security-reviewer",
             "raveil-tester", "raveil-researcher", "raveil-librarian",
         }
@@ -1167,10 +1168,31 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("Integration/review/records", estimate_template)
         for name in (
             "raveil-experience-implementer",
+            "raveil-chisel-implementer",
             "raveil-systems-implementer",
             "raveil-measurement-implementer",
         ):
             self.assertIn("Do not edit", agents[name]["developer_instructions"])
+
+        reasoning_effort = {
+            name: agent["model_reasoning_effort"] for name, agent in agents.items()
+        }
+        for name in (
+            "raveil-experience-implementer",
+            "raveil-chisel-implementer",
+            "raveil-systems-implementer",
+            "raveil-measurement-implementer",
+            "raveil-tester",
+        ):
+            self.assertEqual(reasoning_effort[name], "low")
+        self.assertEqual(reasoning_effort["raveil-librarian"], "medium")
+        for name in (
+            "raveil-project-manager",
+            "raveil-performance-reviewer",
+            "raveil-security-reviewer",
+            "raveil-researcher",
+        ):
+            self.assertEqual(reasoning_effort[name], "high")
 
 
 if __name__ == "__main__":

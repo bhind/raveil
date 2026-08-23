@@ -64,28 +64,34 @@ experiment, evidence, performance claim, or remote-publication authority
 changes.
 ADR-0056 and T-0116 add a repository-linked, private GitHub Project weekly
 sprint workflow with a stable-T-ID Kanban board, retained initial and revised
-Fibonacci estimates, seven-day Iterations, an eight-point pilot capacity, WIP
-limit two, executable review demo, and retrospective. The Project has an
+Fibonacci estimates, seven-day Iterations, WIP limit two, executable review
+demo, and retrospective. ADR-0059 and T-0118 supersede only the original fixed
+eight-SP capacity rule: SP is now relative AI delivery risk and never a weekly
+stop condition. Execution uses one serial high-reasoning PM integration lane,
+one coherent low-reasoning mutation lane, one low-reasoning Tester, at most two
+read-only risk reviewers, a medium Librarian, and a milestone-only
+high-reasoning Researcher. The Project has an
 explicit `Sprint Board` Kanban plus a filtered `Product Backlog` table and six
 seeded weekly Iterations. Its corrected Product Backlog initially contained 30
 decomposed planning items plus the three original S-0001 items. Each executable
 slice records an owner role, support roles,
 parent T-ID, dependencies, initial/current SP, priority, evidence class, demo
-or evidence command, forecast sprint/date, and confidence. S-0002 commits the
-first eight-point Playable increment under T-0117 as a read-only Garden TUI
-slice plus clean terminal acceptance. Parent epics have no SP, and specialist
-agents are not counted as independent FTE: one human integration and acceptance
-lane remains the capacity bottleneck. The subsequent authority audit found that
+or evidence command, forecast sprint/date, confidence, AI estimate, observed
+cycle, and agent tier. T-0117's preserved Initial SP is 5+3 while its first
+AI-evidence correction sets Current SP to 3+2. Parent epics have no SP, and
+specialist agents are not counted as independent FTE: final integration and
+acceptance remain serial. The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
 T-0044's accepted integrated-physical boundary instead. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
-Post-correction Project readback remains 33 items and 32 fields. After T-0117
-acceptance, it has 27 Backlog, two Ready, one Review, and three Done items;
-delivery WIP is one of two with only T-0106/S01 in Review. S-0001, S-0002, and
-S-0003 each total eight SP. No Project slice retains T-0042 as its parent.
+Post-correction Project readback remains 33 items and now has 35 fields. After
+T-0118 acceptance it has 27 Backlog, one Ready, one Review, and four Done items;
+delivery WIP is one of two with only T-0106/S01 in Review. Current SP totals are
+S-0001=13, S-0002=5, and S-0003=8; these are risk inventories rather than
+execution ceilings. No Project slice retains T-0042 as its parent.
 The bounded T-0106/S01 carry-in now has a verified local implementation
 candidate at `32aab73`. Its exact pinned BOOM Verilator run completes after
 10,916 simulation cycles while a test-only boundary patch changes the positive

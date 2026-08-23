@@ -41,22 +41,25 @@ Backlog -> Ready -> In Progress -> Review -> Done
                          +-> Blocked <-+
 ```
 
-The solo-development default is eight committed story points and at most two
-items in `IN_PROGRESS` or `REVIEW` combined. Prefer one active Playable item and
-one active Research item; Operations is temporary supporting work, not a third
-pillar. A task retains its stable T-ID and remains authoritative in `TODO.md`.
+ADR-0059 retires eight story points as an execution ceiling. At most two items
+may be in `IN_PROGRESS` or `REVIEW` combined. Prefer one active mutation item
+and one independent review or acceptance item; a Playable and Research item may
+overlap only when ownership and evidence paths are independent. Operations is
+temporary supporting work, not a third pillar. A task retains its stable T-ID
+and remains authoritative in `TODO.md`.
 The sprint board may describe a smaller acceptance slice but never redefine
 the task or silently mark it complete. The Project also records seven-day
 `Sprint` Iterations, `Initial SP`, current `Story Points`, `Pillar`, `Owner
 Role`, `Support Roles`, `Parent T-ID`, `Depends On`, `Priority`, `Work Type`,
 `Demo Command`, `Evidence Class`, `Estimate Review`, `Estimate Change Reason`,
 `Forecast Sprint`, `Forecast Date`, `Forecast Confidence`, `Review Outcome`,
-and `Retro Action`.
+`Retro Action`, `AI Estimate`, `Observed Cycle`, and `Agent Tier`.
 
-Capacity is empirical. Keep eight points for the first three closed sprints,
-then set the next capacity from the median completed points of those sprints.
-Do not inflate capacity to absorb unfinished work. Carry-over is re-estimated
-and explicitly recommitted.
+Capacity is empirical and lane-based. Forecast from accepted-slice cycle time
+for the mutation, test, review, and serial PM-integration lanes, plus current
+dependencies and warm/cold environment state. SP remains relative AI delivery
+risk and never stops otherwise authorized work. Carry-over is re-estimated and
+explicitly recommitted without rewriting Initial SP.
 
 ## Product Backlog and refinement
 
@@ -96,23 +99,25 @@ Reviewer advice, prose, partial SP, and a green subagent report are insufficient
 
 ## Role and capacity plan
 
-Raveil currently has one human integration and acceptance lane. Project
-Manager, Systems, Experience, Measurement, Tester, Performance, Security,
-Researcher, and Librarian are responsibility boundaries, not nine independent
-full-time people. Specialist work may overlap only when file ownership and
-evidence boundaries are independent; final integration remains serial.
+Raveil has one serial Project Manager integration and acceptance lane, one
+low-reasoning tracked-file mutation lane, one low-reasoning Tester lane, up to
+two read-only reviewer lanes, one medium Librarian lane as needed, and one
+high-reasoning Researcher only at evidence milestones. Project Manager,
+implementers, Tester, reviewers, Researcher, and Librarian are responsibility
+boundaries, not additive full-time people. Specialist work overlaps only when
+file ownership and evidence boundaries are independent; final records,
+acceptance, PR review comment, and merge remain serial.
 
-Allocate the weekly eight-point pilot capacity across accepted delivery slices,
-not across every role that touches them. Review and ceremony work receives SP
-only when it produces an independently accepted artifact required by the
-parent. After three closed sprints, use median completed SP as the next planning
-capacity and retain a range rather than a single-date promise for low-confidence
-research.
+Review and ceremony work receives SP only when it produces an independently
+accepted artifact required by the parent. Forecast ranges use observed
+accepted-slice cycle time by lane and remain ranges rather than single-date
+promises for low-confidence research. Reaching a Sprint's forecast SP total is
+not a pause condition.
 
 Committed `Sprint` Iterations currently cover S-0001 through S-0006. Later work
 uses `Forecast Sprint`, `Forecast Date`, and `Forecast Confidence`; this avoids
-presenting an uncommitted research sequence as an Iteration promise. At the
-initial eight-point assumption, the dependency forecast is:
+presenting an uncommitted research sequence as an Iteration promise. The
+retained dependency forecast is:
 
 | Window | Intended outcome | Confidence |
 |---|---|---|
@@ -132,8 +137,9 @@ problem. It has neither SP nor a calendar date.
 
 ## Story-point calculation
 
-Points express relative delivery risk, not hours, individual productivity, or
-research value. Calculate a raw score at planning:
+Points express relative AI delivery risk, not hours, weekly capacity, agent
+count, individual productivity, or research value. Calculate a raw score at
+planning:
 
 ```text
 raw = implementation + uncertainty + verification + environment
@@ -141,10 +147,10 @@ raw = implementation + uncertainty + verification + environment
 
 | Factor | Allowed score | Meaning |
 |---|---:|---|
-| implementation | 1–4 | size and number of owned changes |
-| uncertainty | 0–3 | unknown design, mechanism, or failure surface |
-| verification | 0–2 | tests, clean reproduction, review, and evidence work |
-| environment | 0–2 | hardware, vendor tools, emulation, or external setup |
+| implementation | 1–4 | number and coupling of bounded mutation packets |
+| uncertainty | 0–3 | unknown contract, mechanism, or failure surface |
+| verification | 0–2 | independent tests, clean reproduction, review, and evidence work |
+| environment | 0–2 | cold builds, hardware, vendor tools, emulation, or external setup |
 
 Map the sum to Fibonacci points:
 
@@ -160,8 +166,9 @@ Map the sum to Fibonacci points:
 Wednesday review changes `Story Points`, never `Initial SP`. Every change
 records its date and concrete `Estimate Change Reason`, such as a newly
 discovered authority boundary, toolchain setup, missing test seam, or reduced
-scope. Points are not awarded partially: an item is either accepted as `Done`
-or it is not.
+scope, or observed AI execution packet. Also record separate warm/cold ranges
+for edit, verification, and PM integration plus the dominant role lane. Points
+are not awarded partially: an item is either accepted as `Done` or it is not.
 
 ## Runnable increment and demo
 

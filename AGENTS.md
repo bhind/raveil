@@ -118,6 +118,13 @@ claim.
 - A progress review is read-only until the primary agent verifies each finding.
   Newly discovered work is de-duplicated against TODO before a new monotonic ID
   is allocated.
+- Use one low-reasoning mutation owner for one coherent tracked-file change,
+  one low-reasoning Tester after the slice, and at most two read-only reviewers
+  in parallel. Reserve high reasoning for Project Manager authority, security
+  or performance risk review, and evidence-milestone research synthesis.
+- Story points are relative AI delivery risk, not hours or a weekly stop
+  condition. Authorized work continues while its dependency, WIP, and
+  ADR-0051 Human-confirmation boundaries remain satisfied.
 
 ## Continuous execution and human confirmation
 
