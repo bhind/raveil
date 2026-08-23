@@ -82,11 +82,10 @@ carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
 T-0044's accepted integrated-physical boundary instead. Sprint state
 remains a coordination view and cannot promote task, gate, decision,
 experiment, or evidence status.
-Post-correction Project readback remains 33 items and 32 fields: 27 Backlog,
-three Ready, one In Progress, one Review, and one Done. Delivery WIP is two of
-two after T-0117/S01 entered implementation alongside the T-0106/S01 review;
-S-0001, S-0002, and S-0003 each total eight SP. No Project slice retains
-T-0042 as its parent.
+Post-correction Project readback remains 33 items and 32 fields. After T-0117
+acceptance, it has 27 Backlog, two Ready, one Review, and three Done items;
+delivery WIP is one of two with only T-0106/S01 in Review. S-0001, S-0002, and
+S-0003 each total eight SP. No Project slice retains T-0042 as its parent.
 The bounded T-0106/S01 carry-in now has a verified local implementation
 candidate at `32aab73`. Its exact pinned BOOM Verilator run completes after
 10,916 simulation cycles while a test-only boundary patch changes the positive
@@ -99,7 +98,8 @@ The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
 
-T-0117/S01 has a verified implementation candidate at `412f70d`. The Garden
+T-0117 is complete. S01 integrated through PR #6 at canonical commit
+`bb1631109842f85b2a958ebcf30e5ee6a1b5312f`. The Garden
 TUI loads one bounded `raveil.garden-snapshot/v1` fixture, reconstructs the
 existing owned `GraphProgram`, requires its complete variant list to equal a
 fresh canonical `GraphCompiler` slate, and renders nodes, dependencies,
@@ -110,8 +110,11 @@ rejected before rendering. Garden is deliberately separate from T-0093's
 static read-only directory snapshot and imports no execution backend. Its
 evidence is
 `host-functional` and `development-non-claim`; it has no execution, mutation,
-approval, evidence-promotion, performance, or gate authority. T-0117 remains
-open pending the independent clean-terminal acceptance in S02.
+approval, evidence-promotion, performance, or gate authority. S02 independently
+reproduced the merged revision in a clean worktree: the normal TTY view,
+deterministic `jjq` navigation, and empty state exited 0; malformed input was
+rejected with the expected exit 2; and all 35 scoped tests passed. This closes
+the bounded Garden Playable only and changes no research or hardware gate.
 
 ADR-0026 adds lightweight defect governance. Existing experiment failures,
 negative results, regression tests, and logs remain authoritative evidence;

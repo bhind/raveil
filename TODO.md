@@ -93,7 +93,7 @@ and failure preservation do not consume that slot; new implementation does.
 
 ## Playable pillar — Raveil Garden TUI
 
-- [ ] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host
+- [x] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host
   ARM64/x86-64. Render one strictly validated graph snapshot, node/dependency
   structure, variants, evidence labels, and runnable demo commands with bounded
   keyboard navigation plus explicit empty/error states. Reuse existing owned
@@ -102,9 +102,10 @@ and failure preservation do not consume that slot; new implementation does.
   a deterministic fixture, host-functional tests, clean terminal acceptance,
   and one command that a hobbyist can run and understand. This is a Playable
   interface task, not T-0093's static directory snapshot and not performance,
-  FPGA, ASIC, or silicon evidence. S01 is implemented and locally verified at
-  `412f70d`; keep T-0117 open until S02 independently reproduces the terminal
-  demo from a clean revision and records the acceptance transcript.
+  FPGA, ASIC, or silicon evidence. S01 integrated through PR #6 at
+  `bb1631109842f85b2a958ebcf30e5ee6a1b5312f`; S02 independently reproduced
+  the normal, navigation, empty, and malformed-input paths from that clean
+  canonical revision and recorded the terminal transcripts and hashes.
 
 ## Delivery line — active GNU/Linux userspace MVP
 

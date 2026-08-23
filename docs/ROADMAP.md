@@ -316,7 +316,7 @@ remains a later OS/capability backend unless evidence makes it necessary.
 
 ## Playable pillar — Raveil Garden TUI
 
-State: **T-0117/S01 implementation candidate; S02 acceptance pending in S-0002**
+State: **T-0117 complete; S01 and S02 accepted**
 
 T-0117 creates a host-native, read-only TUI over one strictly validated graph
 snapshot so the Playable pillar has a visible object a hobbyist can run and
@@ -325,10 +325,13 @@ labels, and demo commands with deterministic terminal behavior. It reuses the
 owned schemas and guarded graph state, but has no execution, mutation,
 approval, Experience-promotion, task, or gate authority.
 
-The S01 candidate at `412f70d` implements the strict versioned snapshot,
+The S01 canonical commit `bb1631109842f85b2a958ebcf30e5ee6a1b5312f`
+implements the strict versioned snapshot,
 canonical-variant validation, deterministic bounded navigation, and explicit
-empty/error states without an external TUI dependency. T-0117 does not close
-until S02 reproduces the demo and acceptance transcript from a clean revision.
+empty/error states without an external TUI dependency. S02 reproduced the
+normal TTY view, deterministic navigation and exit, empty state, malformed
+input refusal, evidence labels, and 35 scoped tests from a clean checkout of
+that revision. This is host-functional Playable acceptance only.
 
 Garden is distinct from T-0093's static graph directory projection and from
 T-0103's synthetic timing showcase. Its host-functional evidence cannot imply
