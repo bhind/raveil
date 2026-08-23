@@ -58,3 +58,4 @@ rewrite it.
 | [ADR-0051](ADR-0051-continuous-work-stops-only-on-human-confirmation-incidents.md) | Accepted | Authorized local work continues until a defined human-confirmation incident |
 | [ADR-0055](ADR-0055-weekly-sprints-coordinate-but-do-not-promote-evidence.md) | Superseded | Markdown sprint board superseded by the GitHub Project coordination view |
 | [ADR-0056](ADR-0056-github-project-is-the-sprint-coordination-view.md) | Accepted | GitHub Project supersedes the Markdown sprint board as the sole live coordination view |
+| [ADR-0057](ADR-0057-main-integration-requires-pull-requests.md) | Accepted | Main integration requires a pull request with no direct-push bypass |

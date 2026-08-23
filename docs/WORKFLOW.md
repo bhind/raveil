@@ -16,10 +16,12 @@ Last updated: 2026-08-23
    lowercase `t-`, `exp-`, `adr-`, or `rfc-` ID. Example:
    `research/exp-0003-gate1-measurement`. Read-only review does not require a
    new branch.
-5. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
+5. Push only the dedicated change branch and integrate it through a GitHub pull
+   request. Never push directly to `refs/heads/main`.
+6. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
    architecture, roadmap, EXP, question, or log records selected by the
    document router for this task.
-6. Classify the proposed work as an implementation fact, decision, hypothesis,
+7. Classify the proposed work as an implementation fact, decision, hypothesis,
    experiment, or environment observation.
 
 ## During a change
@@ -75,9 +77,17 @@ may continue after the failed attempt is retained, unless HCI-07 applies.
 Confirmation is required before deleting, overwriting, resetting, force-
 checking-out, force-pushing, rewriting history, moving tags, discarding or
 stashing user work, or replacing immutable evidence. It is also required before
-remote push, PR creation or merge, issue-state mutation, tag or Release
-publication, package publication, or external benchmark publication unless the
-owner already authorized that exact remote action and target.
+PR merge, issue-state mutation, tag or Release publication, package
+publication, or external benchmark publication unless the owner already
+authorized that exact remote action and target.
+
+For an already authorized bounded change, pushing its dedicated branch and
+creating or updating its pull request are the required integration path and do
+not create a separate HCI. Direct push to `main` is prohibited even when the
+change is otherwise authorized. The repository ruleset has no bypass actor,
+requires a pull request, blocks deletion and non-fast-forward updates, and
+requires review threads to be resolved. PR merge remains a human-authority
+remote action under this section.
 
 Creating an isolated local worktree, local branch, local atomic commit, ignored
 build product, or new append-only local artifact is not an HCI.

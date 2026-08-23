@@ -103,6 +103,13 @@ authority. Same-branch corrected defects do not require issue-tracker churn.
 
 Gate 0 is complete, so tracked work now uses a dedicated
 `<type>/<record-id>-<short-slug>` lowercase branch.
+ADR-0057 additionally makes pull requests the only integration path to
+`main`. GitHub ruleset 20582491 is active for `refs/heads/main`, has no bypass
+actor, requires a pull request with zero mandatory approvals for the current
+single-owner workflow, requires review-thread resolution, and blocks deletion
+and non-fast-forward updates. Dedicated task-branch push and PR creation are
+normal integration steps for already authorized bounded work; PR merge remains
+human-authorized. No direct `main` push is permitted.
 
 ## Delivery-line state
 
