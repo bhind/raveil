@@ -329,7 +329,7 @@ remains a later OS/capability backend unless evidence makes it necessary.
 
 ## Playable pillar — Raveil Garden TUI
 
-State: **T-0117 complete; T-0120 multi-pane host slice in progress**
+State: **T-0117 and T-0120 complete at host-functional evidence**
 
 T-0117 creates a host-native, read-only TUI over one strictly validated graph
 snapshot so the Playable pillar has a visible object a hobbyist can run and
@@ -355,8 +355,8 @@ an acceptance dependency of the other unless a later decision records it.
 T-0120 is a bounded Playable refinement, not a reopened T-0117 acceptance
 slice. It adds deterministic wide and stacked workspace layouts while keeping
 the same observe-only snapshot, compiler-validation, and authority boundary.
-Its exit requires host tests, an independent review, and a reproducible static
-capture. It does not change any research or hardware gate.
+Its 40-test clean acceptance, independent review, and reproducible static
+capture are complete. It does not change any research or hardware gate.
 
 ## High-priority demo extension — Sonatine native operator shell
 

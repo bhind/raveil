@@ -135,13 +135,15 @@ and failure preservation do not consume that slot; new implementation does.
   the normal, navigation, empty, and malformed-input paths from that clean
   canonical revision and recorded the terminal transcripts and hashes.
 
-- [ ] **T-0120** Build the deterministic multi-pane Garden workspace. Preserve
+- [x] **T-0120** Build the deterministic multi-pane Garden workspace. Preserve
   T-0117's validated read-only snapshot and authority boundary while adding an
   explicit 72--240-column render contract, a three-pane wide view, a stacked
   narrow view, bounded line lengths, and reproducible host acceptance. Initial
   and Current SP are 5; the owner-priority addition places it in S-0001 above
   the calibrated warm planning band without changing that capacity model.
-  Complete only after independent verification and a reviewable static capture.
+  Independent verification at `7054e01f384a659774635d333c0e114adf6bd800`
+  passed 40 tests, both wide and stacked demos, the record checker, and the
+  diff/clean-tree checks. A reviewable 150-column static capture was inspected.
   This remains `host-functional` and `development-non-claim`; it cannot imply
   graph execution, performance, RTL, FPGA, ASIC, or silicon behavior.
 

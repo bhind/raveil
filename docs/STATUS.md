@@ -157,7 +157,11 @@ consulted, so the same accepted snapshot, navigation keys, and width produce
 byte-identical text. The implementation remains dependency-free and retains
 Garden's existing snapshot validation and read-only authority. This is
 host-functional development evidence only, not graph execution, performance,
-RTL, FPGA, ASIC, or silicon evidence.
+RTL, FPGA, ASIC, or silicon evidence. Independent clean verification of
+`7054e01f384a659774635d333c0e114adf6bd800` passed 40 Garden and owned-graph
+tests, the 142-file record checker, wide and stacked CLI demos, and diff/clean
+tree checks. The acceptance log SHA-256 is
+`c82485df3a2e254bfa54f623fa94f2f88f6b90f7a3a958e3488f7bf05edb2f6f`.
 
 ADR-0026 adds lightweight defect governance. Existing experiment failures,
 negative results, regression tests, and logs remain authoritative evidence;
