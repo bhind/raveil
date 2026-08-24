@@ -147,6 +147,14 @@ and failure preservation do not consume that slot; new implementation does.
   This remains `host-functional` and `development-non-claim`; it cannot imply
   graph execution, performance, RTL, FPGA, ASIC, or silicon behavior.
 
+- [ ] **T-0121** Reconsider Garden as an actual Linux/macOS TUI after the
+  critical path. The dependency-free ASCII CLI remains canonical and usable;
+  a local-only directed Graph Canvas draft is preserved at `d59bbc7` but is
+  neither independently accepted nor merged. Re-refine the interface and
+  dependency policy before resuming, including whether a native TUI library,
+  color, focus, and a real graph layout are worth the platform restriction.
+  Keep this P2 and unscheduled; do not displace T-0044.
+
 ## Delivery line — active GNU/Linux userspace MVP
 
 - [x] **T-0103** Release the synthetic Native Command Graph/Experience
@@ -995,6 +1003,18 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   claim-bearing manifest. Do not collect synthesis, placement, routing,
   timing, area, energy, FPGA, ASIC, silicon, or performance data from
   S08/S10/S11/S12, and do not close T-0044.
+  The owner authorized HCI-02 on 2026-08-24. T-0044/S13 then performed only the
+  required pre-data physical-input binding and hit the fixed
+  `required_physical_input_component_unavailable` pause: the pinned image has
+  usable standard-cell/technology/RC views but no Liberty/LEF/GDS view for any
+  of the seven byte-identical integrated/matched memory macros. Preserve the
+  tracked readiness receipt SHA-256
+  `f81541a8bca267c1b0e4eb1f9936a502147efb17ef71d1416a5b2b1c2ce1c606`.
+  Do not allocate or freeze EXP-0011, invent placeholder macros, or collect
+  candidate data until one common memory physical-view strategy passes
+  provenance, resource, and fairness review. Initial SP 13 is retained;
+  Current SP is 3 for the bounded accepted readiness packet, and the remaining
+  implementation/P&R scope is not counted while blocked.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked
