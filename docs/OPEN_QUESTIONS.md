@@ -159,6 +159,12 @@ resolves it.
   counts alone are insufficient. The unequal but explained Graph/Rocket
   dynamic traffic must remain a reported design result rather than an equality
   assertion.
+  S11 now makes those identity, denominator, oracle, traffic, physical-
+  condition, and non-claim declarations machine-checkable in an unallocated
+  v2 document. It does not resolve them against real P&R artifacts. The exact
+  available macro/standard-cell/tech/RC/floorplan inputs, physical-flow seeds,
+  typed estimator and fixed thresholds, and ADR-0050-strength evidence protocol
+  remain open before any EXP-0011 freeze.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

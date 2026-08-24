@@ -17,6 +17,7 @@ from raveil.t0044_integrated_rtl import (
     compare_reports,
     load_rtlil_hierarchy,
     validate_export,
+    validate_prefreeze_identity_contract,
     validate_readiness_contract,
 )
 from raveil.t0044_physical import tree_sha256
@@ -247,7 +248,135 @@ def readiness_contract():
     }
 
 
+def prefixed_hex(character):
+    return character * 64
+
+
+def prefreeze_contract():
+    variant_identities = {
+        variant: {
+            "config": config,
+            "rtl_tree_sha256": prefixed_hex("a"),
+            "rtl_filelist_sha256": prefixed_hex("b"),
+            "firrtl_sha256": prefixed_hex("c"),
+            "lowering_provenance_sha256": prefixed_hex("d"),
+            "source_sha256": prefixed_hex("e"),
+            "input_sha256": prefixed_hex("f"),
+            "rocket_canonical_module_sha256": prefixed_hex("1"),
+            "memory_macro_contract_sha256": prefixed_hex("2"),
+        }
+        for variant, config in VARIANTS.items()
+    }
+    roles = {
+        "fixture_provider": "common", "owned_memory": "common",
+        "cache_interconnect": "common", "clock_reset": "common",
+        "private_output_validation": "common", "rocket_fallback": "rocket_fallback",
+        "graph_core": "graph_delta", "graph_tl_client": "graph_delta",
+        "selector_adapter": "graph_delta",
+    }
+    integrated, matched = VARIANTS
+    ledger = []
+    for number, (name, role) in enumerate(roles.items()):
+        graph = role == "graph_delta"
+        ledger.append({
+            "name": name, "role": role,
+            "inclusion": {integrated: True, matched: not graph},
+            "instance_paths": {integrated: ["system/" + name], matched: [] if graph else ["system/" + name]},
+            "module_sha256": {integrated: prefixed_hex(format(number, "x")), matched: None if graph else prefixed_hex(format(number, "x"))},
+            "accounting_owner": role,
+            "activity_scope": "idle_when_graph_active_and_active_when_selected" if name == "rocket_fallback" else "active_when_graph_selected" if graph else "included_both_candidates",
+        })
+    return {
+        "schema": "raveil.t0044-integrated-physical-prefreeze/v2",
+        "experiment_id": None, "freeze_state": "unfrozen",
+        "readiness": readiness_contract(),
+        "identity": {
+            "implementation_authority_commit": "3" * 40, "top": "ChipTop",
+            "variants": variant_identities,
+            "preflight": {"comparison_sha256": prefixed_hex("4"), "raw_manifest_sha256": prefixed_hex("5"), "derived_manifest_sha256": prefixed_hex("6")},
+            "toolchain": {"generator_image": "sha256:" + prefixed_hex("7"), "generator_rootfs_sha256": prefixed_hex("8"), "physical_image": "sha256:" + prefixed_hex("9"), "physical_rootfs_sha256": prefixed_hex("a"), "lock_sha256": prefixed_hex("b"), "yosys_sha256": prefixed_hex("c"), "opensta_sha256": prefixed_hex("d"), "standard_cell_liberty_sha256": prefixed_hex("e"), "tech_lef_sha256": prefixed_hex("f"), "sdc_sha256": prefixed_hex("1")},
+        },
+        "component_ledger": ledger,
+        "workload_oracle": {"operation": "uint32_stencil_5_point_bounded", "input_words": 324, "output_words": 256, "comparison": "all_words_plus_checksum", "artifact_sha256": prefixed_hex("a"), "input_generator_sha256": prefixed_hex("b"), "oracle_sha256": prefixed_hex("c"), "simulator_sha256": prefixed_hex("d"), "input_schedule": "candidate_blind_deterministic", "oracle_access": "inaccessible_to_candidates", "lifecycle": ["installation", "staging", "execution", "drain_completion", "validation", "publication"]},
+        "budget_policy": {"traffic_equal": False, "unequal_traffic_disclosed": True, "lawful_candidate_optimization": True, "cpu_load_reuse_explicit": True, "common_resource_equality_required": True, "execution_window": "installation_through_drain_completion_excluding_validation_publication", "accounting_fields": ["useful_load", "useful_add", "useful_store", "useful_output", "admitted_read", "completed_read", "admitted_write", "completed_write", "bytes", "stall", "backpressure"]},
+        "physical_conditions": {"common_to_variants": True, "clock": {"port": "clock_uncore", "period": 40.0, "waveform": [0.0, 20.0]}, "input_delay": 1.0, "output_delay": 1.0, "standard_cell_pvt": "ss_0p72v_125c", "rc_corner": "rcworst", "load_model_sha256": prefixed_hex("a"), "drive_model_sha256": prefixed_hex("b"), "generated_clocks": [], "false_paths": [], "multicycle_paths": [], "sdc_sha256": prefixed_hex("1")},
+        "evidence_scope": {"current_evidence": "host-contract-validation-only", "target": "integrated-place-and-route-area-timing", "p_and_r_required_before_area_timing_claim": True, "physical_disclosures": ["floorplan", "die", "core", "utilization", "placement_seed", "routing", "parasitic_identity"], "energy_claim": {"enabled": False, "status": "not-measured"}, "thermal": {"applicable": False, "prohibits_energy_device_inference": True}, "performance_claim": False, "fpga_claim": False, "asic_claim": False, "silicon_claim": False},
+    }
+
+
 class TestIntegratedRTL(unittest.TestCase):
+    def test_s11_prefreeze_identity_contract_valid(self):
+        document = prefreeze_contract()
+        self.assertEqual(validate_prefreeze_identity_contract(document)["status"], "ready-for-review")
+        document.pop("experiment_id")
+        self.assertEqual(validate_prefreeze_identity_contract(document)["experiment_id"], None)
+
+    def test_s11_rejects_top_level_and_identity_drift(self):
+        cases = []
+        for mutation in (
+            lambda d: d.__setitem__("results", {}),
+            lambda d: d.__setitem__("unknown", True),
+            lambda d: d.__setitem__("experiment_id", ""),
+            lambda d: d.__setitem__("freeze_state", "frozen"),
+            lambda d: d["identity"].__setitem__("unknown", True),
+            lambda d: d["identity"].__setitem__("top", "OtherTop"),
+            lambda d: d["identity"].__setitem__("implementation_authority_commit", "TBD"),
+            lambda d: d["identity"]["variants"].pop("matched-rocket-system"),
+            lambda d: d["identity"]["variants"]["integrated-static-graph-rocket"].__setitem__("config", "wrong"),
+            lambda d: d["identity"]["variants"]["matched-rocket-system"].__setitem__("rocket_canonical_module_sha256", "0" * 64),
+            lambda d: d["identity"]["toolchain"].pop("generator_rootfs_sha256"),
+            lambda d: d["identity"]["toolchain"].__setitem__("generator_image", "sha256:" + "z" * 64),
+            lambda d: d["identity"]["toolchain"].__setitem__("physical_rootfs_sha256", "0" * 63),
+            lambda d: d["identity"]["toolchain"].__setitem__("physical_image", "not-a-hash"),
+            lambda d: d["readiness"]["clock_reset"].__setitem__("unknown", True),
+        ):
+            document = prefreeze_contract(); mutation(document); cases.append(document)
+        for document in cases:
+            with self.subTest(document=document), self.assertRaises(ValueError):
+                validate_prefreeze_identity_contract(document)
+
+    def test_s11_rejects_ledger_or_workload_drift(self):
+        cases = []
+        for mutation in (
+            lambda d: d.__setitem__("component_ledger", d["component_ledger"][:-1]),
+            lambda d: d["component_ledger"][0].__setitem__("extra", True),
+            lambda d: d["component_ledger"][0]["inclusion"].__setitem__("matched-rocket-system", False),
+            lambda d: d["component_ledger"][0]["module_sha256"].__setitem__("matched-rocket-system", "f" * 64),
+            lambda d: d["component_ledger"][0]["instance_paths"].__setitem__("integrated-static-graph-rocket", ["TBD"]),
+            lambda d: d["component_ledger"][0].__setitem__("accounting_owner", "graph_delta"),
+            lambda d: d["component_ledger"][6]["instance_paths"].__setitem__("matched-rocket-system", ["bad"]),
+            lambda d: d["component_ledger"][5].__setitem__("activity_scope", "bounded_execution"),
+            lambda d: d["workload_oracle"].__setitem__("input_words", 323),
+            lambda d: d["workload_oracle"].__setitem__("oracle_sha256", "a" * 64),
+            lambda d: d["workload_oracle"].__setitem__("oracle_access", "candidate_visible"),
+            lambda d: d["workload_oracle"]["lifecycle"].pop(),
+        ):
+            document = prefreeze_contract(); mutation(document); cases.append(document)
+        for document in cases:
+            with self.subTest(document=document), self.assertRaises(ValueError):
+                validate_prefreeze_identity_contract(document)
+
+    def test_s11_rejects_budget_physical_and_claim_drift(self):
+        cases = []
+        for mutation in (
+            lambda d: d["budget_policy"].__setitem__("traffic_equal", True),
+            lambda d: d["budget_policy"].pop("cpu_load_reuse_explicit"),
+            lambda d: d["budget_policy"]["accounting_fields"].pop(),
+            lambda d: d["physical_conditions"].__setitem__("sdc_sha256", "0" * 64),
+            lambda d: d["physical_conditions"]["clock"].__setitem__("period", True),
+            lambda d: d["physical_conditions"].__setitem__("common_to_variants", False),
+            lambda d: d["physical_conditions"].__setitem__("false_paths", [True]),
+            lambda d: d["readiness"]["memory_macro_views"]["macros"][0].__setitem__("pvt", "ff_0p88v_0c"),
+            lambda d: d["readiness"]["memory_macro_views"]["macros"][0].__setitem__("rc_corner", "rcbest"),
+            lambda d: d["evidence_scope"].__setitem__("performance_claim", True),
+            lambda d: d["evidence_scope"].__setitem__("energy_claim", {"enabled": True, "status": "measured"}),
+            lambda d: d["evidence_scope"]["physical_disclosures"].pop(),
+        ):
+            document = prefreeze_contract(); mutation(document); cases.append(document)
+        for document in cases:
+            with self.subTest(document=document), self.assertRaises(ValueError):
+                validate_prefreeze_identity_contract(document)
+
     def test_s10_readiness_contract_valid(self):
         contract = readiness_contract()
         self.assertEqual(validate_readiness_contract(contract)["status"], "ready-for-review")

@@ -327,6 +327,125 @@ def validate_readiness_contract(document: dict[str, Any]) -> dict[str, Any]:
 validate_integrated_physical_readiness = validate_readiness_contract
 
 
+_PREFREEZE_KEYS = frozenset({
+    "schema", "experiment_id", "freeze_state", "readiness", "identity",
+    "component_ledger", "workload_oracle", "budget_policy",
+    "physical_conditions", "evidence_scope",
+})
+_PREFREEZE_COMPONENTS = {
+    "fixture_provider": "common", "owned_memory": "common",
+    "cache_interconnect": "common", "clock_reset": "common",
+    "private_output_validation": "common", "rocket_fallback": "rocket_fallback",
+    "graph_core": "graph_delta", "graph_tl_client": "graph_delta",
+    "selector_adapter": "graph_delta",
+}
+
+
+def validate_prefreeze_identity_contract(document: dict[str, Any]) -> dict[str, Any]:
+    """Validate S11's repository-only, unallocated pre-freeze identity contract.
+
+    This is deliberately a second validator: S10 remains its own accepted
+    readiness boundary and is nested here unchanged.
+    """
+    require(isinstance(document, dict), "pre-freeze contract must be an object")
+    require(set(document) in {_PREFREEZE_KEYS, _PREFREEZE_KEYS - {"experiment_id"}}, "missing or unknown pre-freeze field")
+    require(document["schema"] == "raveil.t0044-integrated-physical-prefreeze/v2", "invalid pre-freeze schema")
+    require(document.get("experiment_id") is None, "experiment_id must be absent or null")
+    require(document["freeze_state"] == "unfrozen", "freeze_state must be unfrozen")
+    validate_readiness_contract(document["readiness"])
+
+    def exact(value: Any, keys: set[str], name: str) -> dict[str, Any]:
+        require(isinstance(value, dict) and set(value) == keys, f"missing or unknown field in {name}")
+        return value
+
+    def digest(value: Any, name: str, *, image: bool = False) -> None:
+        prefix = "sha256:" if image else ""
+        require(isinstance(value, str) and re.fullmatch(prefix + r"[0-9a-f]{64}", value) is not None, f"invalid {name} identity")
+
+    identity = exact(document["identity"], {"implementation_authority_commit", "top", "variants", "preflight", "toolchain"}, "identity")
+    require(isinstance(identity["implementation_authority_commit"], str) and re.fullmatch(r"[0-9a-f]{40}", identity["implementation_authority_commit"]) is not None, "invalid implementation authority")
+    require(identity["top"] == TOP, "top identity must be ChipTop")
+    variants = identity["variants"]
+    require(isinstance(variants, dict) and set(variants) == set(VARIANTS), "variant identity set mismatch")
+    variant_keys = {"config", "rtl_tree_sha256", "rtl_filelist_sha256", "firrtl_sha256", "lowering_provenance_sha256", "source_sha256", "input_sha256", "rocket_canonical_module_sha256", "memory_macro_contract_sha256"}
+    peer_values: dict[str, list[str]] = {"rocket_canonical_module_sha256": [], "memory_macro_contract_sha256": []}
+    for name, config in VARIANTS.items():
+        item = exact(variants[name], variant_keys, f"identity variant {name}")
+        require(item["config"] == config, "variant config mismatch")
+        for key in variant_keys - {"config"}:
+            digest(item[key], key)
+        for key in peer_values:
+            peer_values[key].append(item[key])
+    require(all(len(set(values)) == 1 for values in peer_values.values()), "peer canonical identities mismatch")
+    preflight = exact(identity["preflight"], {"comparison_sha256", "raw_manifest_sha256", "derived_manifest_sha256"}, "preflight")
+    for key, value in preflight.items(): digest(value, key)
+    toolchain = exact(identity["toolchain"], {"generator_image", "generator_rootfs_sha256", "physical_image", "physical_rootfs_sha256", "lock_sha256", "yosys_sha256", "opensta_sha256", "standard_cell_liberty_sha256", "tech_lef_sha256", "sdc_sha256"}, "toolchain")
+    for key, value in toolchain.items(): digest(value, key, image=key in {"generator_image", "physical_image"})
+
+    ledger = document["component_ledger"]
+    require(isinstance(ledger, list) and len(ledger) == len(_PREFREEZE_COMPONENTS), "component ledger must be exhaustive")
+    seen = set()
+    component_keys = {"name", "role", "inclusion", "instance_paths", "module_sha256", "accounting_owner", "activity_scope"}
+    for item in ledger:
+        exact(item, component_keys, "component ledger entry")
+        name, role = item["name"], item["role"]
+        require(name in _PREFREEZE_COMPONENTS and name not in seen and role == _PREFREEZE_COMPONENTS.get(name), "invalid or duplicate component")
+        seen.add(name)
+        inclusion = exact(item["inclusion"], set(VARIANTS), "component inclusion")
+        paths = exact(item["instance_paths"], set(VARIANTS), "component paths")
+        hashes = exact(item["module_sha256"], set(VARIANTS), "component hashes")
+        activity = {"common": "included_both_candidates", "rocket_fallback": "idle_when_graph_active_and_active_when_selected", "graph_delta": "active_when_graph_selected"}
+        require(item["accounting_owner"] == role, "invalid component accounting owner")
+        require(item["activity_scope"] == activity[role], "invalid component activity scope")
+        for variant in VARIANTS:
+            require(isinstance(inclusion[variant], bool) and isinstance(paths[variant], list) and all(isinstance(path, str) and path.strip() and path.lower() not in {"tbd", "unknown", "placeholder"} for path in paths[variant]), "invalid component inclusion/path")
+            require(hashes[variant] is None or (isinstance(hashes[variant], str) and _HEX_SHA256.fullmatch(hashes[variant]) is not None), "invalid component hash")
+        if role in {"common", "rocket_fallback"}:
+            require(all(inclusion.values()) and all(paths.values()) and hashes["integrated-static-graph-rocket"] == hashes["matched-rocket-system"] and hashes["integrated-static-graph-rocket"] is not None, "common/fallback must match peers")
+        else:
+            require(inclusion["integrated-static-graph-rocket"] and not inclusion["matched-rocket-system"] and paths["integrated-static-graph-rocket"] and not paths["matched-rocket-system"] and hashes["integrated-static-graph-rocket"] is not None and hashes["matched-rocket-system"] is None, "graph delta must be integrated-only")
+    require(seen == set(_PREFREEZE_COMPONENTS), "component ledger set mismatch")
+
+    oracle = exact(document["workload_oracle"], {"operation", "input_words", "output_words", "comparison", "artifact_sha256", "input_generator_sha256", "oracle_sha256", "simulator_sha256", "input_schedule", "oracle_access", "lifecycle"}, "workload_oracle")
+    require(oracle["operation"] == "uint32_stencil_5_point_bounded" and oracle["input_words"] == 324 and oracle["output_words"] == 256 and oracle["comparison"] == "all_words_plus_checksum", "fixed workload shape/comparison required")
+    for key in ("artifact_sha256", "input_generator_sha256", "oracle_sha256", "simulator_sha256"): digest(oracle[key], key)
+    require(oracle["artifact_sha256"] != oracle["oracle_sha256"], "candidate and oracle identities must differ")
+    require(oracle["input_schedule"] == "candidate_blind_deterministic" and oracle["oracle_access"] == "inaccessible_to_candidates", "candidate-blind oracle required")
+    require(oracle["lifecycle"] == ["installation", "staging", "execution", "drain_completion", "validation", "publication"], "workload lifecycle mismatch")
+
+    budget = exact(document["budget_policy"], {"traffic_equal", "unequal_traffic_disclosed", "lawful_candidate_optimization", "cpu_load_reuse_explicit", "common_resource_equality_required", "execution_window", "accounting_fields"}, "budget_policy")
+    require(budget["traffic_equal"] is False and all(budget[key] is True for key in ("unequal_traffic_disclosed", "lawful_candidate_optimization", "cpu_load_reuse_explicit", "common_resource_equality_required")), "traffic/reuse policy mismatch")
+    require(budget["execution_window"] == "installation_through_drain_completion_excluding_validation_publication", "execution window mismatch")
+    require(budget["accounting_fields"] == ["useful_load", "useful_add", "useful_store", "useful_output", "admitted_read", "completed_read", "admitted_write", "completed_write", "bytes", "stall", "backpressure"], "accounting fields mismatch")
+
+    physical = exact(document["physical_conditions"], {"common_to_variants", "clock", "input_delay", "output_delay", "standard_cell_pvt", "rc_corner", "load_model_sha256", "drive_model_sha256", "generated_clocks", "false_paths", "multicycle_paths", "sdc_sha256"}, "physical_conditions")
+    require(physical["common_to_variants"] is True and physical["sdc_sha256"] == toolchain["sdc_sha256"], "physical conditions or SDC drift")
+    clock = exact(physical["clock"], {"port", "period", "waveform"}, "physical clock")
+    require(isinstance(clock["port"], str) and clock["port"].strip() and isinstance(clock["period"], (int, float)) and not isinstance(clock["period"], bool) and math.isfinite(clock["period"]) and clock["period"] > 0, "invalid clock")
+    require(clock["waveform"] == [0.0, clock["period"] / 2], "clock waveform mismatch")
+    for key in ("input_delay", "output_delay"):
+        require(isinstance(physical[key], (int, float)) and not isinstance(physical[key], bool) and math.isfinite(physical[key]) and physical[key] >= 0, "invalid IO delay")
+    require(all(isinstance(physical[key], str) and physical[key].strip() and physical[key].lower() not in {"tbd", "placeholder", "unknown"} for key in ("standard_cell_pvt", "rc_corner")), "invalid PVT/RC")
+    for key in ("load_model_sha256", "drive_model_sha256", "sdc_sha256"): digest(physical[key], key)
+    for key in ("generated_clocks", "false_paths", "multicycle_paths"):
+        require(isinstance(physical[key], list) and all(isinstance(value, str) and value.strip() for value in physical[key]), "constraint declaration list required")
+    require(
+        all(
+            macro["pvt"] == physical["standard_cell_pvt"]
+            and macro["rc_corner"] == physical["rc_corner"]
+            for macro in document["readiness"]["memory_macro_views"]["macros"]
+        ),
+        "common PVT/RC mismatch between macro views and physical conditions",
+    )
+
+    scope = exact(document["evidence_scope"], {"current_evidence", "target", "p_and_r_required_before_area_timing_claim", "physical_disclosures", "energy_claim", "thermal", "performance_claim", "fpga_claim", "asic_claim", "silicon_claim"}, "evidence_scope")
+    require(scope["current_evidence"] == "host-contract-validation-only" and scope["target"] == "integrated-place-and-route-area-timing" and scope["p_and_r_required_before_area_timing_claim"] is True, "evidence boundary mismatch")
+    require(scope["physical_disclosures"] == ["floorplan", "die", "core", "utilization", "placement_seed", "routing", "parasitic_identity"], "P&R disclosure mismatch")
+    require(scope["energy_claim"] == {"enabled": False, "status": "not-measured"} and scope["thermal"] == {"applicable": False, "prohibits_energy_device_inference": True}, "energy/thermal boundary mismatch")
+    require(all(scope[key] is False for key in ("performance_claim", "fpga_claim", "asic_claim", "silicon_claim")), "hardware/performance claims prohibited")
+    return {"schema": document["schema"], "status": "ready-for-review", "experiment_id": None, "freeze_state": "unfrozen"}
+
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)

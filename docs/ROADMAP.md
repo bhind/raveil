@@ -27,10 +27,12 @@ for further T-0106 implementation. The active
 Research delivery remains T-0044's post-EXP-0010 integrated physical boundary.
 The first S08 implementation now elaborates and functionally verifies the
 Static Graph/Rocket/common-owned-memory hierarchy and passes a matched RTL
-structural preflight. This does not collect or claim whole-system area, timing,
-energy, FPGA, ASIC, silicon, or performance results. The next boundary is an
-independent clean replay and pre-data fairness review before EXP-0011 is
-allocated or frozen. Later Sprint dates remain unset until that review closes.
+structural preflight. S10 and S11 add fail-closed readiness plus identity,
+denominator, oracle/budget, physical-condition, and P&R-scope validators. None
+collects or claims whole-system area, timing, energy, FPGA, ASIC, silicon, or
+performance results. The next reversible boundary is one typed measurement-
+design and evidence-protocol slice plus independent pre-data review. EXP-0011
+allocation or freeze remains a later HCI-02 boundary.
 
 Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
 remaining matched physical gates, beginning with the post-EXP-0010 integrated
