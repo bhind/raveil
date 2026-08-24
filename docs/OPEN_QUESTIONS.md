@@ -159,12 +159,15 @@ resolves it.
   counts alone are insufficient. The unequal but explained Graph/Rocket
   dynamic traffic must remain a reported design result rather than an equality
   assertion.
-  S11 now makes those identity, denominator, oracle, traffic, physical-
-  condition, and non-claim declarations machine-checkable in an unallocated
-  v2 document. It does not resolve them against real P&R artifacts. The exact
-  available macro/standard-cell/tech/RC/floorplan inputs, physical-flow seeds,
-  typed estimator and fixed thresholds, and ADR-0050-strength evidence protocol
-  remain open before any EXP-0011 freeze.
+  S11 makes those identity, denominator, oracle, traffic, physical-condition,
+  and non-claim declarations machine-checkable in an unallocated v2 document.
+  S12's unallocated v3 contract now fixes paired physical-flow seeds 101 and
+  202, typed absolute and incremental area plus 40 ns timing estimators,
+  explicitly unavailable statistical intervals, fixed decision thresholds,
+  and ADR-0050-strength failure/recovery/evidence sealing. It does not resolve
+  the declarations against real P&R artifacts. The exact available
+  macro/standard-cell/tech/RC/floorplan inputs and their hash-bound manifest
+  remain open; allocating EXP-0011 or freezing that manifest requires HCI-02.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

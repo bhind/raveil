@@ -27,12 +27,11 @@ for further T-0106 implementation. The active
 Research delivery remains T-0044's post-EXP-0010 integrated physical boundary.
 The first S08 implementation now elaborates and functionally verifies the
 Static Graph/Rocket/common-owned-memory hierarchy and passes a matched RTL
-structural preflight. S10 and S11 add fail-closed readiness plus identity,
-denominator, oracle/budget, physical-condition, and P&R-scope validators. None
-collects or claims whole-system area, timing, energy, FPGA, ASIC, silicon, or
-performance results. The next reversible boundary is one typed measurement-
-design and evidence-protocol slice plus independent pre-data review. EXP-0011
-allocation or freeze remains a later HCI-02 boundary.
+structural preflight. S10--S12 add fail-closed readiness, identity/denominator,
+oracle/budget, physical-condition, typed physical estimator, fixed decision,
+and evidence-protocol validators. None collects or claims whole-system area,
+timing, energy, FPGA, ASIC, silicon, or performance results. The next boundary
+is HCI-02 immediately before EXP-0011 allocation or freeze.
 
 Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
 remaining matched physical gates, beginning with the post-EXP-0010 integrated
@@ -280,10 +279,11 @@ merely because a branch or partial implementation already exists.
    common fixture/provider and owned memory, selector/adapter,
    cache/interconnect, and common external clocks/reset. Candidate-mode RTL
    smokes and a matched integrated/Rocket structural preflight pass. Gate 1
-   remains open because this is functional and structural development evidence,
-   not a frozen integrated physical experiment. Independent replay and
-   fairness review must close before EXP-0011 pre-data freeze or any physical
-   collection.
+   remains open because this is functional, structural, and host contract-
+   validation evidence, not a frozen integrated physical experiment. S10--S12
+   now close the bounded readiness, identity/denominator, typed estimator,
+   fixed decision, and evidence-protocol review. HCI-02 applies before
+   EXP-0011 allocation or any claim-bearing physical collection.
    Separately, ADR-0050 separates the locally sealed EXP-0008 result from
    durable promotion: both
    the retained failed RUN and completed recovery RUN need immutable remote
