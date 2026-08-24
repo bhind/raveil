@@ -710,6 +710,31 @@ and `e25ba501f7eebf1b722f0f46aa7d478129374885bfedbc126acb84d3d8dc8d9b`.
 This is host contract-validation evidence only. EXP-0011 remains unallocated
 and unfrozen; no synthesis, timing, area, energy, FPGA, ASIC, silicon, or
 performance datum or conclusion follows.
+T-0044/S11 adds a separate v2 pre-freeze identity and denominator validator
+without weakening or silently widening S10's accepted v1 contract. V2 requires
+the full implementation commit, integrated and matched config/RTL/export
+identities, separate generator and physical toolchain images and root files,
+standard-cell and macro physical views, preflight hashes, and common SDC
+identity. Its exhaustive nine-component ledger admits common fixture, memory,
+cache/interconnect, clock/reset, private validation, and Rocket fallback in
+both peers while limiting Graph core/client/selector deltas to the integrated
+peer. It also fixes the bounded uint32 stencil and independent oracle boundary,
+six lifecycle phases, explicit unequal traffic and CPU load reuse, complete
+accounting field names, common physical conditions, and an integrated P&R
+area/timing target with energy and hardware claims disabled.
+Primary and independent Python 3.14.6 verification passed 35 integrated-RTL
+tests, 21 physical-proxy tests, and all 106 T-0044 tests. The independent clean
+acceptance log SHA-256 is
+`9a55ad52858c37f447ca3cc23794a740f27b6a73f790f5b5425ba5f063dabc55`.
+An earlier stripped environment selected system Python 3.9.6 because PATH was
+ordered incorrectly; its unrelated `zip(strict=True)` discovery errors remain
+preserved at SHA-256
+`c1780b6fa98433fb1d08eebd988eef0d969b8ce916919db06d65f24bc7044e51`
+as an operational failure, not candidate evidence. S11 stores no manifest,
+resolves no declared hash to a physical artifact, and does not yet type the
+estimator, fixed decision thresholds, run matrix, or complete evidence seal.
+EXP-0011 therefore remains unallocated and unfrozen, and every physical,
+performance, energy, FPGA, ASIC, and silicon claim remains false.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

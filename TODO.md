@@ -965,10 +965,19 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   to Rocket's lawful 800 reads plus 256 writes. The validator passes 31 focused
   tests and all 102 T-0044 tests in primary and independent clean-environment
   verification. It allocates or freezes no experiment and stores no result.
-  **Next HCI-02 boundary:** separately review and authorize the first actual
-  EXP-0011 allocation/freeze package before any claim-bearing integrated
-  physical collection. Do not collect synthesis, timing, area, energy, FPGA,
-  ASIC, silicon, or performance data from S08/S10, and do not close T-0044.
+  T-0044/S11 now adds a separate v2 contract for full source/config/export/
+  toolchain identity, an exhaustive common/Rocket/Graph component denominator,
+  bounded workload and independent oracle identity, explicit unequal traffic
+  and load reuse, common physical conditions, and an integrated P&R area/timing
+  target with all result claims disabled. Primary and independent Python 3.14
+  verification passes 35 focused and all 106 T-0044 tests. It stores no actual
+  manifest or physical artifact and leaves the typed estimator, paired seed/run
+  matrix, fixed decision thresholds, and ADR-0050-strength RUN/evidence seal
+  for one bounded S12 pre-freeze slice. After that slice passes Performance
+  review, **HCI-02 applies immediately before** allocating EXP-0011 or freezing
+  its first claim-bearing manifest. Do not collect synthesis, placement,
+  routing, timing, area, energy, FPGA, ASIC, silicon, or performance data from
+  S08/S10/S11, and do not close T-0044.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked
