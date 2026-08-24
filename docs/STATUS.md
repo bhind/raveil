@@ -108,7 +108,7 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 38 items and 37 fields. Current SP totals are S-0001=50
+The Project retains 42 items and 37 fields. Current SP totals are S-0001=64
 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
@@ -132,14 +132,22 @@ This closes only the five-point S01 carry-in as `rtl-simulation-functional`
 negative evidence; T-0106 remains open and conditional, T-0042 remains
 complete, and no performance or resource-match claim follows.
 
-T-0122 is now planned as the current-main simulation-first Graph device MVP.
-The unmerged T-0113 clean replay at `f5ea057` is a low-risk implementation
-donor because its seven Static Graph dependencies are byte-identical to current
-main, but it is not canonical completion. T-0122 will reconstruct only new,
-task-neutral contract, runtime, Verilator wrapper, runner, and test files and
-will re-run every acceptance command on current authority. T-0123 remains
-ordered after T-0122 for bounded generated-schedule and multi-DAG generality.
-No T-0122 implementation or new simulation evidence is present yet.
+T-0122 now supplies the current-main simulation-first Graph device MVP. The
+task-neutral `raveil.graph-device-abi/v1` is fixed-width, little-endian,
+pointer-free, word-addressed, single-request, and finitely polled. The owned
+artifact tool binds the canonical Static Graph descriptor/configuration,
+source, ABI, implementation, inputs, independent Pavane oracles, simulator,
+and environment. A transport-neutral C++ runtime and a Verilator-only adapter
+stage 324 words, execute two normal seeds, expose 256 private output words only
+after output-valid, cancel a third seed without output, and reset/restart.
+Thirty focused tests pass. Primary and independent clean linux/amd64
+Docker/Verilator runs both completed with 3,072 polls per successful seed and
+byte-identical private output/oracle SHA-256 values
+`dd749f0f218c7389730bef5b97af4e9203b0501d5ec57fa48ffa643356f23582`
+and `58090120063557607cf04f684fb511adc3b3794e10ba1902003328113b38fe11`.
+This is `rtl-simulation-functional` evidence only; no dynamic schedule,
+performance, resource, AXI/UIO, FPGA, ASIC, or silicon claim follows. T-0123
+remains ordered next for bounded generated-schedule and multi-DAG generality.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

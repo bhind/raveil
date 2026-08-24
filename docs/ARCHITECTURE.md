@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 ## Four-plane adaptive Harvard model
 
@@ -239,6 +239,19 @@ adds, and one store over 256 points. Cancellation clears output validity;
 normal completion grants only a private result for independent host-oracle
 checking. This is RTL functional simulation, not a product ISA, general Graph
 executor, matched CPU comparison, or hardware-performance result.
+
+T-0122 wraps that exact hardwired region in the first task-neutral simulated
+device vertical slice. `raveil.graph-device-abi/v1` defines a fixed-width,
+little-endian, pointer-free word interface with immutable descriptor,
+configuration, and implementation identities; bounded input and private-output
+windows; start, cancel, reset, status, and checksum registers; one outstanding
+request; and finite polling. The host compiler emits the canonical artifact
+and inputs, a transport-neutral C++ `DeviceTransport` owns staging and lifecycle
+ordering, and only the outer adapter knows Verilator types. Pavane independently
+recomputes and checks every output word before the append-once receipt is
+accepted. This makes the simulation runnable through one operator command, but
+does not install a new schedule, publish Data, define AXI/UIO, measure
+performance, or turn the hardwired region into general Daphnis.
 
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
@@ -621,12 +634,12 @@ renaming executable identifiers.
 | Proposal and optimization | La Valse Optimization Subsystem | optimizer, search system, mapper, ranker, and abstention policy | `AnalyticalPredictor` ranks the fixed Native tensor slate and may abstain | proposal code is fallible advice and has no admission, execution, measurement, or publication authority |
 | Experience | Boléro Experience Runtime | persistent Experience store, retrieval, retention, and advisory transfer | append-only JSONL, a bounded active index, and replayable policy experiments exist | raw measurement, completion telemetry, and Command Graph demo caching remain separate; no current Command Graph or hardware-selection loop consumes Boléro advice |
 | Guarded orchestration | Chloé Graph Orchestrator | admission sequencing, baseline-first execution, private failure, selection, fallback, and rollback | bounded tensor and Command Graph executors implement separate host paths | the orchestrator is not Daphnis, the predictor, the semantic oracle, or the backend implementation |
-| Execution plane | Daphnis Execution Subsystem | replaceable software or hardware execution backend and configuration plane | no general Daphnis exists; current adapters are `NativeCBackend` and correctness-only `SonatineQEMUBackend` | Daphnis does not name the guarded executor, Sonatine, a simulator, or the current hardwired RTL region |
+| Execution plane | Daphnis Execution Subsystem | replaceable software or hardware execution backend and configuration plane | no general Daphnis exists; current adapters are `NativeCBackend`, correctness-only `SonatineQEMUBackend`, and the bounded T-0122 simulated Graph device | the T-0122 ABI runs only the current hardwired region; it does not make Verilator, Sonatine, or that region the general execution plane |
 | Object memory | Ondine Object Memory Subsystem | object residency, versioning, movement, spill, stream, and rematerialization | a descriptive Native `MemoryPlan` plus bounded Sonatine single-hart object/version and publication slices exist | no general allocator, coherent heterogeneous memory, DMA, spill/rematerialization runtime, or persistent object service exists |
 | Privileged runtime | Sonatine Microkernel | capability microkernel, execution authority, cancellation, and guarded publication | the RV64 single-hart kernel exercises job/object lifecycle and guarded publication under QEMU | Sonatine is optional for the Native profile, and emulation is not physical evidence |
 | Measurement and telemetry | Alborada Measurement Observatory | segregated measurement, environment, completion, and policy-evaluation evidence | versioned records, experiment bundles, and cold completion telemetry paths exist | collected evidence does not automatically enter Boléro or grant publication authority |
-| Host and transport | Rapsodie Host Bridge | userspace host integration and future device transport | GNU/Linux and macOS host Native paths; the Linux module is a non-authoritative harness | no real MMIO, DMA, IRQ, shared-memory, cache-coherency, or device-reset contract exists |
-| Hardware research | Tzigane Hardware Research Laboratory | RTL architecture comparison and backend-hypothesis testing | `StaticStencilRegion`, Rocket, and BOOM are isolated experiment candidates or controls | they are not installed Daphnis backends and grant no Program, Data, publication, or Experience authority |
+| Host and transport | Rapsodie Host Bridge | userspace host integration and future device transport | GNU/Linux and macOS Native paths plus T-0122's transport-neutral word runtime and Verilator adapter | the simulated device ABI defines no real MMIO, DMA, IRQ, shared-memory, cache-coherency, or physical reset contract |
+| Hardware research | Tzigane Hardware Research Laboratory | RTL architecture comparison and backend-hypothesis testing | `StaticStencilRegion`, Rocket, and BOOM remain research candidates or controls; T-0122 adds a one-command Verilator device loop | the runnable simulated device is not an installed general Daphnis backend and grants no Program, Data-publication, or Experience authority |
 | Adversarial assurance | Scarbo Verification Subsystem | adversarial testing, fuzzing, fault injection, and hostile-case verification | repository tests cover many malformed, stale, fault, rollback, and fail-closed cases | there is no integrated Scarbo subsystem, complete fuzzing program, or production security assurance |
 
 ### Portable orchestration versus backend execution

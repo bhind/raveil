@@ -1,0 +1,47 @@
+{
+  "byte_order": "little-endian",
+  "control_bits": {
+    "cancel": 2,
+    "reset": 4,
+    "start": 1
+  },
+  "digest_word_encoding": "sha256-hex-bytes-packed-little-endian-u32",
+  "identity_word": 1381368065,
+  "input_window": {
+    "base_word": 256,
+    "count_words": 324,
+    "write_only": true
+  },
+  "max_outstanding_requests": 1,
+  "max_status_polls": 8192,
+  "offset_unit": "u32-word",
+  "output_window": {
+    "base_word": 1024,
+    "count_words": 256,
+    "private": true,
+    "read_requires_output_valid": true
+  },
+  "pointer_free": true,
+  "registers": {
+    "abi_identity": 0,
+    "abi_version": 1,
+    "checksum_high": 41,
+    "checksum_low": 40,
+    "config_sha256_base": 24,
+    "control": 4,
+    "descriptor_sha256_base": 16,
+    "implementation_sha256_base": 32,
+    "input_count_words": 6,
+    "output_count_words": 7,
+    "status": 5
+  },
+  "schema": "raveil.graph-device-abi/v1",
+  "status_bits": {
+    "busy": 1,
+    "cancelled": 4,
+    "completed": 2,
+    "fault": 8,
+    "output_valid": 16
+  },
+  "word_bits": 32
+}
