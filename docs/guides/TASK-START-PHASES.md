@@ -1,7 +1,7 @@
 # Task start phases and work-in-progress handling
 
 Status: active planning guide
-Date: 2026-08-14
+Date: 2026-08-24
 Authority: TODO task assignments, ROADMAP gates, accepted ADRs
 
 ## Purpose
@@ -13,7 +13,8 @@ states when work may begin.
 
 ## Phases
 
-- **P0 — immediate:** the single default implementation focus.
+- **P0 — immediate:** at most two explicitly independent delivery items under
+  ADR-0061; otherwise the single default implementation focus.
 - **P1 — next:** begins only after P0 passes its recorded exit contract.
 - **P2 — result-conditioned:** begins only after a named go result or separately
   accepted product requirement.
@@ -26,10 +27,13 @@ The canonical task-to-phase mapping is the table at the top of `TODO.md`.
 
 ## Work-in-progress limit
 
-Only one coherent P0 implementation task is active by default. Parallel work is
-limited to read-only review, reproducibility checks, or a separately recorded
-independent blocker investigation. A second implementation branch requires a
-dated decision naming why it cannot wait and what resource owns it.
+Only one coherent P0 implementation task is active by default. ADR-0061 permits
+a second mutation item only when both items have disjoint task or child-slice,
+worktree, branch, owner, exact file allowlist, artifacts, tests, acceptance,
+and evidence paths and neither depends on the other's unmerged result.
+Canonical record integration, acceptance, and merge remain serial. Read-only
+review, reproducibility checks, and bounded blocker investigations do not
+consume this two-item delivery limit.
 
 Existing partial work is handled as follows:
 
@@ -40,9 +44,11 @@ Existing partial work is handled as follows:
 5. Resume only after the task is promoted or when a bounded action is necessary
    to preserve otherwise-lost evidence.
 
-For the current reset, the controlled common-resource T-0042 slice is P0. Any
-unfinished stripped/malformed token diagnostic belongs to P2 T-0106. It may be
-retained, but it must not delay or re-enter the T-0042 critical path.
+For the current reset, T-0122 is the mutation P0 for the simulation-first Graph
+device MVP. T-0044/S13 remains Blocked before EXP-0011 data; only the read-only
+S14 physical-input strategy inventory may overlap T-0122. T-0123 follows
+T-0122, and unfinished stripped/malformed token diagnostics remain P2 T-0106.
+Preserved branches do not re-enter the critical path without promotion.
 
 ## Promotion record
 

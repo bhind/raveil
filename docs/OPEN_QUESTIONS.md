@@ -1,10 +1,20 @@
 # Open questions
 
-Last updated: 2026-08-15
+Last updated: 2026-08-24
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
 resolves it.
+
+## Simulation-first device path
+
+- What is the smallest task-neutral name and exact fixed-width register/data
+  schema for the T-0122 simulated device ABI so that a later AXI4-Lite/UIO
+  wrapper maps it without importing AMD, Linux, TileLink, or Verilator types?
+  T-0122 must resolve this with schema and negative tests, not physical code.
+- After T-0122 passes, which second bounded acyclic DAG is the smallest honest
+  T-0123 discriminator while retaining the existing operation alphabet,
+  one-port memory contract, independent oracle, and no graph-specific RTL?
 
 ## Native execution
 

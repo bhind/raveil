@@ -76,8 +76,10 @@ eight SP is the full weekly capacity. Eight SP remains an under-utilization
 lower-bound check, 13 SP is the provisional committed capacity, and 13--21 SP
 is the warm stretch range. These are planning bands, not stop conditions; the
 ADR-0060 weekly usage guard is an independent service-cost stop.
-Execution uses one serial high-reasoning PM integration lane,
-one coherent low-reasoning mutation lane, one low-reasoning Tester, at most two
+Execution uses one serial high-reasoning PM integration lane. ADR-0061 now
+permits up to two independently acceptable low-reasoning mutation lanes only
+with disjoint tasks, files, artifacts, tests, and evidence; one low-reasoning
+Tester follows each accepted packet, with at most two
 read-only risk reviewers, a medium Librarian, and a milestone-only
 high-reasoning Researcher. The Project has an
 explicit `Sprint Board` Kanban plus a filtered `Product Backlog` table and six
@@ -90,7 +92,10 @@ cycle, agent tier, role packets, and resource use. T-0117's preserved Initial
 SP is 5+3 while its first
 AI-evidence correction sets Current SP to 3+2. Parent epics have no SP, and
 specialist agents are not counted as independent FTE: final integration and
-acceptance remain serial. The subsequent authority audit found that
+acceptance remain serial. ADR-0061 requires the default live Kanban to expose
+ten pull fields while populated historical fields remain retained. Active mutation must have a
+matching live Project item; unmatched worktrees are donor material or
+provenance, not current WIP. The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
@@ -126,6 +131,15 @@ and graph SHA-256 `8fbee170f393e6ed777484c9fbb3f6e0d6adddbf1802525fa5a1bb680756a
 This closes only the five-point S01 carry-in as `rtl-simulation-functional`
 negative evidence; T-0106 remains open and conditional, T-0042 remains
 complete, and no performance or resource-match claim follows.
+
+T-0122 is now planned as the current-main simulation-first Graph device MVP.
+The unmerged T-0113 clean replay at `f5ea057` is a low-risk implementation
+donor because its seven Static Graph dependencies are byte-identical to current
+main, but it is not canonical completion. T-0122 will reconstruct only new,
+task-neutral contract, runtime, Verilator wrapper, runner, and test files and
+will re-run every acceptance command on current authority. T-0123 remains
+ordered after T-0122 for bounded generated-schedule and multi-DAG generality.
+No T-0122 implementation or new simulation evidence is present yet.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

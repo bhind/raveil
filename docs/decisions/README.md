@@ -57,8 +57,9 @@ rewrite it.
 | [ADR-0050](ADR-0050-t0044-results-require-sealed-durable-evidence.md) | Accepted | T-0044 results require sealed, immutable, download-verified evidence before promotion |
 | [ADR-0051](ADR-0051-continuous-work-stops-only-on-human-confirmation-incidents.md) | Accepted | Authorized local work continues until a defined human-confirmation incident |
 | [ADR-0055](ADR-0055-weekly-sprints-coordinate-but-do-not-promote-evidence.md) | Superseded | Markdown sprint board superseded by the GitHub Project coordination view |
-| [ADR-0056](ADR-0056-github-project-is-the-sprint-coordination-view.md) | Accepted | GitHub Project supersedes the Markdown sprint board as the sole live coordination view |
+| [ADR-0056](ADR-0056-github-project-is-the-sprint-coordination-view.md) | Accepted; field visibility partially superseded by ADR-0061 | GitHub Project supersedes the Markdown sprint board as the sole live coordination view |
 | [ADR-0057](ADR-0057-main-integration-requires-pull-requests.md) | Accepted | Main integration requires a pull request with no direct-push bypass |
 | [ADR-0058](ADR-0058-incident-free-pull-requests-merge-immediately.md) | Accepted | Verified pull requests merge immediately when no Human-confirmation incident applies |
-| [ADR-0059](ADR-0059-ai-role-lanes-govern-execution-capacity.md) | Accepted | AI role lanes and observed cycle time govern execution capacity; SP remains relative risk |
+| [ADR-0059](ADR-0059-ai-role-lanes-govern-execution-capacity.md) | Accepted; mutation concurrency partially superseded by ADR-0061 | AI role lanes and observed cycle time govern execution capacity; SP remains relative risk |
 | [ADR-0060](ADR-0060-weekly-codex-usage-has-a-hard-cost-stop.md) | Accepted | New costly work stops when verified weekly Codex usage remaining is below five percent |
+| [ADR-0061](ADR-0061-independent-delivery-lanes-require-live-coordination.md) | Accepted | Up to two independently owned mutation lanes require live Project synchronization and serial PM integration |

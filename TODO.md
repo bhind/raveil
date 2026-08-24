@@ -12,18 +12,48 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | The only default critical-path implementation. Start or continue now. | T-0044 remaining matched measurement gates |
-| **P1 — next** | Start only after P0's recorded exit conditions pass. | — |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0122 simulation-first Graph device MVP; T-0044/S14 read-only physical-input strategy inventory while S13 remains Blocked |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0123 bounded generated-schedule and multi-DAG generalization after T-0122 |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
 
 Promotion into P0 requires a dated log entry naming the satisfied trigger,
-dependencies, owner, stop rule, and displaced or completed P0 task. P0 has a
-work-in-progress limit of one coherent implementation task. Read-only review
-and failure preservation do not consume that slot; new implementation does.
+dependencies, owner, stop rule, file allowlist, and displaced or completed P0
+task. ADR-0061 permits at most two independently acceptable implementation
+items when their task, files, artifacts, tests, and evidence are disjoint.
+Project Manager record integration and PR merge remain serial. Read-only
+review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0122** Deliver the smallest simulation-first Static Graph device MVP
+  on current main. Reconstruct, rather than merge wholesale, the previously
+  clean-replayed T-0113 prototype from commit `f5ea057`. One command must bind
+  the canonical bounded-stencil descriptor to a task-neutral, versioned,
+  fixed-width, little-endian, pointer-free device artifact; stage 324 words
+  through a transport-neutral runtime; start and finitely poll the Verilator
+  device; read 256 private output words only after output-valid; and validate
+  every word plus checksum with the independent Pavane oracle. Two normal
+  inputs, cancellation with no publication, and reset/restart must pass.
+
+  Keep the implementation in new task-neutral contract/runtime/runner/test
+  files. Existing `static_region`, `simulation_adapter`, Static Graph core,
+  scratchpad, and T-0044 files are read-only dependencies for this slice.
+  Receipts bind artifact, ABI, source, oracle, simulator, input, and environment
+  identities and remain `rtl-simulation-functional`. Exclude dynamic schedule
+  installation, AXI, UIO, Vivado, DTBO, bitstream, DMA, IRQ, kernel modules,
+  FPGA execution, latency comparison, area, energy, and product claims.
+
+- [ ] **T-0123** After T-0122 is accepted on current main, reconstruct the
+  bounded generality ladder from the clean-replayed T-0114 donor commits
+  without importing their stale records. First prove that a generated immutable
+  schedule is transaction-trace equivalent to the fixed control; then admit
+  bounded affine shape/stride variants; finally run at least two distinct
+  acyclic DAGs over `LOAD_U32`, `ADD_U32`, and `STORE_U32` on one executor RTL
+  and the unchanged T-0122 device ABI, with separate independent oracles and
+  fallback parity. Stop before installable general graphs, variable-latency
+  issue, CGRA/VLIW expansion, AXI/KV260 work, or a performance campaign.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
@@ -778,10 +808,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   correctness constant where possible; report frontend, rename/ROB/issue/LSU,
   graph-ready/token/configuration, cycles, traffic, area, timing, and energy
   proxies separately. Admit only mechanisms that passed the T-0057 source and
-  IP-risk review; retain an explicit no-go outcome. The current P0 slice is
-  only EXP-0005/EXP-0006's frozen 1/4-fresh-input latency/traffic pilots: static Graph,
-  Rocket in-order, BOOM OoO, plus BOOM serialize-dispatch as a diagnostic (not
-  an “OoO-disabled CPU”). Primary comparison preserves lawful CPU load reuse
+  IP-risk review; retain an explicit no-go outcome. EXP-0005/EXP-0006's frozen
+  1/4-fresh-input latency/traffic pilots covered static Graph, Rocket in-order,
+  BOOM OoO, plus BOOM serialize-dispatch as a diagnostic (not an “OoO-disabled
+  CPU”). These completed pilots remain retained evidence. The current P0
+  authority is only the read-only S14 physical-input strategy inventory while
+  S13 remains Blocked before EXP-0011 allocation or data.
+  Primary comparison preserves lawful CPU load reuse
   and reports Graph's extra traffic. VLIW/CGRA, elastic, stream, hybrid,
   energy, synthesis timing, and area remain outside this checkpoint, so pilot
   success cannot close T-0044 or decide go. Fail closed on oracle/resource/
