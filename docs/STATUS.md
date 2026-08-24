@@ -809,6 +809,15 @@ with deterministic replay runner SHA-256
 `9ff24ece4f418edb706857048507b8c63bd05ad6b4901a242bfbec3199583d18`
 and byte-matched tracked transcript SHA-256
 `f44b4ec1da28110d60f693529f230d0809f1ab396b8c7c151b86ae740aca1d52`.
+The subsequent read-only T-0044/S14 public-source inventory found no verified
+Liberty-plus-LEF set for the exact seven-name/dimension/port/pin/mask/PVT
+contract and no already qualified common standard-cell substitute. OpenRAM is
+a possible view-generation substrate, and a public SKY130 32x512 1rw1r macro
+demonstrates that Liberty/LEF views can exist, but neither is the required
+drop-in set. S14 is complete as negative planning evidence; S13 remains
+Blocked, EXP-0011 remains unallocated and unfrozen, and no candidate flow or
+physical result was created. The source and risk packet is retained in
+`docs/research/reviews/2026-08-24-T-0044-S14-common-memory-strategy-inventory.md`.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

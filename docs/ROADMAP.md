@@ -51,6 +51,9 @@ core, scratchpad, and every T-0044 file as read-only. T-0044 separately retains
 the matched physical Research line, but S13 remains blocked before EXP-0011
 allocation or data until a reviewed common memory implementation/view set
 exists. Its S14 source/provenance inventory may run read-only in parallel.
+S14 is now complete with no compatible candidate identified. OpenRAM remains a
+possible generator for a separately reviewed proposal, not an adopted view set;
+the blocked S13 resume condition and all pre-data confirmations are unchanged.
 
 T-0123 starts only after T-0122 passes and owns the bounded progression from a
 generated schedule to at least two DAGs on one executor. T-0106 remains P2 only
