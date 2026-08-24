@@ -34,8 +34,10 @@ timing, energy, FPGA, ASIC, silicon, or performance results. The next boundary
 is HCI-02 immediately before EXP-0011 allocation or freeze.
 The owner granted HCI-02 on 2026-08-24, but S13 stopped before allocation under
 the preregistered missing-physical-input rule. All seven required common memory
-macros lack Liberty/LEF/GDS views in the pinned public image, although the
-standard-cell, technology, and RC inputs are present. The integrated physical
+macros lack the Liberty timing and LEF geometry/pin views required by the P&R
+estimand in the pinned public image, although the standard-cell, technology,
+and RC inputs are present. Matching GDS files are also absent but are
+supplemental to this pause. The integrated physical
 gate is therefore **pause-boundary before data**. It may resume only with one
 reviewed common memory implementation/view set bound identically to both
 candidates; placeholder or candidate-only macro conditions are prohibited.

@@ -1006,10 +1006,11 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   The owner authorized HCI-02 on 2026-08-24. T-0044/S13 then performed only the
   required pre-data physical-input binding and hit the fixed
   `required_physical_input_component_unavailable` pause: the pinned image has
-  usable standard-cell/technology/RC views but no Liberty/LEF/GDS view for any
-  of the seven byte-identical integrated/matched memory macros. Preserve the
-  tracked readiness receipt SHA-256
-  `f81541a8bca267c1b0e4eb1f9936a502147efb17ef71d1416a5b2b1c2ce1c606`.
+  usable standard-cell/technology/RC views but no required Liberty timing or
+  LEF geometry/pin view for any of the seven byte-identical
+  integrated/matched memory macros. Matching GDS files are also absent but are
+  supplemental to this pause. Preserve the tracked deterministic inventory
+  runner and transcript identities recorded by the readiness receipt.
   Do not allocate or freeze EXP-0011, invent placeholder macros, or collect
   candidate data until one common memory physical-view strategy passes
   provenance, resource, and fairness review. Initial SP 13 is retained;

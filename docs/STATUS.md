@@ -779,8 +779,9 @@ physical-input binding stopped before EXP allocation. The two S08 exports have
 the same seven-entry memory contract, SHA-256
 `f318d6bd905d3c8b411082e9c33652593c96ae26d29669da8baf34e726b4de52`,
 while the pinned `raveil-physical-proxy-toolchain:v1` image contains zero
-Liberty, LEF, or GDS matches for every required macro. Standard-cell Liberty,
-standard-cell LEF, technology LEF, and OpenRCX rules are present and hashed,
+required Liberty timing or LEF geometry/pin matches for every required macro.
+Matching GDS files are also absent, but are supplemental to the pause.
+Standard-cell Liberty, standard-cell LEF, technology LEF, and OpenRCX rules are present and hashed,
 so this is specifically a missing memory physical-view boundary rather than an
 absent OpenROAD installation. The fixed
 `required_physical_input_component_unavailable` pause rule fired. EXP-0011
@@ -789,7 +790,11 @@ timing, area, or other candidate datum was collected. The tracked readiness
 receipt is
 `docs/experiments/receipts/T-0044-EXP-0011-physical-input-readiness.json`,
 SHA-256
-`f81541a8bca267c1b0e4eb1f9936a502147efb17ef71d1416a5b2b1c2ce1c606`.
+`0c64aa343b6801c0846744364f2d5dece7af00e26648d53b437de51ea74f3945`,
+with deterministic replay runner SHA-256
+`9ff24ece4f418edb706857048507b8c63bd05ad6b4901a242bfbec3199583d18`
+and byte-matched tracked transcript SHA-256
+`f44b4ec1da28110d60f693529f230d0809f1ab396b8c7c151b86ae740aca1d52`.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,

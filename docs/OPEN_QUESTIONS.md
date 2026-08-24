@@ -168,9 +168,10 @@ resolves it.
   the declarations against real P&R artifacts. The exact available
   macro/standard-cell/tech/RC/floorplan inputs and their hash-bound manifest
   remain open. HCI-02 was authorized, and the first exact inventory resolved
-  the standard-cell, technology, and RC inputs but found zero Liberty/LEF/GDS
-  views for each of the seven required memory macros in the pinned public
-  image. The boundary is now narrower: obtain and review a compatible common
+  the standard-cell, technology, and RC inputs but found zero required Liberty
+  timing or LEF geometry/pin views for each of the seven memory macros in the
+  pinned public image. Matching GDS files are also absent, but that is
+  supplemental to the P&R pause. The boundary is now narrower: obtain and review a compatible common
   macro-view set, pre-data refreeze a common standard-cell memory
   implementation, or pause the custom integrated physical line. Any choice
   must apply identically to both candidates and must not use placeholder or

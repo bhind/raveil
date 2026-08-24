@@ -43,7 +43,12 @@
     ]
   },
   "pinned_view_search": {
-    "searched_suffixes": ["lef", "lib", "gds"],
+    "search_root": "/home/mambauser/physical-mamba/envs/toolchain/share/pdk/sky130A",
+    "required_view_suffixes": ["lib", "lef"],
+    "supplemental_view_suffixes": ["gds"],
+    "required_match_predicate": "fixed-string macro-name content match in every regular file with the declared suffix",
+    "supplemental_match_predicate": "case-sensitive macro-name filename match in every regular GDS file",
+    "sort": "LC_ALL=C full-path ascending",
     "macro_match_counts": {
       "cc_dir_ext": 0,
       "cc_banks_0_ext": 0,
@@ -54,13 +59,21 @@
       "memory_ext": 0
     }
   },
+  "inventory_replay": {
+    "command": "./hardware/chisel/check-exp0011-macro-views.sh",
+    "runner_sha256": "9ff24ece4f418edb706857048507b8c63bd05ad6b4901a242bfbec3199583d18",
+    "tracked_transcript": "docs/experiments/receipts/T-0044-EXP-0011-macro-view-inventory.txt",
+    "tracked_transcript_sha256": "f44b4ec1da28110d60f693529f230d0809f1ab396b8c7c151b86ae740aca1d52",
+    "expected_exit_code": 0,
+    "expected_stdout_byte_identical": true
+  },
   "raw_log": {
     "retention": "local-untracked-operational",
     "bytes": 3956,
     "sha256": "206f6330c630885a59c14bfad5652a7956d09996b34bd9795bc18c0395f0d2b2"
   },
   "decision_boundary": {
-    "reason": "All seven required memory macro Liberty, LEF, and GDS views are absent from the pinned public toolchain image.",
+    "reason": "All seven required memory macros lack the Liberty timing and LEF geometry/pin views required for the integrated P&R estimand. Matching GDS files are also absent but are supplemental to this pause decision.",
     "prohibited_shortcuts": [
       "zero-area-or-timing-free-blackboxes",
       "invented-placeholder-macro-views",
