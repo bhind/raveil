@@ -44,11 +44,13 @@ Existing partial work is handled as follows:
 5. Resume only after the task is promoted or when a bounded action is necessary
    to preserve otherwise-lost evidence.
 
-For the current reset, T-0122 is the mutation P0 for the simulation-first Graph
-device MVP. T-0044/S13 remains Blocked before EXP-0011 data; only the read-only
-S14 physical-input strategy inventory may overlap T-0122. T-0123 follows
-T-0122, and unfinished stripped/malformed token diagnostics remain P2 T-0106.
-Preserved branches do not re-enter the critical path without promotion.
+For the current reset, T-0122's simulation-first Graph device MVP and the
+read-only T-0044/S14 inventory are complete. T-0044/S13 remains Blocked before
+EXP-0011 data. No mutation P0 is implicitly active after T-0122 integration;
+T-0123 remains P1 until the Project Manager records its exact current-main
+allowlist and promotes it. Unfinished stripped/malformed token diagnostics
+remain P2 T-0106. Preserved branches do not re-enter the critical path without
+promotion.
 
 ## Promotion record
 

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0122 simulation-first Graph device MVP |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | — |
 | **P1 — next** | Start only after its named P0 dependency passes. | T-0123 bounded generated-schedule and multi-DAG generalization after T-0122 |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -27,7 +27,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0122** Deliver the smallest simulation-first Static Graph device MVP
+- [x] **T-0122** Deliver the smallest simulation-first Static Graph device MVP
   on current main. Reconstruct, rather than merge wholesale, the previously
   clean-replayed T-0113 prototype from commit `f5ea057`. One command must bind
   the canonical bounded-stencil descriptor to a task-neutral, versioned,
@@ -44,6 +44,15 @@ review and failure preservation do not consume the two-item delivery limit.
   identities and remain `rtl-simulation-functional`. Exclude dynamic schedule
   installation, AXI, UIO, Vivado, DTBO, bitstream, DMA, IRQ, kernel modules,
   FPGA execution, latency comparison, area, energy, and product claims.
+
+  The task-neutral `raveil.graph-device-abi/v1`, artifact/finalizer,
+  `DeviceTransport` runtime, Verilator adapter, and one-command runner now pass
+  30 focused tests plus primary and independent clean Docker/Verilator replay.
+  Both successful seeds stage 324 words, finish in 3,072 finite status polls,
+  expose 256 private words identical to Pavane, and bind full hashes in an
+  append-once receipt. The cancel seed exposes no output, and reset/restart
+  passes. This closes only the bounded `rtl-simulation-functional` MVP; all
+  physical and performance exclusions above remain in force.
 
 - [ ] **T-0123** After T-0122 is accepted on current main, reconstruct the
   bounded generality ladder from the clean-replayed T-0114 donor commits

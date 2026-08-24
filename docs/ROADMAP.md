@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0122 simulation-first device MVP and blocked T-0044 physical research are independent delivery lanes**
+State: **T-0122 simulation-first device MVP complete; T-0123 is next; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -43,21 +43,22 @@ reviewed common memory implementation/view set bound identically to both
 candidates; placeholder or candidate-only macro conditions are prohibited.
 
 Start timing is governed by the canonical phase table in `TODO.md`. ADR-0061
-now permits two explicitly independent P0 delivery lanes. T-0122 owns the
-simulation-first operator path from canonical artifact through a
+now permits two explicitly independent P0 delivery lanes. T-0122 has completed
+the simulation-first operator path from canonical artifact through a
 transport-neutral runtime and Verilator device to Pavane validation. It uses
 new task-neutral interface files and treats the existing compiler, oracle, RTL
 core, scratchpad, and every T-0044 file as read-only. T-0044 separately retains
 the matched physical Research line, but S13 remains blocked before EXP-0011
 allocation or data until a reviewed common memory implementation/view set
-exists. Its S14 source/provenance inventory may run read-only in parallel.
-S14 is now complete with no compatible candidate identified. OpenRAM remains a
+exists. S14 is complete with no compatible candidate identified. OpenRAM remains a
 possible generator for a separately reviewed proposal, not an adopted view set;
 the blocked S13 resume condition and all pre-data confirmations are unchanged.
 
-T-0123 starts only after T-0122 passes and owns the bounded progression from a
-generated schedule to at least two DAGs on one executor. T-0106 remains P2 only
-after T-0044 survival or an accepted product trigger. P3 future-planned and P4
+T-0123's dependency is now satisfied, but it starts only after its exact
+current-main allowlist and acceptance packet are promoted. It owns the bounded
+progression from a generated schedule to at least two DAGs on one executor.
+T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
+P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or
 partial implementation already exists. Canonical record integration, PR
 acceptance, and merge remain one serial Project Manager boundary.
