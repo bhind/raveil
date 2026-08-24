@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0042 complete; T-0044 EXP-0008 latency/traffic campaign completed with advance-partial**
+State: **T-0122 simulation-first device MVP and blocked T-0044 physical research are independent delivery lanes**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -42,12 +42,22 @@ gate is therefore **pause-boundary before data**. It may resume only with one
 reviewed common memory implementation/view set bound identically to both
 candidates; placeholder or candidate-only macro conditions are prohibited.
 
-Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
-remaining matched physical gates, beginning with the post-EXP-0010 integrated
-physical boundary, are the sole P0 immediate work, and
-T-0106 is P2 only after T-0044 survival or an accepted product trigger. P3
-future-planned and P4 optional/triggered work cannot interrupt this sequence
-merely because a branch or partial implementation already exists.
+Start timing is governed by the canonical phase table in `TODO.md`. ADR-0061
+now permits two explicitly independent P0 delivery lanes. T-0122 owns the
+simulation-first operator path from canonical artifact through a
+transport-neutral runtime and Verilator device to Pavane validation. It uses
+new task-neutral interface files and treats the existing compiler, oracle, RTL
+core, scratchpad, and every T-0044 file as read-only. T-0044 separately retains
+the matched physical Research line, but S13 remains blocked before EXP-0011
+allocation or data until a reviewed common memory implementation/view set
+exists. Its S14 source/provenance inventory may run read-only in parallel.
+
+T-0123 starts only after T-0122 passes and owns the bounded progression from a
+generated schedule to at least two DAGs on one executor. T-0106 remains P2 only
+after T-0044 survival or an accepted product trigger. P3 future-planned and P4
+optional/triggered work cannot enter either lane merely because a branch or
+partial implementation already exists. Canonical record integration, PR
+acceptance, and merge remain one serial Project Manager boundary.
 
 1. **T-0105 — reproducible substrate (complete):** the owned counter and pinned
    unmodified Rocket reference now elaborate and execute under fixed
@@ -634,16 +644,17 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **T-0105 substrate complete; Graph hardware evidence not yet started**
+State: **T-0042 RTL-simulation-functional Graph evidence exists; T-0122 operator-visible simulation MVP is planned; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
 simulation, FPGA, and silicon experiment records.
 
-RFC-0004 proposes the pre-FPGA foundation. T-0105 establishes the generic
-Chisel/simulator/RISC-V functional substrate independently; T-0057 must first
-bound direct prior art and IP risk, then freeze the owned low-level Graph
-contract before T-0042 implements any Graph RTL. T-0044 then uses
+RFC-0004 proposes the pre-FPGA foundation. T-0105 established the generic
+Chisel/simulator/RISC-V functional substrate independently; T-0057 bounded
+direct prior art and IP risk, T-0042 implemented the bounded Graph RTL, and
+T-0122 now plans the smallest operator-visible simulation path without
+promoting FPGA evidence. T-0044 separately uses
 matched RISC-V configurations under a common cache, memory, workload,
 functional-resource, and correctness envelope. Rocket/BOOM remain candidate
 references, not adopted product code, ARM equivalents, or proof that OoO can

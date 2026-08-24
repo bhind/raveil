@@ -44,9 +44,11 @@ Backlog -> Ready -> In Progress -> Review -> Done
 ADR-0059 retains eight story points as a lower-bound planning reference rather
 than an execution ceiling. The provisional committed capacity is 13 SP per
 week and the warm stretch range is 13--21 SP. At most two items
-may be in `IN_PROGRESS` or `REVIEW` combined. Prefer one active mutation item
-and one independent review or acceptance item; a Playable and Research item may
-overlap only when ownership and evidence paths are independent. Operations is
+may be in `IN_PROGRESS` or `REVIEW` combined. ADR-0061 permits both items to be
+mutations only when they have explicit non-overlapping task, file, artifact,
+test, and evidence ownership; otherwise prefer one mutation and one independent
+review or acceptance item. A Playable and Research item may overlap only when
+ownership and evidence paths are independent. Operations is
 temporary supporting work, not a third pillar. A task retains its stable T-ID
 and remains authoritative in `TODO.md`.
 The sprint board may describe a smaller acceptance slice but never redefine
@@ -56,7 +58,10 @@ Role`, `Support Roles`, `Parent T-ID`, `Depends On`, `Priority`, `Work Type`,
 `Demo Command`, `Evidence Class`, `Estimate Review`, `Estimate Change Reason`,
 `Forecast Sprint`, `Forecast Date`, `Forecast Confidence`, `Review Outcome`,
 `Retro Action`, `AI Estimate`, `Observed Cycle`, `Agent Tier`, `Role Packets`,
-and `Resource Use`.
+and `Resource Use`. The default live Kanban shall expose only Title, Status,
+Priority, Parent T-ID, Owner Role, Depends On, Sprint, Story Points, Demo
+Command, and Evidence Class. Other fields retain history but stay hidden from
+the pull view unless required by refinement or review.
 
 Capacity is empirical and lane-based. Forecast from accepted-slice cycle time
 for the mutation, test, review, and serial PM-integration lanes, plus current
@@ -115,8 +120,9 @@ Reviewer advice, prose, partial SP, and a green subagent report are insufficient
 
 ## Role and capacity plan
 
-Raveil has one serial Project Manager integration and acceptance lane, one
-low-reasoning tracked-file mutation lane, one low-reasoning Tester lane, up to
+Raveil has one serial Project Manager integration and acceptance lane, up to
+two low-reasoning tracked-file mutation lanes with disjoint ownership, one
+low-reasoning Tester lane per accepted packet, up to
 two read-only reviewer lanes, one medium Librarian lane as needed, and one
 high-reasoning Researcher only at evidence milestones. Project Manager,
 implementers, Tester, reviewers, Researcher, and Librarian are responsibility
@@ -134,7 +140,7 @@ The first provisional weekly service forecast is:
 
 | Role lane | Warm weekly forecast | Scheduling meaning |
 |---|---:|---|
-| coherent tracked-file mutation | 3--5 packets | one low-reasoning owner at a time |
+| coherent tracked-file mutation | 3--5 packets | at most two independent low-reasoning owners; never the same files or evidence |
 | Tester | 5--8 acceptance packets | clean replay after each accepted mutation slice |
 | PM integration, records, PR, merge | 5--8 PR packets | serial acceptance bottleneck |
 | read-only review | 4--8 bounded reviews collectively | at most two parallel; tier follows risk |
@@ -253,8 +259,8 @@ Read back the Project without a browser with:
 
 ```sh
 gh project view 1 --owner @me --format json
-gh project field-list 1 --owner @me --format json
-gh project item-list 1 --owner @me --format json
+gh project field-list 1 --owner @me --limit 100 --format json
+gh project item-list 1 --owner @me --limit 100 --format json
 ```
 
 The Project begins private. Making it public is a separate owner decision

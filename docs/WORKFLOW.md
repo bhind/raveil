@@ -26,9 +26,14 @@ Last updated: 2026-08-24
 
 ## During a change
 
-- Keep the default implementation work-in-progress limit at one coherent P0
-  task. Read-only reviews and bounded evidence preservation may proceed without
-  promoting another implementation task.
+- Keep the implementation work-in-progress limit at two independently
+  acceptable P0 items under ADR-0061. Each requires a distinct T-ID or bounded
+  child slice, worktree, branch, mutation owner, file allowlist, artifacts,
+  tests, and evidence path. If either item needs the other's mutable files or
+  acceptance result, they are one serial item, not parallel work. Read-only
+  reviews and bounded evidence preservation do not consume this delivery WIP.
+  Canonical records, PR acceptance, and merge remain one serial Project Manager
+  lane.
 - Treat eight SP as an under-utilization lower-bound check, 13 SP as the
   provisional committed weekly capacity, and 13--21 SP as the warm stretch
   range. Do not stop authorized work merely because a forecast SP total was
@@ -271,8 +276,9 @@ reads the selected authoritative sections before editing.
   legal clearance, freedom to operate, or implementation approval.
 - Do not allow concurrent changes to one coherent file set. The Project
   Manager performs final integration and canonical record reconciliation.
-- Use one low-reasoning implementer for a coherent mutation packet, then one
-  low-reasoning Tester. Up to two read-only high-reasoning reviewers may run in
+- Use at most two low-reasoning implementers for separately authorized,
+  non-overlapping mutation packets, then one low-reasoning Tester per accepted
+  packet. Up to two read-only high-reasoning reviewers may run in
   parallel only when the security, performance, or final-PR risk warrants it.
   The Librarian is medium read-only, and the high-reasoning Researcher runs only
   after an evidence milestone. Chisel work uses its dedicated implementer and
@@ -331,8 +337,14 @@ initial story points at planning, and retain every estimate revision with a
 dated reason. Run planning on Monday, correction review on Wednesday, and the
 executable review plus retrospective on Sunday.
 
-Maintain an ordered Product Backlog, not only the current Sprint. Refine at
-least the next two sprints into independently acceptable slices with one owner
+Maintain an ordered Product Backlog, not only the current Sprint. The live pull
+surface uses only Title, Status, Priority, Parent T-ID, Owner Role, Depends On,
+Sprint, Story Points, Demo Command, and Evidence Class. Retain richer historical
+fields but keep them out of the default execution view unless a review needs
+them. Synchronize the Project when a branch starts, reaches its first atomic
+commit, opens a PR, enters review, blocks, or merges. A worktree without a
+matching live Project item is preserved provenance or a donor, not active WIP.
+Refine at least the next two sprints into independently acceptable slices with one owner
 role, support roles, dependencies, priority, evidence class, initial SP, and a
 demo or evidence command. Apply the Definition of Ready and Definition of Done
 in `SPRINTS.md`. Do not assign SP to both an epic and its children, and do not
@@ -349,8 +361,8 @@ Read back the current board before review:
 
 ```sh
 gh project view 1 --owner @me --format json
-gh project field-list 1 --owner @me --format json
-gh project item-list 1 --owner @me --format json
+gh project field-list 1 --owner @me --limit 100 --format json
+gh project item-list 1 --owner @me --limit 100 --format json
 ```
 
 Project agent files are shared. Local `.codex/config.toml` remains ignored so
