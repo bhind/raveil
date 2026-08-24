@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import textwrap
 from typing import TextIO
 
 from .graph_mvp import GraphCompiler, GraphNode, GraphProgram, GraphVariant
@@ -16,6 +17,49 @@ GARDEN_CLAIM_STATUS = "development-non-claim"
 MAX_FIXTURE_BYTES = 64 * 1024
 MAX_DEMO_COMMANDS = 8
 MAX_NAVIGATION_STEPS = 64
+DEFAULT_RENDER_WIDTH = 150
+MIN_RENDER_WIDTH = 72
+MAX_RENDER_WIDTH = 240
+
+
+def validate_render_width(width: int) -> int:
+    """Return a supported explicit display width without consulting a terminal."""
+    if type(width) is not int or not MIN_RENDER_WIDTH <= width <= MAX_RENDER_WIDTH:
+        raise ValueError(
+            f"garden width must be an integer from {MIN_RENDER_WIDTH} to {MAX_RENDER_WIDTH}"
+        )
+    return width
+
+
+def _wrapped_lines(items: list[str], width: int) -> list[str]:
+    lines: list[str] = []
+    for item in items:
+        lines.extend(textwrap.wrap(
+            item, width=width, break_long_words=True, break_on_hyphens=False,
+        ) or [""])
+    return lines
+
+
+def _pane(title: str, items: list[str], width: int) -> list[str]:
+    interior = width - 2
+    heading = f"[ {title} ]"
+    top = "+" + heading[:interior].ljust(interior, "-") + "+"
+    body = ["|" + line.ljust(interior) + "|" for line in _wrapped_lines(items, interior)]
+    return [top, *body, "+" + "-" * interior + "+"]
+
+
+def _join_panes(panes: list[list[str]]) -> list[str]:
+    body_height = max(len(pane) - 2 for pane in panes)
+    aligned: list[list[str]] = []
+    for pane in panes:
+        blank_body = "|" + " " * (len(pane[0]) - 2) + "|"
+        aligned.append([
+            pane[0],
+            *pane[1:-1],
+            *[blank_body] * (body_height - len(pane) + 2),
+            pane[-1],
+        ])
+    return [" ".join(pane[index] for pane in aligned) for index in range(body_height + 2)]
 
 
 def _reject_duplicate_object_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -168,8 +212,9 @@ class GardenSnapshot:
 class GardenBrowser:
     """Bounded navigation state with no graph execution or mutation authority."""
 
-    def __init__(self, snapshot: GardenSnapshot) -> None:
+    def __init__(self, snapshot: GardenSnapshot, width: int = DEFAULT_RENDER_WIDTH) -> None:
         self.snapshot = snapshot
+        self.width = validate_render_width(width)
         self.selected = 0
 
     def navigate(self, key: str) -> bool:
@@ -197,7 +242,7 @@ class GardenBrowser:
         program = self.snapshot.program
         selected = program.nodes[self.selected]
         dependencies, external_inputs = self._node_dependencies(selected)
-        lines = [
+        header = _wrapped_lines([
             "Raveil Garden | read-only graph browser",
             f"snapshot: {self.snapshot.title}",
             f"program: {program.program_id} sha256={program.identity}",
@@ -207,38 +252,55 @@ class GardenBrowser:
                 f"claim={self.snapshot.evidence.claim_status}"
             ),
             "authority: observe-only execute=no mutate=no approve=no promote=no",
-            "",
-            f"Nodes ({len(program.nodes)})",
-        ]
+        ], self.width)
+        navigator = [f"nodes: {len(program.nodes)}"]
         for index, node in enumerate(program.nodes):
             marker = ">" if index == self.selected else " "
             node_dependencies, node_external = self._node_dependencies(node)
             relation = ",".join(node_dependencies) or "root"
             external = ",".join(node_external) or "-"
-            lines.append(
+            navigator.append(
                 f"{marker} {index + 1}. {node.node_id} op={node.op} "
                 f"depends={relation} external={external} output={node.output}"
             )
-        lines.extend((
-            "",
-            f"Selected: {selected.node_id}",
-            f"  dependencies: {','.join(dependencies) or 'root'}",
-            f"  external-inputs: {','.join(external_inputs) or '-'}",
-            f"  output: {selected.output}",
-            "",
-            f"Variants ({len(self.snapshot.variants)})",
-        ))
+        inspector = [
+            f"id: {selected.node_id}",
+            f"op: {selected.op}",
+            f"dependencies: {','.join(dependencies) or 'root'}",
+            f"external inputs: {','.join(external_inputs) or '-'}",
+            f"output: {selected.output}",
+        ]
+        variants = [
+            f"evidence class: {self.snapshot.evidence.evidence_class}",
+            f"non-claim status: {self.snapshot.evidence.claim_status}",
+            f"evidence: {self.snapshot.evidence.statement}",
+            f"selected node: {selected.node_id}; variants: {len(self.snapshot.variants)}",
+        ]
         for variant in self.snapshot.variants:
             baseline = " baseline" if variant.candidate.trusted_baseline else ""
-            lines.append(
-                f"  - {variant.variant_id}{baseline}; transforms={'+'.join(variant.transforms)}; "
+            variants.append(
+                f"{variant.variant_id}{baseline}; transforms={'+'.join(variant.transforms)}; "
                 f"memory={variant.memory_plan.materialization}:"
                 f"{variant.memory_plan.maximum_intermediate_bytes}B"
             )
-        lines.extend(("", "Demo commands"))
-        lines.extend(f"  $ {command}" for command in self.snapshot.demo_commands)
-        lines.extend(("", "Navigation: j next | k previous | g first | G last | q quit"))
-        return "\n".join(lines)
+        panes = [
+            _pane("Graph Navigator", navigator, self.width if self.width < 120 else (self.width - 2) // 3),
+            _pane("Node Inspector", inspector, self.width if self.width < 120 else (self.width - 2) // 3),
+            _pane("Variants / Evidence", variants, self.width if self.width < 120 else (self.width - 2) // 3),
+        ]
+        if self.width < 120:
+            body = ["[stacked layout]"]
+            for pane in panes:
+                body.extend(pane)
+        else:
+            body = _join_panes(panes)
+        footer = _wrapped_lines([
+            "Commands / Status",
+            "Navigation: j next | k previous | g first | G last | q quit",
+            "authority: read-only; no graph execution, mutation, approval, or promotion.",
+            *[f"demo: {command}" for command in self.snapshot.demo_commands],
+        ], self.width)
+        return "\n".join([*header, "", *body, "", *footer])
 
 
 def render_empty() -> str:
@@ -259,10 +321,12 @@ def render_error(message: str) -> str:
     ))
 
 
-def render_key_session(snapshot: GardenSnapshot, keys: str) -> str:
+def render_key_session(
+    snapshot: GardenSnapshot, keys: str, width: int = DEFAULT_RENDER_WIDTH
+) -> str:
     if len(keys) > MAX_NAVIGATION_STEPS:
         raise ValueError("garden navigation exceeds the bounded step limit")
-    browser = GardenBrowser(snapshot)
+    browser = GardenBrowser(snapshot, width)
     screens = [browser.render()]
     for key in keys:
         if not browser.navigate(key):
@@ -272,8 +336,11 @@ def render_key_session(snapshot: GardenSnapshot, keys: str) -> str:
     return "\n\n---\n\n".join(screens)
 
 
-def run_interactive(snapshot: GardenSnapshot, input_stream: TextIO, output_stream: TextIO) -> int:
-    browser = GardenBrowser(snapshot)
+def run_interactive(
+    snapshot: GardenSnapshot, input_stream: TextIO, output_stream: TextIO,
+    width: int = DEFAULT_RENDER_WIDTH,
+) -> int:
+    browser = GardenBrowser(snapshot, width)
     output_stream.write(browser.render() + "\n")
     if not input_stream.isatty():
         return 0

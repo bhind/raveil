@@ -35,7 +35,10 @@ from .iree_import import PinnedIreeImporter
 from .interactive_shell import NativeInteractiveSession, run_interactive_shell
 from .workspace import NativeWorkspace
 from .command_showcase import list_showcases, mutate_showcase, prepare_showcase, run_showcase
-from .garden import GardenSnapshot, render_empty, render_error, render_key_session, run_interactive
+from .garden import (
+    GardenSnapshot, render_empty, render_error, render_key_session, run_interactive,
+    validate_render_width,
+)
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -333,6 +336,7 @@ def command_showcase_mutate(args: argparse.Namespace) -> int:
 
 
 def command_garden(args: argparse.Namespace) -> int:
+    validate_render_width(args.width)
     if args.empty:
         if args.keys is not None:
             print(render_error("--keys cannot be used with --empty"), file=sys.stderr)
@@ -342,9 +346,9 @@ def command_garden(args: argparse.Namespace) -> int:
     try:
         snapshot = GardenSnapshot.load(Path(args.fixture))
         if args.keys is not None:
-            print(render_key_session(snapshot, args.keys))
+            print(render_key_session(snapshot, args.keys, args.width))
             return 0
-        return run_interactive(snapshot, sys.stdin, sys.stdout)
+        return run_interactive(snapshot, sys.stdin, sys.stdout, args.width)
     except (FileNotFoundError, OSError, ValueError) as error:
         print(render_error(str(error)), file=sys.stderr)
         return 2
@@ -362,6 +366,10 @@ def build_parser() -> argparse.ArgumentParser:
     garden.add_argument(
         "--keys",
         help="deterministic bounded navigation transcript using j, k, g, G, q",
+    )
+    garden.add_argument(
+        "--width", type=int, default=150,
+        help="deterministic render width from 72 to 240 (default: 150)",
     )
     garden.set_defaults(handler=command_garden)
 

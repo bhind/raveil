@@ -61,6 +61,15 @@ line rendering and bounded navigation avoid a terminal-library dependency;
 this is a host-functional Playable boundary, not T-0093's directory projection
 and not simulation, FPGA, ASIC, silicon, or performance evidence.
 
+T-0120 changes only Garden's presentation layout. The renderer accepts an
+explicit bounded width rather than reading terminal state. Widths of at least
+120 columns compose three ASCII panes for graph navigation, selected-node
+inspection, and variants/evidence; narrower admitted widths stack the same
+panes. Header and command/status regions stay full-width, and critical
+authority and evidence text wraps instead of disappearing. The snapshot
+schema, canonical compiler check, navigation state, and observe-only authority
+remain unchanged.
+
 ADR-0034 places a thin Native Interactive Session above the existing owned
 frontend. The Session stores workflow state and command history but has no
 admission, semantic, measurement, or commit authority: GraphCompiler,

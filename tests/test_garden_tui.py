@@ -27,7 +27,10 @@ class GardenTUITests(unittest.TestCase):
         self.assertIn("authority: observe-only execute=no mutate=no approve=no promote=no", rendered)
         self.assertIn("> 1. matmul", rendered)
         self.assertIn("evidence: host-functional claim=development-non-claim", rendered)
-        self.assertIn("python3 -m raveil garden --fixture", rendered)
+        self.assertIn("Graph Navigator", rendered)
+        self.assertIn("Node Inspector", rendered)
+        self.assertIn("Variants / Evidence", rendered)
+        self.assertIn("Commands / Status", rendered)
 
     def test_navigation_transcript_is_bounded_and_deterministic(self) -> None:
         snapshot = GardenSnapshot.load(FIXTURE)
@@ -46,6 +49,59 @@ class GardenTUITests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(output.getvalue().count("Raveil Garden | read-only graph browser"), 1)
         self.assertIn("Navigation: j next", output.getvalue())
+
+    def test_wide_layout_uses_three_panes_with_bounded_lines(self) -> None:
+        rendered = GardenBrowser(GardenSnapshot.load(FIXTURE), width=150).render()
+        first_pane_line = next(line for line in rendered.splitlines() if "Graph Navigator" in line)
+        self.assertIn("Node Inspector", first_pane_line)
+        self.assertIn("Variants / Evidence", first_pane_line)
+        self.assertLessEqual(max(map(len, rendered.splitlines())), 150)
+        three_pane_borders = [
+            line for line in rendered.splitlines()
+            if line.startswith("+-") and line.count("+") == 6
+        ]
+        self.assertEqual(len(three_pane_borders), 1)
+
+    def test_narrow_layout_stacks_all_panes(self) -> None:
+        rendered = GardenBrowser(GardenSnapshot.load(FIXTURE), width=100).render()
+        self.assertIn("[stacked layout]", rendered)
+        self.assertIn("Graph Navigator", rendered)
+        self.assertIn("Node Inspector", rendered)
+        self.assertIn("Variants / Evidence", rendered)
+        self.assertLessEqual(max(map(len, rendered.splitlines())), 100)
+
+    def test_width_boundaries_and_determinism(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        for width in (72, 119, 120, 240):
+            rendered = GardenBrowser(snapshot, width).render()
+            self.assertLessEqual(max(map(len, rendered.splitlines())), width)
+            self.assertEqual(rendered, GardenBrowser(snapshot, width).render())
+            self.assertEqual(render_key_session(snapshot, "jg", width), render_key_session(snapshot, "jg", width))
+        for width in (71, 241):
+            with self.assertRaisesRegex(ValueError, "width must be"):
+                GardenBrowser(snapshot, width)
+
+    def test_long_content_is_wrapped_printably(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        long_snapshot = snapshot.__class__(
+            "X" * 256, snapshot.program, snapshot.variants, snapshot.evidence,
+            ("python3 -m raveil " + "x" * 300,),
+        )
+        rendered = GardenBrowser(long_snapshot, 72).render()
+        self.assertTrue(all(line.isprintable() for line in rendered.splitlines()))
+        self.assertNotIn("\x1b", rendered)
+        self.assertLessEqual(max(map(len, rendered.splitlines())), 72)
+
+    def test_cli_width_is_applied_and_invalid_width_fails_closed(self) -> None:
+        output = io.StringIO()
+        with mock.patch("sys.stdin", io.StringIO()), mock.patch("sys.stdout", output):
+            self.assertEqual(main(["garden", "--fixture", str(FIXTURE), "--width", "100"]), 0)
+        self.assertIn("[stacked layout]", output.getvalue())
+        for width in ("71", "241"):
+            error = io.StringIO()
+            with mock.patch("sys.stderr", error):
+                self.assertEqual(main(["garden", "--fixture", str(FIXTURE), "--width", width]), 2)
+            self.assertIn("garden width must be", error.getvalue())
 
     def test_cli_exposes_explicit_empty_state(self) -> None:
         output = io.StringIO()
