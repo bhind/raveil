@@ -103,7 +103,7 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 33 items and 37 fields. Current SP totals are S-0001=26
+The Project retains 34 items and 37 fields. Current SP totals are S-0001=34
 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
