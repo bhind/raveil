@@ -169,6 +169,11 @@ resolves it.
   counts alone are insufficient. The unequal but explained Graph/Rocket
   dynamic traffic must remain a reported design result rather than an equality
   assertion.
+  S14 found no verified public view set for the exact seven macros and no
+  already qualified standard-cell substitute. The next unresolved choice is
+  whether to propose and validate an OpenRAM-generated identical seven-view set
+  or to pre-data refreeze both candidates around one common standard-cell
+  memory implementation; neither path is authorized yet.
   S11 makes those identity, denominator, oracle, traffic, physical-condition,
   and non-claim declarations machine-checkable in an unallocated v2 document.
   S12's unallocated v3 contract now fixes paired physical-flow seeds 101 and

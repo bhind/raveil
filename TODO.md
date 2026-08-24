@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0122 simulation-first Graph device MVP; T-0044/S14 read-only physical-input strategy inventory while S13 remains Blocked |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0122 simulation-first Graph device MVP |
 | **P1 — next** | Start only after its named P0 dependency passes. | T-0123 bounded generated-schedule and multi-DAG generalization after T-0122 |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -1049,6 +1049,13 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   provenance, resource, and fairness review. Initial SP 13 is retained;
   Current SP is 3 for the bounded accepted readiness packet, and the remaining
   implementation/P&R scope is not counted while blocked.
+  T-0044/S14's read-only public-source inventory is complete. It found no
+  verified Liberty-plus-LEF set matching all seven exact macros and no already
+  qualified standard-cell substitute. OpenRAM and one public SKY130 32x512
+  1rw1r macro are possible inputs to a future proposal, not compatible assets.
+  Keep S13 Blocked. Any generator or standard-cell-memory path requires the
+  recorded external-dependency, fairness/design-fork, identity, and fresh
+  pre-data confirmations before adoption or EXP-0011 work.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked
