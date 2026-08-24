@@ -446,6 +446,42 @@ def validate_prefreeze_identity_contract(document: dict[str, Any]) -> dict[str, 
     return {"schema": document["schema"], "status": "ready-for-review", "experiment_id": None, "freeze_state": "unfrozen"}
 
 
+def validate_measurement_readiness_contract(document: dict[str, Any]) -> dict[str, Any]:
+    """Validate S12's pre-data physical measurement contract, without freezing it."""
+    keys = {"schema", "experiment_id", "freeze_state", "prefreeze", "measurement_design", "estimator_policy", "decision_policy", "evidence_protocol"}
+    require(isinstance(document, dict) and (set(document) == keys or set(document) == keys - {"experiment_id"}), "missing or unknown measurement readiness field")
+    require(document["schema"] == "raveil.t0044-integrated-physical-measurement-readiness/v3", "invalid measurement readiness schema")
+    require(document.get("experiment_id") is None and document["freeze_state"] == "unfrozen", "experiment must be unallocated and unfrozen")
+    validate_prefreeze_identity_contract(document["prefreeze"])
+    def exact(value: Any, expected: set[str], name: str) -> dict[str, Any]:
+        require(isinstance(value, dict) and set(value) == expected, f"missing or unknown field in {name}")
+        return value
+    design = exact(document["measurement_design"], {"matrix", "physical_flow_seeds", "run_order", "pairing", "stages", "scope", "repetition_policy"}, "measurement design")
+    require(design["matrix"] == list(VARIANTS) and design["physical_flow_seeds"] == [101, 202] and design["run_order"] == [[101, "integrated-static-graph-rocket"], [101, "matched-rocket-system"], [202, "matched-rocket-system"], [202, "integrated-static-graph-rocket"]], "matrix, seeds, or balanced seed-major order mismatch")
+    require(design["pairing"] == {"same_seed_constraints_toolchain": True, "fresh_synthesis_and_pnr_per_pair": True, "raw_result_import": False, "deterministic_reruns_reproducibility_only": True, "reruns_are_samples": False}, "pairing/reproducibility policy mismatch")
+    require(design["stages"] == ["synthesis", "floorplan", "placement", "clock_tree", "routing", "parasitic_extraction", "sta"], "physical stage sequence mismatch")
+    require(design["scope"] == {"dynamic_latency_traffic_campaign": "not_in_scope_not_reopened", "energy": "not_in_scope", "boom": "not_in_scope", "cgra": "not_in_scope"}, "physical scope mixing")
+    reps = exact(design["repetition_policy"], {"runs_per_variant", "inference_unit", "uncertainty", "ci_95", "reruns"}, "repetition policy")
+    nested = document["prefreeze"]["readiness"]["repetitions"]
+    require(reps == {"runs_per_variant": 2, "inference_unit": "paired_physical_flow_seed", "uncertainty": "controlled_paired_seed_sensitivity_only", "ci_95": "unavailable_not_imputed", "reruns": "reproducibility_only_not_samples"} and nested["count"] == 2 and nested["seeds"] == [101, 202] and nested["inference_unit"] == reps["inference_unit"] and nested["uncertainty_policy"] == reps["uncertainty"] and nested["interval_95_policy"] == reps["ci_95"], "nested repetition/CI policy mismatch")
+    estimator = exact(document["estimator_policy"], {"area", "timing", "uncertainty"}, "estimator policy")
+    require(estimator["area"] == {"required_fields": ["integrated_total_area", "matched_total_area", "graph_delta_component_area", "matched_rocket_component_area"], "ratio_formula": "graph_delta_component_area/matched_rocket_component_area", "absolute_totals_reported": True, "summary": "per_seed_ratio_and_median_of_paired_seed_ratios_descriptive"}, "area estimator mismatch")
+    require(estimator["timing"] == {"metric": "worst_setup_slack_ns", "period_ns": 40.0, "same_sdc_pvt_rc": True, "report_each_candidate_seed": True, "meet_iff": "slack>=0"}, "timing estimator mismatch")
+    require(estimator["uncertainty"] == {"kind": "controlled_paired_seed_sensitivity_only", "ci_95": "unavailable_not_imputed", "deterministic_reruns_independent_samples": False}, "uncertainty estimator mismatch")
+    decision = exact(document["decision_policy"], {"stop", "no_go", "pause", "advance", "prohibitions", "energy"}, "decision policy")
+    require(decision["stop"] == ["oracle_mismatch", "resource_inequality", "unexplained_traffic", "accounting_missing", "identity_config_tool_drift", "incomplete_matrix", "window_mismatch", "physical_stage_closure_missing", "seal_failure"], "stop policy mismatch")
+    require(decision["no_go"] == ["any_area_ratio_gt_0.25", "integrated_misses_40ns_matched_meets", "candidate_only_condition_needed", "rtl_regeneration_configurability_reinvention_dependency_needed"], "no-go policy mismatch")
+    require(decision["pause"] == ["matched_misses_or_both_miss", "required_physical_input_component_unavailable", "pnr_closure_ambiguous", "fairness_boundary_unresolved"], "pause policy mismatch")
+    require(decision["advance"] == {"name": "advance_partial_integrated_physical", "requires": ["every_pair_stage_seal_complete", "both_meet_40ns", "every_area_ratio_lte_0.25", "equality_fairness_pass", "missing_dimensions_explicit"]}, "advance policy mismatch")
+    require(decision["prohibitions"] == ["generic_go", "t0044_close", "product_hardware_claim", "adaptive_threshold_target_sweep_change"] and decision["energy"] == {"status": "not_evaluable_in_s12", "threshold_0.90_active": False}, "decision prohibition/energy mismatch")
+    evidence = exact(document["evidence_protocol"], {"run", "raw", "raw_seal", "derived", "result_seal", "failed_attempt", "recovery", "promotion", "prohibitions", "scientific_field_change"}, "evidence protocol")
+    require(evidence["run"] == "immutable_new_run_id_per_attempt" and evidence["raw"] == ["frozen_manifest", "command_environment_exit", "identity_snapshot", "physical_stage_reports", "component_area_ledger", "timing_paths_constraints", "file_map"], "RUN/raw protocol mismatch")
+    require(evidence["raw_seal"] == ["relative_path", "bytes", "sha256", "manifest", "run_id"] and evidence["derived"] == "reads_only_sealed_raw_writes_once" and evidence["result_seal"] == ["raw_seal", "report", "derived_file_map"], "seal protocol mismatch")
+    require(evidence["failed_attempt"] == "retain_failed_raw_seal_no_eligible_derived_claim" and evidence["recovery"] == "new_run_id_binds_failed_seal_imported_hashes_exact_rerun_imports_not_samples", "failure/recovery mismatch")
+    require(evidence["promotion"] == "immutable_remote_copy_one_way_download_verify_marker_last_tracked_non_sensitive_receipt" and evidence["prohibitions"] == ["credentials", "absolute_paths"] and evidence["scientific_field_change"] == "requires_new_predata_freeze", "promotion/prohibition mismatch")
+    return {"schema": document["schema"], "status": "ready-for-review", "experiment_id": None, "freeze_state": "unfrozen"}
+
+
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)

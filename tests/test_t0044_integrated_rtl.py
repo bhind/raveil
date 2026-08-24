@@ -18,6 +18,7 @@ from raveil.t0044_integrated_rtl import (
     load_rtlil_hierarchy,
     validate_export,
     validate_prefreeze_identity_contract,
+    validate_measurement_readiness_contract,
     validate_readiness_contract,
 )
 from raveil.t0044_physical import tree_sha256
@@ -255,17 +256,12 @@ def prefixed_hex(character):
 def prefreeze_contract():
     variant_identities = {
         variant: {
-            "config": config,
-            "rtl_tree_sha256": prefixed_hex("a"),
-            "rtl_filelist_sha256": prefixed_hex("b"),
-            "firrtl_sha256": prefixed_hex("c"),
-            "lowering_provenance_sha256": prefixed_hex("d"),
-            "source_sha256": prefixed_hex("e"),
-            "input_sha256": prefixed_hex("f"),
-            "rocket_canonical_module_sha256": prefixed_hex("1"),
+            "config": config, "rtl_tree_sha256": prefixed_hex("a"),
+            "rtl_filelist_sha256": prefixed_hex("b"), "firrtl_sha256": prefixed_hex("c"),
+            "lowering_provenance_sha256": prefixed_hex("d"), "source_sha256": prefixed_hex("e"),
+            "input_sha256": prefixed_hex("f"), "rocket_canonical_module_sha256": prefixed_hex("1"),
             "memory_macro_contract_sha256": prefixed_hex("2"),
-        }
-        for variant, config in VARIANTS.items()
+        } for variant, config in VARIANTS.items()
     }
     roles = {
         "fixture_provider": "common", "owned_memory": "common",
@@ -304,7 +300,59 @@ def prefreeze_contract():
     }
 
 
+def measurement_contract():
+    prefreeze = prefreeze_contract()
+    prefreeze["readiness"]["repetitions"].update({"inference_unit": "paired_physical_flow_seed", "uncertainty_policy": "controlled_paired_seed_sensitivity_only", "interval_95_policy": "unavailable_not_imputed"})
+    return {"schema": "raveil.t0044-integrated-physical-measurement-readiness/v3", "experiment_id": None, "freeze_state": "unfrozen", "prefreeze": prefreeze,
+        "measurement_design": {"matrix": list(VARIANTS), "physical_flow_seeds": [101, 202], "run_order": [[101, "integrated-static-graph-rocket"], [101, "matched-rocket-system"], [202, "matched-rocket-system"], [202, "integrated-static-graph-rocket"]], "pairing": {"same_seed_constraints_toolchain": True, "fresh_synthesis_and_pnr_per_pair": True, "raw_result_import": False, "deterministic_reruns_reproducibility_only": True, "reruns_are_samples": False}, "stages": ["synthesis", "floorplan", "placement", "clock_tree", "routing", "parasitic_extraction", "sta"], "scope": {"dynamic_latency_traffic_campaign": "not_in_scope_not_reopened", "energy": "not_in_scope", "boom": "not_in_scope", "cgra": "not_in_scope"}, "repetition_policy": {"runs_per_variant": 2, "inference_unit": "paired_physical_flow_seed", "uncertainty": "controlled_paired_seed_sensitivity_only", "ci_95": "unavailable_not_imputed", "reruns": "reproducibility_only_not_samples"}},
+        "estimator_policy": {"area": {"required_fields": ["integrated_total_area", "matched_total_area", "graph_delta_component_area", "matched_rocket_component_area"], "ratio_formula": "graph_delta_component_area/matched_rocket_component_area", "absolute_totals_reported": True, "summary": "per_seed_ratio_and_median_of_paired_seed_ratios_descriptive"}, "timing": {"metric": "worst_setup_slack_ns", "period_ns": 40.0, "same_sdc_pvt_rc": True, "report_each_candidate_seed": True, "meet_iff": "slack>=0"}, "uncertainty": {"kind": "controlled_paired_seed_sensitivity_only", "ci_95": "unavailable_not_imputed", "deterministic_reruns_independent_samples": False}},
+        "decision_policy": {"stop": ["oracle_mismatch", "resource_inequality", "unexplained_traffic", "accounting_missing", "identity_config_tool_drift", "incomplete_matrix", "window_mismatch", "physical_stage_closure_missing", "seal_failure"], "no_go": ["any_area_ratio_gt_0.25", "integrated_misses_40ns_matched_meets", "candidate_only_condition_needed", "rtl_regeneration_configurability_reinvention_dependency_needed"], "pause": ["matched_misses_or_both_miss", "required_physical_input_component_unavailable", "pnr_closure_ambiguous", "fairness_boundary_unresolved"], "advance": {"name": "advance_partial_integrated_physical", "requires": ["every_pair_stage_seal_complete", "both_meet_40ns", "every_area_ratio_lte_0.25", "equality_fairness_pass", "missing_dimensions_explicit"]}, "prohibitions": ["generic_go", "t0044_close", "product_hardware_claim", "adaptive_threshold_target_sweep_change"], "energy": {"status": "not_evaluable_in_s12", "threshold_0.90_active": False}},
+        "evidence_protocol": {"run": "immutable_new_run_id_per_attempt", "raw": ["frozen_manifest", "command_environment_exit", "identity_snapshot", "physical_stage_reports", "component_area_ledger", "timing_paths_constraints", "file_map"], "raw_seal": ["relative_path", "bytes", "sha256", "manifest", "run_id"], "derived": "reads_only_sealed_raw_writes_once", "result_seal": ["raw_seal", "report", "derived_file_map"], "failed_attempt": "retain_failed_raw_seal_no_eligible_derived_claim", "recovery": "new_run_id_binds_failed_seal_imported_hashes_exact_rerun_imports_not_samples", "promotion": "immutable_remote_copy_one_way_download_verify_marker_last_tracked_non_sensitive_receipt", "prohibitions": ["credentials", "absolute_paths"], "scientific_field_change": "requires_new_predata_freeze"}}
+
+
 class TestIntegratedRTL(unittest.TestCase):
+    def test_s12_measurement_readiness_contract_valid(self):
+        document = measurement_contract()
+        self.assertEqual(validate_measurement_readiness_contract(document)["status"], "ready-for-review")
+        document.pop("experiment_id")
+        self.assertEqual(validate_measurement_readiness_contract(document)["experiment_id"], None)
+        for key, value in (("experiment_id", "EXP-0011"), ("freeze_state", "frozen"), ("results", {})):
+            document = measurement_contract(); document[key] = value
+            with self.subTest(key=key), self.assertRaises(ValueError): validate_measurement_readiness_contract(document)
+
+    def test_s12_rejects_design_estimator_and_scope_drift(self):
+        mutations = (
+            lambda d: d["measurement_design"].__setitem__("matrix", ["matched-rocket-system"]),
+            lambda d: d["measurement_design"].__setitem__("physical_flow_seeds", [101, 303]),
+            lambda d: d["measurement_design"]["run_order"].reverse(),
+            lambda d: d["measurement_design"]["pairing"].__setitem__("reruns_are_samples", True),
+            lambda d: d["measurement_design"]["stages"].pop(),
+            lambda d: d["measurement_design"]["scope"].__setitem__("energy", "in_scope"),
+            lambda d: d["measurement_design"]["repetition_policy"].__setitem__("ci_95", "percentile_bootstrap"),
+            lambda d: d["prefreeze"]["readiness"]["repetitions"].__setitem__("interval_95_policy", "percentile_bootstrap"),
+            lambda d: d["estimator_policy"]["area"].__setitem__("ratio_formula", "total_area_ratio"),
+            lambda d: d["estimator_policy"]["timing"].__setitem__("period_ns", 20.0),
+        )
+        for mutation in mutations:
+            document = measurement_contract(); mutation(document)
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError): validate_measurement_readiness_contract(document)
+
+    def test_s12_rejects_decision_and_evidence_protocol_drift(self):
+        mutations = (
+            lambda d: d["decision_policy"]["stop"].pop(),
+            lambda d: d["decision_policy"]["stop"].append("seal_failure"),
+            lambda d: d["decision_policy"]["no_go"].append("adaptive_threshold"),
+            lambda d: d["decision_policy"]["advance"]["requires"].pop(),
+            lambda d: d["decision_policy"]["energy"].__setitem__("threshold_0.90_active", True),
+            lambda d: d["evidence_protocol"]["raw"].pop(),
+            lambda d: d["evidence_protocol"].__setitem__("failed_attempt", "discard_failed_run"),
+            lambda d: d["evidence_protocol"].__setitem__("recovery", "reuse_run_id"),
+            lambda d: d["evidence_protocol"]["prohibitions"].pop(),
+        )
+        for mutation in mutations:
+            document = measurement_contract(); mutation(document)
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError): validate_measurement_readiness_contract(document)
+
     def test_s11_prefreeze_identity_contract_valid(self):
         document = prefreeze_contract()
         self.assertEqual(validate_prefreeze_identity_contract(document)["status"], "ready-for-review")

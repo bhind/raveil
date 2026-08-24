@@ -971,13 +971,18 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   and load reuse, common physical conditions, and an integrated P&R area/timing
   target with all result claims disabled. Primary and independent Python 3.14
   verification passes 35 focused and all 106 T-0044 tests. It stores no actual
-  manifest or physical artifact and leaves the typed estimator, paired seed/run
-  matrix, fixed decision thresholds, and ADR-0050-strength RUN/evidence seal
-  for one bounded S12 pre-freeze slice. After that slice passes Performance
-  review, **HCI-02 applies immediately before** allocating EXP-0011 or freezing
-  its first claim-bearing manifest. Do not collect synthesis, placement,
-  routing, timing, area, energy, FPGA, ASIC, silicon, or performance data from
-  S08/S10/S11, and do not close T-0044.
+  manifest or physical artifact. T-0044/S12 now completes the bounded
+  repository-only pre-freeze validator for a two-seed paired physical matrix,
+  absolute and incremental area accounting, common 40 ns timing, explicitly
+  unavailable statistical intervals, fixed 0.25/40 ns decisions, and
+  ADR-0050-strength RUN/evidence sealing. Primary and independent verification
+  passes 38 focused, 21 physical-proxy, and all 109 T-0044 tests, and the high
+  Performance review approves the bounded contract. It explicitly excludes
+  the dynamic 1/4/16/64/256 campaign, energy, BOOM, and CGRA. **HCI-02 now
+  applies immediately before** allocating EXP-0011 or freezing its first
+  claim-bearing manifest. Do not collect synthesis, placement, routing,
+  timing, area, energy, FPGA, ASIC, silicon, or performance data from
+  S08/S10/S11/S12, and do not close T-0044.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked

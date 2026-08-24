@@ -103,7 +103,7 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 34 items and 37 fields. Current SP totals are S-0001=34
+The Project retains 35 items and 37 fields. Current SP totals are S-0001=42
 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
@@ -735,6 +735,30 @@ resolves no declared hash to a physical artifact, and does not yet type the
 estimator, fixed decision thresholds, run matrix, or complete evidence seal.
 EXP-0011 therefore remains unallocated and unfrozen, and every physical,
 performance, energy, FPGA, ASIC, and silicon claim remains false.
+T-0044/S12 adds a separate v3 measurement-readiness validator without changing
+the accepted S10 or S11 schemas. It fixes a physical-only Graph/Rocket versus
+matched-Rocket matrix at paired flow seeds 101 and 202, a balanced run order,
+fresh synthesis and P&R per pair, the exact seven-stage physical lifecycle,
+and deterministic reruns as reproducibility checks rather than samples. The
+typed estimator reports both absolute top areas and the per-seed
+`graph_delta_component_area / matched_rocket_component_area` ratio, requires
+per-candidate worst setup slack at the common 40 ns condition, and treats the
+two seeds only as a controlled sensitivity check. A 95% interval is explicitly
+unavailable and may not be imputed. Exact stop, pause, no-go, and
+`advance-partial-integrated-physical` rules retain the 0.25 area threshold and
+40 ns timing boundary while prohibiting generic go, T-0044 closure, adaptive
+threshold changes, and product or hardware claims. ADR-0050-strength raw,
+derived, failed-attempt, recovery, and durable-promotion rules are also typed.
+Primary and independent Python 3.14.6 verification passed 38 integrated-RTL
+tests, 21 physical-proxy tests, and all 109 T-0044 tests. The independent log
+SHA-256 is
+`782fed7aeb337fff0ea429bbbe59f7aa91f64544695a811eeae6b1c62468647b`,
+and the high Performance review found no blocking fairness or overclaim defect.
+Dynamic 1/4/16/64/256 latency/traffic work, energy, BOOM, and CGRA are
+explicitly outside this physical slice. No manifest, EXP identity, RUN-ID,
+physical invocation, result, or claim was created. EXP-0011 remains
+unallocated and unfrozen; HCI-02 applies immediately before allocation or a
+claim-bearing pre-data freeze.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
