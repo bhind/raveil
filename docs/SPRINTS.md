@@ -155,7 +155,7 @@ retained dependency forecast is:
 | Window | Intended outcome | Confidence |
 |---|---|---|
 | S-0002, through 2026-09-06 | T-0117 first read-only Garden TUI and terminal acceptance | medium |
-| S-0001, through 2026-08-30 | T-0044 integrated prerequisite plus readiness, identity/denominator, and typed physical measurement-contract validation; owner-priority T-0120 Garden multi-pane refinement; 47 Current SP after absorbed S09 is counted as zero | low |
+| S-0001, through 2026-08-30 | T-0044 integrated prerequisite plus readiness, identity/denominator, typed contract validation, and the three-SP S13 pre-data physical-input pause; owner-priority T-0120 Garden multi-pane refinement; 50 Current SP after absorbed S09 is counted as zero | low |
 
 The original Project forecast incorrectly attached deferred token-lifecycle
 hardening to completed T-0042 and also replanned T-0044 latency/traffic work
@@ -168,10 +168,13 @@ low-confidence S-0003 forecast into S-0001. Its already-performed clean replay
 absorbs S09 at Current SP zero, S10 adds five Current SP for the readiness
 validator, S11 adds eight for the identity/denominator boundary, and S12 adds
 eight for the typed physical estimator and evidence protocol. The resulting
-47-SP Sprint is above the 13--21 warm planning band; it is an observed
+50-SP Sprint is above the 13--21 warm planning band; it is an observed
 owner-authorized over-band delivery after the weekly service window recovered,
 not evidence that later T-0044 work fits the Sprint or a new capacity forecast.
 No later forecast date is inferred from the removed sequence.
+S13 retains Initial SP 13 but records Current SP 3 because its fixed
+missing-physical-input stop fired before allocation, collector implementation,
+or cold P&R. The blocked remainder is not treated as delivered capacity.
 
 Custom RISC-V remains Icebox until FPGA evidence identifies a concrete residual
 problem. It has neither SP nor a calendar date.

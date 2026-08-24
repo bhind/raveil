@@ -1,0 +1,34 @@
+schema=raveil.exp-0011-macro-view-inventory/v1
+image=raveil-physical-proxy-toolchain:v1
+image_id=sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169
+image_rootfs_sha256=21620b37d8c2f62d831d186304b2b32912e6f0d5d34ca14a8e659edbbdfbeac5
+platform=linux/amd64
+search_root=/home/mambauser/physical-mamba/envs/toolchain/share/pdk/sky130A
+required_predicate=fixed-string macro-name content match in every regular *.lib and *.lef file
+supplemental_predicate=case-sensitive macro-name filename match in every regular *.gds file
+sort=LC_ALL=C full-path ascending
+macro=cc_dir_ext view=lib required=true count=0
+macro=cc_dir_ext view=lef required=true count=0
+macro=cc_dir_ext view=gds required=false count=0
+macro=cc_banks_0_ext view=lib required=true count=0
+macro=cc_banks_0_ext view=lef required=true count=0
+macro=cc_banks_0_ext view=gds required=false count=0
+macro=data_arrays_0_ext view=lib required=true count=0
+macro=data_arrays_0_ext view=lef required=true count=0
+macro=data_arrays_0_ext view=gds required=false count=0
+macro=tag_array_ext view=lib required=true count=0
+macro=tag_array_ext view=lef required=true count=0
+macro=tag_array_ext view=gds required=false count=0
+macro=tag_array_0_ext view=lib required=true count=0
+macro=tag_array_0_ext view=lef required=true count=0
+macro=tag_array_0_ext view=gds required=false count=0
+macro=data_arrays_0_0_ext view=lib required=true count=0
+macro=data_arrays_0_0_ext view=lef required=true count=0
+macro=data_arrays_0_0_ext view=gds required=false count=0
+macro=memory_ext view=lib required=true count=0
+macro=memory_ext view=lef required=true count=0
+macro=memory_ext view=gds required=false count=0
+evidence_class=physical-input-readiness-no-candidate-data
+experiment_allocated=false
+manifest_frozen=false
+candidate_data_collected=false

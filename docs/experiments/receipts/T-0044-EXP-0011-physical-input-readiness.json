@@ -1,0 +1,96 @@
+{
+  "schema": "raveil.t0044-exp0011-physical-input-readiness-receipt/v1",
+  "task_id": "T-0044",
+  "candidate_experiment_id": "EXP-0011",
+  "authority_commit": "7a48dc942db8800c3f6f25f7f0d2b60f697ca952",
+  "date": "2026-08-24",
+  "timezone": "Asia/Tokyo",
+  "status": "pause",
+  "stop_condition": "required_physical_input_component_unavailable",
+  "evidence_class": "physical-input-readiness-no-candidate-data",
+  "experiment_allocated": false,
+  "manifest_frozen": false,
+  "candidate_data_collected": false,
+  "placeholder_blackboxes_used": false,
+  "toolchain": {
+    "image": "raveil-physical-proxy-toolchain:v1",
+    "image_id": "sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169",
+    "image_rootfs_sha256": "21620b37d8c2f62d831d186304b2b32912e6f0d5d34ca14a8e659edbbdfbeac5",
+    "platform": "linux/amd64",
+    "openroad_revision": "0264023b6c2a8ae803b8d440478d657387277d93",
+    "yosys_version": "0.27+3",
+    "yosys_revision": "b58664d44",
+    "opensta_version": "2.3.3"
+  },
+  "available_common_views": {
+    "standard_cell_liberty_sha256": "e66aab4e0a3eef8d0b13eb5b75aaadb725ba78b032203342eb1e419a2c111baf",
+    "standard_cell_lef_sha256": "cf8bcac8e831cff18c22a80999af3a97c8247028cd7dbbcdd8e3b73f725069ec",
+    "technology_lef_sha256": "1a18b353fb5457caf0eca5b3cb28b2c0c9bbacdbbdeee7c4fc64a115932066c2",
+    "openrcx_rule_sha256": "682de2d5ceba1fffbdd58ee3033b2ab89ac81ced4ad3f51406f77a05ec4bca8b"
+  },
+  "memory_contract": {
+    "integrated_sha256": "f318d6bd905d3c8b411082e9c33652593c96ae26d29669da8baf34e726b4de52",
+    "matched_rocket_sha256": "f318d6bd905d3c8b411082e9c33652593c96ae26d29669da8baf34e726b4de52",
+    "byte_identical": true,
+    "required_macros": [
+      {"name": "cc_dir_ext", "depth": 1024, "width": 128, "ports": "mrw", "mask_granularity": 16},
+      {"name": "cc_banks_0_ext", "depth": 16384, "width": 64, "ports": "rw"},
+      {"name": "data_arrays_0_ext", "depth": 512, "width": 256, "ports": "mrw", "mask_granularity": 8},
+      {"name": "tag_array_ext", "depth": 64, "width": 88, "ports": "mrw", "mask_granularity": 22},
+      {"name": "tag_array_0_ext", "depth": 64, "width": 84, "ports": "mrw", "mask_granularity": 21},
+      {"name": "data_arrays_0_0_ext", "depth": 512, "width": 128, "ports": "mrw", "mask_granularity": 32},
+      {"name": "memory_ext", "depth": 1024, "width": 32, "ports": "mwrite,read", "mask_granularity": 8}
+    ]
+  },
+  "pinned_view_search": {
+    "search_root": "/home/mambauser/physical-mamba/envs/toolchain/share/pdk/sky130A",
+    "required_view_suffixes": ["lib", "lef"],
+    "supplemental_view_suffixes": ["gds"],
+    "required_match_predicate": "fixed-string macro-name content match in every regular file with the declared suffix",
+    "supplemental_match_predicate": "case-sensitive macro-name filename match in every regular GDS file",
+    "sort": "LC_ALL=C full-path ascending",
+    "macro_match_counts": {
+      "cc_dir_ext": 0,
+      "cc_banks_0_ext": 0,
+      "data_arrays_0_ext": 0,
+      "tag_array_ext": 0,
+      "tag_array_0_ext": 0,
+      "data_arrays_0_0_ext": 0,
+      "memory_ext": 0
+    }
+  },
+  "inventory_replay": {
+    "command": "./hardware/chisel/check-exp0011-macro-views.sh",
+    "runner_sha256": "9ff24ece4f418edb706857048507b8c63bd05ad6b4901a242bfbec3199583d18",
+    "tracked_transcript": "docs/experiments/receipts/T-0044-EXP-0011-macro-view-inventory.txt",
+    "tracked_transcript_sha256": "f44b4ec1da28110d60f693529f230d0809f1ab396b8c7c151b86ae740aca1d52",
+    "expected_exit_code": 0,
+    "expected_stdout_byte_identical": true
+  },
+  "raw_log": {
+    "retention": "local-untracked-operational",
+    "bytes": 3956,
+    "sha256": "206f6330c630885a59c14bfad5652a7956d09996b34bd9795bc18c0395f0d2b2"
+  },
+  "decision_boundary": {
+    "reason": "All seven required memory macros lack the Liberty timing and LEF geometry/pin views required for the integrated P&R estimand. Matching GDS files are also absent but are supplemental to this pause decision.",
+    "prohibited_shortcuts": [
+      "zero-area-or-timing-free-blackboxes",
+      "invented-placeholder-macro-views",
+      "candidate-only-memory-conditions",
+      "result-dependent-threshold-change"
+    ],
+    "remaining_options": [
+      "bind reviewed compatible public macro views",
+      "pre-data refreeze a common standard-cell memory implementation after fairness review",
+      "pause the custom integrated physical line"
+    ]
+  },
+  "nonclaims": [
+    "no EXP-0011 allocation",
+    "no frozen manifest",
+    "no synthesis, placement, routing, parasitic, timing, or area candidate data",
+    "no performance, energy, FPGA, ASIC, or silicon evidence",
+    "no T-0044 completion or go/no-go conclusion"
+  ]
+}

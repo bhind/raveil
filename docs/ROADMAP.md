@@ -32,6 +32,15 @@ oracle/budget, physical-condition, typed physical estimator, fixed decision,
 and evidence-protocol validators. None collects or claims whole-system area,
 timing, energy, FPGA, ASIC, silicon, or performance results. The next boundary
 is HCI-02 immediately before EXP-0011 allocation or freeze.
+The owner granted HCI-02 on 2026-08-24, but S13 stopped before allocation under
+the preregistered missing-physical-input rule. All seven required common memory
+macros lack the Liberty timing and LEF geometry/pin views required by the P&R
+estimand in the pinned public image, although the standard-cell, technology,
+and RC inputs are present. Matching GDS files are also absent but are
+supplemental to this pause. The integrated physical
+gate is therefore **pause-boundary before data**. It may resume only with one
+reviewed common memory implementation/view set bound identically to both
+candidates; placeholder or candidate-only macro conditions are prohibited.
 
 Start timing is governed by the canonical phase table in `TODO.md`: T-0044's
 remaining matched physical gates, beginning with the post-EXP-0010 integrated
@@ -357,6 +366,11 @@ slice. It adds deterministic wide and stacked workspace layouts while keeping
 the same observe-only snapshot, compiler-validation, and authority boundary.
 Its 40-test clean acceptance, independent review, and reproducible static
 capture are complete. It does not change any research or hardware gate.
+
+T-0121 is a deferred P2 follow-up. Its local Graph Canvas draft is preserved,
+but the project will reconsider Garden as an actual Linux/macOS TUI, including
+library, color, focus, and graph-layout choices, after the critical path. The
+canonical dependency-free Garden CLI remains available meanwhile.
 
 ## High-priority demo extension — Sonatine native operator shell
 

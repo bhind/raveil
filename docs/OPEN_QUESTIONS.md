@@ -167,7 +167,15 @@ resolves it.
   and ADR-0050-strength failure/recovery/evidence sealing. It does not resolve
   the declarations against real P&R artifacts. The exact available
   macro/standard-cell/tech/RC/floorplan inputs and their hash-bound manifest
-  remain open; allocating EXP-0011 or freezing that manifest requires HCI-02.
+  remain open. HCI-02 was authorized, and the first exact inventory resolved
+  the standard-cell, technology, and RC inputs but found zero required Liberty
+  timing or LEF geometry/pin views for each of the seven memory macros in the
+  pinned public image. Matching GDS files are also absent, but that is
+  supplemental to the P&R pause. The boundary is now narrower: obtain and review a compatible common
+  macro-view set, pre-data refreeze a common standard-cell memory
+  implementation, or pause the custom integrated physical line. Any choice
+  must apply identically to both candidates and must not use placeholder or
+  zero-area blackboxes.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

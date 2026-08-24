@@ -103,7 +103,7 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 36 items and 37 fields. Current SP totals are S-0001=47
+The Project retains 38 items and 37 fields. Current SP totals are S-0001=50
 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
@@ -774,6 +774,27 @@ explicitly outside this physical slice. No manifest, EXP identity, RUN-ID,
 physical invocation, result, or claim was created. EXP-0011 remains
 unallocated and unfrozen; HCI-02 applies immediately before allocation or a
 claim-bearing pre-data freeze.
+The owner then authorized HCI-02 for T-0044/S13, but the mandatory pre-data
+physical-input binding stopped before EXP allocation. The two S08 exports have
+the same seven-entry memory contract, SHA-256
+`f318d6bd905d3c8b411082e9c33652593c96ae26d29669da8baf34e726b4de52`,
+while the pinned `raveil-physical-proxy-toolchain:v1` image contains zero
+required Liberty timing or LEF geometry/pin matches for every required macro.
+Matching GDS files are also absent, but are supplemental to the pause.
+Standard-cell Liberty, standard-cell LEF, technology LEF, and OpenRCX rules are present and hashed,
+so this is specifically a missing memory physical-view boundary rather than an
+absent OpenROAD installation. The fixed
+`required_physical_input_component_unavailable` pause rule fired. EXP-0011
+remains unallocated and unfrozen; no synthesis, placement, routing, parasitic,
+timing, area, or other candidate datum was collected. The tracked readiness
+receipt is
+`docs/experiments/receipts/T-0044-EXP-0011-physical-input-readiness.json`,
+SHA-256
+`0c64aa343b6801c0846744364f2d5dece7af00e26648d53b437de51ea74f3945`,
+with deterministic replay runner SHA-256
+`9ff24ece4f418edb706857048507b8c63bd05ad6b4901a242bfbec3199583d18`
+and byte-matched tracked transcript SHA-256
+`f44b4ec1da28110d60f693529f230d0809f1ab396b8c7c151b86ae740aca1d52`.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
