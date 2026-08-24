@@ -103,7 +103,7 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 35 items and 37 fields. Current SP totals are S-0001=42
+The Project retains 36 items and 37 fields. Current SP totals are S-0001=47
 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
@@ -147,6 +147,17 @@ reproduced the merged revision in a clean worktree: the normal TTY view,
 deterministic `jjq` navigation, and empty state exited 0; malformed input was
 rejected with the expected exit 2; and all 35 scoped tests passed. This closes
 the bounded Garden Playable only and changes no research or hardware gate.
+
+T-0120 extends that completed observe-only boundary with a deterministic
+IDE-like terminal workspace. An explicit width from 72 through 240 controls
+either three side-by-side `Graph Navigator`, `Node Inspector`, and
+`Variants / Evidence` panes or a narrow stacked layout; `Commands / Status`
+remains full-width. The default width is 150 and no terminal capability is
+consulted, so the same accepted snapshot, navigation keys, and width produce
+byte-identical text. The implementation remains dependency-free and retains
+Garden's existing snapshot validation and read-only authority. This is
+host-functional development evidence only, not graph execution, performance,
+RTL, FPGA, ASIC, or silicon evidence.
 
 ADR-0026 adds lightweight defect governance. Existing experiment failures,
 negative results, regression tests, and logs remain authoritative evidence;
