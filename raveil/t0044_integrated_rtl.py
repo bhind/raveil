@@ -1009,7 +1009,6 @@ def compare_common_concrete_reports(
         "memory_macro_port_signatures",
         "memory_macro_module_sha256",
         "source_sha256",
-        "clock_inventory",
     ):
         require(
             integrated.get(field) == baseline.get(field),
@@ -1019,6 +1018,17 @@ def compare_common_concrete_reports(
         integrated.get("reachable_blackboxes") == baseline.get("reachable_blackboxes") == [],
         "common concrete hierarchy contains a reachable blackbox",
     )
+    for label, report in (("integrated", integrated), ("baseline", baseline)):
+        clocks = report.get("clock_inventory")
+        require(isinstance(clocks, dict), f"{label} concrete clock inventory missing")
+        require(
+            clocks.get("allowed_roots") == sorted(CLOCK_ROOTS),
+            f"{label} concrete clock-root policy drift",
+        )
+        require(
+            clocks.get("unconstrained_clock_endpoints") == 0,
+            f"{label} concrete hierarchy has unconstrained clock endpoints",
+        )
     return {
         "schema": "raveil.exp-0011-common-memory-concrete/v1",
         "status": "structural-only",

@@ -361,9 +361,16 @@ class TestIntegratedRTL(unittest.TestCase):
             "matched-rocket-system",
             source_sha256=HEX,
         )
-        clock_inventory = {"allowed_roots": sorted(CLOCK_ROOTS)}
-        integrated["clock_inventory"] = clock_inventory
-        baseline["clock_inventory"] = clock_inventory
+        integrated["clock_inventory"] = {
+            "allowed_roots": sorted(CLOCK_ROOTS),
+            "unconstrained_clock_endpoints": 0,
+            "sequential_endpoint_count": 10,
+        }
+        baseline["clock_inventory"] = {
+            "allowed_roots": sorted(CLOCK_ROOTS),
+            "unconstrained_clock_endpoints": 0,
+            "sequential_endpoint_count": 9,
+        }
         self.assertEqual(
             compare_common_concrete_reports(integrated, baseline)["reachable_blackboxes"],
             0,
