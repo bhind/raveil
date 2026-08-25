@@ -279,6 +279,24 @@ standard cells, establish macro equivalence under excluded collisions, or
 authorize physical collection. Those are later pre-data closure and fairness
 boundaries.
 
+T-0044/S16 uses that source to elaborate both real S08 candidate exports under
+one offline hierarchy preflight. It does not generate candidate-specific
+wrappers: the source is loaded first, each export supplies its existing
+hierarchy, and the checker requires all eleven macro instances to expose the
+exact named-port pass-through set, including clock and mask pins. A canonical
+RTLIL module identity removes only fixed candidate mount prefixes and Yosys
+process-local auto identifiers; it does not equalize Graph activity or remove
+Graph logic. The comparison separately preserves the identical Rocket module,
+common memory paths, external ports, and allowed clock roots while permitting
+the integrated candidate's additional Graph endpoints. The closure contract
+binds the hierarchy comparison, source preflight, functional simulation,
+runtime receipt, and every raw/derived size/hash manifest. Completed evidence
+trees are read-only and independently revalidated. This remains a pre-mapping
+structural and RTL-functional boundary: `$mem_v2` cells are expected here.
+Only a future identical `memory_map`, `dfflibmap`, and `abc` stage may invoke
+the mapped-netlist guard that rejects remaining `$mem*` cells and blackboxes
+before P&R.
+
 ADR-0042 uses the pinned subsystem TileLink RAM inherited by Rocket and BOOM as
 an intermediate functional bridge. Only the fallback's input and private output
 are linked there; code and completion control remain in normal memory. This

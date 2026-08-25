@@ -14,6 +14,8 @@ from raveil.t0044_integrated_rtl import (
     analyze_clock_inventory,
     analyze_export,
     analyze_hierarchy,
+    analyze_common_concrete_hierarchy,
+    compare_common_concrete_reports,
     compare_reports,
     load_rtlil_hierarchy,
     validate_export,
@@ -102,6 +104,12 @@ def flat_document():
                     },
                     "serial_memory": {
                         "type": "$mem_v2",
+                        "parameters": {
+                            "RD_PORTS": "00000000000000000000000000000001",
+                            "WR_PORTS": "00000000000000000000000000000001",
+                            "RD_CLK_ENABLE": "1",
+                            "WR_CLK_ENABLE": "1",
+                        },
                         "port_directions": {"RD_CLK": "input", "WR_CLK": "input"},
                         "connections": {"RD_CLK": [3], "WR_CLK": ["0"]},
                     },
@@ -311,6 +319,89 @@ def measurement_contract():
 
 
 class TestIntegratedRTL(unittest.TestCase):
+    def concrete_document(self):
+        doc = hierarchy_document(graph=True)
+        for name in MEMORY_MACRO_CONTRACT:
+            doc["modules"][name].pop("attributes", None)
+            doc["modules"][name]["cells"] = {"mem": {"type": "$mem_v2"}}
+        return doc
+
+    def test_common_concrete_policy_success_and_blackbox_rejection(self):
+        document = self.concrete_document()
+        for index, name in enumerate(sorted(MEMORY_MACRO_CONTRACT)):
+            document["modules"][name]["rtlil_canonical_sha256"] = f"{index + 1:064x}"
+            document["modules"][name]["rtlil_raw_sha256"] = f"{index + 9:064x}"
+        report = analyze_common_concrete_hierarchy(document, "integrated-static-graph-rocket", source_sha256=HEX)
+        self.assertEqual(len(report["memory_macro_paths"]), 7)
+        self.assertEqual(
+            report["memory_macro_module_sha256"],
+            {
+                name: f"{index + 1:064x}"
+                for index, name in enumerate(sorted(MEMORY_MACRO_CONTRACT))
+            },
+        )
+        bad = self.concrete_document()
+        bad["modules"]["cc_dir_ext"]["attributes"] = {"blackbox": "1"}
+        with self.assertRaisesRegex(ValueError, "blackbox"):
+            analyze_common_concrete_hierarchy(bad, "integrated-static-graph-rocket", source_sha256=HEX)
+
+        bad = self.concrete_document()
+        bad["modules"]["cc_dir_ext"]["rtlil_canonical_sha256"] = "bad"
+        with self.assertRaisesRegex(ValueError, "canonical RTLIL"):
+            analyze_common_concrete_hierarchy(
+                bad, "integrated-static-graph-rocket", source_sha256=HEX
+            )
+
+    def test_common_concrete_policy_rejects_instance_port_and_mem_drift(self):
+        for mutate, text in (
+            (lambda d: d["modules"]["RaveilIntegratedGraphDigitalTop"]["cells"].pop("macro_cc_dir_ext_0"), "macro type missing"),
+            (lambda d: d["modules"]["cc_dir_ext"]["ports"].pop("RW0_wmask"), "port contract"),
+            (lambda d: d["modules"]["cc_dir_ext"]["cells"].clear(), "exactly one"),
+        ):
+            bad = self.concrete_document(); mutate(bad)
+            with self.assertRaisesRegex(ValueError, text):
+                analyze_common_concrete_hierarchy(bad, "integrated-static-graph-rocket", source_sha256=HEX)
+
+    def test_common_concrete_policy_rejects_missing_source_identity(self):
+        with self.assertRaisesRegex(ValueError, "source SHA-256"):
+            analyze_common_concrete_hierarchy(
+                self.concrete_document(),
+                "integrated-static-graph-rocket",
+                source_sha256="",
+            )
+
+    def test_common_concrete_comparison_rejects_identity_drift(self):
+        integrated = analyze_common_concrete_hierarchy(
+            self.concrete_document(),
+            "integrated-static-graph-rocket",
+            source_sha256=HEX,
+        )
+        baseline_doc = hierarchy_document(graph=False)
+        for name in MEMORY_MACRO_CONTRACT:
+            baseline_doc["modules"][name].pop("attributes", None)
+            baseline_doc["modules"][name]["cells"] = {"mem": {"type": "$mem_v2"}}
+        baseline = analyze_common_concrete_hierarchy(
+            baseline_doc,
+            "matched-rocket-system",
+            source_sha256=HEX,
+        )
+        integrated["clock_inventory"] = {
+            "allowed_roots": sorted(CLOCK_ROOTS),
+            "unconstrained_clock_endpoints": 0,
+            "sequential_endpoint_count": 10,
+        }
+        baseline["clock_inventory"] = {
+            "allowed_roots": sorted(CLOCK_ROOTS),
+            "unconstrained_clock_endpoints": 0,
+            "sequential_endpoint_count": 9,
+        }
+        self.assertEqual(
+            compare_common_concrete_reports(integrated, baseline)["reachable_blackboxes"],
+            0,
+        )
+        baseline["source_sha256"] = "1" * 64
+        with self.assertRaisesRegex(ValueError, "source_sha256"):
+            compare_common_concrete_reports(integrated, baseline)
     def test_s12_measurement_readiness_contract_valid(self):
         document = measurement_contract()
         self.assertEqual(validate_measurement_readiness_contract(document)["status"], "ready-for-review")
@@ -646,6 +737,39 @@ class TestIntegratedRTL(unittest.TestCase):
         self.assertEqual(report["allowed_roots"], sorted(CLOCK_ROOTS))
         self.assertEqual(report["sequential_endpoint_count"], 3)
 
+    def test_inactive_mem_v2_rom_clocks_are_not_endpoints(self):
+        document = flat_document()
+        document["modules"]["ChipTop"]["cells"]["serial_ff"] = {
+            "type": "$dff",
+            "port_directions": {"CLK": "input", "D": "input", "Q": "output"},
+            "connections": {"CLK": [3], "D": ["0"], "Q": [12]},
+        }
+        memory = document["modules"]["ChipTop"]["cells"]["serial_memory"]
+        memory["parameters"].update({
+            "RD_PORTS": "00000000000000000000000000000001",
+            "WR_PORTS": "00000000000000000000000000000000",
+            "RD_CLK_ENABLE": "0",
+            "WR_CLK_ENABLE": "0",
+        })
+        memory["connections"].update({"RD_CLK": ["x"], "WR_CLK": []})
+        report = analyze_clock_inventory(document)
+        self.assertEqual(report["sequential_endpoint_count"], 3)
+
+    def test_active_or_malformed_mem_v2_clocks_fail_closed(self):
+        mutations = (
+            lambda memory: memory["connections"].__setitem__("RD_CLK", ["x"]),
+            lambda memory: memory["connections"].__setitem__("RD_CLK", []),
+            lambda memory: memory["parameters"].__setitem__("RD_PORTS", "bad"),
+            lambda memory: memory["parameters"].__setitem__("RD_CLK_ENABLE", ""),
+            lambda memory: memory["parameters"].__setitem__("RD_CLK_ENABLE", "10"),
+        )
+        for mutate in mutations:
+            document = flat_document()
+            memory = document["modules"]["ChipTop"]["cells"]["serial_memory"]
+            mutate(memory)
+            with self.subTest(mutation=mutate), self.assertRaises(ValueError):
+                analyze_clock_inventory(document)
+
     def test_rtlil_hierarchy_loader_keeps_only_structural_identity(self):
         text = """attribute \\top 1
 module \\ChipTop
@@ -667,7 +791,49 @@ end
             path.write_text(text)
             document = load_rtlil_hierarchy(path)
         self.assertEqual(document["modules"]["ChipTop"]["cells"]["\\rocket"]["type"], "Rocket")
+        self.assertEqual(
+            document["modules"]["ChipTop"]["cells"]["\\rocket"]["connections"],
+            {"clock": "\\clock_uncore"},
+        )
         self.assertEqual(len(document["modules"]["ChipTop"]["ports"]["out"]["bits"]), 2)
+
+    def test_common_concrete_rtlil_requires_exact_named_macro_connections(self):
+        document = self.concrete_document()
+        document["modules"]["ChipTop"]["rtlil_canonical_sha256"] = HEX
+        macro_cells = []
+        for module in document["modules"].values():
+            for cell in module.get("cells", {}).values():
+                cell_type = cell.get("type")
+                if cell_type in MEMORY_MACRO_CONTRACT:
+                    cell["connections"] = {
+                        pin: f"\\{pin}" for pin in MEMORY_MACRO_PORTS[cell_type]
+                    }
+                    macro_cells.append(cell)
+        self.assertEqual(len(macro_cells), 11)
+        report = analyze_common_concrete_hierarchy(
+            document,
+            "integrated-static-graph-rocket",
+            source_sha256=HEX,
+        )
+        self.assertEqual(len(report["memory_macro_instance_connections"]), 11)
+
+        pin = next(iter(macro_cells[0]["connections"]))
+        macro_cells[0]["connections"][pin] = "\\wrong"
+        with self.assertRaisesRegex(ValueError, "exact named-port pass-through"):
+            analyze_common_concrete_hierarchy(
+                document,
+                "integrated-static-graph-rocket",
+                source_sha256=HEX,
+            )
+
+        macro_cells[0]["connections"][pin] = f"\\{pin}"
+        macro_cells[0]["connections"].pop(pin)
+        with self.assertRaisesRegex(ValueError, "port connection drift"):
+            analyze_common_concrete_hierarchy(
+                document,
+                "integrated-static-graph-rocket",
+                source_sha256=HEX,
+            )
 
     def test_rtlil_canonical_hash_elides_only_yosys_auto_ids_and_unit_order(self):
         def rocket_rtlil(
@@ -678,30 +844,36 @@ end
             source_line: int = 10,
             cell_type: str = "$and",
             input_name: str = "named_input",
+            mount: str = "/integrated/",
         ) -> str:
+            source = f"{mount}generated-src/Rocket.sv"
             units = [
                 (
-                    f'  attribute \\src "generated-src/Rocket.sv:{source_line}.1-{source_line}.8"\n'
-                    f"  wire $and$generated-src/Rocket.sv:{source_line}${first_id}_Y"
+                    f'  attribute \\src "{source}:{source_line}.1-{source_line}.8"\n'
+                    f"  wire $and${source}:{source_line}${first_id}_Y"
                 ),
                 (
-                    f'  attribute \\src "generated-src/Rocket.sv:{source_line}.1-{source_line}.8"\n'
-                    f"  cell {cell_type} $and$generated-src/Rocket.sv:{source_line}${first_id}\n"
+                    f'  attribute \\src "{source}:{source_line}.1-{source_line}.8"\n'
+                    f"  cell {cell_type} $and${source}:{source_line}${first_id}\n"
                     f"    parameter \\Y_WIDTH {width}\n"
                     f"    connect \\A \\{input_name}\n"
-                    f"    connect \\Y $and$generated-src/Rocket.sv:{source_line}${first_id}_Y\n"
+                    f"    connect \\Y $and${source}:{source_line}${first_id}_Y\n"
                     "  end"
                 ),
             ]
             if reverse:
                 units.reverse()
-            return "module \\Rocket\n" + "\n".join(units) + "\nend\n"
+            return (
+                f'attribute \\src "{source}:1.1-20.1"\nmodule \\Rocket\n'
+                + "\n".join(units)
+                + "\nend\n"
+            )
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             a_path, b_path = root / "a.rtlil", root / "b.rtlil"
             a_path.write_text(rocket_rtlil(101, reverse=False))
-            b_path.write_text(rocket_rtlil(9021, reverse=True))
+            b_path.write_text(rocket_rtlil(9021, reverse=True, mount="/baseline/"))
             a = load_rtlil_hierarchy(a_path)["modules"]["Rocket"]
             b = load_rtlil_hierarchy(b_path)["modules"]["Rocket"]
             drifts = []
@@ -710,9 +882,11 @@ end
                 {"source_line": 11},
                 {"cell_type": "$or"},
                 {"input_name": "other_input"},
+                {"mount": "/other/"},
             )):
                 drift_path = root / f"drift-{index}.rtlil"
-                drift_path.write_text(rocket_rtlil(9021, reverse=True, **kwargs))
+                options = {"mount": "/baseline/", **kwargs}
+                drift_path.write_text(rocket_rtlil(9021, reverse=True, **options))
                 drifts.append(
                     load_rtlil_hierarchy(drift_path)["modules"]["Rocket"]
                 )
@@ -914,6 +1088,17 @@ end
         self.assertEqual(report["eicg_control_latch_cells"], ["eicg_latch"])
         self.assertEqual(report["root_endpoint_counts"]["clock_uncore"], 2)
 
+    def test_exact_eicg_accepts_variant_absolute_source_prefix(self):
+        document = self.eicg_document()
+        for cell_name in ("eicg_latch", "eicg_gate"):
+            cell = document["modules"]["ChipTop"]["cells"][cell_name]
+            cell["attributes"]["src"] = "/integrated/" + cell["attributes"]["src"].replace(
+                "|generated-src/", "|/integrated/generated-src/"
+            )
+        report = analyze_clock_inventory(document)
+        self.assertEqual(report["eicg_clock_gate_cells"], ["eicg_gate"])
+        self.assertEqual(report["eicg_control_latch_cells"], ["eicg_latch"])
+
     def test_eicg_pattern_drift_fails_closed(self):
         mutations = (
             lambda d: d["modules"]["ChipTop"]["cells"]["eicg_latch"]["connections"].__setitem__("EN", [2]),
@@ -1084,6 +1269,36 @@ end
         for forbidden in ("synth -top", "abc -liberty", "stat -liberty", "sta "):
             self.assertNotIn(forbidden, preflight)
         self.assertNotIn('awk "{print \\\\$1}"', export)
+
+    def test_common_concrete_runner_is_pinned_offline_and_stops_before_mapping(self):
+        runner = (
+            ROOT / "hardware/chisel/run-exp0011-common-memory-hierarchy-preflight.sh"
+        ).read_text()
+        for token in (
+            "APPEND_ONLY_OUTPUT_DIR",
+            "--network none",
+            "expected_image_id=sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169",
+            "exp0011_common_stdcell_memories.sv",
+            "hierarchy -check -top ChipTop",
+            "memory_collect",
+            "check -assert",
+            "write_rtlil /out/$variant-hierarchy.rtlil",
+            "write_json /out/$variant-flat.json",
+            "--source-sha256",
+            "compare-concrete",
+            '"memory_mapping": False',
+            '"reachable_blackboxes": 0',
+        ):
+            self.assertIn(token, runner)
+        for forbidden in (
+            "hierarchy -generate",
+            "\nmemory_map\n",
+            "synth -top",
+            "abc -liberty",
+            "openroad",
+            "docker build",
+        ):
+            self.assertNotIn(forbidden, runner.lower())
 
 
 if __name__ == "__main__":

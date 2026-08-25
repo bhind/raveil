@@ -1100,6 +1100,28 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   review. Preserve collision/interleaving exclusions or prove the additional
   admissible semantics. Do not infer synthesis, P&R, area, timing, energy,
   performance, FPGA, ASIC, silicon, T-0044 completion, or go/no-go evidence.
+  T-0044/S16 completes that repository-only pre-data closure at implementation
+  commit `3b91286be86d8dadf098a91f00c369c5a1d28743`. The integrated and
+  matched-Rocket exports each resolve the same seven concrete macro modules at
+  the same eleven exact paths; every instance has the complete expected
+  named-port connection set, including clocks and write masks. Both retain the
+  same canonical Rocket identity and approved clock-root policy with zero
+  reachable blackboxes. A v4 unfrozen contract and v2 bundle validator bind the
+  comparison report plus all six raw/derived leg manifests, rehash every
+  payload size and SHA-256, verify an aggregate manifest, and seal completed
+  trees read-only. PM and independent one-command runs exit zero, pass all 162
+  scoped tests, reproduce the same comparison SHA-256
+  `1d3957d0f6b009d2ffedfac932c837f1051cc0a4f63b798392686e5891a6a7c3`,
+  seven-memory source preflight, and 28-check Verilator result. Preserve both
+  run-local hierarchy logs: their only differences are Yosys operational
+  CPU/system/peak-memory/time-spent footers, so their manifest and dependent
+  receipt hashes legitimately differ. Do not normalize raw evidence or treat
+  those values as candidate performance. S16 does not unblock S13: before any
+  EXP-0011 allocation or candidate flow, adopt and review actual common
+  Liberty/LEF physical views, execute the future mapping passes identically,
+  prove the mapped netlists contain no `$mem*` or reachable blackbox cells, and
+  complete the already-frozen physical fairness boundary. Keep EXP-0011
+  unallocated and T-0044 open.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked

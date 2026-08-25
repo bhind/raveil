@@ -504,6 +504,7 @@ def load_json(path: Path) -> dict[str, Any]:
 YOSYS_AUTO_ID = re.compile(
     r"(?<=\$)[0-9]+(?=_[A-Za-z0-9]|[ \t\[]|$)"
 )
+YOSYS_CANDIDATE_MOUNT = re.compile(r"/(?:integrated|baseline)/generated-src/")
 
 
 def canonical_rtlil_module_sha256(
@@ -527,7 +528,10 @@ def canonical_rtlil_module_sha256(
     )
 
     def normalize(line: str) -> str:
-        return YOSYS_AUTO_ID.sub("<yosys-auto-id>", line)
+        candidate_relative = YOSYS_CANDIDATE_MOUNT.sub(
+            "/candidate/generated-src/", line
+        )
+        return YOSYS_AUTO_ID.sub("<yosys-auto-id>", candidate_relative)
 
     def signal_base(token: str) -> str | None:
         if not token.startswith(("\\", "$")):
@@ -664,7 +668,9 @@ def canonical_rtlil_module_sha256(
     require(not pending_attributes, "orphan RTLIL module attributes")
     payload = {
         "module": normalize(module_lines[0]),
-        "attributes": module_attributes,
+        "attributes": {
+            key: normalize(value) for key, value in sorted(module_attributes.items())
+        },
         "units": sorted(units),
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
@@ -672,10 +678,11 @@ def canonical_rtlil_module_sha256(
 
 
 def load_rtlil_hierarchy(path: Path) -> dict[str, Any]:
-    """Load only module, port, cell, and module-attribute structure from RTLIL."""
+    """Load module, port, cell-connection, and module-attribute structure."""
     parsed: dict[str, Any] = {"modules": {}}
     pending_attributes: dict[str, str] = {}
     current: dict[str, Any] | None = None
+    current_cell: dict[str, Any] | None = None
     current_name = ""
     module_lines: list[str] = []
     with path.open() as source:
@@ -698,6 +705,19 @@ def load_rtlil_hierarchy(path: Path) -> dict[str, Any]:
                     module_lines = [line]
                 continue
             module_lines.append(line)
+            if current_cell is not None:
+                connection = re.fullmatch(r"    connect \\([^ ]+) (.+)", line)
+                if connection:
+                    pin = connection.group(1)
+                    require(
+                        pin not in current_cell["connections"],
+                        f"duplicate RTLIL cell connection: {pin}",
+                    )
+                    current_cell["connections"][pin] = connection.group(2)
+                    continue
+                if line == "  end":
+                    current_cell = None
+                    continue
             if line == "end":
                 current["rtlil_raw_sha256"] = hashlib.sha256(
                     ("\n".join(module_lines) + "\n").encode()
@@ -724,8 +744,10 @@ def load_rtlil_hierarchy(path: Path) -> dict[str, Any]:
             cell = re.fullmatch(r"  cell (?:\\([^ ]+)|(\$[^ ]+)) (.+)", line)
             if cell:
                 cell_type = cell.group(1) or cell.group(2)
-                current["cells"][cell.group(3)] = {"type": cell_type}
+                current_cell = {"type": cell_type, "connections": {}}
+                current["cells"][cell.group(3)] = current_cell
     require(current is None, f"unterminated RTLIL module: {current_name}")
+    require(current_cell is None, "unterminated RTLIL cell")
     require(parsed["modules"], f"RTLIL lacks modules: {path}")
     return parsed
 
@@ -787,6 +809,17 @@ def reachable_module_names(
 def module_json_sha256(module: dict[str, Any]) -> str:
     encoded = json.dumps(module, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest()
+
+
+def module_structural_sha256(module: dict[str, Any]) -> str:
+    canonical = module.get("rtlil_canonical_sha256")
+    if canonical is None:
+        return module_json_sha256(module)
+    require(
+        isinstance(canonical, str) and _HEX_SHA256.fullmatch(canonical) is not None,
+        "malformed canonical RTLIL module SHA-256",
+    )
+    return canonical
 
 
 def analyze_hierarchy(document: dict[str, Any], variant: str) -> dict[str, Any]:
@@ -898,6 +931,184 @@ def analyze_hierarchy(document: dict[str, Any], variant: str) -> dict[str, Any]:
     }
 
 
+def analyze_common_concrete_hierarchy(
+    document: dict[str, Any],
+    variant: str,
+    *,
+    source_sha256: str,
+    flat_document: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Strict Option-B pre-data check for a concrete (non-blackbox) export."""
+    require(variant in VARIANTS, f"unknown variant: {variant}")
+    require(
+        _HEX_SHA256.fullmatch(source_sha256) is not None,
+        "common memory source SHA-256 is required",
+    )
+    all_modules = modules(document)
+    instances = list(walk_hierarchy(all_modules))
+    reachable = reachable_module_names(all_modules, instances)
+    blackboxes = {name for name in reachable if attribute_true(all_modules[name].get("attributes", {}).get("blackbox", False))}
+    require(not blackboxes, "common-concrete policy requires zero reachable blackboxes")
+    typed_paths: dict[str, list[str]] = {}
+    for path, cell_type, _ in instances:
+        typed_paths.setdefault(cell_type, []).append(path)
+    macro_paths = {name: sorted(typed_paths.get(name, [])) for name in sorted(MEMORY_MACRO_CONTRACT)}
+    require(set(typed_paths) >= set(MEMORY_MACRO_CONTRACT), "common concrete macro type missing")
+    for name, expected in MEMORY_MACRO_COUNTS.items():
+        require(len(macro_paths[name]) == expected, f"common concrete instance count drift for {name}")
+        module = all_modules[name]
+        require(not attribute_true(module.get("attributes", {}).get("blackbox", False)), f"concrete macro remains blackbox: {name}")
+        actual_ports = {p: (v[0], v[1]) for p, v in port_signature(module).items()}
+        require(actual_ports == MEMORY_MACRO_PORTS[name], f"common concrete port contract drift for {name}")
+        mems = [cell for cell in module.get("cells", {}).values() if cell.get("type") == "$mem_v2"]
+        require(len(mems) == 1, f"common concrete module must contain exactly one $mem_v2: {name}")
+    macro_connections: dict[str, dict[str, str]] = {}
+    if "rtlil_canonical_sha256" in all_modules[TOP]:
+        for path, cell_type, cell in instances:
+            if cell_type not in MEMORY_MACRO_CONTRACT:
+                continue
+            connections = cell.get("connections")
+            require(
+                isinstance(connections, dict),
+                f"common concrete instance connections missing: {path}",
+            )
+            expected_pins = set(MEMORY_MACRO_PORTS[cell_type])
+            require(
+                set(connections) == expected_pins,
+                f"common concrete instance port connection drift: {path}",
+            )
+            for pin, rhs in connections.items():
+                require(
+                    rhs == f"\\{pin}",
+                    f"common concrete instance is not an exact named-port pass-through: {path}/{pin}",
+                )
+            macro_connections[path] = dict(sorted(connections.items()))
+        require(
+            len(macro_connections) == sum(MEMORY_MACRO_COUNTS.values()),
+            "common concrete connection inventory is incomplete",
+        )
+    rockets = typed_paths.get("Rocket", [])
+    require(len(rockets) == 1, "hierarchy must contain exactly one Rocket instance")
+    managers = typed_paths.get("RaveilOwnedTLMemory", [])
+    fixtures = typed_paths.get("RaveilFixtureInputProvider", [])
+    require(len(managers) == 1, "hierarchy must contain exactly one owned memory manager")
+    require(len(fixtures) == 1, "hierarchy must contain exactly one fixture provider")
+    require(
+        any(name == "DCache" or name.endswith("DCache") for name in reachable),
+        "hierarchy lacks a Rocket data cache",
+    )
+    require(
+        any(
+            name.startswith("TLXbar") or name.startswith("TLInterconnectCoupler")
+            for name in reachable
+        ),
+        "hierarchy lacks a TileLink interconnect",
+    )
+    graph_types = {
+        "RaveilIntegratedGraphDigitalTop",
+        "RaveilStaticStencilCore",
+        "RaveilStaticStencilTLClient",
+    }
+    graph_paths = {name: typed_paths.get(name, []) for name in sorted(graph_types)}
+    if variant == "integrated-static-graph-rocket":
+        for name, paths in graph_paths.items():
+            require(len(paths) == 1, f"integrated hierarchy requires one {name} instance")
+    else:
+        require(
+            not any(graph_paths.values()),
+            "matched Rocket baseline contains integrated Graph logic",
+        )
+    signature = port_signature(all_modules[TOP])
+    missing_ports = sorted(REQUIRED_PORTS - signature.keys())
+    require(not missing_ports, f"ChipTop lacks required ports: {missing_ports}")
+    require(signature["axi4_mem_0_clock"][0] == "output", "AXI clock must be output")
+    require(signature["clock_tap"][0] == "output", "clock tap must be output")
+    for name in CLOCK_ROOTS | {"reset_io", "custom_boot"}:
+        require(signature[name][0] == "input", f"{name} must be input")
+    clock_inventory = (
+        analyze_clock_inventory(flat_document) if flat_document is not None else None
+    )
+    return {
+        "top": TOP, "variant": variant, "config": VARIANTS[variant],
+        "rocket_instance_path": rockets[0],
+        "rocket_module_canonical_sha256": module_structural_sha256(all_modules["Rocket"]),
+        "rocket_module_raw_sha256": all_modules["Rocket"].get("rtlil_raw_sha256", module_json_sha256(all_modules["Rocket"])),
+        "owned_memory_path": managers[0],
+        "fixture_provider_path": fixtures[0],
+        "graph_paths": graph_paths,
+        "port_signature": signature, "memory_macro_paths": macro_paths,
+        "memory_macro_port_signatures": {n: port_signature(all_modules[n]) for n in sorted(MEMORY_MACRO_CONTRACT)},
+        "memory_macro_module_sha256": {
+            name: module_structural_sha256(all_modules[name])
+            for name in sorted(MEMORY_MACRO_CONTRACT)
+        },
+        "memory_macro_instance_connections": dict(sorted(macro_connections.items())),
+        "reachable_blackboxes": [], "blackbox_policy": "common-concrete-zero-reachable-blackboxes",
+        "source_sha256": source_sha256,
+        "clock_inventory": clock_inventory,
+        "status": "structural-preflight-only",
+    }
+
+
+def compare_common_concrete_reports(
+    integrated: dict[str, Any], baseline: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare the two concrete-memory hierarchy reports without candidate data."""
+    require(
+        integrated.get("variant") == "integrated-static-graph-rocket",
+        "wrong integrated concrete report",
+    )
+    require(
+        baseline.get("variant") == "matched-rocket-system",
+        "wrong matched-Rocket concrete report",
+    )
+    for field in (
+        "port_signature",
+        "rocket_module_canonical_sha256",
+        "owned_memory_path",
+        "fixture_provider_path",
+        "memory_macro_paths",
+        "memory_macro_port_signatures",
+        "memory_macro_module_sha256",
+        "memory_macro_instance_connections",
+        "source_sha256",
+    ):
+        require(
+            integrated.get(field) == baseline.get(field),
+            f"common concrete identity mismatch: {field}",
+        )
+    require(
+        integrated.get("reachable_blackboxes") == baseline.get("reachable_blackboxes") == [],
+        "common concrete hierarchy contains a reachable blackbox",
+    )
+    for label, report in (("integrated", integrated), ("baseline", baseline)):
+        clocks = report.get("clock_inventory")
+        require(isinstance(clocks, dict), f"{label} concrete clock inventory missing")
+        require(
+            clocks.get("allowed_roots") == sorted(CLOCK_ROOTS),
+            f"{label} concrete clock-root policy drift",
+        )
+        require(
+            clocks.get("unconstrained_clock_endpoints") == 0,
+            f"{label} concrete hierarchy has unconstrained clock endpoints",
+        )
+    return {
+        "schema": "raveil.exp-0011-common-memory-concrete/v1",
+        "status": "structural-only",
+        "source_sha256": integrated["source_sha256"],
+        "memory_macro_instances": sum(MEMORY_MACRO_COUNTS.values()),
+        "memory_macro_types": len(MEMORY_MACRO_CONTRACT),
+        "rocket_module_canonical_sha256": integrated["rocket_module_canonical_sha256"],
+        "common_clock_roots": integrated["clock_inventory"]["allowed_roots"],
+        "reachable_blackboxes": 0,
+        "nonclaims": [
+            "no synthesis or memory mapping",
+            "no placement or routing",
+            "no timing, area, energy, performance, FPGA, ASIC, or silicon result",
+        ],
+    }
+
+
 def is_constant(bit: Any) -> bool:
     return isinstance(bit, str) and bit.lower() in {"0", "1", "x", "z"}
 
@@ -908,8 +1119,54 @@ def sequential_clock_ports(cell_type: str, cell: dict[str, Any]) -> set[str]:
         pins = MEMORY_MACRO_CLOCK_PORTS[cell_type]
         require(pins <= connections.keys(), f"memory macro lacks clock pin: {cell_type}")
         return pins
-    memory_types = ("$mem_v2", "$memrd", "$memwr")
-    if cell_type.startswith(memory_types):
+    if cell_type == "$mem_v2":
+        parameters = cell.get("parameters", {})
+        active_pins: set[str] = set()
+        for prefix in ("RD", "WR"):
+            ports_value = parameters.get(f"{prefix}_PORTS")
+            require(
+                isinstance(ports_value, str)
+                and ports_value
+                and set(ports_value) <= {"0", "1"},
+                f"$mem_v2 has malformed {prefix}_PORTS",
+            )
+            port_count = int(ports_value, 2)
+            enable_value = parameters.get(f"{prefix}_CLK_ENABLE")
+            require(
+                isinstance(enable_value, str)
+                and enable_value
+                and set(enable_value) <= {"0", "1"},
+                f"$mem_v2 has malformed {prefix}_CLK_ENABLE",
+            )
+            pin = f"{prefix}_CLK"
+            require(pin in connections, f"$mem_v2 lacks {pin}")
+            clock_bits = connections[pin]
+            require(isinstance(clock_bits, list), f"$mem_v2 has malformed {pin}")
+            if port_count == 0:
+                require(int(enable_value, 2) == 0, f"$mem_v2 enables absent {prefix} port")
+                require(not clock_bits, f"$mem_v2 has clock bits for absent {prefix} port")
+                continue
+            require(
+                len(enable_value) == port_count,
+                f"$mem_v2 {prefix}_CLK_ENABLE width disagrees with {prefix}_PORTS",
+            )
+            require(
+                len(clock_bits) == port_count,
+                f"$mem_v2 {pin} width disagrees with {prefix}_PORTS",
+            )
+            if set(enable_value) == {"0"}:
+                require(
+                    all(is_constant(bit) for bit in clock_bits),
+                    f"$mem_v2 disabled {pin} is not constant",
+                )
+                continue
+            require(
+                set(enable_value) == {"1"},
+                f"$mem_v2 mixed {prefix}_CLK_ENABLE is unsupported",
+            )
+            active_pins.add(pin)
+        return active_pins
+    if cell_type.startswith(("$memrd", "$memwr")):
         pins = {name for name in connections if "CLK" in name.upper()}
         require(pins, f"clocked memory cell lacks a clock pin: {cell_type}")
         return pins
@@ -973,7 +1230,13 @@ def analyze_clock_inventory(document: dict[str, Any]) -> dict[str, Any]:
         if cell.get("type") not in {"$and", "$logic_and"}:
             return None
         gate_source = str(cell.get("attributes", {}).get("src", ""))
-        if "|generated-src/EICG_wrapper.v:18." not in gate_source:
+        gate_source_parts = gate_source.split("|")
+        gate_leaf = "generated-src/EICG_wrapper.v:18.16-18.32"
+        if (
+            len(gate_source_parts) != 2
+            or gate_source_parts[1]
+            not in {gate_leaf, f"/integrated/{gate_leaf}", f"/baseline/{gate_leaf}"}
+        ):
             return None
         if cell.get("port_directions") != {"A": "input", "B": "input", "Y": "output"}:
             return None
@@ -982,7 +1245,7 @@ def analyze_clock_inventory(document: dict[str, Any]) -> dict[str, Any]:
             return None
         if any(len(connections[pin]) != 1 for pin in ("A", "B", "Y")):
             return None
-        wrapper_source = gate_source.split("|generated-src/EICG_wrapper.v:", 1)[0]
+        wrapper_source = gate_source_parts[0]
         for latched_pin, raw_pin in (("A", "B"), ("B", "A")):
             latched_bit = connections[latched_pin][0]
             raw_bit = connections[raw_pin][0]
@@ -994,7 +1257,18 @@ def analyze_clock_inventory(document: dict[str, Any]) -> dict[str, Any]:
             if latch.get("type") != "$dlatch":
                 continue
             latch_source = str(latch.get("attributes", {}).get("src", ""))
-            if not latch_source.startswith(wrapper_source + "|generated-src/EICG_wrapper.v:12."):
+            latch_source_parts = latch_source.split("|")
+            latch_leaf = "generated-src/EICG_wrapper.v:12.3-16.6"
+            if (
+                len(latch_source_parts) != 2
+                or latch_source_parts[0] != wrapper_source
+                or latch_source_parts[1]
+                not in {
+                    latch_leaf,
+                    f"/integrated/{latch_leaf}",
+                    f"/baseline/{latch_leaf}",
+                }
+            ):
                 continue
             if latch.get("port_directions") != {"D": "input", "EN": "input", "Q": "output"}:
                 continue
@@ -1305,6 +1579,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     analyze.add_argument("--hierarchy", type=Path, required=True)
     analyze.add_argument("--flat", type=Path, required=True)
     analyze.add_argument("--variant", choices=sorted(VARIANTS), required=True)
+    concrete = subparsers.add_parser("analyze-concrete")
+    concrete.add_argument("--hierarchy", type=Path, required=True)
+    concrete.add_argument("--flat", type=Path, required=True)
+    concrete.add_argument("--variant", choices=sorted(VARIANTS), required=True)
+    concrete.add_argument("--source-sha256", required=True)
+    compare_concrete = subparsers.add_parser("compare-concrete")
+    compare_concrete.add_argument("--integrated-report", type=Path, required=True)
+    compare_concrete.add_argument("--baseline-report", type=Path, required=True)
     validate = subparsers.add_parser("validate-export")
     validate.add_argument("--export-dir", type=Path, required=True)
     validate.add_argument("--variant", choices=sorted(VARIANTS), required=True)
@@ -1318,6 +1600,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "analyze":
         result = analyze_export(args.export_dir, args.hierarchy, args.flat, args.variant)
+    elif args.command == "analyze-concrete":
+        result = analyze_common_concrete_hierarchy(
+            load_rtlil_hierarchy(args.hierarchy),
+            args.variant,
+            source_sha256=args.source_sha256,
+            flat_document=load_json(args.flat),
+        )
+    elif args.command == "compare-concrete":
+        result = compare_common_concrete_reports(
+            load_json(args.integrated_report), load_json(args.baseline_report)
+        )
     elif args.command == "validate-export":
         result = validate_export(args.export_dir, args.variant)
     else:

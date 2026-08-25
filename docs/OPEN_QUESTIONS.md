@@ -187,15 +187,18 @@ resolves it.
   implementation, or pause the custom integrated physical line. Any choice
   must apply identically to both candidates and must not use placeholder or
   zero-area blackboxes.
-  S15 answers only whether one repository-owned common source can reproduce the
+  S15 answers whether one repository-owned common source can reproduce the
   seven macro type signatures and tested functional semantics and survive
   pre-mapping collection: yes, for 28 counted Verilator checks and seven fresh
-  one-memory/no-blackbox Yosys tops. It does not answer whether all eleven real
-  instances in both candidate hierarchies can use that source under identical
-  clocks, connectivity, mapping, and physical constraints. It also does not
-  bind the unfrozen proposal contract to a sealed actual-runtime receipt. Those
-  two closures remain required before the source can be reviewed as an
-  EXP-0011 physical input.
+  one-memory/no-blackbox Yosys tops. S16 further answers the real-hierarchy and
+  evidence-chain parts: both candidates resolve all eleven exact instances
+  with complete clock/mask connectivity, identical Rocket identity and clock
+  policy, zero reachable blackboxes, and an independently replayed sealed
+  runtime/contract/bundle chain. It does not answer the physical question.
+  Which reviewed common Liberty/LEF view set and identical future mapping
+  procedure can eliminate every `$mem*` cell without destroying the fair
+  physical denominator or the integrated advantage? That remains the single
+  S13 resume boundary before EXP-0011 allocation or claim-bearing data.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

@@ -29,7 +29,32 @@ expected_lock_sha256=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc2
 
 [ -x "$repo_root/$verifier_rel" ] || fail 'functional image verifier is not executable'
 image=$("$repo_root/$verifier_rel") || fail 'verified functional simulator receipt is required'
+runtime_hex=${image#sha256:}
+case "$runtime_hex" in *[!0-9a-f]*|'') fail 'invalid verified runtime OCI index' ;; esac
+[ "${#runtime_hex}" -eq 64 ] || fail 'invalid verified runtime OCI index'
+receipt_rel=artifacts/boom-functional-sim-images/$runtime_hex/receipt
+receipt_source=$repo_root/$receipt_rel
+[ -s "$receipt_source" ] || fail 'digest-named functional simulator receipt is missing'
+verified_image=$("$repo_root/$verifier_rel" "$receipt_source") ||
+    fail 'digest-named functional simulator receipt did not verify'
+[ "$verified_image" = "$image" ] || fail 'functional simulator receipt identity changed'
+receipt_sha256=$(sha256_file "$receipt_source")
+receipt_field() {
+    awk -F= -v wanted="$1" '$1 == wanted { print $2 }' "$receipt_source"
+}
+descriptor_digest=$(receipt_field RUNTIME_DESCRIPTOR_DIGEST)
+descriptor_media_type=$(receipt_field RUNTIME_DESCRIPTOR_MEDIA_TYPE)
+descriptor_size=$(receipt_field RUNTIME_DESCRIPTOR_SIZE)
+payload_manifest=$(receipt_field PAYLOAD_MANIFEST)
+payload_media_type=$(receipt_field PAYLOAD_MEDIA_TYPE)
+build_ref=$(receipt_field BUILD_REF)
 image_id=$(docker image inspect --format '{{.Id}}' "$image")
+[ "$descriptor_digest" = "$image_id" ] || fail 'runtime descriptor digest drift'
+[ "$descriptor_media_type" = "application/vnd.oci.image.index.v1+json" ] ||
+    fail 'runtime descriptor media type drift'
+[ "$payload_manifest" = "$expected_payload_manifest" ] || fail 'runtime payload manifest drift'
+[ "$payload_media_type" = "application/vnd.oci.image.manifest.v1+json" ] ||
+    fail 'runtime payload media type drift'
 config_view_sha256=$(docker image inspect --format '{{json .Config}}' "$image" | shasum -a 256 | awk '{print $1}')
 rootfs_sha256=$(docker image inspect --format '{{json .RootFS.Layers}}' "$image" | shasum -a 256 | awk '{print $1}')
 [ "$config_view_sha256" = "$expected_config_view_sha256" ] || fail "functional Config view drift: $config_view_sha256"
@@ -40,6 +65,9 @@ output_dir=$(CDPATH= cd -- "$output_dir" && pwd)
 mkdir "$output_dir/raw" "$output_dir/derived" "$output_dir/build"
 raw_dir=$output_dir/raw
 derived_dir=$output_dir/derived
+cp "$receipt_source" "$raw_dir/runtime-image-receipt.txt"
+receipt_copy_sha256=$(sha256_file "$raw_dir/runtime-image-receipt.txt")
+[ "$receipt_copy_sha256" = "$receipt_sha256" ] || fail 'runtime receipt copy drift'
 
 docker run --rm --platform "$platform" --network none \
     --security-opt no-new-privileges=true \
@@ -68,7 +96,7 @@ grep -qx "EXP0011_COMMON_STDCELL_MEMORY_FUNCTIONAL_OK checks=28 modules=7" /out/
 
 find "$raw_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$raw_dir/sha256s.txt"
 raw_manifest_sha256=$(sha256_file "$raw_dir/sha256s.txt")
 source_sha256=$(sha256_file "$repo_root/$source_rel")
@@ -82,11 +110,20 @@ python3 - "$derived_dir/simulation-metadata.json" <<PY
 import json
 import pathlib
 record = {
-    "schema": "raveil.exp-0011-common-stdcell-memory-functional/v2",
+    "schema": "raveil.exp-0011-common-stdcell-memory-functional/v3",
     "task_id": "T-0044", "authority_commit": "$(git -C "$repo_root" rev-parse HEAD)",
-    "runtime_oci_index": "$image_id", "payload_manifest": "$expected_payload_manifest",
+    "runtime_oci_index": "$image_id",
+    "descriptor_digest": "$descriptor_digest",
+    "descriptor_media_type": "$descriptor_media_type",
+    "descriptor_size": int("$descriptor_size"),
+    "payload_manifest": "$payload_manifest",
+    "payload_media_type": "$payload_media_type",
     "config_view_sha256": "$config_view_sha256",
     "rootfs_layers_sha256": "$rootfs_sha256", "platform": "$platform",
+    "build_ref": "$build_ref",
+    "receipt_sha256": "$receipt_sha256",
+    "receipt_path": "$receipt_rel",
+    "receipt_copy_sha256": "$receipt_copy_sha256",
     "toolchain_volume": "$toolchain_volume", "lock_sha256": "$expected_lock_sha256",
     "verilator_version": "$verilator_version", "verilator_sha256": "$verilator_sha256",
     "source_sha256": "$source_sha256", "testbench_sha256": "$testbench_sha256",
@@ -105,7 +142,8 @@ PY
 
 find "$derived_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$derived_dir/sha256s.txt"
 metadata_sha256=$(sha256_file "$derived_dir/simulation-metadata.json")
-printf 'EXP0011-COMMON-STDCELL-MEMORY-FUNCTIONAL-V2 status=OK modules=7 checks=28 candidate_data=false metadata_sha256=%s evidence=rtl-simulation-functional\n' "$metadata_sha256"
+printf 'EXP0011-COMMON-STDCELL-MEMORY-FUNCTIONAL-V3 status=OK modules=7 checks=28 candidate_data=false receipt_sha256=%s metadata_sha256=%s evidence=rtl-simulation-functional\n' \
+    "$receipt_sha256" "$metadata_sha256"
