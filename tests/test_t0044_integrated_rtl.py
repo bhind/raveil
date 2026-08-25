@@ -784,30 +784,36 @@ end
             source_line: int = 10,
             cell_type: str = "$and",
             input_name: str = "named_input",
+            mount: str = "/integrated/",
         ) -> str:
+            source = f"{mount}generated-src/Rocket.sv"
             units = [
                 (
-                    f'  attribute \\src "generated-src/Rocket.sv:{source_line}.1-{source_line}.8"\n'
-                    f"  wire $and$generated-src/Rocket.sv:{source_line}${first_id}_Y"
+                    f'  attribute \\src "{source}:{source_line}.1-{source_line}.8"\n'
+                    f"  wire $and${source}:{source_line}${first_id}_Y"
                 ),
                 (
-                    f'  attribute \\src "generated-src/Rocket.sv:{source_line}.1-{source_line}.8"\n'
-                    f"  cell {cell_type} $and$generated-src/Rocket.sv:{source_line}${first_id}\n"
+                    f'  attribute \\src "{source}:{source_line}.1-{source_line}.8"\n'
+                    f"  cell {cell_type} $and${source}:{source_line}${first_id}\n"
                     f"    parameter \\Y_WIDTH {width}\n"
                     f"    connect \\A \\{input_name}\n"
-                    f"    connect \\Y $and$generated-src/Rocket.sv:{source_line}${first_id}_Y\n"
+                    f"    connect \\Y $and${source}:{source_line}${first_id}_Y\n"
                     "  end"
                 ),
             ]
             if reverse:
                 units.reverse()
-            return "module \\Rocket\n" + "\n".join(units) + "\nend\n"
+            return (
+                f'attribute \\src "{source}:1.1-20.1"\nmodule \\Rocket\n'
+                + "\n".join(units)
+                + "\nend\n"
+            )
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             a_path, b_path = root / "a.rtlil", root / "b.rtlil"
             a_path.write_text(rocket_rtlil(101, reverse=False))
-            b_path.write_text(rocket_rtlil(9021, reverse=True))
+            b_path.write_text(rocket_rtlil(9021, reverse=True, mount="/baseline/"))
             a = load_rtlil_hierarchy(a_path)["modules"]["Rocket"]
             b = load_rtlil_hierarchy(b_path)["modules"]["Rocket"]
             drifts = []
@@ -816,9 +822,11 @@ end
                 {"source_line": 11},
                 {"cell_type": "$or"},
                 {"input_name": "other_input"},
+                {"mount": "/other/"},
             )):
                 drift_path = root / f"drift-{index}.rtlil"
-                drift_path.write_text(rocket_rtlil(9021, reverse=True, **kwargs))
+                options = {"mount": "/baseline/", **kwargs}
+                drift_path.write_text(rocket_rtlil(9021, reverse=True, **options))
                 drifts.append(
                     load_rtlil_hierarchy(drift_path)["modules"]["Rocket"]
                 )

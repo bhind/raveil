@@ -504,6 +504,7 @@ def load_json(path: Path) -> dict[str, Any]:
 YOSYS_AUTO_ID = re.compile(
     r"(?<=\$)[0-9]+(?=_[A-Za-z0-9]|[ \t\[]|$)"
 )
+YOSYS_CANDIDATE_MOUNT = re.compile(r"/(?:integrated|baseline)/generated-src/")
 
 
 def canonical_rtlil_module_sha256(
@@ -527,7 +528,10 @@ def canonical_rtlil_module_sha256(
     )
 
     def normalize(line: str) -> str:
-        return YOSYS_AUTO_ID.sub("<yosys-auto-id>", line)
+        candidate_relative = YOSYS_CANDIDATE_MOUNT.sub(
+            "/candidate/generated-src/", line
+        )
+        return YOSYS_AUTO_ID.sub("<yosys-auto-id>", candidate_relative)
 
     def signal_base(token: str) -> str | None:
         if not token.startswith(("\\", "$")):
@@ -664,7 +668,9 @@ def canonical_rtlil_module_sha256(
     require(not pending_attributes, "orphan RTLIL module attributes")
     payload = {
         "module": normalize(module_lines[0]),
-        "attributes": module_attributes,
+        "attributes": {
+            key: normalize(value) for key, value in sorted(module_attributes.items())
+        },
         "units": sorted(units),
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
