@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0123/S03 external bounded-DAG execution |
-| **P1 — next** | Start only after its named P0 dependency passes. | None; select a successor only after S03 evidence closes. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | None; T-0123/S03 is a verified PR candidate awaiting its required exact-head review and merge. |
+| **P1 — next** | Start only after its named P0 dependency passes. | None; select a successor only after T-0123/S03 integrates. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -192,6 +192,17 @@ review and failure preservation do not consume the two-item delivery limit.
   explicit owner approval to take sole mutation ownership. The 16-path
   allowlist, both read-only ABI boundaries, 21 SP, acceptance, and non-claims
   are unchanged; no partial packet is completion evidence.
+
+  S03's primary implementation/evidence candidate is commit `9682f783`.
+  Its finalizer correction removes the non-contractual busy-mutation zero-count
+  requirement: this segment may be empty or a strict correct prefix of the
+  first invocation, and its observed count is receipt-bound. The ignored
+  `run.mAgriX` primary receipt SHA-256 is
+  `093aa3ba723bca69f3e26f5e1b960d53bfdbb00a2cb708b1bf4a01cb5b221942` with
+  evidence class `rtl-simulation-functional` and `performance=not-measured`.
+  It proves only the frozen three-Graph scope pending independent exact-head
+  review and PR merge; it does not complete any broader generality, performance,
+  resource, physical, FPGA, ASIC, or silicon boundary.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
