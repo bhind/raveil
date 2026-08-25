@@ -67,6 +67,11 @@ class StaticStencilRegion extends Module {
     val outputCompletedCount = Output(UInt(32.W))
     val graphInputReadsAccepted = Output(UInt(16.W))
     val graphOutputWritesAccepted = Output(UInt(16.W))
+    // Simulation-functional observation only; excluded from graph-device ABI.
+    val transactionTraceValid = Output(Bool())
+    val transactionTraceWrite = Output(Bool())
+    val transactionTraceAddress = Output(UInt(10.W))
+    val transactionTraceWriteData = Output(UInt(32.W))
     val memoryPending = Output(Bool())
   })
 
@@ -242,6 +247,10 @@ class StaticStencilRegion extends Module {
   io.outputCompletedCount := 0.U
   io.graphInputReadsAccepted := core.io.graphInputReadsAccepted
   io.graphOutputWritesAccepted := core.io.graphOutputWritesAccepted
+  io.transactionTraceValid := core.io.transactionTraceValid
+  io.transactionTraceWrite := core.io.transactionTraceWrite
+  io.transactionTraceAddress := core.io.transactionTraceAddress
+  io.transactionTraceWriteData := core.io.transactionTraceWriteData
   io.memoryPending := scratchpad.io.pending
 
   when(!reset.asBool) {
