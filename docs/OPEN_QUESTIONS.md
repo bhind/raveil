@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -12,8 +12,10 @@ resolves it.
   T-0123 discriminator while retaining the existing operation alphabet,
   one-port memory contract, independent oracle, and no graph-specific RTL?
   S01 now proves only that a generated schedule describes the fixed executor's
-  accepted transaction trace; it does not answer affine installation or this
-  multi-DAG discriminator.
+  accepted transaction trace. S02 now verifies ADR-0063's separate affine-
+  installation boundary for two bounded shapes and strides on one RTL image;
+  it still executes only the same stencil. The multi-DAG discriminator and its
+  exact artifact/installation ownership remain unanswered for S03.
 
 ## Native execution
 

@@ -1,0 +1,14 @@
+{
+  "byte_order": "little-endian",
+  "control_bits": {"clear": 1, "commit": 2},
+  "identity_word": 1381386497,
+  "max_payload_words": 16,
+  "max_outstanding_requests": 1,
+  "offset_unit": "u32-word",
+  "payload_window": {"base_word": 256, "count_words": 16, "write_only": true},
+  "pointer_free": true,
+  "registers": {"control": 4, "installed_config_sha256_base": 16, "install_identity": 0, "install_version": 1, "payload_count_words": 6, "status": 5},
+  "schema": "raveil.graph-device-install-abi/v1",
+  "status_bits": {"fault": 4, "installed": 2, "loading": 1},
+  "word_bits": 32
+}

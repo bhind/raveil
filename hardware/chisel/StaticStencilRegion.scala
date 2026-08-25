@@ -1,6 +1,7 @@
 //> using scala 2.13.17
 //> using dep org.chipsalliance::chisel:7.2.0
 //> using plugin org.chipsalliance:::chisel-plugin:7.2.0
+//> using file GraphDeviceAffineConfigInstaller.scala
 
 import chisel3._
 import chisel3.util._
@@ -47,6 +48,18 @@ class StaticStencilRegion extends Module {
     val start = Input(Bool())
     val cancel = Input(Bool())
 
+    // Task-neutral affine installation ABI; separate from execution control.
+    val configClear = Input(Bool())
+    val configWrite = Input(Bool())
+    val configCommit = Input(Bool())
+    val configAddress = Input(UInt(5.W))
+    val configData = Input(UInt(32.W))
+    val configInstalled = Output(Bool())
+    val configLoading = Output(Bool())
+    val configFault = Output(Bool())
+    val configPayloadCount = Output(UInt(5.W))
+    val configLiveDigest = Output(Vec(8, UInt(32.W)))
+
     val outputValidationValid = Input(Bool())
     val outputValidationReady = Output(Bool())
     val outputValidationAddress = Input(UInt(8.W))
@@ -78,6 +91,7 @@ class StaticStencilRegion extends Module {
   val scratchpad = Module(new OwnedFixedLatencyScratchpad(1024, 580))
   val fixtureProvider = Module(new RaveilFixtureInputProvider)
   val core = Module(new RaveilStaticStencilCore)
+  val configInstaller = Module(new GraphDeviceAffineConfigInstaller)
 
   val outputValidReg = RegInit(false.B)
   val doneReg = RegInit(false.B)
@@ -100,11 +114,25 @@ class StaticStencilRegion extends Module {
     io.outputValidationValid && outputValidReg
   val controlResponseIsValidation = RegInit(false.B)
 
+  configInstaller.io.clear := io.configClear
+  configInstaller.io.write := io.configWrite
+  configInstaller.io.commit := io.configCommit
+  configInstaller.io.address := io.configAddress
+  configInstaller.io.data := io.configData
+  configInstaller.io.busy := core.io.busy || scratchpad.io.pending ||
+    fixtureProvider.io.active
+
+  val configReady = configInstaller.io.installed && !configInstaller.io.fault
   val directStart = io.start && !core.io.busy && !scratchpad.io.pending &&
-    !fixtureProvider.io.active
-  val graphStart = fixtureProvider.io.release || directStart
+    !fixtureProvider.io.active && configReady
+  val graphStart = (fixtureProvider.io.release || directStart) && configReady
   core.io.start := graphStart
   core.io.cancel := io.cancel
+  core.io.rows := configInstaller.io.rows
+  core.io.columns := configInstaller.io.columns
+  core.io.inputStride := configInstaller.io.inputStride
+  core.io.outputStride := configInstaller.io.outputStride
+  core.io.activeOutputs := configInstaller.io.activeOutputs
   core.io.memory.pending := scratchpad.io.pending
 
   scratchpad.io.requestValid := Mux(
@@ -238,6 +266,11 @@ class StaticStencilRegion extends Module {
   io.busy := core.io.busy
   io.done := doneReg
   io.cancelled := cancelledReg
+  io.configInstalled := configInstaller.io.installed
+  io.configLoading := configInstaller.io.loading
+  io.configFault := configInstaller.io.fault
+  io.configPayloadCount := configInstaller.io.payloadCount
+  io.configLiveDigest := configInstaller.io.liveDigest
   io.cycleCount := core.io.cycleCount
   io.checksum := core.io.checksum
   io.configurationTag := StaticStencilRegionContract.ConfigurationTagValue.U(64.W)
@@ -298,6 +331,10 @@ class StaticStencilRegion extends Module {
       assert(scratchpad.io.responsePhase === OwnedMemoryContract.PhaseValidation.U)
     }
     assert(!(outputValidReg && core.io.busy))
+    when(core.io.busy) {
+      assert(configInstaller.io.installed)
+      assert(!configInstaller.io.loading)
+    }
   }
 }
 

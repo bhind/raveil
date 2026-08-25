@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123/S01 generated-schedule trace equivalence passes; affine S02 is next; T-0044 physical research remains blocked**
+State: **T-0123/S02 bounded affine installation passes; no successor is promoted; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -65,14 +65,14 @@ exists. S14 is complete with no compatible candidate identified. OpenRAM remains
 possible generator for a separately reviewed proposal, not an adopted view set;
 the blocked S13 resume condition and all pre-data confirmations are unchanged.
 
-T-0123/S01 now passes its exact current-main acceptance: one immutable generated
-schedule matches two complete accepted-request traces and a strict cancellation
-prefix without changing the T-0122 ABI. The executor still follows fixed RTL
-control and does not consume that schedule. Bounded affine S02 is therefore the
-next P1 boundary; two-DAG S03 remains serial after S02. Neither may start until
-its own allowlist, installation/ownership boundary, acceptance packet, and live
-Project item are fixed. T-0123 still owns the bounded progression from a
-generated schedule to at least two DAGs on one executor.
+T-0123/S01 and S02 pass their exact scoped RTL-simulation acceptance. ADR-0063's
+separate task-neutral install ABI configures baseline and compact bounded
+shapes/strides while preserving the byte-identical execution ABI and one
+executor image. The generated schedule remains observation-only. Two-DAG S03
+stays serial and unstarted until its own allowlist, artifact/ownership boundary,
+acceptance packet, and live Project item are fixed. T-0123 still owns the
+bounded progression from a generated schedule to at least two DAGs on one
+executor; S02 alone does not establish that result.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or
