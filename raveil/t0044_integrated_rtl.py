@@ -678,10 +678,11 @@ def canonical_rtlil_module_sha256(
 
 
 def load_rtlil_hierarchy(path: Path) -> dict[str, Any]:
-    """Load only module, port, cell, and module-attribute structure from RTLIL."""
+    """Load module, port, cell-connection, and module-attribute structure."""
     parsed: dict[str, Any] = {"modules": {}}
     pending_attributes: dict[str, str] = {}
     current: dict[str, Any] | None = None
+    current_cell: dict[str, Any] | None = None
     current_name = ""
     module_lines: list[str] = []
     with path.open() as source:
@@ -704,6 +705,19 @@ def load_rtlil_hierarchy(path: Path) -> dict[str, Any]:
                     module_lines = [line]
                 continue
             module_lines.append(line)
+            if current_cell is not None:
+                connection = re.fullmatch(r"    connect \\([^ ]+) (.+)", line)
+                if connection:
+                    pin = connection.group(1)
+                    require(
+                        pin not in current_cell["connections"],
+                        f"duplicate RTLIL cell connection: {pin}",
+                    )
+                    current_cell["connections"][pin] = connection.group(2)
+                    continue
+                if line == "  end":
+                    current_cell = None
+                    continue
             if line == "end":
                 current["rtlil_raw_sha256"] = hashlib.sha256(
                     ("\n".join(module_lines) + "\n").encode()
@@ -730,8 +744,10 @@ def load_rtlil_hierarchy(path: Path) -> dict[str, Any]:
             cell = re.fullmatch(r"  cell (?:\\([^ ]+)|(\$[^ ]+)) (.+)", line)
             if cell:
                 cell_type = cell.group(1) or cell.group(2)
-                current["cells"][cell.group(3)] = {"type": cell_type}
+                current_cell = {"type": cell_type, "connections": {}}
+                current["cells"][cell.group(3)] = current_cell
     require(current is None, f"unterminated RTLIL module: {current_name}")
+    require(current_cell is None, "unterminated RTLIL cell")
     require(parsed["modules"], f"RTLIL lacks modules: {path}")
     return parsed
 
@@ -946,6 +962,31 @@ def analyze_common_concrete_hierarchy(
         require(actual_ports == MEMORY_MACRO_PORTS[name], f"common concrete port contract drift for {name}")
         mems = [cell for cell in module.get("cells", {}).values() if cell.get("type") == "$mem_v2"]
         require(len(mems) == 1, f"common concrete module must contain exactly one $mem_v2: {name}")
+    macro_connections: dict[str, dict[str, str]] = {}
+    if "rtlil_canonical_sha256" in all_modules[TOP]:
+        for path, cell_type, cell in instances:
+            if cell_type not in MEMORY_MACRO_CONTRACT:
+                continue
+            connections = cell.get("connections")
+            require(
+                isinstance(connections, dict),
+                f"common concrete instance connections missing: {path}",
+            )
+            expected_pins = set(MEMORY_MACRO_PORTS[cell_type])
+            require(
+                set(connections) == expected_pins,
+                f"common concrete instance port connection drift: {path}",
+            )
+            for pin, rhs in connections.items():
+                require(
+                    rhs == f"\\{pin}",
+                    f"common concrete instance is not an exact named-port pass-through: {path}/{pin}",
+                )
+            macro_connections[path] = dict(sorted(connections.items()))
+        require(
+            len(macro_connections) == sum(MEMORY_MACRO_COUNTS.values()),
+            "common concrete connection inventory is incomplete",
+        )
     rockets = typed_paths.get("Rocket", [])
     require(len(rockets) == 1, "hierarchy must contain exactly one Rocket instance")
     managers = typed_paths.get("RaveilOwnedTLMemory", [])
@@ -1001,6 +1042,7 @@ def analyze_common_concrete_hierarchy(
             name: module_structural_sha256(all_modules[name])
             for name in sorted(MEMORY_MACRO_CONTRACT)
         },
+        "memory_macro_instance_connections": dict(sorted(macro_connections.items())),
         "reachable_blackboxes": [], "blackbox_policy": "common-concrete-zero-reachable-blackboxes",
         "source_sha256": source_sha256,
         "clock_inventory": clock_inventory,
@@ -1028,6 +1070,7 @@ def compare_common_concrete_reports(
         "memory_macro_paths",
         "memory_macro_port_signatures",
         "memory_macro_module_sha256",
+        "memory_macro_instance_connections",
         "source_sha256",
     ):
         require(

@@ -120,7 +120,7 @@ PYTHONPATH="$repo_root" python3 -m raveil.t0044_integrated_rtl compare-concrete 
 
 find "$raw_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$raw_dir/sha256s.txt"
 raw_manifest_sha256=$(sha256_file "$raw_dir/sha256s.txt")
 runner_sha256=$(sha256_file "$repo_root/$runner_rel")
@@ -165,7 +165,7 @@ EOF
 
 find "$derived_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$derived_dir/sha256s.txt"
 comparison_sha256=$(sha256_file "$derived_dir/comparison-report.json")
 printf 'EXP0011-COMMON-MEMORY-HIERARCHY-PREFLIGHT-V1 status=OK macro_types=7 macro_instances=11 blackboxes=0 source_sha256=%s comparison_sha256=%s evidence=rtl-structural-preflight performance=not-measured\n' \

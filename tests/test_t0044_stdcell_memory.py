@@ -36,7 +36,9 @@ from raveil.t0044_stdcell_memory import (
     YOSYS_SHA256,
     parse_runtime_receipt,
     validate_evidence_bundle,
+    validate_mapped_netlist_postconditions,
     validate_option_b_contract,
+    verify_evidence_manifest,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -66,7 +68,7 @@ RUNTIME_RECEIPT = (
     "PLATFORM=linux/amd64\n"
     "BUILD_REF=abcdefghijklmnopqrstuvwxy\n"
 ).encode()
-RAW_MANIFEST = b"1" * 64 + b"  simulation-transcript.txt\n"
+RAW_MANIFEST = b"1" * 64 + b"  1  simulation-transcript.txt\n"
 
 
 def valid_contract():
@@ -93,8 +95,21 @@ def valid_contract():
             "testbench_sha256": H5,
             "verifier_sha256": FUNCTIONAL_VERIFIER_SHA256,
             "readiness_receipt_sha256": READINESS_RECEIPT_SHA256,
-            "preflight_receipt": {"sha256": H6, "source_sha256": H2, "runner_sha256": H3},
-            "simulation_receipt": {"sha256": H7, "source_sha256": H2, "runner_sha256": H4, "testbench_sha256": H5},
+            "preflight_receipt": {
+                "sha256": H6, "source_sha256": H2, "runner_sha256": H3,
+                "raw_manifest_sha256": H4, "derived_manifest_sha256": H5,
+            },
+            "simulation_receipt": {
+                "sha256": H7, "source_sha256": H2, "runner_sha256": H4,
+                "testbench_sha256": H5, "raw_manifest_sha256": H6,
+                "derived_manifest_sha256": H7,
+            },
+            "hierarchy_receipt": {
+                "metadata_sha256": H1, "comparison_sha256": H2,
+                "raw_manifest_sha256": H3, "derived_manifest_sha256": H4,
+                "source_sha256": H2, "runner_sha256": H5,
+                "analyzer_sha256": H6,
+            },
             "toolchain": {
                 "physical_image": "raveil-physical-proxy-toolchain:v1",
                 "physical_image_id": PHYSICAL_IMAGE_ID,
@@ -270,6 +285,9 @@ class TestT0044OptionBContract(unittest.TestCase):
             "testbench_sha256": "hardware/chisel/exp0011_common_stdcell_memory_tb.sv",
             "runner_sha256": "hardware/chisel/run-exp0011-stdcell-memory-sim.sh",
             "verifier_sha256": "hardware/chisel/verify-boom-functional-sim-image.sh",
+            "preflight_runner_sha256": "hardware/chisel/run-exp0011-stdcell-memory-preflight.sh",
+            "hierarchy_runner_sha256": "hardware/chisel/run-exp0011-common-memory-hierarchy-preflight.sh",
+            "analyzer_sha256": "raveil/t0044_integrated_rtl.py",
         }
         hashes = {}
         for key, relative in relative_files.items():
@@ -286,6 +304,24 @@ class TestT0044OptionBContract(unittest.TestCase):
         )
         receipt_path.parent.mkdir(parents=True)
         receipt_path.write_bytes(RUNTIME_RECEIPT)
+        def write_manifest(directory):
+            entries = []
+            for path in sorted(directory.iterdir(), key=lambda item: item.name):
+                if path.name == "sha256s.txt":
+                    continue
+                payload = path.read_bytes()
+                entries.append(
+                    f"{hashlib.sha256(payload).hexdigest()}  {len(payload)}  {path.name}\n"
+                )
+            value = "".join(entries).encode()
+            (directory / "sha256s.txt").write_bytes(value)
+            return value
+
+        simulation_raw = root / "simulation/raw"
+        simulation_raw.mkdir(parents=True)
+        (simulation_raw / "runtime-image-receipt.txt").write_bytes(RUNTIME_RECEIPT)
+        (simulation_raw / "simulation-transcript.txt").write_bytes(b"x")
+        simulation_raw_manifest = write_manifest(simulation_raw)
         metadata = {
             "schema": "raveil.exp-0011-common-stdcell-memory-functional/v3",
             "task_id": "T-0044",
@@ -313,7 +349,7 @@ class TestT0044OptionBContract(unittest.TestCase):
             "source_sha256": hashes["source_sha256"],
             "testbench_sha256": hashes["testbench_sha256"],
             "runner_sha256": hashes["runner_sha256"],
-            "raw_manifest_sha256": hashlib.sha256(RAW_MANIFEST).hexdigest(),
+            "raw_manifest_sha256": hashlib.sha256(simulation_raw_manifest).hexdigest(),
             "verifier_sha256": hashes["verifier_sha256"],
             "modules": FUNCTIONAL_MODULES,
             "checks": FUNCTIONAL_CHECKS,
@@ -327,6 +363,76 @@ class TestT0044OptionBContract(unittest.TestCase):
             "nonclaims": FUNCTIONAL_NONCLAIMS,
         }
         metadata_bytes = (json.dumps(metadata, indent=2, sort_keys=True) + "\n").encode()
+        simulation_derived = root / "simulation/derived"
+        simulation_derived.mkdir()
+        (simulation_derived / "simulation-metadata.json").write_bytes(metadata_bytes)
+        simulation_derived_manifest = write_manifest(simulation_derived)
+
+        hierarchy_raw = root / "hierarchy/raw"
+        hierarchy_raw.mkdir(parents=True)
+        (hierarchy_raw / "yosys-version.txt").write_bytes(b"Yosys 0.27+3\n")
+        hierarchy_raw_manifest = write_manifest(hierarchy_raw)
+        hierarchy_comparison = {
+            "schema": "raveil.exp-0011-common-memory-concrete/v1",
+            "status": "structural-only", "source_sha256": hashes["source_sha256"],
+            "memory_macro_instances": 11, "memory_macro_types": 7,
+            "rocket_module_canonical_sha256": H1,
+            "common_clock_roots": ["clock_uncore", "jtag_TCK", "serial_tl_0_clock_in"],
+            "reachable_blackboxes": 0,
+            "nonclaims": ["no synthesis or memory mapping", "no placement or routing", "no timing, area, energy, performance, FPGA, ASIC, or silicon result"],
+        }
+        hierarchy_metadata = {
+            "schema": "raveil.exp-0011-common-memory-hierarchy-preflight/v1",
+            "task_id": "T-0044", "authority_commit": authority,
+            "image": "raveil-physical-proxy-toolchain:v1",
+            "image_id": PHYSICAL_IMAGE_ID, "image_rootfs_sha256": PHYSICAL_ROOTFS_SHA256,
+            "platform": "linux/amd64", "source_sha256": hashes["source_sha256"],
+            "runner_sha256": hashes["hierarchy_runner_sha256"],
+            "analyzer_sha256": hashes["analyzer_sha256"],
+            "integrated_export_metadata_sha256": H1,
+            "baseline_export_metadata_sha256": H2,
+            "raw_manifest_sha256": hashlib.sha256(hierarchy_raw_manifest).hexdigest(),
+            "memory_macro_types": 7, "memory_macro_instances": 11,
+            "reachable_blackboxes": 0, "evidence_class": "rtl-structural-preflight",
+            "candidate_synthesis": False, "memory_mapping": False, "pnr": False,
+            "nonclaims": ["no synthesis or memory mapping", "no placement or routing", "no timing, area, energy, performance, FPGA, ASIC, or silicon result"],
+        }
+        hierarchy_derived = root / "hierarchy/derived"
+        hierarchy_derived.mkdir()
+        comparison_bytes = (json.dumps(hierarchy_comparison, indent=2, sort_keys=True) + "\n").encode()
+        hierarchy_metadata_bytes = (json.dumps(hierarchy_metadata, indent=2, sort_keys=True) + "\n").encode()
+        (hierarchy_derived / "comparison-report.json").write_bytes(comparison_bytes)
+        (hierarchy_derived / "preflight-metadata.json").write_bytes(hierarchy_metadata_bytes)
+        hierarchy_derived_manifest = write_manifest(hierarchy_derived)
+
+        preflight_raw = root / "source-preflight/raw"
+        preflight_raw.mkdir(parents=True)
+        (preflight_raw / "yosys-version.txt").write_bytes(b"Yosys 0.27+3\n")
+        preflight_raw_manifest = write_manifest(preflight_raw)
+        preflight_metadata = {
+            "schema": "raveil.exp-0011-common-stdcell-memory-preflight/v2",
+            "task_id": "T-0044", "authority_commit": authority,
+            "image": "raveil-physical-proxy-toolchain:v1", "image_id": PHYSICAL_IMAGE_ID,
+            "image_rootfs_sha256": PHYSICAL_ROOTFS_SHA256, "platform": "linux/amd64",
+            "source_sha256": hashes["source_sha256"],
+            "runner_sha256": hashes["preflight_runner_sha256"],
+            "readiness_receipt_sha256": READINESS_RECEIPT_SHA256,
+            "inventory_runner_sha256": H1, "yosys_sha256": YOSYS_SHA256,
+            "yosys_version": "0.27+3", "yosys_revision": "b58664d44",
+            "raw_manifest_sha256": hashlib.sha256(preflight_raw_manifest).hexdigest(),
+            "tops": FUNCTIONAL_MODULES, "fresh_yosys_processes": 7,
+            "total_storage_bits": TOTAL_STORAGE_BITS, "commands": ["read_verilog -sv"],
+            "evidence_class": EVIDENCE_CLASS, "experiment_id": None,
+            "manifest_frozen": False, "preflight_evidence_collected": True,
+            "claim_bearing_candidate_data_collected": False,
+            "candidate_synthesis": False, "pnr": False,
+            "nonclaims": ["no synthesis mapping", "no placement or routing", "no area, timing, energy, FPGA, ASIC, or silicon claim"],
+        }
+        preflight_metadata_bytes = (json.dumps(preflight_metadata, indent=2, sort_keys=True) + "\n").encode()
+        preflight_derived = root / "source-preflight/derived"
+        preflight_derived.mkdir()
+        (preflight_derived / "preflight-metadata.json").write_bytes(preflight_metadata_bytes)
+        preflight_derived_manifest = write_manifest(preflight_derived)
         contract = valid_contract()
         contract["authority_commit"] = authority
         identities = contract["identities"]
@@ -334,24 +440,42 @@ class TestT0044OptionBContract(unittest.TestCase):
         identities["testbench_sha256"] = hashes["testbench_sha256"]
         identities["simulation_runner_sha256"] = hashes["runner_sha256"]
         identities["verifier_sha256"] = hashes["verifier_sha256"]
-        identities["preflight_receipt"]["source_sha256"] = hashes["source_sha256"]
+        identities["preflight_runner_sha256"] = hashes["preflight_runner_sha256"]
+        identities["preflight_receipt"] = {
+            "sha256": hashlib.sha256(preflight_metadata_bytes).hexdigest(),
+            "source_sha256": hashes["source_sha256"],
+            "runner_sha256": hashes["preflight_runner_sha256"],
+            "raw_manifest_sha256": hashlib.sha256(preflight_raw_manifest).hexdigest(),
+            "derived_manifest_sha256": hashlib.sha256(preflight_derived_manifest).hexdigest(),
+        }
         identities["simulation_receipt"] = {
             "sha256": hashlib.sha256(metadata_bytes).hexdigest(),
             "source_sha256": hashes["source_sha256"],
             "runner_sha256": hashes["runner_sha256"],
             "testbench_sha256": hashes["testbench_sha256"],
+            "raw_manifest_sha256": hashlib.sha256(simulation_raw_manifest).hexdigest(),
+            "derived_manifest_sha256": hashlib.sha256(simulation_derived_manifest).hexdigest(),
         }
-        return contract, metadata_bytes
+        identities["hierarchy_receipt"] = {
+            "metadata_sha256": hashlib.sha256(hierarchy_metadata_bytes).hexdigest(),
+            "comparison_sha256": hashlib.sha256(comparison_bytes).hexdigest(),
+            "raw_manifest_sha256": hashlib.sha256(hierarchy_raw_manifest).hexdigest(),
+            "derived_manifest_sha256": hashlib.sha256(hierarchy_derived_manifest).hexdigest(),
+            "source_sha256": hashes["source_sha256"],
+            "runner_sha256": hashes["hierarchy_runner_sha256"],
+            "analyzer_sha256": hashes["analyzer_sha256"],
+        }
+        return contract, metadata_bytes, simulation_raw_manifest
 
-    def test_v3_bundle_binds_receipt_metadata_contract_head_and_files(self):
+    def test_v4_bundle_binds_all_leg_payloads_and_rejects_tampering(self):
         with tempfile.TemporaryDirectory() as temp:
             root = pathlib.Path(temp)
-            contract, metadata_bytes = self.bundle_fixture(root)
+            contract, metadata_bytes, raw_manifest = self.bundle_fixture(root)
             completed = mock.Mock(stdout="a" * 40 + "\n")
             with mock.patch("raveil.t0044_stdcell_memory.subprocess.run", return_value=completed):
                 result = validate_evidence_bundle(
-                    contract, metadata_bytes, RUNTIME_RECEIPT, RAW_MANIFEST,
-                    repo_root=root,
+                    contract, metadata_bytes, RUNTIME_RECEIPT, raw_manifest,
+                    repo_root=root, evidence_root=root,
                 )
             self.assertEqual(result["status"], "valid-unfrozen-pre-data")
 
@@ -361,9 +485,47 @@ class TestT0044OptionBContract(unittest.TestCase):
             with mock.patch("raveil.t0044_stdcell_memory.subprocess.run", return_value=completed):
                 with self.assertRaises(ValueError):
                     validate_evidence_bundle(
-                        contract, metadata_bytes, tampered, RAW_MANIFEST,
-                        repo_root=root,
+                        contract, metadata_bytes, tampered, raw_manifest,
+                        repo_root=root, evidence_root=root,
                     )
+
+            transcript = root / "simulation/raw/simulation-transcript.txt"
+            transcript.write_bytes(b"y")
+            with mock.patch("raveil.t0044_stdcell_memory.subprocess.run", return_value=completed):
+                with self.assertRaisesRegex(ValueError, "size or hash mismatch"):
+                    validate_evidence_bundle(
+                        contract, metadata_bytes, RUNTIME_RECEIPT, raw_manifest,
+                        repo_root=root, evidence_root=root,
+                    )
+
+    def test_manifest_parser_rejects_malformed_duplicate_and_unlisted_payloads(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = pathlib.Path(temp)
+            (directory / "payload.txt").write_bytes(b"x")
+            valid = (
+                f"{hashlib.sha256(b'x').hexdigest()}  1  payload.txt\n".encode()
+            )
+            self.assertEqual(verify_evidence_manifest(valid, directory)["entries"], 1)
+            for bad in (
+                valid.replace(b"  1  ", b"  "),
+                valid + valid,
+                valid.replace(b"payload.txt", b"../payload.txt"),
+            ):
+                with self.subTest(bad=bad), self.assertRaises(ValueError):
+                    verify_evidence_manifest(bad, directory)
+            (directory / "unlisted.txt").write_bytes(b"z")
+            with self.assertRaisesRegex(ValueError, "file set mismatch"):
+                verify_evidence_manifest(valid, directory)
+
+    def test_future_mapped_netlist_postcondition_rejects_abstract_memory(self):
+        clean = {"modules": {"top": {"cells": {"gate": {"type": "AND2_X1"}}}}}
+        self.assertEqual(
+            validate_mapped_netlist_postconditions(clean)["pnr"], False
+        )
+        dirty = copy.deepcopy(clean)
+        dirty["modules"]["top"]["cells"]["memory"] = {"type": "$mem_v2"}
+        with self.assertRaisesRegex(ValueError, "abstract memory"):
+            validate_mapped_netlist_postconditions(dirty)
 
     def test_source_has_exact_modules_interfaces_and_guard(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -447,6 +609,12 @@ class TestT0044OptionBContract(unittest.TestCase):
         self.assertIn("--bundle-metadata", runner)
         self.assertIn("--bundle-receipt", runner)
         self.assertIn("--bundle-raw-manifest", runner)
+        self.assertIn("--bundle-root", runner)
+        self.assertIn('"hierarchy_receipt"', runner)
+        self.assertIn('find "$output_dir" -type f -exec chmod 0444', runner)
+        self.assertIn('find "$output_dir" -depth -type d -exec chmod 0555', runner)
+        self.assertIn("aggregate_manifest_sha256", runner)
+        self.assertIn("verify_evidence_manifest", runner)
         self.assertNotIn("memory_map", runner)
         self.assertNotIn("openroad", runner.lower())
         self.assertNotIn("candidate_synthesis\": True", runner)

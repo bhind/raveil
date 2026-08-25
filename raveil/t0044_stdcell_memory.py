@@ -20,7 +20,7 @@ from .t0044_integrated_rtl import (
     MEMORY_MACRO_PORTS,
 )
 
-SCHEMA = "raveil.t0044-common-stdcell-memory/v3"
+SCHEMA = "raveil.t0044-common-stdcell-memory/v4"
 RUNTIME_RECEIPT_SCHEMA = "raveil.boom-functional-sim-image/v2"
 METADATA_SCHEMA = "raveil.exp-0011-common-stdcell-memory-functional/v3"
 TOTAL_STORAGE_BITS = 4_631_296
@@ -32,10 +32,10 @@ NONCLAIMS = [
 ]
 FUTURE_MAPPING_PASSES = ["memory_map", "dfflibmap", "abc"]
 POSTCONDITIONS = [
-    "no $mem* cells before P&R",
-    "no reachable blackbox cells before P&R",
-    "no placeholder memory views before P&R",
-    "no candidate-specific source branch before P&R",
+    "after future mapping passes, the mapped netlist has no $mem* cells before P&R",
+    "after future mapping passes, the mapped netlist has no reachable blackbox cells before P&R",
+    "after future mapping passes, the mapped netlist has no placeholder memory views before P&R",
+    "the future mapped netlist has no candidate-specific source branch before P&R",
 ]
 
 PHYSICAL_IMAGE_ID = "sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169"
@@ -69,10 +69,21 @@ TOP_FIELDS = frozenset({
 IDENTITY_FIELDS = frozenset({
     "source_sha256", "preflight_runner_sha256", "simulation_runner_sha256",
     "testbench_sha256", "verifier_sha256", "readiness_receipt_sha256", "preflight_receipt",
-    "simulation_receipt", "toolchain",
+    "simulation_receipt", "hierarchy_receipt", "toolchain",
 })
-PREFLIGHT_RECEIPT_FIELDS = frozenset({"sha256", "source_sha256", "runner_sha256"})
-SIMULATION_RECEIPT_FIELDS = frozenset({"sha256", "source_sha256", "runner_sha256", "testbench_sha256"})
+PREFLIGHT_RECEIPT_FIELDS = frozenset({
+    "sha256", "source_sha256", "runner_sha256", "raw_manifest_sha256",
+    "derived_manifest_sha256",
+})
+SIMULATION_RECEIPT_FIELDS = frozenset({
+    "sha256", "source_sha256", "runner_sha256", "testbench_sha256",
+    "raw_manifest_sha256", "derived_manifest_sha256",
+})
+HIERARCHY_RECEIPT_FIELDS = frozenset({
+    "metadata_sha256", "comparison_sha256", "raw_manifest_sha256",
+    "derived_manifest_sha256", "source_sha256", "runner_sha256",
+    "analyzer_sha256",
+})
 TOOLCHAIN_FIELDS = frozenset({
     "physical_image", "physical_image_id", "physical_rootfs_sha256",
     "functional_runtime_oci_index", "functional_payload_manifest",
@@ -104,6 +115,30 @@ METADATA_FIELDS = frozenset({
     "functional_evidence_collected", "claim_bearing_candidate_data_collected",
     "experiment_id", "manifest_frozen", "candidate_synthesis", "pnr",
     "nonclaims",
+})
+HIERARCHY_METADATA_FIELDS = frozenset({
+    "schema", "task_id", "authority_commit", "image", "image_id",
+    "image_rootfs_sha256", "platform", "source_sha256", "runner_sha256",
+    "analyzer_sha256", "integrated_export_metadata_sha256",
+    "baseline_export_metadata_sha256", "raw_manifest_sha256",
+    "memory_macro_types", "memory_macro_instances", "reachable_blackboxes",
+    "evidence_class", "candidate_synthesis", "memory_mapping", "pnr",
+    "nonclaims",
+})
+PREFLIGHT_METADATA_FIELDS = frozenset({
+    "schema", "task_id", "authority_commit", "image", "image_id",
+    "image_rootfs_sha256", "platform", "source_sha256", "runner_sha256",
+    "readiness_receipt_sha256", "inventory_runner_sha256", "yosys_sha256",
+    "yosys_version", "yosys_revision", "raw_manifest_sha256", "tops",
+    "fresh_yosys_processes", "total_storage_bits", "commands",
+    "evidence_class", "experiment_id", "manifest_frozen",
+    "preflight_evidence_collected", "claim_bearing_candidate_data_collected",
+    "candidate_synthesis", "pnr", "nonclaims",
+})
+HIERARCHY_COMPARISON_FIELDS = frozenset({
+    "schema", "status", "source_sha256", "memory_macro_instances",
+    "memory_macro_types", "rocket_module_canonical_sha256",
+    "common_clock_roots", "reachable_blackboxes", "nonclaims",
 })
 MACRO_FIELDS = frozenset({"name", "depth", "width", "count", "ports", "mask_granularity"})
 SEMANTICS = {
@@ -237,13 +272,24 @@ def validate_option_b_contract(document: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("merged readiness receipt identity drift")
     preflight = _exact(identities["preflight_receipt"], PREFLIGHT_RECEIPT_FIELDS, "preflight_receipt")
     simulation = _exact(identities["simulation_receipt"], SIMULATION_RECEIPT_FIELDS, "simulation_receipt")
-    for label, receipt in (("preflight", preflight), ("simulation", simulation)):
+    hierarchy = _exact(
+        identities["hierarchy_receipt"],
+        HIERARCHY_RECEIPT_FIELDS,
+        "hierarchy_receipt",
+    )
+    for label, receipt in (
+        ("preflight", preflight),
+        ("simulation", simulation),
+        ("hierarchy", hierarchy),
+    ):
         for field, value in receipt.items():
             _sha256(value, f"{label} receipt {field}")
     if preflight["source_sha256"] != identities["source_sha256"] or preflight["runner_sha256"] != identities["preflight_runner_sha256"]:
         raise ValueError("preflight receipt/source/runner binding drift")
     if simulation["source_sha256"] != identities["source_sha256"] or simulation["runner_sha256"] != identities["simulation_runner_sha256"] or simulation["testbench_sha256"] != identities["testbench_sha256"]:
         raise ValueError("simulation receipt/source/runner/testbench binding drift")
+    if hierarchy["source_sha256"] != identities["source_sha256"]:
+        raise ValueError("hierarchy receipt/source binding drift")
 
     tool = _exact(identities["toolchain"], TOOLCHAIN_FIELDS, "toolchain")
     runtime_oci_index = _image_id(
@@ -310,6 +356,74 @@ def _sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
+def _canonical_json_bytes(value: Any) -> bytes:
+    return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
+
+
+def verify_evidence_manifest(manifest_bytes: bytes, directory: Path) -> dict[str, Any]:
+    """Rehash one flat evidence directory from its canonical size/hash manifest."""
+    if not manifest_bytes or not manifest_bytes.endswith(b"\n"):
+        raise ValueError("evidence manifest must be nonempty and newline terminated")
+    try:
+        lines = manifest_bytes.decode("ascii").splitlines()
+    except UnicodeDecodeError as error:
+        raise ValueError("evidence manifest must be ASCII") from error
+    entries: dict[str, tuple[str, int]] = {}
+    for line in lines:
+        match = re.fullmatch(
+            r"([0-9a-f]{64})  (0|[1-9][0-9]*)  ([A-Za-z0-9][A-Za-z0-9._-]*)",
+            line,
+        )
+        if match is None:
+            raise ValueError("malformed evidence manifest entry")
+        digest, size_text, name = match.groups()
+        if name == "sha256s.txt" or name in entries:
+            raise ValueError("duplicate or self-referential evidence manifest entry")
+        entries[name] = (digest, int(size_text))
+    if list(entries) != sorted(entries):
+        raise ValueError("evidence manifest paths are not canonically sorted")
+    if not directory.is_dir() or directory.is_symlink():
+        raise ValueError("evidence manifest directory is missing or symlinked")
+    actual_names = {
+        path.name for path in directory.iterdir() if path.name != "sha256s.txt"
+    }
+    if actual_names != set(entries):
+        raise ValueError("evidence manifest file set mismatch")
+    for name, (digest, size) in entries.items():
+        path = directory / name
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"evidence payload is missing or symlinked: {name}")
+        payload = path.read_bytes()
+        if len(payload) != size or _sha256_bytes(payload) != digest:
+            raise ValueError(f"evidence payload size or hash mismatch: {name}")
+    return {
+        "manifest_sha256": _sha256_bytes(manifest_bytes),
+        "entries": len(entries),
+    }
+
+
+def validate_mapped_netlist_postconditions(document: dict[str, Any]) -> dict[str, Any]:
+    """Check future post-mapping netlist conditions without running mapping or P&R."""
+    design_modules = document.get("modules")
+    if not isinstance(design_modules, dict) or not design_modules:
+        raise ValueError("mapped netlist lacks modules")
+    for module_name, module in design_modules.items():
+        if not isinstance(module, dict):
+            raise ValueError(f"mapped netlist module is malformed: {module_name}")
+        if module.get("attributes", {}).get("blackbox") not in (None, 0, "0", False):
+            raise ValueError(f"mapped netlist contains a blackbox: {module_name}")
+        cells = module.get("cells", {})
+        if not isinstance(cells, dict):
+            raise ValueError(f"mapped netlist cells are malformed: {module_name}")
+        for cell in cells.values():
+            cell_type = cell.get("type") if isinstance(cell, dict) else None
+            if not isinstance(cell_type, str):
+                raise ValueError(f"mapped netlist cell type is malformed: {module_name}")
+            if cell_type.startswith("$mem"):
+                raise ValueError(f"mapped netlist retains an abstract memory cell: {cell_type}")
+    return {"status": "mapped-netlist-postconditions-satisfied", "pnr": False}
+
+
 def parse_runtime_receipt(receipt_bytes: bytes) -> dict[str, str]:
     """Parse the exact ADR-0062 receipt syntax and reject any field drift."""
     try:
@@ -364,12 +478,41 @@ def validate_evidence_bundle(
     raw_manifest_bytes: bytes,
     *,
     repo_root: Path,
+    evidence_root: Path,
 ) -> dict[str, Any]:
-    """Bind the v3 contract, functional metadata, files, HEAD, and receipt."""
+    """Bind the v4 contract to all three closure legs and their payload bytes."""
     validate_option_b_contract(contract)
+    if not evidence_root.is_dir() or evidence_root.is_symlink():
+        raise ValueError("closure evidence root is missing or symlinked")
+    leg_paths = {
+        "hierarchy": evidence_root / "hierarchy",
+        "preflight": evidence_root / "source-preflight",
+        "simulation": evidence_root / "simulation",
+    }
+    seals: dict[str, dict[str, Any]] = {}
+    for label, leg in leg_paths.items():
+        raw_bytes = (leg / "raw/sha256s.txt").read_bytes()
+        derived_bytes = (leg / "derived/sha256s.txt").read_bytes()
+        seals[label] = {
+            "raw": verify_evidence_manifest(raw_bytes, leg / "raw"),
+            "derived": verify_evidence_manifest(derived_bytes, leg / "derived"),
+        }
+    canonical_simulation_manifest = (
+        leg_paths["simulation"] / "raw/sha256s.txt"
+    ).read_bytes()
+    if raw_manifest_bytes != canonical_simulation_manifest:
+        raise ValueError("supplied and closure simulation raw manifests differ")
     metadata = _load_json_bytes(metadata_bytes, "functional metadata")
     metadata = _exact(metadata, METADATA_FIELDS, "functional metadata")
     receipt = parse_runtime_receipt(receipt_bytes)
+    if metadata_bytes != (
+        leg_paths["simulation"] / "derived/simulation-metadata.json"
+    ).read_bytes():
+        raise ValueError("supplied and closure functional metadata differ")
+    if receipt_bytes != (
+        leg_paths["simulation"] / "raw/runtime-image-receipt.txt"
+    ).read_bytes():
+        raise ValueError("supplied and closure runtime receipts differ")
     if metadata["schema"] != METADATA_SCHEMA or metadata["task_id"] != "T-0044":
         raise ValueError("functional metadata schema or task drift")
     if not isinstance(metadata["authority_commit"], str) or _HEX40.fullmatch(metadata["authority_commit"]) is None:
@@ -431,6 +574,119 @@ def validate_evidence_bundle(
 
     identities = contract["identities"]
     tool = identities["toolchain"]
+    hierarchy_metadata_bytes = (
+        leg_paths["hierarchy"] / "derived/preflight-metadata.json"
+    ).read_bytes()
+    hierarchy_comparison_bytes = (
+        leg_paths["hierarchy"] / "derived/comparison-report.json"
+    ).read_bytes()
+    preflight_metadata_bytes = (
+        leg_paths["preflight"] / "derived/preflight-metadata.json"
+    ).read_bytes()
+    hierarchy_metadata = _exact(
+        _load_json_bytes(hierarchy_metadata_bytes, "hierarchy metadata"),
+        HIERARCHY_METADATA_FIELDS,
+        "hierarchy metadata",
+    )
+    hierarchy_comparison = _exact(
+        _load_json_bytes(hierarchy_comparison_bytes, "hierarchy comparison"),
+        HIERARCHY_COMPARISON_FIELDS,
+        "hierarchy comparison",
+    )
+    preflight_metadata = _exact(
+        _load_json_bytes(preflight_metadata_bytes, "source preflight metadata"),
+        PREFLIGHT_METADATA_FIELDS,
+        "source preflight metadata",
+    )
+    for label, value, encoded in (
+        ("hierarchy metadata", hierarchy_metadata, hierarchy_metadata_bytes),
+        ("hierarchy comparison", hierarchy_comparison, hierarchy_comparison_bytes),
+        ("source preflight metadata", preflight_metadata, preflight_metadata_bytes),
+    ):
+        if _canonical_json_bytes(value) != encoded:
+            raise ValueError(f"{label} canonical encoding drift")
+    hierarchy_receipt = identities["hierarchy_receipt"]
+    hierarchy_bindings = {
+        "metadata_sha256": _sha256_bytes(hierarchy_metadata_bytes),
+        "comparison_sha256": _sha256_bytes(hierarchy_comparison_bytes),
+        "raw_manifest_sha256": seals["hierarchy"]["raw"]["manifest_sha256"],
+        "derived_manifest_sha256": seals["hierarchy"]["derived"]["manifest_sha256"],
+        "source_sha256": hierarchy_metadata["source_sha256"],
+        "runner_sha256": hierarchy_metadata["runner_sha256"],
+        "analyzer_sha256": hierarchy_metadata["analyzer_sha256"],
+    }
+    if hierarchy_receipt != hierarchy_bindings:
+        raise ValueError("contract does not bind the exact hierarchy evidence")
+    if (
+        hierarchy_metadata["schema"]
+        != "raveil.exp-0011-common-memory-hierarchy-preflight/v1"
+        or hierarchy_metadata["task_id"] != "T-0044"
+        or hierarchy_metadata["authority_commit"] != current_head
+        or hierarchy_metadata["source_sha256"] != identities["source_sha256"]
+        or hierarchy_metadata["image_id"] != PHYSICAL_IMAGE_ID
+        or hierarchy_metadata["image_rootfs_sha256"] != PHYSICAL_ROOTFS_SHA256
+        or hierarchy_metadata["platform"] != "linux/amd64"
+        or hierarchy_metadata["runner_sha256"] != hierarchy_receipt["runner_sha256"]
+        or hierarchy_metadata["analyzer_sha256"] != hierarchy_receipt["analyzer_sha256"]
+        or hierarchy_metadata["raw_manifest_sha256"]
+        != seals["hierarchy"]["raw"]["manifest_sha256"]
+        or hierarchy_metadata["memory_macro_types"] != 7
+        or hierarchy_metadata["memory_macro_instances"] != 11
+        or hierarchy_metadata["reachable_blackboxes"] != 0
+        or hierarchy_metadata["evidence_class"] != "rtl-structural-preflight"
+        or hierarchy_metadata["candidate_synthesis"] is not False
+        or hierarchy_metadata["memory_mapping"] is not False
+        or hierarchy_metadata["pnr"] is not False
+    ):
+        raise ValueError("hierarchy metadata identity or claim boundary drift")
+    for key in ("integrated_export_metadata_sha256", "baseline_export_metadata_sha256"):
+        _sha256(hierarchy_metadata[key], f"hierarchy {key}")
+    if (
+        hierarchy_comparison["schema"]
+        != "raveil.exp-0011-common-memory-concrete/v1"
+        or hierarchy_comparison["status"] != "structural-only"
+        or hierarchy_comparison["source_sha256"] != identities["source_sha256"]
+        or hierarchy_comparison["memory_macro_types"] != 7
+        or hierarchy_comparison["memory_macro_instances"] != 11
+        or hierarchy_comparison["reachable_blackboxes"] != 0
+        or hierarchy_comparison["common_clock_roots"]
+        != ["clock_uncore", "jtag_TCK", "serial_tl_0_clock_in"]
+    ):
+        raise ValueError("hierarchy comparison identity or fairness boundary drift")
+    _sha256(
+        hierarchy_comparison["rocket_module_canonical_sha256"],
+        "hierarchy Rocket canonical identity",
+    )
+    preflight_receipt = identities["preflight_receipt"]
+    if preflight_receipt != {
+        "sha256": _sha256_bytes(preflight_metadata_bytes),
+        "source_sha256": preflight_metadata["source_sha256"],
+        "runner_sha256": preflight_metadata["runner_sha256"],
+        "raw_manifest_sha256": seals["preflight"]["raw"]["manifest_sha256"],
+        "derived_manifest_sha256": seals["preflight"]["derived"]["manifest_sha256"],
+    }:
+        raise ValueError("contract does not bind the exact source preflight evidence")
+    if (
+        preflight_metadata["schema"]
+        != "raveil.exp-0011-common-stdcell-memory-preflight/v2"
+        or preflight_metadata["task_id"] != "T-0044"
+        or preflight_metadata["authority_commit"] != current_head
+        or preflight_metadata["source_sha256"] != identities["source_sha256"]
+        or preflight_metadata["image_id"] != PHYSICAL_IMAGE_ID
+        or preflight_metadata["image_rootfs_sha256"] != PHYSICAL_ROOTFS_SHA256
+        or preflight_metadata["platform"] != "linux/amd64"
+        or preflight_metadata["runner_sha256"] != identities["preflight_runner_sha256"]
+        or preflight_metadata["readiness_receipt_sha256"] != READINESS_RECEIPT_SHA256
+        or preflight_metadata["yosys_sha256"] != YOSYS_SHA256
+        or preflight_metadata["tops"] != FUNCTIONAL_MODULES
+        or preflight_metadata["raw_manifest_sha256"]
+        != seals["preflight"]["raw"]["manifest_sha256"]
+        or preflight_metadata["total_storage_bits"] != TOTAL_STORAGE_BITS
+        or preflight_metadata["claim_bearing_candidate_data_collected"] is not False
+        or preflight_metadata["candidate_synthesis"] is not False
+        or preflight_metadata["pnr"] is not False
+    ):
+        raise ValueError("source preflight identity or claim boundary drift")
     contract_bindings = {
         "source_sha256": identities["source_sha256"],
         "testbench_sha256": identities["testbench_sha256"],
@@ -458,6 +714,15 @@ def validate_evidence_bundle(
         raise ValueError("contract does not bind the exact functional metadata bytes")
     if metadata["raw_manifest_sha256"] != _sha256_bytes(raw_manifest_bytes):
         raise ValueError("functional metadata does not bind the raw manifest bytes")
+    if identities["simulation_receipt"] != {
+        "sha256": _sha256_bytes(metadata_bytes),
+        "source_sha256": metadata["source_sha256"],
+        "runner_sha256": metadata["runner_sha256"],
+        "testbench_sha256": metadata["testbench_sha256"],
+        "raw_manifest_sha256": seals["simulation"]["raw"]["manifest_sha256"],
+        "derived_manifest_sha256": seals["simulation"]["derived"]["manifest_sha256"],
+    }:
+        raise ValueError("contract does not bind the exact functional evidence tree")
 
     file_bindings = {
         "source_sha256": "hardware/chisel/exp0011_common_stdcell_memories.sv",
@@ -469,6 +734,18 @@ def validate_evidence_bundle(
         path = repo_root / relative
         if not path.is_file() or _sha256_bytes(path.read_bytes()) != metadata[key]:
             raise ValueError(f"current file identity mismatch: {relative}")
+    additional_bindings = (
+        (identities["preflight_runner_sha256"],
+         "hardware/chisel/run-exp0011-stdcell-memory-preflight.sh"),
+        (identities["hierarchy_receipt"]["runner_sha256"],
+         "hardware/chisel/run-exp0011-common-memory-hierarchy-preflight.sh"),
+        (identities["hierarchy_receipt"]["analyzer_sha256"],
+         "raveil/t0044_integrated_rtl.py"),
+    )
+    for expected, relative in additional_bindings:
+        path = repo_root / relative
+        if not path.is_file() or _sha256_bytes(path.read_bytes()) != expected:
+            raise ValueError(f"current file identity mismatch: {relative}")
     if (
         metadata["toolchain_volume"] != FUNCTIONAL_TOOLCHAIN_VOLUME
         or metadata["lock_sha256"] != FUNCTIONAL_LOCK_SHA256
@@ -478,8 +755,6 @@ def validate_evidence_bundle(
         or metadata["checks"] != FUNCTIONAL_CHECKS
         or metadata["nonclaims"] != FUNCTIONAL_NONCLAIMS
         or json.dumps(metadata, indent=2, sort_keys=True).encode() + b"\n" != metadata_bytes
-        or not raw_manifest_bytes.endswith(b"\n")
-        or not raw_manifest_bytes
     ):
         raise ValueError("functional evidence content or canonical encoding drift")
     if (
@@ -493,12 +768,14 @@ def validate_evidence_bundle(
     ):
         raise ValueError("functional evidence claim boundary drift")
     return {
-        "schema": "raveil.t0044-evidence-bundle/v1",
+        "schema": "raveil.t0044-evidence-bundle/v2",
         "status": "valid-unfrozen-pre-data",
         "authority_commit": current_head,
         "runtime_oci_index": receipt["RUNTIME_IMAGE_ID"],
         "receipt_sha256": receipt_sha256,
         "metadata_sha256": _sha256_bytes(metadata_bytes),
+        "hierarchy_comparison_sha256": _sha256_bytes(hierarchy_comparison_bytes),
+        "evidence_seals": seals,
     }
 
 
@@ -508,18 +785,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--bundle-metadata", type=Path)
     parser.add_argument("--bundle-receipt", type=Path)
     parser.add_argument("--bundle-raw-manifest", type=Path)
+    parser.add_argument("--bundle-root", type=Path)
     parser.add_argument("--repo-root", type=Path)
     args = parser.parse_args(argv)
     document = _load_json_bytes(args.contract.read_bytes(), "contract")
-    if args.bundle_metadata or args.bundle_receipt or args.bundle_raw_manifest or args.repo_root:
-        if not args.bundle_metadata or not args.bundle_receipt or not args.bundle_raw_manifest or not args.repo_root:
-            raise ValueError("bundle validation requires metadata, receipt, raw manifest, and repo root")
+    if args.bundle_metadata or args.bundle_receipt or args.bundle_raw_manifest or args.bundle_root or args.repo_root:
+        if not args.bundle_metadata or not args.bundle_receipt or not args.bundle_raw_manifest or not args.bundle_root or not args.repo_root:
+            raise ValueError("bundle validation requires metadata, receipt, raw manifest, evidence root, and repo root")
         result = validate_evidence_bundle(
             document,
             args.bundle_metadata.read_bytes(),
             args.bundle_receipt.read_bytes(),
             args.bundle_raw_manifest.read_bytes(),
             repo_root=args.repo_root,
+            evidence_root=args.bundle_root,
         )
     else:
         result = validate_option_b_contract(document)

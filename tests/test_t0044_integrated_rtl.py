@@ -791,7 +791,49 @@ end
             path.write_text(text)
             document = load_rtlil_hierarchy(path)
         self.assertEqual(document["modules"]["ChipTop"]["cells"]["\\rocket"]["type"], "Rocket")
+        self.assertEqual(
+            document["modules"]["ChipTop"]["cells"]["\\rocket"]["connections"],
+            {"clock": "\\clock_uncore"},
+        )
         self.assertEqual(len(document["modules"]["ChipTop"]["ports"]["out"]["bits"]), 2)
+
+    def test_common_concrete_rtlil_requires_exact_named_macro_connections(self):
+        document = self.concrete_document()
+        document["modules"]["ChipTop"]["rtlil_canonical_sha256"] = HEX
+        macro_cells = []
+        for module in document["modules"].values():
+            for cell in module.get("cells", {}).values():
+                cell_type = cell.get("type")
+                if cell_type in MEMORY_MACRO_CONTRACT:
+                    cell["connections"] = {
+                        pin: f"\\{pin}" for pin in MEMORY_MACRO_PORTS[cell_type]
+                    }
+                    macro_cells.append(cell)
+        self.assertEqual(len(macro_cells), 11)
+        report = analyze_common_concrete_hierarchy(
+            document,
+            "integrated-static-graph-rocket",
+            source_sha256=HEX,
+        )
+        self.assertEqual(len(report["memory_macro_instance_connections"]), 11)
+
+        pin = next(iter(macro_cells[0]["connections"]))
+        macro_cells[0]["connections"][pin] = "\\wrong"
+        with self.assertRaisesRegex(ValueError, "exact named-port pass-through"):
+            analyze_common_concrete_hierarchy(
+                document,
+                "integrated-static-graph-rocket",
+                source_sha256=HEX,
+            )
+
+        macro_cells[0]["connections"][pin] = f"\\{pin}"
+        macro_cells[0]["connections"].pop(pin)
+        with self.assertRaisesRegex(ValueError, "port connection drift"):
+            analyze_common_concrete_hierarchy(
+                document,
+                "integrated-static-graph-rocket",
+                source_sha256=HEX,
+            )
 
     def test_rtlil_canonical_hash_elides_only_yosys_auto_ids_and_unit_order(self):
         def rocket_rtlil(

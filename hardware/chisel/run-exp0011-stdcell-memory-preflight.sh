@@ -146,7 +146,7 @@ PY
 
 find "$raw_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$raw_dir/sha256s.txt"
 raw_manifest_sha256=$(sha256_file "$raw_dir/sha256s.txt")
 source_sha256=$(sha256_file "$repo_root/$source_rel")
@@ -182,7 +182,7 @@ PY
 
 find "$derived_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$derived_dir/sha256s.txt"
 metadata_sha256=$(sha256_file "$derived_dir/preflight-metadata.json")
 printf 'EXP0011-COMMON-STDCELL-MEMORY-PREFLIGHT-V2 status=OK tops=7 memories=7 total_storage_bits=4631296 blackboxes=0 candidate_data=false metadata_sha256=%s evidence=physical-input-readiness-no-candidate-data\n' "$metadata_sha256"

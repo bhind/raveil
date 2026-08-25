@@ -38,7 +38,13 @@ simulation_metadata=$output_dir/simulation/derived/simulation-metadata.json
 runtime_receipt=$output_dir/simulation/raw/runtime-image-receipt.txt
 raw_manifest=$output_dir/simulation/raw/sha256s.txt
 hierarchy_comparison=$output_dir/hierarchy/derived/comparison-report.json
-for evidence in "$preflight_metadata" "$simulation_metadata" "$runtime_receipt" "$raw_manifest" "$hierarchy_comparison"; do
+hierarchy_metadata=$output_dir/hierarchy/derived/preflight-metadata.json
+hierarchy_raw_manifest=$output_dir/hierarchy/raw/sha256s.txt
+hierarchy_derived_manifest=$output_dir/hierarchy/derived/sha256s.txt
+preflight_raw_manifest=$output_dir/source-preflight/raw/sha256s.txt
+preflight_derived_manifest=$output_dir/source-preflight/derived/sha256s.txt
+simulation_derived_manifest=$output_dir/simulation/derived/sha256s.txt
+for evidence in "$preflight_metadata" "$simulation_metadata" "$runtime_receipt" "$raw_manifest" "$hierarchy_comparison" "$hierarchy_metadata" "$hierarchy_raw_manifest" "$hierarchy_derived_manifest" "$preflight_raw_manifest" "$preflight_derived_manifest" "$simulation_derived_manifest"; do
     [ -s "$evidence" ] || fail "missing closure evidence: $evidence"
 done
 
@@ -53,11 +59,12 @@ simulation_metadata_sha256=$(sha256_file "$simulation_metadata")
 PYTHONPATH="$repo_root" python3 - \
     "$preflight_metadata" "$simulation_metadata" \
     "$output_dir/derived/option-b-contract.json" \
-    "$repo_root" \
+    "$repo_root" "$output_dir" \
     "$source_sha256" "$preflight_runner_sha256" "$simulation_runner_sha256" \
     "$testbench_sha256" "$verifier_sha256" \
     "$preflight_metadata_sha256" "$simulation_metadata_sha256" <<'PY'
 import json
+import hashlib
 import pathlib
 import subprocess
 import sys
@@ -89,6 +96,7 @@ preflight = json.loads(pathlib.Path(sys.argv[1]).read_text())
 simulation = json.loads(pathlib.Path(sys.argv[2]).read_text())
 output = pathlib.Path(sys.argv[3])
 repo_root = pathlib.Path(sys.argv[4])
+evidence_root = pathlib.Path(sys.argv[5])
 (
     source_sha256,
     preflight_runner_sha256,
@@ -97,7 +105,13 @@ repo_root = pathlib.Path(sys.argv[4])
     verifier_sha256,
     preflight_metadata_sha256,
     simulation_metadata_sha256,
-) = sys.argv[5:]
+) = sys.argv[6:]
+
+def digest(relative):
+    return hashlib.sha256((evidence_root / relative).read_bytes()).hexdigest()
+
+def repo_digest(relative):
+    return hashlib.sha256((repo_root / relative).read_bytes()).hexdigest()
 authority = subprocess.run(
     ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
     check=True,
@@ -136,12 +150,25 @@ record = {
             "sha256": preflight_metadata_sha256,
             "source_sha256": source_sha256,
             "runner_sha256": preflight_runner_sha256,
+            "raw_manifest_sha256": digest("source-preflight/raw/sha256s.txt"),
+            "derived_manifest_sha256": digest("source-preflight/derived/sha256s.txt"),
         },
         "simulation_receipt": {
             "sha256": simulation_metadata_sha256,
             "source_sha256": source_sha256,
             "runner_sha256": simulation_runner_sha256,
             "testbench_sha256": testbench_sha256,
+            "raw_manifest_sha256": digest("simulation/raw/sha256s.txt"),
+            "derived_manifest_sha256": digest("simulation/derived/sha256s.txt"),
+        },
+        "hierarchy_receipt": {
+            "metadata_sha256": digest("hierarchy/derived/preflight-metadata.json"),
+            "comparison_sha256": digest("hierarchy/derived/comparison-report.json"),
+            "raw_manifest_sha256": digest("hierarchy/raw/sha256s.txt"),
+            "derived_manifest_sha256": digest("hierarchy/derived/sha256s.txt"),
+            "source_sha256": source_sha256,
+            "runner_sha256": repo_digest("hardware/chisel/run-exp0011-common-memory-hierarchy-preflight.sh"),
+            "analyzer_sha256": repo_digest("raveil/t0044_integrated_rtl.py"),
         },
         "toolchain": {
             "physical_image": "raveil-physical-proxy-toolchain:v1",
@@ -183,11 +210,27 @@ PYTHONPATH="$repo_root" python3 -m raveil.t0044_stdcell_memory \
     --bundle-metadata "$simulation_metadata" \
     --bundle-receipt "$runtime_receipt" \
     --bundle-raw-manifest "$raw_manifest" \
+    --bundle-root "$output_dir" \
     --repo-root "$repo_root" \
     > "$output_dir/derived/bundle-validation.json"
 
 contract_sha256=$(sha256_file "$output_dir/derived/option-b-contract.json")
 bundle_sha256=$(sha256_file "$output_dir/derived/bundle-validation.json")
 hierarchy_sha256=$(sha256_file "$hierarchy_comparison")
-printf 'EXP0011-COMMON-MEMORY-CLOSURE-V1 status=OK contract_sha256=%s bundle_sha256=%s hierarchy_sha256=%s candidate_data=false evidence=rtl-structural-preflight,rtl-simulation-functional performance=not-measured\n' \
-    "$contract_sha256" "$bundle_sha256" "$hierarchy_sha256"
+find "$output_dir/derived" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
+    while IFS= read -r file; do
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
+    done > "$output_dir/derived/sha256s.txt"
+PYTHONPATH="$repo_root" python3 - "$output_dir/derived" <<'PY'
+import pathlib
+import sys
+from raveil.t0044_stdcell_memory import verify_evidence_manifest
+
+root = pathlib.Path(sys.argv[1])
+verify_evidence_manifest((root / "sha256s.txt").read_bytes(), root)
+PY
+closure_manifest_sha256=$(sha256_file "$output_dir/derived/sha256s.txt")
+find "$output_dir" -type f -exec chmod 0444 {} +
+find "$output_dir" -depth -type d -exec chmod 0555 {} +
+printf 'EXP0011-COMMON-MEMORY-CLOSURE-V2 status=OK contract_sha256=%s bundle_sha256=%s hierarchy_sha256=%s aggregate_manifest_sha256=%s candidate_data=false evidence=rtl-structural-preflight,rtl-simulation-functional performance=not-measured\n' \
+    "$contract_sha256" "$bundle_sha256" "$hierarchy_sha256" "$closure_manifest_sha256"

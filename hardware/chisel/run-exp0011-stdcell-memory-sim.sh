@@ -96,7 +96,7 @@ grep -qx "EXP0011_COMMON_STDCELL_MEMORY_FUNCTIONAL_OK checks=28 modules=7" /out/
 
 find "$raw_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$raw_dir/sha256s.txt"
 raw_manifest_sha256=$(sha256_file "$raw_dir/sha256s.txt")
 source_sha256=$(sha256_file "$repo_root/$source_rel")
@@ -142,7 +142,7 @@ PY
 
 find "$derived_dir" -type f ! -name sha256s.txt -print | LC_ALL=C sort |
     while IFS= read -r file; do
-        printf '%s  %s\n' "$(sha256_file "$file")" "$(basename "$file")"
+        printf '%s  %s  %s\n' "$(sha256_file "$file")" "$(wc -c < "$file" | tr -d ' ')" "$(basename "$file")"
     done > "$derived_dir/sha256s.txt"
 metadata_sha256=$(sha256_file "$derived_dir/simulation-metadata.json")
 printf 'EXP0011-COMMON-STDCELL-MEMORY-FUNCTIONAL-V3 status=OK modules=7 checks=28 candidate_data=false receipt_sha256=%s metadata_sha256=%s evidence=rtl-simulation-functional\n' \
