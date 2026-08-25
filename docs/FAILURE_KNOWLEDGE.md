@@ -1049,6 +1049,35 @@ labelled unknown.
   removal, malformed nonzero metadata, and general lifecycle handling remain
   open.
 
+## Ordinary verification must not rebuild a shared simulator tag
+
+- Symptom: an independent BOOM replay replaced the local
+  raveil-boom-functional-sim:v1 tag at 2026-08-24 05:46:35 JST, although the
+  command was treated as a replay of a pinned simulator image.
+- Cause: run-owned-cpu-memory-smoke.sh unconditionally built
+  Dockerfile.boom-sim with that shared tag before every run. Three integrated
+  Graph runners could also rebuild it, while eight other execution/export
+  paths consumed the same mutable name. The review also conflated a stable
+  linux/amd64 payload-manifest digest with a provenance-bearing runtime
+  OCI-index digest.
+- Prevention: keep image construction in one explicit tagless builder. Store
+  an append-only receipt per runtime index; bind the index descriptor,
+  BuildKit payload attachment, Config, RootFS, platform, and local runtime
+  image; and make ordinary runners execute only the verifier's returned
+  digest. A mutable tag is never evidence authority.
+- Detection: statically enumerate the complete consumer closure and reject the
+  old tag plus build/tag/pull operations. Around functional replay, compare
+  the shared tag ID and LastTagTime exactly. Rebuild independently and require
+  changing provenance indexes to retain identical admitted payload, Config,
+  and RootFS identities.
+- Evidence: T-0124 primary and independent Docker 29.6.2 / Buildx 0.35.0
+  replays, ADR-0062, and docs/log/2026-08-25.md. The BOOM wrapper and G1E
+  selector passed while shared tag ID
+  ccf3e059...e01791 and its LastTagTime remained unchanged.
+- State: corrected for the complete repository BOOM functional-simulator
+  consumer closure. Receipts remain local and BuildKit-history-dependent;
+  cross-host OCI artifact portability is unresolved and fails closed.
+
 ## Promotion checklist
 
 At milestone review, promote a lesson here when all are true:

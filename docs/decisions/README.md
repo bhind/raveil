@@ -63,3 +63,4 @@ rewrite it.
 | [ADR-0059](ADR-0059-ai-role-lanes-govern-execution-capacity.md) | Accepted; mutation concurrency partially superseded by ADR-0061 | AI role lanes and observed cycle time govern execution capacity; SP remains relative risk |
 | [ADR-0060](ADR-0060-weekly-codex-usage-has-a-hard-cost-stop.md) | Accepted | New costly work stops when verified weekly Codex usage remaining is below five percent |
 | [ADR-0061](ADR-0061-independent-delivery-lanes-require-live-coordination.md) | Accepted | Up to two independently owned mutation lanes require live Project synchronization and serial PM integration |
+| [ADR-0062](ADR-0062-simulator-execution-requires-a-verified-tagless-receipt.md) | Accepted | BOOM simulator execution requires a verified tagless local receipt; mutable tags are never evidence authority |

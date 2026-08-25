@@ -3,7 +3,7 @@ set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 chipyard="$repo_root/external/chipyard"
-image=raveil-boom-functional-sim:v1
+image=$("$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh")
 platform=linux/amd64
 toolchain_volume=raveil-chipyard-conda-lock-v1
 build_volume=raveil-chipyard-rocket-sim-build-v1
@@ -16,6 +16,7 @@ chipyard_revision=ac58f38d77c99e9d1cafa64dfd6d4b00bdcd43e1
 
 docker run --rm \
     --platform "$platform" \
+    --network none \
     --security-opt no-new-privileges=true \
     --mount "type=bind,source=$repo_root,target=/repo,readonly" \
     --mount "type=bind,source=$chipyard,target=/source,readonly" \

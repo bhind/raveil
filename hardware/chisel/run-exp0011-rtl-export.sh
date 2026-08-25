@@ -31,8 +31,7 @@ dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
 pin_file="$repo_root/hardware/chisel/boom-pin.env"
 runner="$repo_root/hardware/chisel/run-exp0011-rtl-export.sh"
 platform=linux/amd64
-image=raveil-boom-functional-sim:v1
-expected_image_id=sha256:9009a923ce829097efacd97fe62cbef79dfdcafc70dc435d4bf5e1a66fdaf822
+image=$("$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh")
 expected_rootfs_sha256=154dc63d7967ea4dce962f002ee10be12f598b5358f6b0ffc524a80d72bb8b9c
 toolchain_volume=raveil-chipyard-conda-lock-v1
 lock_rel=conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml
@@ -92,7 +91,7 @@ output_dir=$(CDPATH= cd -- "$output_dir" && pwd)
 image_id=$(docker image inspect --format '{{.Id}}' "$image")
 rootfs_sha256=$(docker image inspect --format '{{json .RootFS.Layers}}' "$image" |
     shasum -a 256 | awk '{print $1}')
-[ "$image_id" = "$expected_image_id" ] || fail "RTL export image ID drift: $image_id"
+[ "$image_id" = "$image" ] || fail "RTL export runtime image ID drift: $image_id"
 [ "$rootfs_sha256" = "$expected_rootfs_sha256" ] || fail "RTL export image RootFS drift: $rootfs_sha256"
 
 docker run --rm --platform "$platform" --network none \

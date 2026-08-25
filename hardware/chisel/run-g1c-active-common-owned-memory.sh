@@ -11,7 +11,7 @@ pin_file="$repo_root/hardware/chisel/boom-pin.env"
 overlay="$repo_root/hardware/chisel/chipyard-overlay"
 patches="$repo_root/hardware/chisel/chipyard-patches"
 platform=linux/amd64
-image=raveil-boom-functional-sim:v1
+image=$("$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh")
 toolchain_volume=raveil-chipyard-conda-lock-v1
 lock_rel=conda-reqs/conda-lock-reqs/conda-requirements-riscv-tools-linux-64-lean.conda-lock.yml
 lock_sha256=5248d0e404ab5ac0884ffd03934e31b757c6999c9987009e5cfd5d80fc21da3d
@@ -56,8 +56,6 @@ build_volume="raveil-chipyard-g1c-active-$input_prefix"
 printf 'G1C-ACTIVE-COMMON-OWNED-MEMORY-HOST-V1 input_sha256=%s chipyard_revision=%s rocket_revision=%s build_volume=%s platform=%s evidence=rtl-simulation-functional performance=not-measured\n' \
   "$input_sha256" "$chipyard_revision" "$rocket_revision" \
   "$build_volume" "$platform"
-
-docker build --provenance=false --platform "$platform" --file "$dockerfile" --tag "$image" "$repo_root"
 
 docker run --rm --platform "$platform" --network none \
   --security-opt no-new-privileges=true \

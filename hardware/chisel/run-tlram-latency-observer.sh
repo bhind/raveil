@@ -2,7 +2,7 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-image=raveil-boom-functional-sim:v1
+image=$("$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh")
 platform=linux/amd64
 toolchain_volume=raveil-chipyard-conda-lock-v1
 boom_build_volume=raveil-chipyard-boom-sim-build-v1
