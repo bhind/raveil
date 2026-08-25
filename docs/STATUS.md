@@ -890,6 +890,37 @@ source, bind a proposal contract to a sealed run receipt, preserve the physical
 denominator after mapping, or authorize EXP-0011. S13 remains Blocked; no
 candidate synthesis, P&R, area, timing, energy, FPGA, ASIC, silicon,
 performance, completion, or go/no-go claim follows.
+T-0044/S16 closes the next repository-only pre-data hierarchy and evidence
+boundary without resuming S13. Fresh integrated and matched-Rocket exports load
+one byte-identical common memory source before either candidate file list.
+Yosys `hierarchy -check`, process lowering, memory collection, structural
+checking, and flat clock analysis resolve all seven macro types and all eleven
+instances with exact named-port pass-through connections, including clocks and
+write masks. Both candidates retain the same canonical Rocket module SHA-256
+`ee1c4008da0e1cbb4874365fc4ed0d6051beb979c871432bfd7a56043619f8e3`,
+the same three approved clock roots, zero unconstrained clock endpoints, and
+zero reachable blackboxes. The stable comparison report SHA-256 is
+`1d3957d0f6b009d2ffedfac932c837f1051cc0a4f63b798392686e5891a6a7c3`.
+The v4 unfrozen Option-B contract now binds the hierarchy comparison and all
+raw/derived manifests for hierarchy, source preflight, and functional
+simulation. The v2 bundle validator rehashes every listed payload size and
+SHA-256, rejects unsafe or incomplete file sets, creates a verified aggregate
+manifest, and leaves the completed evidence tree read-only. The PM one-command
+run and an independent one-command replay both exit zero, pass 162 scoped
+T-0044 tests, reproduce seven source-preflight memories and 28 Verilator
+checks, and independently validate their complete immutable bundles. Their
+source-preflight and functional-simulation manifests and structural comparison
+are byte-identical. Their hierarchy raw-log manifests and dependent run-local
+contract/bundle hashes differ only because Yosys records CPU/system time, peak
+memory, and time-spent footer telemetry; both raw logs remain unmodified and
+sealed. Those footer values are operational provenance, not candidate
+performance or resource data. This is `rtl-structural-preflight`,
+`rtl-simulation-functional`, and
+`physical-input-readiness-no-candidate-data` evidence only. It does not run
+memory mapping, synthesis, P&R, or prove that the future mapped netlists remove
+all abstract memories. S13 remains Blocked, EXP-0011 remains unallocated and
+unfrozen, and no area, timing, energy, performance, FPGA, ASIC, silicon,
+equivalence, T-0044 completion, or go/no-go claim follows.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
