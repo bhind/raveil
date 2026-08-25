@@ -7,7 +7,10 @@
 #include <array>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <ostream>
 
 namespace raveil::graph_device {
 
@@ -16,6 +19,10 @@ public:
     explicit VerilatorDeviceTransport(VStaticStencilRegion& top) : top_(top) {
         clear_inputs();
         hard_reset();
+    }
+
+    void set_transaction_trace(std::ostream* trace) {
+        transaction_trace_ = trace;
     }
 
     DeviceRead read_word(std::uint32_t offset) override {
@@ -67,6 +74,24 @@ private:
     bool cancelled_ = false;
     bool fault_ = false;
     bool rtl_configuration_matches_ = false;
+    std::ostream* transaction_trace_ = nullptr;
+
+    void trace_event(const char* event) {
+        if (transaction_trace_ != nullptr) {
+            *transaction_trace_ << "GraphDevice-TRACE-V1 event=" << event << '\n';
+        }
+    }
+
+    void trace_transaction() {
+        if (transaction_trace_ != nullptr && top_.io_transactionTraceValid) {
+            *transaction_trace_ << "GraphDevice-TRACE-V1 event=transaction write="
+                << static_cast<unsigned>(top_.io_transactionTraceWrite)
+                << " address=" << top_.io_transactionTraceAddress
+                << " data=" << std::hex << std::setw(8) << std::setfill('0')
+                << static_cast<std::uint32_t>(top_.io_transactionTraceWriteData)
+                << std::dec << std::setfill(' ') << '\n';
+        }
+    }
 
     void clear_inputs() {
         top_.io_inputStageValid = 0;
@@ -90,6 +115,7 @@ private:
     void cycle() {
         top_.clock = 0;
         top_.eval();
+        trace_transaction();
         top_.clock = 1;
         top_.eval();
         update_sticky();
@@ -121,6 +147,7 @@ private:
 
     bool control(std::uint32_t value) {
         if (value == abi::kControlReset) {
+            trace_event("reset");
             hard_reset();
             return true;
         }
@@ -135,6 +162,7 @@ private:
             if (fault_) {
                 return false;
             }
+            trace_event("start");
             top_.io_start = 1;
             cycle();
             top_.io_start = 0;
@@ -147,6 +175,7 @@ private:
                 fault_ = true;
                 return false;
             }
+            trace_event("cancel");
             top_.io_cancel = 1;
             cycle();
             top_.io_cancel = 0;
@@ -210,12 +239,21 @@ private:
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
-    if (argc != 2) {
-        std::cerr << "usage: VStaticStencilRegion EVIDENCE_ROOT\n";
+    if (argc != 2 && argc != 3) {
+        std::cerr << "usage: VStaticStencilRegion EVIDENCE_ROOT [TRACE_PATH]\n";
         return 2;
     }
     VStaticStencilRegion top;
     raveil::graph_device::VerilatorDeviceTransport device(top);
+    std::ofstream trace;
+    if (argc == 3) {
+        trace.open(argv[2], std::ios::out | std::ios::trunc);
+        if (!trace) {
+            std::cerr << "transaction trace could not be opened\n";
+            return 2;
+        }
+        device.set_transaction_trace(&trace);
+    }
     const int result = raveil::graph_device::run_mvp(
         device, std::filesystem::path(argv[1]), std::cout, std::cerr
     );

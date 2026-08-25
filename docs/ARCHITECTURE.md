@@ -253,6 +253,18 @@ accepted. This makes the simulation runnable through one operator command, but
 does not install a new schedule, publish Data, define AXI/UIO, measure
 performance, or turn the hardwired region into general Daphnis.
 
+T-0123/S01 adds an observation boundary outside that owned ABI. A deterministic
+compiler derives an immutable schedule and internal scratchpad transaction
+template from the same validated descriptor. Four Chisel outputs expose only
+accepted `requestFire` events to the Verilator adapter; they are absent from the
+device register contract and grant no execution or publication authority. A
+strict finalizer compares two complete traces and one cancelled strict prefix,
+checks store data against Pavane, and binds the schedule to the complete T-0122
+artifact/ABI/source/input/oracle/output/simulator/environment receipt. The
+executor still follows its hardwired state machine and does not consume or
+install the generated schedule. Affine configuration and multi-DAG execution
+remain later boundaries.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

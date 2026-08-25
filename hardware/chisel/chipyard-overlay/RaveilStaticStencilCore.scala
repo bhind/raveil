@@ -54,6 +54,10 @@ class RaveilStaticStencilCore extends Module {
     val checksum = Output(UInt(64.W))
     val graphInputReadsAccepted = Output(UInt(16.W))
     val graphOutputWritesAccepted = Output(UInt(16.W))
+    val transactionTraceValid = Output(Bool())
+    val transactionTraceWrite = Output(Bool())
+    val transactionTraceAddress = Output(UInt(10.W))
+    val transactionTraceWriteData = Output(UInt(32.W))
   })
 
   val busyReg = RegInit(false.B)
@@ -246,6 +250,10 @@ class RaveilStaticStencilCore extends Module {
   io.checksum := checksumReg
   io.graphInputReadsAccepted := graphInputReadsAcceptedReg
   io.graphOutputWritesAccepted := graphOutputWritesAcceptedReg
+  io.transactionTraceValid := requestFire
+  io.transactionTraceWrite := io.memory.request.bits.write
+  io.transactionTraceAddress := io.memory.request.bits.address
+  io.transactionTraceWriteData := io.memory.request.bits.writeData
 
   when(!reset.asBool) {
     when(graphInputResponseState && io.memory.response.valid) {

@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0122 simulation-first device MVP complete; T-0123 is next; T-0044 physical research remains blocked**
+State: **T-0123/S01 generated-schedule trace equivalence passes; affine S02 is next; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -65,9 +65,14 @@ exists. S14 is complete with no compatible candidate identified. OpenRAM remains
 possible generator for a separately reviewed proposal, not an adopted view set;
 the blocked S13 resume condition and all pre-data confirmations are unchanged.
 
-T-0123's dependency is now satisfied, but it starts only after its exact
-current-main allowlist and acceptance packet are promoted. It owns the bounded
-progression from a generated schedule to at least two DAGs on one executor.
+T-0123/S01 now passes its exact current-main acceptance: one immutable generated
+schedule matches two complete accepted-request traces and a strict cancellation
+prefix without changing the T-0122 ABI. The executor still follows fixed RTL
+control and does not consume that schedule. Bounded affine S02 is therefore the
+next P1 boundary; two-DAG S03 remains serial after S02. Neither may start until
+its own allowlist, installation/ownership boundary, acceptance packet, and live
+Project item are fixed. T-0123 still owns the bounded progression from a
+generated schedule to at least two DAGs on one executor.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or
@@ -659,7 +664,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **T-0042 RTL-simulation-functional Graph evidence exists; T-0122 operator-visible simulation MVP is planned; no FPGA or silicon evidence exists**
+State: **T-0122 device MVP and T-0123/S01 schedule-trace equivalence pass in RTL simulation; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -668,8 +673,8 @@ simulation, FPGA, and silicon experiment records.
 RFC-0004 proposes the pre-FPGA foundation. T-0105 established the generic
 Chisel/simulator/RISC-V functional substrate independently; T-0057 bounded
 direct prior art and IP risk, T-0042 implemented the bounded Graph RTL, and
-T-0122 now plans the smallest operator-visible simulation path without
-promoting FPGA evidence. T-0044 separately uses
+T-0122 supplies the smallest operator-visible simulation path and T-0123/S01
+adds generated-schedule observation without promoting FPGA evidence. T-0044 separately uses
 matched RISC-V configurations under a common cache, memory, workload,
 functional-resource, and correctness envelope. Rocket/BOOM remain candidate
 references, not adopted product code, ARM equivalents, or proof that OoO can
