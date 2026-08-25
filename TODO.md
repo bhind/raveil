@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | None; T-0123/S02 passes and no successor is promoted yet. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0123/S03 two-DAG execution after its own freeze packet |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0123/S03 external bounded-DAG execution |
+| **P1 — next** | Start only after its named P0 dependency passes. | None; select a successor only after S03 evidence closes. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -98,8 +98,8 @@ review and failure preservation do not consume the two-item delivery limit.
   artifact compiler, oracle, scratchpad, and every T-0044 file are read-only.
   S01 must prove exact generated-schedule equivalence for two complete traces,
   a strict-prefix cancelled trace, and Pavane-matched store data while keeping
-  the T-0122 ABI unchanged. S02 and S03 remain sequential P1 work and cannot
-  start before their predecessor is accepted.
+  the T-0122 ABI unchanged. S02 later completed; S03's serial promotion is
+  recorded below.
 
   S01 now passes at implementation commit `f44d444`. The task-neutral schedule
   compiler emits an immutable ten-entry schedule and six-transaction template;
@@ -131,7 +131,8 @@ review and failure preservation do not consume the two-item delivery limit.
   RTL image, independent oracle and fallback parity, exact transaction/store
   equivalence, zero inactive output, fail-closed installation/lifecycle/hash
   negatives, cancellation and reset/restart, deterministic exports, and one
-  append-once RTL-simulation receipt. S03 remains serial P1 work.
+  append-once RTL-simulation receipt. S03 remains serial and is promoted only
+  by the separate packet below.
 
   S02 now passes at implementation commit `b9b7d88`. The same RTL and unchanged
   execution ABI run baseline 16-by-16 and compact 8-by-8 profiles installed
@@ -146,6 +147,42 @@ review and failure preservation do not consume the two-item delivery limit.
   is 13 after two incomplete low-agent packets, PM recovery, and independent
   evidence closure. This completes S02 only. T-0123 and S03 remain open, and
   no performance or physical claim follows.
+
+  S03 is promoted from canonical PR #25 merge commit `27870f0` under
+  ADR-0064 and live Project item `T-0123/S03`. It preserves the execution and
+  affine-install ABI files byte-for-byte and adds a separate 32-word program-
+  installation ABI. Three repository-owned external Graph JSON files describe
+  baseline five-point, compact horizontal-three-point, and baseline vertical-
+  three-point DAGs. A task-neutral compiler must topologically lower all three
+  without name-based semantics; one sequential executor RTL interprets at most
+  16 `LOAD_U32`/`ADD_U32`/`STORE_U32` instructions over eight value registers.
+
+  The sole mutation owner may edit only
+  `contracts/graph_device_program_install_abi_v1.json`, the three files under
+  `contracts/graph_device_dags/`,
+  `hardware/chisel/GraphDeviceProgramInstaller.scala`,
+  `hardware/chisel/StaticStencilRegion.scala`,
+  `hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala`,
+  `hardware/chisel/chipyard-overlay/RaveilStaticStencilTLClient.scala`,
+  `hardware/chisel/graph_device_dag_runtime.h`,
+  `hardware/chisel/graph_device_dag_runtime.cpp`,
+  `hardware/chisel/graph_device_verilator.cpp`, the two new
+  `run-graph-device-dag*` runners, `raveil/graph_device_dag.py`,
+  `tests/test_graph_device_dag.py`, and `tests/test_static_region.py`.
+  Existing execution and affine ABI files, T-0122 runtime/compiler, S01/S02
+  evidence and tests, scratchpad, Pavane inputs, and every T-0044 manifest and
+  evidence path remain read-only.
+
+  Acceptance requires three deterministic external Graphs on one byte-
+  identical RTL export, unchanged existing ABIs, direct-DAG oracle and generic
+  compiled-program fallback parity, exact transaction/store traces, compact
+  inactive-tail zero, cancellation without publication, factory reset/restart,
+  fail-closed graph/program/install/source/receipt negatives, and primary plus
+  independent clean replay of one append-once receipt. Initial and Current SP
+  are 21. This is an AI delivery-risk estimate: the warm range is 3--6 hours
+  editing, 1.5--3 hours verification, 0.5--1 hour Tester, and 0.5--1 hour PM
+  integration, or 5.5--11 AI working hours at medium confidence. No arbitrary
+  Graph, performance, resource, physical, FPGA, ASIC, or silicon claim follows.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,

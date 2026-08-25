@@ -8,14 +8,12 @@ resolves it.
 
 ## Simulation-first device path
 
-- After T-0122 passes, which second bounded acyclic DAG is the smallest honest
-  T-0123 discriminator while retaining the existing operation alphabet,
-  one-port memory contract, independent oracle, and no graph-specific RTL?
-  S01 now proves only that a generated schedule describes the fixed executor's
-  accepted transaction trace. S02 now verifies ADR-0063's separate affine-
-  installation boundary for two bounded shapes and strides on one RTL image;
-  it still executes only the same stencil. The multi-DAG discriminator and its
-  exact artifact/installation ownership remain unanswered for S03.
+- If S03 passes its three external bounded DAGs, what additional discriminator
+  is required before broadening the fixed address-selector alphabet or calling
+  the executor generally installable? ADR-0064 deliberately stops at five
+  neighbor selectors, three opcodes, 16 instructions, eight value registers,
+  one active invocation, and one outstanding memory request. No larger opcode,
+  memory, scheduling, or exception boundary is selected yet.
 
 ## Native execution
 

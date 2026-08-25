@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123/S02 bounded affine installation passes; no successor is promoted; T-0044 physical research remains blocked**
+State: **T-0123/S03 external bounded-DAG execution is active; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -68,11 +68,14 @@ the blocked S13 resume condition and all pre-data confirmations are unchanged.
 T-0123/S01 and S02 pass their exact scoped RTL-simulation acceptance. ADR-0063's
 separate task-neutral install ABI configures baseline and compact bounded
 shapes/strides while preserving the byte-identical execution ABI and one
-executor image. The generated schedule remains observation-only. Two-DAG S03
-stays serial and unstarted until its own allowlist, artifact/ownership boundary,
-acceptance packet, and live Project item are fixed. T-0123 still owns the
-bounded progression from a generated schedule to at least two DAGs on one
-executor; S02 alone does not establish that result.
+executor image. The generated schedule remains observation-only. ADR-0064 and
+the live Project packet now promote S03. It keeps both existing ABIs byte-
+identical, adds a separate bounded program-installation ABI, and must compile
+three external Graph JSON files into one generic sequential interpreter RTL.
+The compact case changes both affine shape/stride and program. T-0123 still
+owns the bounded progression from a generated schedule to at least two DAGs on
+one executor; no broader generality or performance result exists before S03
+acceptance.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or
