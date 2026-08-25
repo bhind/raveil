@@ -274,7 +274,11 @@ word input and 256-word private output windows do not move. Reset restores the
 baseline profile and clears the simulation scratchpad, making inactive compact
 output words zero before the complete fixed window becomes valid. This is a
 simulation-functional ownership rule, not a physical-memory implementation or
-performance claim.
+performance claim. S02 now verifies this boundary for baseline 16-by-16 and
+compact 8-by-8 profiles on one elaborated RTL image. The execution ABI retains
+its fixed configuration-identity words; the separate installation ABI alone
+reports the installed digest. The executor is still the same five-point
+stencil state machine, not a general-DAG engine.
 
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;

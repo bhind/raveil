@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0123/S02 bounded affine configuration installation |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0123/S03 two-DAG execution after S02 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | None; T-0123/S02 passes and no successor is promoted yet. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0123/S03 two-DAG execution after its own freeze packet |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -132,6 +132,20 @@ review and failure preservation do not consume the two-item delivery limit.
   equivalence, zero inactive output, fail-closed installation/lifecycle/hash
   negatives, cancellation and reset/restart, deterministic exports, and one
   append-once RTL-simulation receipt. S03 remains serial P1 work.
+
+  S02 now passes at implementation commit `b9b7d88`. The same RTL and unchanged
+  execution ABI run baseline 16-by-16 and compact 8-by-8 profiles installed
+  through the separate ABI. Primary and independent runs reproduce affine
+  receipt SHA-256
+  `58d788bfcddf85a5c85236b99e8fc79d3d05659464936f19ead4bccda936e955`;
+  77 scoped regressions and the unchanged S01 runner pass. Partial, order,
+  duplicate, digest, and busy negatives fault without mutation; Pavane,
+  fallback, transaction/store traces, cancellation, zero inactive tail, and
+  reset/restart checks pass. The allowlist expanded only to update the stale
+  `tests/test_static_region.py` assertion. Initial SP remains 8 and Current SP
+  is 13 after two incomplete low-agent packets, PM recovery, and independent
+  evidence closure. This completes S02 only. T-0123 and S03 remain open, and
+  no performance or physical claim follows.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,

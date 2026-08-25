@@ -37,9 +37,10 @@ run resets before installation, so every inactive private-output word is known
 zero before output-valid can authorize the complete fixed window.
 
 The implementation identity/configuration tag remains distinct from the
-installed configuration digest. The existing execution ABI exposes the live
-installed digest through its existing configuration-identity words without
-changing their offsets or representation. The same elaborated executor RTL
+installed configuration digest. The existing execution ABI keeps its fixed
+configuration-identity words unchanged. Only the separate installation ABI
+exposes the live installed digest, so installation state cannot silently
+change the meaning of an execution register. The same elaborated executor RTL
 consumes the installed affine bounds and strides; selecting a profile does not
 regenerate RTL or branch on a graph name.
 

@@ -186,8 +186,8 @@ byte-identical private output/oracle SHA-256 values
 and `58090120063557607cf04f684fb511adc3b3794e10ba1902003328113b38fe11`.
 This is `rtl-simulation-functional` evidence only; no dynamic schedule,
 performance, resource, AXI/UIO, FPGA, ASIC, or silicon claim follows. T-0123
-S01 is accepted on the unchanged T-0122 ABI. S02 is now the sole implementation
-P0; multi-DAG S03 remains serial P1 work and has not started.
+S01 is accepted on the unchanged T-0122 ABI. S02 now passes its scoped
+acceptance; multi-DAG S03 remains serial P1 work and has not started.
 
 T-0123/S01 now passes at implementation commit `f44d444` in the clean
 `feat/t-0123-bounded-generality` worktree. It adds no register or transport
@@ -236,23 +236,54 @@ invalidated the initial five-SP risk assumption; Initial SP remains 5 while
 Current SP becomes 8 for the accepted slice. Remaining record, review, and PR
 integration is re-estimated at 30--60 AI working minutes.
 
-T-0123/S02 starts from canonical merge commit `84c926b` in the clean
+T-0123/S02 passes at implementation commit `b9b7d88` in the clean
 `feat/t-0123-bounded-affine` worktree. ADR-0063 preserves the byte-identical
-execution ABI and owns a separate bounded configuration-installation ABI. The
-frozen slice admits baseline 16-by-16 strides 18/16 and compact 8-by-8 strides
-10/8 on one elaborated executor, fixed 324/256 physical windows, reset-cleared
-inactive output, idle-only atomic clear/write/commit, and a configuration digest
-distinct from the implementation tag. Its 11-path implementation allowlist,
-acceptance matrix, non-claims, low mutation owner, low Tester, and eight-SP
-initial/current estimate are bound to live Project item `T-0123/S02`.
+execution ABI and owns a separate fixed-width, little-endian, pointer-free,
+word-addressed configuration-installation ABI with identity `0x52564901`.
+The same elaborated executor admits baseline 16-by-16 strides 18/16 and compact
+8-by-8 strides 10/8, retains fixed 324/256 windows, clears inactive output on
+reset, and faults partial, misordered, duplicate, digest-mismatched, and busy
+installation attempts without mutation. The implementation tag remains fixed;
+only the separate installation ABI exposes the live installed digest.
 
-The PM verified current Codex CLI `/status` at 71 percent weekly remaining
-before promotion. The warm AI estimate is 90--180 minutes editing, 30--90
-minutes verification, 20--45 minutes independent testing, and 30--60 minutes
-records/PR integration, or about 2.8--6.3 AI working hours. This is planning,
-not S02 evidence. The existing generated schedule is still observation-only;
-no multi-DAG, general Graph, performance, physical, FPGA, ASIC, or silicon
-result is recorded.
+The PM scoped suite passed 77 tests. Exact-commit primary evidence at
+`artifacts/graph_device_affine/run.97Wn56` and independent Tester evidence at
+`artifacts/graph_device_affine/run.gAZdlo` both reproduce receipt SHA-256
+`58d788bfcddf85a5c85236b99e8fc79d3d05659464936f19ead4bccda936e955`.
+Both bind artifact
+`49e5b5c450f344af632c91dfb901a3658eed28a6208c94ff5a9702d9310bb012`,
+transaction trace
+`66df204d8345be202f948578d443057358a030ea25d549d4de41e430e7e094c5`,
+simulator
+`4667dd1352e9c2a48c3397e004a7c3a4f0e179cefc23c0d01e9957339381ff01`,
+and environment
+`d9963ad4fa4dc0aff9279ae5ed2a20813bd552e669c2b89c6c7299a36627af77`.
+The two deterministic exports in each run are byte-identical with RTL identity
+`146f291d6964835d4bcd9d59b6c9cc2218e94da84afc550301f0c3fe051d9945`.
+Baseline and two compact inputs complete with 1,536/384/384 accepted
+transactions, all active words and store traces match independent Pavane and
+generic fallback results, compact tails contain 192 zeros, two strict cancel
+prefixes publish no output, and reset/restart succeeds. The unchanged S01
+runner also passes at the same commit; the execution ABI diff is empty.
+
+The frozen allowlist expanded from 11 to 12 paths only to correct the stale
+`tests/test_static_region.py` regression assertion after the core became
+configuration-driven. Two sequential low-reasoning mutation owners returned
+partial packets that did not meet the slice acceptance. Their work was not
+accepted as completion evidence; after owner authorization the PM took sole
+mutation ownership, completed the bounded packet, and assigned a separate
+read-only low Tester. Initial SP remains 8 and Current SP becomes 13 to retain
+the implementation recovery, evidence-integrity work, 12-path closure, and
+independent double RTL replay. This is an AI-work estimate, not person-days.
+The original 2.8--6.3 AI-hour range trended toward its upper bound; the total
+edit interval was not time-sealed. Warm verification measured about 31 seconds
+for 77 tests and roughly two minutes for each RTL runner. Weekly telemetry had
+reset to 100 percent before the final fresh run.
+
+S02 is `rtl-simulation-functional` evidence only and completes only this affine
+slice. The generated schedule remains observation-only; T-0123 remains open
+for S03. No general-DAG, performance, resource, physical, FPGA, ASIC, silicon,
+or publication result is recorded.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
