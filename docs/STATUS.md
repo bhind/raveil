@@ -296,16 +296,23 @@ five neighbor selectors, `LOAD_U32`/`ADD_U32`/`STORE_U32`, 16 instructions,
 eight value registers, one active invocation, and one outstanding memory
 request. The compact Graph changes both shape/stride and instruction sequence.
 
-The live Project item binds a 16-path mutation allowlist, one low Chisel owner,
+The live Project item binds a 16-path mutation allowlist, one mutation owner,
 one low Tester, serial PM integration, Initial and Current 21 SP, exact stop
-rules, acceptance, demo command, and non-claims. The warm Dockerfile-derived
-linux/amd64 image and Scala cache are present. The AI estimate is 3--6 hours
-editing, 1.5--3 hours verification, 0.5--1 hour Tester, and 0.5--1 hour PM
-records/PR integration, or 5.5--11 AI working hours at medium confidence.
-Current local Codex telemetry read 98 percent weekly remaining before
-promotion. These are planning observations, not S03 evidence. No arbitrary
-Graph, performance, resource, physical, FPGA, ASIC, silicon, novelty, legal,
-or T-0044 result is recorded.
+rules, acceptance, demo command, and non-claims. The first low Chisel owner
+returned two incomplete packets; the second also made the placeholder runner
+exit zero after compiling only one JSON file while core, TLClient, tests,
+receipt, and matrix work were absent. The PM rejected that false-green result,
+recorded the repeated-root-cause HCI, obtained owner approval, and took sole
+mutation ownership without changing scope or accepting partial evidence.
+
+The warm Dockerfile-derived linux/amd64 image and Scala cache are present. The
+AI estimate remains 3--6 hours editing, 1.5--3 hours verification, 0.5--1 hour
+Tester, and 0.5--1 hour PM records/PR integration, or 5.5--11 AI working hours
+at medium confidence pending the first honest end-to-end run. Current local
+Codex telemetry read 98 percent weekly remaining before promotion. These are
+planning observations, not S03 evidence. No arbitrary Graph, performance,
+resource, physical, FPGA, ASIC, silicon, novelty, legal, or T-0044 result is
+recorded.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

@@ -184,6 +184,15 @@ review and failure preservation do not consume the two-item delivery limit.
   integration, or 5.5--11 AI working hours at medium confidence. No arbitrary
   Graph, performance, resource, physical, FPGA, ASIC, or silicon claim follows.
 
+  The initial low Chisel owner returned two partial packets despite the frozen
+  full-packet requirement. Its second `run-graph-device-dag.sh` exited zero by
+  compiling only the five-point JSON and did not elaborate or execute RTL.
+  Core, TLClient, tests, receipt, and the three-Graph matrix were missing. The
+  PM rejected the result, recorded a repeated-root-cause HCI, and obtained
+  explicit owner approval to take sole mutation ownership. The 16-path
+  allowlist, both read-only ABI boundaries, 21 SP, acceptance, and non-claims
+  are unchanged; no partial packet is completion evidence.
+
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
   local investigation, assigned edits, atomic commits, tests, review, record
