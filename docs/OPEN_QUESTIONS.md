@@ -187,6 +187,15 @@ resolves it.
   implementation, or pause the custom integrated physical line. Any choice
   must apply identically to both candidates and must not use placeholder or
   zero-area blackboxes.
+  S15 answers only whether one repository-owned common source can reproduce the
+  seven macro type signatures and tested functional semantics and survive
+  pre-mapping collection: yes, for 28 counted Verilator checks and seven fresh
+  one-memory/no-blackbox Yosys tops. It does not answer whether all eleven real
+  instances in both candidate hierarchies can use that source under identical
+  clocks, connectivity, mapping, and physical constraints. It also does not
+  bind the unfrozen proposal contract to a sealed actual-runtime receipt. Those
+  two closures remain required before the source can be reviewed as an
+  EXP-0011 physical input.
   The earlier
   source survey found
   no existing upstream config that proves this boundary: Rocket's tile-internal

@@ -41,6 +41,11 @@ supplemental to this pause. The integrated physical
 gate is therefore **pause-boundary before data**. It may resume only with one
 reviewed common memory implementation/view set bound identically to both
 candidates; placeholder or candidate-only macro conditions are prohibited.
+S15 supplies a deterministic repository-owned functional source and structural
+collection preflight for all seven required macro types. It does not satisfy
+that resume condition: the actual integrated and matched-Rocket hierarchies
+have not yet demonstrated identical replacement and mapping of all eleven
+instances, and the physical denominator has not been re-frozen or reviewed.
 
 Start timing is governed by the canonical phase table in `TODO.md`. ADR-0061
 now permits two explicitly independent P0 delivery lanes. T-0122 has completed

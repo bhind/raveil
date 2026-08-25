@@ -266,6 +266,19 @@ future integrated physical denominator. This structural composition does not
 make the fixed executor configurable and does not establish physical or
 performance advantage.
 
+T-0044/S15 adds a candidate-independent source boundary for exploring one
+possible common standard-cell-memory realization without adopting it as the
+physical denominator. Seven synthesizable SystemVerilog modules reproduce the
+canonical macro type signatures and bounded functional semantics. A
+machine-readable validator derives the eleven-instance, 4,631,296-bit ledger;
+an offline Verilator harness checks module behavior, and fresh per-type Yosys
+processes stop at collected memories before mapping. Functional execution uses
+ADR-0062's verified tagless simulator receipt. This boundary deliberately does
+not splice the modules into either exported candidate hierarchy, map storage to
+standard cells, establish macro equivalence under excluded collisions, or
+authorize physical collection. Those are later pre-data closure and fairness
+boundaries.
+
 ADR-0042 uses the pinned subsystem TileLink RAM inherited by Rocket and BOOM as
 an intermediate functional bridge. Only the fallback's input and private output
 are linked there; code and completion control remain in normal memory. This
