@@ -280,6 +280,17 @@ its fixed configuration-identity words; the separate installation ABI alone
 reports the installed digest. The executor is still the same five-point
 stencil state machine, not a general-DAG engine.
 
+ADR-0064 adds a third owned boundary without changing either prior ABI. The
+program-installation ABI atomically installs one bounded instruction sequence;
+the affine ABI continues to own only rows, columns, strides, and active output
+count. A generic sequential core consumes both installed views and decodes
+only `LOAD_U32`, `ADD_U32`, and final `STORE_U32`. External Graph JSON is
+lowered by a task-neutral host compiler, while an independent direct-Graph
+oracle and a separate compiled-program fallback provide two validation paths.
+Execution is authorized only when both installers are installed and fault-free.
+This intended S03 boundary remains RTL-simulation-only until executable
+evidence passes.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

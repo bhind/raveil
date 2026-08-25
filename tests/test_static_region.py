@@ -106,7 +106,9 @@ class StaticRegionContractTests(unittest.TestCase):
         self.assertIn("val request = Decoupled", core)
         self.assertIn("val response = Flipped(Decoupled", core)
         self.assertIn("class RaveilStaticStencilCore", core)
-        self.assertIn("Enum(13)", core)
+        self.assertIn("Enum(6)", core)
+        self.assertIn("io.program(programCounter)", core)
+        self.assertIn("val opcode = instruction(31, 28)", core)
         self.assertIn("io.memory.request.bits.initiator := 2.U", core)
         self.assertIn("io.memory.request.bits.phase := 2.U", core)
         self.assertIn("busyReg && !cancelling && state === storeResponse", core)
@@ -114,7 +116,7 @@ class StaticRegionContractTests(unittest.TestCase):
         self.assertIn("lastOutput && responseFire", core)
         self.assertIn("val requestFire = io.memory.request.valid && io.memory.request.ready", core)
         self.assertIn("val responseFire = io.memory.response.valid && io.memory.response.ready", core)
-        self.assertIn("maximum-one-outstanding", core)
+        self.assertIn("one outstanding request", core)
         self.assertNotIn("TLClientNode", core)
 
         harness = (ROOT / "hardware" / "chisel" /

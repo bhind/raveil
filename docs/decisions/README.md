@@ -65,3 +65,4 @@ rewrite it.
 | [ADR-0061](ADR-0061-independent-delivery-lanes-require-live-coordination.md) | Accepted | Up to two independently owned mutation lanes require live Project synchronization and serial PM integration |
 | [ADR-0062](ADR-0062-simulator-execution-requires-a-verified-tagless-receipt.md) | Accepted | BOOM simulator execution requires a verified tagless local receipt; mutable tags are never evidence authority |
 | [ADR-0063](ADR-0063-execution-and-configuration-installation-abis-are-separate.md) | Accepted | Graph execution and bounded affine configuration installation use separate owned ABIs |
+| [ADR-0064](ADR-0064-program-installation-is-separate-from-execution-and-affine-configuration.md) | Accepted | Bounded program installation uses a third owned ABI and one generic sequential interpreter |

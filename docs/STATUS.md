@@ -186,8 +186,8 @@ byte-identical private output/oracle SHA-256 values
 and `58090120063557607cf04f684fb511adc3b3794e10ba1902003328113b38fe11`.
 This is `rtl-simulation-functional` evidence only; no dynamic schedule,
 performance, resource, AXI/UIO, FPGA, ASIC, or silicon claim follows. T-0123
-S01 is accepted on the unchanged T-0122 ABI. S02 now passes its scoped
-acceptance; multi-DAG S03 remains serial P1 work and has not started.
+S01 is accepted on the unchanged T-0122 ABI. S02 passes its scoped acceptance;
+the S03 bounded-DAG implementation and primary evidence are recorded below.
 
 T-0123/S01 now passes at implementation commit `f44d444` in the clean
 `feat/t-0123-bounded-generality` worktree. It adds no register or transport
@@ -284,6 +284,56 @@ S02 is `rtl-simulation-functional` evidence only and completes only this affine
 slice. The generated schedule remains observation-only; T-0123 remains open
 for S03. No general-DAG, performance, resource, physical, FPGA, ASIC, silicon,
 or publication result is recorded.
+
+T-0123/S03 starts from canonical PR #25 merge commit `27870f0` in clean
+worktree `feat/t-0123-multi-dag`. ADR-0064 keeps the execution and affine-
+installation ABI files byte-identical and adds a separate 32-word task-neutral
+program-installation ABI. The frozen slice uses three external Graph JSON files:
+baseline five-point, compact horizontal-three-point, and baseline vertical-
+three-point. A generic compiler and one sequential interpreter are bounded to
+five neighbor selectors, `LOAD_U32`/`ADD_U32`/`STORE_U32`, 16 instructions,
+eight value registers, one active invocation, and one outstanding memory
+request. The compact Graph changes both shape/stride and instruction sequence.
+
+The live Project item binds a 16-path mutation allowlist, one mutation owner,
+one low Tester, serial PM integration, Initial and Current 21 SP, exact stop
+rules, acceptance, demo command, and non-claims. The first low Chisel owner
+returned two incomplete packets; the second also made the placeholder runner
+exit zero after compiling only one JSON file while core, TLClient, tests,
+receipt, and matrix work were absent. The PM rejected that false-green result,
+recorded the repeated-root-cause HCI, obtained owner approval, and took sole
+mutation ownership without changing scope or accepting partial evidence.
+
+The warm Dockerfile-derived linux/amd64 image and Scala cache are present. The
+AI estimate remains 3--6 hours editing, 1.5--3 hours verification, 0.5--1 hour
+Tester, and 0.5--1 hour PM records/PR integration, or 5.5--11 AI working hours
+at medium confidence pending the first honest end-to-end run. Current local
+Codex telemetry read 98 percent weekly remaining before promotion. These are
+planning observations, not S03 evidence. No arbitrary Graph, performance,
+resource, physical, FPGA, ASIC, silicon, novelty, legal, or T-0044 result is
+recorded.
+
+T-0123/S03 implementation commit `9682f783a7dfbc66426bfb6637cfa03cacd07b87`
+now passes its primary bounded `rtl-simulation-functional` evidence run at
+ignored `artifacts/graph_device_dag/run.mAgriX`. The same RTL export was
+generated twice with matching raw hash
+`64524cdc6b9f0365749f6f5925981d859a3b0b6e1c1b7c959ae8dbfddf58510f`; the
+append-once receipt SHA-256 is
+`093aa3ba723bca69f3e26f5e1b960d53bfdbb00a2cb708b1bf4a01cb5b221942` and binds
+raw trace SHA-256
+`4ed091a66a9d68063ddc76ad251feb6c4aa5b7a46cf1b5b8485ecd563f94bee2`.
+It records three external Graphs, four complete invocations with transaction
+counts 1536/256/1024/1536, one three-transaction strict cancellation prefix,
+eight invalid program cases, one same-RTL image, direct-DAG oracle and generic
+fallback parity, and no cancelled output publication. The busy-program-mutation
+segment has one correct read prefix transaction; finalization now derives that
+segment from the first invocation and accepts either an empty or strict correct
+prefix, recording its observed count in the receipt. This corrects a previous
+zero-count finalizer and unit-fixture assumption without changing ADR-0064,
+either accepted ABI, or execution timing. `python3 -m unittest
+tests.test_graph_device_dag tests.test_static_region` passed 19 tests (exit 0).
+Independent exact-head review and PR integration remain required; no arbitrary
+Graph, performance, resource, physical, FPGA, ASIC, or silicon claim follows.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

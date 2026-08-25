@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123/S02 bounded affine installation passes; no successor is promoted; T-0044 physical research remains blocked**
+State: **T-0123/S03 bounded-DAG primary evidence passes pending exact-head PR review; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -68,11 +68,15 @@ the blocked S13 resume condition and all pre-data confirmations are unchanged.
 T-0123/S01 and S02 pass their exact scoped RTL-simulation acceptance. ADR-0063's
 separate task-neutral install ABI configures baseline and compact bounded
 shapes/strides while preserving the byte-identical execution ABI and one
-executor image. The generated schedule remains observation-only. Two-DAG S03
-stays serial and unstarted until its own allowlist, artifact/ownership boundary,
-acceptance packet, and live Project item are fixed. T-0123 still owns the
-bounded progression from a generated schedule to at least two DAGs on one
-executor; S02 alone does not establish that result.
+executor image. The generated schedule remains observation-only. ADR-0064's
+S03 implementation preserves both existing ABIs byte-identically, adds a
+separate bounded program-installation ABI, and compiles the three external
+Graph JSON files into one generic sequential interpreter RTL. The compact case
+changes both affine shape/stride and program. Its primary receipt is
+`rtl-simulation-functional` only and remains a PR candidate pending the
+required exact-head review. T-0123 therefore closes only the bounded
+progression to the frozen three Graphs on one executor; no broader generality
+or performance result exists.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or
@@ -664,7 +668,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **T-0122 device MVP and T-0123/S01 schedule-trace equivalence pass in RTL simulation; no FPGA or silicon evidence exists**
+State: **T-0122 device MVP and T-0123/S01/S02 plus S03's bounded three-Graph primary evidence pass in RTL simulation; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate

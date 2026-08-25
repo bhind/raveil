@@ -67,6 +67,17 @@ class RaveilStaticStencilTLClient(
 
     core.io.start := (params.activeOneShot.B || launchRequested) && !startIssued
     core.io.cancel := false.B
+    core.io.rows := 16.U
+    core.io.columns := 16.U
+    core.io.inputStride := 18.U
+    core.io.outputStride := 16.U
+    core.io.activeOutputs := 256.U
+    core.io.programLength := RaveilBoundedProgramContract.FactoryProgram.length.U
+    for (index <- 0 until RaveilBoundedProgramContract.ProgramCapacity) {
+      core.io.program(index) :=
+        (if (index < RaveilBoundedProgramContract.FactoryProgram.length)
+          RaveilBoundedProgramContract.FactoryProgram(index).U else 0.U)
+    }
     core.io.memory.pending := pending
     val validationRequest = validationActive && !pending
     val requestValid = Mux(validationActive, validationRequest,
