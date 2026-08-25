@@ -3,14 +3,25 @@ package chipyard.raveil
 import chisel3._
 import chisel3.util._
 
-/**
-  * The explicit owned-memory client seam for the fixed static stencil.
-  *
-  * This is deliberately a plain Chisel request/response interface rather than
-  * a TileLink interface. A later attachment may translate this one-client,
-  * maximum-one-outstanding boundary to a system fabric without changing the
-  * fixed schedule below.
-  */
+object RaveilBoundedProgramContract {
+  val PayloadWords = 32
+  val ProgramCapacity = 16
+  val ValueRegisters = 8
+  val Magic = 0x52504731L
+  val Version = 1
+  val LoadOpcode = 1
+  val AddOpcode = 2
+  val StoreOpcode = 3
+  val EastAddress = 4
+  val FactoryProgram = Seq(
+    0x10000000L, 0x12400000L, 0x20080000L, 0x12800000L,
+    0x20080000L, 0x12c00000L, 0x20080000L, 0x13000000L,
+    0x20080000L, 0x30000000L)
+  val FactoryDigestWords = Seq(
+    0x8d87ba83L, 0x52b9dd2dL, 0x66938ad0L, 0xd640d6e3L,
+    0x3746bc31L, 0x1c78b040L, 0x47bf4922L, 0xbd85e7e6L)
+}
+
 class RaveilStaticStencilMemoryRequest extends Bundle {
   val write = Bool()
   val address = UInt(10.W)
@@ -35,11 +46,12 @@ class RaveilStaticStencilMemoryPort extends Bundle {
 }
 
 /**
-  * Exact fixed 13-state execution schedule for the RFC-0005 stencil.
+  * Bounded sequential installed-program executor.
   *
-  * Staging, validation, fixture lifecycle, and public result ownership remain
-  * in the compatibility wrapper. This core owns only execution state and its
-  * single explicit memory client port.
+  * The historical class name remains a source-compatibility seam. Runtime
+  * behavior depends only on installed opcodes and affine parameters; Graph
+  * identifiers and filenames are absent from this module. The owned memory
+  * boundary admits at most one outstanding request.
   */
 class RaveilStaticStencilCore extends Module {
   val io = IO(new Bundle {
@@ -50,6 +62,9 @@ class RaveilStaticStencilCore extends Module {
     val inputStride = Input(UInt(9.W))
     val outputStride = Input(UInt(9.W))
     val activeOutputs = Input(UInt(9.W))
+    val programLength = Input(UInt(5.W))
+    val program = Input(Vec(RaveilBoundedProgramContract.ProgramCapacity,
+      UInt(32.W)))
     val memory = new RaveilStaticStencilMemoryPort
 
     val busy = Output(Bool())
@@ -67,86 +82,70 @@ class RaveilStaticStencilCore extends Module {
 
   val busyReg = RegInit(false.B)
   val outputIndex = RegInit(0.U(8.W))
-  val accumulator = RegInit(0.U(32.W))
+  val programCounter = RegInit(0.U(4.W))
+  val values = RegInit(VecInit(Seq.fill(
+    RaveilBoundedProgramContract.ValueRegisters)(0.U(32.W))))
   val cycleCountReg = RegInit(0.U(14.W))
   val checksumReg = RegInit(0.U(64.W))
   val graphInputReadsAcceptedReg = RegInit(0.U(16.W))
   val graphOutputWritesAcceptedReg = RegInit(0.U(16.W))
   val cancelRequestedReg = RegInit(false.B)
 
-  val Seq(
-    idle,
-    loadCenterRequest,
-    loadCenterResponse,
-    loadNorthRequest,
-    loadNorthResponse,
-    loadSouthRequest,
-    loadSouthResponse,
-    loadWestRequest,
-    loadWestResponse,
-    loadEastRequest,
-    loadEastResponse,
-    storeRequest,
-    storeResponse
-  ) = Enum(13)
+  val Seq(idle, fetch, loadRequest, loadResponse, storeRequest,
+    storeResponse) = Enum(6)
   val state = RegInit(idle)
 
+  val instruction = io.program(programCounter)
+  val opcode = instruction(31, 28)
+  val destination = instruction(27, 25)
+  val sourceA = instruction(24, 22)
+  val sourceB = instruction(21, 19)
+  val selector = instruction(24, 22)
   val logicalRow = Wire(UInt(5.W))
   val logicalColumn = Wire(UInt(5.W))
-  val inputRowBase = Wire(UInt(10.W))
-  val outputRowBase = Wire(UInt(10.W))
-  val center = Wire(UInt(10.W))
-  val outputAddress = Wire(UInt(10.W))
   logicalRow := outputIndex / io.columns
   logicalColumn := outputIndex % io.columns
-  inputRowBase := (logicalRow + 1.U) * io.inputStride
+  val center = Wire(UInt(10.W))
+  val outputRowBase = Wire(UInt(10.W))
+  val outputAddress = Wire(UInt(10.W))
+  center := (logicalRow + 1.U) * io.inputStride + logicalColumn + 1.U
   outputRowBase := logicalRow * io.outputStride
-  center := inputRowBase + logicalColumn + 1.U
   outputAddress := 324.U + outputRowBase + logicalColumn
-
-  val cancelling = io.cancel || cancelRequestedReg
-  val graphInputRequest = busyReg && !cancelling && (
-    state === loadCenterRequest || state === loadNorthRequest ||
-    state === loadSouthRequest || state === loadWestRequest ||
-    state === loadEastRequest)
-  val graphOutputRequest = busyReg && !cancelling && state === storeRequest
-  val graphInputResponseState = busyReg && (
-    state === loadCenterResponse || state === loadNorthResponse ||
-    state === loadSouthResponse || state === loadWestResponse ||
-    state === loadEastResponse)
-
   val inputAddress = Wire(UInt(10.W))
   inputAddress := center
-  when(state === loadNorthRequest) { inputAddress := center - io.inputStride }
-  when(state === loadSouthRequest) { inputAddress := center + io.inputStride }
-  when(state === loadWestRequest) { inputAddress := center - 1.U }
-  when(state === loadEastRequest) { inputAddress := center + 1.U }
+  switch(selector) {
+    is(1.U) { inputAddress := center - io.inputStride }
+    is(2.U) { inputAddress := center + io.inputStride }
+    is(3.U) { inputAddress := center - 1.U }
+    is(4.U) { inputAddress := center + 1.U }
+  }
+  val storeData = values(destination)
 
+  val cancelling = io.cancel || cancelRequestedReg
+  val graphInputRequest = busyReg && !cancelling && state === loadRequest
+  val graphOutputRequest = busyReg && !cancelling && state === storeRequest
   io.memory.request.valid := graphInputRequest || graphOutputRequest
   io.memory.request.bits.write := graphOutputRequest
-  io.memory.request.bits.address := Mux(graphOutputRequest,
-    outputAddress, inputAddress)
-  io.memory.request.bits.writeData := accumulator
+  io.memory.request.bits.address := Mux(
+    graphOutputRequest, outputAddress, inputAddress)
+  io.memory.request.bits.writeData := storeData
   io.memory.request.bits.writeMask := Mux(graphOutputRequest, "hf".U, 0.U)
-  io.memory.request.bits.initiator := 2.U // Graph
-  io.memory.request.bits.phase := 2.U // Execution
-  io.memory.response.ready := graphInputResponseState || state === storeResponse
+  io.memory.request.bits.initiator := 2.U
+  io.memory.request.bits.phase := 2.U
+  io.memory.response.ready := state === loadResponse || state === storeResponse
 
   val requestFire = io.memory.request.valid && io.memory.request.ready
   val responseFire = io.memory.response.valid && io.memory.response.ready
-
+  val finalInstruction = programCounter.pad(5) === io.programLength - 1.U
   val lastOutput = outputIndex.pad(9) === io.activeOutputs - 1.U
   val completion = busyReg && !cancelling && state === storeResponse &&
-    lastOutput && responseFire &&
+    finalInstruction && lastOutput && responseFire &&
     !io.memory.response.bits.error
-  val storeFailure = busyReg && state === storeResponse &&
-    responseFire &&
+  val storeFailure = busyReg && state === storeResponse && responseFire &&
     io.memory.response.bits.error
   val cancellation = busyReg && cancelling && !io.memory.pending
 
-  when(io.cancel && busyReg) {
-    cancelRequestedReg := true.B
-  }
+  when(io.cancel && busyReg) { cancelRequestedReg := true.B }
 
   when(cancelling && busyReg) {
     when(!io.memory.pending) {
@@ -157,64 +156,35 @@ class RaveilStaticStencilCore extends Module {
   }.elsewhen(busyReg) {
     cycleCountReg := cycleCountReg + 1.U
     switch(state) {
-      is(loadCenterRequest) {
-        when(requestFire) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadCenterResponse
-        }
-      }
-      is(loadCenterResponse) {
-        when(responseFire) {
-          accumulator := io.memory.response.bits.readData
-          state := loadNorthRequest
-        }
-      }
-      is(loadNorthRequest) {
-        when(requestFire) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadNorthResponse
-        }
-      }
-      is(loadNorthResponse) {
-        when(responseFire) {
-          accumulator := accumulator + io.memory.response.bits.readData
-          state := loadSouthRequest
-        }
-      }
-      is(loadSouthRequest) {
-        when(requestFire) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadSouthResponse
-        }
-      }
-      is(loadSouthResponse) {
-        when(responseFire) {
-          accumulator := accumulator + io.memory.response.bits.readData
-          state := loadWestRequest
-        }
-      }
-      is(loadWestRequest) {
-        when(requestFire) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadWestResponse
-        }
-      }
-      is(loadWestResponse) {
-        when(responseFire) {
-          accumulator := accumulator + io.memory.response.bits.readData
-          state := loadEastRequest
-        }
-      }
-      is(loadEastRequest) {
-        when(requestFire) {
-          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
-          state := loadEastResponse
-        }
-      }
-      is(loadEastResponse) {
-        when(responseFire) {
-          accumulator := accumulator + io.memory.response.bits.readData
+      is(fetch) {
+        when(opcode === RaveilBoundedProgramContract.LoadOpcode.U) {
+          state := loadRequest
+        }.elsewhen(opcode === RaveilBoundedProgramContract.AddOpcode.U) {
+          values(destination) := (values(sourceA) +& values(sourceB))(31, 0)
+          programCounter := programCounter + 1.U
+        }.elsewhen(opcode === RaveilBoundedProgramContract.StoreOpcode.U) {
           state := storeRequest
+        }.otherwise {
+          busyReg := false.B
+          state := idle
+        }
+      }
+      is(loadRequest) {
+        when(requestFire) {
+          graphInputReadsAcceptedReg := graphInputReadsAcceptedReg + 1.U
+          state := loadResponse
+        }
+      }
+      is(loadResponse) {
+        when(responseFire) {
+          when(io.memory.response.bits.error) {
+            busyReg := false.B
+            state := idle
+          }.otherwise {
+            values(destination) := io.memory.response.bits.readData
+            programCounter := programCounter + 1.U
+            state := fetch
+          }
         }
       }
       is(storeRequest) {
@@ -225,17 +195,21 @@ class RaveilStaticStencilCore extends Module {
       }
       is(storeResponse) {
         when(responseFire) {
-          when(io.memory.response.bits.error) {
+          when(io.memory.response.bits.error || !finalInstruction) {
             busyReg := false.B
             state := idle
           }.otherwise {
-            checksumReg := checksumReg + accumulator
+            checksumReg := checksumReg + storeData
+            for (index <- 0 until RaveilBoundedProgramContract.ValueRegisters) {
+              values(index) := 0.U
+            }
             when(lastOutput) {
               busyReg := false.B
               state := idle
             }.otherwise {
               outputIndex := outputIndex + 1.U
-              state := loadCenterRequest
+              programCounter := 0.U
+              state := fetch
             }
           }
         }
@@ -244,8 +218,14 @@ class RaveilStaticStencilCore extends Module {
   }.elsewhen(io.start) {
     busyReg := true.B
     outputIndex := 0.U
-    state := loadCenterRequest
-    accumulator := 0.U
+    programCounter := 0.U
+    for (index <- 0 until RaveilBoundedProgramContract.ValueRegisters) {
+      values(index) := 0.U
+    }
+    // Every admitted program starts with LOAD_U32; expose that request on the
+    // first execution cycle so cancellation and busy-mutation evidence retain
+    // the existing nonempty-prefix boundary.
+    state := loadRequest
     cycleCountReg := 0.U
     checksumReg := 0.U
     cancelRequestedReg := false.B
@@ -269,15 +249,19 @@ class RaveilStaticStencilCore extends Module {
     assert(io.rows >= 1.U && io.rows <= 16.U)
     assert(io.columns >= 1.U && io.columns <= 16.U)
     assert(io.activeOutputs === io.rows * io.columns)
-    assert(io.inputStride >= io.columns + 2.U)
-    assert(io.outputStride >= io.columns)
-    when(graphInputResponseState && io.memory.response.valid) {
-      assert(!io.memory.response.bits.error)
+    assert(io.programLength >= 2.U &&
+      io.programLength <= RaveilBoundedProgramContract.ProgramCapacity.U)
+    when(state === fetch && busyReg) {
+      assert(opcode === RaveilBoundedProgramContract.LoadOpcode.U ||
+        opcode === RaveilBoundedProgramContract.AddOpcode.U ||
+        opcode === RaveilBoundedProgramContract.StoreOpcode.U)
+    }
+    when(state === loadResponse && io.memory.response.valid) {
       assert(!io.memory.response.bits.write)
       assert(io.memory.response.bits.initiator === 2.U)
       assert(io.memory.response.bits.phase === 2.U)
     }
-    when(busyReg && state === storeResponse && io.memory.response.valid) {
+    when(state === storeResponse && io.memory.response.valid) {
       assert(io.memory.response.bits.write)
       assert(io.memory.response.bits.initiator === 2.U)
       assert(io.memory.response.bits.phase === 2.U)

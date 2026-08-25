@@ -3,7 +3,9 @@
 
 #include "graph_device_abi_generated.h"
 #include "graph_device_runtime.h"
-#ifdef RAVEIL_AFFINE_RUNTIME
+#ifdef RAVEIL_DAG_RUNTIME
+#include "graph_device_dag_runtime.h"
+#elif defined(RAVEIL_AFFINE_RUNTIME)
 #include "graph_device_affine_runtime.h"
 #endif
 
@@ -19,8 +21,11 @@
 namespace raveil::graph_device {
 
 class VerilatorDeviceTransport final : public DeviceTransport
-#ifdef RAVEIL_AFFINE_RUNTIME
+#if defined(RAVEIL_AFFINE_RUNTIME) || defined(RAVEIL_DAG_RUNTIME)
     , public AffineInstallTransport
+#endif
+#ifdef RAVEIL_DAG_RUNTIME
+    , public ProgramInstallTransport
 #endif
 {
 public:
@@ -75,7 +80,7 @@ public:
         return false;
     }
 
-#ifdef RAVEIL_AFFINE_RUNTIME
+#if defined(RAVEIL_AFFINE_RUNTIME) || defined(RAVEIL_DAG_RUNTIME)
     DeviceRead read_install_word(std::uint32_t offset) override {
         if (offset == install_abi::kRegIdentity) {
             return {true, install_abi::kIdentity};
@@ -141,6 +146,70 @@ public:
     }
 #endif
 
+#ifdef RAVEIL_DAG_RUNTIME
+    DeviceRead read_program_word(std::uint32_t offset) override {
+        if (offset == program_abi::kRegIdentity) {
+            return {true, program_abi::kIdentity};
+        }
+        if (offset == program_abi::kRegVersion) {
+            return {true, program_abi::kVersion};
+        }
+        if (offset == program_abi::kRegStatus) {
+            std::uint32_t value = 0;
+            if (top_.io_programLoading) value |= program_abi::kStatusLoading;
+            if (top_.io_programInstalled) value |= program_abi::kStatusInstalled;
+            if (top_.io_programFault) value |= program_abi::kStatusFault;
+            return {true, value};
+        }
+        if (offset == program_abi::kRegPayloadCount) {
+            return {true, top_.io_programPayloadCount};
+        }
+        if (offset >= program_abi::kRegDigestBase
+            && offset < program_abi::kRegDigestBase + 8U) {
+            const std::array<std::uint32_t, 8> digest = {
+                top_.io_programLiveDigest_0,
+                top_.io_programLiveDigest_1,
+                top_.io_programLiveDigest_2,
+                top_.io_programLiveDigest_3,
+                top_.io_programLiveDigest_4,
+                top_.io_programLiveDigest_5,
+                top_.io_programLiveDigest_6,
+                top_.io_programLiveDigest_7,
+            };
+            return {true, digest[offset - program_abi::kRegDigestBase]};
+        }
+        return {false, 0U};
+    }
+
+    bool write_program_word(
+        std::uint32_t offset,
+        std::uint32_t value
+    ) override {
+        if (offset == program_abi::kRegControl) {
+            if (value != program_abi::kControlClear
+                && value != program_abi::kControlCommit) return false;
+            top_.io_programClear = value == program_abi::kControlClear;
+            top_.io_programCommit = value == program_abi::kControlCommit;
+            cycle();
+            top_.io_programClear = 0;
+            top_.io_programCommit = 0;
+            top_.eval();
+            return true;
+        }
+        if (offset >= program_abi::kPayloadBase
+            && offset < program_abi::kPayloadBase + program_abi::kPayloadCount) {
+            top_.io_programWrite = 1;
+            top_.io_programAddress = offset - program_abi::kPayloadBase;
+            top_.io_programData = value;
+            cycle();
+            top_.io_programWrite = 0;
+            top_.eval();
+            return true;
+        }
+        return false;
+    }
+#endif
+
 private:
     VStaticStencilRegion& top_;
     std::uint32_t staged_words_ = 0;
@@ -181,6 +250,11 @@ private:
         top_.io_configCommit = 0;
         top_.io_configAddress = 0;
         top_.io_configData = 0;
+        top_.io_programClear = 0;
+        top_.io_programWrite = 0;
+        top_.io_programCommit = 0;
+        top_.io_programAddress = 0;
+        top_.io_programData = 0;
         top_.io_outputValidationValid = 0;
         top_.io_outputValidationAddress = 0;
         top_.io_outputValidationResponseReady = 0;
@@ -221,6 +295,9 @@ private:
         if (cancelled_) value |= abi::kStatusCancelled;
         if (fault_) value |= abi::kStatusFault;
         if (top_.io_outputValid) value |= abi::kStatusOutputValid;
+#ifdef RAVEIL_DAG_RUNTIME
+        if (top_.io_configFault || top_.io_programFault) value |= abi::kStatusFault;
+#endif
         return value;
     }
 
@@ -239,6 +316,10 @@ private:
             cancelled_ = false;
             fault_ = !rtl_configuration_matches_ || !top_.io_configInstalled
                 || top_.io_configLoading || top_.io_configFault;
+#ifdef RAVEIL_DAG_RUNTIME
+            fault_ = fault_ || !top_.io_programInstalled
+                || top_.io_programLoading || top_.io_programFault;
+#endif
             if (fault_) {
                 return false;
             }
@@ -319,24 +400,35 @@ private:
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
-#ifdef RAVEIL_AFFINE_RUNTIME
+#ifdef RAVEIL_DAG_RUNTIME
+    const bool dag = argc >= 2 && std::string(argv[1]) == "--dag";
+    if (!dag || (argc != 3 && argc != 4)) {
+        std::cerr << "usage: VStaticStencilRegion --dag EVIDENCE_ROOT [TRACE_PATH]\n";
+        return 2;
+    }
+#elif defined(RAVEIL_AFFINE_RUNTIME)
     const bool affine = argc >= 2 && std::string(argv[1]) == "--affine";
     if (affine && argc != 3 && argc != 4) {
         std::cerr << "usage: VStaticStencilRegion --affine EVIDENCE_ROOT [TRACE_PATH]\n";
         return 2;
     }
     if (!affine && argc != 2 && argc != 3) {
-#else
-    if (argc != 2 && argc != 3) {
-#endif
         std::cerr << "usage: VStaticStencilRegion EVIDENCE_ROOT [TRACE_PATH]\n";
         return 2;
     }
+#else
+    if (argc != 2 && argc != 3) {
+        std::cerr << "usage: VStaticStencilRegion EVIDENCE_ROOT [TRACE_PATH]\n";
+        return 2;
+    }
+#endif
     VStaticStencilRegion top;
     raveil::graph_device::VerilatorDeviceTransport device(top);
     std::ofstream trace;
     const int evidenceIndex =
-#ifdef RAVEIL_AFFINE_RUNTIME
+#ifdef RAVEIL_DAG_RUNTIME
+        2;
+#elif defined(RAVEIL_AFFINE_RUNTIME)
         affine ? 2 : 1;
 #else
         1;
@@ -352,7 +444,11 @@ int main(int argc, char** argv) {
     }
     const std::filesystem::path evidence(argv[evidenceIndex]);
     const int result =
-#ifdef RAVEIL_AFFINE_RUNTIME
+#ifdef RAVEIL_DAG_RUNTIME
+        raveil::graph_device::run_dag(
+            device, device, device, evidence, std::cout, std::cerr
+        );
+#elif defined(RAVEIL_AFFINE_RUNTIME)
         affine
             ? raveil::graph_device::run_affine(
                 device, device, evidence, std::cout, std::cerr
