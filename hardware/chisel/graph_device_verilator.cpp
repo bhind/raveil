@@ -3,6 +3,9 @@
 
 #include "graph_device_abi_generated.h"
 #include "graph_device_runtime.h"
+#ifdef RAVEIL_AFFINE_RUNTIME
+#include "graph_device_affine_runtime.h"
+#endif
 
 #include <array>
 #include <cstdint>
@@ -11,10 +14,15 @@
 #include <iomanip>
 #include <iostream>
 #include <ostream>
+#include <string>
 
 namespace raveil::graph_device {
 
-class VerilatorDeviceTransport final : public DeviceTransport {
+class VerilatorDeviceTransport final : public DeviceTransport
+#ifdef RAVEIL_AFFINE_RUNTIME
+    , public AffineInstallTransport
+#endif
+{
 public:
     explicit VerilatorDeviceTransport(VStaticStencilRegion& top) : top_(top) {
         clear_inputs();
@@ -67,6 +75,72 @@ public:
         return false;
     }
 
+#ifdef RAVEIL_AFFINE_RUNTIME
+    DeviceRead read_install_word(std::uint32_t offset) override {
+        if (offset == install_abi::kRegIdentity) {
+            return {true, install_abi::kIdentity};
+        }
+        if (offset == install_abi::kRegVersion) {
+            return {true, install_abi::kVersion};
+        }
+        if (offset == install_abi::kRegStatus) {
+            std::uint32_t value = 0;
+            if (top_.io_configLoading) value |= install_abi::kStatusLoading;
+            if (top_.io_configInstalled) value |= install_abi::kStatusInstalled;
+            if (top_.io_configFault) value |= install_abi::kStatusFault;
+            return {true, value};
+        }
+        if (offset == install_abi::kRegPayloadCount) {
+            return {true, top_.io_configPayloadCount};
+        }
+        if (offset >= install_abi::kRegDigestBase
+            && offset < install_abi::kRegDigestBase + 8U) {
+            const std::array<std::uint32_t, 8> digest = {
+                top_.io_configLiveDigest_0,
+                top_.io_configLiveDigest_1,
+                top_.io_configLiveDigest_2,
+                top_.io_configLiveDigest_3,
+                top_.io_configLiveDigest_4,
+                top_.io_configLiveDigest_5,
+                top_.io_configLiveDigest_6,
+                top_.io_configLiveDigest_7,
+            };
+            return {true, digest[offset - install_abi::kRegDigestBase]};
+        }
+        return {false, 0U};
+    }
+
+    bool write_install_word(
+        std::uint32_t offset,
+        std::uint32_t value
+    ) override {
+        if (offset == install_abi::kRegControl) {
+            if (value != install_abi::kControlClear
+                && value != install_abi::kControlCommit) {
+                return false;
+            }
+            top_.io_configClear = value == install_abi::kControlClear;
+            top_.io_configCommit = value == install_abi::kControlCommit;
+            cycle();
+            top_.io_configClear = 0;
+            top_.io_configCommit = 0;
+            top_.eval();
+            return true;
+        }
+        if (offset >= install_abi::kPayloadBase
+            && offset < install_abi::kPayloadBase + install_abi::kPayloadCount) {
+            top_.io_configWrite = 1;
+            top_.io_configAddress = offset - install_abi::kPayloadBase;
+            top_.io_configData = value;
+            cycle();
+            top_.io_configWrite = 0;
+            top_.eval();
+            return true;
+        }
+        return false;
+    }
+#endif
+
 private:
     VStaticStencilRegion& top_;
     std::uint32_t staged_words_ = 0;
@@ -102,6 +176,11 @@ private:
         top_.io_fixtureStageSeed = 0;
         top_.io_start = 0;
         top_.io_cancel = 0;
+        top_.io_configClear = 0;
+        top_.io_configWrite = 0;
+        top_.io_configCommit = 0;
+        top_.io_configAddress = 0;
+        top_.io_configData = 0;
         top_.io_outputValidationValid = 0;
         top_.io_outputValidationAddress = 0;
         top_.io_outputValidationResponseReady = 0;
@@ -158,7 +237,8 @@ private:
             }
             completed_ = false;
             cancelled_ = false;
-            fault_ = !rtl_configuration_matches_;
+            fault_ = !rtl_configuration_matches_ || !top_.io_configInstalled
+                || top_.io_configLoading || top_.io_configFault;
             if (fault_) {
                 return false;
             }
@@ -239,24 +319,52 @@ private:
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
+#ifdef RAVEIL_AFFINE_RUNTIME
+    const bool affine = argc >= 2 && std::string(argv[1]) == "--affine";
+    if (affine && argc != 3 && argc != 4) {
+        std::cerr << "usage: VStaticStencilRegion --affine EVIDENCE_ROOT [TRACE_PATH]\n";
+        return 2;
+    }
+    if (!affine && argc != 2 && argc != 3) {
+#else
     if (argc != 2 && argc != 3) {
+#endif
         std::cerr << "usage: VStaticStencilRegion EVIDENCE_ROOT [TRACE_PATH]\n";
         return 2;
     }
     VStaticStencilRegion top;
     raveil::graph_device::VerilatorDeviceTransport device(top);
     std::ofstream trace;
-    if (argc == 3) {
-        trace.open(argv[2], std::ios::out | std::ios::trunc);
+    const int evidenceIndex =
+#ifdef RAVEIL_AFFINE_RUNTIME
+        affine ? 2 : 1;
+#else
+        1;
+#endif
+    const int traceIndex = evidenceIndex + 1;
+    if (argc > traceIndex) {
+        trace.open(argv[traceIndex], std::ios::out | std::ios::trunc);
         if (!trace) {
             std::cerr << "transaction trace could not be opened\n";
             return 2;
         }
         device.set_transaction_trace(&trace);
     }
-    const int result = raveil::graph_device::run_mvp(
-        device, std::filesystem::path(argv[1]), std::cout, std::cerr
-    );
+    const std::filesystem::path evidence(argv[evidenceIndex]);
+    const int result =
+#ifdef RAVEIL_AFFINE_RUNTIME
+        affine
+            ? raveil::graph_device::run_affine(
+                device, device, evidence, std::cout, std::cerr
+            )
+            : raveil::graph_device::run_mvp(
+                device, evidence, std::cout, std::cerr
+            );
+#else
+        raveil::graph_device::run_mvp(
+            device, evidence, std::cout, std::cerr
+        );
+#endif
     top.final();
     return result;
 }

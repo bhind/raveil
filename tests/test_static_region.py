@@ -95,7 +95,11 @@ class StaticRegionContractTests(unittest.TestCase):
         self.assertIn("package chipyard.raveil", core)
         self.assertIn("class RaveilStaticStencilMemoryPort", core)
         self.assertIn("val address = UInt(10.W)", core)
-        self.assertIn("324.U(10.W) + outputIndex.pad(10)", core)
+        self.assertIn("outputAddress := 324.U + outputRowBase + logicalColumn", core)
+        self.assertIn("logicalRow := outputIndex / io.columns", core)
+        self.assertIn("logicalColumn := outputIndex % io.columns", core)
+        self.assertIn("center - io.inputStride", core)
+        self.assertIn("center + io.inputStride", core)
         self.assertIn(
             "324.U(10.W) + io.outputValidationAddress.pad(10)", source
         )
@@ -106,7 +110,8 @@ class StaticRegionContractTests(unittest.TestCase):
         self.assertIn("io.memory.request.bits.initiator := 2.U", core)
         self.assertIn("io.memory.request.bits.phase := 2.U", core)
         self.assertIn("busyReg && !cancelling && state === storeResponse", core)
-        self.assertIn("outputIndex === 255.U && responseFire", core)
+        self.assertIn("val lastOutput = outputIndex.pad(9) === io.activeOutputs - 1.U", core)
+        self.assertIn("lastOutput && responseFire", core)
         self.assertIn("val requestFire = io.memory.request.valid && io.memory.request.ready", core)
         self.assertIn("val responseFire = io.memory.response.valid && io.memory.response.ready", core)
         self.assertIn("maximum-one-outstanding", core)

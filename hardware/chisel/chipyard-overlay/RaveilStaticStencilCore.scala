@@ -45,6 +45,11 @@ class RaveilStaticStencilCore extends Module {
   val io = IO(new Bundle {
     val start = Input(Bool())
     val cancel = Input(Bool())
+    val rows = Input(UInt(5.W))
+    val columns = Input(UInt(5.W))
+    val inputStride = Input(UInt(9.W))
+    val outputStride = Input(UInt(9.W))
+    val activeOutputs = Input(UInt(9.W))
     val memory = new RaveilStaticStencilMemoryPort
 
     val busy = Output(Bool())
@@ -86,14 +91,18 @@ class RaveilStaticStencilCore extends Module {
   ) = Enum(13)
   val state = RegInit(idle)
 
-  val y = Wire(UInt(5.W))
-  val x = Wire(UInt(5.W))
-  val scaledY = Wire(UInt(9.W))
-  val center = Wire(UInt(9.W))
-  y := outputIndex(7, 4).pad(5) + 1.U(5.W)
-  x := outputIndex(3, 0).pad(5) + 1.U(5.W)
-  scaledY := y * 18.U
-  center := scaledY + x
+  val logicalRow = Wire(UInt(5.W))
+  val logicalColumn = Wire(UInt(5.W))
+  val inputRowBase = Wire(UInt(10.W))
+  val outputRowBase = Wire(UInt(10.W))
+  val center = Wire(UInt(10.W))
+  val outputAddress = Wire(UInt(10.W))
+  logicalRow := outputIndex / io.columns
+  logicalColumn := outputIndex % io.columns
+  inputRowBase := (logicalRow + 1.U) * io.inputStride
+  outputRowBase := logicalRow * io.outputStride
+  center := inputRowBase + logicalColumn + 1.U
+  outputAddress := 324.U + outputRowBase + logicalColumn
 
   val cancelling = io.cancel || cancelRequestedReg
   val graphInputRequest = busyReg && !cancelling && (
@@ -106,17 +115,17 @@ class RaveilStaticStencilCore extends Module {
     state === loadSouthResponse || state === loadWestResponse ||
     state === loadEastResponse)
 
-  val inputAddress = Wire(UInt(9.W))
+  val inputAddress = Wire(UInt(10.W))
   inputAddress := center
-  when(state === loadNorthRequest) { inputAddress := center - 18.U }
-  when(state === loadSouthRequest) { inputAddress := center + 18.U }
+  when(state === loadNorthRequest) { inputAddress := center - io.inputStride }
+  when(state === loadSouthRequest) { inputAddress := center + io.inputStride }
   when(state === loadWestRequest) { inputAddress := center - 1.U }
   when(state === loadEastRequest) { inputAddress := center + 1.U }
 
   io.memory.request.valid := graphInputRequest || graphOutputRequest
   io.memory.request.bits.write := graphOutputRequest
   io.memory.request.bits.address := Mux(graphOutputRequest,
-    324.U(10.W) + outputIndex.pad(10), inputAddress.pad(10))
+    outputAddress, inputAddress)
   io.memory.request.bits.writeData := accumulator
   io.memory.request.bits.writeMask := Mux(graphOutputRequest, "hf".U, 0.U)
   io.memory.request.bits.initiator := 2.U // Graph
@@ -126,8 +135,9 @@ class RaveilStaticStencilCore extends Module {
   val requestFire = io.memory.request.valid && io.memory.request.ready
   val responseFire = io.memory.response.valid && io.memory.response.ready
 
+  val lastOutput = outputIndex.pad(9) === io.activeOutputs - 1.U
   val completion = busyReg && !cancelling && state === storeResponse &&
-    outputIndex === 255.U && responseFire &&
+    lastOutput && responseFire &&
     !io.memory.response.bits.error
   val storeFailure = busyReg && state === storeResponse &&
     responseFire &&
@@ -220,7 +230,7 @@ class RaveilStaticStencilCore extends Module {
             state := idle
           }.otherwise {
             checksumReg := checksumReg + accumulator
-            when(outputIndex === 255.U) {
+            when(lastOutput) {
               busyReg := false.B
               state := idle
             }.otherwise {
@@ -256,6 +266,11 @@ class RaveilStaticStencilCore extends Module {
   io.transactionTraceWriteData := io.memory.request.bits.writeData
 
   when(!reset.asBool) {
+    assert(io.rows >= 1.U && io.rows <= 16.U)
+    assert(io.columns >= 1.U && io.columns <= 16.U)
+    assert(io.activeOutputs === io.rows * io.columns)
+    assert(io.inputStride >= io.columns + 2.U)
+    assert(io.outputStride >= io.columns)
     when(graphInputResponseState && io.memory.response.valid) {
       assert(!io.memory.response.bits.error)
       assert(!io.memory.response.bits.write)
