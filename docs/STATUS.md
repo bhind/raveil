@@ -186,7 +186,19 @@ byte-identical private output/oracle SHA-256 values
 and `58090120063557607cf04f684fb511adc3b3794e10ba1902003328113b38fe11`.
 This is `rtl-simulation-functional` evidence only; no dynamic schedule,
 performance, resource, AXI/UIO, FPGA, ASIC, or silicon claim follows. T-0123
-remains ordered next for bounded generated-schedule and multi-DAG generality.
+is now active only through S01, which owns generated-schedule trace equivalence
+on the unchanged T-0122 ABI. The later affine and multi-DAG slices remain P1
+and have not started.
+
+T-0123/S01 starts from current-main commit `12227f5` in the clean
+`feat/t-0123-bounded-generality` worktree. Its live Project card is the sole In
+Progress mutation item and binds one low-reasoning Chisel owner, one exact file
+allowlist, the focused unittest command, and the offline Verilator demo. The
+warm 1.17 GB Chisel/Verilator image and Scala cache are present. The AI estimate
+is 60--120 minutes for editing, 20--45 minutes for verification, 20--40 minutes
+for independent testing, and 30--60 minutes for PM records and PR integration,
+or about 2.2--4.4 AI working hours total at medium-high confidence. No S01
+result is recorded yet.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

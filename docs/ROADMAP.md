@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0122 simulation-first device MVP complete; T-0123 is next; T-0044 physical research remains blocked**
+State: **T-0123/S01 generated-schedule trace equivalence is active; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -65,9 +65,12 @@ exists. S14 is complete with no compatible candidate identified. OpenRAM remains
 possible generator for a separately reviewed proposal, not an adopted view set;
 the blocked S13 resume condition and all pre-data confirmations are unchanged.
 
-T-0123's dependency is now satisfied, but it starts only after its exact
-current-main allowlist and acceptance packet are promoted. It owns the bounded
-progression from a generated schedule to at least two DAGs on one executor.
+T-0123's dependency is satisfied. Its exact current-main S01 allowlist and
+acceptance packet are promoted, so only generated-schedule trace equivalence is
+active. The bounded affine S02 and two-DAG S03 stages remain serial P1 work;
+neither may start until its predecessor is accepted. T-0123 still owns the
+bounded progression from a generated schedule to at least two DAGs on one
+executor.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or

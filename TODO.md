@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | — |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0123 bounded generated-schedule and multi-DAG generalization after T-0122 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0123/S01 generated-schedule trace equivalence |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0123/S02 bounded affine shape/stride after S01; T-0123/S03 two-DAG execution after S02 |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -83,6 +83,23 @@ review and failure preservation do not consume the two-item delivery limit.
   and the unchanged T-0122 device ABI, with separate independent oracles and
   fallback parity. Stop before installable general graphs, variable-latency
   issue, CGRA/VLIW expansion, AXI/KV260 work, or a performance campaign.
+
+  The G2 clean-replay donor `c3a5eda` is implementation reference only; its
+  stale T-0114 task names and records are not authority. S01 is promoted to P0
+  from current-main commit `12227f5` with one live Project item, one clean
+  `feat/t-0123-bounded-generality` worktree, one Chisel mutation owner, and a
+  five-SP warm estimate. Its mutation allowlist is
+  `hardware/chisel/StaticStencilRegion.scala`,
+  `hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala`,
+  `hardware/chisel/graph_device_verilator.cpp`, the two new
+  `run-graph-device-generated-schedule*` runners,
+  `raveil/graph_device_schedule.py`, and
+  `tests/test_graph_device_schedule.py`. Existing T-0122 ABI, runtime,
+  artifact compiler, oracle, scratchpad, and every T-0044 file are read-only.
+  S01 must prove exact generated-schedule equivalence for two complete traces,
+  a strict-prefix cancelled trace, and Pavane-matched store data while keeping
+  the T-0122 ABI unchanged. S02 and S03 remain sequential P1 work and cannot
+  start before their predecessor is accepted.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
