@@ -1085,6 +1085,21 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
   Keep S13 Blocked. Any generator or standard-cell-memory path requires the
   recorded external-dependency, fairness/design-fork, identity, and fresh
   pre-data confirmations before adoption or EXP-0011 work.
+  T-0044/S15 completes the narrower repository-only common-source functional
+  prerequisite. Its seven synthesizable module types match the canonical port
+  directions, widths, depths, write masks, and functional semantics; the
+  machine-readable contract derives eleven instances and 4,631,296 storage
+  bits. Deterministic Verilator and Yosys preflight evidence is recorded in
+  STATUS and the 2026-08-25 log. This does not unblock S13 or adopt the source
+  as a physical denominator. Before any EXP-0011 allocation, candidate flow,
+  or physical use, add a clean pre-data closure that replaces all exact 11
+  instances in both exported hierarchies with one byte-identical source,
+  verifies full connectivity/clocks/masks and absence of reachable blackboxes
+  or `$mem*` cells at the required mapping boundary, binds the actual runtime
+  receipt to the contract, and receives the already-required fairness/design
+  review. Preserve collision/interleaving exclusions or prove the additional
+  admissible semantics. Do not infer synthesis, P&R, area, timing, energy,
+  performance, FPGA, ASIC, silicon, T-0044 completion, or go/no-go evidence.
   Separately, ADR-0050 requires the retained failed
   RUN and completed recovery RUN to receive immutable remote copies,
   download-based verification, marker-last completion, and a tracked

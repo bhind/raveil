@@ -865,6 +865,31 @@ drop-in set. S14 is complete as negative planning evidence; S13 remains
 Blocked, EXP-0011 remains unallocated and unfrozen, and no candidate flow or
 physical result was created. The source and risk packet is retained in
 `docs/research/reviews/2026-08-24-T-0044-S14-common-memory-strategy-inventory.md`.
+T-0044/S15 now establishes only the repository-owned common-source functional
+prerequisite for the standard-cell-memory option. Seven synthesizable modules
+implement the exact emitted macro type interfaces and uninitialized,
+reset-free, synchronous-read, masked/full-write, and output-hold semantics.
+The contract derives eleven instances and 4,631,296 storage bits from the
+canonical integrated/matched-Rocket inventory. Verilator passes 28 counted
+behavior checks across all seven types, while seven fresh Yosys processes each
+collect exactly one `$mem_v2` and find no reachable blackbox. Two PM runs are
+byte-identical: simulation raw-manifest and metadata SHA-256 values are
+`1061edc55daeb0bc4608c5a54bbb0d2c0f4562d47ae145ac1fe66e8763777ad9`
+and
+`1792fa166b57f86ed7cdb2a6d3660e1d33afee27fd1dd3ebb3d2ad6f5dfbd38f`;
+preflight values are
+`b134d7cc1fef25f5649388baabb949f8acfcf5f08d8ee12160b5d5962c0fcbfd`
+and
+`efd412e6cd65c71ad31fbe8d6b6203cc2621f40c261e19f550f3bb1d02d6d00a`.
+Functional execution uses ADR-0062's verified tagless runtime OCI index and
+binds its stable payload, Config, RootFS, and verifier identities. This is
+`rtl-simulation-functional` and
+`physical-input-readiness-no-candidate-data` evidence only. It does not prove
+that all eleven instances in both real candidate hierarchies close on this
+source, bind a proposal contract to a sealed run receipt, preserve the physical
+denominator after mapping, or authorize EXP-0011. S13 remains Blocked; no
+candidate synthesis, P&R, area, timing, energy, FPGA, ASIC, silicon,
+performance, completion, or go/no-go claim follows.
 ADR-0050's EXP-0008 promotion boundary is now verified. The dedicated
 fail-closed verifier accepted only the two frozen RUN-IDs and expected
 seal/report/manifest hashes, recomputed every sealed file size and SHA-256,
