@@ -186,9 +186,8 @@ byte-identical private output/oracle SHA-256 values
 and `58090120063557607cf04f684fb511adc3b3794e10ba1902003328113b38fe11`.
 This is `rtl-simulation-functional` evidence only; no dynamic schedule,
 performance, resource, AXI/UIO, FPGA, ASIC, or silicon claim follows. T-0123
-is now active only through S01, which owns generated-schedule trace equivalence
-on the unchanged T-0122 ABI. The later affine and multi-DAG slices remain P1
-and have not started.
+S01 is accepted on the unchanged T-0122 ABI. S02 is now the sole implementation
+P0; multi-DAG S03 remains serial P1 work and has not started.
 
 T-0123/S01 now passes at implementation commit `f44d444` in the clean
 `feat/t-0123-bounded-generality` worktree. It adds no register or transport
@@ -236,6 +235,25 @@ overall edit cycle was not time-sealed, and the repeated receipt-closure repair
 invalidated the initial five-SP risk assumption; Initial SP remains 5 while
 Current SP becomes 8 for the accepted slice. Remaining record, review, and PR
 integration is re-estimated at 30--60 AI working minutes.
+
+T-0123/S02 starts from canonical merge commit `84c926b` in the clean
+`feat/t-0123-bounded-affine` worktree. ADR-0063 preserves the byte-identical
+execution ABI and owns a separate bounded configuration-installation ABI. The
+frozen slice admits baseline 16-by-16 strides 18/16 and compact 8-by-8 strides
+10/8 on one elaborated executor, fixed 324/256 physical windows, reset-cleared
+inactive output, idle-only atomic clear/write/commit, and a configuration digest
+distinct from the implementation tag. Its 11-path implementation allowlist,
+acceptance matrix, non-claims, low mutation owner, low Tester, and eight-SP
+initial/current estimate are bound to live Project item `T-0123/S02`.
+
+The PM verified current Codex CLI `/status` at 71 percent weekly remaining
+before promotion. The warm AI estimate is 90--180 minutes editing, 30--90
+minutes verification, 20--45 minutes independent testing, and 30--60 minutes
+records/PR integration, or about 2.8--6.3 AI working hours. This is planning,
+not S02 evidence. The existing generated schedule is still observation-only;
+no multi-DAG, general Graph, performance, physical, FPGA, ASIC, or silicon
+result is recorded.
+
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

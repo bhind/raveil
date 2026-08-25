@@ -265,6 +265,17 @@ executor still follows its hardwired state machine and does not consume or
 install the generated schedule. Affine configuration and multi-DAG execution
 remain later boundaries.
 
+ADR-0063 separates the next configuration-installation boundary from that
+execution ABI. A bounded installer owns fixed-width clear, sequential payload
+write, and atomic commit only while the executor and owned memory are idle. The
+executor consumes installed rows, columns, and input/output strides, while the
+implementation tag remains separate from the live installed digest. The 324-
+word input and 256-word private output windows do not move. Reset restores the
+baseline profile and clears the simulation scratchpad, making inactive compact
+output words zero before the complete fixed window becomes valid. This is a
+simulation-functional ownership rule, not a physical-memory implementation or
+performance claim.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the
