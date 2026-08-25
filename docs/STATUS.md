@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -131,6 +131,45 @@ and graph SHA-256 `8fbee170f393e6ed777484c9fbb3f6e0d6adddbf1802525fa5a1bb680756a
 This closes only the five-point S01 carry-in as `rtl-simulation-functional`
 negative evidence; T-0106 remains open and conditional, T-0042 remains
 complete, and no performance or resource-match claim follows.
+
+T-0124 removes a mutable local Docker tag from the complete BOOM functional
+simulator consumer closure. The incident was not a changed executable payload:
+Docker 29.6.2 with Buildx 0.35.0 emitted a provenance-bearing OCI index whose
+digest changes between builds, while its linux/amd64 payload manifest
+9009a923ce829097efacd97fe62cbef79dfdcafc70dc435d4bf5e1a66fdaf822,
+Config-view hash
+32a509e843f24ac9a49c679f967a4626a6614f158775e352f3b38fdc7d8ed522,
+and RootFS-layer-list hash
+154dc63d7967ea4dce962f002ee10be12f598b5358f6b0ffc524a80d72bb8b9c
+remained stable. The evidence defect was that an ordinary runner rebuilt and
+retagged a shared name and project records could conflate the stable payload
+manifest with the dynamic runtime index.
+
+The only build entry point is now the explicit tagless
+build-boom-functional-sim-image.sh. It publishes an append-only ignored
+receipt under the exact runtime digest and atomically updates a local current
+pointer only after the verifier binds descriptor digest/media type/size,
+BuildKit runtime-index and linux/amd64-payload attachments, Config, RootFS,
+platform, and the exact locally loaded image. Eleven existing runners consume
+only the verifier result; none references or replaces
+raveil-boom-functional-sim:v1. The primary and independent v2 builds used
+different runtime OCI indexes,
+7f8b6466109f0839d3f1d802e7db0b70181e05f6340779c379a38858ead18320
+and
+673e17bee26db760ef51b0ebb1655f349ac175f258f7832ca3fd9d1df34a2cc5,
+with the same descriptor size 856 and stable payload, Config, and RootFS
+identities above. The BOOM stripped-token wrapper again passed after
+10,916 cycles, and the G1E runtime selector again passed both Graph and Rocket
+modes on one RTL image. The old shared tag retained exact ID
+ccf3e059120c688014eaf5bc4fa2dd15b7fed719061d969ee0146b0477e01791
+and LastTagTime 2026-08-23T20:46:35.539767298Z before and after all accepted
+runs.
+
+This is local rtl-simulation-functional and evidence-integrity support only.
+The receipt depends on the local BuildKit history record and is therefore not
+a cross-host portable OCI archive. No prior performance result, EXP decision,
+resource match, physical result, FPGA, ASIC, silicon, or general semantic
+claim changes.
 
 T-0122 now supplies the current-main simulation-first Graph device MVP. The
 task-neutral `raveil.graph-device-abi/v1` is fixed-width, little-endian,

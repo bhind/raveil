@@ -9,7 +9,7 @@ set -eu
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 output_dir=$1
 chipyard=${RAVEIL_CHIPYARD_SOURCE:-"$repo_root/external/chipyard"}
-image=raveil-boom-functional-sim:v1
+image=$("$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh")
 platform=linux/amd64
 build_volume=raveil-chipyard-physical-yosys-rocket-v1
 baseline_build_volume=raveil-chipyard-fixture-repeated-rocket-v1

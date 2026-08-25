@@ -394,6 +394,12 @@ resolves it.
 - What immutable environment receipt, base-image digest, and OS resource
   limits are required before the pinned compiler adapter may process anything
   beyond repository-owned allowlisted sources?
+- If BOOM simulator images later require cross-host replay rather than an
+  explicit rebuild on each admitted host, should T-0124's local
+  BuildKit-history receipt be replaced by a validated OCI layout/archive that
+  retains the complete index-to-manifest-to-config/layer digest and size
+  graph? The current receipt deliberately fails closed when its local build
+  record is absent and is not portable evidence.
 - Which upstream components should be integrated, wrapped, progressively
   replaced, or rejected?
 - What measured threshold—performance, memory, energy, variance, security, or

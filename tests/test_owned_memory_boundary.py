@@ -317,6 +317,13 @@ BOOM_DEBUG_SBA_RUNNER = (
 
 
 class OwnedMemoryBoundaryTests(unittest.TestCase):
+    def test_ordinary_owned_runner_is_pinned(self) -> None:
+        source = (ROOT / "hardware/chisel/run-owned-cpu-memory-smoke.sh").read_text(encoding="utf-8")
+        self.assertIn('runtime_image_id=$("$image_verifier")', source)
+        for forbidden in ("docker build", "docker buildx", "docker tag", "docker pull", "raveil-boom-functional-sim:v1"):
+            self.assertNotIn(forbidden, source)
+        self.assertLess(source.index("verify-boom-functional-sim-image.sh"), source.index("docker run"))
+
     def test_contract_is_owned_bounded_and_attributed(self) -> None:
         source = RTL.read_text(encoding="utf-8")
         self.assertIn("class OwnedFixedLatencyScratchpad", source)

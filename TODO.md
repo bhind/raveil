@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -26,6 +26,26 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [x] **T-0124** Remove the mutable shared BOOM simulator tag from ordinary
+  RTL execution after an independent replay silently rebuilt
+  raveil-boom-functional-sim:v1. Keep the explicit image build separate and
+  tagless. Publish each successful local runtime OCI-index receipt under its
+  exact digest without replacing an earlier receipt, use only a validated
+  current pointer for local convenience, and fail closed unless the descriptor
+  digest/media type/size, BuildKit index-to-linux/amd64-payload attachments,
+  Config view, RootFS layer list, platform, and exact runtime image all agree.
+
+  Migrate the complete eleven-runner consumer closure, not only the runner
+  that exposed the incident. Preserve the stable payload manifest
+  9009a923...fdaf822 as a payload identity rather than mislabelling it as the
+  provenance-bearing runtime OCI index. Ordinary runners may not build, tag,
+  pull, or execute the former shared tag. The explicit bootstrap may resolve
+  the already pinned base dependency; post-bootstrap simulation runs use no
+  network. The accepted result is local rtl-simulation-functional
+  reproducibility hygiene only. It does not reinterpret a prior experiment,
+  create performance or physical evidence, or make a local BuildKit receipt
+  portable to another host.
 
 - [x] **T-0122** Deliver the smallest simulation-first Static Graph device MVP
   on current main. Reconstruct, rather than merge wholesale, the previously

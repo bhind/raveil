@@ -60,9 +60,9 @@ controlled_verifier="$repo_root/raveil/controlled_run.py"
 repeated_verifier="$repo_root/raveil/t0044_repeated.py"
 linker="$repo_root/hardware/chisel/boom_functional_smoke.ld"
 runner="$repo_root/hardware/chisel/run-owned-cpu-memory-smoke.sh"
+image_verifier="$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh"
 physical_yosys_wrapper="$repo_root/hardware/chisel/run-physical-yosys-rocket-build.sh"
 dockerfile="$repo_root/hardware/chisel/Dockerfile.boom-sim"
-image=raveil-boom-functional-sim:v1
 platform=linux/amd64
 toolchain_volume=raveil-chipyard-conda-lock-v1
 cpu_config=${RAVEIL_OWNED_CPU_CONFIG:?owned CPU config is required}
@@ -204,7 +204,7 @@ for input in "$overlay" "$origin_overlay" "$fixture_overlay" "$static_core_overl
     "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
     "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
     "$controlled_workload_s" "$controlled_workload_c" "$repeated_workload_s" "$repeated_workload_c" "$fixture_repeated_workload_c" "$controlled_linker" "$controlled_verifier" \
-    "$linker" "$runner" "$physical_yosys_wrapper" "$dockerfile"; do
+    "$linker" "$runner" "$image_verifier" "$physical_yosys_wrapper" "$dockerfile"; do
     [ -f "$input" ] || {
         echo "error: required owned CPU smoke input is missing: $input" >&2
         exit 1
@@ -252,7 +252,7 @@ input_sha256=$(
             "$verifier" "$loader_probe" "$loader_probe_linker" "$loader_probe_verifier" "$source_nonidentity_verifier" "$source_map_verifier" \
             "$debug_sba_workload" "$debug_sba_verifier" "$debug_sba_source_map_verifier" \
             "$controlled_workload_s" "$controlled_workload_c" "$repeated_workload_s" "$repeated_workload_c" "$fixture_repeated_workload_c" "$controlled_linker" "$controlled_verifier" "$repeated_verifier" \
-            "$linker" "$runner" "$dockerfile" |
+            "$linker" "$runner" "$dockerfile" "$image_verifier" |
             awk '{print $1}'
         printf '%s\n' "$cpu_mode" "$applied_patch_manifest"
         printf 'controlled_seed=%s\ncontrolled_invocation=%s\ncontrolled_serialize=%s\nrepeat_account=%s\ncpu_label=%s\n' \
@@ -329,15 +329,12 @@ if [ "$cpu_mode" = controlled-fixture-repeat ]; then
     )
 fi
 
-docker build \
-    --platform "$platform" \
-    --file "$repo_root/hardware/chisel/Dockerfile.boom-sim" \
-    --tag "$image" \
-    "$repo_root"
+runtime_image_id=$("$image_verifier")
 
 dockerfile_sha256=$(shasum -a 256 "$dockerfile" | awk '{print $1}')
 toolchain_sha256=$(
-    printf '%s\n' "$platform" "$dockerfile_sha256" "$lock_sha" \
+    printf '%s\n' "$platform" "$runtime_image_id" "$dockerfile_sha256" \
+        "$(shasum -a 256 "$image_verifier" | awk '{print $1}')" "$lock_sha" \
         'verilator=5.020' 'riscv64-unknown-elf-gcc=12.2.0' |
         shasum -a 256 |
         awk '{print $1}'
@@ -345,6 +342,7 @@ toolchain_sha256=$(
 
 docker run --rm \
     --platform "$platform" \
+    --network none \
     --security-opt no-new-privileges=true \
     --mount "type=bind,source=$repo_root,target=/repo,readonly" \
     --mount "type=bind,source=$chipyard,target=/source,readonly" \
@@ -387,7 +385,7 @@ docker run --rm \
     --env "RAVEIL_PHYSICAL_YOSYS_FLOW=$physical_yosys_flow" \
     --env "RAVEIL_CHIPYARD_COMMON_MK_SHA256=$chipyard_common_mk_sha256" \
     --env "RAVEIL_PHYSICAL_LOWERING_OPTIONS=$physical_lowering_options" \
-    "$image" \
+    "$runtime_image_id" \
     bash -lc 'set -euo pipefail
 export PATH=/locked/env/bin:/locked/env/riscv-tools/bin:$PATH
 export RISCV=/locked/env/riscv-tools

@@ -671,6 +671,16 @@ or Boléro.
   and their simulation results grant no Program, Data, publication, or
   Experience authority.
 
+  BOOM functional simulator execution uses a repository-owned local image
+  receipt boundary. One explicit tagless builder may create a provenance-
+  bearing OCI index. Ordinary runners resolve an ignored current pointer to an
+  append-only digest-named receipt, verify the exact local index descriptor,
+  its BuildKit-bound linux/amd64 payload manifest, Config view, RootFS layer
+  list, and platform, then execute the returned digest. A Docker tag is never
+  runtime authority. This receipt is host-local because verification requires
+  the corresponding BuildKit history record; it is not a portable artifact,
+  remote registry identity, or durable experiment seal.
+
 The Linux module remains outside these authority domains as a non-authoritative
 transport harness. No real MMIO, DMA, IRQ, shared-memory, cache-coherency, or
 device-reset contract exists. A future reviewed CPU, CGRA, FPGA, NPU, RISC-V

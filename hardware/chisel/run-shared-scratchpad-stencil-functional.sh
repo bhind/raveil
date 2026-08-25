@@ -2,7 +2,7 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-image=raveil-boom-functional-sim:v1
+image=$("$repo_root/hardware/chisel/verify-boom-functional-sim-image.sh")
 platform=linux/amd64
 toolchain_volume=raveil-chipyard-conda-lock-v1
 boom_build_volume=raveil-chipyard-boom-sim-build-v1
@@ -15,6 +15,7 @@ memory_model=shared-tilelink-banked-scratchpad-unverified-latency
 
 docker run --rm \
     --platform "$platform" \
+    --network none \
     --security-opt no-new-privileges=true \
     --mount "type=bind,source=$repo_root,target=/repo,readonly" \
     --mount "type=volume,source=$toolchain_volume,target=/locked,readonly" \
