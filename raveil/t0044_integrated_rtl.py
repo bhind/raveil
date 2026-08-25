@@ -898,6 +898,144 @@ def analyze_hierarchy(document: dict[str, Any], variant: str) -> dict[str, Any]:
     }
 
 
+def analyze_common_concrete_hierarchy(
+    document: dict[str, Any],
+    variant: str,
+    *,
+    source_sha256: str,
+    flat_document: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Strict Option-B pre-data check for a concrete (non-blackbox) export."""
+    require(variant in VARIANTS, f"unknown variant: {variant}")
+    require(
+        _HEX_SHA256.fullmatch(source_sha256) is not None,
+        "common memory source SHA-256 is required",
+    )
+    all_modules = modules(document)
+    instances = list(walk_hierarchy(all_modules))
+    reachable = reachable_module_names(all_modules, instances)
+    blackboxes = {name for name in reachable if attribute_true(all_modules[name].get("attributes", {}).get("blackbox", False))}
+    require(not blackboxes, "common-concrete policy requires zero reachable blackboxes")
+    typed_paths: dict[str, list[str]] = {}
+    for path, cell_type, _ in instances:
+        typed_paths.setdefault(cell_type, []).append(path)
+    macro_paths = {name: sorted(typed_paths.get(name, [])) for name in sorted(MEMORY_MACRO_CONTRACT)}
+    require(set(typed_paths) >= set(MEMORY_MACRO_CONTRACT), "common concrete macro type missing")
+    for name, expected in MEMORY_MACRO_COUNTS.items():
+        require(len(macro_paths[name]) == expected, f"common concrete instance count drift for {name}")
+        module = all_modules[name]
+        require(not attribute_true(module.get("attributes", {}).get("blackbox", False)), f"concrete macro remains blackbox: {name}")
+        actual_ports = {p: (v[0], v[1]) for p, v in port_signature(module).items()}
+        require(actual_ports == MEMORY_MACRO_PORTS[name], f"common concrete port contract drift for {name}")
+        mems = [cell for cell in module.get("cells", {}).values() if cell.get("type") == "$mem_v2"]
+        require(len(mems) == 1, f"common concrete module must contain exactly one $mem_v2: {name}")
+    rockets = typed_paths.get("Rocket", [])
+    require(len(rockets) == 1, "hierarchy must contain exactly one Rocket instance")
+    managers = typed_paths.get("RaveilOwnedTLMemory", [])
+    fixtures = typed_paths.get("RaveilFixtureInputProvider", [])
+    require(len(managers) == 1, "hierarchy must contain exactly one owned memory manager")
+    require(len(fixtures) == 1, "hierarchy must contain exactly one fixture provider")
+    require(
+        any(name == "DCache" or name.endswith("DCache") for name in reachable),
+        "hierarchy lacks a Rocket data cache",
+    )
+    require(
+        any(
+            name.startswith("TLXbar") or name.startswith("TLInterconnectCoupler")
+            for name in reachable
+        ),
+        "hierarchy lacks a TileLink interconnect",
+    )
+    graph_types = {
+        "RaveilIntegratedGraphDigitalTop",
+        "RaveilStaticStencilCore",
+        "RaveilStaticStencilTLClient",
+    }
+    graph_paths = {name: typed_paths.get(name, []) for name in sorted(graph_types)}
+    if variant == "integrated-static-graph-rocket":
+        for name, paths in graph_paths.items():
+            require(len(paths) == 1, f"integrated hierarchy requires one {name} instance")
+    else:
+        require(
+            not any(graph_paths.values()),
+            "matched Rocket baseline contains integrated Graph logic",
+        )
+    signature = port_signature(all_modules[TOP])
+    missing_ports = sorted(REQUIRED_PORTS - signature.keys())
+    require(not missing_ports, f"ChipTop lacks required ports: {missing_ports}")
+    require(signature["axi4_mem_0_clock"][0] == "output", "AXI clock must be output")
+    require(signature["clock_tap"][0] == "output", "clock tap must be output")
+    for name in CLOCK_ROOTS | {"reset_io", "custom_boot"}:
+        require(signature[name][0] == "input", f"{name} must be input")
+    clock_inventory = (
+        analyze_clock_inventory(flat_document) if flat_document is not None else None
+    )
+    return {
+        "top": TOP, "variant": variant, "config": VARIANTS[variant],
+        "rocket_instance_path": rockets[0],
+        "rocket_module_canonical_sha256": all_modules["Rocket"].get("rtlil_canonical_sha256", module_json_sha256(all_modules["Rocket"])),
+        "rocket_module_raw_sha256": all_modules["Rocket"].get("rtlil_raw_sha256", module_json_sha256(all_modules["Rocket"])),
+        "owned_memory_path": managers[0],
+        "fixture_provider_path": fixtures[0],
+        "graph_paths": graph_paths,
+        "port_signature": signature, "memory_macro_paths": macro_paths,
+        "memory_macro_port_signatures": {n: port_signature(all_modules[n]) for n in sorted(MEMORY_MACRO_CONTRACT)},
+        "memory_macro_module_sha256": {n: module_json_sha256(all_modules[n]) for n in sorted(MEMORY_MACRO_CONTRACT)},
+        "reachable_blackboxes": [], "blackbox_policy": "common-concrete-zero-reachable-blackboxes",
+        "source_sha256": source_sha256,
+        "clock_inventory": clock_inventory,
+        "status": "structural-preflight-only",
+    }
+
+
+def compare_common_concrete_reports(
+    integrated: dict[str, Any], baseline: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare the two concrete-memory hierarchy reports without candidate data."""
+    require(
+        integrated.get("variant") == "integrated-static-graph-rocket",
+        "wrong integrated concrete report",
+    )
+    require(
+        baseline.get("variant") == "matched-rocket-system",
+        "wrong matched-Rocket concrete report",
+    )
+    for field in (
+        "port_signature",
+        "rocket_module_canonical_sha256",
+        "owned_memory_path",
+        "fixture_provider_path",
+        "memory_macro_paths",
+        "memory_macro_port_signatures",
+        "memory_macro_module_sha256",
+        "source_sha256",
+        "clock_inventory",
+    ):
+        require(
+            integrated.get(field) == baseline.get(field),
+            f"common concrete identity mismatch: {field}",
+        )
+    require(
+        integrated.get("reachable_blackboxes") == baseline.get("reachable_blackboxes") == [],
+        "common concrete hierarchy contains a reachable blackbox",
+    )
+    return {
+        "schema": "raveil.exp-0011-common-memory-concrete/v1",
+        "status": "structural-only",
+        "source_sha256": integrated["source_sha256"],
+        "memory_macro_instances": sum(MEMORY_MACRO_COUNTS.values()),
+        "memory_macro_types": len(MEMORY_MACRO_CONTRACT),
+        "rocket_module_canonical_sha256": integrated["rocket_module_canonical_sha256"],
+        "common_clock_roots": integrated["clock_inventory"]["allowed_roots"],
+        "reachable_blackboxes": 0,
+        "nonclaims": [
+            "no synthesis or memory mapping",
+            "no placement or routing",
+            "no timing, area, energy, performance, FPGA, ASIC, or silicon result",
+        ],
+    }
+
+
 def is_constant(bit: Any) -> bool:
     return isinstance(bit, str) and bit.lower() in {"0", "1", "x", "z"}
 
@@ -1305,6 +1443,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     analyze.add_argument("--hierarchy", type=Path, required=True)
     analyze.add_argument("--flat", type=Path, required=True)
     analyze.add_argument("--variant", choices=sorted(VARIANTS), required=True)
+    concrete = subparsers.add_parser("analyze-concrete")
+    concrete.add_argument("--hierarchy", type=Path, required=True)
+    concrete.add_argument("--flat", type=Path, required=True)
+    concrete.add_argument("--variant", choices=sorted(VARIANTS), required=True)
+    concrete.add_argument("--source-sha256", required=True)
+    compare_concrete = subparsers.add_parser("compare-concrete")
+    compare_concrete.add_argument("--integrated-report", type=Path, required=True)
+    compare_concrete.add_argument("--baseline-report", type=Path, required=True)
     validate = subparsers.add_parser("validate-export")
     validate.add_argument("--export-dir", type=Path, required=True)
     validate.add_argument("--variant", choices=sorted(VARIANTS), required=True)
@@ -1318,6 +1464,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if args.command == "analyze":
         result = analyze_export(args.export_dir, args.hierarchy, args.flat, args.variant)
+    elif args.command == "analyze-concrete":
+        result = analyze_common_concrete_hierarchy(
+            load_json(args.hierarchy),
+            args.variant,
+            source_sha256=args.source_sha256,
+            flat_document=load_json(args.flat),
+        )
+    elif args.command == "compare-concrete":
+        result = compare_common_concrete_reports(
+            load_json(args.integrated_report), load_json(args.baseline_report)
+        )
     elif args.command == "validate-export":
         result = validate_export(args.export_dir, args.variant)
     else:

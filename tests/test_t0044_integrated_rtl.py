@@ -14,6 +14,8 @@ from raveil.t0044_integrated_rtl import (
     analyze_clock_inventory,
     analyze_export,
     analyze_hierarchy,
+    analyze_common_concrete_hierarchy,
+    compare_common_concrete_reports,
     compare_reports,
     load_rtlil_hierarchy,
     validate_export,
@@ -311,6 +313,64 @@ def measurement_contract():
 
 
 class TestIntegratedRTL(unittest.TestCase):
+    def concrete_document(self):
+        doc = hierarchy_document(graph=True)
+        for name in MEMORY_MACRO_CONTRACT:
+            doc["modules"][name].pop("attributes", None)
+            doc["modules"][name]["cells"] = {"mem": {"type": "$mem_v2"}}
+        return doc
+
+    def test_common_concrete_policy_success_and_blackbox_rejection(self):
+        report = analyze_common_concrete_hierarchy(self.concrete_document(), "integrated-static-graph-rocket", source_sha256=HEX)
+        self.assertEqual(len(report["memory_macro_paths"]), 7)
+        bad = self.concrete_document()
+        bad["modules"]["cc_dir_ext"]["attributes"] = {"blackbox": "1"}
+        with self.assertRaisesRegex(ValueError, "blackbox"):
+            analyze_common_concrete_hierarchy(bad, "integrated-static-graph-rocket", source_sha256=HEX)
+
+    def test_common_concrete_policy_rejects_instance_port_and_mem_drift(self):
+        for mutate, text in (
+            (lambda d: d["modules"]["RaveilIntegratedGraphDigitalTop"]["cells"].pop("macro_cc_dir_ext_0"), "macro type missing"),
+            (lambda d: d["modules"]["cc_dir_ext"]["ports"].pop("RW0_wmask"), "port contract"),
+            (lambda d: d["modules"]["cc_dir_ext"]["cells"].clear(), "exactly one"),
+        ):
+            bad = self.concrete_document(); mutate(bad)
+            with self.assertRaisesRegex(ValueError, text):
+                analyze_common_concrete_hierarchy(bad, "integrated-static-graph-rocket", source_sha256=HEX)
+
+    def test_common_concrete_policy_rejects_missing_source_identity(self):
+        with self.assertRaisesRegex(ValueError, "source SHA-256"):
+            analyze_common_concrete_hierarchy(
+                self.concrete_document(),
+                "integrated-static-graph-rocket",
+                source_sha256="",
+            )
+
+    def test_common_concrete_comparison_rejects_identity_drift(self):
+        integrated = analyze_common_concrete_hierarchy(
+            self.concrete_document(),
+            "integrated-static-graph-rocket",
+            source_sha256=HEX,
+        )
+        baseline_doc = hierarchy_document(graph=False)
+        for name in MEMORY_MACRO_CONTRACT:
+            baseline_doc["modules"][name].pop("attributes", None)
+            baseline_doc["modules"][name]["cells"] = {"mem": {"type": "$mem_v2"}}
+        baseline = analyze_common_concrete_hierarchy(
+            baseline_doc,
+            "matched-rocket-system",
+            source_sha256=HEX,
+        )
+        clock_inventory = {"allowed_roots": sorted(CLOCK_ROOTS)}
+        integrated["clock_inventory"] = clock_inventory
+        baseline["clock_inventory"] = clock_inventory
+        self.assertEqual(
+            compare_common_concrete_reports(integrated, baseline)["reachable_blackboxes"],
+            0,
+        )
+        baseline["source_sha256"] = "1" * 64
+        with self.assertRaisesRegex(ValueError, "source_sha256"):
+            compare_common_concrete_reports(integrated, baseline)
     def test_s12_measurement_readiness_contract_valid(self):
         document = measurement_contract()
         self.assertEqual(validate_measurement_readiness_contract(document)["status"], "ready-for-review")
@@ -1084,6 +1144,36 @@ end
         for forbidden in ("synth -top", "abc -liberty", "stat -liberty", "sta "):
             self.assertNotIn(forbidden, preflight)
         self.assertNotIn('awk "{print \\\\$1}"', export)
+
+    def test_common_concrete_runner_is_pinned_offline_and_stops_before_mapping(self):
+        runner = (
+            ROOT / "hardware/chisel/run-exp0011-common-memory-hierarchy-preflight.sh"
+        ).read_text()
+        for token in (
+            "APPEND_ONLY_OUTPUT_DIR",
+            "--network none",
+            "expected_image_id=sha256:7a0db885c100695626175931d3e053ba6a1602d949167b83e2ef60888eea7169",
+            "exp0011_common_stdcell_memories.sv",
+            "hierarchy -check -top ChipTop",
+            "memory_collect",
+            "check -assert",
+            "write_json /out/$variant-hierarchy.json",
+            "write_json /out/$variant-flat.json",
+            "--source-sha256",
+            "compare-concrete",
+            '"memory_mapping": False',
+            '"reachable_blackboxes": 0',
+        ):
+            self.assertIn(token, runner)
+        for forbidden in (
+            "hierarchy -generate",
+            "\nmemory_map\n",
+            "synth -top",
+            "abc -liberty",
+            "openroad",
+            "docker build",
+        ):
+            self.assertNotIn(forbidden, runner.lower())
 
 
 if __name__ == "__main__":
