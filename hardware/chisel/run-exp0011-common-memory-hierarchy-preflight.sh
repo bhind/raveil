@@ -93,7 +93,7 @@ hierarchy -check -top ChipTop
 proc
 memory_collect
 check -assert
-write_json /out/$variant-hierarchy.json
+write_rtlil /out/$variant-hierarchy.rtlil
 flatten
 opt_clean
 check -assert
@@ -107,7 +107,7 @@ for variant in integrated baseline; do
     config=matched-rocket-system
     [ "$variant" = integrated ] && config=integrated-static-graph-rocket
     PYTHONPATH="$repo_root" python3 -m raveil.t0044_integrated_rtl analyze-concrete \
-        --hierarchy "$raw_dir/$variant-hierarchy.json" \
+        --hierarchy "$raw_dir/$variant-hierarchy.rtlil" \
         --flat "$raw_dir/$variant-flat.json" \
         --variant "$config" \
         --source-sha256 "$source_sha256" \

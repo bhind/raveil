@@ -104,6 +104,12 @@ def flat_document():
                     },
                     "serial_memory": {
                         "type": "$mem_v2",
+                        "parameters": {
+                            "RD_PORTS": "00000000000000000000000000000001",
+                            "WR_PORTS": "00000000000000000000000000000001",
+                            "RD_CLK_ENABLE": "1",
+                            "WR_CLK_ENABLE": "1",
+                        },
                         "port_directions": {"RD_CLK": "input", "WR_CLK": "input"},
                         "connections": {"RD_CLK": [3], "WR_CLK": ["0"]},
                     },
@@ -713,6 +719,39 @@ class TestIntegratedRTL(unittest.TestCase):
         self.assertEqual(report["allowed_roots"], sorted(CLOCK_ROOTS))
         self.assertEqual(report["sequential_endpoint_count"], 3)
 
+    def test_inactive_mem_v2_rom_clocks_are_not_endpoints(self):
+        document = flat_document()
+        document["modules"]["ChipTop"]["cells"]["serial_ff"] = {
+            "type": "$dff",
+            "port_directions": {"CLK": "input", "D": "input", "Q": "output"},
+            "connections": {"CLK": [3], "D": ["0"], "Q": [12]},
+        }
+        memory = document["modules"]["ChipTop"]["cells"]["serial_memory"]
+        memory["parameters"].update({
+            "RD_PORTS": "00000000000000000000000000000001",
+            "WR_PORTS": "00000000000000000000000000000000",
+            "RD_CLK_ENABLE": "0",
+            "WR_CLK_ENABLE": "0",
+        })
+        memory["connections"].update({"RD_CLK": ["x"], "WR_CLK": []})
+        report = analyze_clock_inventory(document)
+        self.assertEqual(report["sequential_endpoint_count"], 3)
+
+    def test_active_or_malformed_mem_v2_clocks_fail_closed(self):
+        mutations = (
+            lambda memory: memory["connections"].__setitem__("RD_CLK", ["x"]),
+            lambda memory: memory["connections"].__setitem__("RD_CLK", []),
+            lambda memory: memory["parameters"].__setitem__("RD_PORTS", "bad"),
+            lambda memory: memory["parameters"].__setitem__("RD_CLK_ENABLE", ""),
+            lambda memory: memory["parameters"].__setitem__("RD_CLK_ENABLE", "10"),
+        )
+        for mutate in mutations:
+            document = flat_document()
+            memory = document["modules"]["ChipTop"]["cells"]["serial_memory"]
+            mutate(memory)
+            with self.subTest(mutation=mutate), self.assertRaises(ValueError):
+                analyze_clock_inventory(document)
+
     def test_rtlil_hierarchy_loader_keeps_only_structural_identity(self):
         text = """attribute \\top 1
 module \\ChipTop
@@ -981,6 +1020,17 @@ end
         self.assertEqual(report["eicg_control_latch_cells"], ["eicg_latch"])
         self.assertEqual(report["root_endpoint_counts"]["clock_uncore"], 2)
 
+    def test_exact_eicg_accepts_variant_absolute_source_prefix(self):
+        document = self.eicg_document()
+        for cell_name in ("eicg_latch", "eicg_gate"):
+            cell = document["modules"]["ChipTop"]["cells"][cell_name]
+            cell["attributes"]["src"] = "/integrated/" + cell["attributes"]["src"].replace(
+                "|generated-src/", "|/integrated/generated-src/"
+            )
+        report = analyze_clock_inventory(document)
+        self.assertEqual(report["eicg_clock_gate_cells"], ["eicg_gate"])
+        self.assertEqual(report["eicg_control_latch_cells"], ["eicg_latch"])
+
     def test_eicg_pattern_drift_fails_closed(self):
         mutations = (
             lambda d: d["modules"]["ChipTop"]["cells"]["eicg_latch"]["connections"].__setitem__("EN", [2]),
@@ -1164,7 +1214,7 @@ end
             "hierarchy -check -top ChipTop",
             "memory_collect",
             "check -assert",
-            "write_json /out/$variant-hierarchy.json",
+            "write_rtlil /out/$variant-hierarchy.rtlil",
             "write_json /out/$variant-flat.json",
             "--source-sha256",
             "compare-concrete",

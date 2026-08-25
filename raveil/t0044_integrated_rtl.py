@@ -1056,8 +1056,54 @@ def sequential_clock_ports(cell_type: str, cell: dict[str, Any]) -> set[str]:
         pins = MEMORY_MACRO_CLOCK_PORTS[cell_type]
         require(pins <= connections.keys(), f"memory macro lacks clock pin: {cell_type}")
         return pins
-    memory_types = ("$mem_v2", "$memrd", "$memwr")
-    if cell_type.startswith(memory_types):
+    if cell_type == "$mem_v2":
+        parameters = cell.get("parameters", {})
+        active_pins: set[str] = set()
+        for prefix in ("RD", "WR"):
+            ports_value = parameters.get(f"{prefix}_PORTS")
+            require(
+                isinstance(ports_value, str)
+                and ports_value
+                and set(ports_value) <= {"0", "1"},
+                f"$mem_v2 has malformed {prefix}_PORTS",
+            )
+            port_count = int(ports_value, 2)
+            enable_value = parameters.get(f"{prefix}_CLK_ENABLE")
+            require(
+                isinstance(enable_value, str)
+                and enable_value
+                and set(enable_value) <= {"0", "1"},
+                f"$mem_v2 has malformed {prefix}_CLK_ENABLE",
+            )
+            pin = f"{prefix}_CLK"
+            require(pin in connections, f"$mem_v2 lacks {pin}")
+            clock_bits = connections[pin]
+            require(isinstance(clock_bits, list), f"$mem_v2 has malformed {pin}")
+            if port_count == 0:
+                require(int(enable_value, 2) == 0, f"$mem_v2 enables absent {prefix} port")
+                require(not clock_bits, f"$mem_v2 has clock bits for absent {prefix} port")
+                continue
+            require(
+                len(enable_value) == port_count,
+                f"$mem_v2 {prefix}_CLK_ENABLE width disagrees with {prefix}_PORTS",
+            )
+            require(
+                len(clock_bits) == port_count,
+                f"$mem_v2 {pin} width disagrees with {prefix}_PORTS",
+            )
+            if set(enable_value) == {"0"}:
+                require(
+                    all(is_constant(bit) for bit in clock_bits),
+                    f"$mem_v2 disabled {pin} is not constant",
+                )
+                continue
+            require(
+                set(enable_value) == {"1"},
+                f"$mem_v2 mixed {prefix}_CLK_ENABLE is unsupported",
+            )
+            active_pins.add(pin)
+        return active_pins
+    if cell_type.startswith(("$memrd", "$memwr")):
         pins = {name for name in connections if "CLK" in name.upper()}
         require(pins, f"clocked memory cell lacks a clock pin: {cell_type}")
         return pins
@@ -1121,7 +1167,13 @@ def analyze_clock_inventory(document: dict[str, Any]) -> dict[str, Any]:
         if cell.get("type") not in {"$and", "$logic_and"}:
             return None
         gate_source = str(cell.get("attributes", {}).get("src", ""))
-        if "|generated-src/EICG_wrapper.v:18." not in gate_source:
+        gate_source_parts = gate_source.split("|")
+        gate_leaf = "generated-src/EICG_wrapper.v:18.16-18.32"
+        if (
+            len(gate_source_parts) != 2
+            or gate_source_parts[1]
+            not in {gate_leaf, f"/integrated/{gate_leaf}", f"/baseline/{gate_leaf}"}
+        ):
             return None
         if cell.get("port_directions") != {"A": "input", "B": "input", "Y": "output"}:
             return None
@@ -1130,7 +1182,7 @@ def analyze_clock_inventory(document: dict[str, Any]) -> dict[str, Any]:
             return None
         if any(len(connections[pin]) != 1 for pin in ("A", "B", "Y")):
             return None
-        wrapper_source = gate_source.split("|generated-src/EICG_wrapper.v:", 1)[0]
+        wrapper_source = gate_source_parts[0]
         for latched_pin, raw_pin in (("A", "B"), ("B", "A")):
             latched_bit = connections[latched_pin][0]
             raw_bit = connections[raw_pin][0]
@@ -1142,7 +1194,18 @@ def analyze_clock_inventory(document: dict[str, Any]) -> dict[str, Any]:
             if latch.get("type") != "$dlatch":
                 continue
             latch_source = str(latch.get("attributes", {}).get("src", ""))
-            if not latch_source.startswith(wrapper_source + "|generated-src/EICG_wrapper.v:12."):
+            latch_source_parts = latch_source.split("|")
+            latch_leaf = "generated-src/EICG_wrapper.v:12.3-16.6"
+            if (
+                len(latch_source_parts) != 2
+                or latch_source_parts[0] != wrapper_source
+                or latch_source_parts[1]
+                not in {
+                    latch_leaf,
+                    f"/integrated/{latch_leaf}",
+                    f"/baseline/{latch_leaf}",
+                }
+            ):
                 continue
             if latch.get("port_directions") != {"D": "input", "EN": "input", "Q": "output"}:
                 continue
@@ -1476,7 +1539,7 @@ def main(argv: list[str] | None = None) -> int:
         result = analyze_export(args.export_dir, args.hierarchy, args.flat, args.variant)
     elif args.command == "analyze-concrete":
         result = analyze_common_concrete_hierarchy(
-            load_json(args.hierarchy),
+            load_rtlil_hierarchy(args.hierarchy),
             args.variant,
             source_sha256=args.source_sha256,
             flat_document=load_json(args.flat),
