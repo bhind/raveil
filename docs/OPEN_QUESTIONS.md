@@ -11,6 +11,9 @@ resolves it.
 - After T-0122 passes, which second bounded acyclic DAG is the smallest honest
   T-0123 discriminator while retaining the existing operation alphabet,
   one-port memory contract, independent oracle, and no graph-specific RTL?
+  S01 now proves only that a generated schedule describes the fixed executor's
+  accepted transaction trace; it does not answer affine installation or this
+  multi-DAG discriminator.
 
 ## Native execution
 

@@ -190,15 +190,52 @@ is now active only through S01, which owns generated-schedule trace equivalence
 on the unchanged T-0122 ABI. The later affine and multi-DAG slices remain P1
 and have not started.
 
-T-0123/S01 starts from current-main commit `12227f5` in the clean
-`feat/t-0123-bounded-generality` worktree. Its live Project card is the sole In
-Progress mutation item and binds one low-reasoning Chisel owner, one exact file
-allowlist, the focused unittest command, and the offline Verilator demo. The
-warm 1.17 GB Chisel/Verilator image and Scala cache are present. The AI estimate
-is 60--120 minutes for editing, 20--45 minutes for verification, 20--40 minutes
-for independent testing, and 30--60 minutes for PM records and PR integration,
-or about 2.2--4.4 AI working hours total at medium-high confidence. No S01
-result is recorded yet.
+T-0123/S01 now passes at implementation commit `f44d444` in the clean
+`feat/t-0123-bounded-generality` worktree. It adds no register or transport
+field to `raveil.graph-device-abi/v1`; four simulation-only ports observe each
+accepted internal scratchpad request at `requestFire`. The task-neutral
+schedule compiler derives ten immutable entries and a six-transaction template
+from the validated descriptor, keeps host ABI windows distinct from internal
+scratchpad words `[0,580)`, and rejects malformed lifecycle, numeric, count,
+address, store-data, ABI, artifact, source, input, oracle, output, simulator,
+environment, cancel-publication, and receipt identities. All 12 focused
+unittest methods pass; parameterized negative checks remain reported within
+those methods rather than being inflated into the runner's test count.
+
+Primary exact-commit evidence at
+`artifacts/graph_device_schedule/run.8IMrPt` and independent evidence at
+`artifacts/graph_device_schedule/run.roJ3MC` reproduce two complete 1,536-
+transaction traces, one nine-request strict cancellation prefix, Pavane-matched
+store data, no cancelled private output, and the same schedule receipt SHA-256
+`f91582420c49b88465b6215a61d1937b9448803f7b7fe76e3c8a5855c111e232`.
+Stable identities include ABI
+`fe01496e260f6504a9a04a0a54a5f65ad680fdded267293087f3edb929867277`,
+artifact `8e2d655e1769ca291ed99d72698cdc52f0b64924cac685de6d6883bafd766e6c`,
+generated schedule
+`f6a8beeb814bf60ba3b42b4070d50d2e71f79b9396d7c7c63d6e05deb1932e30`,
+transaction trace
+`8e998d7ea4332b2c7485fd754c939a326cbbd935d397e560227e7d85852f3dbc`,
+and Graph-device receipt
+`2b05e1c63a644a1f36a82b2336e32895fdc4108f6ea701e42ec730b176ae8f7a`.
+
+The initial low-reasoning mutation owner twice omitted the required prerequisite
+receipt closure and negative matrix while reporting them complete. The PM
+stopped under HCI-04/HCI-07, obtained owner approval for one narrow recovery,
+and directly closed the fail-open in the two authorized Python paths. A PM run
+before the final source edit produced schedule receipt `6491c373...a7f0`; its
+runtime payload is valid but its schedule source identity is not exact-
+`f44d444`, so it is excluded from closeout provenance. The independent agent
+wrapper later returned status 6 despite creating a complete valid receipt;
+the PM repeated the exact command at exact commit and observed shell exit zero
+with the same receipt. S01 is `rtl-simulation-functional` only. The generated
+schedule is not consumed or installed, S02 affine and S03 multi-DAG generality
+remain open, and no performance, physical, FPGA, ASIC, or silicon claim follows.
+The warm exact-commit PM end-to-end replay completed in about 37 seconds after
+the image existed, and the focused test suite completed in 6.410 seconds. The
+overall edit cycle was not time-sealed, and the repeated receipt-closure repair
+invalidated the initial five-SP risk assumption; Initial SP remains 5 while
+Current SP becomes 8 for the accepted slice. Remaining record, review, and PR
+integration is re-estimated at 30--60 AI working minutes.
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.

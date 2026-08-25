@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0123/S01 generated-schedule trace equivalence |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | — |
 | **P1 — next** | Start only after its named P0 dependency passes. | T-0123/S02 bounded affine shape/stride after S01; T-0123/S03 two-DAG execution after S02 |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -100,6 +100,20 @@ review and failure preservation do not consume the two-item delivery limit.
   a strict-prefix cancelled trace, and Pavane-matched store data while keeping
   the T-0122 ABI unchanged. S02 and S03 remain sequential P1 work and cannot
   start before their predecessor is accepted.
+
+  S01 now passes at implementation commit `f44d444`. The task-neutral schedule
+  compiler emits an immutable ten-entry schedule and six-transaction template;
+  simulation-only `requestFire` observation records exactly 1,536 accepted
+  scratchpad requests for each successful seed and a nine-request strict
+  cancellation prefix. Both complete traces and all store data match the
+  descriptor-derived schedule and Pavane. The unchanged ABI, artifact, source,
+  input, oracle, private output, simulator, and environment identities are
+  bound into the append-once schedule receipt. Primary and independent exact-
+  commit runs reproduce receipt SHA-256
+  `f91582420c49b88465b6215a61d1937b9448803f7b7fe76e3c8a5855c111e232`.
+  This completes S01 only: the schedule is observed but not consumed by the
+  executor. S02 remains P1 until its separate current-main allowlist,
+  installation boundary, acceptance packet, and live Project item are fixed.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
