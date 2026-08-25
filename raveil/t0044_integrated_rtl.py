@@ -795,6 +795,17 @@ def module_json_sha256(module: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def module_structural_sha256(module: dict[str, Any]) -> str:
+    canonical = module.get("rtlil_canonical_sha256")
+    if canonical is None:
+        return module_json_sha256(module)
+    require(
+        isinstance(canonical, str) and _HEX_SHA256.fullmatch(canonical) is not None,
+        "malformed canonical RTLIL module SHA-256",
+    )
+    return canonical
+
+
 def analyze_hierarchy(document: dict[str, Any], variant: str) -> dict[str, Any]:
     require(variant in VARIANTS, f"unknown variant: {variant}")
     all_modules = modules(document)
@@ -979,14 +990,17 @@ def analyze_common_concrete_hierarchy(
     return {
         "top": TOP, "variant": variant, "config": VARIANTS[variant],
         "rocket_instance_path": rockets[0],
-        "rocket_module_canonical_sha256": all_modules["Rocket"].get("rtlil_canonical_sha256", module_json_sha256(all_modules["Rocket"])),
+        "rocket_module_canonical_sha256": module_structural_sha256(all_modules["Rocket"]),
         "rocket_module_raw_sha256": all_modules["Rocket"].get("rtlil_raw_sha256", module_json_sha256(all_modules["Rocket"])),
         "owned_memory_path": managers[0],
         "fixture_provider_path": fixtures[0],
         "graph_paths": graph_paths,
         "port_signature": signature, "memory_macro_paths": macro_paths,
         "memory_macro_port_signatures": {n: port_signature(all_modules[n]) for n in sorted(MEMORY_MACRO_CONTRACT)},
-        "memory_macro_module_sha256": {n: module_json_sha256(all_modules[n]) for n in sorted(MEMORY_MACRO_CONTRACT)},
+        "memory_macro_module_sha256": {
+            name: module_structural_sha256(all_modules[name])
+            for name in sorted(MEMORY_MACRO_CONTRACT)
+        },
         "reachable_blackboxes": [], "blackbox_policy": "common-concrete-zero-reachable-blackboxes",
         "source_sha256": source_sha256,
         "clock_inventory": clock_inventory,

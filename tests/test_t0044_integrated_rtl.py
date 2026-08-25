@@ -327,12 +327,30 @@ class TestIntegratedRTL(unittest.TestCase):
         return doc
 
     def test_common_concrete_policy_success_and_blackbox_rejection(self):
-        report = analyze_common_concrete_hierarchy(self.concrete_document(), "integrated-static-graph-rocket", source_sha256=HEX)
+        document = self.concrete_document()
+        for index, name in enumerate(sorted(MEMORY_MACRO_CONTRACT)):
+            document["modules"][name]["rtlil_canonical_sha256"] = f"{index + 1:064x}"
+            document["modules"][name]["rtlil_raw_sha256"] = f"{index + 9:064x}"
+        report = analyze_common_concrete_hierarchy(document, "integrated-static-graph-rocket", source_sha256=HEX)
         self.assertEqual(len(report["memory_macro_paths"]), 7)
+        self.assertEqual(
+            report["memory_macro_module_sha256"],
+            {
+                name: f"{index + 1:064x}"
+                for index, name in enumerate(sorted(MEMORY_MACRO_CONTRACT))
+            },
+        )
         bad = self.concrete_document()
         bad["modules"]["cc_dir_ext"]["attributes"] = {"blackbox": "1"}
         with self.assertRaisesRegex(ValueError, "blackbox"):
             analyze_common_concrete_hierarchy(bad, "integrated-static-graph-rocket", source_sha256=HEX)
+
+        bad = self.concrete_document()
+        bad["modules"]["cc_dir_ext"]["rtlil_canonical_sha256"] = "bad"
+        with self.assertRaisesRegex(ValueError, "canonical RTLIL"):
+            analyze_common_concrete_hierarchy(
+                bad, "integrated-static-graph-rocket", source_sha256=HEX
+            )
 
     def test_common_concrete_policy_rejects_instance_port_and_mem_drift(self):
         for mutate, text in (
