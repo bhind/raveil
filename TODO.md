@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0125 |
-| **P1 — next** | Start only after its named P0 dependency passes. | None; select a successor after T-0125 acceptance. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None after T-0126 integration; T-0125 is paused by HCI-07 and Blocked as Issue #27. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0125 may resume only with human-approved mutation-owner transfer or third recovery. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -229,6 +229,30 @@ review and failure preservation do not consume the two-item delivery limit.
   AI working hours at medium confidence. Stop on ABI or RTL mutation, receipt
   weakening, identity ambiguity, arbitrary-Graph or opcode expansion, or any
   performance/resource/physical claim.
+
+  Two low-owner packets then failed the same acceptance/reporting boundary.
+  The second packet still omitted the required negative matrix after claiming
+  it was present. ADR-0051 HCI-07 pauses the four-file mutation; its incomplete
+  local files are preserved but are not evidence. Project item Issue #27 is
+  `Blocked`. Resume requires explicit human authority to transfer the mutation
+  owner or permit a third recovery. The task scope, 5 SP, read-only ABI/RTL
+  boundary, evidence class, and non-claims remain unchanged.
+
+- [x] **T-0126** Make GitHub Project #1 an executable work queue instead of an
+  after-the-fact DraftIssue ledger. ADR-0065 requires every newly active P0
+  slice to use a real `work-item` Issue, stable T-ID branch, named owner,
+  visible execution fields, and checked `In Progress`/`Review`/closed/`Done`
+  lifecycle. Reconcile `AGENTS.md` with ADR-0061 so at most two Implementers may
+  own truly disjoint mutation packets while PM records, acceptance, and merge
+  remain serial. Add a dry-run-default queue CLI and focused fail-closed tests.
+
+  T-0125 was converted in place to real Issue #27 and retained all Project
+  fields; T-0126 uses real Issue #28. Historical Draft cards remain untouched.
+  The live audit passed with one active delivery item after T-0125 was moved to
+  `Blocked`. Seven unit tests cover valid two-lane state, active Drafts, missing
+  cards, WIP overflow, task/lifecycle/branch mismatch, visible fields, and PR
+  closing references. This is host-functional governance only; it changes no
+  Graph, research, performance, FPGA, ASIC, silicon, or gate result.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
