@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import redirect_stdout
+import io
 import unittest
 
 from scripts.project_queue import (
@@ -252,7 +254,8 @@ class ProjectQueueAuditTest(unittest.TestCase):
         one_issue = issue(27, "T-0125 — Playable")
         project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
         queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
-        self.assertEqual(0, start(queue, start_args()))
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, start(queue, start_args()))
         self.assertEqual("Status", queue.edits[-1][1])
         self.assertEqual("In Progress", queue.edits[-1][2])
 
@@ -270,7 +273,8 @@ class ProjectQueueAuditTest(unittest.TestCase):
         project = {"items": [item(27, one_issue["title"], "In Progress", "T-0125")]}
         queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
         args = argparse.Namespace(issue=27, pr=30, apply=True)
-        self.assertEqual(0, review(queue, args))
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, review(queue, args))
         self.assertEqual([("item-27", "Status", "Review")], queue.edits)
 
 
