@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0128/S01 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None after T-0128/S01 integration; S02 is unallocated. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -33,7 +33,7 @@ review and failure preservation do not consume the two-item delivery limit.
   no aggregate SP. Promote only one independently acceptable child slice at a
   time, re-estimating after each canonical merge.
 
-  S01 is the sole P0 under real Issue #36 and branch
+  S01 was the sole P0 under real Issue #36 and branch
   `feat/t-0128-s01-operator-admission`, with Initial and Current SP 3. It adds
   `python3 -m raveil graph-device submit --graph <canonical-json> --seed N` and
   emits a deterministic `raveil.graph-device-submission/v1` envelope only for
@@ -49,7 +49,9 @@ review and failure preservation do not consume the two-item delivery limit.
   verification pass 35 combined submit/DAG/Playable tests, all three canonical
   CLI admissions, representative exit-2 rejection paths, and `git diff
   --check`. Evidence is `host-functional` admission only. S02 remains
-  unallocated until S01 merges and is re-estimated from canonical authority.
+  unallocated until a separate current-main packet is re-estimated and
+  promoted. PR #37 merged S01 as canonical commit `748debee`; S01 is complete
+  at `host-functional` admission only and does not activate S02.
   Stop on ABI, Graph JSON, compiler/oracle, Chisel/Verilator, T-0044, opcode,
   selector, window, scheduler, Experience-authority, filesystem-authority, or
   arbitrary/general-Graph expansion.

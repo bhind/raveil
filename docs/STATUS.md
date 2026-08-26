@@ -418,6 +418,11 @@ allocate S02, broaden the three accepted Graphs, or establish performance,
 resource, emulation, KV260, FPGA, ASIC, silicon, Experience-authority,
 security, novelty, patent, or legal results.
 
+PR #37 merged the exact reviewed S01 candidate as canonical commit
+`748debee204d8cfe06da99c456aa0ba8d1d543e1`. S01 is complete only for that
+host admission envelope. Parent T-0128 remains open, no Product P0 is active,
+and S02 is unallocated.
+
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
