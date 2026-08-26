@@ -95,7 +95,14 @@ specialist agents are not counted as independent FTE: final integration and
 acceptance remain serial. ADR-0061 requires the default live Kanban to expose
 ten pull fields while populated historical fields remain retained. Active mutation must have a
 matching live Project item; unmatched worktrees are donor material or
-provenance, not current WIP. The subsequent authority audit found that
+provenance, not current WIP. ADR-0065 and T-0126 now require that item to be a
+real `work-item` Issue rather than an active DraftIssue. Issue title, branch,
+Parent T-ID, owner, demo, evidence class, and lifecycle are checked by
+`scripts/project_queue.py`; transitions are read-only unless `--apply` is
+given. `AGENTS.md` permits named Implementers to own ADR-0061-compliant
+disjoint mutation packets while canonical records, final verification, PR
+acceptance, and merge stay serial with the Project Manager. Historical Draft
+cards remain preserved. The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
@@ -108,7 +115,7 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 42 items and 37 fields. Current SP totals are S-0001=64
+The Project retains 47 items and 37 fields. Current SP totals are S-0001=64
 and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
@@ -349,6 +356,15 @@ Graph-specific RTL regeneration. Chisel RTL, all accepted ABIs, Graph JSON,
 the S03 compiler/runner/receipt, and T-0044 remain read-only. Evidence remains
 `rtl-simulation-functional` plus `development-non-claim`; performance is not
 measured.
+
+T-0125 mutation is currently paused under ADR-0051 HCI-07. Two packets from
+the low mutation owner failed the same acceptance/reporting boundary; the
+second still omitted the required negative matrix after reporting it present.
+The incomplete four-file local state is preserved but unaccepted and untested
+as RTL evidence. Real Issue #27 is `Blocked`; resumption requires human-approved
+owner transfer or a third recovery. T-0126 uses real Issue #28 and its live
+queue audit passed with one active delivery item. This workflow result is
+host-functional only and does not alter T-0125's Graph scope or evidence class.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

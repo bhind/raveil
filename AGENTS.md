@@ -106,11 +106,17 @@ verification, and the STATUS/TODO/ADR/EXP/log consistency check. A subagent is
 an advisor, never an authority for a Raveil fact, decision, or measurement
 claim.
 
-- Delegate only independent, read-heavy work such as code or record
-  exploration, test-log analysis, evidence review, and diff review.
-- Do not delegate concurrent edits to the same coherent change. Assign one
-  named owner for every tracked-file mutation and keep the final integration in
-  the primary thread.
+- Delegate independent read-heavy work such as code or record exploration,
+  test-log analysis, evidence review, and diff review whenever it reduces the
+  primary context load. A named Implementer may also own tracked-file mutation
+  for one active real GitHub `work-item` Issue when ADR-0061's independence
+  packet fixes its clean worktree, branch, exact file allowlist, artifacts,
+  tests, evidence path, and stop rule before editing begins.
+- Do not delegate concurrent edits to the same coherent change. At most two
+  mutation owners may run concurrently, and their files, generated artifacts,
+  tests, evidence, correctness, and rollback must be disjoint. The primary
+  keeps task classification, canonical-record edits, final integration,
+  verification, PR acceptance, and merge serial.
 - Require each subagent to return paths, commands, evidence class, findings,
   and unresolved risks in a concise summary.
 - Use the repository skills in `.agents/skills/` when their trigger matches.
@@ -118,6 +124,11 @@ claim.
 - A progress review is read-only until the primary agent verifies each finding.
   Newly discovered work is de-duplicated against TODO before a new monotonic ID
   is allocated.
+- Before assigning a mutation owner, require the real Issue and Project item to
+  be `In Progress`; before accepting a PR, require the same item to be `Review`.
+  Use `scripts/project_queue.py` to audit or perform these transitions. Draft
+  cards and unmatched branches are planning, donor material, or provenance,
+  not active mutation authority.
 - Use one low-reasoning mutation owner for one coherent tracked-file change,
   one low-reasoning Tester after the slice, and at most two read-only reviewers
   in parallel. Reserve high reasoning for Project Manager authority, security
