@@ -93,11 +93,24 @@ def branch_work_id(branch: str) -> str | None:
 
 
 def missing_packet_markers(body: str) -> list[str]:
-    return [
-        name
+    matches = {
+        name: re.search(pattern, body, re.IGNORECASE)
         for name, pattern in REQUIRED_PACKET_MARKERS.items()
-        if re.search(pattern, body, re.IGNORECASE) is None
-    ]
+    }
+    missing: list[str] = []
+    for name, match in matches.items():
+        if match is None:
+            missing.append(name)
+            continue
+        following = [
+            other.start()
+            for other in matches.values()
+            if other is not None and other.start() > match.end()
+        ]
+        end = min(following, default=len(body))
+        if not body[match.end() : end].strip().strip("-* "):
+            missing.append(name)
+    return missing
 
 
 def issue_has_label(issue: dict[str, Any], label: str) -> bool:
@@ -358,7 +371,22 @@ def validate_issue_for_start(issue: dict[str, Any], branch: str) -> str:
     return task_id(issue_identity) or issue_identity
 
 
+def validate_start_arguments(args: argparse.Namespace) -> None:
+    required = {
+        "owner-role": args.owner_role,
+        "depends-on": args.depends_on,
+        "demo": args.demo,
+        "evidence-class": args.evidence_class,
+    }
+    for name, value in required.items():
+        if not isinstance(value, str) or not value.strip():
+            raise QueueError(f"--{name} must be nonblank")
+    if args.story_points <= 0:
+        raise QueueError("--story-points must be a positive integer")
+
+
 def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
+    validate_start_arguments(args)
     issue = queue.issue(args.issue)
     issue_tid = validate_issue_for_start(issue, queue.branch())
     project = queue.project()

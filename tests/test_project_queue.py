@@ -207,6 +207,10 @@ class ProjectQueueAuditTest(unittest.TestCase):
         self.assertTrue(any("incomplete independence packet" in error for error in errors))
         self.assertIn("Dependencies", missing_packet_markers(one_issue["body"]))
 
+    def test_packet_marker_values_cannot_be_empty(self) -> None:
+        empty_dependencies = PACKET.replace("Dependencies: none", "Dependencies:\n")
+        self.assertIn("Dependencies", missing_packet_markers(empty_dependencies))
+
     def test_child_slice_identity_is_not_collapsed(self) -> None:
         child = issue(27, "T-0123/S03 — Bounded DAG")
         child_item = item(27, child["title"], "In Progress", "T-0123")
@@ -258,6 +262,30 @@ class ProjectQueueAuditTest(unittest.TestCase):
             self.assertEqual(0, start(queue, start_args()))
         self.assertEqual("Status", queue.edits[-1][1])
         self.assertEqual("In Progress", queue.edits[-1][2])
+
+    def test_start_rejects_blank_required_values_without_remote_edit(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
+        for attribute in ("owner_role", "depends_on", "demo", "evidence_class"):
+            with self.subTest(attribute=attribute):
+                queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
+                args = start_args()
+                setattr(args, attribute, "  ")
+                with self.assertRaisesRegex(QueueError, "must be nonblank"):
+                    start(queue, args)
+                self.assertEqual([], queue.edits)
+
+    def test_start_rejects_nonpositive_points_without_remote_edit(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
+        for points in (0, -1):
+            with self.subTest(points=points):
+                queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
+                args = start_args()
+                args.story_points = points
+                with self.assertRaisesRegex(QueueError, "positive integer"):
+                    start(queue, args)
+                self.assertEqual([], queue.edits)
 
     def test_review_rejects_ready_to_review_jump(self) -> None:
         one_issue = issue(27, "T-0125 — Playable")

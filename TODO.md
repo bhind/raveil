@@ -249,7 +249,7 @@ review and failure preservation do not consume the two-item delivery limit.
   T-0125 was converted in place to real Issue #27 and retained all Project
   fields; T-0126 uses real Issue #28. Historical Draft cards remain untouched.
   The live audit passed with one active delivery item after T-0125 was moved to
-  `Blocked`. Fourteen unit tests cover valid two-lane state, active Drafts,
+  `Blocked`. Seventeen unit tests cover valid two-lane state, active Drafts,
   complete independence packets, missing cards, WIP overflow, full child-slice
   identity, transition preflight/order, task/lifecycle/branch mismatch, visible
   fields, and PR closing references. This is host-functional governance only; it changes no
