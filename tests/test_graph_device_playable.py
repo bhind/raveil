@@ -8,11 +8,14 @@ import tempfile
 import unittest
 
 from raveil.graph_device_dag import (
-    EVIDENCE_CLASS,
     GraphDeviceDagError,
+    _generated_header,
     compile_artifact,
+    expected_transactions,
+    finalize,
 )
-from raveil.graph_device_playable import NON_CLAIMS, parse_marker, render, validate
+from raveil.graph_device_playable import parse_marker, render, validate
+from raveil.riscv_stencil_signature import input_words
 
 
 def _canonical(value: object) -> bytes:
@@ -35,58 +38,57 @@ class PlayableValidationTest(unittest.TestCase):
         (self.root / "rtl-export.sha256").write_text(
             self.rtl_identity + "\n", encoding="ascii"
         )
+        (self.root / "graph_device_dag_generated.h").write_bytes(
+            _generated_header(self.artifact)
+        )
+        (self.root / "device.log").write_text(
+            "GraphDevice-DAG-RUNTIME-V1 status=OK graphs=3 completed=4 "
+            "cancelled=1 invalid_cases=8\n",
+            encoding="ascii",
+        )
+        (self.root / "simulator.sha256").write_text("3" * 64 + "\n", encoding="ascii")
+        (self.root / "environment.txt").write_text(
+            "schema=raveil.graph-device-dag-environment/v1\n",
+            encoding="ascii",
+        )
+        (self.root / "dag-oracles").mkdir()
         by_id = {graph["graph_id"]: graph for graph in self.artifact["graphs"]}
-        runs = []
-        counts = []
         for invocation in self.artifact["invocations"]:
-            graph = by_id[invocation["graph_id"]]
-            full_count = (
-                graph["affine"]["rows"]
-                * graph["affine"]["columns"]
-                * graph["transactions_per_output"]
-            )
-            count = 3 if invocation["mode"] == "cancel" else full_count
-            output_id = hashlib.sha256(
-                f"{invocation['graph_id']}:{invocation['seed']}".encode("ascii")
-            ).hexdigest()
-            run = {
-                **invocation,
-                "program_sha256": graph["program_sha256"],
-                "oracle_sha256": output_id,
-                "transaction_count": count,
-            }
+            graph_id = invocation["graph_id"]
+            seed = invocation["seed"]
+            output = f"{graph_id}:{seed}".encode("ascii")
+            oracle = self.root / "dag-oracles" / f"{graph_id}-seed-{seed}.bin"
+            oracle.write_bytes(output)
+            (self.root / f"fallback-output-{graph_id}-seed-{seed}.bin").write_bytes(output)
             if invocation["mode"] != "cancel":
-                run["private_output_sha256"] = output_id
-            runs.append(run)
-            counts.append(count)
-        self.receipt = {
-            "schema": "raveil.graph-device-dag-receipt/v1",
-            "status": "complete",
-            "task": "T-0123",
-            "slice": "S03",
-            "evidence_class": EVIDENCE_CLASS,
-            "performance": "not-measured",
-            "source_sha256": self.artifact["source_sha256"],
-            "artifact_sha256": hashlib.sha256(artifact_raw).hexdigest(),
-            "execution_abi_sha256": self.artifact["execution_abi_sha256"],
-            "affine_abi_sha256": self.artifact["affine_abi_sha256"],
-            "program_abi_sha256": self.artifact["program_abi_sha256"],
-            "simulator_sha256": "3" * 64,
-            "environment_sha256": "4" * 64,
-            "transaction_trace_sha256": "5" * 64,
-            "busy_mutation_transaction_count": 1,
-            "transaction_counts": counts,
-            "transaction_addresses_match": True,
-            "store_data_oracle_match": True,
-            "same_executor_rtl": True,
-            "rtl_regenerated_per_graph": False,
-            "generic_fallback": True,
-            "invalid_programs_rejected": True,
-            "cancel_output_published": False,
-            "runs": runs,
-            "non_claims": NON_CLAIMS,
-        }
-        self._write_receipt()
+                (self.root / f"private-output-{graph_id}-seed-{seed}.bin").write_bytes(output)
+
+        def event(name: str) -> str:
+            return f"GraphDevice-TRACE-V1 event={name}\n"
+
+        def transactions(items) -> str:
+            return "".join(
+                "GraphDevice-TRACE-V1 event=transaction "
+                f"write={int(item['write'])} address={item['address']} "
+                f"data={item['data']:08x}\n"
+                for item in items
+            )
+
+        invocation_transactions = [
+            expected_transactions(by_id[item["graph_id"]], input_words(item["seed"]))
+            for item in self.artifact["invocations"]
+        ]
+        trace = event("reset") * 8
+        trace += event("start") + transactions(invocation_transactions[0][:1])
+        trace += event("cancel") + event("reset") + event("reset")
+        trace += event("start") + transactions(invocation_transactions[0]) + event("reset")
+        trace += event("start") + transactions(invocation_transactions[1]) + event("reset")
+        trace += event("start") + transactions(invocation_transactions[2][:3]) + event("cancel")
+        trace += event("reset")
+        trace += event("start") + transactions(invocation_transactions[3]) + event("reset")
+        trace += event("start") + transactions(invocation_transactions[4])
+        (self.root / "transaction-trace.txt").write_text(trace, encoding="ascii")
+        self.receipt = finalize(self.root)
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -223,6 +225,32 @@ class PlayableValidationTest(unittest.TestCase):
                 "private_output_sha256", "6" * 64
             )
         )
+
+    def test_rejects_lifecycle_mode_substitution(self) -> None:
+        self._reject_receipt(
+            lambda receipt: receipt["runs"][1].__setitem__("mode", "restart")
+        )
+
+    def test_rejects_raw_trace_substitution(self) -> None:
+        with (self.root / "transaction-trace.txt").open("a", encoding="ascii") as stream:
+            stream.write("GraphDevice-TRACE-V1 event=reset\n")
+        with self.assertRaises(GraphDeviceDagError):
+            validate(self.root)
+
+    def test_rejects_raw_output_substitution(self) -> None:
+        output = self.root / "private-output-five-point-seed-1.bin"
+        output.write_bytes(output.read_bytes() + b"changed")
+        with self.assertRaises(GraphDeviceDagError):
+            validate(self.root)
+
+    def test_rejects_symbolic_link_in_evidence(self) -> None:
+        link = self.root / "unexpected-link"
+        try:
+            link.symlink_to(self.root / "dag-artifact.json")
+        except OSError as error:
+            self.skipTest(f"symbolic links unavailable: {error}")
+        with self.assertRaises(GraphDeviceDagError):
+            validate(self.root)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,9 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 import sys
+import tempfile
 from typing import Any, Sequence
 
 from .graph_device_dag import (
@@ -16,6 +18,7 @@ from .graph_device_dag import (
     RECEIPT_SCHEMA,
     GraphDeviceDagError,
     compile_artifact,
+    finalize,
 )
 
 
@@ -121,6 +124,47 @@ def parse_marker(marker: str) -> Path:
     if MARKER_PATH_RE.fullmatch(values["path"]) is None:
         raise GraphDeviceDagError("evidence marker path escaped the bounded run directory")
     return Path(values["path"])
+
+
+def resolve_evidence_path(value: Path | str) -> Path:
+    relative = Path(value)
+    if relative.is_absolute() or MARKER_PATH_RE.fullmatch(relative.as_posix()) is None:
+        raise GraphDeviceDagError("evidence path is not a bounded repository run path")
+    repo = Path(__file__).resolve().parents[1]
+    expected_parent = repo / "artifacts" / "graph_device_dag"
+    for component in (
+        repo / "artifacts",
+        expected_parent,
+        expected_parent / relative.name,
+    ):
+        if component.is_symlink():
+            raise GraphDeviceDagError("evidence path contains a symbolic link")
+    try:
+        resolved_repo = repo.resolve(strict=True)
+        resolved_parent = expected_parent.resolve(strict=True)
+        resolved = (repo / relative).resolve(strict=True)
+    except OSError as error:
+        raise GraphDeviceDagError(f"evidence path cannot be resolved: {error}") from error
+    if resolved_parent.parent.parent != resolved_repo or resolved.parent != resolved_parent:
+        raise GraphDeviceDagError("evidence path escaped the repository artifact boundary")
+    return resolved
+
+
+def _revalidate_raw_evidence(
+    root: Path, receipt: dict[str, Any]
+) -> None:
+    if root.is_symlink() or any(path.is_symlink() for path in root.rglob("*")):
+        raise GraphDeviceDagError("evidence contains a symbolic link")
+    try:
+        with tempfile.TemporaryDirectory(prefix="raveil-playable-validate-") as directory:
+            copied = Path(directory) / "evidence"
+            shutil.copytree(root, copied, symlinks=True)
+            (copied / "dag-receipt.json").unlink()
+            regenerated = finalize(copied)
+    except (OSError, shutil.Error) as error:
+        raise GraphDeviceDagError(f"raw evidence cannot be revalidated: {error}") from error
+    if regenerated != receipt:
+        raise GraphDeviceDagError("receipt differs from raw S03 finalizer output")
 
 
 def validate(evidence: Path | str) -> tuple[dict[str, Any], dict[str, Any], str]:
@@ -234,6 +278,7 @@ def validate(evidence: Path | str) -> tuple[dict[str, Any], dict[str, Any], str]
     if type(busy_count) is not int or not 0 <= busy_count < counts[0]:
         raise GraphDeviceDagError("busy-mutation prefix accounting is malformed")
 
+    _revalidate_raw_evidence(root, receipt)
     return receipt, artifact, _rtl_identity(root)
 
 
@@ -286,7 +331,7 @@ def _main(argv: Sequence[str]) -> int:
         if args.command == "marker":
             print(parse_marker(args.value))
         else:
-            print(render(args.evidence))
+            print(render(resolve_evidence_path(args.evidence)))
     except GraphDeviceDagError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

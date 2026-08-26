@@ -25,4 +25,4 @@ if [ ! -d "$evidence" ]; then
   echo 'error: evidence directory is missing' >&2
   exit 1
 fi
-python3 -m raveil.graph_device_playable show "$evidence"
+python3 -m raveil.graph_device_playable show "$relative_path"
