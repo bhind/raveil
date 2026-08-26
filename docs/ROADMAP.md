@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123 bounded three-Graph RTL functionality is accepted; T-0125 Playable is paused by HCI-07; T-0044 physical research remains blocked**
+State: **T-0123 bounded three-Graph RTL functionality is accepted; T-0125 Playable is a verified PR candidate; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -79,10 +79,13 @@ changes both affine shape/stride and program. Its primary receipt is
   result exists. T-0125 is the next Playable presentation slice: it must make
   that capability understandable in one command while preserving the accepted
   RTL, ABI, Graph, compiler, runner, receipt, and non-claim boundaries. Its
-  mutation is paused after two incomplete acceptance packets; Issue #27 is
-  `Blocked`, and resume requires the human authority defined by HCI-07.
-  T-0126 changes only Project execution coordination through ADR-0065 and does
-  not alter this research or product gate.
+  first mutation owner was stopped after two incomplete acceptance packets.
+  The owner-authorized HCI-07 transfer to Jitro is now exercised: the four-file
+  candidate passes focused tests, primary and independent presentation of the
+  accepted S03 receipt, and read-only evidence-closure validation. Issue #27 is
+  `In Progress` under ADR-0065 pending exact-head PR review and merge. T-0126
+  changes only Project execution coordination and does not alter this research
+  or product gate.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or

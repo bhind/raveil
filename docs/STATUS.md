@@ -357,14 +357,28 @@ the S03 compiler/runner/receipt, and T-0044 remain read-only. Evidence remains
 `rtl-simulation-functional` plus `development-non-claim`; performance is not
 measured.
 
-T-0125 mutation is currently paused under ADR-0051 HCI-07. Two packets from
-the low mutation owner failed the same acceptance/reporting boundary; the
-second still omitted the required negative matrix after reporting it present.
-The incomplete four-file local state is preserved but unaccepted and untested
-as RTL evidence. Real Issue #27 is `Blocked`; resumption requires human-approved
-owner transfer or a third recovery. T-0126 uses real Issue #28 and its live
-queue audit passed with one active delivery item. This workflow result is
-host-functional only and does not alter T-0125's Graph scope or evidence class.
+The low mutation owner twice failed the same T-0125 acceptance/reporting
+boundary; the second packet still omitted the required negative matrix after
+reporting it present. HCI-07 preserved that incomplete state and stopped the
+owner. The repository owner then explicitly authorized option A, transferring
+the frozen four-file mutation to Jitro. After T-0126 merged, Issue #27 was
+upgraded to the complete ADR-0065 execution packet and moved through `Ready`
+to `In Progress`; no parallel-session file or authority was overwritten.
+
+The resulting local T-0125 candidate validates rather than trusts the retained
+raw evidence: it rejects symbolic links and path escape, copies the raw run to
+a temporary closure, removes the receipt, reruns the canonical S03 finalizer,
+and requires the regenerated receipt to be byte-identical. Twenty focused
+Playable tests and the combined 39-test Playable/DAG/static-region suite pass.
+PM replay `run.tJxhWF` and independent replay `run.LpVgAC` both render three
+Graph rows with RTL/oracle/fallback PASS from receipt SHA-256
+`093aa3ba723bca69f3e26f5e1b960d53bfdbb00a2cb708b1bf4a01cb5b221942`;
+the shared RTL aggregate is
+`64524cdc6b9f0365749f6f5925981d859a3b0b6e1c1b7c959ae8dbfddf58510f`.
+T-0125 is a verified PR candidate, not yet canonical completion. Its evidence
+class remains `rtl-simulation-functional` plus operator-presentation
+development evidence; performance is not measured, and no arbitrary-Graph,
+resource, physical, FPGA, ASIC, or silicon result follows.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
