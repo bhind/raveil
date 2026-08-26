@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -14,6 +14,10 @@ resolves it.
   neighbor selectors, three opcodes, 16 instructions, eight value registers,
   one active invocation, and one outstanding memory request. No larger opcode,
   memory, scheduling, or exception boundary is selected yet.
+- T-0128/S01 deliberately does not answer that question. Its admission
+  catalogue is exactly the three accepted descriptor byte and program
+  identities, and no runtime consumes the emitted envelope yet. Any S02
+  execution mapping or broader descriptor set requires a separate promotion.
 
 ## Native execution
 

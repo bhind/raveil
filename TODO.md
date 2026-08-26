@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None after T-0127 integration; the next task requires a separate dependency-based promotion. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0128/S01 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -26,6 +26,33 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0128** Turn the accepted three-Graph device capability into a small,
+  serial operator submission path without reopening the ABI, RTL, opcode, or
+  general-Graph boundary. Parent T-0128 is not an active mutation item and has
+  no aggregate SP. Promote only one independently acceptable child slice at a
+  time, re-estimating after each canonical merge.
+
+  S01 is the sole P0 under real Issue #36 and branch
+  `feat/t-0128-s01-operator-admission`, with Initial and Current SP 3. It adds
+  `python3 -m raveil graph-device submit --graph <canonical-json> --seed N` and
+  emits a deterministic `raveil.graph-device-submission/v1` envelope only for
+  the three byte- and program-identity-bound T-0123 descriptors. Absolute,
+  escaping, symlinked, unknown, mutated, malformed, extra-field,
+  duplicate-identity, and invalid-seed requests fail closed. The command does
+  not execute RTL, invoke Docker or Verilator, publish Data, write a receipt,
+  or authorize S02.
+
+  The Systems Implementer owns only `raveil/cli.py`,
+  `raveil/graph_device_submit.py`, and `tests/test_graph_device_submit.py`;
+  canonical records remain Project Manager-owned. PM and independent Tester
+  verification pass 35 combined submit/DAG/Playable tests, all three canonical
+  CLI admissions, representative exit-2 rejection paths, and `git diff
+  --check`. Evidence is `host-functional` admission only. S02 remains
+  unallocated until S01 merges and is re-estimated from canonical authority.
+  Stop on ABI, Graph JSON, compiler/oracle, Chisel/Verilator, T-0044, opcode,
+  selector, window, scheduler, Experience-authority, filesystem-authority, or
+  arbitrary/general-Graph expansion.
 
 - [x] **T-0124** Remove the mutable shared BOOM simulator tag from ordinary
   RTL execution after an independent replay silently rebuilt

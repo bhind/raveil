@@ -291,6 +291,16 @@ Execution is authorized only when both installers are installed and fault-free.
 This intended S03 boundary remains RTL-simulation-only until executable
 evidence passes.
 
+T-0128/S01 adds only the operator admission envelope above those accepted
+boundaries. The top-level CLI resolves one exact repository-relative member of
+the frozen three-Graph catalogue, rejects symbolic links and identity drift,
+recompiles it through the existing bounded compiler, and emits descriptor,
+program, and seed identities with `execution=not-started`. The envelope is not
+a device artifact, execution authorization, receipt, Data publication, or
+Experience input. No transport adapter consumes it in S01; a later child must
+be separately promoted before mapping it onto the existing execution, affine,
+and program-install ABIs.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the
