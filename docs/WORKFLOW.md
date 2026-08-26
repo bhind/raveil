@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-24
+Last updated: 2026-08-26
 
 ## Before a change
 
@@ -23,11 +23,15 @@ Last updated: 2026-08-24
    lowercase `t-`, `exp-`, `adr-`, or `rfc-` ID. Example:
    `research/exp-0003-gate1-measurement`. Read-only review does not require a
    new branch.
-6. From that branch, run `python3 scripts/project_queue.py audit --check-branch`
-   and then `python3 scripts/project_queue.py start ISSUE --owner-role ROLE
-   --story-points SP --demo COMMAND --evidence-class CLASS --apply`. The command
-   is dry-run without `--apply`; it fails closed on a mismatched T-ID, closed or
-   unlabeled Issue, missing field, or non-matching branch.
+6. From that branch, dry-run `python3 scripts/project_queue.py start ISSUE
+   --owner-role ROLE --story-points SP --demo COMMAND --evidence-class CLASS`,
+   repeat it with `--apply`, and then run `python3 scripts/project_queue.py
+   audit --check-branch`. `start` fails closed on a mismatched T-ID, closed or
+   unlabeled Issue, missing field, or non-matching branch; the post-transition
+   audit proves that the branch now has a matching active Project Issue. Pass
+   `--depends-on` explicitly; child-slice Issues such as `T-0123/S03` use a
+   branch segment such as `t-0123-s03` so two slices cannot collapse to one
+   parent identity.
 7. Push only the dedicated change branch and integrate it through a GitHub pull
    request. Never push directly to `refs/heads/main`.
 8. Read executable code/tests first, then STATUS and TODO. Load only the ADR,

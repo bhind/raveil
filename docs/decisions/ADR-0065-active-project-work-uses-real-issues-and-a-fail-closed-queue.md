@@ -54,10 +54,12 @@ Use this lifecycle:
    resumption first creates a real `work-item` Issue.
 
 Add `scripts/project_queue.py`. Its default transition mode is read-only;
-`--apply` is required for remote mutation. `start` validates Issue label/state,
-branch/T-ID identity, and the visible execution fields before moving a card to
-`In Progress`. `review` validates the open PR, matching head T-ID, and closing
-reference before moving it to `Review`. `audit` fails on an open `work-item`
+`--apply` is required for remote mutation. `start` requires the Issue to be
+linked already, validates its complete independence packet, full child-slice
+and branch identity, WIP, current Ready state, fields, and select options before
+writing metadata; it writes `In Progress` last. `review` requires current In
+Progress state and validates the full live audit, open PR, matching head work
+identity, and closing reference before moving it to `Review`. `audit` fails on an open `work-item`
 Issue missing from the Project, an active Draft card, lifecycle or Parent-T-ID
 disagreement, missing execution fields, a task branch without a matching active
 Issue, or more than two `In Progress` plus `Review` delivery items.
@@ -70,9 +72,9 @@ classification, canonical-record edits, final verification, PR acceptance,
 and merge remain one serial Project Manager lane.
 
 T-0125 Issue #27 and T-0126 Issue #28 are the migration seeds. Do not convert
-all historical Draft cards. The default Project view still uses ADR-0061's ten
-fields; layout changes that the API cannot express remain a one-time UI action,
-not a second board.
+all historical Draft cards. Configure the `Sprint Board` view through the
+GitHub GraphQL view API to expose ADR-0061's ten fields in order; retain every
+historical field and the separate Product Backlog view.
 
 ## Consequences
 

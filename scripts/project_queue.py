@@ -17,7 +17,8 @@ from typing import Any, Sequence
 
 
 ACTIVE_STATUSES = {"In Progress", "Review"}
-TASK_RE = re.compile(r"\b(T-\d{4})(?:/S\d{2})?\b", re.IGNORECASE)
+WORK_ID_RE = re.compile(r"\b(T-\d{4})(?:/(S\d{2}))?\b", re.IGNORECASE)
+BRANCH_ID_RE = re.compile(r"\b(t-\d{4})(?:-(s\d{2}))?(?:-|$)", re.IGNORECASE)
 CLOSING_RE = re.compile(
     r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(?P<number>\d+)\b",
     re.IGNORECASE,
@@ -26,10 +27,22 @@ REQUIRED_ACTIVE_FIELDS = (
     "priority",
     "parent T-ID",
     "owner Role",
+    "depends On",
     "story Points",
     "demo Command",
     "evidence Class",
 )
+REQUIRED_PACKET_MARKERS = {
+    "Authority": r"\bauthority\s*:",
+    "Dependencies": r"\b(?:dependencies|depends on|read-only dependencies)\s*:",
+    "Mutation owner": r"\bmutation owner\s*:",
+    "Allowlist": r"\b(?:mutation )?allowlist\s*:",
+    "Artifacts": r"\bartifacts?\s*:",
+    "Acceptance": r"\bacceptance\s*:",
+    "Evidence class": r"\bevidence class\s*:",
+    "Stop rule": r"\bstop(?: rule)?\s*:",
+    "Non-claims": r"\bnon-claims?\s*:",
+}
 
 
 class QueueError(RuntimeError):
@@ -58,9 +71,33 @@ def gh_json(arguments: Sequence[str]) -> Any:
         raise QueueError(f"gh returned invalid JSON: {error}") from error
 
 
+def work_id(text: str) -> str | None:
+    match = WORK_ID_RE.search(text)
+    if match is None:
+        return None
+    task = match.group(1).upper()
+    return f"{task}/{match.group(2).upper()}" if match.group(2) else task
+
+
 def task_id(text: str) -> str | None:
-    match = TASK_RE.search(text)
-    return match.group(1).upper() if match else None
+    identity = work_id(text)
+    return identity.split("/", 1)[0] if identity else None
+
+
+def branch_work_id(branch: str) -> str | None:
+    match = BRANCH_ID_RE.search(branch)
+    if match is None:
+        return None
+    task = match.group(1).upper()
+    return f"{task}/{match.group(2).upper()}" if match.group(2) else task
+
+
+def missing_packet_markers(body: str) -> list[str]:
+    return [
+        name
+        for name, pattern in REQUIRED_PACKET_MARKERS.items()
+        if re.search(pattern, body, re.IGNORECASE) is None
+    ]
 
 
 def issue_has_label(issue: dict[str, Any], label: str) -> bool:
@@ -130,6 +167,7 @@ def audit_state(
         if state == "CLOSED" and status != "Done":
             errors.append(f"closed work-item Issue is not Done in Project: {url}")
 
+        title_work_id = work_id(issue.get("title", ""))
         title_tid = task_id(issue.get("title", ""))
         parent_tid = item.get("parent T-ID")
         if title_tid is None:
@@ -139,8 +177,13 @@ def audit_state(
                 f"Project Parent T-ID mismatch for {url}: expected {title_tid}, got {parent_tid!r}"
             )
         if status in ACTIVE_STATUSES:
-            if title_tid:
-                active_task_ids.add(title_tid)
+            if title_work_id:
+                active_task_ids.add(title_work_id)
+            missing_markers = missing_packet_markers(issue.get("body", ""))
+            if missing_markers:
+                errors.append(
+                    f"active work-item has incomplete independence packet ({', '.join(missing_markers)}): {url}"
+                )
             if item.get("priority") != "P0":
                 errors.append(f"active work-item is not Priority P0: {url}")
             for field in REQUIRED_ACTIVE_FIELDS:
@@ -148,10 +191,10 @@ def audit_state(
                     errors.append(f"active work-item lacks {field}: {url}")
 
     if branch and branch not in {"main", "HEAD"}:
-        branch_tid = task_id(branch)
-        if branch_tid is None:
+        branch_identity = branch_work_id(branch)
+        if branch_identity is None:
             errors.append(f"task branch lacks a stable T-ID: {branch}")
-        elif branch_tid not in active_task_ids:
+        elif branch_identity not in active_task_ids:
             errors.append(f"branch {branch} has no matching active Project Issue")
 
     return errors
@@ -192,7 +235,7 @@ class ProjectQueue:
                 "--limit",
                 "200",
                 "--json",
-                "number,title,url,state,labels",
+                "number,title,url,state,labels,body",
             )
         )
 
@@ -205,7 +248,7 @@ class ProjectQueue:
                 "--repo",
                 self.repository,
                 "--json",
-                "number,title,url,state,labels",
+                "number,title,url,state,labels,body",
             )
         )
 
@@ -246,6 +289,8 @@ class ProjectQueue:
                 str(self.project_number),
                 "--owner",
                 self.owner,
+                "--limit",
+                "100",
                 "--format",
                 "json",
             )
@@ -261,21 +306,6 @@ class ProjectQueue:
                 if item.get("content", {}).get("url") == issue_url
             ),
             None,
-        )
-
-    def add_issue(self, issue_url: str) -> dict[str, Any]:
-        return gh_json(
-            (
-                "project",
-                "item-add",
-                str(self.project_number),
-                "--owner",
-                self.owner,
-                "--url",
-                issue_url,
-                "--format",
-                "json",
-            )
         )
 
     @staticmethod
@@ -317,12 +347,15 @@ def validate_issue_for_start(issue: dict[str, Any], branch: str) -> str:
         raise QueueError("work item must be an open Issue")
     if not issue_has_label(issue, "work-item"):
         raise QueueError("Issue must carry the work-item label")
-    issue_tid = task_id(issue.get("title", ""))
-    if issue_tid is None:
+    issue_identity = work_id(issue.get("title", ""))
+    if issue_identity is None:
         raise QueueError("Issue title must contain a stable T-ID")
-    if task_id(branch) != issue_tid:
-        raise QueueError(f"branch {branch!r} does not match Issue task {issue_tid}")
-    return issue_tid
+    if branch_work_id(branch) != issue_identity:
+        raise QueueError(f"branch {branch!r} does not match Issue work item {issue_identity}")
+    missing_markers = missing_packet_markers(issue.get("body", ""))
+    if missing_markers:
+        raise QueueError(f"Issue independence packet lacks: {', '.join(missing_markers)}")
+    return task_id(issue_identity) or issue_identity
 
 
 def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
@@ -330,19 +363,28 @@ def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
     issue_tid = validate_issue_for_start(issue, queue.branch())
     project = queue.project()
     item = queue.find_item(project, issue["url"])
-    actions = []
     if item is None:
-        actions.append(f"add {issue['url']} to Project #{queue.project_number}")
-    actions.extend(
-        (
-            "set Status=In Progress",
-            "set Priority=P0",
-            f"set Parent T-ID={issue_tid}",
-            f"set Owner Role={args.owner_role}",
-            f"set Story Points={args.story_points}",
-            f"set Demo Command={args.demo}",
-            f"set Evidence Class={args.evidence_class}",
-        )
+        raise QueueError("Issue must be linked to the Project before start")
+    if item.get("status") not in {"Ready", "In Progress"}:
+        raise QueueError("start requires Project status Ready (or idempotent In Progress)")
+    current_errors = audit_state(project, queue.issues())
+    if current_errors:
+        raise QueueError(f"current Project audit failed: {'; '.join(current_errors)}")
+    active_count = sum(
+        entry.get("status") in ACTIVE_STATUSES for entry in project.get("items", [])
+    )
+    if item.get("status") != "In Progress" and active_count >= 2:
+        raise QueueError("start would exceed the two-item delivery WIP limit")
+
+    actions = (
+        "set Priority=P0",
+        f"set Parent T-ID={issue_tid}",
+        f"set Owner Role={args.owner_role}",
+        f"set Depends On={args.depends_on}",
+        f"set Story Points={args.story_points}",
+        f"set Demo Command={args.demo}",
+        f"set Evidence Class={args.evidence_class}",
+        "set Status=In Progress last",
     )
     if not args.apply:
         print("dry-run:")
@@ -350,22 +392,27 @@ def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
             print(f"- {action}")
         return 0
 
-    if item is None:
-        item = queue.add_issue(issue["url"])
     fields = queue.fields()
-    values = {
-        "Status": "In Progress",
+    metadata_values = {
         "Priority": "P0",
         "Parent T-ID": issue_tid,
         "Owner Role": args.owner_role,
+        "Depends On": args.depends_on,
         "Story Points": args.story_points,
         "Demo Command": args.demo,
         "Evidence Class": args.evidence_class,
     }
-    for name, value in values.items():
+    for name, value in metadata_values.items():
         if name not in fields:
             raise QueueError(f"Project is missing required field {name!r}")
+        if fields[name]["type"] == "ProjectV2SingleSelectField":
+            queue.option_id(fields[name], str(value))
+    if "Status" not in fields:
+        raise QueueError("Project is missing required field 'Status'")
+    queue.option_id(fields["Status"], "In Progress")
+    for name, value in metadata_values.items():
         queue.edit_field(item["id"], fields[name], value=value)
+    queue.edit_field(item["id"], fields["Status"], value="In Progress")
     print(f"started Issue #{args.issue}: {issue_tid}")
     return 0
 
@@ -376,17 +423,26 @@ def review(queue: ProjectQueue, args: argparse.Namespace) -> int:
     pull = queue.pull_request(args.pr)
     if pull.get("state") != "OPEN":
         raise QueueError("review transition requires an open pull request")
-    if task_id(pull.get("headRefName", "")) != issue_tid:
+    if branch_work_id(pull.get("headRefName", "")) != work_id(issue.get("title", "")):
         raise QueueError("pull-request branch T-ID does not match the Issue")
     if not closing_reference(pull.get("body", ""), args.issue):
         raise QueueError(f"pull request must contain Closes #{args.issue}")
-    item = queue.find_item(queue.project(), issue["url"])
+    project = queue.project()
+    item = queue.find_item(project, issue["url"])
     if item is None:
         raise QueueError("Issue is missing from the Project")
+    if item.get("status") not in {"In Progress", "Review"}:
+        raise QueueError("review requires Project status In Progress")
+    current_errors = audit_state(project, queue.issues(), queue.branch())
+    if current_errors:
+        raise QueueError(f"current Project audit failed: {'; '.join(current_errors)}")
     if not args.apply:
         print(f"dry-run:\n- set {issue['url']} Status=Review for {pull['url']}")
         return 0
     fields = queue.fields()
+    if "Status" not in fields:
+        raise QueueError("Project is missing required field 'Status'")
+    queue.option_id(fields["Status"], "Review")
     queue.edit_field(item["id"], fields["Status"], value="Review")
     print(f"moved Issue #{args.issue} to Review for PR #{args.pr}")
     return 0
@@ -427,6 +483,7 @@ def parser() -> argparse.ArgumentParser:
     start_parser = subparsers.add_parser("start")
     start_parser.add_argument("issue", type=int)
     start_parser.add_argument("--owner-role", required=True)
+    start_parser.add_argument("--depends-on", required=True)
     start_parser.add_argument("--story-points", type=int, required=True)
     start_parser.add_argument("--demo", required=True)
     start_parser.add_argument("--evidence-class", required=True)
