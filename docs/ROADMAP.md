@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0128/S02 selected RTL execution is the sole Product P0; T-0044 physical research remains blocked**
+State: **T-0128/S02 selected RTL execution is canonical; no Product P0 is active and T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -95,14 +95,16 @@ S01 was the only promoted child and merged through PR #37 at canonical commit
 descriptor byte/program identities through the top-level CLI and emits a
 non-executing host envelope. It changes no ABI, Graph JSON, compiler/oracle,
 RTL, runtime transport, or evidence receipt. S02 was then separately packeted
-as Issue #39 and is the sole five-SP P0. Its candidate maps one admitted frozen
+as Issue #39 and completed as a five-SP slice. It maps one admitted frozen
 Graph and seed onto the existing program/config/execution ABIs, installs and
 runs only that selected program under Verilator, and binds private output to the
 direct oracle, generic fallback, eight hardware rejection cases, source, RTL,
-simulator, and environment identities. Two selected Graph replays and the
-existing fixed matrix pass at `rtl-simulation-functional` evidence; exact-head
-review and canonical merge remain pending. S03 remains unallocated, and no
-future child inherits authority merely from the parent identifier.
+simulator, dependency-cache, and environment identities. Two primary selected
+Graph replays, one independent selected replay, and the existing fixed matrix
+pass at `rtl-simulation-functional` evidence. Exact-head Security and Tester
+reviews found no blocker; PR #40 merged canonical commit `1a3ad369`. S03 remains
+unallocated, no Product P0 is active, and no future child inherits authority
+merely from the parent identifier.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or
