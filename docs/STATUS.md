@@ -420,12 +420,12 @@ security, novelty, patent, or legal results.
 
 PR #37 merged the exact reviewed S01 candidate as canonical commit
 `748debee204d8cfe06da99c456aa0ba8d1d543e1`. S01 is complete only for that
-host admission envelope. Parent T-0128 remains open, no Product P0 is active,
-and S02 is unallocated.
+host admission envelope. At that S01 closeout point, Parent T-0128 remained
+open, no Product P0 was active, and S02 was unallocated.
 
-T-0128/S02 is now the separately governed sole Product P0 under real Issue #39,
-branch `feat/t-0128-s02-selected-rtl-execution`, Systems Implementer ownership,
-and an exact eight-path implementation allowlist. It reuses S01 admission and
+T-0128/S02 completed under real Issue #39, branch
+`feat/t-0128-s02-selected-rtl-execution`, Systems Implementer ownership, and an
+exact eight-path implementation allowlist. It reuses S01 admission and
 the frozen T-0123 compiler/oracles and leaves all three pointer-free ABIs and all
 Chisel/Scala RTL byte-for-byte unchanged. A new selected runtime entry resolves
 one generated Graph and affine profile, runs the existing eight-case installer
@@ -439,7 +439,7 @@ identities in an append-once receipt. The Scala dependency cache is mounted
 read-only, rejected before build if it contains a symlink or special entry,
 emitted as a strict sorted regular-file manifest, and hash-bound into that receipt.
 
-The candidate passes 71 focused host tests on macOS 26.5.1 arm64 with Python
+The implementation passes 71 focused host tests on macOS 26.5.1 arm64 with Python
 3.14.6. Primary Docker/Verilator `linux/amd64` runs `run.W9rhdR`
 (vertical-three-point, seed 59) and `run.cIzTvg`
 (compact-horizontal-three-point, seed 61) both complete, reject all eight
@@ -456,11 +456,17 @@ and `bf0b7f7db553cccebaa42afade7baa7a909cf23d63dd8b18c558c04c8eeb5c4b`.
 Existing T-0123 fixed-matrix replay `run.tAfxeP` also passes on the same final
 source with receipt SHA-256
 `da989f65d7e1eb98946ff472cbde822c5b6670ab933e6e50477d0760129c5cdd`.
-This is `rtl-simulation-functional` evidence only. The branch is not canonical
-until exact-head review and PR merge; S03 is unallocated, T-0044 remains
-blocked, and no performance, resource, emulation, KV260/FPGA, ASIC, silicon,
-general-Graph, production, legal, publication, or Experience-authority claim
-follows.
+Independent exact-head Tester replay `run.Hh2saa` executes five-point/seed 67
+with receipt SHA-256
+`bd5f20a3db779f59cadef3dd2883270e187d1242f661170075a474db97746321`;
+its source, RTL, simulator, and dependency-cache identities equal the primary
+runs. Final Security review found no High or Medium issue; one non-blocking Low
+same-user evidence-tree TOCTOU remains within the private, non-production-
+security boundary. PR #40 merged the reviewed head as canonical commit
+`1a3ad369`. This is `rtl-simulation-functional` evidence only. S02 is complete,
+S03 is unallocated, no Product P0 is active, T-0044 remains blocked, and no
+performance, resource, emulation, KV260/FPGA, ASIC, silicon, general-Graph,
+production, legal, publication, or Experience-authority claim follows.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0128/S02 only, under Issue #39 and its exact selected-RTL allowlist. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None. T-0128/S03 remains unallocated. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -52,21 +52,23 @@ review and failure preservation do not consume the two-item delivery limit.
   as canonical commit `748debee`; S01 is complete at `host-functional`
   admission only and did not automatically activate S02.
 
-  S02 is now the sole P0 under real Issue #39 and branch
+  S02 was promoted under real Issue #39 and branch
   `feat/t-0128-s02-selected-rtl-execution`, with Current SP 5. Its lower-level
   runner admits one S01 descriptor and seed before Docker, prepares the frozen
   compiler/program/config/input identities, then directs the existing
   transport-neutral Verilator adapter to install and execute only that selected
-  program. The candidate passes 71 focused host tests. Primary private RTL runs
+  program. The implementation passes 71 focused host tests. Primary private RTL runs
   `run.W9rhdR` (vertical-three-point, seed 59) and `run.cIzTvg`
   (compact-horizontal-three-point, seed 61) bind different program identities
   to the same RTL, simulator, and read-only dependency-cache hashes; both match
   the direct oracle and generic fallback and reject all eight installer
   negatives with no rejected output publication. Existing T-0123 fixed-matrix
   replay `run.tAfxeP` also passes on the same final source.
-  Evidence is `rtl-simulation-functional` only and the candidate is not
-  canonical until exact-head review and PR merge. S03 top-level CLI presentation
-  remains separately unallocated.
+  Evidence is `rtl-simulation-functional` only. Exact-head Security review
+  found no High or Medium issue, and an independent Tester reproduced
+  five-point/seed 67 as `run.Hh2saa`. PR #40 merged S02 as canonical commit
+  `1a3ad369`; S02 is complete. S03 top-level CLI presentation remains
+  separately unallocated and no Product P0 is active.
   Stop on ABI, Graph JSON, compiler/oracle, Chisel/Verilator, T-0044, opcode,
   selector, window, scheduler, Experience-authority, filesystem-authority, or
   arbitrary/general-Graph expansion.
