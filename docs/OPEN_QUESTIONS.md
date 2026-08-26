@@ -14,10 +14,12 @@ resolves it.
   neighbor selectors, three opcodes, 16 instructions, eight value registers,
   one active invocation, and one outstanding memory request. No larger opcode,
   memory, scheduling, or exception boundary is selected yet.
-- T-0128/S01 deliberately does not answer that question. Its admission
-  catalogue is exactly the three accepted descriptor byte and program
-  identities, and no runtime consumes the emitted envelope yet. Any S02
-  execution mapping or broader descriptor set requires a separate promotion.
+- T-0128/S02 now answers only how one S01-admitted frozen descriptor and seed
+  map onto the existing program/config/execution ABIs in RTL simulation. It
+  does not broaden the three accepted identities or answer the generality
+  question. The remaining operator question is whether S03 can expose this
+  exact lower-level selected runner through the same top-level CLI without
+  weakening marker/path/receipt validation or making the ABI transport-specific.
 
 ## Native execution
 

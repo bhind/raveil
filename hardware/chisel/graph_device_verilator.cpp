@@ -10,6 +10,7 @@
 #endif
 
 #include <array>
+#include <charconv>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -17,6 +18,15 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+
+namespace {
+bool parse_seed(const char* text, std::uint32_t& value) {
+    const std::string source(text);
+    if (source.empty()) return false;
+    const auto result = std::from_chars(source.data(), source.data() + source.size(), value);
+    return result.ec == std::errc{} && result.ptr == source.data() + source.size();
+}
+}  // namespace
 
 namespace raveil::graph_device {
 
@@ -402,8 +412,11 @@ int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
 #ifdef RAVEIL_DAG_RUNTIME
     const bool dag = argc >= 2 && std::string(argv[1]) == "--dag";
-    if (!dag || (argc != 3 && argc != 4)) {
-        std::cerr << "usage: VStaticStencilRegion --dag EVIDENCE_ROOT [TRACE_PATH]\n";
+    const bool selected = argc >= 2 && std::string(argv[1]) == "--dag-selected";
+    if ((!dag && !selected) || (dag && argc != 3 && argc != 4)
+        || (selected && argc != 5 && argc != 6)) {
+        std::cerr << "usage: VStaticStencilRegion --dag EVIDENCE_ROOT [TRACE_PATH]"
+            " | --dag-selected EVIDENCE_ROOT GRAPH_ID SEED [TRACE_PATH]\n";
         return 2;
     }
 #elif defined(RAVEIL_AFFINE_RUNTIME)
@@ -433,7 +446,11 @@ int main(int argc, char** argv) {
 #else
         1;
 #endif
-    const int traceIndex = evidenceIndex + 1;
+    const int traceIndex = evidenceIndex + 1
+#ifdef RAVEIL_DAG_RUNTIME
+        + (selected ? 2 : 0)
+#endif
+        ;
     if (argc > traceIndex) {
         trace.open(argv[traceIndex], std::ios::out | std::ios::trunc);
         if (!trace) {
@@ -443,11 +460,23 @@ int main(int argc, char** argv) {
         device.set_transaction_trace(&trace);
     }
     const std::filesystem::path evidence(argv[evidenceIndex]);
+    std::uint32_t selected_seed = 0U;
+#ifdef RAVEIL_DAG_RUNTIME
+    if (selected && !parse_seed(argv[4], selected_seed)) {
+        std::cerr << "selected seed must be a uint32 decimal\n";
+        return 2;
+    }
+#endif
     const int result =
 #ifdef RAVEIL_DAG_RUNTIME
-        raveil::graph_device::run_dag(
-            device, device, device, evidence, std::cout, std::cerr
-        );
+        selected
+            ? raveil::graph_device::run_selected_dag(
+                device, device, device, evidence, argv[3],
+                selected_seed, std::cout, std::cerr
+            )
+            : raveil::graph_device::run_dag(
+                device, device, device, evidence, std::cout, std::cerr
+            );
 #elif defined(RAVEIL_AFFINE_RUNTIME)
         affine
             ? raveil::graph_device::run_affine(

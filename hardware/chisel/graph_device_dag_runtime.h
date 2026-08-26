@@ -46,6 +46,17 @@ int run_dag(
     std::ostream& errors
 );
 
+int run_selected_dag(
+    DeviceTransport& device,
+    AffineInstallTransport& affine,
+    ProgramInstallTransport& program,
+    const std::filesystem::path& evidence_root,
+    const char* graph_id,
+    std::uint32_t seed,
+    std::ostream& log,
+    std::ostream& errors
+);
+
 }  // namespace raveil::graph_device
 
 #endif
