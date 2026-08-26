@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123 bounded three-Graph RTL functionality is accepted; T-0125 Playable is a verified PR candidate; T-0044 physical research remains blocked**
+State: **T-0123 bounded three-Graph RTL functionality and T-0125 Playable presentation are accepted; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -83,7 +83,9 @@ changes both affine shape/stride and program. Its primary receipt is
   The owner-authorized HCI-07 transfer to Jitro is now exercised: the four-file
   candidate passes focused tests, primary and independent presentation of the
   accepted S03 receipt, and read-only evidence-closure validation. Issue #27 is
-  `In Progress` under ADR-0065 pending exact-head PR review and merge. T-0126
+  closed after independent exact-head review and PR #31 merged as canonical
+  commit `770a299b`. T-0125 therefore completes only the bounded operator
+  presentation; it adds no Graph generality or performance result. T-0126
   changes only Project execution coordination and does not alter this research
   or product gate.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.

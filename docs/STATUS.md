@@ -375,10 +375,13 @@ Graph rows with RTL/oracle/fallback PASS from receipt SHA-256
 `093aa3ba723bca69f3e26f5e1b960d53bfdbb00a2cb708b1bf4a01cb5b221942`;
 the shared RTL aggregate is
 `64524cdc6b9f0365749f6f5925981d859a3b0b6e1c1b7c959ae8dbfddf58510f`.
-T-0125 is a verified PR candidate, not yet canonical completion. Its evidence
-class remains `rtl-simulation-functional` plus operator-presentation
-development evidence; performance is not measured, and no arbitrary-Graph,
-resource, physical, FPGA, ASIC, or silicon result follows.
+Independent low-agent review of exact head `8e6182b` found no blocker, major,
+or minor defect and was recorded on PR #31. The PR merged as canonical commit
+`770a299b0b35e806e2ac8e42f497fc7f7a83d9c4`, closing real Issue #27. T-0125 is
+complete only for this bounded operator presentation. Its evidence class
+remains `rtl-simulation-functional` plus operator-presentation development
+evidence; performance is not measured, and no arbitrary-Graph, resource,
+physical, FPGA, ASIC, or silicon result follows.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

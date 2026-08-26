@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0125 verified Playable integration candidate; real Issue #27 is `In Progress` after the owner-authorized HCI-07 transfer to Jitro. |
-| **P1 — next** | Start only after its named P0 dependency passes. | None selected until T-0125 PR integration and Project closeout. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None after T-0125 integration; the next task requires a separate dependency-based promotion. |
+| **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -206,7 +206,7 @@ review and failure preservation do not consume the two-item delivery limit.
   broader generality, performance, resource, physical, FPGA, ASIC, or silicon
   boundary.
 
-- [ ] **T-0125** Present the accepted bounded Graph-device capability as one
+- [x] **T-0125** Present the accepted bounded Graph-device capability as one
   operator-readable command without changing its execution or evidence
   boundary. Reuse the T-0123/S03 runner and append-once receipt unchanged, then
   render the three external Graph identities, affine shapes and strides,
@@ -247,9 +247,11 @@ review and failure preservation do not consume the two-item delivery limit.
   `093aa3ba723bca69f3e26f5e1b960d53bfdbb00a2cb708b1bf4a01cb5b221942`,
   shared RTL aggregate
   `64524cdc6b9f0365749f6f5925981d859a3b0b6e1c1b7c959ae8dbfddf58510f`,
-  and three Graph rows with RTL/oracle/fallback PASS. T-0125 remains open until
-  exact-head PR review and canonical merge; this is RTL-simulation-functional
-  presentation evidence only, with performance explicitly not measured.
+  and three Graph rows with RTL/oracle/fallback PASS. Independent low-agent
+  exact-head review found no blocker, major, or minor defect and was recorded
+  on PR #31. The PR merged as canonical commit `770a299b`; Issue #27 closed.
+  This completes only the bounded operator presentation at
+  RTL-simulation-functional evidence, with performance explicitly not measured.
 
 - [x] **T-0126** Make GitHub Project #1 an executable work queue instead of an
   after-the-fact DraftIssue ledger. ADR-0065 requires every newly active P0
