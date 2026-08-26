@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123 bounded three-Graph RTL functionality and T-0125 Playable presentation are accepted; T-0044 physical research remains blocked**
+State: **T-0128/S01 host admission is the sole Product P0; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -89,6 +89,13 @@ changes both affine shape/stride and program. Its primary receipt is
   T-0127 change only Project execution coordination and agent enforcement;
   neither alters this research
   or product gate.
+T-0128 is split into serial child slices rather than one large delivery item.
+S01 is the only promoted child: it admits exactly one of the three accepted
+descriptor byte/program identities through the top-level CLI and emits a
+non-executing host envelope. It changes no ABI, Graph JSON, compiler/oracle,
+RTL, runtime transport, or evidence receipt. S02 is unallocated until S01 is
+canonically merged and independently re-estimated; no future child inherits
+authority merely from the parent identifier.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or

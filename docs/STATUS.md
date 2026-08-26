@@ -394,6 +394,30 @@ remains `rtl-simulation-functional` plus operator-presentation development
 evidence; performance is not measured, and no arbitrary-Graph, resource,
 physical, FPGA, ASIC, or silicon result follows.
 
+T-0128/S01 is the first deliberately small operator-submission slice after
+T-0125. Real Issue #36 and branch
+`feat/t-0128-s01-operator-admission` bind a three-file Systems Implementer
+allowlist and three SP. `python3 -m raveil graph-device submit` accepts only an
+exact repository-relative path to one of the three frozen T-0123 descriptor
+files plus a uint32 seed. It revalidates all three descriptor byte hashes,
+schema/content, Graph identities, compiled program identities, and catalogue
+uniqueness before emitting deterministic
+`raveil.graph-device-submission/v1` JSON. Absolute, escaping, symlinked,
+unknown, mutated, malformed, extra-field, duplicate-identity, and invalid-seed
+requests fail closed with exit 2 and no traceback.
+
+PM verification passed 35 submit/DAG/Playable tests and the vertical-three-
+point CLI demo. Independent Tester verification passed the focused six tests,
+29 DAG/Playable regressions, all three canonical admissions, and representative
+rejections; its raw regression and CLI logs have SHA-256
+`aa680128ec65170e960c8b635e0cf90e0f25513a7f54c661d8ddcb876845000d`
+and `f0dc2017e00942943840c650ac3cd7d6b46909596d19647e2ac2c525463edc67`.
+This is `host-functional` admission only with `execution=not-started`. It does
+not invoke Docker or Verilator, write a receipt, publish Data, execute RTL,
+allocate S02, broaden the three accepted Graphs, or establish performance,
+resource, emulation, KV260, FPGA, ASIC, silicon, Experience-authority,
+security, novelty, patent, or legal results.
+
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
