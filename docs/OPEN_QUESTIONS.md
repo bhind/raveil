@@ -17,12 +17,12 @@ resolves it.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality
-  question. T-0128/S03's current candidate exposes that exact lower-level
+  question. T-0128/S03 now exposes that exact lower-level
   selected runner through the same top-level CLI without changing the ABI and
-  revalidates marker, path, raw evidence, and receipt. This answer remains
-  integration-pending until exact-head review and canonical merge. Even after
-  it passes, no accepted discriminator yet authorizes a larger Graph catalogue,
-  selector/opcode/window boundary, scheduler, or generally installable claim.
+  revalidates marker, path, raw evidence, and receipt. PR #43 made this bounded
+  answer canonical. No accepted discriminator yet authorizes a larger Graph
+  catalogue, selector/opcode/window boundary, scheduler, or generally
+  installable claim.
 
 ## Native execution
 

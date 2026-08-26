@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0128/S03 only, under Issue #42 and its exact top-level CLI allowlist. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -27,11 +27,12 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0128** Turn the accepted three-Graph device capability into a small,
+- [x] **T-0128** Turn the accepted three-Graph device capability into a small,
   serial operator submission path without reopening the ABI, RTL, opcode, or
   general-Graph boundary. Parent T-0128 is not an active mutation item and has
   no aggregate SP. Promote only one independently acceptable child slice at a
-  time, re-estimating after each canonical merge.
+  time, re-estimating after each canonical merge. S01 through S03 are now
+  canonical; the parent is complete without an aggregate SP.
 
   S01 was the sole P0 under real Issue #36 and branch
   `feat/t-0128-s01-operator-admission`, with Initial and Current SP 3. It adds
@@ -67,24 +68,27 @@ review and failure preservation do not consume the two-item delivery limit.
   Evidence is `rtl-simulation-functional` only. Exact-head Security review
   found no High or Medium issue, and an independent Tester reproduced
   five-point/seed 67 as `run.Hh2saa`. PR #40 merged S02 as canonical commit
-  `1a3ad369`; S02 is complete. S03 top-level CLI presentation remains
-  separately unallocated and no Product P0 is active.
+  `1a3ad369`; S02 is complete. At that S02 closeout point, S03 top-level CLI
+  presentation remained separately unallocated and no Product P0 was active.
   Stop on ABI, Graph JSON, compiler/oracle, Chisel/Verilator, T-0044, opcode,
   selector, window, scheduler, Experience-authority, filesystem-authority, or
   arbitrary/general-Graph expansion.
 
-  S03 is now the sole P0 under real Issue #42 and branch
+  S03 completed under real Issue #42 and branch
   `feat/t-0128-s03-top-level-rtl-cli`, with Current SP 3. It adds only
   `python3 -m raveil graph-device run --graph <canonical-json> --seed N`,
   delegates to the canonical S02 selected runner, accepts exactly one strict
   private marker amid captured build diagnostics, and revalidates raw evidence
-  plus the append-once receipt before deterministic presentation. The candidate
-  passes 50 focused host tests. Exact demo `run.SUXz5A`
+  plus the append-once receipt before deterministic presentation. The
+  implementation passes 50 focused host tests. Exact demo `run.SUXz5A`
   (vertical-three-point, seed 7) shows RTL/direct-oracle/generic-fallback PASS,
   all eight named installer boundaries as FAULT, and rejected publication zero.
-  Evidence is `rtl-simulation-functional` only; the candidate is not canonical
-  until exact-head review and PR merge. Stop on any shell/C++/Scala/RTL, ABI,
-  Graph/compiler/oracle, generality, authority, publication, or claim expansion.
+  Evidence is `rtl-simulation-functional` only. Exact-head Security review found
+  no High or Medium issue, and an independent Tester passed 62 tests and
+  reproduced five-point/seed 83 as `run.xM83E7`. PR #43 merged S03 as canonical
+  commit `25d094bc`; S03 and parent T-0128 are complete, and no Product P0 is
+  active. No shell/C++/Scala/RTL, ABI, Graph/compiler/oracle, generality,
+  authority, publication, or claim expansion follows.
 
 - [x] **T-0124** Remove the mutable shared BOOM simulator tag from ordinary
   RTL execution after an independent replay silently rebuilt
