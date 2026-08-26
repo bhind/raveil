@@ -10,18 +10,30 @@ Last updated: 2026-08-24
    implementation outside P0 merely because a branch, patch, local change, or
    unfinished milestone exists. Promotion follows
    `docs/guides/TASK-START-PHASES.md` and requires a dated trigger record.
-4. For tracked work, create a dedicated branch named
+4. Every newly active P0 task or independently acceptable child slice uses one
+   real GitHub Issue labelled `work-item`, linked to Project #1. Its title
+   contains the stable T-ID; its body records authority, dependencies, mutation
+   owner and allowlist, acceptance command, evidence class, and non-claims.
+   Historical DraftIssue cards remain intact, but a DraftIssue cannot authorize
+   new mutation. GitHub remains coordination metadata rather than task or
+   evidence authority.
+5. For tracked work, create a dedicated branch named
    `<type>/<record-id>-<short-slug>` in lowercase kebab-case. Types are `feat`,
    `fix`, `research`, `docs`, `test`, `build`, and `chore`; use the primary
    lowercase `t-`, `exp-`, `adr-`, or `rfc-` ID. Example:
    `research/exp-0003-gate1-measurement`. Read-only review does not require a
    new branch.
-5. Push only the dedicated change branch and integrate it through a GitHub pull
+6. From that branch, run `python3 scripts/project_queue.py audit --check-branch`
+   and then `python3 scripts/project_queue.py start ISSUE --owner-role ROLE
+   --story-points SP --demo COMMAND --evidence-class CLASS --apply`. The command
+   is dry-run without `--apply`; it fails closed on a mismatched T-ID, closed or
+   unlabeled Issue, missing field, or non-matching branch.
+7. Push only the dedicated change branch and integrate it through a GitHub pull
    request. Never push directly to `refs/heads/main`.
-6. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
+8. Read executable code/tests first, then STATUS and TODO. Load only the ADR,
    architecture, roadmap, EXP, question, or log records selected by the
    document router for this task.
-7. Classify the proposed work as an implementation fact, decision, hypothesis,
+9. Classify the proposed work as an implementation fact, decision, hypothesis,
    experiment, or environment observation.
 
 ## During a change
@@ -34,6 +46,14 @@ Last updated: 2026-08-24
   reviews and bounded evidence preservation do not consume this delivery WIP.
   Canonical records, PR acceptance, and merge remain one serial Project Manager
   lane.
+- Project status is a lifecycle assertion, not a retrospective note. `Ready`
+  means the packet is pullable; `In Progress` means its named owner and branch
+  are active; `Review` means an open PR contains `Closes #ISSUE`; `Blocked`
+  retains the exact blocker; merge closes the Issue and `Done` must agree with
+  that closed state. Run `python3 scripts/project_queue.py audit` at kickoff,
+  PR review, and closeout. The audit rejects active DraftIssue cards, open
+  `work-item` Issues missing from the Project, more than two active delivery
+  items, lifecycle/T-ID disagreement, and missing visible execution fields.
 - Treat eight SP as an under-utilization lower-bound check, 13 SP as the
   provisional committed weekly capacity, and 13--21 SP as the warm stretch
   range. Do not stop authorized work merely because a forecast SP total was
@@ -409,10 +429,12 @@ At progress and milestone review:
 5. close the issue only after integration, regression verification, and record
    reconciliation.
 
-GitHub Issues is a coordination view, not project authority. If GitHub is
-unavailable, record the T-ID and candidate locally and batch issue creation
-later. Negative experiments, expected fail-closed behavior, transient command
-errors, and speculative features are not bugs by themselves.
+GitHub Issues is a coordination view, not project authority. The `work-item`
+label serves active P0 delivery as well as retained cross-owner defects. If
+GitHub is unavailable, record the T-ID and candidate locally, but do not begin
+new tracked-file mutation until the real Issue and Project item can be created
+and audited. Negative experiments, expected fail-closed behavior, transient
+command errors, and speculative features are not bugs by themselves.
 
 Never put sensitive security detail, credentials, internal URLs/hostnames,
 absolute user paths, unpublished artifact contents, third-party text/figures,
@@ -430,6 +452,13 @@ Before declaring completion, record:
 - test counts and skipped checks;
 - raw-log path/hash when appropriate;
 - remaining non-claims and unverified assumptions.
+
+Before requesting final PR review, run
+`python3 scripts/project_queue.py review ISSUE --pr PR --apply`. It validates
+that the open PR head carries the same T-ID and that the body closes the Issue,
+then moves the item to `Review`. After merge, verify the closed Issue, `Done`
+Project status, and canonical record reconciliation; Project state never closes
+a task by itself.
 
 Use the templates in [`templates/`](templates/).
 
