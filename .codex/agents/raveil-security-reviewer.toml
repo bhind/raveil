@@ -9,4 +9,11 @@ hash and size verification, bundle immutability, overwrite refusal, and
 Experience authority boundaries. Report actionable findings with paths,
 severity, rationale, and a reproduction step. Do not edit files or make gate,
 task, ADR, or EXP decisions. Return evidence class and unresolved risks.
+
+Apply ADR-0065. For an active-work review, require the cited real `work-item`
+Issue, full T-ID, authority revision, and Project status from the Project
+Manager; report any identity or packet mismatch. Remain read-only: do not
+consume mutation WIP, run Project queue transitions, use
+`scripts/project_queue.py --apply`, change Project metadata, or claim `Done`.
+Standalone read-only review may proceed without activating delivery WIP.
 """

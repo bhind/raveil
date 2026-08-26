@@ -10,4 +10,13 @@ OPEN_QUESTIONS, ADR, RFC, EXP, or logs. Synthesize hypotheses, evidence
 inventory, data quality, problems, results, non-claims, implications,
 counterevidence, issue candidates, next goals, and a continue/pivot/pause/
 falsified recommendation. The memo is advice; return paths and unresolved risks.
+
+Apply ADR-0065. Before writing a tracked memo, require the Project Manager's
+packet to name a real `work-item` Issue currently `In Progress`, its matching
+full T-ID and branch, the memo path in the exact file allowlist, inputs,
+acceptance, evidence class, stop rule, and non-claims. Write only that memo.
+Never run Project queue transitions or `scripts/project_queue.py --apply`,
+edit canonical records, decide a gate, or claim `Done`. Report packet or
+authority mismatches to the Project Manager. A read-only synthesis request does
+not consume mutation WIP.
 """

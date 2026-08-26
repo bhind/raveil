@@ -197,6 +197,34 @@ class ProjectQueueAuditTest(unittest.TestCase):
             errors,
         )
 
+    def test_ready_issue_may_have_no_metadata_before_start(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        ready_item = item(27, one_issue["title"], "Ready", "T-0125")
+        for field in (
+            "priority",
+            "parent T-ID",
+            "owner Role",
+            "depends On",
+            "story Points",
+            "demo Command",
+            "evidence Class",
+        ):
+            ready_item.pop(field)
+        self.assertEqual([], audit_state({"items": [ready_item]}, [one_issue]))
+
+        queue = FakeQueue({"items": [ready_item]}, [one_issue], "feat/t-0125-playable")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, start(queue, start_args()))
+        self.assertEqual("Parent T-ID", queue.edits[1][1])
+        self.assertEqual("T-0125", queue.edits[1][2])
+        self.assertEqual(("item-27", "Status", "In Progress"), queue.edits[-1])
+
+    def test_ready_issue_rejects_incorrect_existing_parent(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        ready_item = item(27, one_issue["title"], "Ready", "T-9999")
+        errors = audit_state({"items": [ready_item]}, [one_issue])
+        self.assertTrue(any("Parent T-ID mismatch" in error for error in errors))
+
     def test_requires_complete_independence_packet(self) -> None:
         one_issue = issue(27, "T-0125 — Playable")
         one_issue["body"] = "Authority: main\nAcceptance: pass"
