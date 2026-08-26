@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -332,8 +332,23 @@ prefix, recording its observed count in the receipt. This corrects a previous
 zero-count finalizer and unit-fixture assumption without changing ADR-0064,
 either accepted ABI, or execution timing. `python3 -m unittest
 tests.test_graph_device_dag tests.test_static_region` passed 19 tests (exit 0).
-Independent exact-head review and PR integration remain required; no arbitrary
-Graph, performance, resource, physical, FPGA, ASIC, or silicon claim follows.
+Independent exact-head review approved the candidate, and PR #26 merged it at
+canonical commit `0cd2c890c26cba5dbb51fc5ea6cf454e8e4fe09c`. T-0123 is
+complete for the frozen three-Graph `rtl-simulation-functional` boundary. No
+arbitrary Graph, performance, resource, physical, FPGA, ASIC, or silicon claim
+follows.
+
+T-0125 is the sole implementation P0 after that merge. It adds only an
+operator-readable wrapper and deterministic receipt presentation around the
+unchanged T-0123/S03 one-command runner. Its intended visible result is a
+three-row capability matrix binding external Graph, affine shape/stride,
+instruction/program identity, one shared RTL identity, and oracle/fallback/RTL
+agreement. The comparison to the earlier fixed five-point baseline is
+functional capability only: three frozen programs may be installed without
+Graph-specific RTL regeneration. Chisel RTL, all accepted ABIs, Graph JSON,
+the S03 compiler/runner/receipt, and T-0044 remain read-only. Evidence remains
+`rtl-simulation-functional` plus `development-non-claim`; performance is not
+measured.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

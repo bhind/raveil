@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0123/S03 bounded-DAG primary evidence passes pending exact-head PR review; T-0044 physical research remains blocked**
+State: **T-0123 bounded three-Graph RTL functionality is accepted; T-0125 is the operator-readable Playable P0; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -73,10 +73,12 @@ S03 implementation preserves both existing ABIs byte-identically, adds a
 separate bounded program-installation ABI, and compiles the three external
 Graph JSON files into one generic sequential interpreter RTL. The compact case
 changes both affine shape/stride and program. Its primary receipt is
-`rtl-simulation-functional` only and remains a PR candidate pending the
-required exact-head review. T-0123 therefore closes only the bounded
-progression to the frozen three Graphs on one executor; no broader generality
-or performance result exists.
+  `rtl-simulation-functional` only. Exact-head review approved it and PR #26
+  merged at `0cd2c890`. T-0123 therefore closes only the bounded progression to
+  the frozen three Graphs on one executor; no broader generality or performance
+  result exists. T-0125 is the next Playable presentation slice: it must make
+  that capability understandable in one command while preserving the accepted
+  RTL, ABI, Graph, compiler, runner, receipt, and non-claim boundaries.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
 optional/triggered work cannot enter either lane merely because a branch or

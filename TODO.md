@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | None; T-0123/S03 is a verified PR candidate awaiting its required exact-head review and merge. |
-| **P1 — next** | Start only after its named P0 dependency passes. | None; select a successor only after T-0123/S03 integrates. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061. | T-0125 |
+| **P1 — next** | Start only after its named P0 dependency passes. | None; select a successor after T-0125 acceptance. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -74,7 +74,7 @@ review and failure preservation do not consume the two-item delivery limit.
   passes. This closes only the bounded `rtl-simulation-functional` MVP; all
   physical and performance exclusions above remain in force.
 
-- [ ] **T-0123** After T-0122 is accepted on current main, reconstruct the
+- [x] **T-0123** After T-0122 is accepted on current main, reconstruct the
   bounded generality ladder from the clean-replayed T-0114 donor commits
   without importing their stale records. First prove that a generated immutable
   schedule is transaction-trace equivalent to the fixed control; then admit
@@ -200,9 +200,35 @@ review and failure preservation do not consume the two-item delivery limit.
   `run.mAgriX` primary receipt SHA-256 is
   `093aa3ba723bca69f3e26f5e1b960d53bfdbb00a2cb708b1bf4a01cb5b221942` with
   evidence class `rtl-simulation-functional` and `performance=not-measured`.
-  It proves only the frozen three-Graph scope pending independent exact-head
-  review and PR merge; it does not complete any broader generality, performance,
-  resource, physical, FPGA, ASIC, or silicon boundary.
+  It proves only the frozen three-Graph scope. Independent exact-head review
+  approved the candidate, and PR #26 merged it at canonical commit `0cd2c890`.
+  T-0123 is complete at this bounded evidence class; it does not complete any
+  broader generality, performance, resource, physical, FPGA, ASIC, or silicon
+  boundary.
+
+- [ ] **T-0125** Present the accepted bounded Graph-device capability as one
+  operator-readable command without changing its execution or evidence
+  boundary. Reuse the T-0123/S03 runner and append-once receipt unchanged, then
+  render the three external Graph identities, affine shapes and strides,
+  instruction counts, program hashes, one shared RTL identity, and direct-
+  oracle/generic-fallback/RTL agreement. Contrast this only with the earlier
+  fixed five-point baseline capability: the improvement is installing three
+  frozen programs on one executor image without Graph-specific RTL
+  regeneration, not a speed, area, energy, or generality result.
+
+  The mutation owner is limited to a new task-neutral presentation module, a
+  new wrapper command, its focused tests, and the relevant Chisel README. The
+  Chisel RTL, three accepted ABIs, external Graph JSON, T-0123 compiler,
+  runner, receipt schema, raw evidence, and every T-0044 path are read-only.
+  Acceptance requires deterministic fail-closed receipt rendering, exactly
+  three distinct programs, one nonempty shared RTL identity, successful
+  oracle/fallback/RTL status, explicit `performance=not-measured`, one clean
+  one-command RTL replay, and independent review. Initial and Current SP are 5;
+  the warm AI estimate is 45--90 minutes editing, 30--60 minutes verification,
+  20--40 minutes Tester replay, and 30--60 minutes PM integration, or 2.1--4.2
+  AI working hours at medium confidence. Stop on ABI or RTL mutation, receipt
+  weakening, identity ambiguity, arbitrary-Graph or opcode expansion, or any
+  performance/resource/physical claim.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
