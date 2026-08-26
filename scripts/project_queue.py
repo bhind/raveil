@@ -185,7 +185,12 @@ def audit_state(
         parent_tid = item.get("parent T-ID")
         if title_tid is None:
             errors.append(f"work-item title lacks stable T-ID: {url}")
-        elif parent_tid != title_tid:
+        elif status in ACTIVE_STATUSES or status == "Done":
+            if parent_tid != title_tid:
+                errors.append(
+                    f"Project Parent T-ID mismatch for {url}: expected {title_tid}, got {parent_tid!r}"
+                )
+        elif parent_tid not in (None, "") and parent_tid != title_tid:
             errors.append(
                 f"Project Parent T-ID mismatch for {url}: expected {title_tid}, got {parent_tid!r}"
             )

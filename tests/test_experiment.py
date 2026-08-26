@@ -1106,6 +1106,73 @@ class BundleTests(unittest.TestCase):
 
 
 class AgentBoundaryTests(unittest.TestCase):
+    def test_every_agent_obeys_project_queue_contract(self) -> None:
+        agents = {
+            path.stem: tomllib.loads(path.read_text(encoding="utf-8"))
+            for path in (ROOT / ".codex/agents").glob("*.toml")
+        }
+        for name, agent in agents.items():
+            with self.subTest(agent=name):
+                instructions = " ".join(agent["developer_instructions"].split())
+                self.assertIn("ADR-0065", instructions)
+                self.assertIn("real `work-item`", instructions)
+                self.assertIn("Issue", instructions)
+                self.assertIn("Project Manager", instructions)
+
+        implementers = {
+            "raveil-chisel-implementer",
+            "raveil-experience-implementer",
+            "raveil-measurement-implementer",
+            "raveil-systems-implementer",
+        }
+        for name in implementers:
+            instructions = " ".join(agents[name]["developer_instructions"].split())
+            self.assertIn("currently `In Progress`", instructions)
+            self.assertIn("exact file allowlist", instructions)
+            self.assertIn("scripts/project_queue.py --apply", instructions)
+            self.assertIn("Stop and report", instructions)
+
+        for name in (
+            "raveil-librarian",
+            "raveil-performance-reviewer",
+            "raveil-security-reviewer",
+        ):
+            instructions = " ".join(agents[name]["developer_instructions"].split())
+            self.assertEqual("read-only", agents[name]["sandbox_mode"])
+            self.assertIn("do not consume mutation WIP", instructions)
+            self.assertIn("scripts/project_queue.py --apply", instructions)
+            self.assertIn("Standalone read-only", instructions)
+
+        researcher = " ".join(
+            agents["raveil-researcher"]["developer_instructions"].split()
+        )
+        self.assertIn("Before writing a tracked memo", researcher)
+        self.assertIn("exact file allowlist", researcher)
+        self.assertIn("does not consume mutation WIP", researcher)
+
+        tester = " ".join(agents["raveil-tester"]["developer_instructions"].split())
+        self.assertIn("`In Progress` or `Review`", tester)
+        self.assertIn("Do not edit tracked files", tester)
+        self.assertIn("scripts/project_queue.py --apply", tester)
+
+        project_manager = " ".join(
+            agents["raveil-project-manager"]["developer_instructions"].split()
+        )
+        self.assertIn("sole Project queue-transition authority", project_manager)
+        self.assertIn("including any `/Sxx`", project_manager)
+        self.assertIn("python3 scripts/project_queue.py audit", project_manager)
+        self.assertIn("Only the Project Manager may use", project_manager)
+        self.assertIn("Never activate more than two", project_manager)
+        self.assertIn("before `Done`", project_manager)
+
+        governance = (
+            ROOT / ".agents/skills/raveil-task-governance/SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("apply ADR-0065", governance)
+        self.assertIn("real `work-item` Issue", governance)
+        self.assertIn("python3 scripts/project_queue.py audit", governance)
+        self.assertIn("Only the primary Project Manager", governance)
+
     def test_librarian_is_read_only_and_skill_metadata_is_valid(self) -> None:
         agent = tomllib.loads(
             (ROOT / ".codex/agents/raveil-librarian.toml").read_text(encoding="utf-8")

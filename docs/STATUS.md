@@ -102,7 +102,17 @@ Parent T-ID, owner, demo, evidence class, and lifecycle are checked by
 given. `AGENTS.md` permits named Implementers to own ADR-0061-compliant
 disjoint mutation packets while canonical records, final verification, PR
 acceptance, and merge stay serial with the Project Manager. Historical Draft
-cards remain preserved. The subsequent authority audit found that
+cards remain preserved. T-0127 binds all ten repository agent configurations
+to this role-specific contract and extends the task-governance skill across
+kickoff, progress, and closeout. Four Implementers refuse mutation without an
+`In Progress` real-Issue packet; Researcher is limited to its assigned memo;
+Tester and the three read-only roles cannot transition the queue or claim
+completion; and only the Project Manager may use `--apply`. An executable
+agent-boundary test enumerates the exact role set and required constraints.
+The queue audit permits missing start metadata on a `Ready` item so `start` can
+write all metadata before status, but still rejects an incorrect pre-populated
+Parent T-ID and requires complete metadata for active and `Done` items.
+The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
 carry-in only; later T-0106 work is unscheduled, and S-0003 is refined around
@@ -362,8 +372,9 @@ boundary; the second packet still omitted the required negative matrix after
 reporting it present. HCI-07 preserved that incomplete state and stopped the
 owner. The repository owner then explicitly authorized option A, transferring
 the frozen four-file mutation to Jitro. After T-0126 merged, Issue #27 was
-upgraded to the complete ADR-0065 execution packet and moved through `Ready`
-to `In Progress`; no parallel-session file or authority was overwritten.
+upgraded to the complete ADR-0065 execution packet and moved through `Ready`,
+`In Progress`, and `Review`; no parallel-session file or authority was
+overwritten.
 
 The resulting local T-0125 candidate validates rather than trusts the retained
 raw evidence: it rejects symbolic links and path escape, copies the raw run to

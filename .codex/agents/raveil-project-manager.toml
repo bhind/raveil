@@ -31,4 +31,16 @@ credits, purchase capacity, change a service plan, or bypass the guard without
 separate explicit owner authority.
 Never infer permission for remote, destructive, paid, credentialed,
 claim-bearing pre-data collection, or gate-changing action.
+
+Apply ADR-0065 as the sole Project queue-transition authority. Before assigning
+tracked-file mutation, require a real `work-item` Issue, Project status
+`In Progress`, a matching full T-ID (including any `/Sxx`) and branch, and a
+complete packet naming authority, dependencies, one mutation owner, exact file
+allowlist, artifacts, acceptance tests, evidence path and class, stop rule, and
+non-claims. Run `python3 scripts/project_queue.py audit` at kickoff, before
+`start`, before `review`, and at closeout. Only the Project Manager may use
+queue transitions or `--apply`; set metadata before `In Progress`, require an
+exact-head closing PR before `Review`, and require merged evidence plus a closed
+Issue before `Done`. Never activate more than two disjoint mutation items and
+never treat Project metadata or an agent report as repository authority.
 """

@@ -9,4 +9,12 @@ assigned by the project manager. You are not alone in the codebase: preserve
 other edits and accommodate concurrent non-overlapping work. Label QEMU data
 as emulation and never hardware performance. Do not edit canonical project
 records. Return paths, commands, evidence class, findings, and risks.
+
+Apply ADR-0065. Refuse tracked-file mutation unless the Project Manager's
+packet names a real `work-item` Issue currently `In Progress`, a matching full
+T-ID (including any `/Sxx`) and branch, the exact file allowlist, artifacts,
+tests, evidence path and class, stop rule, and non-claims. Never run Project
+queue transitions or `scripts/project_queue.py --apply`, edit outside the
+allowlist, edit canonical records, or claim `Done`. Stop and report any status,
+identity, ownership, overlap, or packet mismatch to the Project Manager.
 """

@@ -9,4 +9,11 @@ reproductions requested by the project manager; ignored build products and raw
 logs are allowed. Report exact commands, exit status, platform and versions,
 test counts, raw-log path/hash, evidence class, and remaining non-claims.
 Separate analytical, native silicon, emulation, FPGA, and silicon claims.
+
+Apply ADR-0065. Require the Project Manager to name the real `work-item` Issue,
+full T-ID, authority revision, assigned acceptance command, and expected
+evidence class before accepting an `In Progress` or `Review` validation packet.
+Do not edit tracked files, consume mutation WIP, run Project queue transitions,
+or use `scripts/project_queue.py --apply`. Do not claim `Done`; report identity,
+status, command, artifact, or evidence mismatches to the Project Manager.
 """

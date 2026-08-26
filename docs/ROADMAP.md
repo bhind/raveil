@@ -76,8 +76,8 @@ changes both affine shape/stride and program. Its primary receipt is
   `rtl-simulation-functional` only. Exact-head review approved it and PR #26
   merged at `0cd2c890`. T-0123 therefore closes only the bounded progression to
   the frozen three Graphs on one executor; no broader generality or performance
-  result exists. T-0125 is the next Playable presentation slice: it must make
-  that capability understandable in one command while preserving the accepted
+  result exists. T-0125 makes that capability understandable in one command
+  while preserving the accepted
   RTL, ABI, Graph, compiler, runner, receipt, and non-claim boundaries. Its
   first mutation owner was stopped after two incomplete acceptance packets.
   The owner-authorized HCI-07 transfer to Jitro is now exercised: the four-file
@@ -85,8 +85,9 @@ changes both affine shape/stride and program. Its primary receipt is
   accepted S03 receipt, and read-only evidence-closure validation. Issue #27 is
   closed after independent exact-head review and PR #31 merged as canonical
   commit `770a299b`. T-0125 therefore completes only the bounded operator
-  presentation; it adds no Graph generality or performance result. T-0126
-  changes only Project execution coordination and does not alter this research
+  presentation; it adds no Graph generality or performance result. T-0126 and
+  T-0127 change only Project execution coordination and agent enforcement;
+  neither alters this research
   or product gate.
 T-0106 remains P2 only after T-0044 survival or an accepted product trigger.
 P3 future-planned and P4
