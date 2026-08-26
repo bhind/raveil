@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None. T-0128/S03 remains unallocated. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0128/S03 only, under Issue #42 and its exact top-level CLI allowlist. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -72,6 +72,19 @@ review and failure preservation do not consume the two-item delivery limit.
   Stop on ABI, Graph JSON, compiler/oracle, Chisel/Verilator, T-0044, opcode,
   selector, window, scheduler, Experience-authority, filesystem-authority, or
   arbitrary/general-Graph expansion.
+
+  S03 is now the sole P0 under real Issue #42 and branch
+  `feat/t-0128-s03-top-level-rtl-cli`, with Current SP 3. It adds only
+  `python3 -m raveil graph-device run --graph <canonical-json> --seed N`,
+  delegates to the canonical S02 selected runner, accepts exactly one strict
+  private marker amid captured build diagnostics, and revalidates raw evidence
+  plus the append-once receipt before deterministic presentation. The candidate
+  passes 50 focused host tests. Exact demo `run.SUXz5A`
+  (vertical-three-point, seed 7) shows RTL/direct-oracle/generic-fallback PASS,
+  all eight named installer boundaries as FAULT, and rejected publication zero.
+  Evidence is `rtl-simulation-functional` only; the candidate is not canonical
+  until exact-head review and PR merge. Stop on any shell/C++/Scala/RTL, ABI,
+  Graph/compiler/oracle, generality, authority, publication, or claim expansion.
 
 - [x] **T-0124** Remove the mutable shared BOOM simulator tag from ordinary
   RTL execution after an independent replay silently rebuilt

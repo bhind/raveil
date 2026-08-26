@@ -321,6 +321,16 @@ Docker/Verilator adapter around pointer-free word-addressed
 boundaries; the S03 top-level CLI must stay a thin presentation and may not
 introduce a Verilator-specific ABI or generalize the frozen Graph catalogue.
 
+T-0128/S03 implements that thin presentation as a host-side CLI adapter only.
+It invokes the unchanged selected shell runner, captures incidental build
+diagnostics, accepts exactly one strict private evidence marker, confines the
+resolved run directory to the repository artifact root, and calls the same S02
+receipt reconstruction in read-only mode. The operator sees only the requested
+Graph and seed, three-way RTL/oracle/fallback agreement, the eight named
+installer faults, rejected publication zero, and explicit evidence/non-claim
+labels. This presentation is not a transport, device ABI, execution authority,
+public Data path, or Experience input.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

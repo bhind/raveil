@@ -14,12 +14,15 @@ resolves it.
   neighbor selectors, three opcodes, 16 instructions, eight value registers,
   one active invocation, and one outstanding memory request. No larger opcode,
   memory, scheduling, or exception boundary is selected yet.
-- T-0128/S02 now answers only how one S01-admitted frozen descriptor and seed
+- T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality
-  question. The remaining operator question is whether S03 can expose this
-  exact lower-level selected runner through the same top-level CLI without
-  weakening marker/path/receipt validation or making the ABI transport-specific.
+  question. T-0128/S03's current candidate exposes that exact lower-level
+  selected runner through the same top-level CLI without changing the ABI and
+  revalidates marker, path, raw evidence, and receipt. This answer remains
+  integration-pending until exact-head review and canonical merge. Even after
+  it passes, no accepted discriminator yet authorizes a larger Graph catalogue,
+  selector/opcode/window boundary, scheduler, or generally installable claim.
 
 ## Native execution
 

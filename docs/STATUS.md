@@ -468,6 +468,35 @@ S03 is unallocated, no Product P0 is active, T-0044 remains blocked, and no
 performance, resource, emulation, KV260/FPGA, ASIC, silicon, general-Graph,
 production, legal, publication, or Experience-authority claim follows.
 
+T-0128/S03 is now the sole Product P0 under real Issue #42, branch
+`feat/t-0128-s03-top-level-rtl-cli`, Experience Implementer ownership, and an
+exact six-path implementation allowlist. It adds a thin top-level
+`graph-device run` presentation without changing any S02 shell/C++ runtime,
+contract, Graph descriptor, compiler/oracle, ABI, or Chisel/Scala RTL. The
+wrapper captures lower-runner diagnostics, requires exactly one strict private
+marker, resolves only a real repository-confined evidence directory, and
+read-only revalidates the raw S02 evidence and append-once receipt against the
+current accepted source/compiler/oracle identities before rendering.
+
+The candidate passes 50 focused submit/DAG/selected/Playable/run tests. Initial
+real runs completed valid lower S02 receipts but exposed that Scala/Verilator
+build diagnostics also occupy stdout; requiring the marker to be the only line
+therefore failed closed at the S03 presentation boundary. The corrected wrapper
+ignores captured diagnostics as non-authoritative while still rejecting zero,
+multiple, or malformed markers. Exact top-level demo
+`artifacts/graph_device_selected/run.SUXz5A` executes vertical-three-point/seed
+7 and deterministically displays RTL, direct oracle, and generic fallback PASS;
+partial, order, duplicate, opcode, undefined, reserved, missing-store, and busy
+FAULT; and rejected publication zero. Its receipt SHA-256 is
+`388fbe7b3985d38600365d4b88b4e8e93cea45289bf1267b12833a121ffb6217`.
+Source SHA-256 is
+`cd99617868145371ac8607cbf8f7c4ac375a7d048ba1bc2b3f1ae1350ba32bae`;
+RTL, simulator, and dependency-cache hashes remain the canonical S02 values.
+This is `rtl-simulation-functional` evidence only. The branch is not canonical
+until exact-head review and PR merge; T-0044 remains blocked, and no arbitrary/
+general-Graph, performance, resource, emulation, KV260/FPGA, ASIC, silicon,
+production, legal, publication, or Experience-authority claim follows.
+
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
 that already contained it remain immutable provenance.
