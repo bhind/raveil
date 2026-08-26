@@ -14,7 +14,12 @@ from raveil.graph_device_dag import (
     expected_transactions,
     finalize,
 )
-from raveil.graph_device_playable import parse_marker, render, validate
+from raveil.graph_device_playable import (
+    parse_marker,
+    render,
+    resolve_evidence_path,
+    validate,
+)
 from raveil.riscv_stencil_signature import input_words
 
 
@@ -138,6 +143,17 @@ class PlayableValidationTest(unittest.TestCase):
         for marker in invalid:
             with self.subTest(marker=marker), self.assertRaises(GraphDeviceDagError):
                 parse_marker(marker)
+
+    def test_resolve_evidence_path_stays_under_repository(self) -> None:
+        repository = self.root / "repository"
+        run = repository / "artifacts" / "graph_device_dag" / "run.Ab12Z9"
+        run.mkdir(parents=True)
+        self.assertEqual(
+            resolve_evidence_path(
+                "artifacts/graph_device_dag/run.Ab12Z9", repository
+            ),
+            run.resolve(),
+        )
 
     def test_rejects_receipt_envelope_drift(self) -> None:
         for field, value in (

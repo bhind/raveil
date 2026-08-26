@@ -126,11 +126,13 @@ def parse_marker(marker: str) -> Path:
     return Path(values["path"])
 
 
-def resolve_evidence_path(value: Path | str) -> Path:
+def resolve_evidence_path(
+    value: Path | str, repository: Path | None = None
+) -> Path:
     relative = Path(value)
     if relative.is_absolute() or MARKER_PATH_RE.fullmatch(relative.as_posix()) is None:
         raise GraphDeviceDagError("evidence path is not a bounded repository run path")
-    repo = Path(__file__).resolve().parents[1]
+    repo = repository if repository is not None else Path(__file__).resolve().parents[1]
     expected_parent = repo / "artifacts" / "graph_device_dag"
     for component in (
         repo / "artifacts",
