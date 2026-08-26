@@ -927,6 +927,16 @@ direct-oracle, fallback, and all eight installer boundary results. It is
 makes no claims about general Graphs, resources, FPGA/KV260, ASIC/silicon,
 legal clearance, publication, Experience authority, or production security.
 
+After receipt revalidation, the command also presents a bounded trace view:
+canonical installed/program node order (with `LOAD_U32` addresses, `ADD_U32`
+operands, and `STORE_U32` input; ADD internals are not directly observed),
+selected-segment read/write/transaction totals, and first/middle/last
+output-cell samples. A read address is RTL-observed, but the displayed read
+value is derived from the receipt-bound seed input and is explicitly not an
+RTL-observed value. A write address and data are RTL-observed. The output is a
+deterministic, post-validation presentation of retained evidence; it is not a
+live trace stream or timing display.
+
 For the lower-level selected-runner diagnostic, use
 `./hardware/chisel/run-graph-device-selected.sh --graph
 contracts/graph_device_dags/vertical-three-point.json --seed 7`. Its sole

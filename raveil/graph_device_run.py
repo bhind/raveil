@@ -7,8 +7,13 @@ from pathlib import Path
 import subprocess
 from typing import Any
 
+from .graph_device_dag import (
+    GraphDeviceDagError, _parse_trace, _require_transactions, compile_descriptor,
+    expected_transactions, load_descriptor,
+)
 from .graph_device_selected import EVIDENCE, GraphDeviceSelectedError, validate_receipt
 from .graph_device_submit import admit
+from .riscv_stencil_signature import input_words
 
 
 _MARKER = re.compile(
@@ -53,11 +58,92 @@ def _evidence_path(marker: str, repository: Path) -> Path:
     return resolved
 
 
-def _render(receipt: dict[str, Any]) -> str:
+def _sample_cells(transactions: list[dict[str, Any]]) -> list[tuple[str, int, list[dict[str, Any]]]]:
+    """Select bounded output-cell transaction groups from a completed segment."""
+    cells: list[list[dict[str, Any]]] = []
+    current: list[dict[str, Any]] = []
+    for transaction in transactions:
+        current.append(transaction)
+        if transaction["write"]:
+            cells.append(current)
+            current = []
+    if current or not cells:
+        raise GraphDeviceRunError("selected trace has no completed output cells")
+    samples: list[tuple[str, int, list[dict[str, Any]]]] = []
+    seen: set[int] = set()
+    for label, index in (("first", 0), ("middle", len(cells) // 2), ("last", len(cells) - 1)):
+        if index not in seen:
+            samples.append((label, index, cells[index]))
+            seen.add(index)
+    return samples
+
+
+def _selected_trace(receipt: dict[str, Any], evidence: Path, repository: Path) -> list[dict[str, Any]]:
+    """Recheck the selected completion segment before presenting a second read."""
+    submission = receipt["submission"]
+    try:
+        descriptor = load_descriptor(repository / submission["graph_path"])
+        expected = expected_transactions(
+            compile_descriptor(descriptor), input_words(submission["seed"])
+        )
+        events, segments = _parse_trace(evidence / "transaction-trace.txt")
+        expected_events = ["reset"] * 8 + ["start", "cancel", "reset", "reset", "start"]
+        if events != expected_events or len(segments) != 2:
+            raise GraphDeviceDagError("selected trace lifecycle changed")
+        _require_transactions(segments[1], expected, strict_prefix=False)
+    except (GraphDeviceDagError, IndexError, OSError, ValueError) as error:
+        raise GraphDeviceRunError(f"selected trace cannot be rendered: {error}") from error
+    return segments[1]
+
+
+def _node_detail(node: dict[str, Any]) -> str:
+    if node["op"] == "LOAD_U32":
+        return f"address={node['address']}"
+    if node["op"] == "ADD_U32":
+        return "inputs=" + ",".join(node["inputs"])
+    return f"input={node['input']}"
+
+
+def _render_trace(receipt: dict[str, Any], trace: list[dict[str, Any]], repository: Path) -> list[str]:
+    """Render a bounded view of already validated trace records only."""
+    submission = receipt["submission"]
+    try:
+        descriptor = load_descriptor(repository / submission["graph_path"])
+        words = input_words(submission["seed"])
+    except (GraphDeviceDagError, OSError, ValueError) as error:
+        raise GraphDeviceRunError(f"selected trace context cannot be loaded: {error}") from error
+    reads = sum(not transaction["write"] for transaction in trace)
+    writes = sum(transaction["write"] for transaction in trace)
+    lines = [
+        "Installed program order (canonical; ADD internals not directly observed):",
+        *(f"  node={index} id={node['id']} op={node['op']} {_node_detail(node)}" for index, node in enumerate(descriptor["nodes"])),
+        f"Selected segment totals: transactions={len(trace)} reads={reads} writes={writes}",
+        "Output-cell samples (bounded: first/middle/last):",
+    ]
+    for label, index, cell in _sample_cells(trace):
+        lines.append(f"  sample={label} output_cell={index}")
+        for transaction in cell:
+            address = transaction["address"]
+            if transaction["write"]:
+                lines.append(
+                    f"    WRITE address={address} data=0x{transaction['data']:08x} "
+                    "(RTL-observed)"
+                )
+            else:
+                lines.append(
+                    f"    READ address={address} (RTL-observed) "
+                    f"value=0x{words[address]:08x} "
+                    "(receipt-bound input; not RTL-observed)"
+                )
+    return lines
+
+
+def _render(receipt: dict[str, Any], trace: list[dict[str, Any]], repository: Path) -> str:
     submission = receipt["submission"]
     return "\n".join((
         "GraphDevice-RTL-RUN-V1 status=PASS",
         f"Graph={submission['graph_id']} seed={submission['seed']}",
+        *_render_trace(receipt, trace, repository),
         "RTL=PASS", "Oracle=PASS", "Fallback=PASS",
         *(f"Boundary {name}=FAULT" for name in _BOUNDARIES),
         "Rejected publication=0",
@@ -102,4 +188,5 @@ def run(graph: str, seed: int, repository: Path | None = None) -> str:
         raise GraphDeviceRunError("selected receipt evidence class changed")
     if receipt["invalid_programs_rejected"] != 8 or receipt["output_published_on_rejection"]:
         raise GraphDeviceRunError("selected receipt rejection boundary changed")
-    return _render(receipt)
+    trace = _selected_trace(receipt, evidence, repo)
+    return _render(receipt, trace, repo)
