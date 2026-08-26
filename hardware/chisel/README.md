@@ -905,3 +905,13 @@ local SDK for code analysis:
 Do not select the host's current Java 8. Project-local `.idea` state stays
 ignored and is not a reproducibility record. The Docker smoke remains the
 authoritative build until a host BSP/Mill import is deliberately added.
+
+### Playable Graph-device capability view
+
+Run `./hardware/chisel/run-graph-device-playable.sh` after the accepted S03
+runner is available. It presents the finalized `rtl-simulation-functional`
+receipt as a compact matrix: three frozen external programs, including shape
+and stride changes, executed by one shared generic executor/RTL identity. This
+is a capability demonstration only (`performance=not-measured`); it makes no
+claim about arbitrary Graphs, speedup, latency, resource use, FPGA, ASIC, or
+silicon results.
