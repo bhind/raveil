@@ -306,7 +306,7 @@ bool run_one(
     const generated::Graph& graph,
     const affine_generated::Profile& affine_profile,
     const std::filesystem::path& root,
-    unsigned seed,
+    std::uint32_t seed,
     const char* mode,
     bool install_selected_program,
     std::ostream& log,
@@ -378,6 +378,44 @@ int run_dag(
     log << "GraphDevice-DAG-RUNTIME-V1 status=OK graphs=3 completed=4"
         << " cancelled=1 invalid_cases=8 same_rtl=1 rtl_regeneration=0"
         << " evidence=rtl-simulation-functional performance=not-measured\n";
+    return 0;
+}
+
+int run_selected_dag(
+    DeviceTransport& device,
+    AffineInstallTransport& affine,
+    ProgramInstallTransport& program,
+    const std::filesystem::path& root,
+    const char* graph_id,
+    unsigned seed,
+    std::ostream& log,
+    std::ostream& errors
+) {
+    const generated::Graph* selected = nullptr;
+    for (const generated::Graph& graph : generated::kGraphs) {
+        if (std::string(graph.id) == graph_id) {
+            selected = &graph;
+            break;
+        }
+    }
+    if (selected == nullptr) {
+        errors << "DAG selected graph is unknown\n";
+        return 2;
+    }
+    const affine_generated::Profile* profile = nullptr;
+    if (std::string(selected->affine) == "baseline") profile = &affine_generated::kProfiles[0];
+    else if (std::string(selected->affine) == "compact") profile = &affine_generated::kProfiles[1];
+    else {
+        errors << "DAG selected affine profile is unknown\n";
+        return 2;
+    }
+    if (!invalid_matrix(device, affine, program, root, log, errors)
+        || !run_one(device, affine, program, *selected, *profile, root, seed,
+            "complete", true, log, errors)) return 1;
+    log << "GraphDevice-DAG-SELECTED-RUNTIME-V1 status=OK graph=" << selected->id
+        << " seed=" << seed << " completed=1 invalid_cases=8 same_rtl=1"
+        << " rtl_regeneration=0 evidence=rtl-simulation-functional"
+        << " performance=not-measured\n";
     return 0;
 }
 

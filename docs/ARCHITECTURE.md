@@ -301,6 +301,26 @@ Experience input. No transport adapter consumes it in S01; a later child must
 be separately promoted before mapping it onto the existing execution, affine,
 and program-install ABIs.
 
+T-0128/S02 supplies that mapping without changing any of the three ABIs or the
+Chisel RTL. A lower-level selected runner revalidates the S01 envelope, prepares
+the existing frozen three-program header plus the selected seed, and passes only
+the admitted Graph identity and seed to a separate Verilator runtime entry. The
+runtime resolves the generated program and affine metadata, exercises the same
+eight installer rejection cases, then installs and executes only the selected
+program. A host finalizer independently regenerates the generated headers and
+oracles and rejects any log, trace, output, source, simulator, or environment
+substitution before writing the private receipt. The host repository is mounted
+read-only and exact source inputs are copied into a container-private build
+directory; only the private evidence mount is writable. The receipt binds the
+complete build-source manifest, named two-pass RTL manifests, and a retained
+simulator binary through recomputed hashes and is created exclusively. This
+receipt also binds a strict sorted manifest of the Scala dependency cache,
+which is mounted read-only during the selected build; symlinks and special
+entries fail before build instead of remaining outside that manifest. This remains a local
+Docker/Verilator adapter around pointer-free word-addressed
+boundaries; the S03 top-level CLI must stay a thin presentation and may not
+introduce a Verilator-specific ABI or generalize the frozen Graph catalogue.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the
