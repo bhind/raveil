@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from pathlib import Path
 import subprocess
@@ -9,10 +11,10 @@ from typing import Any
 
 from .graph_device_dag import (
     GraphDeviceDagError, _parse_trace, _require_transactions, compile_descriptor,
-    expected_transactions, load_descriptor,
+    expected_transactions, validate_descriptor,
 )
 from .graph_device_selected import EVIDENCE, GraphDeviceSelectedError, validate_receipt
-from .graph_device_submit import admit
+from .graph_device_submit import _canonical_path, _reject_symlinks, admit
 from .riscv_stencil_signature import input_words
 
 
@@ -78,11 +80,31 @@ def _sample_cells(transactions: list[dict[str, Any]]) -> list[tuple[str, int, li
     return samples
 
 
-def _selected_trace(receipt: dict[str, Any], evidence: Path, repository: Path) -> list[dict[str, Any]]:
+def _verified_descriptor(receipt: dict[str, Any], repository: Path) -> dict[str, Any]:
+    """Capture one canonical descriptor whose bytes still bind the receipt."""
+    submission = receipt["submission"]
+    try:
+        path = _reject_symlinks(repository, _canonical_path(submission["graph_path"]))
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != submission["descriptor_sha256"]:
+            raise GraphDeviceRunError("selected descriptor bytes changed after receipt validation")
+        descriptor = json.loads(raw.decode("ascii"))
+        if not isinstance(descriptor, dict):
+            raise GraphDeviceRunError("selected descriptor is not an object")
+        validate_descriptor(descriptor)
+    except (GraphDeviceDagError, OSError, UnicodeError, ValueError, json.JSONDecodeError) as error:
+        raise GraphDeviceRunError(f"selected descriptor cannot be rendered: {error}") from error
+    if descriptor["graph_id"] != submission["graph_id"]:
+        raise GraphDeviceRunError("selected descriptor graph identity changed after receipt validation")
+    return descriptor
+
+
+def _selected_trace(
+    receipt: dict[str, Any], evidence: Path, descriptor: dict[str, Any]
+) -> list[dict[str, Any]]:
     """Recheck the selected completion segment before presenting a second read."""
     submission = receipt["submission"]
     try:
-        descriptor = load_descriptor(repository / submission["graph_path"])
         expected = expected_transactions(
             compile_descriptor(descriptor), input_words(submission["seed"])
         )
@@ -104,13 +126,14 @@ def _node_detail(node: dict[str, Any]) -> str:
     return f"input={node['input']}"
 
 
-def _render_trace(receipt: dict[str, Any], trace: list[dict[str, Any]], repository: Path) -> list[str]:
+def _render_trace(
+    receipt: dict[str, Any], trace: list[dict[str, Any]], descriptor: dict[str, Any]
+) -> list[str]:
     """Render a bounded view of already validated trace records only."""
     submission = receipt["submission"]
     try:
-        descriptor = load_descriptor(repository / submission["graph_path"])
         words = input_words(submission["seed"])
-    except (GraphDeviceDagError, OSError, ValueError) as error:
+    except ValueError as error:
         raise GraphDeviceRunError(f"selected trace context cannot be loaded: {error}") from error
     reads = sum(not transaction["write"] for transaction in trace)
     writes = sum(transaction["write"] for transaction in trace)
@@ -138,12 +161,12 @@ def _render_trace(receipt: dict[str, Any], trace: list[dict[str, Any]], reposito
     return lines
 
 
-def _render(receipt: dict[str, Any], trace: list[dict[str, Any]], repository: Path) -> str:
+def _render(receipt: dict[str, Any], trace: list[dict[str, Any]], descriptor: dict[str, Any]) -> str:
     submission = receipt["submission"]
     return "\n".join((
         "GraphDevice-RTL-RUN-V1 status=PASS",
         f"Graph={submission['graph_id']} seed={submission['seed']}",
-        *_render_trace(receipt, trace, repository),
+        *_render_trace(receipt, trace, descriptor),
         "RTL=PASS", "Oracle=PASS", "Fallback=PASS",
         *(f"Boundary {name}=FAULT" for name in _BOUNDARIES),
         "Rejected publication=0",
@@ -188,5 +211,6 @@ def run(graph: str, seed: int, repository: Path | None = None) -> str:
         raise GraphDeviceRunError("selected receipt evidence class changed")
     if receipt["invalid_programs_rejected"] != 8 or receipt["output_published_on_rejection"]:
         raise GraphDeviceRunError("selected receipt rejection boundary changed")
-    trace = _selected_trace(receipt, evidence, repo)
-    return _render(receipt, trace, repo)
+    descriptor = _verified_descriptor(receipt, repo)
+    trace = _selected_trace(receipt, evidence, descriptor)
+    return _render(receipt, trace, descriptor)

@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 import subprocess
 import sys
@@ -16,7 +17,11 @@ class GraphDeviceRunTests(unittest.TestCase):
 
     def _receipt(self, **changes):
         receipt = {
-            "submission": {"graph_id": "vertical-three-point", "graph_path": VERTICAL, "seed": 7},
+            "submission": {
+                "graph_id": "vertical-three-point", "graph_path": VERTICAL,
+                "descriptor_sha256": hashlib.sha256((ROOT / VERTICAL).read_bytes()).hexdigest(),
+                "seed": 7,
+            },
             "evidence_class": "rtl-simulation-functional", "performance": "not-measured",
             "invalid_programs_rejected": 8, "output_published_on_rejection": False,
             "non_claims": ["performance", "fpga"],
@@ -142,6 +147,28 @@ class GraphDeviceRunTests(unittest.TestCase):
             with self.assertRaises(GraphDeviceRunError):
                 run(VERTICAL, 7, ROOT)
         parse_trace.assert_not_called()
+
+    def test_descriptor_mutation_after_receipt_validation_fails_before_trace_render(self) -> None:
+        completed = subprocess.CompletedProcess([], 0, self.marker + "\n", "")
+        receipt = self._receipt()
+        with tempfile.TemporaryDirectory() as temporary:
+            repository = Path(temporary)
+            descriptor = repository / VERTICAL
+            descriptor.parent.mkdir(parents=True)
+            descriptor.write_bytes((ROOT / VERTICAL).read_bytes())
+
+            def mutate_after_validation(*_args):
+                descriptor.write_bytes(descriptor.read_bytes() + b"\n")
+                return receipt
+
+            with patch("raveil.graph_device_run.subprocess.run", return_value=completed), \
+                 patch("raveil.graph_device_run._evidence_path", return_value=repository), \
+                 patch("raveil.graph_device_run.validate_receipt", side_effect=mutate_after_validation), \
+                 patch("raveil.graph_device_run.admit", return_value=receipt["submission"]), \
+                 patch("raveil.graph_device_run._parse_trace") as parse_trace:
+                with self.assertRaisesRegex(GraphDeviceRunError, "descriptor bytes changed"):
+                    run(VERTICAL, 7, repository)
+            parse_trace.assert_not_called()
 
     def test_samples_are_first_middle_last_and_write_values_are_observed(self) -> None:
         trace = self._selected_trace()
