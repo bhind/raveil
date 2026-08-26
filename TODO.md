@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | T-0127 agent queue enforcement; real Issue #32 is `In Progress`. |
-| **P1 — next** | Start only after its named P0 dependency passes. | None selected until T-0127 integration and Project closeout. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None after T-0127 integration; the next task requires a separate dependency-based promotion. |
+| **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -270,19 +270,21 @@ review and failure preservation do not consume the two-item delivery limit.
   fields, and PR closing references. This is host-functional governance only; it changes no
   Graph, research, performance, FPGA, ASIC, silicon, or gate result.
 
-- [ ] **T-0127** Enforce ADR-0065 in every repository agent role. All ten
-  `.codex/agents` role definitions must require the role-appropriate real-Issue,
+- [x] **T-0127** Enforce ADR-0065 in every repository agent role. All ten
+  `.codex/agents` role definitions require the role-appropriate real-Issue,
   full-T-ID, Project-state, ownership, allowlist, acceptance, evidence,
   stop-rule, and non-claim checks. Mutation roles refuse unbound edits;
   read-only roles cannot consume mutation WIP; Tester cannot edit tracked
   files; and only the Project Manager may apply queue transitions. The shared
-  task-governance skill must repeat the kickoff, progress, and closeout checks.
-  Agent-boundary regression tests must enumerate every role so a new or
-  weakened role fails closed. Fix the queue pre-start seam so a `Ready` item
-  may omit `Parent T-ID` until `start` writes all metadata before status, while
-  still rejecting a wrong populated identity. This is host-functional
-  governance only; it changes no Graph, research, performance, FPGA, ASIC,
-  silicon, or gate result.
+  task-governance skill repeats the kickoff, progress, and closeout checks.
+  Agent-boundary regression tests enumerate every role so a new or weakened
+  role fails closed. The queue pre-start seam now permits a `Ready` item to omit
+  `Parent T-ID` until `start` writes all metadata before status, while still
+  rejecting a wrong populated identity. Twenty-three focused tests, the record
+  checker, and the live Project audit passed. PR #34 merged as canonical commit
+  `3c7cbc9`; Issue #32 is closed and its Project item is `Done`. This is
+  host-functional governance only; it changes no Graph, research, performance,
+  FPGA, ASIC, silicon, or gate result.
 
 - [x] **T-0110** Define continuous execution and Human-confirmation incidents
   as repository-wide agent workflow. Once an owner authorizes a bounded task,
