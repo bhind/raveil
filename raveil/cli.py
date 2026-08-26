@@ -40,6 +40,7 @@ from .garden import (
     validate_render_width,
 )
 from .graph_device_submit import render_submission
+from .graph_device_run import run as run_graph_device
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -360,6 +361,11 @@ def command_graph_device_submit(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_graph_device_run(args: argparse.Namespace) -> int:
+    print(run_graph_device(args.graph, args.seed))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -477,7 +483,7 @@ def build_parser() -> argparse.ArgumentParser:
     graph_mvp.set_defaults(handler=command_graph_mvp)
 
     graph_device = subparsers.add_parser(
-        "graph-device", help="admit one accepted Graph-device descriptor"
+        "graph-device", help="admit or run one accepted Graph-device descriptor"
     )
     graph_device_commands = graph_device.add_subparsers(
         dest="graph_device_command", required=True
@@ -488,6 +494,12 @@ def build_parser() -> argparse.ArgumentParser:
     graph_device_submit.add_argument("--graph", required=True)
     graph_device_submit.add_argument("--seed", type=int, required=True)
     graph_device_submit.set_defaults(handler=command_graph_device_submit)
+    graph_device_run = graph_device_commands.add_parser(
+        "run", help="run one accepted descriptor through the selected RTL simulator"
+    )
+    graph_device_run.add_argument("--graph", required=True)
+    graph_device_run.add_argument("--seed", type=int, required=True)
+    graph_device_run.set_defaults(handler=command_graph_device_run)
 
     sonatine_demo = subparsers.add_parser(
         "sonatine-demo", help="run the fixed Sonatine operator demo under QEMU"

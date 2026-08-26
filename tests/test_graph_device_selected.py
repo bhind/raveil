@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 
-from raveil.graph_device_selected import GraphDeviceSelectedError, finalize, prepare
+from raveil.graph_device_selected import GraphDeviceSelectedError, finalize, prepare, validate_receipt
 from raveil.graph_device_selected import _cache_manifest, _manifest
 from raveil.graph_device_dag import expected_transactions
 from raveil.riscv_stencil_signature import input_words
@@ -85,8 +85,12 @@ class GraphDeviceSelectedTests(unittest.TestCase):
                 receipt["dependency_cache_sha256"],
                 hashlib.sha256((root / "dependency-cache.manifest").read_bytes()).hexdigest(),
             )
+            self.assertEqual(validate_receipt(root), receipt)
             with self.assertRaises(GraphDeviceSelectedError):
                 finalize(root)
+            (root / "selected-receipt.json").write_text("{}\n", encoding="ascii")
+            with self.assertRaises(GraphDeviceSelectedError):
+                validate_receipt(root)
 
     def test_prepare_accepts_empty_mktemp_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

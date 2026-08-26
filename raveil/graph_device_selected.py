@@ -160,7 +160,7 @@ def prepare(graph: str, seed: int, output: Path, repository: Path | None = None)
         raise
 
 
-def finalize(evidence: Path, repository: Path | None = None) -> dict[str, Any]:
+def _expected_receipt(evidence: Path, repository: Path | None = None) -> dict[str, Any]:
     repo = repository or _root()
     _no_symlinks(evidence)
     submission = _json(evidence / "submission.json", "submission")
@@ -254,6 +254,20 @@ def finalize(evidence: Path, repository: Path | None = None) -> dict[str, Any]:
     cache_manifest = _read(evidence / "dependency-cache.manifest", "dependency cache manifest")
     _cache_manifest(cache_manifest)
     receipt = {"schema": SCHEMA, "task": "T-0128", "slice": "S02", "status": "complete", "evidence_class": EVIDENCE, "performance": "not-measured", "submission": submission, "artifact_sha256": hashlib.sha256(_read(evidence / "selected-artifact.json", "selected artifact")).hexdigest(), "source_sha256": hashlib.sha256(_canonical(_sources(repo))).hexdigest(), "input_sha256": hashlib.sha256(expected_input).hexdigest(), "oracle_sha256": hashlib.sha256(expected_oracle).hexdigest(), "simulator_sha256": simulator, "rtl_sha256": hashlib.sha256(first_manifest).hexdigest(), "toolchain_sha256": hashlib.sha256(toolchain).hexdigest(), "dependency_cache_sha256": hashlib.sha256(cache_manifest).hexdigest(), "invalid_programs_rejected": 8, "output_published_on_rejection": False, "non_claims": NON_CLAIMS}
+    return receipt
+
+
+def validate_receipt(evidence: Path, repository: Path | None = None) -> dict[str, Any]:
+    """Revalidate an append-once selected receipt without changing evidence."""
+    receipt = _expected_receipt(evidence, repository)
+    existing = _read(evidence / "selected-receipt.json", "selected receipt")
+    if existing != _canonical(receipt) + b"\n":
+        raise GraphDeviceSelectedError("selected receipt identity changed")
+    return receipt
+
+
+def finalize(evidence: Path, repository: Path | None = None) -> dict[str, Any]:
+    receipt = _expected_receipt(evidence, repository)
     target = evidence / "selected-receipt.json"
     try:
         with target.open("xb") as stream:

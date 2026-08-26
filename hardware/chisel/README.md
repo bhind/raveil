@@ -918,12 +918,18 @@ silicon results.
 
 ### Selected Graph-device RTL execution
 
-Run `./hardware/chisel/run-graph-device-selected.sh --graph
-contracts/graph_device_dags/vertical-three-point.json --seed 7` to admit one
-of the three frozen descriptors, install only its generated program, and run it
-through the shared Verilator/Chisel device. The private receipt binds input,
-descriptor, program, compiler, RTL, simulator, direct oracle, generic fallback,
-and eight installer rejections. It is `rtl-simulation-functional` evidence
-only: performance is not measured, and it makes no claims about general Graphs,
-resources, FPGA/KV260, ASIC/silicon, legal clearance, publication, Experience
-authority, or production security.
+Run `python3 -m raveil graph-device run --graph
+contracts/graph_device_dags/vertical-three-point.json --seed 7`. The one
+top-level command invokes the selected runner, accepts exactly one private
+evidence marker, and revalidates its append-once receipt before showing RTL,
+direct-oracle, fallback, and all eight installer boundary results. It is
+`rtl-simulation-functional` evidence only: performance is not measured, and it
+makes no claims about general Graphs, resources, FPGA/KV260, ASIC/silicon,
+legal clearance, publication, Experience authority, or production security.
+
+For the lower-level selected-runner diagnostic, use
+`./hardware/chisel/run-graph-device-selected.sh --graph
+contracts/graph_device_dags/vertical-three-point.json --seed 7`. Its sole
+authoritative stdout marker is the private evidence marker consumed by the
+top-level CLI; incidental build diagnostics are not displayed or treated as a
+public-data transport or performance interface.
