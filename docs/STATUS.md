@@ -463,12 +463,13 @@ its source, RTL, simulator, and dependency-cache identities equal the primary
 runs. Final Security review found no High or Medium issue; one non-blocking Low
 same-user evidence-tree TOCTOU remains within the private, non-production-
 security boundary. PR #40 merged the reviewed head as canonical commit
-`1a3ad369`. This is `rtl-simulation-functional` evidence only. S02 is complete,
-S03 is unallocated, no Product P0 is active, T-0044 remains blocked, and no
+`1a3ad369`. This is `rtl-simulation-functional` evidence only. At that S02
+closeout point S03 was unallocated and no Product P0 was active. T-0044 remains
+blocked, and no
 performance, resource, emulation, KV260/FPGA, ASIC, silicon, general-Graph,
 production, legal, publication, or Experience-authority claim follows.
 
-T-0128/S03 is now the sole Product P0 under real Issue #42, branch
+T-0128/S03 completed under real Issue #42, branch
 `feat/t-0128-s03-top-level-rtl-cli`, Experience Implementer ownership, and an
 exact six-path implementation allowlist. It adds a thin top-level
 `graph-device run` presentation without changing any S02 shell/C++ runtime,
@@ -478,7 +479,7 @@ marker, resolves only a real repository-confined evidence directory, and
 read-only revalidates the raw S02 evidence and append-once receipt against the
 current accepted source/compiler/oracle identities before rendering.
 
-The candidate passes 50 focused submit/DAG/selected/Playable/run tests. Initial
+The implementation passes 50 focused submit/DAG/selected/Playable/run tests. Initial
 real runs completed valid lower S02 receipts but exposed that Scala/Verilator
 build diagnostics also occupy stdout; requiring the marker to be the only line
 therefore failed closed at the S03 presentation boundary. The corrected wrapper
@@ -492,10 +493,17 @@ FAULT; and rejected publication zero. Its receipt SHA-256 is
 Source SHA-256 is
 `cd99617868145371ac8607cbf8f7c4ac375a7d048ba1bc2b3f1ae1350ba32bae`;
 RTL, simulator, and dependency-cache hashes remain the canonical S02 values.
-This is `rtl-simulation-functional` evidence only. The branch is not canonical
-until exact-head review and PR merge; T-0044 remains blocked, and no arbitrary/
-general-Graph, performance, resource, emulation, KV260/FPGA, ASIC, silicon,
-production, legal, publication, or Experience-authority claim follows.
+Independent exact-head Tester passed 62 tests and reproduced five-point/seed 83
+through the same top-level CLI as `run.xM83E7`; receipt SHA-256 is
+`ec70f0a2aeaaead1bd18cf804ffd8c00327e26fce952ad9516923ddade7ba194`,
+and source, RTL, simulator, and dependency-cache identities equal the primary
+run. Final Security review found no High or Medium issue; the inherited Low
+same-user private-evidence TOCTOU remains inside the explicit non-production-
+security boundary. PR #43 merged the reviewed head as canonical commit
+`25d094bc`. This is `rtl-simulation-functional` evidence only. S03 and parent
+T-0128 are complete, no Product P0 is active, T-0044 remains blocked, and no
+arbitrary/general-Graph, performance, resource, emulation, KV260/FPGA, ASIC,
+silicon, production, legal, publication, or Experience-authority claim follows.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases
