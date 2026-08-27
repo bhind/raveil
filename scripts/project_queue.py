@@ -28,6 +28,7 @@ REQUIRED_ACTIVE_FIELDS = (
     "parent T-ID",
     "owner Role",
     "depends On",
+    "sprint",
     "story Points",
     "demo Command",
     "evidence Class",
@@ -315,6 +316,45 @@ class ProjectQueue:
         )
         return {field["name"]: field for field in payload["fields"]}
 
+    def iteration_id(self, title: str) -> str:
+        query = """
+        query($login: String!, $number: Int!) {
+          user(login: $login) {
+            projectV2(number: $number) {
+              field(name: "Sprint") {
+                ... on ProjectV2IterationField {
+                  configuration {
+                    iterations { id title }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """
+        payload = gh_json(
+            (
+                "api",
+                "graphql",
+                "-f",
+                f"query={query}",
+                "-F",
+                f"login={self.owner}",
+                "-F",
+                f"number={self.project_number}",
+            )
+        )
+        try:
+            iterations = payload["data"]["user"]["projectV2"]["field"][
+                "configuration"
+            ]["iterations"]
+        except (KeyError, TypeError) as error:
+            raise QueueError("Project Sprint iteration configuration is unavailable") from error
+        matches = [entry for entry in iterations if entry.get("title") == title]
+        if len(matches) != 1:
+            raise QueueError(f"Project Sprint has no unique current iteration {title!r}")
+        return matches[0]["id"]
+
     @staticmethod
     def find_item(project: dict[str, Any], issue_url: str) -> dict[str, Any] | None:
         return next(
@@ -353,6 +393,8 @@ class ProjectQueue:
         ]
         if field["type"] == "ProjectV2SingleSelectField":
             command.extend(("--single-select-option-id", self.option_id(field, str(value))))
+        elif field["type"] == "ProjectV2IterationField":
+            command.extend(("--iteration-id", str(value)))
         elif field["name"] in {"Story Points", "Initial SP"}:
             command.extend(("--number", str(value)))
         else:
@@ -380,6 +422,7 @@ def validate_start_arguments(args: argparse.Namespace) -> None:
     required = {
         "owner-role": args.owner_role,
         "depends-on": args.depends_on,
+        "sprint": args.sprint,
         "demo": args.demo,
         "evidence-class": args.evidence_class,
     }
@@ -409,11 +452,45 @@ def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
     if item.get("status") != "In Progress" and active_count >= 2:
         raise QueueError("start would exceed the two-item delivery WIP limit")
 
+    fields = queue.fields()
+    required_fields = (
+        "Priority",
+        "Parent T-ID",
+        "Owner Role",
+        "Depends On",
+        "Sprint",
+        "Story Points",
+        "Demo Command",
+        "Evidence Class",
+        "Status",
+    )
+    for name in required_fields:
+        if name not in fields:
+            raise QueueError(f"Project is missing required field {name!r}")
+    if fields["Sprint"]["type"] != "ProjectV2IterationField":
+        raise QueueError("Project field 'Sprint' is not an Iteration field")
+    sprint_id = queue.iteration_id(args.sprint)
+    metadata_values = {
+        "Priority": "P0",
+        "Parent T-ID": issue_tid,
+        "Owner Role": args.owner_role,
+        "Depends On": args.depends_on,
+        "Sprint": sprint_id,
+        "Story Points": args.story_points,
+        "Demo Command": args.demo,
+        "Evidence Class": args.evidence_class,
+    }
+    for name, value in metadata_values.items():
+        if fields[name]["type"] == "ProjectV2SingleSelectField":
+            queue.option_id(fields[name], str(value))
+    queue.option_id(fields["Status"], "In Progress")
+
     actions = (
         "set Priority=P0",
         f"set Parent T-ID={issue_tid}",
         f"set Owner Role={args.owner_role}",
         f"set Depends On={args.depends_on}",
+        f"set Sprint={args.sprint}",
         f"set Story Points={args.story_points}",
         f"set Demo Command={args.demo}",
         f"set Evidence Class={args.evidence_class}",
@@ -425,24 +502,6 @@ def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
             print(f"- {action}")
         return 0
 
-    fields = queue.fields()
-    metadata_values = {
-        "Priority": "P0",
-        "Parent T-ID": issue_tid,
-        "Owner Role": args.owner_role,
-        "Depends On": args.depends_on,
-        "Story Points": args.story_points,
-        "Demo Command": args.demo,
-        "Evidence Class": args.evidence_class,
-    }
-    for name, value in metadata_values.items():
-        if name not in fields:
-            raise QueueError(f"Project is missing required field {name!r}")
-        if fields[name]["type"] == "ProjectV2SingleSelectField":
-            queue.option_id(fields[name], str(value))
-    if "Status" not in fields:
-        raise QueueError("Project is missing required field 'Status'")
-    queue.option_id(fields["Status"], "In Progress")
     for name, value in metadata_values.items():
         queue.edit_field(item["id"], fields[name], value=value)
     queue.edit_field(item["id"], fields["Status"], value="In Progress")
@@ -517,6 +576,7 @@ def parser() -> argparse.ArgumentParser:
     start_parser.add_argument("issue", type=int)
     start_parser.add_argument("--owner-role", required=True)
     start_parser.add_argument("--depends-on", required=True)
+    start_parser.add_argument("--sprint", required=True)
     start_parser.add_argument("--story-points", type=int, required=True)
     start_parser.add_argument("--demo", required=True)
     start_parser.add_argument("--evidence-class", required=True)

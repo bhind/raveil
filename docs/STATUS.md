@@ -112,6 +112,12 @@ agent-boundary test enumerates the exact role set and required constraints.
 The queue audit permits missing start metadata on a `Ready` item so `start` can
 write all metadata before status, but still rejects an incorrect pre-populated
 Parent T-ID and requires complete metadata for active and `Done` items.
+ADR-0066 and T-0130 additionally require every active real-Issue item to carry
+a configured Sprint Iteration. `start --sprint TITLE` resolves the title before
+any remote edit, writes Sprint with the other metadata, and moves status last;
+the audit rejects a missing active Sprint. The non-pullable S-0001 review Draft
+is Backlog rather than Ready. A separate clean current-main clone is the normal
+operator entry while the dirty historical T-0042 root remains untouched.
 The subsequent authority audit found that
 its T-0042 child sequence contradicted completed T-0042 and ADR-0046. The
 already-active stripped-token slice is therefore a bounded T-0106 evidence
@@ -125,8 +131,12 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The Project retains 47 items and 37 fields. Current SP totals are S-0001=64
-and S-0002=5; S-0003 is no longer committed. The capacity calibration uses 13 SP as the
+The live Project readback during T-0130 contains 53 items and 37 fields: 26
+Backlog, one Blocked, 25 Done, and T-0130 as the sole In Progress item. No
+DraftIssue is Ready. The visible Story Points assigned across all historical
+Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
+retained planning items and are not the current delivery load. S-0003 is no
+longer committed. The capacity calibration uses 13 SP as the
 committed weekly load and 13--21 SP as a warm range while retaining eight SP as
 an under-utilization alarm. The Project records role packets and resource use
 separately; existing slices state when token usage was not instrumented. These
