@@ -40,8 +40,9 @@ review and failure preservation do not consume the two-item delivery limit.
   delivery-speed, Graph, research, performance, FPGA, ASIC, or silicon claim
   follows. Twenty-seven focused tests, the record checker, `git diff --check`,
   and live Sprint/branch audits passed. PR #49 merged as canonical commit
-  `c7a9abd`; Issue #48 is Closed and Project Done. The clean operator clone is
-  on that exact main commit with an empty worktree.
+  `c7a9abd`; records PR #50 merged as `3534e35`; Issue #48 is Closed and
+  Project Done. The clean operator clone tracks `origin/main` and had an empty
+  worktree after final closeout.
 
 - [x] **T-0129** Make the accepted top-level Graph-device CLI visibly replay a
   bounded portion of its already validated RTL memory trace. Real Issue #45,
