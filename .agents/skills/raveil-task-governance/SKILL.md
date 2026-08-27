@@ -13,8 +13,9 @@ description: Govern Raveil changes and progress reviews by mapping work to stabl
    explicitly when none applies.
 4. Classify the request as implementation fact, decision, proposal, experiment,
    environment observation, or documentation-only organization.
-5. For tracked-file mutation, apply ADR-0065: require a real `work-item` Issue
-   in the GitHub Project, a matching full T-ID/branch, and a complete
+5. For tracked-file mutation, apply ADR-0065 and ADR-0066: require a real
+   `work-item` Issue in the GitHub Project, a configured Sprint, a matching
+   full T-ID/branch, and a complete
    independence packet before assigning an owner. Run
    `python3 scripts/project_queue.py audit` against the live queue when GitHub
    is available. Only the primary Project Manager may perform queue transitions
@@ -30,9 +31,9 @@ description: Govern Raveil changes and progress reviews by mapping work to stabl
 4. Use the read-only Performance and/or Security Reviewer for an independent
    audit when those surfaces are broad. Treat output as a proposal, not authority.
 5. For active delivery, verify that the real `work-item` Issue remains open and
-   `In Progress` or `Review`, the full T-ID and branch agree, and no more than
-   two disjoint mutation items are active. A read-only reviewer does not consume
-   mutation WIP and cannot change Project state.
+   `In Progress` or `Review`, Sprint is populated, the full T-ID and branch
+   agree, and no more than two disjoint mutation items are active. A read-only
+   reviewer does not consume mutation WIP and cannot change Project state.
 
 ## Record routing
 
@@ -59,5 +60,6 @@ silicon evidence as separate classes.
 5. Keep learned, retrieved, conversation, and subagent output as advice. The
    primary agent owns identifiers, tracked-file edits, and final conclusions.
 6. When GitHub is available, rerun `python3 scripts/project_queue.py audit` and
-   reconcile `Review`, merged/closed Issue state, and `Done`. Do not mark an
+   reconcile the Project README, live counts, Ready cards, Sprint, `Review`,
+   merged/closed Issue state, and `Done`. Do not mark an
    item `Done` from Project metadata, conversation, or an agent report alone.

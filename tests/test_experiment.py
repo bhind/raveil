@@ -1159,6 +1159,9 @@ class AgentBoundaryTests(unittest.TestCase):
             agents["raveil-project-manager"]["developer_instructions"].split()
         )
         self.assertIn("sole Project queue-transition authority", project_manager)
+        self.assertIn("ADR-0066", project_manager)
+        self.assertIn("configured Sprint", project_manager)
+        self.assertIn("require `--sprint`", project_manager)
         self.assertIn("including any `/Sxx`", project_manager)
         self.assertIn("python3 scripts/project_queue.py audit", project_manager)
         self.assertIn("Only the Project Manager may use", project_manager)
@@ -1168,7 +1171,8 @@ class AgentBoundaryTests(unittest.TestCase):
         governance = (
             ROOT / ".agents/skills/raveil-task-governance/SKILL.md"
         ).read_text(encoding="utf-8")
-        self.assertIn("apply ADR-0065", governance)
+        self.assertIn("apply ADR-0065 and ADR-0066", governance)
+        self.assertIn("configured Sprint", governance)
         self.assertIn("real `work-item` Issue", governance)
         self.assertIn("python3 scripts/project_queue.py audit", governance)
         self.assertIn("Only the primary Project Manager", governance)

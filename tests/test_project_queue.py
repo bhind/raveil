@@ -4,9 +4,11 @@ import argparse
 from contextlib import redirect_stdout
 import io
 import unittest
+from unittest.mock import patch
 
 from scripts.project_queue import (
     QueueError,
+    ProjectQueue,
     audit_state,
     branch_work_id,
     closing_reference,
@@ -50,6 +52,7 @@ def item(number: int, title: str, status: str, parent: str) -> dict:
         "parent T-ID": parent,
         "owner Role": "Chisel Implementer",
         "depends On": "None",
+        "sprint": {"title": "S-0001"},
         "story Points": 5,
         "demo Command": "./demo.sh",
         "evidence Class": "RTL Simulation",
@@ -84,6 +87,7 @@ class FakeQueue:
             "Parent T-ID": {"id": "parent", "name": "Parent T-ID", "type": "ProjectV2Field"},
             "Owner Role": select_field("Owner Role", "Chisel Implementer"),
             "Depends On": {"id": "depends", "name": "Depends On", "type": "ProjectV2Field"},
+            "Sprint": {"id": "sprint", "name": "Sprint", "type": "ProjectV2IterationField"},
             "Story Points": {"id": "points", "name": "Story Points", "type": "ProjectV2Field"},
             "Demo Command": {"id": "demo", "name": "Demo Command", "type": "ProjectV2Field"},
             "Evidence Class": select_field("Evidence Class", "Host Functional"),
@@ -103,6 +107,12 @@ class FakeQueue:
 
     def fields(self) -> dict:
         return self._fields
+
+    @staticmethod
+    def iteration_id(title: str) -> str:
+        if title != "S-0001":
+            raise QueueError(f"Project Sprint has no unique current iteration {title!r}")
+        return "iteration-s-0001"
 
     def pull_request(self, number: int) -> dict:
         return {
@@ -133,6 +143,7 @@ def start_args(*, apply: bool = True) -> argparse.Namespace:
         issue=27,
         owner_role="Chisel Implementer",
         depends_on="None",
+        sprint="S-0001",
         story_points=5,
         demo="./demo.sh",
         evidence_class="Host Functional",
@@ -205,6 +216,7 @@ class ProjectQueueAuditTest(unittest.TestCase):
             "parent T-ID",
             "owner Role",
             "depends On",
+            "sprint",
             "story Points",
             "demo Command",
             "evidence Class",
@@ -224,6 +236,16 @@ class ProjectQueueAuditTest(unittest.TestCase):
         ready_item = item(27, one_issue["title"], "Ready", "T-9999")
         errors = audit_state({"items": [ready_item]}, [one_issue])
         self.assertTrue(any("Parent T-ID mismatch" in error for error in errors))
+
+    def test_active_issue_requires_sprint(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        active_item = item(27, one_issue["title"], "In Progress", "T-0125")
+        active_item.pop("sprint")
+        errors = audit_state({"items": [active_item]}, [one_issue])
+        self.assertIn(
+            "active work-item lacks sprint: https://github.com/bhind/raveil/issues/27",
+            errors,
+        )
 
     def test_requires_complete_independence_packet(self) -> None:
         one_issue = issue(27, "T-0125 — Playable")
@@ -290,11 +312,64 @@ class ProjectQueueAuditTest(unittest.TestCase):
             self.assertEqual(0, start(queue, start_args()))
         self.assertEqual("Status", queue.edits[-1][1])
         self.assertEqual("In Progress", queue.edits[-1][2])
+        self.assertIn(("item-27", "Sprint", "iteration-s-0001"), queue.edits[:-1])
+
+    def test_start_rejects_unknown_sprint_without_remote_edit(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
+        queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
+        args = start_args()
+        args.sprint = "S-9999"
+        with self.assertRaisesRegex(QueueError, "no unique current iteration"):
+            start(queue, args)
+        self.assertEqual([], queue.edits)
+
+        args.apply = False
+        with self.assertRaisesRegex(QueueError, "no unique current iteration"):
+            start(queue, args)
+        self.assertEqual([], queue.edits)
+
+    def test_start_rejects_non_iteration_sprint_field_without_remote_edit(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
+        queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
+        queue._fields["Sprint"]["type"] = "ProjectV2Field"
+        with self.assertRaisesRegex(QueueError, "not an Iteration field"):
+            start(queue, start_args())
+        self.assertEqual([], queue.edits)
+
+    def test_iteration_field_uses_iteration_id_flag(self) -> None:
+        queue = ProjectQueue("bhind", "bhind/raveil", 1)
+        field = {
+            "id": "field-sprint",
+            "name": "Sprint",
+            "type": "ProjectV2IterationField",
+        }
+        with (
+            patch.object(queue, "project_identity", return_value="project-id"),
+            patch("scripts.project_queue.run") as run_command,
+        ):
+            queue.edit_field("item-id", field, value="iteration-id")
+        run_command.assert_called_once_with(
+            [
+                "gh",
+                "project",
+                "item-edit",
+                "--id",
+                "item-id",
+                "--project-id",
+                "project-id",
+                "--field-id",
+                "field-sprint",
+                "--iteration-id",
+                "iteration-id",
+            ]
+        )
 
     def test_start_rejects_blank_required_values_without_remote_edit(self) -> None:
         one_issue = issue(27, "T-0125 — Playable")
         project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
-        for attribute in ("owner_role", "depends_on", "demo", "evidence_class"):
+        for attribute in ("owner_role", "depends_on", "sprint", "demo", "evidence_class"):
             with self.subTest(attribute=attribute):
                 queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
                 args = start_args()

@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061 and ADR-0065. | None. |
-| **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0130 Project Sprint and workspace hygiene. |
+| **P1 — next** | Start only after its named P0 dependency passes. | None selected until T-0130 closes. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -26,6 +26,19 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0130** Make GitHub Project #1 truthful as both the executable queue
+  and weekly Sprint surface. Require `--sprint` for every newly active real
+  work-item, resolve the configured Iteration before remote edits, write it
+  before `In Progress`, and reject missing active Sprint in the live audit.
+  Reconcile the Project README and live item count through T-0129, move the
+  non-pullable S-0001 review Draft from Ready to Backlog, and provide a clean
+  current-main operator workspace without modifying the dirty T-0042 root.
+  Real Issue #48, branch `chore/t-0130-project-hygiene`, Project Manager, three
+  SP, and Sprint S-0001 own only governance code/tests/records and the named
+  live Project metadata. Evidence is host-functional governance only; no
+  delivery-speed, Graph, research, performance, FPGA, ASIC, or silicon claim
+  follows.
 
 - [x] **T-0129** Make the accepted top-level Graph-device CLI visibly replay a
   bounded portion of its already validated RTL memory trace. Real Issue #45,

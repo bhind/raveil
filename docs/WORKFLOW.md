@@ -24,7 +24,8 @@ Last updated: 2026-08-26
    `research/exp-0003-gate1-measurement`. Read-only review does not require a
    new branch.
 6. From that branch, dry-run `python3 scripts/project_queue.py start ISSUE
-   --owner-role ROLE --story-points SP --demo COMMAND --evidence-class CLASS`,
+   --owner-role ROLE --sprint S-NNNN --story-points SP --demo COMMAND
+   --evidence-class CLASS`,
    repeat it with `--apply`, and then run `python3 scripts/project_queue.py
    audit --check-branch`. `start` fails closed on a mismatched T-ID, closed or
    unlabeled Issue, missing field, or non-matching branch; the post-transition
@@ -58,6 +59,9 @@ Last updated: 2026-08-26
   PR review, and closeout. The audit rejects active DraftIssue cards, open
   `work-item` Issues missing from the Project, more than two active delivery
   items, lifecycle/T-ID disagreement, and missing visible execution fields.
+  ADR-0066 includes Sprint among those required active fields. `start` resolves
+  the named configured Iteration before any remote write and records it before
+  moving status last; an unknown or missing Sprint fails closed.
 - Treat eight SP as an under-utilization lower-bound check, 13 SP as the
   provisional committed weekly capacity, and 13--21 SP as the warm stretch
   range. Do not stop authorized work merely because a forecast SP total was
@@ -368,12 +372,19 @@ fields but keep them out of the default execution view unless a review needs
 them. Synchronize the Project when a branch starts, reaches its first atomic
 commit, opens a PR, enters review, blocks, or merges. A worktree without a
 matching live Project item is preserved provenance or a donor, not active WIP.
+Keep the Project README current through the latest Done item, keep its current
+pull consistent with TODO, and move a non-pullable Draft out of `Ready`.
 Refine at least the next two sprints into independently acceptable slices with one owner
 role, support roles, dependencies, priority, evidence class, initial SP, and a
 demo or evidence command. Apply the Definition of Ready and Definition of Done
 in `SPRINTS.md`. Do not assign SP to both an epic and its children, and do not
 treat the configured agent roles as additional human FTE. Committed Iterations
 and low-confidence forecast dates remain visibly separate.
+
+Use a clean current-main clone or worktree as the normal operator entry point.
+Preserve dirty historical roots as donor/provenance worktrees; never reset,
+stash, or treat their stale records as current authority merely because they
+occupy the original repository path.
 
 The sprint board is a coordination view, not task or evidence authority.
 `TODO.md` still owns task scope and execution state, and research review remains
