@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -504,6 +504,38 @@ security boundary. PR #43 merged the reviewed head as canonical commit
 T-0128 are complete, no Product P0 is active, T-0044 remains blocked, and no
 arbitrary/general-Graph, performance, resource, emulation, KV260/FPGA, ASIC,
 silicon, production, legal, publication, or Experience-authority claim follows.
+
+T-0129 completes the smallest operator-visible verified-trace refinement on
+canonical main. It keeps the exact `python3 -m raveil graph-device run --graph
+<canonical-json> --seed N` command and the lower selected runner, receipt
+schema, Graph catalogue, compiler/oracles, three ABIs, C++ runtime, and
+Chisel/Scala RTL unchanged. Only the top-level presenter, focused tests, and
+Chisel README changed. After the append-once receipt validates, the presenter
+byte-binds one captured descriptor to the submission SHA-256, rechecks the
+second trace read's fixed lifecycle, two segments, complete transaction order,
+addresses, and write data, then renders canonical installed node/operand order,
+full selected-run totals, and first/middle/last output-cell samples. It labels
+read addresses as RTL-observed but their shown values as receipt-bound and not
+RTL-observed; only write addresses/data are labelled RTL-observed, and ADD
+internals are not claimed as observed.
+
+Fifty-four focused submit/DAG/selected/Playable/run tests pass on macOS 26.5.1
+arm64 with Python 3.14.6. Primary vertical-three-point/seed-7 run
+`artifacts/graph_device_selected/run.tFw7sp` reports 1,024 transactions (768
+reads and 256 writes), three-way RTL/direct-oracle/fallback PASS, eight named
+installer FAULTs, and rejected publication zero; receipt SHA-256 is
+`388fbe7b3985d38600365d4b88b4e8e93cea45289bf1267b12833a121ffb6217`.
+Independent five-point/seed-83 run `run.DgHipE` reports 1,536 transactions
+(1,280 reads and 256 writes) with the same acceptance outcomes; receipt SHA-256
+is `ec70f0a2aeaaead1bd18cf804ffd8c00327e26fce952ad9516923ddade7ba194`.
+Exact-head Security review found High 0, Medium 0, Low 0 after a bounded
+descriptor-identity correction. PR #46 merged the three-file implementation as
+canonical commit `4e4028142403dd7438afae9e4369cc328bb962df`; Issue #45 is
+Closed, Project is Done, active delivery WIP is zero, and T-0044 remains
+blocked. Evidence remains `rtl-simulation-functional` plus presentation
+development only. No real-time telemetry, ARM64 execution, performance,
+emulation, KV260/FPGA, ASIC, silicon, arbitrary/general Graph, publication, or
+Experience-authority claim follows.
 
 The agent call-sign catalog is also local-only under ignored `.codex/` state;
 the root `AgentNames.md` is absent and explicitly ignored. Historical releases

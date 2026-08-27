@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -26,6 +26,32 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [x] **T-0129** Make the accepted top-level Graph-device CLI visibly replay a
+  bounded portion of its already validated RTL memory trace. Real Issue #45,
+  branch `feat/t-0129-verified-rtl-trace-demo`, Experience Implementer, and two
+  SP owned only `raveil/graph_device_run.py`, its focused test, and the Chisel
+  README; canonical records remained PM-owned. The unchanged command now shows
+  canonical installed node/operand order, complete selected-segment transaction
+  accounting, and first/middle/last output-cell accesses. Read addresses are
+  labelled RTL-observed while their displayed values are receipt-bound inputs;
+  write addresses and data are RTL-observed. ADD internals are explicitly not
+  presented as observed.
+
+  The presenter validates the append-once receipt first, byte-binds one captured
+  descriptor to its submission SHA-256, and rechecks the second trace read's
+  lifecycle, two-segment shape, addresses, and write data before rendering.
+  Fifty-four focused submit/DAG/selected/Playable/run tests pass. Primary
+  vertical-three-point/seed-7 run `run.tFw7sp` reports 1,024 transactions;
+  independent five-point/seed-83 run `run.DgHipE` reports 1,536. Their receipt
+  SHA-256 values are `388fbe7b3985d38600365d4b88b4e8e93cea45289bf1267b12833a121ffb6217`
+  and `ec70f0a2aeaaead1bd18cf804ffd8c00327e26fce952ad9516923ddade7ba194`.
+  Exact-head Security review found High 0, Medium 0, Low 0. PR #46 merged as
+  canonical commit `4e402814`; Issue #45 is Closed, Project is Done, and no
+  Product P0 is active. This remains post-validation presentation of
+  `rtl-simulation-functional` evidence, not live telemetry, ARM64 execution,
+  performance, emulation, KV260/FPGA, ASIC, silicon, general-Graph, publication,
+  or Experience-authority evidence.
 
 - [x] **T-0128** Turn the accepted three-Graph device capability into a small,
   serial operator submission path without reopening the ABI, RTL, opcode, or
