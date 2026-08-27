@@ -131,9 +131,9 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The live Project readback during T-0130 contains 53 items and 37 fields: 26
-Backlog, one Blocked, 25 Done, and T-0130 as the sole In Progress item. No
-DraftIssue is Ready. The visible Story Points assigned across all historical
+The live Project after T-0130 contains 53 items and 37 fields: 26 Backlog, one
+Blocked, 26 Done, and no Ready, In Progress, or Review item. The visible Story
+Points assigned across all historical
 Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
 retained planning items and are not the current delivery load. S-0003 is no
 longer committed. The capacity calibration uses 13 SP as the
