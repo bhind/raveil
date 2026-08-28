@@ -1,0 +1,4 @@
+interface:
+  display_name: "Raveil Sprint Operator"
+  short_description: "Run the Raveil weekly Sprint lifecycle"
+  default_prompt: "Use $raveil-sprint-operator to audit and operate the current Raveil Sprint."

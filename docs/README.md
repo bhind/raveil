@@ -83,5 +83,8 @@ A subagent never marks a task complete, changes a gate, accepts an ADR, or
 concludes an experiment.
 
 Run the governance workflow at task kickoff and closeout. The detailed process
-is in [WORKFLOW](WORKFLOW.md). Remote publication uses the repository-scoped
-`raveil-remote-release` skill; hosted CI/CD remains disabled by policy.
+is in [WORKFLOW](WORKFLOW.md). Use the repository-scoped
+`raveil-sprint-operator` skill for the repeatable weekly audit, kickoff,
+continuation, correction, review, closeout, retrospective, and next-pull loop.
+Remote publication uses `raveil-remote-release`; hosted CI/CD remains disabled
+by policy.

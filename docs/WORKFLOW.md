@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-26
+Last updated: 2026-08-28
 
 ## Before a change
 
@@ -314,6 +314,10 @@ reads the selected authoritative sections before editing.
 - `raveil-task-governance` applies the record and evidence checklist to any
   material Raveil change. `raveil-gate0-evidence` applies the specific
   Sonatine Microkernel Gate 0 collection procedure.
+- `raveil-sprint-operator` applies the repeatable weekly audit, kickoff,
+  continuation, Wednesday correction, executable review, closeout,
+  retrospective, and next-pull loop. It calls `project_queue.py` rather than
+  duplicating queue transitions and returns one stable phase receipt.
 - `raveil-remote-release` audits release readiness and permits remote tag and
   Release publication only after explicit owner approval. It never enables
   hosted CI/CD; current validation runs through `scripts/ci-local.sh`.
@@ -364,6 +368,11 @@ progress and require a runnable increment. Reference stable T-IDs, calculate
 initial story points at planning, and retain every estimate revision with a
 dated reason. Run planning on Monday, correction review on Wednesday, and the
 executable review plus retrospective on Sunday.
+
+Use `raveil-sprint-operator` for every Sprint status, kickoff, continuation,
+correction, review, closeout, retrospective, and next-pull boundary. The skill
+standardizes the audit and handoff receipt while this workflow, `SPRINTS.md`,
+the canonical records, and `project_queue.py` retain authority.
 
 Maintain an ordered Product Backlog, not only the current Sprint. The live pull
 surface uses only Title, Status, Priority, Parent T-ID, Owner Role, Depends On,
