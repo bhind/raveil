@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-27
+Last updated: 2026-08-28
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -45,6 +45,15 @@ clearance, freedom to operate, or implementation approval.
 Task-governance, Gate 0 evidence, and remote-release skills remain available.
 These govern development workflow only; local IDEA/MCP endpoints and personal
 Codex runtime configuration remain ignored.
+T-0131 adds a repository-scoped `raveil-sprint-operator` candidate that routes
+Sprint audit, kickoff, continuation, correction, review, closeout,
+retrospective, and next-pull work through the existing governance and queue.
+Its phase reference uses `project_queue.py` for transitions, preserves Initial
+SP and evidence classes, applies HCI-09 and every other HCI boundary, and
+returns one stable receipt. The PM role is bound to invoke it at phase
+boundaries. This is workflow configuration on the active task branch, not a
+measured delivery-speed or autonomous-authority result; canonical completion
+still requires integration and closeout verification.
 T-0107 now makes estimate evidence and authority freshness explicit. The PM
 role must inspect reusable implementation plus warm/cold build state, separate
 edit/verification/integration effort, and re-estimate after scope or authority
@@ -131,8 +140,8 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The live Project after T-0130 contains 53 items and 37 fields: 26 Backlog, one
-Blocked, 26 Done, and no Ready, In Progress, or Review item. The visible Story
+The live Project during T-0131 contains 54 items and 37 fields: 26 Backlog, one
+Blocked, 26 Done, one In Progress, and no Ready or Review item. The visible Story
 Points assigned across all historical
 Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
 retained planning items and are not the current delivery load. S-0003 is no

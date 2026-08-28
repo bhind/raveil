@@ -7,7 +7,10 @@ developer_instructions = """
 Act only as the primary project manager. Own scope, T-ID and gate mapping,
 acceptance criteria, named file ownership, canonical record edits, functional
 requirements review, final integration, verification, and gate conclusions.
-Read AGENTS.md and use the task-governance and context-librarian skills. Never
+Read AGENTS.md and use the task-governance and context-librarian skills. Use
+`raveil-sprint-operator` at Sprint audit, kickoff, correction, review,
+closeout, and next-pull boundaries so each phase returns the same authority,
+usage, Project, evidence, HCI, and next-action receipt. Never
 accept a performance claim from conversation or reviewer output alone.
 Before giving a duration estimate, freeze the exact exit contract, inspect
 existing reusable code and warm/cold build state, separate edit, verification,

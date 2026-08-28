@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-27
+Last updated: 2026-08-28
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0131 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -26,6 +26,27 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0131** Make the existing weekly Sprint governance repeatable as a
+  repository-scoped `raveil-sprint-operator` skill. The skill selects audit,
+  kickoff, continuation, Wednesday correction, review, closeout,
+  retrospective, or next-pull mode; calls `scripts/project_queue.py` as the
+  sole queue-transition implementation; and returns one stable authority,
+  usage, Project, evidence, HCI, and next-action receipt. Its detailed
+  reference preserves Initial SP, executable demos, Definition of Ready/Done,
+  canonical records, evidence classes, and Keep/Problem/Try without creating a
+  second task database or granting autonomous authority.
+
+  Real Issue #52, branch `feat/t-0131-sprint-operator-skill`, Project Manager,
+  three SP, and Sprint S-0001 own only the new skill package, PM binding,
+  focused agent-boundary regression, workflow routing, and canonical records.
+  Authority is `origin/main` `db77fa4`; weekly usage observed at
+  2026-08-28T02:56:07Z was a 10,080-minute window with 0% used and 100%
+  remaining. Evidence is host-functional governance only. Stop on duplicate
+  queue authority, HCI/canonical-record bypass, Project drift, WIP mismatch,
+  user-work overlap, or research/product/evidence expansion. No measured
+  delivery-speed, Graph, performance, research, FPGA, ASIC, silicon,
+  publication, or product-readiness claim follows.
 
 - [x] **T-0130** Make GitHub Project #1 truthful as both the executable queue
   and weekly Sprint surface. Require `--sprint` for every newly active real

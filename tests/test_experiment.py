@@ -1167,6 +1167,8 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("Only the Project Manager may use", project_manager)
         self.assertIn("Never activate more than two", project_manager)
         self.assertIn("before `Done`", project_manager)
+        self.assertIn("raveil-sprint-operator", project_manager)
+        self.assertIn("next-pull boundaries", project_manager)
 
         governance = (
             ROOT / ".agents/skills/raveil-task-governance/SKILL.md"
@@ -1176,6 +1178,24 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("real `work-item` Issue", governance)
         self.assertIn("python3 scripts/project_queue.py audit", governance)
         self.assertIn("Only the primary Project Manager", governance)
+
+        sprint_skill_root = ROOT / ".agents/skills/raveil-sprint-operator"
+        sprint_skill = (sprint_skill_root / "SKILL.md").read_text(encoding="utf-8")
+        sprint_reference = (
+            sprint_skill_root / "references/sprint-cycle.md"
+        ).read_text(encoding="utf-8")
+        sprint_interface = (
+            sprint_skill_root / "agents/openai.yaml"
+        ).read_text(encoding="utf-8")
+        self.assertTrue(sprint_skill.startswith("---\nname: raveil-sprint-operator\n"))
+        self.assertIn("scripts/project_queue.py", sprint_skill)
+        self.assertIn("sole queue-transition implementation", sprint_skill)
+        self.assertIn("10,080-minute HCI-09", sprint_skill)
+        self.assertIn("references/sprint-cycle.md", sprint_skill)
+        self.assertIn("Never change `Initial SP`", sprint_reference)
+        self.assertIn("python3 scripts/project_queue.py review", sprint_reference)
+        self.assertIn("one `Keep`", sprint_reference)
+        self.assertIn("default_prompt:", sprint_interface)
 
     def test_librarian_is_read_only_and_skill_metadata_is_valid(self) -> None:
         agent = tomllib.loads(
