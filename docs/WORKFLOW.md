@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-28
+Last updated: 2026-08-29
 
 ## Before a change
 
@@ -367,7 +367,9 @@ Use the GitHub Project cadence in [`SPRINTS.md`](SPRINTS.md) to cap work in
 progress and require a runnable increment. Reference stable T-IDs, calculate
 initial story points at planning, and retain every estimate revision with a
 dated reason. Run planning on Monday, correction review on Wednesday, and the
-executable review plus retrospective on Sunday.
+executable review plus retrospective on Saturday. Sunday is a bounded recovery,
+record-reconciliation, and Monday-handoff buffer, not the normal ceremony or a
+license to pull new closing-Sprint scope.
 
 Use `raveil-sprint-operator` for every Sprint status, kickoff, continuation,
 correction, review, closeout, retrospective, and next-pull boundary. The skill

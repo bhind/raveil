@@ -1195,7 +1195,19 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("Never change `Initial SP`", sprint_reference)
         self.assertIn("python3 scripts/project_queue.py review", sprint_reference)
         self.assertIn("one `Keep`", sprint_reference)
+        self.assertIn(
+            "## Saturday closeout, retrospective, and handoff", sprint_reference
+        )
+        self.assertIn("## Sunday recovery and Monday preparation", sprint_reference)
+        self.assertNotIn(
+            "## Sunday closeout, retrospective, and handoff", sprint_reference
+        )
         self.assertIn("default_prompt:", sprint_interface)
+
+        sprint_governance = (ROOT / "docs/SPRINTS.md").read_text(encoding="utf-8")
+        self.assertIn("Saturday, review and demo", sprint_governance)
+        self.assertIn("Saturday, retrospective", sprint_governance)
+        self.assertIn("Sunday, recovery and handoff", sprint_governance)
 
     def test_librarian_is_read_only_and_skill_metadata_is_valid(self) -> None:
         agent = tomllib.loads(
