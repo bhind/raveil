@@ -61,12 +61,54 @@ class GraphDeviceAxi4LiteTests(unittest.TestCase):
                 (root / manifest).write_text(" ".join(fields) + "\n" + "\n".join(lines[1:]) + "\n")
                 with self.assertRaisesRegex(GraphDeviceAxi4LiteError, expected): finalize(root)
 
+    def test_finalizer_rejects_symlink_nonregular_and_header_substitution(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            root = Path(tmp) / "evidence"; prepare(root); self._complete_evidence(root)
+            link = Path(tmp) / "evidence-link"; link.symlink_to(root, target_is_directory=True)
+            with self.assertRaisesRegex(GraphDeviceAxi4LiteError, "evidence symlink"):
+                finalize(link)
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            root = Path(tmp) / "evidence"; prepare(root); self._complete_evidence(root)
+            (root / "device.log").unlink(); (root / "device.log").mkdir()
+            with self.assertRaisesRegex(GraphDeviceAxi4LiteError, "unsafe file"):
+                finalize(root)
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            root = Path(tmp) / "evidence"; prepare(root); self._complete_evidence(root)
+            (root / "graph_device_axi4lite_aperture_generated.h").write_text("substituted\n")
+            with self.assertRaisesRegex(GraphDeviceAxi4LiteError, "header drifted"):
+                finalize(root)
+
+    def test_finalizer_rejects_path_escape_manifest_and_rtl_mismatch(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            root = Path(tmp) / "evidence"; prepare(root); self._complete_evidence(root)
+            (root / "rtl-first.manifest").write_text("../escape " + "0" * 64 + "\n")
+            with self.assertRaisesRegex(GraphDeviceAxi4LiteError, "invalid manifest"):
+                finalize(root)
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            root = Path(tmp) / "evidence"; prepare(root); self._complete_evidence(root)
+            second = root / "rtl-second" / "GraphDeviceAxi4LiteTop.sv"
+            second.write_text("module y; endmodule\n")
+            digest = hashlib.sha256(second.read_bytes()).hexdigest()
+            (root / "rtl-second.manifest").write_text(f"GraphDeviceAxi4LiteTop.sv {digest}\n")
+            with self.assertRaisesRegex(GraphDeviceAxi4LiteError, "RTL manifests differ"):
+                finalize(root)
+
+    def test_finalizer_rejects_simulator_substitution(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as tmp:
+            root = Path(tmp) / "evidence"; prepare(root); self._complete_evidence(root)
+            (root / "simulator.bin").write_bytes(b"substituted")
+            with self.assertRaisesRegex(GraphDeviceAxi4LiteError, "simulator hash mismatch"):
+                finalize(root)
+
     def test_top_has_independent_aw_w_and_fail_closed_classes(self):
         source = (ROOT / "hardware/chisel/GraphDeviceAxi4LiteTop.scala").read_text()
         self.assertIn("extends RawModule", source)
         self.assertIn("3.U", source)  # DECERR
         self.assertIn("2.U", source)  # SLVERR
         self.assertIn("resetBarrier", source)
+        self.assertIn("pendingReset", source)
+        self.assertIn("!awvalid && !wvalid", source)
+        self.assertIn("0.U(29.W)", source)
         self.assertIn("withClockAndReset", source)
 
 if __name__ == "__main__": unittest.main()

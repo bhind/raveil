@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
   Verilated::commandArgs(argc, argv); VGraphDeviceAxi4LiteTop top; reset(top);
   // All S01 identity/version/status/count words, each aperture separately.
   read(top, 0x0000, OKAY, 0x52560101); read(top, 0x0004, OKAY, 1); read(top, 0x0014, OKAY, 0); read(top, 0x0018, OKAY, 324); read(top, 0x001c, OKAY, 256);
-  read(top, 0x2000, OKAY, 0x52564901); read(top, 0x2004, OKAY, 1); read(top, 0x2014, OKAY, 4); read(top, 0x2018, OKAY, 16);
-  read(top, 0x3000, OKAY, 0x52565001); read(top, 0x3004, OKAY, 1); read(top, 0x3014, OKAY, 4); read(top, 0x3018, OKAY, 0);
+  read(top, 0x2000, OKAY, 0x52564901); read(top, 0x2004, OKAY, 1); read(top, 0x2014, OKAY, 2); read(top, 0x2018, OKAY, 16);
+  read(top, 0x3000, OKAY, 0x52565001); read(top, 0x3004, OKAY, 1); read(top, 0x3014, OKAY, 2); read(top, 0x3018, OKAY, 0);
   // AW-first, W-first and same-cycle capture; all non-reset writes fail closed.
   write(top, 0x0014, 0, 0xf, 0, SLVERR); write(top, 0x0014, 0, 0xf, 1, SLVERR); write(top, 0x0014, 0, 0xf, 2, SLVERR);
   // Decoded holes/RO/partial write are SLVERR; unaligned/outside are DECERR.
@@ -41,12 +41,25 @@ int main(int argc, char** argv) {
   // ARESETn clears partial AW/W, held R, and held B transactions, not merely core state.
   top.awaddr = 0x10; top.awvalid = 1; tick(top); if (top.arready) fail("partial AW did not gate AR"); reset(top);
   top.wdata = 0; top.wstrb = 0xf; top.wvalid = 1; tick(top); if (top.arready) fail("partial W did not gate AR"); reset(top);
+  // When idle read and write are presented together, write has priority and
+  // the target must not admit a second, concurrent read transaction.
+  top.awaddr = 0x14; top.awvalid = 1; top.wdata = 0; top.wstrb = 0xf; top.wvalid = 1;
+  top.araddr = 0; top.arvalid = 1; top.eval(); if (top.arready) fail("read admitted with write");
+  tick(top); top.awvalid = top.wvalid = top.arvalid = 0; tick(top); wait_b(top, SLVERR);
   top.araddr = 0; top.arvalid = 1; tick(top); top.arvalid = 0; if (!top.rvalid) fail("held R setup"); reset(top);
   top.awaddr = 0; top.awvalid = 1; top.wdata = 0; top.wstrb = 0xf; top.wvalid = 1; tick(top); top.awvalid = top.wvalid = 0; tick(top); if (!top.bvalid) fail("held B setup"); reset(top);
   // CONTROL.reset blocks admission while retaining its OKAY B response until BREADY.
   top.awaddr = 0x10; top.awvalid = 1; top.wdata = 4; top.wstrb = 0xf; top.wvalid = 1; tick(top); top.awvalid = top.wvalid = 0; tick(top);
-  if (!top.bvalid || top.bresp != OKAY || top.awready || top.wready || top.arready) fail("soft reset barrier/admission"); tick(top); if (!top.bvalid || top.bresp != OKAY || top.awready || top.wready || top.arready) fail("soft reset B hold"); tick(top); if (!top.bvalid || top.awready || top.wready || top.arready) fail("soft reset multi-cycle admission"); top.bready = 1; tick(top); top.bready = 0;
-  read(top, 0x0014, OKAY, 0); reset(top);
+  if (!top.bvalid || top.bresp != OKAY || top.awready || top.wready || top.arready) fail("soft reset response/admission");
+  tick(top); if (!top.bvalid || top.bresp != OKAY || top.awready || top.wready || top.arready) fail("soft reset B hold");
+  tick(top); if (!top.bvalid || top.awready || top.wready || top.arready) fail("soft reset pre-handshake admission");
+  top.bready = 1; tick(top); top.bready = 0;
+  if (top.awready || top.wready || top.arready) fail("soft reset barrier after B handshake");
+  tick(top);
+  read(top, 0x0000, OKAY, 0x52560101); read(top, 0x0014, OKAY, 0);
+  read(top, 0x2000, OKAY, 0x52564901); read(top, 0x2014, OKAY, 2);
+  read(top, 0x3000, OKAY, 0x52565001); read(top, 0x3014, OKAY, 2);
+  reset(top);
   std::cout << "GraphDevice-AXI4LITE-CONTROL-V1 status=OK evidence=rtl-simulation-functional performance=not-measured\n";
   return 0;
 }
