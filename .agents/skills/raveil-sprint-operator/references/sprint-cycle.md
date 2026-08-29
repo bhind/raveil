@@ -127,7 +127,7 @@ records, mergeability, checks, and review threads. After merge, verify that the
 Issue is closed and Project status is `Done`; automation or Project metadata
 alone never proves task completion.
 
-## Sunday closeout, retrospective, and handoff
+## Saturday closeout, retrospective, and handoff
 
 1. Reconcile STATUS, TODO, ROADMAP, OPEN_QUESTIONS, relevant ADR/RFC/EXP, and
    the dated log from verified repository evidence.
@@ -146,6 +146,14 @@ alone never proves task completion.
 If there is no pullable item, finish with the exact missing trigger rather than
 inventing work. A closed Sprint may be unsuccessful; truthful failure is a valid
 review outcome.
+
+## Sunday recovery and Monday preparation
+
+Sunday is not the normal review day. Use it only to reconcile records and
+Project state exposed on Saturday, preserve a failed demo, perform an
+already-authorized bounded correction followed by an explicit re-review, or
+prepare Ready work for Monday. Do not add new closing-Sprint scope. Anything
+not accepted on Saturday or through that bounded re-review carries explicitly.
 
 ## Phase receipt
 

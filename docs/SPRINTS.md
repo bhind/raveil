@@ -18,12 +18,16 @@ The normal sprint runs Monday through Sunday.
 - Wednesday, correction review: compare the board with actual work, preserve
   every initial estimate, record changed points and reasons, and split or
   remove scope when capacity is exceeded.
-- Sunday, review and demo: run the increment from a recorded command and
+- Saturday, review and demo: run the increment from a recorded command and
   environment, inspect acceptance evidence, and move only verified work to
   `DONE`.
-- Sunday, retrospective: record one useful observation in each of `Keep`,
+- Saturday, retrospective: record one useful observation in each of `Keep`,
   `Problem`, and `Try`. At most one process-improvement action enters the next
   sprint so process work cannot consume the product.
+- Sunday, recovery and handoff: reconcile records and Project state, retain a
+  failed Saturday demo, perform only an already-authorized bounded correction
+  plus explicit re-review, and prepare Ready work for Monday. Do not pull new
+  closing-Sprint scope merely because the Iteration has one day remaining.
 
 Research reviews remain milestone-driven under `docs/WORKFLOW.md`. A weekly
 sprint review may expose evidence or trigger a research review, but it cannot
