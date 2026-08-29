@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import io
 import json
 from pathlib import Path
@@ -8,7 +9,13 @@ import unittest
 from unittest import mock
 
 from raveil.cli import main
-from raveil.garden import GardenBrowser, GardenSnapshot, render_error, render_key_session
+from raveil.garden import (
+    GardenBrowser,
+    GardenSnapshot,
+    _materialized_fused_plan_pair,
+    render_error,
+    render_key_session,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +48,98 @@ class GardenTUITests(unittest.TestCase):
         self.assertTrue(first.endswith("Raveil Garden | closed"))
         with self.assertRaisesRegex(ValueError, "bounded step limit"):
             render_key_session(snapshot, "j" * 65)
+
+    def test_validated_fusion_comparison_is_data_bound_and_non_claiming(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        pair = _materialized_fused_plan_pair(snapshot.variants)
+        self.assertIsNotNone(pair)
+        materialized, fused = pair
+        self.assertEqual(
+            (materialized.variant_id, fused.variant_id),
+            ("loop-ikj", "loop-ikj-fused"),
+        )
+        self.assertEqual(materialized.program_sha256, fused.program_sha256)
+        self.assertEqual(materialized.contract_sha256, fused.contract_sha256)
+        self.assertEqual(materialized.memory_plan.maximum_intermediate_bytes, 512)
+        self.assertEqual(fused.memory_plan.maximum_intermediate_bytes, 0)
+        for width in (72, 100, 150, 240):
+            rendered = GardenBrowser(snapshot, width).render()
+            normalized = " ".join(rendered.replace("|", "").split())
+            compact = "".join(rendered.replace("|", "").split())
+            self.assertIn(
+                "Matched plan pair: loop-ikj vs loop-ikj-fused "
+                "(deterministic comparison; not a measured best-plan selection)",
+                normalized,
+            )
+            self.assertIn(
+                "semanticgraph:unchanged;programsha256=" + materialized.program_sha256,
+                compact,
+            )
+            self.assertIn(
+                "resultcontract:unchanged;contractsha256=" + materialized.contract_sha256,
+                compact,
+            )
+            self.assertIn(
+                "materialized [loop-ikj]: matmul -> bias_add -> "
+                "intermediate[512B] -> relu -> output",
+                normalized,
+            )
+            self.assertIn(
+                "fused [loop-ikj-fused]: matmul -> bias_add + relu -> output; "
+                "intermediate[0B]",
+                normalized,
+            )
+            self.assertIn(
+                "scope: intermediate buffer only; not total Graph memory (512B vs 0B)",
+                normalized,
+            )
+            self.assertLess(
+                rendered.index("Matched plan pair:"),
+                rendered.index("baseline-ijk baseline;"),
+            )
+            self.assertNotIn("speedup", rendered)
+            self.assertNotIn("latency", rendered)
+            self.assertNotIn("energy", rendered)
+
+    def test_fusion_comparison_is_omitted_without_a_validated_pair(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        without_fused = tuple(
+            variant for variant in snapshot.variants
+            if variant.memory_plan.materialization != "fused"
+        )
+        no_pair_snapshot = snapshot.__class__(
+            snapshot.title, snapshot.program, without_fused, snapshot.evidence,
+            snapshot.demo_commands,
+        )
+        self.assertIsNone(_materialized_fused_plan_pair(without_fused))
+        self.assertNotIn("Matched plan pair:", GardenBrowser(no_pair_snapshot).render())
+
+    def test_fusion_comparison_rejects_near_match_lineage_and_schedule(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        materialized = next(
+            variant for variant in snapshot.variants if variant.variant_id == "loop-ikj"
+        )
+        fused = next(
+            variant for variant in snapshot.variants if variant.variant_id == "loop-ikj-fused"
+        )
+        near_matches = (
+            replace(fused, program_sha256="0" * 64),
+            replace(fused, contract_sha256="0" * 64),
+            replace(fused, candidate=replace(fused.candidate, loop_order="ijk")),
+            replace(fused, transforms=("loop-tiling:32", "fuse:bias_add+relu")),
+        )
+        for near_match in near_matches:
+            with self.subTest(near_match=near_match):
+                self.assertIsNone(_materialized_fused_plan_pair((materialized, near_match)))
+
+        tiled_materialized = next(
+            variant for variant in snapshot.variants if variant.variant_id == "tile32"
+        )
+        tiled_fused = next(
+            variant for variant in snapshot.variants if variant.variant_id == "tile32-fused"
+        )
+        wrong_tile = replace(tiled_fused, candidate=replace(tiled_fused.candidate, tile=16))
+        self.assertIsNone(_materialized_fused_plan_pair((tiled_materialized, wrong_tile)))
 
     def test_cli_renders_one_noninteractive_screen(self) -> None:
         output = io.StringIO()
