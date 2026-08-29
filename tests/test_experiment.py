@@ -1201,7 +1201,9 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn(
             "## Saturday closeout, retrospective, and handoff", sprint_reference
         )
-        self.assertIn("## Sunday recovery and Monday preparation", sprint_reference)
+        self.assertIn("## Kickoff and immediate next pull", sprint_reference)
+        self.assertIn("## Sunday recovery and remaining preparation", sprint_reference)
+        self.assertIn("Do not wait for Monday", sprint_reference)
         self.assertNotIn(
             "## Sunday closeout, retrospective, and handoff", sprint_reference
         )
@@ -1211,6 +1213,7 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("Saturday, review and demo", sprint_governance)
         self.assertIn("Saturday, retrospective", sprint_governance)
         self.assertIn("Sunday, recovery and handoff", sprint_governance)
+        self.assertIn("Immediately after accepted review and retrospective", sprint_governance)
         self.assertIn("show the actual output or visible interface to the owner", sprint_governance)
         self.assertIn("explicit owner disposition", sprint_governance)
 

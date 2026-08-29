@@ -214,6 +214,16 @@ execution through AXI, a Linux or FPGA integration, AXI certification, or a
 performance, resource, ARM64, ASIC, silicon, publication, or product-readiness
 result.
 
+After the accepted S-0001 owner-visible review and Keep/Problem/Try
+retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
+one ready next-Sprint item to be pulled immediately after closeout while
+retaining every usage, WIP, dependency, Issue-packet, branch, evidence, and
+queue guard. T-0135 is now the S-0002 P0 Product Slice under Issue #60 and
+branch `feat/t-0135-garden-fusion-explanation`; T-0136 is the disjoint one-SP
+Operations correction under Issue #65. The live queue audit passes with these
+two active items. This is coordination state, not product acceptance or a
+measured delivery-speed claim.
+
 The bounded T-0106/S01 carry-in is repository-accepted. On the current-main
 descendant, the owned CPU runner now includes the complete five-file Scala
 source closure required by `RaveilDCacheOriginTagger.scala`; the added Static

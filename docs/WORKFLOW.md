@@ -366,10 +366,12 @@ agent and no automatic external issue-tracker write.
 Use the GitHub Project cadence in [`SPRINTS.md`](SPRINTS.md) to cap work in
 progress and require a runnable increment. Reference stable T-IDs, calculate
 initial story points at planning, and retain every estimate revision with a
-dated reason. Run planning on Monday, correction review on Wednesday, and the
-executable review plus retrospective on Saturday. Sunday is a bounded recovery,
-record-reconciliation, and Monday-handoff buffer, not the normal ceremony or a
-license to pull new closing-Sprint scope.
+dated reason. Use Monday as the regular planning checkpoint, correction review
+on Wednesday, and the executable review plus retrospective on Saturday. After
+an accepted owner-visible review and recorded Keep/Problem/Try, immediately
+evaluate and pull one ready next-Sprint item through the canonical queue;
+Monday is not a wait boundary. Sunday remains a bounded recovery and record-
+reconciliation buffer, not a license to add scope to the reviewed Sprint.
 
 Use `raveil-sprint-operator` for every Sprint status, kickoff, continuation,
 correction, review, closeout, retrospective, and next-pull boundary. The skill

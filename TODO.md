@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0135 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0135, T-0136 |
+| **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -26,6 +26,15 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0136** Make accepted owner-visible Sprint review plus the recorded
+  Keep/Problem/Try retrospective the immediate next-Sprint pull boundary.
+  ADR-0070 supersedes only ADR-0068's Monday wait; HCI-09, Definition of Ready,
+  dependency, WIP, branch, Issue-packet, and canonical queue guards remain.
+  Real Issue #65, branch `docs/t-0136-immediate-post-review-pull`, Project
+  Manager, one SP, S-0002, and host-functional governance evidence own the
+  bounded workflow/skill/test/record allowlist. T-0135 is already the separate
+  ready product lane and does not wait for this record correction.
 
 - [x] **T-0132/S01** Prove the smallest repository-owned AXI4-Lite control
   boundary around the real current `StaticStencilRegion`. ADR-0067 fixes one
