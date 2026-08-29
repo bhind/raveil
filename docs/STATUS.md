@@ -218,11 +218,17 @@ After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while
 retaining every usage, WIP, dependency, Issue-packet, branch, evidence, and
-queue guard. T-0135 is now the S-0002 P0 Product Slice under Issue #60 and
-branch `feat/t-0135-garden-fusion-explanation`; T-0136 is the disjoint one-SP
-Operations correction under Issue #65. The live queue audit passes with these
-two active items. This is coordination state, not product acceptance or a
-measured delivery-speed claim.
+queue guard. T-0136 merged through PR #66 as canonical commit `224394b`;
+Issue #65 is Closed and its Project item is Done. T-0135 is the sole active
+S-0002 P0 Product Slice under Issue #60 and branch
+`feat/t-0135-garden-fusion-explanation`. Its implementation candidate now
+explains the validated materialized and fused paths, binds the unchanged
+program and result-contract hashes, and labels `512B` versus `0B` as only the
+intermediate-buffer scope. Forty-three focused/regression tests and the 150- and
+100-column host demos pass. This is a review candidate at host-functional
+evidence only; owner disposition remains required before acceptance or Done,
+and no measured delivery-speed, Graph-performance, FPGA, ASIC, or silicon
+claim follows.
 
 The bounded T-0106/S01 carry-in is repository-accepted. On the current-main
 descendant, the owned CPU runner now includes the complete five-file Scala

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0135, T-0136 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0135 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -27,14 +27,16 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0136** Make accepted owner-visible Sprint review plus the recorded
+- [x] **T-0136** Make accepted owner-visible Sprint review plus the recorded
   Keep/Problem/Try retrospective the immediate next-Sprint pull boundary.
   ADR-0070 supersedes only ADR-0068's Monday wait; HCI-09, Definition of Ready,
   dependency, WIP, branch, Issue-packet, and canonical queue guards remain.
   Real Issue #65, branch `docs/t-0136-immediate-post-review-pull`, Project
   Manager, one SP, S-0002, and host-functional governance evidence own the
   bounded workflow/skill/test/record allowlist. T-0135 is already the separate
-  ready product lane and does not wait for this record correction.
+  ready product lane and does not wait for this record correction. PR #66
+  merged as canonical commit `224394bd3147bb31cb196e2caecde27729d7cfc9`;
+  Issue #65 is Closed and its Project item is Done.
 
 - [x] **T-0132/S01** Prove the smallest repository-owned AXI4-Lite control
   boundary around the real current `StaticStencilRegion`. ADR-0067 fixes one
@@ -594,8 +596,13 @@ review and failure preservation do not consume the two-item delivery limit.
   Bind every explanation to the validated variant and memory plan, retain
   bounded deterministic rendering and observe-only authority, and make no
   speed, energy, latency, FPGA, ASIC, or silicon claim. This is real Issue #60,
-  P1 Product Backlog, three SP, Experience Implementer, dependent on T-0120,
-  with S-0002 as a medium-confidence forecast rather than a committed Sprint.
+  S-0002 P0 Product Slice, three SP, Experience Implementer, dependent on
+  T-0120. The implementation candidate on
+  `feat/t-0135-garden-fusion-explanation` deterministically pairs validated
+  materialized and fused variants, renders the data-derived `512B` versus
+  `0B` intermediate-buffer scope in wide and narrow layouts, and passes 43
+  focused/regression tests. It remains open pending the required owner-visible
+  review and explicit disposition under ADR-0069.
 
 - [x] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host
   ARM64/x86-64. Render one strictly validated graph snapshot, node/dependency

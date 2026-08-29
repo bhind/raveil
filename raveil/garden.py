@@ -20,6 +20,7 @@ MAX_NAVIGATION_STEPS = 64
 DEFAULT_RENDER_WIDTH = 150
 MIN_RENDER_WIDTH = 72
 MAX_RENDER_WIDTH = 240
+FUSION_TRANSFORM = "fuse:bias_add+relu"
 
 
 def validate_render_width(width: int) -> int:
@@ -209,6 +210,43 @@ class GardenSnapshot:
         )
 
 
+def _materialized_fused_plan_pair(
+    variants: tuple[GraphVariant, ...],
+) -> tuple[GraphVariant, GraphVariant] | None:
+    """Return the first validated materialized/fused comparison, if present."""
+    pairs: list[tuple[GraphVariant, GraphVariant]] = []
+    for fused in variants:
+        if (
+            fused.memory_plan.materialization != "fused"
+            or FUSION_TRANSFORM not in fused.transforms
+        ):
+            continue
+        unfused_transforms = tuple(
+            transform for transform in fused.transforms if transform != FUSION_TRANSFORM
+        )
+        for materialized in variants:
+            if (
+                materialized.memory_plan.materialization == "materialized"
+                and materialized.candidate.loop_order == fused.candidate.loop_order
+                and materialized.candidate.tile == fused.candidate.tile
+                and materialized.program_sha256 == fused.program_sha256
+                and materialized.contract_sha256 == fused.contract_sha256
+                and materialized.transforms == unfused_transforms
+            ):
+                pairs.append((materialized, fused))
+    if not pairs:
+        return None
+    return min(
+        pairs,
+        key=lambda pair: (
+            pair[0].candidate.cold_priority,
+            pair[1].candidate.cold_priority,
+            pair[0].variant_id,
+            pair[1].variant_id,
+        ),
+    )
+
+
 class GardenBrowser:
     """Bounded navigation state with no graph execution or mutation authority."""
 
@@ -276,6 +314,39 @@ class GardenBrowser:
             f"evidence: {self.snapshot.evidence.statement}",
             f"selected node: {selected.node_id}; variants: {len(self.snapshot.variants)}",
         ]
+        comparison = _materialized_fused_plan_pair(self.snapshot.variants)
+        if comparison is not None:
+            materialized, fused = comparison
+            variants.extend([
+                (
+                    "Matched plan pair: "
+                    f"{materialized.variant_id} vs {fused.variant_id} "
+                    "(deterministic comparison; not a measured best-plan selection)"
+                ),
+                (
+                    "semantic graph: unchanged; program sha256="
+                    f"{materialized.program_sha256}"
+                ),
+                (
+                    "result contract: unchanged; contract sha256="
+                    f"{materialized.contract_sha256}"
+                ),
+                (
+                    f"materialized [{materialized.variant_id}]: matmul -> bias_add -> "
+                    "intermediate["
+                    f"{materialized.memory_plan.maximum_intermediate_bytes}B] -> relu -> output"
+                ),
+                (
+                    f"fused [{fused.variant_id}]: matmul -> bias_add + relu -> output; "
+                    "intermediate["
+                    f"{fused.memory_plan.maximum_intermediate_bytes}B]"
+                ),
+                (
+                    "scope: intermediate buffer only; not total Graph memory "
+                    f"({materialized.memory_plan.maximum_intermediate_bytes}B vs "
+                    f"{fused.memory_plan.maximum_intermediate_bytes}B)"
+                ),
+            ])
         for variant in self.snapshot.variants:
             baseline = " baseline" if variant.candidate.trusted_baseline else ""
             variants.append(
