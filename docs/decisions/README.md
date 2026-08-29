@@ -68,5 +68,6 @@ rewrite it.
 | [ADR-0064](ADR-0064-program-installation-is-separate-from-execution-and-affine-configuration.md) | Accepted | Bounded program installation uses a third owned ABI and one generic sequential interpreter |
 | [ADR-0065](ADR-0065-active-project-work-uses-real-issues-and-a-fail-closed-queue.md) | Accepted | Active P0 work uses real Issues, checked lifecycle transitions, and at most two disjoint mutation owners |
 | [ADR-0066](ADR-0066-active-project-work-requires-a-sprint-and-truthful-live-metadata.md) | Accepted | Active real-Issue work requires a configured Sprint and truthful live coordination metadata |
+| [ADR-0067](ADR-0067-graph-device-abis-use-one-relative-axi4lite-aperture.md) | Accepted | Three owned Graph-device ABIs use one unbased relative AXI4-Lite aperture |
 | [ADR-0068](ADR-0068-sprint-review-and-retrospective-run-on-saturday.md) | Accepted | Sprint review and retrospective run on Saturday; Sunday is a bounded recovery and handoff buffer |
 | [ADR-0069](ADR-0069-owner-visible-review-precedes-sprint-review-done.md) | Accepted | Actual output, explanation, feedback routing, and explicit owner disposition precede Sprint review Done |
