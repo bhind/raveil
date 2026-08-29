@@ -331,6 +331,25 @@ installer faults, rejected publication zero, and explicit evidence/non-claim
 labels. This presentation is not a transport, device ABI, execution authority,
 public Data path, or Experience input.
 
+T-0132/S01 adds the first concrete control transport without changing those
+three owned ABIs. ADR-0067 places execution, affine installation, and program
+installation at relative byte ranges `[0x0000,0x2000)`, `[0x2000,0x3000)`, and
+`[0x3000,0x4000)` in one 32-bit little-endian AXI4-Lite aperture. Its absolute
+platform base is intentionally unassigned. The wrapper around the unchanged
+`StaticStencilRegion` captures AW and W independently but owns only one total
+read-or-write transaction. It preserves R/B responses under backpressure,
+classifies decoded invalid accesses separately from unmapped addresses, and
+uses external ARESETn for bus-plus-core reset. Execution `CONTROL.reset`
+retains its OKAY B response through handshake and then applies a bounded core-
+only reset barrier before admitting another request.
+
+This S01 adapter exposes only identity, version, status, counts, and execution
+reset. Data windows, install payloads, digests, start/cancel, DMA, IRQ, and an
+operator runtime remain outside the adapter. Chisel/Verilator evidence proves
+only the repository-owned RTL control behavior; the relative aperture is not
+an AXI certification, physical-address assignment, Linux driver, FPGA
+integration, or performance result.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the
