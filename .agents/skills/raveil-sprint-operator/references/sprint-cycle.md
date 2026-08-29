@@ -30,7 +30,7 @@ Report separately:
 Do not repair state during a status-only request unless the user also authorized
 the mutation.
 
-## Kickoff and Monday planning
+## Kickoff and immediate next pull
 
 1. Read current weekly Codex telemetry. It is valid only when the window is
    10,080 minutes. Record timestamp, used percentage, and `100 - used` remaining.
@@ -158,17 +158,23 @@ alone never proves task completion.
    whose canonical trigger, dependencies, Definition of Ready, Sprint, and WIP
    boundaries are satisfied.
 
+7. When the owner accepted the review and Keep/Problem/Try are recorded, run
+   the kickoff dry-run and apply immediately for that one ready item.
+   Do not wait for Monday solely because the next Iteration's reporting date
+   has not begun.
+
 If there is no pullable item, finish with the exact missing trigger rather than
 inventing work. A closed Sprint may be unsuccessful; truthful failure is a valid
 review outcome.
 
-## Sunday recovery and Monday preparation
+## Sunday recovery and remaining preparation
 
-Sunday is not the normal review day. Use it only to reconcile records and
-Project state exposed on Saturday, preserve a failed demo, perform an
-already-authorized bounded correction followed by an explicit re-review, or
-prepare Ready work for Monday. Do not add new closing-Sprint scope. Anything
-not accepted on Saturday or through that bounded re-review carries explicitly.
+Sunday is not the normal review day. Use it to reconcile records and Project
+state exposed on Saturday, preserve a failed demo, perform an already-
+authorized bounded correction followed by an explicit re-review, or prepare
+work that was not ready at closeout. Do not add scope to the already-reviewed
+Sprint. Ready next-Sprint work should already have been pulled immediately
+after accepted review and postmortem.
 
 ## Phase receipt
 

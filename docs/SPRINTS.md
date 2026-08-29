@@ -11,7 +11,9 @@ EXP contracts.
 
 ## Cadence
 
-The normal sprint runs Monday through Sunday.
+GitHub Sprint Iterations retain Monday-through-Sunday reporting dates. Work
+does not wait for Monday when the preceding review and retrospective have
+closed and the next item is ready.
 
 - Monday, planning: choose one sprint goal, calculate initial story points,
   commit no more than current capacity, and name the exact demo path.
@@ -25,10 +27,13 @@ The normal sprint runs Monday through Sunday.
 - Saturday, retrospective: record one useful observation in each of `Keep`,
   `Problem`, and `Try`. At most one process-improvement action enters the next
   sprint so process work cannot consume the product.
+- Immediately after accepted review and retrospective: recheck usage, WIP,
+  dependencies, Definition of Ready, and the real-Issue packet, then pull one
+  ready item into its configured next Sprint through the canonical queue.
 - Sunday, recovery and handoff: reconcile records and Project state, retain a
   failed Saturday demo, perform only an already-authorized bounded correction
-  plus explicit re-review, and prepare Ready work for Monday. Do not pull new
-  closing-Sprint scope merely because the Iteration has one day remaining.
+  plus explicit re-review, and prepare work that was not ready at closeout.
+  Do not add scope to the already-reviewed Sprint.
 
 Research reviews remain milestone-driven under `docs/WORKFLOW.md`. A weekly
 sprint review may expose evidence or trigger a research review, but it cannot
@@ -101,7 +106,7 @@ silently narrow the parent task. Parent epics receive no story points. Count SP
 only on child slices that can be accepted independently, preventing duplicate
 velocity when implementation, testing, and review appear under one parent.
 
-Refinement happens before Monday planning and whenever a newly discovered
+Refinement happens before the next pull and whenever a newly discovered
 dependency invalidates the next two sprints. A refined item records:
 
 - one observable outcome and bounded non-goals;
