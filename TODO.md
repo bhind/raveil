@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S01 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S01, T-0134 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -26,6 +26,17 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0134** Require owner-visible Sprint review before the review ceremony
+  enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
+  and route feedback, receive explicit owner disposition, then change status.
+  A `Conditional Accept` requires every condition to have a stable tracked
+  destination. Real Issue #59, branch
+  `docs/t-0134-owner-visible-review`, Project Manager, three SP, and Sprint
+  S-0001 own only Sprint workflow, operator-skill, regression, canonical
+  governance records, and matching Project metadata. Evidence is
+  host-functional governance only; this task cannot accept product or research
+  claims or implement Garden feedback.
 
 - [x] **T-0133** Move the recurring executable Sprint Review and
   Keep/Problem/Try retrospective from Sunday to Saturday while retaining the
@@ -536,6 +547,17 @@ review and failure preservation do not consume the two-item delivery limit.
   performance claim, or research/hardware gate.
 
 ## Playable pillar — Raveil Garden TUI
+
+- [ ] **T-0135** Explain materialized baseline versus fused implementation
+  plans in the read-only Garden UI. Show the semantic Graph unchanged, a
+  baseline path that materializes the `bias_add` intermediate, a fused path
+  that forwards it directly into `relu`, and that `512B` versus `0B` concerns
+  only the eliminated intermediate buffer rather than total Graph memory.
+  Bind every explanation to the validated variant and memory plan, retain
+  bounded deterministic rendering and observe-only authority, and make no
+  speed, energy, latency, FPGA, ASIC, or silicon claim. This is real Issue #60,
+  P1 Product Backlog, three SP, Experience Implementer, dependent on T-0120,
+  with S-0002 as a medium-confidence forecast rather than a committed Sprint.
 
 - [x] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host
   ARM64/x86-64. Render one strictly validated graph snapshot, node/dependency

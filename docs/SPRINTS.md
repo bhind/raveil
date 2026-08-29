@@ -19,8 +19,9 @@ The normal sprint runs Monday through Sunday.
   every initial estimate, record changed points and reasons, and split or
   remove scope when capacity is exceeded.
 - Saturday, review and demo: run the increment from a recorded command and
-  environment, inspect acceptance evidence, and move only verified work to
-  `DONE`.
+  environment, show the actual output or visible interface to the owner,
+  explain behavior and non-claims, route feedback, and move the review
+  ceremony to `Done` only after an explicit owner disposition.
 - Saturday, retrospective: record one useful observation in each of `Keep`,
   `Problem`, and `Try`. At most one process-improvement action enters the next
   sprint so process work cannot consume the product.
@@ -121,6 +122,15 @@ An item moves to `Done` only when the increment or evidence command ran at a
 recorded revision and environment, acceptance was reviewed, failures and
 non-claims remain visible, and required canonical records were reconciled.
 Reviewer advice, prose, partial SP, and a green subagent report are insufficient.
+
+The Sprint review ceremony has an additional owner-visible boundary under
+ADR-0069. Successful commands make a demo candidate; they do not accept the
+ceremony. The Project Manager must show and explain the actual result, classify
+durable feedback, route it to a stable task and Issue or Product Backlog item
+when appropriate, and record an explicit `Accept`, `Conditional Accept`,
+`Carry`, or `Reject` disposition before the ceremony enters `Done`.
+`Conditional Accept` requires every condition to have a tracked destination;
+it does not complete that follow-up work.
 
 ## Role and capacity plan
 
@@ -239,6 +249,14 @@ The review records:
 - acceptance evidence and evidence class;
 - non-claims and remaining risks;
 - accepted, rejected, carried, and dropped scope.
+
+The Project Manager presents those facts to the owner in the interface being
+used for the review. For a terminal Playable, this means running the command,
+letting the owner exercise the visible controls when practical, and explaining
+the exact screen contents rather than only reporting a test count. Feedback is
+classified as a defect, new feature/Product Backlog item, research question,
+or transient observation. Durable feedback is de-duplicated and routed before
+`Conditional Accept` or `Accept` is finalized.
 
 If the intended increment does not run, demonstrate the last working baseline
 and the exact failing boundary. The sprint can be unsuccessful without hiding

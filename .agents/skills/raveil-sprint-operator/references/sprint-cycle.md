@@ -121,6 +121,20 @@ and non-claims. Prose or mock output is not a runnable increment. If the new
 increment fails, demonstrate the last accepted baseline and the exact failing
 boundary without calling the item Done.
 
+Command success creates a review candidate only. Show the owner the actual
+output or visible interface and explain what each relevant result proves, what
+it does not prove, and what remains unfinished. Let the owner exercise a
+human-facing Playable when practical. Classify feedback as defect, new
+feature/Product Backlog item, research question, or transient observation;
+de-duplicate durable feedback and route it to a stable task and Issue or
+Backlog item as appropriate.
+
+Keep the Sprint review ceremony non-Done until the owner explicitly chooses
+`Accept`, `Conditional Accept`, `Carry`, or `Reject`. A `Conditional Accept`
+may close the ceremony only after every condition has a tracked destination;
+it neither implements nor completes that destination. Record the disposition,
+conditions, and links in `Review Outcome` before moving status last.
+
 An incident-free PR may merge under the standing authority in ADR-0058 after
 the primary verifies the intended diff, current authority ancestry, acceptance,
 records, mergeability, checks, and review threads. After merge, verify that the
@@ -133,7 +147,8 @@ alone never proves task completion.
    the dated log from verified repository evidence.
 2. Run the task-governance record checker, relevant tests, `git diff --check`,
    and the live queue audit. Keep exact commands and exit codes.
-3. Update the private Project README through the latest accepted `Done` item.
+3. Update the private Project README through the latest owner-accepted `Done`
+   review and latest repository-accepted task item; do not conflate the two.
 4. Record accepted, rejected, carried, and dropped scope. Retain failures and
    all evidence-class non-claims.
 5. Record exactly one `Keep`, one evidence-backed `Problem`, and one bounded
