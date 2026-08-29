@@ -1195,6 +1195,9 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("Never change `Initial SP`", sprint_reference)
         self.assertIn("python3 scripts/project_queue.py review", sprint_reference)
         self.assertIn("one `Keep`", sprint_reference)
+        self.assertIn("Command success creates a review candidate only", sprint_reference)
+        self.assertIn("`Conditional Accept`", sprint_reference)
+        self.assertIn("every condition has a tracked destination", sprint_reference)
         self.assertIn(
             "## Saturday closeout, retrospective, and handoff", sprint_reference
         )
@@ -1208,6 +1211,8 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertIn("Saturday, review and demo", sprint_governance)
         self.assertIn("Saturday, retrospective", sprint_governance)
         self.assertIn("Sunday, recovery and handoff", sprint_governance)
+        self.assertIn("show the actual output or visible interface to the owner", sprint_governance)
+        self.assertIn("explicit owner disposition", sprint_governance)
 
     def test_librarian_is_read_only_and_skill_metadata_is_valid(self) -> None:
         agent = tomllib.loads(

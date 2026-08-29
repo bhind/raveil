@@ -39,7 +39,9 @@ GitHub Project mutation implementation.
   remove scope without rewriting history.
 - **Review/closeout:** validate the exact-head PR and recorded acceptance,
   transition through the canonical review command, run the executable Sprint
-  demo, reconcile records, and verify closed-Issue/`Done` agreement after merge.
+  demo, show and explain the actual result to the owner, route durable
+  feedback, obtain an explicit owner disposition, reconcile records, and
+  verify closed-Issue/`Done` agreement after merge.
 - **Retrospective/next pull:** record one `Keep`, one observed `Problem`, and at
   most one bounded `Try`. Recheck usage, WIP, dependencies, and readiness before
   pulling the next item.
@@ -62,6 +64,11 @@ tracked mutation. For a read-only status request, its audit section is enough.
 - A Sprint demo, points total, Project status, agent report, or retrospective
   never closes a T-ID, accepts an ADR/RFC, concludes an EXP, passes a gate, or
   promotes simulation to FPGA or silicon evidence.
+- Command success never accepts the Sprint review ceremony. Keep it non-Done
+  until the owner sees the result, receives an evidence-grounded explanation,
+  durable feedback is routed, and the owner explicitly chooses `Accept`,
+  `Conditional Accept`, `Carry`, or `Reject`. Every conditional acceptance
+  item must have a stable tracked destination before ceremony closeout.
 - Apply all HCI classes before destructive, remote, claim-bearing, paid,
   credentialed, gate-changing, or materially forked work.
 

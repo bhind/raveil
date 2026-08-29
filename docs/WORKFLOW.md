@@ -376,6 +376,14 @@ correction, review, closeout, retrospective, and next-pull boundary. The skill
 standardizes the audit and handoff receipt while this workflow, `SPRINTS.md`,
 the canonical records, and `project_queue.py` retain authority.
 
+ADR-0069 makes the owner-visible review interaction a separate fail-closed
+boundary from command success. Keep the Sprint review ceremony non-Done until
+the actual output or interface has been shown and explained, durable feedback
+has been classified and routed, and the owner has explicitly selected
+`Accept`, `Conditional Accept`, `Carry`, or `Reject`. A conditional acceptance
+requires a stable destination for every condition; it does not mark those
+follow-ups complete.
+
 Maintain an ordered Product Backlog, not only the current Sprint. The live pull
 surface uses only Title, Status, Priority, Parent T-ID, Owner Role, Depends On,
 Sprint, Story Points, Demo Command, and Evidence Class. Retain richer historical
@@ -454,6 +462,14 @@ At progress and milestone review:
 4. promote only reusable, evidence-backed lessons to failure knowledge;
 5. close the issue only after integration, regression verification, and record
    reconciliation.
+
+At an owner-visible Sprint review, classify UI and product feedback before
+creating work. Behavior that violates an accepted contract is a defect; a
+missing capability outside the accepted contract is a new feature or Product
+Backlog item; an untested mechanism or claim is a research question; and a
+nonrecurring interaction note may remain a transient review observation.
+De-duplicate durable work against TODO and open Issues before allocating the
+next monotonic T-ID.
 
 GitHub Issues is a coordination view, not project authority. The `work-item`
 label serves active P0 delivery as well as retained cross-owner defects. If
