@@ -1,0 +1,18 @@
+{
+  "schema": "raveil.graph-device-axi4lite-aperture/v1",
+  "byte_order": "little-endian",
+  "word_bits": 32,
+  "address_unit": "byte",
+  "absolute_base": "unassigned",
+  "max_outstanding_requests": 1,
+  "write_strobes": "0xf-only",
+  "responses": {"okay": 0, "slverr": 2, "decerr": 3},
+  "apertures": {
+    "execution": {"base": 0, "limit": 8192, "abi": "graph_device_abi_v1"},
+    "configuration": {"base": 8192, "limit": 12288, "abi": "graph_device_install_abi_v1"},
+    "program": {"base": 12288, "limit": 16384, "abi": "graph_device_program_install_abi_v1"}
+  },
+  "s01_mapped": ["identity", "version", "status", "payload-or-io-count", "execution-control-reset"],
+  "s01_unmapped": ["input-window", "output-window", "digest", "install-payload", "install-control", "start", "cancel"],
+  "reset": {"aresetn": "clears bus and core state", "control_reset": "core-only barrier; response remains OKAY until accepted"}
+}
