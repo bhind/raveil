@@ -188,6 +188,32 @@ an under-utilization alarm. The Project records role packets and resource use
 separately; existing slices state when token usage was not instrumented. These
 are planning facts, not measured productivity claims. No Project slice retains
 T-0042 as its parent.
+
+T-0132/S01 now supplies the first relative AXI4-Lite control wrapper around
+the real current `StaticStencilRegion`. ADR-0067 maps the unchanged execution,
+affine-installation, and program-installation word ABIs into relative byte
+ranges `[0x0000,0x2000)`, `[0x2000,0x3000)`, and `[0x3000,0x4000)` while
+leaving the absolute base unassigned. The wrapper admits one total transaction,
+captures AW and W independently, holds R/B responses under backpressure,
+distinguishes `SLVERR` from `DECERR`, and delays the core-only execution reset
+until its retained OKAY B response is accepted. External ARESETn clears core,
+wrapper, and captured bus state. S01 maps only identity/version/status/count
+reads and execution reset; all execution data, digest, installation payload,
+installation control, start, and cancel accesses fail closed.
+
+The corrected implementation candidate is `363cad3`. Thirty-six host tests
+pass, including strict append-once receipt and evidence-substitution rejection.
+The offline Chisel/Verilator run reaches the real core through only the AXI top,
+returns the exact marker
+`GraphDevice-AXI4LITE-CONTROL-V1 status=OK evidence=rtl-simulation-functional
+performance=not-measured`, and records identical RTL manifest SHA-256
+`0b591c15f98982c65e0fee9673fe94c3c48e75254a075100e877138382d5ee36`
+for both emissions. This is RTL-simulation-functional control evidence and
+host-functional contract/finalizer evidence only. It is not full Graph
+execution through AXI, a Linux or FPGA integration, AXI certification, or a
+performance, resource, ARM64, ASIC, silicon, publication, or product-readiness
+result.
+
 The bounded T-0106/S01 carry-in is repository-accepted. On the current-main
 descendant, the owned CPU runner now includes the complete five-file Scala
 source closure required by `RaveilDCacheOriginTagger.scala`; the added Static
