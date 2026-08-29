@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0135 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -588,7 +588,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Playable pillar — Raveil Garden TUI
 
-- [ ] **T-0135** Explain materialized baseline versus fused implementation
+- [x] **T-0135** Explain materialized baseline versus fused implementation
   plans in the read-only Garden UI. Show the semantic Graph unchanged, a
   baseline path that materializes the `bias_add` intermediate, a fused path
   that forwards it directly into `relu`, and that `512B` versus `0B` concerns
@@ -597,12 +597,16 @@ review and failure preservation do not consume the two-item delivery limit.
   bounded deterministic rendering and observe-only authority, and make no
   speed, energy, latency, FPGA, ASIC, or silicon claim. This is real Issue #60,
   S-0002 P0 Product Slice, three SP, Experience Implementer, dependent on
-  T-0120. The implementation candidate on
+  T-0120. The accepted implementation on
   `feat/t-0135-garden-fusion-explanation` deterministically pairs validated
   materialized and fused variants, renders the data-derived `512B` versus
   `0B` intermediate-buffer scope in wide and narrow layouts, and passes 43
-  focused/regression tests. It remains open pending the required owner-visible
-  review and explicit disposition under ADR-0069.
+  focused/regression tests. After the owner-visible review, the owner explicitly
+  accepted the increment under ADR-0069. PR #67 merged as canonical commit
+  `cde349c2d4896f0d19a59eef177f359966132f17`, and Issue #60 is Closed. This is
+  host-functional presentation and validation only; it establishes no Graph
+  execution, performance, total-memory, compiler, RTL, FPGA, ASIC, silicon,
+  publication, or product-readiness result.
 
 - [x] **T-0117** Build the first read-only Raveil Garden TUI on ordinary host
   ARM64/x86-64. Render one strictly validated graph snapshot, node/dependency
