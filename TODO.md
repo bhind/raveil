@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S01, T-0133 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S01 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -27,7 +27,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0133** Move the recurring executable Sprint Review and
+- [x] **T-0133** Move the recurring executable Sprint Review and
   Keep/Problem/Try retrospective from Sunday to Saturday while retaining the
   Monday-through-Sunday GitHub Iteration. ADR-0068 makes Sunday a bounded
   record-reconciliation, failed-demo recovery, explicit same-item re-review,
@@ -42,9 +42,14 @@ review and failure preservation do not consume the two-item delivery limit.
   2026-08-29T04:42:12Z was a 10,080-minute window with 5% used and 95%
   remaining. The concurrent T-0132/S01 implementation remains in its disjoint
   implementation allowlist; its PM-only record integration is serial after
-  T-0133. Evidence is host-functional governance only. No Sprint acceptance,
-  measured delivery-speed, Graph, performance, research/gate, FPGA, ASIC,
-  silicon, publication, or product-readiness claim follows.
+  T-0133. The official skill validator, four AgentBoundaryTests, record
+  checker, `git diff --check`, exact authority ancestry, and live two-lane
+  audit passed. PR #57 merged as canonical commit `0416e15`; Issue #56 is
+  Closed and Project Done. The S-0001 review card is Ready for Saturday
+  2026-08-29 with matching body, dates, outcome, and retro fields. Evidence is
+  host-functional governance only. No Sprint acceptance, measured delivery-
+  speed, Graph, performance, research/gate, FPGA, ASIC, silicon, publication,
+  or product-readiness claim follows.
 
 - [x] **T-0131** Make the existing weekly Sprint governance repeatable as a
   repository-scoped `raveil-sprint-operator` skill. The skill selects audit,

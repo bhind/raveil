@@ -60,9 +60,11 @@ T-0133 and ADR-0068 change the recurring Sprint ceremony from Sunday to
 Saturday while preserving Monday-through-Sunday Iterations. The Sprint
 operator reference now reserves Sunday for bounded record reconciliation,
 failed-demo recovery, explicit same-item re-review, and Monday preparation;
-Sunday does not authorize new closing-Sprint scope. This is an active
-host-functional governance candidate and changes no task, evidence, research,
-gate, Graph, performance, FPGA, ASIC, or silicon conclusion.
+Sunday does not authorize new closing-Sprint scope. PR #57 merged as canonical
+commit `0416e15`; Issue #56 is Closed, Project Done, and the S-0001 review card
+is Ready for Saturday 2026-08-29. This is host-functional governance and
+changes no task, evidence, research, gate, Graph, performance, FPGA, ASIC, or
+silicon conclusion.
 T-0107 now makes estimate evidence and authority freshness explicit. The PM
 role must inspect reusable implementation plus warm/cold build state, separate
 edit/verification/integration effort, and re-estimate after scope or authority
@@ -149,11 +151,10 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The live Project during T-0133 contains 56 items and 37 fields: 25 Backlog, one
-Ready, one Blocked, 27 Done, two In Progress, and no Review item. The Ready
-item is the S-0001 Saturday review ceremony. T-0132/S01 and T-0133 are the two
-active delivery items; their implementation paths are disjoint and PM record
-integration stays serial. The visible Story
+The live Project after T-0133 contains 56 items and 37 fields: 25 Backlog, one
+Ready, one Blocked, 28 Done, one In Progress, and no Review item. The Ready
+item is the S-0001 Saturday review ceremony; T-0132/S01 is the sole active
+delivery item. The visible Story
 Points assigned across all historical
 Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
 retained planning items and are not the current delivery load. S-0003 is no
