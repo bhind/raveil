@@ -75,6 +75,11 @@ stable tracked destination. Issue #59 and branch
 correction. The owner's first conditional S-0001 feedback is T-0135, a P1
 Product Backlog feature to explain baseline materialization versus fusion in
 Garden without adding execution authority or making a performance claim.
+The Skill validator, 27 focused queue/agent-boundary tests, record checker,
+diff check, exact-head PR inspection, and live queue audit passed. PR #61
+merged as canonical commit `b02402c22a27ad8c693d2153df19f52051656c72`;
+Issue #59 is Closed and Project Done. T-0134 is complete at host-functional
+governance evidence only.
 T-0107 now makes estimate evidence and authority freshness explicit. The PM
 role must inspect reusable implementation plus warm/cold build state, separate
 edit/verification/integration effort, and re-estimate after scope or authority
@@ -161,11 +166,10 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The live Project after T-0134 kickoff contains 58 items and 37 fields: 26
-Backlog, one Ready, one Blocked, 28 Done, two In Progress, and no Review item.
-The Ready item is the S-0001 Saturday review ceremony; T-0132/S01 and the
-disjoint T-0134 governance correction are active. T-0135 remains Backlog and
-has not started. The visible Story
+The live Project after T-0134 integration contains 58 items and 37 fields: 26
+Backlog, one Ready, one Blocked, 29 Done, one In Progress, and no Review item.
+The Ready item is the S-0001 Saturday review ceremony; T-0132/S01 is the sole
+active delivery item. T-0135 remains Backlog and has not started. The visible Story
 Points assigned across all historical
 Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
 retained planning items and are not the current delivery load. S-0003 is no

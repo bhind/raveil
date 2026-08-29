@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S01, T-0134 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S01 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0093, T-0091, T-0018 |
@@ -27,7 +27,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0134** Require owner-visible Sprint review before the review ceremony
+- [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
   and route feedback, receive explicit owner disposition, then change status.
   A `Conditional Accept` requires every condition to have a stable tracked
@@ -37,6 +37,13 @@ review and failure preservation do not consume the two-item delivery limit.
   governance records, and matching Project metadata. Evidence is
   host-functional governance only; this task cannot accept product or research
   claims or implement Garden feedback.
+
+  The Skill validator, 27 focused queue/agent-boundary tests, record checker,
+  `git diff --check`, exact-head PR inspection, and live queue audits passed.
+  PR #61 merged as canonical commit `b02402c`; Issue #59 is Closed and Project
+  Done. T-0135 remains an unstarted Backlog condition. No product, research,
+  performance, FPGA, ASIC, silicon, publication, or product-readiness claim
+  follows.
 
 - [x] **T-0133** Move the recurring executable Sprint Review and
   Keep/Problem/Try retrospective from Sunday to Saturday while retaining the
