@@ -64,13 +64,14 @@ outcomes and alone applies ADR-0069's owner-visible disposition. Issue #72,
 branch `fix/t-0137-sprint-review-boundary`, S-0003, two SP, and the Project
 Manager own the bounded skill/workflow/record correction. This changes no
 product code, research claim, evidence class, Gate, cadence, or authority.
-The candidate implements that split in the skill router, phase reference,
+The integrated correction implements that split in the skill router, phase reference,
 WORKFLOW, and SPRINTS. Twenty-three queue regressions, the governance record
 checker, diff check, and an equivalent Ruby YAML/frontmatter validation pass.
 The bundled Python skill validator is not runnable because its host lacks the
 validator's undeclared PyYAML dependency; no project dependency was added to
-mask that environment defect. This is an integration candidate, not a weekly
-S-0003 Review disposition.
+mask that environment defect. PR #73 merged exact reviewed head `74b1f27` as
+canonical commit `e8b500e`; Issue #72 is Closed and T-0137 is complete. This
+task completion is not a weekly S-0003 Review disposition.
 T-0133 and ADR-0068 change the recurring Sprint ceremony from Sunday to
 Saturday while preserving Monday-through-Sunday Iterations. The Sprint
 operator reference now reserves Sunday for bounded record reconciliation,
