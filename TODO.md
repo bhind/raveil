@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0137 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,24 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0137** Separate continuous task PR integration from the weekly
+  owner-visible Sprint Review. Task review verifies exact head, allowlist,
+  tests, records, authority, and merge safety, then integrates accepted work
+  without waiting for a per-task owner demo by default. The Saturday ceremony
+  aggregates the Sprint's runnable outcomes, collects feedback, and alone
+  receives the ADR-0069 Sprint disposition. Real Issue #72, clean branch
+  `fix/t-0137-sprint-review-boundary`, S-0003, two SP, Project Manager, Tester
+  support, and Host Functional governance evidence own only the sprint skill,
+  reference, WORKFLOW, SPRINTS, TODO, STATUS, and dated-log correction. No new
+  ADR is required because ADR-0069 already scopes owner-visible acceptance to
+  the weekly ceremony. The implementation candidate now separates task
+  integration and weekly Review in both skill layers and canonical workflow
+  records. Twenty-three queue regressions, the record checker, diff check, and
+  an equivalent Ruby YAML/frontmatter validation pass. The bundled Python
+  validator cannot import its undeclared PyYAML dependency in this host and is
+  preserved as an explicit environment limitation. The task remains open
+  pending exact-head PR integration; no per-task owner demo is required.
 
 - [x] **T-0136** Make accepted owner-visible Sprint review plus the recorded
   Keep/Problem/Try retrospective the immediate next-Sprint pull boundary.

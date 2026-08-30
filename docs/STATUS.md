@@ -56,6 +56,21 @@ record checker, diff check, and live queue audit passed. PR #53 merged as
 canonical commit `2cf5413`; Issue #52 is Closed and Project Done. This is
 host-functional workflow configuration, not a measured delivery-speed or
 autonomous-authority result.
+T-0137 corrects an operational ambiguity exposed during T-0093: task PR review
+and the weekly Sprint Review are separate phases. The task phase validates and
+integrates exact-head work continuously without a per-task owner demo by
+default; the scheduled weekly ceremony aggregates the Sprint's runnable
+outcomes and alone applies ADR-0069's owner-visible disposition. Issue #72,
+branch `fix/t-0137-sprint-review-boundary`, S-0003, two SP, and the Project
+Manager own the bounded skill/workflow/record correction. This changes no
+product code, research claim, evidence class, Gate, cadence, or authority.
+The candidate implements that split in the skill router, phase reference,
+WORKFLOW, and SPRINTS. Twenty-three queue regressions, the governance record
+checker, diff check, and an equivalent Ruby YAML/frontmatter validation pass.
+The bundled Python skill validator is not runnable because its host lacks the
+validator's undeclared PyYAML dependency; no project dependency was added to
+mask that environment defect. This is an integration candidate, not a weekly
+S-0003 Review disposition.
 T-0133 and ADR-0068 change the recurring Sprint ceremony from Sunday to
 Saturday while preserving Monday-through-Sunday Iterations. The Sprint
 operator reference now reserves Sunday for bounded record reconciliation,

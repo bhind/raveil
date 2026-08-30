@@ -37,11 +37,16 @@ GitHub Project mutation implementation.
 - **Correction:** compare committed work with evidence. Preserve `Initial SP`,
   change current `Story Points` only with a dated reason, and split, carry, or
   remove scope without rewriting history.
-- **Review/closeout:** validate the exact-head PR and recorded acceptance,
-  transition through the canonical review command, run the executable Sprint
-  demo, show and explain the actual result to the owner, route durable
-  feedback, obtain an explicit owner disposition, reconcile records, and
-  verify closed-Issue/`Done` agreement after merge.
+- **Task review/integration:** validate the exact-head PR, allowlist, tests,
+  records, mergeability, and technical acceptance; transition through the
+  canonical review command, merge, reconcile the task records, and verify
+  closed-Issue/`Done` agreement. Do not stop continuous Sprint delivery for a
+  per-task owner demo unless the owner or a task-specific risk gate explicitly
+  requires one. Task `Done` never accepts the weekly Sprint Review ceremony.
+- **Weekly Sprint Review:** at the scheduled ceremony, select and run the
+  Sprint's representative runnable outcome or outcomes, show and explain them
+  to the owner, route durable feedback, and obtain the explicit ceremony
+  disposition. This is the ADR-0069 owner-visible boundary.
 - **Retrospective/next pull:** record one `Keep`, one observed `Problem`, and at
   most one bounded `Try`. Recheck usage, WIP, dependencies, and readiness before
   pulling the next item.
@@ -64,6 +69,10 @@ tracked mutation. For a read-only status request, its audit section is enough.
 - A Sprint demo, points total, Project status, agent report, or retrospective
   never closes a T-ID, accepts an ADR/RFC, concludes an EXP, passes a gate, or
   promotes simulation to FPGA or silicon evidence.
+- Task PR review and weekly Sprint Review are different control points. Merge
+  technically accepted tasks continuously; aggregate their user-visible
+  outcomes at the weekly ceremony. Never turn every task merge into an
+  owner-attendance gate or treat one task acceptance as Sprint acceptance.
 - Command success never accepts the Sprint review ceremony. Keep it non-Done
   until the owner sees the result, receives an evidence-grounded explanation,
   durable feedback is routed, and the owner explicitly chooses `Accept`,

@@ -103,7 +103,7 @@ Project field edits are PM-owned remote mutations. Read IDs from the current
 Project schema; never hard-code retained field or option IDs in repository
 instructions.
 
-## PR review and executable Sprint review
+## Task PR review and integration
 
 Before `Review`, verify the PR head is the task head, the PR body closes the
 real Issue, the diff stays in the allowlist, tests and records are current, and
@@ -115,13 +115,29 @@ python3 scripts/project_queue.py review ISSUE --pr PR --apply
 python3 scripts/project_queue.py audit --check-branch
 ```
 
-Run the Sprint's recorded demo at the reviewed revision and capture command,
+Run the task's acceptance/evidence commands at the reviewed revision. An
+incident-free PR may merge under ADR-0058 after the primary verifies the
+intended diff, current authority ancestry, acceptance, records, mergeability,
+checks, and review threads. After merge, verify that the Issue is closed and
+Project status is `Done`; automation or Project metadata alone never proves
+task completion.
+
+Do not require the owner to attend or accept a demo for every ordinary task.
+Continue integrating technically accepted tasks through the Sprint unless the
+owner or an explicit task-specific risk gate requires a separate human review.
+Task merge or task `Done` does not accept the weekly Sprint Review ceremony.
+
+## Executable weekly Sprint Review
+
+At the scheduled weekly ceremony, choose the representative runnable outcome
+or outcomes from the integrated Sprint work. Run the recorded demo at an
+identified revision and capture command,
 revision, environment, exit status, evidence class, visible change, failures,
 and non-claims. Prose or mock output is not a runnable increment. If the new
 increment fails, demonstrate the last accepted baseline and the exact failing
 boundary without calling the item Done.
 
-Command success creates a review candidate only. Show the owner the actual
+Command success creates a Sprint review candidate only. Show the owner the actual
 output or visible interface and explain what each relevant result proves, what
 it does not prove, and what remains unfinished. Let the owner exercise a
 human-facing Playable when practical. Classify feedback as defect, new
@@ -134,12 +150,6 @@ Keep the Sprint review ceremony non-Done until the owner explicitly chooses
 may close the ceremony only after every condition has a tracked destination;
 it neither implements nor completes that destination. Record the disposition,
 conditions, and links in `Review Outcome` before moving status last.
-
-An incident-free PR may merge under the standing authority in ADR-0058 after
-the primary verifies the intended diff, current authority ancestry, acceptance,
-records, mergeability, checks, and review threads. After merge, verify that the
-Issue is closed and Project status is `Done`; automation or Project metadata
-alone never proves task completion.
 
 ## Saturday closeout, retrospective, and handoff
 
