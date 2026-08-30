@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0137 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -27,7 +27,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0137** Separate continuous task PR integration from the weekly
+- [x] **T-0137** Separate continuous task PR integration from the weekly
   owner-visible Sprint Review. Task review verifies exact head, allowlist,
   tests, records, authority, and merge safety, then integrates accepted work
   without waiting for a per-task owner demo by default. The Saturday ceremony
@@ -42,8 +42,10 @@ review and failure preservation do not consume the two-item delivery limit.
   records. Twenty-three queue regressions, the record checker, diff check, and
   an equivalent Ruby YAML/frontmatter validation pass. The bundled Python
   validator cannot import its undeclared PyYAML dependency in this host and is
-  preserved as an explicit environment limitation. The task remains open
-  pending exact-head PR integration; no per-task owner demo is required.
+  preserved as an explicit environment limitation. PR #73 merged exact
+  reviewed head `74b1f27` as canonical commit `e8b500e`; Issue #72 is Closed.
+  T-0137 is repository-accepted without a per-task owner demo, while the
+  weekly S-0003 Sprint Review correctly remains pending.
 
 - [x] **T-0136** Make accepted owner-visible Sprint review plus the recorded
   Keep/Problem/Try retrospective the immediate next-Sprint pull boundary.
