@@ -230,6 +230,16 @@ execution through AXI, a Linux or FPGA integration, AXI certification, or a
 performance, resource, ARM64, ASIC, silicon, publication, or product-readiness
 result.
 
+T-0132/S02 is the sole active P0 after T-0093 and T-0137 closeout. Issue #75
+and clean current-main branch `feat/t-0132-s02-axi-install` bind S-0003, eight
+SP, the Systems Implementer, Tester/PM support, and RTL Simulation evidence to
+one install-only vertical slice. It exposes only the unchanged affine and
+bounded-program clear, ordered payload, commit, installed digest, status, and
+count words through the existing relative AXI4-Lite aperture. S01 behavior
+remains a regression requirement; execution I/O/start/cancel, Linux, board
+addresses, KV260/FPGA, performance, resource, Experience, and ABI/schema
+changes remain excluded.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

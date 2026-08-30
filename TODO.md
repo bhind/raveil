@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S02 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -79,6 +79,17 @@ review and failure preservation do not consume the two-item delivery limit.
   `rtl-simulation-functional`; no full Graph window, runtime/CLI, AXI
   certification, performance, FPGA, ARM64, ASIC, silicon, or product claim
   follows.
+
+- [ ] **T-0132/S02** Carry the two existing bounded installation ABIs through
+  the S01 AXI4-Lite pins. Enable only affine/program clear, sequential payload,
+  commit, status/count, and installed-digest accesses at the ADR-0067 relative
+  addresses while preserving S01 identity/reset and one-outstanding behavior.
+  Real Issue #75, clean branch `feat/t-0132-s02-axi-install`, S-0003, eight SP,
+  Systems Implementer, Tester/PM support, the exact RTL/runner/evidence/test
+  allowlist, and RTL Simulation evidence own the slice. The cached immutable
+  offline Chisel image and Docker 29.6.2 are present. Stop before execution
+  I/O/start/cancel, DMA/IRQ, Linux, absolute board addresses, KV260/FPGA,
+  performance, resource, Experience, or schema/ABI changes.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
