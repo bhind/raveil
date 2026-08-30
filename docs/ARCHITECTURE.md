@@ -362,6 +362,26 @@ Execution data, start, cancel, and output remain fail-closed for a later slice.
 This is still an unbased, single-outstanding RTL-simulation transport, not
 Linux or FPGA integration.
 
+T-0132/S03 adds only the execution data plane reserved by ADR-0067. Execution
+word decoding uses address bits `[12:2]` because the 8 KiB namespace includes
+the output window beginning at byte `0x1000`; configuration and program remain
+independent 4 KiB namespaces decoded with `[11:2]`. Ordered input words are
+queued behind accepted B, then hold the existing input-stage request and
+response handshakes while all AXI admission is blocked. Start and cancel are
+post-B one-cycle core pulses with a following admission barrier. Completion
+and cancellation are sticky at the wrapper because the nested core reports
+them as pulses. An accepted cancel revokes output authority even if the core
+finishes while B is backpressured. Output reads enter the existing validation
+request/response path and only then create a retained AXI R response; premature
+or cancelled output remains SLVERR. This slice exposes checksum only with
+authorized output and deliberately leaves execution descriptor and
+implementation digest registers unsupported. It is one factory bounded Graph
+in RTL simulation, not a general accelerator or platform runtime. Its private
+evidence binds the complete external AXI transaction transcript; the harness
+holds one authorized output R response and holds an admitted cancel B long
+enough for core completion, then verifies that post-B cancel still suppresses
+publication.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

@@ -271,6 +271,28 @@ Issue #75 is Closed, and its Project item is Done. T-0132/S02 is complete.
 This establishes no execution, Linux, FPGA, performance, resource, ASIC,
 silicon, publication, or product-readiness claim.
 
+T-0132/S03 is now the sole active P0 under real Issue #78 and clean branch
+`feat/t-0132-s03-axi-execution`. The eight-SP S-0003 Product Slice is the
+smallest data-plane continuation. The implementation candidate now stages
+exactly 324 factory five-point words, queues input/start/cancel only after
+retained B acceptance, latches one-cycle completion/cancellation for polling,
+services the private output window through the owned scratchpad handshake, and
+keeps the 8 KiB execution word index distinct from the 4 KiB installation word
+indices. Private run `artifacts/graph_device_axi4lite_execute/run.NH03sk`
+completes seed 1 and reset/restart seed 2 with both 256-word outputs exactly
+equal to their independent oracles; seed 3 cancels with no output authority.
+Its append-once receipt binds a strict 7,160-transaction AXI transcript,
+including retained output R backpressure and completion during a retained
+cancel B response before post-B cancellation revokes output.
+S01 `run.ksiVqs` and S02 `run.OEy5ia` replays pass, and all three runs bind
+identical double-emitted RTL manifest SHA-256
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+Twenty-four focused/regression host tests pass. This remains an RTL Simulation
+Functional integration candidate; independent Security and Performance review
+passes with no blocking finding. Descriptor/implementation digest promotion,
+arbitrary Graphs, Linux, absolute board mapping, KV260/FPGA, DMA/IRQ,
+performance, resources, Experience, and schema changes remain excluded.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S02 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S03 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -107,6 +107,31 @@ review and failure preservation do not consume the two-item delivery limit.
   `23538c9`; PR #76 merged as canonical commit
   `f2c283449ce9071755a9ff1d0ba35834368a7ca0`. Issue #75 is Closed and its
   Project item is Done. This completes only T-0132/S02.
+
+- [ ] **T-0132/S03** Carry one complete factory five-point invocation through
+  the existing relative AXI4-Lite pins. Enable only the unchanged execution
+  input window, start/cancel, checksum, and output window while preserving all
+  accepted S01/S02 behavior and leaving descriptor/implementation digest holes
+  unsupported. Real Issue #78, clean branch
+  `feat/t-0132-s03-axi-execution`, S-0003, eight SP, Systems Implementer with
+  Tester/Security/Performance/PM support, the exact ten-path allowlist, and RTL
+  Simulation evidence own the slice. The executable acceptance is 324 staged
+  input words, one start, terminal poll, 256 private output words matching the
+  independent oracle, cancel with output denied, reset/restart, and bounded
+  transport/semantic negatives. Stop before Linux, board addresses, FPGA,
+  DMA/IRQ, ABI/schema or Graph generality changes, and performance/resources.
+  The implementation candidate now passes all three real offline RTL paths.
+  Private S03 run `artifacts/graph_device_axi4lite_execute/run.NH03sk` proves
+  seed 1 completion, seed 3 cancel with no output, and reset/restart seed 2;
+  every one of the two published 256-word outputs equals its generated
+  independent oracle byte-for-byte. Its receipt binds all 7,160 AXI
+  transactions, including 4-cycle output-R retention and a 4,096-cycle held
+  cancel-B interval in which the core finishes before cancellation is applied.
+  S01 run `run.ksiVqs` and S02 run
+  `run.OEy5ia` also pass against the same identical double-emitted RTL manifest
+  SHA-256 `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+  Twenty-four focused/regression host tests and independent Security and
+  Performance reviews pass. Exact-head integration remains.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
