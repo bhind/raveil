@@ -120,6 +120,18 @@ review and failure preservation do not consume the two-item delivery limit.
   independent oracle, cancel with output denied, reset/restart, and bounded
   transport/semantic negatives. Stop before Linux, board addresses, FPGA,
   DMA/IRQ, ABI/schema or Graph generality changes, and performance/resources.
+  The implementation candidate now passes all three real offline RTL paths.
+  Private S03 run `artifacts/graph_device_axi4lite_execute/run.NH03sk` proves
+  seed 1 completion, seed 3 cancel with no output, and reset/restart seed 2;
+  every one of the two published 256-word outputs equals its generated
+  independent oracle byte-for-byte. Its receipt binds all 7,160 AXI
+  transactions, including 4-cycle output-R retention and a 4,096-cycle held
+  cancel-B interval in which the core finishes before cancellation is applied.
+  S01 run `run.ksiVqs` and S02 run
+  `run.OEy5ia` also pass against the same identical double-emitted RTL manifest
+  SHA-256 `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+  Twenty-four focused/regression host tests and independent Security and
+  Performance reviews pass. Exact-head integration remains.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
