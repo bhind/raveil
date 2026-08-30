@@ -239,6 +239,15 @@ count words through the existing relative AXI4-Lite aperture. S01 behavior
 remains a regression requirement; execution I/O/start/cancel, Linux, board
 addresses, KV260/FPGA, performance, resource, Experience, and ABI/schema
 changes remain excluded.
+The first S02 RTL checkpoint now queues one accepted affine/program mutation
+until the held OKAY B response is accepted, applies one bounded installer pulse
+behind an admission barrier, and reads the existing installed digests. The
+first real S01 replay caught an execution output-count word accidentally routed
+to the new digest path; the same branch restored its priority and the corrected
+offline Chisel/Verilator replay passed. Both RTL emissions have manifest
+SHA-256 `59d4b5c94a8959756c4877d2fa1dd0b3514d0e72dc516d8ce70c71d2812f11bd`.
+This is an implementation checkpoint only; the S02 install transcript and
+receipt are not yet complete.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

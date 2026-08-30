@@ -89,7 +89,12 @@ review and failure preservation do not consume the two-item delivery limit.
   allowlist, and RTL Simulation evidence own the slice. The cached immutable
   offline Chisel image and Docker 29.6.2 are present. Stop before execution
   I/O/start/cancel, DMA/IRQ, Linux, absolute board addresses, KV260/FPGA,
-  performance, resource, Experience, or schema/ABI changes.
+  performance, resource, Experience, or schema/ABI changes. The first RTL
+  checkpoint queues accepted installer mutations behind B-response acceptance
+  and maps installed digests. An initial real-S01 replay exposed and then fixed
+  an execution output-count routing regression; the corrected replay passes
+  with identical double-emitted RTL manifests. The S02 installer transcript,
+  bounded evidence adapter, focused negatives, and independent replay remain.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
