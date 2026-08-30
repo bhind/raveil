@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-29
+Last updated: 2026-08-30
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0093 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -800,7 +800,7 @@ general Unix personality or displace the GNU/Linux/RK3588 product path.
 
 ## Queued visibility side project — graph directory view
 
-- [ ] **T-0093** Add a deterministic read-only host directory view of one
+- [x] **T-0093** Add a deterministic read-only host directory view of one
   validated Raveil graph snapshot. Materialize the existing owned v1 program,
   contract, nodes, variants, memory plans, proposal, selection, and result into
   an explicitly selected empty output directory with stable names, exact
@@ -825,8 +825,11 @@ general Unix personality or displace the GNU/Linux/RK3588 product path.
   documentation pass 61 focused/regression tests. Two fresh materializations
   are byte-identical and report manifest SHA-256
   `b6ab732f9305212cc39510eb0f7e01ab3c4172bb2f209da636937b994bc92ca0`.
-  It remains open pending exact-head PR review, the owner-visible demo, and an
-  explicit ADR-0069 disposition.
+  PR #70 merged exact reviewed head `64ca94b` as canonical commit `4db3a1e`;
+  Issue #69 is Closed. The owner explicitly accepted task integration, the
+  Project item moves to Done after canonical closeout, and the S-0003 weekly
+  Sprint Review remains a separate Saturday ceremony under ADR-0069. Task
+  integration does not wait for or prematurely complete that Sprint Review.
 
 ## Post-MVP side project — ReactOS portability probe
 

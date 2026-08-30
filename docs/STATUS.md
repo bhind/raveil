@@ -257,10 +257,12 @@ It rejects malformed types, duplicate/unknown fields, stale or inconsistent
 lineage/outcomes, nonregular inputs, symlinks, nonempty targets, and overwrite.
 Sixty-one focused/regression tests pass; two fresh CLI materializations are
 byte-identical with manifest SHA-256 `b6ab732f9305212cc39510eb0f7e01ab3c4172bb2f209da636937b994bc92ca0`.
-This is a host-functional review candidate only. It grants no execution,
-mutation, approval, Experience, filesystem-security, FUSE/VFS, performance,
-hardware, publication, or product-readiness claim, and requires owner-visible
-review before acceptance or Done.
+PR #70 merged its exact reviewed head `64ca94b` as canonical commit `4db3a1e`;
+Issue #69 is Closed and T-0093 is repository-accepted. This is host-functional
+inspection-artifact evidence only. It grants no execution, mutation, approval,
+Experience, filesystem-security, FUSE/VFS, performance, hardware, publication,
+or product-readiness claim. Its task integration is distinct from the still
+pending S-0003 weekly Sprint Review and does not complete that ceremony.
 
 The bounded T-0106/S01 carry-in is repository-accepted. On the current-main
 descendant, the owned CPU runner now includes the complete five-file Scala
