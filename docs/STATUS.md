@@ -265,9 +265,11 @@ simulator, empty runtime/container stderr, toolchain, and the reviewed immutable
 offline image ID. Twenty-one focused/regression host tests pass. Independent
 security and measurement reviews found no blocking AXI-authorization or claim-
 classification defect after invalid-control, payload-overflow, and split-AW/W
-coverage was added. This remains an integration candidate: it makes no
-execution, Linux, FPGA, performance, resource, ASIC, silicon, publication, or
-product-readiness claim.
+coverage was added. Both reviewers approved exact head `23538c9`; PR #76
+merged as canonical commit `f2c283449ce9071755a9ff1d0ba35834368a7ca0`,
+Issue #75 is Closed, and its Project item is Done. T-0132/S02 is complete.
+This establishes no execution, Linux, FPGA, performance, resource, ASIC,
+silicon, publication, or product-readiness claim.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

@@ -80,7 +80,7 @@ review and failure preservation do not consume the two-item delivery limit.
   certification, performance, FPGA, ARM64, ASIC, silicon, or product claim
   follows.
 
-- [ ] **T-0132/S02** Carry the two existing bounded installation ABIs through
+- [x] **T-0132/S02** Carry the two existing bounded installation ABIs through
   the S01 AXI4-Lite pins. Enable only affine/program clear, sequential payload,
   commit, status/count, and installed-digest accesses at the ADR-0067 relative
   addresses while preserving S01 identity/reset and one-outstanding behavior.
@@ -103,8 +103,10 @@ review and failure preservation do not consume the two-item delivery limit.
   Twenty-one focused/regression host tests pass. Independent security and
   measurement reviews found no claim or AXI-authorization blocker; their
   bounded invalid/overflow/split-channel, stderr, immutable-image, and receipt-
-  verification conditions are incorporated. Exact-head integration and
-  canonical closeout remain.
+  verification conditions are incorporated. Both reviewers approved exact head
+  `23538c9`; PR #76 merged as canonical commit
+  `f2c283449ce9071755a9ff1d0ba35834368a7ca0`. Issue #75 is Closed and its
+  Project item is Done. This completes only T-0132/S02.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
