@@ -12,6 +12,7 @@ from raveil.graph_mvp import (
     AnalyticalPredictor,
     GraphCompiler,
     GraphExecutor,
+    GraphMVPResult,
     GraphProgram,
     GraphVariant,
     MemoryPlan,
@@ -108,6 +109,22 @@ class GraphCompilerTests(unittest.TestCase):
                 variant,
                 memory_plan=replace(variant.memory_plan, materialization="fused"),
             )
+
+    def test_existing_program_and_result_loaders_are_strict(self) -> None:
+        program = GraphProgram.create("gemm_bias_relu", 8, 8, 8)
+        self.assertEqual(GraphProgram.from_dict(program.to_dict()), program)
+        malformed = program.to_dict(); malformed["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "fields do not match"):
+            GraphProgram.from_dict(malformed)
+        result = GraphMVPResult(
+            program.program_id, program.identity, GraphCompiler().contract.identity, (),
+            AnalyticalPredictor().propose(program, GraphCompiler().compile(program)), (), None,
+            "failed-closed", "test",
+        )
+        self.assertEqual(GraphMVPResult.from_dict(result.to_dict()), result)
+        malformed_result = result.to_dict(); malformed_result["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "fields do not match"):
+            GraphMVPResult.from_dict(malformed_result)
 
 
 class GraphExecutorTests(unittest.TestCase):

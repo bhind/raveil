@@ -245,6 +245,19 @@ python3 -m raveil showcase run \
   --scenario showcase-incremental --nodes 16
 ```
 
+Materialize one validated Graph MVP snapshot as a deterministic, ordinary host
+inspection directory. The directory is observe-only; it neither executes nor
+modifies a Graph, admits Experience, or makes a performance claim.
+
+```sh
+mkdir -p /tmp/raveil-graph-directory
+python3 -m raveil graph-directory \
+  --program tests/fixtures/graph_directory/program.json \
+  --result tests/fixtures/graph_directory/result.json \
+  --output /tmp/raveil-graph-directory
+find /tmp/raveil-graph-directory -type f | sort
+```
+
 This showcase uses whole host processes as conceptual nodes. It is not the
 intended operation-level Graph and makes no CPU, ISA, or hardware claim.
 

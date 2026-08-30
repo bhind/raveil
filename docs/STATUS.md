@@ -232,6 +232,36 @@ Issue #60 is Closed. This remains host-functional evidence only; no measured
 delivery-speed, Graph-performance, total-memory, compiler, RTL, FPGA, ASIC, or
 silicon claim follows. No implementation P0 is selected after this closeout.
 
+ADR-0070 next-pull evaluation found no live Ready item after T-0135, rejected
+T-0121 as unready because its native-TUI dependency and interface policy remain
+a material owner decision, and refined the already-planned T-0093 host
+directory snapshot instead. Issue #69 and clean branch
+`feat/t-0093-graph-directory-snapshot` bind current main `96b2c60`, S-0003,
+five SP, the Experience Implementer, complete dependencies, exact allowlists,
+an owner-runnable demo, host-functional evidence, and fail-closed non-claims.
+The canonical start dry-run and `--apply` succeeded, and the following live
+branch audit passed with T-0093 as the sole active delivery item. The slice may
+add strict parsers only to existing Graph Program/Graph MVP v1 records and a
+deterministic ordinary-directory projection. It adds no schema, contract
+identity, Garden dependency, execution authority, filesystem security claim,
+FUSE/VFS/write-back behavior, performance evidence, or hardware result.
+
+The T-0093 implementation candidate now adds strict loaders for the existing
+Graph Program, nested variant/observation, and Graph MVP result v1 records,
+then validates canonical contract, variant-set, proposal, observation,
+selection, and outcome lineage before any publication. The new
+`graph-directory` CLI exclusively publishes one deterministic ordinary
+directory with ordinal node/variant/memory-plan files, exact source and output
+hashes, a manifest, an observe-only selection summary, and a bounded text tree.
+It rejects malformed types, duplicate/unknown fields, stale or inconsistent
+lineage/outcomes, nonregular inputs, symlinks, nonempty targets, and overwrite.
+Sixty-one focused/regression tests pass; two fresh CLI materializations are
+byte-identical with manifest SHA-256 `b6ab732f9305212cc39510eb0f7e01ab3c4172bb2f209da636937b994bc92ca0`.
+This is a host-functional review candidate only. It grants no execution,
+mutation, approval, Experience, filesystem-security, FUSE/VFS, performance,
+hardware, publication, or product-readiness claim, and requires owner-visible
+review before acceptance or Done.
+
 The bounded T-0106/S01 carry-in is repository-accepted. On the current-main
 descendant, the owned CPU runner now includes the complete five-file Scala
 source closure required by `RaveilDCacheOriginTagger.scala`; the added Static

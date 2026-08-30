@@ -28,6 +28,7 @@ from .experiment_runner import (
     seal_bundle,
 )
 from .graph_mvp import GraphProgram, run_graph_mvp
+from .graph_directory import materialize as materialize_graph_directory
 from .native_backend import NativeCBackend
 from .sonatine_backend import SonatineQEMUBackend
 from .sonatine_demo import MAX_TIMEOUT_SECONDS, run_sonatine_demo
@@ -356,6 +357,18 @@ def command_garden(args: argparse.Namespace) -> int:
         return 2
 
 
+def command_graph_directory(args: argparse.Namespace) -> int:
+    try:
+        manifest_sha256 = materialize_graph_directory(
+            Path(args.program), Path(args.result), Path(args.output)
+        )
+    except (OSError, ValueError) as error:
+        print(f"graph-directory: {error}", file=sys.stderr)
+        return 2
+    print(f"graph-directory manifest_sha256={manifest_sha256}")
+    return 0
+
+
 def command_graph_device_submit(args: argparse.Namespace) -> int:
     print(render_submission(args.graph, args.seed))
     return 0
@@ -384,6 +397,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="deterministic render width from 72 to 240 (default: 150)",
     )
     garden.set_defaults(handler=command_garden)
+
+    graph_directory = subparsers.add_parser(
+        "graph-directory", help="materialize one strict Graph MVP snapshot for read-only inspection"
+    )
+    graph_directory.add_argument("--program", required=True, help="strict existing-v1 graph program JSON")
+    graph_directory.add_argument("--result", required=True, help="strict existing-v1 Graph MVP result JSON")
+    graph_directory.add_argument("--output", required=True, help="existing empty output directory")
+    graph_directory.set_defaults(handler=command_graph_directory)
 
     shell = subparsers.add_parser("shell", help="open the Native userspace graph session")
     shell.add_argument(
