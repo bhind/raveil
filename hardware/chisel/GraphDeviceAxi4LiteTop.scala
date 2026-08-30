@@ -6,7 +6,7 @@ import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
 
-/** S01-only AXI4-Lite control shell: identity/status/reset, not graph I/O. */
+/** S02 AXI4-Lite shell: control plus bounded installers, never graph I/O. */
 class GraphDeviceAxi4LiteTop extends RawModule {
   val aclk = IO(Input(Clock()))
   val aresetn = IO(Input(Bool()))
@@ -23,15 +23,28 @@ class GraphDeviceAxi4LiteTop extends RawModule {
     val haveR = RegInit(false.B); val savedRdata = RegInit(0.U(32.W)); val savedRresp = RegInit(0.U(2.W))
     val pendingReset = RegInit(false.B)
     val resetBarrier = RegInit(false.B)
+    val pendingMutation = RegInit(false.B)
+    val mutationApply = RegInit(false.B)
+    val mutationBarrier = RegInit(false.B)
+    val mutationKind = RegInit(0.U(3.W))
+    val mutationAddress = RegInit(0.U(6.W))
+    val mutationData = RegInit(0.U(32.W))
     val core = withClockAndReset(aclk, (!aresetn || resetBarrier).asAsyncReset) { Module(new StaticStencilRegion) }
     core.io.inputStageValid := false.B; core.io.inputStageAddress := 0.U; core.io.inputStageData := 0.U; core.io.inputStageResponseReady := true.B
     core.io.fixtureStageStart := false.B; core.io.fixtureStageSeed := 0.U; core.io.start := false.B; core.io.cancel := false.B
-    core.io.configClear := false.B; core.io.configWrite := false.B; core.io.configCommit := false.B; core.io.configAddress := 0.U; core.io.configData := 0.U
-    core.io.programClear := false.B; core.io.programWrite := false.B; core.io.programCommit := false.B; core.io.programAddress := 0.U; core.io.programData := 0.U
+    core.io.configClear := mutationApply && mutationKind === 1.U
+    core.io.configWrite := mutationApply && mutationKind === 2.U
+    core.io.configCommit := mutationApply && mutationKind === 3.U
+    core.io.configAddress := mutationAddress(4, 0); core.io.configData := mutationData
+    core.io.programClear := mutationApply && mutationKind === 4.U
+    core.io.programWrite := mutationApply && mutationKind === 5.U
+    core.io.programCommit := mutationApply && mutationKind === 6.U
+    core.io.programAddress := mutationAddress; core.io.programData := mutationData
     core.io.outputValidationValid := false.B; core.io.outputValidationAddress := 0.U; core.io.outputValidationResponseReady := true.B
-    val busy = haveAw || haveW || haveB || haveR || pendingReset || resetBarrier
-    awready := !haveAw && !haveB && !haveR && !resetBarrier
-    wready := !haveW && !haveB && !haveR && !resetBarrier
+    val busy = haveAw || haveW || haveB || haveR || pendingReset ||
+      pendingMutation || resetBarrier || mutationApply || mutationBarrier
+    awready := !haveAw && !haveB && !haveR && !resetBarrier && !mutationApply && !mutationBarrier
+    wready := !haveW && !haveB && !haveR && !resetBarrier && !mutationApply && !mutationBarrier
     // Give either write channel priority over AR when an idle target sees both
     // classes in one cycle. This keeps the target at one total transaction,
     // rather than one read plus one write.
@@ -40,19 +53,43 @@ class GraphDeviceAxi4LiteTop extends RawModule {
     when(haveB && bready) {
       haveB := false.B
       when(pendingReset) { pendingReset := false.B; resetBarrier := true.B }
+      when(pendingMutation) {
+        pendingMutation := false.B; mutationApply := true.B; mutationBarrier := true.B
+      }
     }
     when(haveR && rready) { haveR := false.B }
     when(resetBarrier) { resetBarrier := false.B }
+    when(mutationApply) { mutationApply := false.B }
+    when(mutationBarrier) { mutationBarrier := false.B }
     when(awvalid && awready) { haveAw := true.B; savedAw := awaddr }
     when(wvalid && wready) { haveW := true.B; savedW := wdata; savedStrb := wstrb }
     when(haveAw && haveW && !haveB && !resetBarrier) {
       val aligned = savedAw(1, 0) === 0.U; val inAperture = savedAw < "h4000".U
       val reset = savedAw === "h0010".U && savedW === 4.U && savedStrb === "hf".U
+      val config = savedAw >= "h2000".U && savedAw < "h3000".U
+      val program = savedAw >= "h3000".U && savedAw < "h4000".U
+      val word = savedAw(11, 2)
+      val full = savedStrb === "hf".U
+      val configControl = config && word === 4.U && (savedW === 1.U || savedW === 2.U)
+      val configPayload = config && word >= 256.U && word < 272.U
+      val programControl = program && word === 4.U && (savedW === 1.U || savedW === 2.U)
+      val programPayload = program && word >= 256.U && word < 288.U
+      val mutation = full && (configControl || configPayload || programControl || programPayload)
+      val acceptedReset = aligned && inAperture && reset
+      val acceptedMutation = aligned && inAperture && mutation
       haveAw := false.B; haveW := false.B; haveB := true.B
-      savedBresp := Mux(!aligned || !inAperture, 3.U, Mux(reset, 0.U, 2.U))
+      savedBresp := Mux(!aligned || !inAperture, 3.U, Mux(acceptedReset || acceptedMutation, 0.U, 2.U))
       // Preserve the accepted write response. The core-only reset begins only
       // after the owner accepts B, then blocks one complete admission cycle.
-      when(reset) { pendingReset := true.B }
+      when(acceptedReset) { pendingReset := true.B }
+      when(acceptedMutation) {
+        pendingMutation := true.B
+        mutationKind := Mux(configControl, Mux(savedW === 1.U, 1.U, 3.U),
+          Mux(configPayload, 2.U,
+          Mux(programControl, Mux(savedW === 1.U, 4.U, 6.U), 5.U)))
+        mutationAddress := (word - 256.U)(5, 0)
+        mutationData := savedW
+      }
     }
     when(arvalid && arready) {
       val aligned = araddr(1, 0); val exec = araddr < "h2000".U; val config = araddr >= "h2000".U && araddr < "h3000".U; val program = araddr >= "h3000".U && araddr < "h4000".U
@@ -64,8 +101,10 @@ class GraphDeviceAxi4LiteTop extends RawModule {
           Cat(0.U(29.W), core.io.configFault, core.io.configInstalled, core.io.configLoading),
           Cat(0.U(29.W), core.io.programFault, core.io.programInstalled, core.io.programLoading)))
       val count = Mux(exec, Mux(word === 6.U, 324.U, 256.U), Mux(config, core.io.configPayloadCount, core.io.programPayloadCount))
-      val readable = word === 0.U || word === 1.U || word === 5.U || word === 6.U || (exec && word === 7.U)
-      haveR := true.B; savedRresp := Mux(aligned =/= 0.U || !inAperture, 3.U, Mux(readable, 0.U, 2.U)); savedRdata := Mux(word === 0.U, identity, Mux(word === 1.U, 1.U, Mux(word === 5.U, status, count)))
+      val digest = (config || program) && word >= 16.U && word < 24.U
+      val readable = word === 0.U || word === 1.U || word === 5.U || word === 6.U || (exec && word === 7.U) || digest
+      val digestData = Mux(config, core.io.configLiveDigest((word - 16.U)(2, 0)), core.io.programLiveDigest((word - 16.U)(2, 0)))
+      haveR := true.B; savedRresp := Mux(aligned =/= 0.U || !inAperture, 3.U, Mux(readable, 0.U, 2.U)); savedRdata := Mux(word === 0.U, identity, Mux(word === 1.U, 1.U, Mux(word === 5.U, status, Mux(word === 6.U || (exec && word === 7.U), count, digestData))))
     }
   }
 }

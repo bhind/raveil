@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S02 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -79,6 +79,32 @@ review and failure preservation do not consume the two-item delivery limit.
   `rtl-simulation-functional`; no full Graph window, runtime/CLI, AXI
   certification, performance, FPGA, ARM64, ASIC, silicon, or product claim
   follows.
+
+- [ ] **T-0132/S02** Carry the two existing bounded installation ABIs through
+  the S01 AXI4-Lite pins. Enable only affine/program clear, sequential payload,
+  commit, status/count, and installed-digest accesses at the ADR-0067 relative
+  addresses while preserving S01 identity/reset and one-outstanding behavior.
+  Real Issue #75, clean branch `feat/t-0132-s02-axi-install`, S-0003, eight SP,
+  Systems Implementer, Tester/PM support, the exact RTL/runner/evidence/test
+  allowlist, and RTL Simulation evidence own the slice. The cached immutable
+  offline Chisel image and Docker 29.6.2 are present. Stop before execution
+  I/O/start/cancel, DMA/IRQ, Linux, absolute board addresses, KV260/FPGA,
+  performance, resource, Experience, or schema/ABI changes. The first RTL
+  checkpoint queues accepted installer mutations behind B-response acceptance
+  and maps installed digests. An initial real-S01 replay exposed and then fixed
+  an execution output-count routing regression; the corrected replay passes
+  with identical double-emitted RTL manifests. The S02 installer candidate now
+  also passes its actual AXI-pin transcript: baseline-to-compact affine install,
+  bounded-program install, installed digest reads, retained-B admission,
+  transport and semantic negatives, namespace separation, and factory restore.
+  Private run `artifacts/graph_device_axi4lite_install/run.9i9v74` binds identical
+  double-emitted RTL manifest SHA-256
+  `02e010b141d7ce9d05eb0ee1df307c13d12a77823dfc6b1473cef0c0beffaf89`.
+  Twenty-one focused/regression host tests pass. Independent security and
+  measurement reviews found no claim or AXI-authorization blocker; their
+  bounded invalid/overflow/split-channel, stderr, immutable-image, and receipt-
+  verification conditions are incorporated. Exact-head integration and
+  canonical closeout remain.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
