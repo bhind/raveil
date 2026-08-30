@@ -27,8 +27,10 @@ def _require_exact_keys(value: dict[str, object], expected: set[str], kind: str)
         raise ValueError(f"{kind} fields do not match schema")
 
 
-def _valid_identity(value: str) -> bool:
-    return len(value) == 64 and all(character in "0123456789abcdef" for character in value)
+def _valid_identity(value: object) -> bool:
+    return type(value) is str and len(value) == 64 and all(
+        character in "0123456789abcdef" for character in value
+    )
 
 
 @dataclass(frozen=True)
@@ -37,6 +39,24 @@ class GraphNode:
     op: str
     inputs: tuple[str, ...]
     output: str
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: dict[str, object]) -> "GraphNode":
+        if type(value) is not dict:
+            raise ValueError("graph node is not an object")
+        _require_exact_keys(value, set(cls.__dataclass_fields__), "graph node")
+        if type(value["inputs"]) not in {list, tuple}:
+            raise ValueError("graph node inputs must be an array")
+        if any(type(value[key]) is not str for key in ("node_id", "op", "output")) or any(
+            type(item) is not str for item in value["inputs"]
+        ):
+            raise ValueError("graph node fields must use strings")
+        return cls(
+            value["node_id"], value["op"], tuple(value["inputs"]), value["output"]
+        )  # type: ignore[arg-type]
 
 
 @dataclass(frozen=True)
@@ -122,6 +142,26 @@ class GraphProgram:
             inner_iterations,
         )
 
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: dict[str, object]) -> "GraphProgram":
+        if type(value) is not dict:
+            raise ValueError("graph program is not an object")
+        _require_exact_keys(value, set(cls.__dataclass_fields__), "graph program")
+        if type(value["nodes"]) not in {list, tuple}:
+            raise ValueError("graph program nodes must be an array")
+        if type(value["program_id"]) is not str or type(value["family"]) is not str or type(value["schema"]) is not str or any(
+            type(value[key]) is not int for key in ("m", "n", "k")
+        ):
+            raise ValueError("graph program fields have invalid types")
+        copied = dict(value)
+        copied["nodes"] = tuple(GraphNode.from_dict(item) for item in value["nodes"] if type(item) is dict)
+        if len(copied["nodes"]) != len(value["nodes"]):
+            raise ValueError("graph program nodes must be objects")
+        return cls(**copied)  # type: ignore[arg-type]
+
 
 @dataclass(frozen=True)
 class MemoryPlan:
@@ -149,6 +189,8 @@ class MemoryPlan:
     @classmethod
     def from_dict(cls, value: dict[str, object]) -> "MemoryPlan":
         _require_exact_keys(value, set(cls.__dataclass_fields__), "memory plan")
+        if type(value["plan_id"]) is not str or type(value["schema"]) is not str:
+            raise ValueError("memory plan fields have invalid types")
         return cls(**value)  # type: ignore[arg-type]
 
 
@@ -188,8 +230,28 @@ class GraphVariant:
         copied = dict(value)
         if type(copied["candidate"]) is not dict or type(copied["memory_plan"]) is not dict:
             raise ValueError("graph variant nested records must be objects")
-        copied["candidate"] = BenchmarkCandidate.from_dict(copied["candidate"])
-        copied["memory_plan"] = MemoryPlan.from_dict(copied["memory_plan"])
+        _require_exact_keys(
+            copied["candidate"],
+            set(BenchmarkCandidate.__dataclass_fields__),
+            "benchmark candidate",
+        )
+        if (
+            any(
+                type(copied["candidate"][key]) is not str
+                for key in ("candidate_id", "loop_order", "materialization")
+            )
+            or any(
+                type(copied["candidate"][key]) is not int
+                for key in ("tile", "cold_priority")
+            )
+            or type(copied["candidate"]["trusted_baseline"]) is not bool
+        ):
+            raise ValueError("benchmark candidate fields have invalid types")
+        try:
+            copied["candidate"] = BenchmarkCandidate.from_dict(copied["candidate"])
+            copied["memory_plan"] = MemoryPlan.from_dict(copied["memory_plan"])
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"invalid graph variant nested record: {error}") from error
         if type(copied["transforms"]) not in {list, tuple}:
             raise ValueError("graph variant transforms must be an array")
         copied["transforms"] = tuple(copied["transforms"])
@@ -319,6 +381,24 @@ class OptimizationProposal:
     def from_dict(cls, value: dict[str, object]) -> "OptimizationProposal":
         _require_exact_keys(value, set(cls.__dataclass_fields__), "optimization proposal")
         copied = dict(value)
+        if (
+            any(
+                type(copied[key]) is not str
+                for key in (
+                    "reason",
+                    "program_sha256",
+                    "contract_sha256",
+                    "candidate_set_sha256",
+                    "schema",
+                )
+            )
+            or (
+                copied["variant_id"] is not None
+                and type(copied["variant_id"]) is not str
+            )
+            or type(copied["abstained"]) is not bool
+        ):
+            raise ValueError("optimization proposal fields have invalid types")
         if type(copied["ranking"]) not in {list, tuple}:
             raise ValueError("proposal ranking must be an array")
         ranking: list[RankedVariant] = []
@@ -326,6 +406,10 @@ class OptimizationProposal:
             if type(item) is not dict:
                 raise ValueError("proposal ranking entries must be objects")
             _require_exact_keys(item, {"variant_id", "relative_cost"}, "ranked variant")
+            if type(item["variant_id"]) is not str or type(
+                item["relative_cost"]
+            ) not in {int, float}:
+                raise ValueError("ranked variant fields have invalid types")
             ranking.append(RankedVariant(**item))
         copied["ranking"] = tuple(ranking)
         return cls(**copied)  # type: ignore[arg-type]
@@ -540,6 +624,34 @@ class VariantObservation:
     semantic_valid: bool
     failure: str
 
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: dict[str, object]) -> "VariantObservation":
+        if type(value) is not dict:
+            raise ValueError("variant observation is not an object")
+        _require_exact_keys(value, set(cls.__dataclass_fields__), "variant observation")
+        if (
+            type(value["variant_id"]) is not str
+            or not value["variant_id"]
+            or type(value["failure"]) is not str
+            or (
+                value["latency_ns"] is not None
+                and (
+                    type(value["latency_ns"]) is not int
+                    or value["latency_ns"] < 0
+                )
+            )
+            or any(
+                type(value[key]) is not str and value[key] is not None
+                for key in ("checksum", "reference_checksum")
+            )
+            or type(value["semantic_valid"]) is not bool
+        ):
+            raise ValueError("variant observation fields have invalid types")
+        return cls(**value)  # type: ignore[arg-type]
+
     @classmethod
     def from_measurement(
         cls, variant_id: str, measurement: NativeMeasurement
@@ -571,6 +683,52 @@ class GraphMVPResult:
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: dict[str, object]) -> "GraphMVPResult":
+        if type(value) is not dict:
+            raise ValueError("graph MVP result is not an object")
+        _require_exact_keys(value, set(cls.__dataclass_fields__), "graph MVP result")
+        copied = dict(value)
+        if any(
+            type(copied[key]) is not str
+            for key in (
+                "program_id",
+                "outcome",
+                "rollback_reason",
+                "claim_status",
+                "evidence_class",
+                "schema",
+            )
+        ) or (
+            copied["selected_variant"] is not None
+            and type(copied["selected_variant"]) is not str
+        ):
+            raise ValueError("graph MVP result fields have invalid types")
+        if type(copied["variants"]) not in {list, tuple} or type(copied["observations"]) not in {list, tuple}:
+            raise ValueError("graph MVP result variants and observations must be arrays")
+        if type(copied["proposal"]) is not dict:
+            raise ValueError("graph MVP result proposal is not an object")
+        variants = tuple(GraphVariant.from_dict(item) for item in copied["variants"] if type(item) is dict)
+        observations = tuple(VariantObservation.from_dict(item) for item in copied["observations"] if type(item) is dict)
+        if len(variants) != len(copied["variants"]) or len(observations) != len(copied["observations"]):
+            raise ValueError("graph MVP result nested records must be objects")
+        copied["variants"] = tuple(item.to_dict() for item in variants)
+        try:
+            copied["proposal"] = OptimizationProposal.from_dict(copied["proposal"])
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"invalid graph MVP result proposal: {error}") from error
+        copied["observations"] = observations
+        result = cls(**copied)  # type: ignore[arg-type]
+        if (
+            result.schema != RESULT_SCHEMA
+            or not _valid_identity(result.program_sha256)
+            or not _valid_identity(result.contract_sha256)
+            or result.claim_status != "development-non-claim"
+            or result.evidence_class != "host-correctness"
+        ):
+            raise ValueError("unsupported graph MVP result schema or lineage")
+        return result
 
 
 class GraphExecutor:

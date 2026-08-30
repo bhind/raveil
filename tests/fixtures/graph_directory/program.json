@@ -1,0 +1,1 @@
+{"family":"gemm_bias_relu","k":8,"m":8,"n":8,"nodes":[{"inputs":["a","b"],"node_id":"matmul","op":"matmul","output":"mm"},{"inputs":["mm","bias"],"node_id":"bias","op":"bias_add","output":"biased"},{"inputs":["biased"],"node_id":"relu","op":"relu","output":"output"}],"program_id":"gemm_bias_relu-8x8x8","schema":"raveil.graph-program/v1"}
