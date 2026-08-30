@@ -386,6 +386,15 @@ has been classified and routed, and the owner has explicitly selected
 requires a stable destination for every condition; it does not mark those
 follow-ups complete.
 
+Task PR review and the weekly Sprint Review are distinct. Validate and merge
+ordinary task PRs continuously after their exact-head technical acceptance,
+tests, records, and authority checks pass; do not wait for owner attendance or
+turn each task into a miniature Sprint Review unless an explicit task-specific
+risk gate or owner request requires it. On Saturday, aggregate the Sprint's
+runnable outcomes into the owner-visible ceremony. A task reaching `Done`
+neither accepts nor closes that weekly ceremony, and the ceremony disposition
+does not replace task-level repository evidence.
+
 Maintain an ordered Product Backlog, not only the current Sprint. The live pull
 surface uses only Title, Status, Priority, Parent T-ID, Owner Role, Depends On,
 Sprint, Story Points, Demo Command, and Evidence Class. Retain richer historical

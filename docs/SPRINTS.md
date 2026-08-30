@@ -127,6 +127,10 @@ An item moves to `Done` only when the increment or evidence command ran at a
 recorded revision and environment, acceptance was reviewed, failures and
 non-claims remain visible, and required canonical records were reconciled.
 Reviewer advice, prose, partial SP, and a green subagent report are insufficient.
+For an ordinary task, this is technical repository acceptance and does not
+require an owner-attended demo by default. Integrate accepted tasks throughout
+the Sprint; reserve the aggregated owner-visible demo and disposition for the
+weekly Sprint Review unless a task has an explicit human-review gate.
 
 The Sprint review ceremony has an additional owner-visible boundary under
 ADR-0069. Successful commands make a demo candidate; they do not accept the
