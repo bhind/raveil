@@ -475,7 +475,7 @@ This closes the operator demo only; it does not advance Gate 3 or Gate 4.
 
 ## Queued visibility side project — graph directory view
 
-State: **T-0093 planned; non-blocking**
+State: **T-0093 complete; non-blocking**
 
 T-0093 exposes one validated graph snapshot as an ordinary read-only host
 directory so a person can inspect program, contract, node, variant,
@@ -491,6 +491,10 @@ Sonatine VFS namespace, execute a graph, ingest Experience, or make a
 performance/security claim. A live `/graphs` namespace requires a later ADR
 covering snapshot consistency, capability visibility, lifecycle, and
 write-back prohibition; T-0093 deliberately does not pre-decide it.
+
+PR #70 merged the bounded ordinary-directory slice as canonical commit
+`4db3a1e`. This completion records host-functional inspection behavior only;
+the later live `/graphs` decision remains intentionally unmade.
 
 ## Post-MVP side project — ReactOS portability probe
 
