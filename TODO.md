@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-30
+Last updated: 2026-08-31
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S03 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -108,7 +108,7 @@ review and failure preservation do not consume the two-item delivery limit.
   `f2c283449ce9071755a9ff1d0ba35834368a7ca0`. Issue #75 is Closed and its
   Project item is Done. This completes only T-0132/S02.
 
-- [ ] **T-0132/S03** Carry one complete factory five-point invocation through
+- [x] **T-0132/S03** Carry one complete factory five-point invocation through
   the existing relative AXI4-Lite pins. Enable only the unchanged execution
   input window, start/cancel, checksum, and output window while preserving all
   accepted S01/S02 behavior and leaving descriptor/implementation digest holes
@@ -131,7 +131,10 @@ review and failure preservation do not consume the two-item delivery limit.
   `run.OEy5ia` also pass against the same identical double-emitted RTL manifest
   SHA-256 `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
   Twenty-four focused/regression host tests and independent Security and
-  Performance reviews pass. Exact-head integration remains.
+  Performance reviews pass. Both reviewers approved exact head `6cf910e`; PR
+  #79 merged as canonical commit
+  `fc52e47a2770b5751b99117816bb87dff2582c01`. Issue #78 is Closed and its
+  Project item is Done. This completes only T-0132/S03.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
