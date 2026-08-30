@@ -271,6 +271,17 @@ Issue #75 is Closed, and its Project item is Done. T-0132/S02 is complete.
 This establishes no execution, Linux, FPGA, performance, resource, ASIC,
 silicon, publication, or product-readiness claim.
 
+T-0132/S03 is now the sole active P0 under real Issue #78 and clean branch
+`feat/t-0132-s03-axi-execution`. The eight-SP S-0003 Product Slice is the
+smallest data-plane continuation: stage exactly 324 factory five-point words,
+start and poll one invocation, read 256 private output words only under output
+authority, compare them with the independent oracle, then exercise cancel and
+reset/restart through actual AXI4-Lite pins. It preserves S01/S02 and the three
+unchanged ABIs. Descriptor/implementation digest promotion, arbitrary Graphs,
+Linux, absolute board mapping, KV260/FPGA, DMA/IRQ, performance, resources,
+Experience, and schema changes remain excluded. This is planned RTL Simulation
+Functional evidence only; no S03 result exists yet.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while
