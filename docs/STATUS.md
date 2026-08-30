@@ -271,9 +271,8 @@ Issue #75 is Closed, and its Project item is Done. T-0132/S02 is complete.
 This establishes no execution, Linux, FPGA, performance, resource, ASIC,
 silicon, publication, or product-readiness claim.
 
-T-0132/S03 is now the sole active P0 under real Issue #78 and clean branch
-`feat/t-0132-s03-axi-execution`. The eight-SP S-0003 Product Slice is the
-smallest data-plane continuation. The implementation candidate now stages
+T-0132/S03 completed as an eight-SP S-0003 Product Slice under real Issue #78
+and branch `feat/t-0132-s03-axi-execution`. The implementation stages
 exactly 324 factory five-point words, queues input/start/cancel only after
 retained B acceptance, latches one-cycle completion/cancellation for polling,
 services the private output window through the owned scratchpad handshake, and
@@ -288,8 +287,11 @@ S01 `run.ksiVqs` and S02 `run.OEy5ia` replays pass, and all three runs bind
 identical double-emitted RTL manifest SHA-256
 `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
 Twenty-four focused/regression host tests pass. This remains an RTL Simulation
-Functional integration candidate; independent Security and Performance review
-passes with no blocking finding. Descriptor/implementation digest promotion,
+Functional result; independent Security and Performance review passes with no
+blocking finding at exact head `6cf910e`. PR #79 merged as canonical commit
+`fc52e47a2770b5751b99117816bb87dff2582c01`; Issue #78 is Closed and its
+Project item is Done. No delivery item is active after closeout.
+Descriptor/implementation digest promotion,
 arbitrary Graphs, Linux, absolute board mapping, KV260/FPGA, DMA/IRQ,
 performance, resources, Experience, and schema changes remain excluded.
 
