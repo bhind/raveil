@@ -355,9 +355,12 @@ installation namespaces. Full-word AXI writes may request affine/program
 clear, sequential payload, and commit operations; installed digest, status,
 and count become readable. Each admitted mutation remains queued until its
 held OKAY write response is accepted, then applies exactly one core command
-behind a bounded admission barrier. Execution data, start, cancel, and output
-remain fail-closed for a later slice. This is still an unbased, single-
-outstanding RTL-simulation transport, not Linux or FPGA integration.
+behind a bounded admission barrier. The same aligned, in-aperture, full-word,
+decoded predicate that selects OKAY also authorizes the queued side effect;
+DECERR and SLVERR transactions cannot mutate a rounded internal word address.
+Execution data, start, cancel, and output remain fail-closed for a later slice.
+This is still an unbased, single-outstanding RTL-simulation transport, not
+Linux or FPGA integration.
 
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;

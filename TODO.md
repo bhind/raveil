@@ -93,8 +93,18 @@ review and failure preservation do not consume the two-item delivery limit.
   checkpoint queues accepted installer mutations behind B-response acceptance
   and maps installed digests. An initial real-S01 replay exposed and then fixed
   an execution output-count routing regression; the corrected replay passes
-  with identical double-emitted RTL manifests. The S02 installer transcript,
-  bounded evidence adapter, focused negatives, and independent replay remain.
+  with identical double-emitted RTL manifests. The S02 installer candidate now
+  also passes its actual AXI-pin transcript: baseline-to-compact affine install,
+  bounded-program install, installed digest reads, retained-B admission,
+  transport and semantic negatives, namespace separation, and factory restore.
+  Private run `artifacts/graph_device_axi4lite_install/run.9i9v74` binds identical
+  double-emitted RTL manifest SHA-256
+  `02e010b141d7ce9d05eb0ee1df307c13d12a77823dfc6b1473cef0c0beffaf89`.
+  Twenty-one focused/regression host tests pass. Independent security and
+  measurement reviews found no claim or AXI-authorization blocker; their
+  bounded invalid/overflow/split-channel, stderr, immutable-image, and receipt-
+  verification conditions are incorporated. Exact-head integration and
+  canonical closeout remain.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

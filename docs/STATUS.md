@@ -246,8 +246,28 @@ first real S01 replay caught an execution output-count word accidentally routed
 to the new digest path; the same branch restored its priority and the corrected
 offline Chisel/Verilator replay passed. Both RTL emissions have manifest
 SHA-256 `59d4b5c94a8959756c4877d2fa1dd0b3514d0e72dc516d8ce70c71d2812f11bd`.
-This is an implementation checkpoint only; the S02 install transcript and
-receipt are not yet complete.
+The completed S02 candidate transcript then installed the compact affine
+profile and one bounded DAG program through actual AXI4-Lite pins, read back
+their existing installed digests, retained B under backpressure, rejected
+partial/misaligned/read-only/out-of-range and malformed install sequences,
+kept configuration and program namespaces separate, and restored factory state
+through the existing core reset. A negative replay first exposed that a
+misaligned config-control address returned DECERR but still queued the rounded
+word mutation; the wrapper now shares its accepted-transaction predicate with
+both response and side-effect authorization. Private corrected run
+`artifacts/graph_device_axi4lite_install/run.9i9v74` exits zero with exact
+marker `GraphDevice-AXI4LITE-INSTALL-V1 status=OK
+evidence=rtl-simulation-functional performance=not-measured`, identical
+double-emitted RTL manifest SHA-256
+`02e010b141d7ce9d05eb0ee1df307c13d12a77823dfc6b1473cef0c0beffaf89`,
+and an append-once, re-verifiable receipt binding sources, unchanged ABIs,
+simulator, empty runtime/container stderr, toolchain, and the reviewed immutable
+offline image ID. Twenty-one focused/regression host tests pass. Independent
+security and measurement reviews found no blocking AXI-authorization or claim-
+classification defect after invalid-control, payload-overflow, and split-AW/W
+coverage was added. This remains an integration candidate: it makes no
+execution, Linux, FPGA, performance, resource, ASIC, silicon, publication, or
+product-readiness claim.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

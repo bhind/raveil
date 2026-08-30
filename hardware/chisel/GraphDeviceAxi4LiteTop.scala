@@ -75,12 +75,14 @@ class GraphDeviceAxi4LiteTop extends RawModule {
       val programControl = program && word === 4.U && (savedW === 1.U || savedW === 2.U)
       val programPayload = program && word >= 256.U && word < 288.U
       val mutation = full && (configControl || configPayload || programControl || programPayload)
+      val acceptedReset = aligned && inAperture && reset
+      val acceptedMutation = aligned && inAperture && mutation
       haveAw := false.B; haveW := false.B; haveB := true.B
-      savedBresp := Mux(!aligned || !inAperture, 3.U, Mux(reset || mutation, 0.U, 2.U))
+      savedBresp := Mux(!aligned || !inAperture, 3.U, Mux(acceptedReset || acceptedMutation, 0.U, 2.U))
       // Preserve the accepted write response. The core-only reset begins only
       // after the owner accepts B, then blocks one complete admission cycle.
-      when(reset) { pendingReset := true.B }
-      when(mutation) {
+      when(acceptedReset) { pendingReset := true.B }
+      when(acceptedMutation) {
         pendingMutation := true.B
         mutationKind := Mux(configControl, Mux(savedW === 1.U, 1.U, 3.U),
           Mux(configPayload, 2.U,
