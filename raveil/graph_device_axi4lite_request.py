@@ -31,7 +31,8 @@ GENERATED = {
     "abi.sha256", "graph_device_axi4lite_aperture_generated.h",
     "graph_device_abi_generated.h", "graph_device_affine_generated.h",
     "graph_device_dag_generated.h", "dag-artifact.json", "request.json",
-    "request-input.bin", "request-oracle.bin",
+    "request-input.bin", "request-oracle.bin", "uio-request.bin",
+    "graph_device_uio_request_generated.h",
 }
 SOURCE_FILES = (
     "hardware/chisel/GraphDeviceAxi4LiteTop.scala", "hardware/chisel/StaticStencilRegion.scala",
@@ -41,6 +42,7 @@ SOURCE_FILES = (
     "hardware/chisel/graph_device_runtime.cpp", "hardware/chisel/graph_device_affine_runtime.h",
     "hardware/chisel/graph_device_affine_runtime.cpp", "hardware/chisel/graph_device_dag_runtime.h",
     "hardware/chisel/graph_device_dag_runtime.cpp", "hardware/chisel/graph_device_axi4lite_request_verilator.cpp",
+    "hardware/chisel/graph_device_axi4lite_transport.h",
     "hardware/chisel/run-graph-device-axi4lite-request.sh", "hardware/chisel/run-graph-device-axi4lite-request-in-container.sh",
     "contracts/graph_device_axi4lite_aperture_v1.json", "raveil/graph_device_axi4lite.py",
     "raveil/graph_device_axi4lite_request.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py",
@@ -56,6 +58,26 @@ class GraphDeviceAxi4LiteRequestError(RuntimeError): pass
 def _sha(value: bytes) -> str: return hashlib.sha256(value).hexdigest()
 def _canonical(value: Any) -> bytes: return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
 def _words(words: list[int]) -> bytes: return struct.pack(f"<{len(words)}I", *words)
+def _uio_header(submission: dict[str, Any], binding: bytes, input_bytes: bytes) -> bytes:
+    def array(name: str, payload: bytes) -> str:
+        values = ", ".join(f"0x{value:02x}U" for value in payload)
+        return f"inline constexpr std::array<unsigned char, {len(payload)}> {name} = {{{values}}};"
+    request = _canonical(submission) + b"\n"
+    return ("\n".join((
+        "#ifndef RAVEIL_GRAPH_DEVICE_UIO_REQUEST_GENERATED_H",
+        "#define RAVEIL_GRAPH_DEVICE_UIO_REQUEST_GENERATED_H",
+        "#include <array>",
+        "#include <cstdint>",
+        "namespace raveil::graph_device::uio_request_generated {",
+        f'inline constexpr const char* kGraphId = "{submission["graph_id"]}";',
+        f'inline constexpr std::uint32_t kSeed = {submission["seed"]}U;',
+        array("kBinding", binding),
+        array("kRequestJson", request),
+        array("kInput", input_bytes),
+        "}",
+        "#endif",
+        "",
+    ))).encode("ascii")
 def _read(path: Path, limit: int = 32 << 20) -> bytes:
     try: info = path.lstat()
     except OSError as exc: raise GraphDeviceAxi4LiteRequestError(f"missing {path.name}") from exc
@@ -79,9 +101,20 @@ def prepare(output: Path, submission: dict[str, Any]) -> dict[str, Any]:
     words = input_words(submission["seed"]); oracle = dag.graph_oracle(descriptor, words)
     (output / "graph_device_axi4lite_aperture_generated.h").write_bytes(aperture._header())
     (output / "abi.sha256").write_text("".join(f"{value}  {name}\n" for name, value in sorted(aperture.ABI_HASHES.items())), encoding="ascii")
-    (output / "request.json").write_bytes(_canonical(submission) + b"\n")
-    (output / "request-input.bin").write_bytes(_words(words))
+    request_bytes = _canonical(submission) + b"\n"
+    input_bytes = _words(words)
+    (output / "request.json").write_bytes(request_bytes)
+    (output / "request-input.bin").write_bytes(input_bytes)
     (output / "request-oracle.bin").write_bytes(_words(oracle))
+    graph_ids = [item["graph_id"] for item in dag.descriptors(ROOT)]
+    binding = struct.pack(
+        "<5I", 0x52555131, 1, 20, graph_ids.index(submission["graph_id"]),
+        submission["seed"],
+    )
+    (output / "uio-request.bin").write_bytes(binding)
+    (output / "graph_device_uio_request_generated.h").write_bytes(
+        _uio_header(submission, binding, input_bytes)
+    )
     (output / "inputs" / f"seed-{submission['seed']}.bin").write_bytes(_words(words))
     return artifact
 
@@ -102,7 +135,7 @@ def _reject_tree(evidence: Path, submission: dict[str, Any]) -> None:
         "emit-first.stderr", "emit-first.stdout", "emit-second.stderr", "emit-second.stdout", "environment.txt", "graph_device_abi_generated.h",
         "graph_device_affine_generated.h", "graph_device_axi4lite_aperture_generated.h", "graph_device_dag_generated.h", "inputs", "oracles",
         "rtl-first", "rtl-first.manifest", "rtl-second", "rtl-second.manifest", "simulator.bin", "simulator.sha256", "source.manifest",
-        "toolchain.txt", "verilator.stderr", "verilator.stdout", "request.json", "request-input.bin", "request-oracle.bin",
+        "toolchain.txt", "verilator.stderr", "verilator.stdout", "request.json", "request-input.bin", "request-oracle.bin", "uio-request.bin", "graph_device_uio_request_generated.h",
         f"fallback-output-{graph}-seed-{seed}.bin", f"private-output-{graph}-seed-{seed}.bin",
     }
     actual = {item.name for item in evidence.iterdir()}
@@ -223,6 +256,15 @@ def _expected(evidence: Path) -> dict[str, Any]:
             != dag._generated_header(dag_artifact)):
         raise GraphDeviceAxi4LiteRequestError("DAG artifact or header differs")
     if _read(evidence / "request-input.bin") != _words(input_words(submission["seed"])): raise GraphDeviceAxi4LiteRequestError("request input differs")
+    graph_ids = [item["graph_id"] for item in dag.descriptors(ROOT)]
+    expected_uio_request = struct.pack(
+        "<5I", 0x52555131, 1, 20, graph_ids.index(submission["graph_id"]),
+        submission["seed"],
+    )
+    if _read(evidence / "uio-request.bin", 20) != expected_uio_request: raise GraphDeviceAxi4LiteRequestError("UIO request binding differs")
+    if (_read(evidence / "graph_device_uio_request_generated.h", 1 << 20)
+            != _uio_header(submission, expected_uio_request, _words(input_words(submission["seed"])))):
+        raise GraphDeviceAxi4LiteRequestError("UIO compiled request binding differs")
     descriptor = dag.load_descriptor(ROOT / submission["graph_path"])
     oracle = _words(dag.graph_oracle(descriptor, input_words(submission["seed"])))
     if _read(evidence / "request-oracle.bin") != oracle: raise GraphDeviceAxi4LiteRequestError("request oracle differs")

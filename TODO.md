@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0132/S05 stacked local candidate; remote kickoff pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S06 local Linux-UIO transport candidate. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0132/S04 and S05 remain stacked local integration candidates; remote kickoff pending. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -174,6 +174,25 @@ review and failure preservation do not consume the two-item delivery limit.
   stacked local candidate on `feat/t-0132-s05-axi-request` based on reviewed
   local S04 commit `0b248ed`; it has no live Project item and is not authorized
   for remote push without explicit external-disclosure approval.
+
+- [ ] **T-0132/S06** Reuse the S05 transport-neutral runtime through one Linux
+  UIO mapping without changing Graph semantics, any owned ABI, or the RTL.
+  ADR-0071 limits the implementation to a shared checked relative-aperture
+  adapter plus an explicitly supplied `/dev/uioN` character-device backend
+  that maps exactly 16 KiB at UIO offset zero. Acceptance requires exact fake
+  register-I/O address/bounds tests, anonymous-mapping lifetime tests,
+  fail-closed path/type/span negatives, a warning-free C++17 Linux build, and
+  an unchanged S05 Verilator replay after the adapter refactor. A fake mapping
+  must never report end-to-end Graph success. Stop before absolute physical
+  addresses, `/dev/mem`, kernel modules, device tree, Vivado/bitstream, XRT,
+  DMA, IRQ, cache coherence, FPGA execution, performance/resources, arbitrary
+  Graphs, Experience, or evidence promotion. This is a local stacked slice on
+  `feat/t-0132-s06-linux-uio-transport`; no remote Issue, Project transition,
+  push, or FPGA claim is authorized by the local work. The local candidate now
+  passes a warning-free ARM64 Linux build, 110 focused regressions, exact
+  request-binding/path negatives, and an unchanged-semantic S05 RTL replay at
+  `run.Glve09`. It remains unchecked because the stacked S04/S05/S06 series is
+  not integrated or remotely coordinated, and no real UIO/FPGA run exists.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

@@ -1,0 +1,29 @@
+FROM raveil-linux-driver:latest@sha256:2619082d2573496975b5423440fff84d02830aa83fb2e7cff8bfb8687f101453
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends g++ python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /raveil
+COPY contracts /raveil/contracts
+COPY hardware/chisel /raveil/hardware/chisel
+COPY linux /raveil/linux
+COPY raveil /raveil/raveil
+COPY tests/graph_device_axi4lite_transport_host_test.cpp /raveil/tests/
+COPY tests/graph_device_uio_linux_test.cpp /raveil/tests/
+
+RUN python3 -m raveil.graph_device_axi4lite_request prepare \
+      --output /tmp/graph-device-generated \
+      --graph contracts/graph_device_dags/vertical-three-point.json --seed 7 \
+    && make -C linux clean graph-device-uio \
+      GENERATED_DIR=/tmp/graph-device-generated \
+    && c++ -std=c++17 -O2 -Wall -Wextra -Werror \
+      -Ihardware/chisel tests/graph_device_axi4lite_transport_host_test.cpp \
+      -o /tmp/graph-device-transport-test \
+    && /tmp/graph-device-transport-test \
+    && c++ -std=c++17 -O2 -Wall -Wextra -Werror \
+      -Ilinux/include -Ihardware/chisel tests/graph_device_uio_linux_test.cpp \
+      linux/src/raveil_graph_device_uio.cpp -o /tmp/graph-device-uio-test \
+    && /tmp/graph-device-uio-test
+
+CMD ["/raveil/linux/build/raveil-graph-device-uio-run"]

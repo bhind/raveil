@@ -72,3 +72,4 @@ rewrite it.
 | [ADR-0068](ADR-0068-sprint-review-and-retrospective-run-on-saturday.md) | Accepted; Monday-only pull boundary superseded by ADR-0070 | Sprint review and retrospective run on Saturday; Sunday is a bounded recovery and handoff buffer |
 | [ADR-0069](ADR-0069-owner-visible-review-precedes-sprint-review-done.md) | Accepted | Actual output, explanation, feedback routing, and explicit owner disposition precede Sprint review Done |
 | [ADR-0070](ADR-0070-post-review-next-sprint-pull-is-immediate.md) | Accepted | A ready next Sprint may start immediately after accepted review and postmortem |
+| [ADR-0071](ADR-0071-linux-uio-is-a-relative-non-authoritative-graph-device-transport.md) | Accepted | Linux UIO maps the relative Graph-device aperture without execution or evidence authority |

@@ -425,6 +425,28 @@ descriptor, three-opcode, RTL-simulation-functional path; it does not establish
 arbitrary Graph support, Linux/UIO or a driver, absolute mapping, FPGA/KV260,
 DMA/IRQ, performance, resources, production security, or silicon behavior.
 
+T-0132/S06 extracts the address calculation from the Verilator bridge into one
+transport adapter over a minimal 32-bit `RegisterIo`. It alone maps execution,
+affine-install, and program-install word offsets into the ADR-0067 namespace
+bases and rejects overflow or namespace crossing before I/O. The Verilator
+backend still emits the same external AXI transactions. A second backend opens
+only an explicit `/dev/uioN`, binds its `fstat` device identity to sysfs, checks
+map 0 is exactly 16 KiB, and exposes aligned volatile words at relative offset
+zero. Neither backend contains Graph-selection logic.
+
+The Linux runner is compiled for one prepared request. A generated header
+freezes the exact request record, canonical JSON, deterministic input bytes,
+catalogue Graph, and seed; every corresponding file must match byte-for-byte
+before the UIO device is opened. The unchanged `run_selected_dag` then owns
+installation and execution. Output creation is exclusive and no-follow, so an
+existing file or symlink cannot be truncated. This is a host transport build,
+not a dynamic admission service, driver authority, or hardware result. No
+absolute base, `/dev/mem`, DMA/IRQ, cache policy, device tree, bitstream, FPGA,
+or performance boundary is introduced. The UIO executable captures rather
+than forwards the shared runtime's simulation summary and emits only
+`linux-uio-transport-unverified`, `graph_output=unpromoted`, and explicit
+not-verified RTL/hardware labels.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

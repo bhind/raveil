@@ -5,10 +5,13 @@
 #include "graph_device_dag_generated.h"
 
 #include <array>
+#include <cerrno>
 #include <cstdint>
+#include <fcntl.h>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 namespace raveil::graph_device {
 namespace {
@@ -41,8 +44,15 @@ bool load_words(
 }
 
 bool store_output(const std::filesystem::path& path, const Output& words) {
-    std::ofstream stream(path, std::ios::binary | std::ios::trunc);
-    if (!stream) return false;
+    int flags = O_WRONLY | O_CREAT | O_EXCL;
+#ifdef O_CLOEXEC
+    flags |= O_CLOEXEC;
+#endif
+#ifdef O_NOFOLLOW
+    flags |= O_NOFOLLOW;
+#endif
+    const int descriptor = ::open(path.c_str(), flags, 0600);
+    if (descriptor < 0) return false;
     for (const std::uint32_t word : words) {
         const std::array<unsigned char, 4> bytes = {
             static_cast<unsigned char>(word),
@@ -50,9 +60,20 @@ bool store_output(const std::filesystem::path& path, const Output& words) {
             static_cast<unsigned char>(word >> 16U),
             static_cast<unsigned char>(word >> 24U),
         };
-        stream.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+        std::size_t written = 0;
+        while (written < bytes.size()) {
+            const ssize_t result = ::write(
+                descriptor, bytes.data() + written, bytes.size() - written
+            );
+            if (result < 0 && errno == EINTR) continue;
+            if (result <= 0) {
+                ::close(descriptor);
+                return false;
+            }
+            written += static_cast<std::size_t>(result);
+        }
     }
-    return stream.good();
+    return ::close(descriptor) == 0;
 }
 
 bool read_device(DeviceTransport& device, std::uint32_t offset, std::uint32_t& value) {

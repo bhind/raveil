@@ -2,6 +2,7 @@
 #include "verilated.h"
 
 #include "graph_device_axi4lite_aperture_generated.h"
+#include "graph_device_axi4lite_transport.h"
 #include "graph_device_runtime.h"
 #include "graph_device_affine_runtime.h"
 #include "graph_device_dag_runtime.h"
@@ -20,19 +21,13 @@ constexpr std::uint32_t kOkay = 0;
 // This bridge deliberately contains no Graph selection logic.  It maps the
 // pre-existing transport-neutral runtime interfaces onto the three already
 // specified AXI4-Lite apertures and records every completed transaction.
-class AxiBridge final : public raveil::graph_device::DeviceTransport,
-                        public raveil::graph_device::AffineInstallTransport,
-                        public raveil::graph_device::ProgramInstallTransport {
+class AxiBridge final : public raveil::graph_device::RegisterIo {
  public:
   AxiBridge(VGraphDeviceAxi4LiteTop& top, std::ostream& trace) : top_(top), trace_(trace) {
     idle(); top_.aresetn = 0; tick(); top_.aresetn = 1; tick();
   }
-  raveil::graph_device::DeviceRead read_word(std::uint32_t word) override { return read(RAVEIL_AXI_EXEC_BASE + 4U * word); }
-  bool write_word(std::uint32_t word, std::uint32_t value) override { return write(RAVEIL_AXI_EXEC_BASE + 4U * word, value); }
-  raveil::graph_device::DeviceRead read_install_word(std::uint32_t word) override { return read(RAVEIL_AXI_CONFIG_BASE + 4U * word); }
-  bool write_install_word(std::uint32_t word, std::uint32_t value) override { return write(RAVEIL_AXI_CONFIG_BASE + 4U * word, value); }
-  raveil::graph_device::DeviceRead read_program_word(std::uint32_t word) override { return read(RAVEIL_AXI_PROGRAM_BASE + 4U * word); }
-  bool write_program_word(std::uint32_t word, std::uint32_t value) override { return write(RAVEIL_AXI_PROGRAM_BASE + 4U * word, value); }
+  raveil::graph_device::DeviceRead read32(std::uint32_t address) override { return read(address); }
+  bool write32(std::uint32_t address, std::uint32_t value) override { return write(address, value); }
  private:
   VGraphDeviceAxi4LiteTop& top_; std::ostream& trace_; std::uint64_t sequence_ = 0;
   void idle() { top_.awvalid = top_.wvalid = top_.arvalid = 0; top_.bready = top_.rready = 0; top_.awaddr = top_.wdata = top_.wstrb = top_.araddr = 0; }
@@ -64,6 +59,7 @@ int main(int argc, char** argv) {
   const std::filesystem::path evidence(argv[1]); std::ofstream trace(evidence / "axi-transcript.log", std::ios::trunc);
   if (!trace) fail("transcript open");
   VGraphDeviceAxi4LiteTop top; AxiBridge bridge(top, trace);
-  const int result = raveil::graph_device::run_selected_dag(bridge, bridge, bridge, evidence, argv[2], static_cast<std::uint32_t>(parsed), std::cout, std::cerr);
+  raveil::graph_device::Axi4LiteTransport transport(bridge, RAVEIL_AXI_EXEC_BASE, RAVEIL_AXI_CONFIG_BASE, RAVEIL_AXI_PROGRAM_BASE);
+  const int result = raveil::graph_device::run_selected_dag(transport, transport, transport, evidence, argv[2], static_cast<std::uint32_t>(parsed), std::cout, std::cerr);
   top.final(); return result;
 }

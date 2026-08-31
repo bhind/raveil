@@ -364,6 +364,48 @@ review passes both artifacts and all 53 focused regressions. Exact-head Security
 review reports High 0 and Medium 0; the documented same-owner receipt limitation
 remains Low. This is a reviewed local candidate, not an integrated result.
 
+T-0132/S06 is the active local physicalization slice stacked on the reviewed
+S05 candidate. ADR-0071 accepts only a checked relative-aperture adapter and a
+Linux UIO character-device mapping of the existing 16 KiB window. The
+transport must feed unchanged `run_selected_dag`; Linux receives no admission,
+publication, Experience, recovery, or evidence-promotion authority. No S06
+implementation result, Linux build result, UIO device run, FPGA result, or
+hardware claim exists at kickoff. The slice stops before absolute mapping,
+`/dev/mem`, kernel modules, board tooling, DMA/IRQ, cache coherence, and actual
+FPGA execution.
+
+The local S06 candidate now implements that bounded route. One shared adapter
+drives both the existing Verilator AXI bridge and a Linux-only UIO mapping;
+execution, affine, and program namespaces are independently bounded. The UIO
+runner accepts only `/dev/uioN` plus one prepared request root, validates exact
+compiled request/JSON/input bytes before opening the device, binds the opened
+major:minor and 16 KiB map size to sysfs, and uses the unchanged selected DAG
+runtime. Runtime outputs now use exclusive no-follow creation rather than
+truncation.
+
+The ARM64 Linux image builds warning-free with GNU C++17 and runs the common
+address/bounds test plus Linux mapping/path negatives. One hundred ten focused
+Graph/AXI/DAG/UIO tests pass. Final exact-source RTL replay
+`artifacts/graph_device_axi4lite_request/run.Glve09` retains 2,976 AXI records,
+transcript SHA-256
+`6bef1cdcb4414a923ae42f7d8a256e966a63e8dacfdd7fcb6612ef113d1da0f8`,
+output/oracle SHA-256
+`fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`,
+and RTL manifest
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+Its request-specific generated header and receipt hash to
+`672043d4479758ae5cd20fff5f0196f19267cd856586cf94c461a6af342628e9`
+and `e638b2e75047a722b9856ed947eddc6c06b68b5700b5ec90d1c9b906b7045a0f`.
+This proves preserved RTL-simulation semantics and an ARM64 host transport
+build only. No real UIO device, ARM board execution, FPGA, bitstream,
+performance, resource, or product result exists. Final ARM64 build image ID is
+`sha256:ac1292a74048c8260543f3e34f920676648144b5c1c07e2daf8a764bb270e6e5`.
+Independent exact-head Security review reports High 0 and Medium 0; the
+remaining Low is that host negatives do not exercise adversarial race
+injection. A UIO zero return is deliberately labelled only
+`linux-uio-transport-unverified` with Graph output unpromoted and RTL/hardware
+not verified.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while
