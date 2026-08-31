@@ -6,7 +6,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from raveil.graph_device_run import GraphDeviceRunError, _evidence_path, run
+from raveil.cli import build_parser
+from raveil.graph_device_run import GraphDeviceRunError, _axi_evidence_path, _evidence_path, run
 from raveil.graph_device_dag import compile_descriptor, load_descriptor, expected_transactions
 from raveil.riscv_stencil_signature import input_words
 from tests.test_graph_device_selected import ROOT, VERTICAL
@@ -211,6 +212,50 @@ class GraphDeviceRunTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("error:", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_cli_accepts_explicit_axi4lite_sim_transport(self) -> None:
+        args = build_parser().parse_args(
+            ["graph-device", "run", "--graph", VERTICAL, "--seed", "7",
+             "--transport", "axi4lite-sim"]
+        )
+        self.assertEqual(args.transport, "axi4lite-sim")
+
+    def test_axi4lite_transport_is_explicit_about_catalogue_scope(self) -> None:
+        marker = (
+            "GraphDevice-AXI4LITE-SELECTED-EVIDENCE-V1 "
+            "path=artifacts/graph_device_axi4lite_selected/run.Abc123 "
+            "private=1 publication=0"
+        )
+        completed = subprocess.CompletedProcess([], 0, marker + "\n", "")
+        receipt = {
+            "evidence_class": "rtl-simulation-functional",
+            "performance": "not-measured",
+        }
+        with patch("raveil.graph_device_run.subprocess.run", return_value=completed) as invoked, \
+             patch("raveil.graph_device_run._axi_evidence_path", return_value=ROOT), \
+             patch("raveil.graph_device_axi4lite_selected.finalize", return_value=receipt):
+            output = run(VERTICAL, 7, ROOT, transport="axi4lite-sim")
+        self.assertEqual(
+            invoked.call_args.args[0],
+            [str(ROOT / "hardware/chisel/run-graph-device-axi4lite-selected.sh")],
+        )
+        self.assertIn("Admission graph=vertical-three-point seed=7", output)
+        self.assertIn("Execution scope=frozen-catalogue (not one selected invocation)", output)
+        self.assertIn("Factory restart=PASS", output)
+
+    def test_axi4lite_marker_path_is_repository_confined(self) -> None:
+        marker = (
+            "GraphDevice-AXI4LITE-SELECTED-EVIDENCE-V1 "
+            "path=artifacts/graph_device_axi4lite_selected/run.Abc123 "
+            "private=1 publication=0"
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            repository = Path(temporary)
+            evidence = repository / "artifacts/graph_device_axi4lite_selected/run.Abc123"
+            evidence.mkdir(parents=True)
+            self.assertEqual(_axi_evidence_path(marker, repository), evidence.resolve())
+            with self.assertRaises(GraphDeviceRunError):
+                _axi_evidence_path(marker.replace("private=1", "private=0"), repository)
 
 
 if __name__ == "__main__":

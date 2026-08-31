@@ -382,6 +382,28 @@ holds one authorized output R response and holds an admitted cancel B long
 enough for core completion, then verifies that post-B cancel still suppresses
 publication.
 
+T-0132/S04 adds a host-side AXI simulation adapter without changing the S03
+wrapper, core, or any owned ABI. One C++ bridge implements the existing
+transport-neutral execution, affine-install, and program-install interfaces by
+issuing only external AXI4-Lite reads and writes into the three relative
+windows. The unchanged DAG runtime then executes the frozen three-Graph
+catalogue, including four completed invocations, one cancellation, one
+factory-default restart through the runtime's execution reset, and the eight installer rejection cases, against one
+emitted RTL image. A private finalizer binds the complete AXI transcript,
+double RTL elaboration, simulator, toolchain, source set, independent oracles,
+and output hashes in an exclusively created local receipt. The writer refuses
+replacement, but the same filesystem owner can delete and recreate the private
+bundle; this is not an immutable external seal.
+
+The explicit `graph-device run --transport axi4lite-sim` option preserves the
+existing Graph path and seed as a fail-closed admission request, but S04 runs
+the complete fixed catalogue rather than claiming that the requested pair is a
+single selected AXI invocation. The CLI says so directly. A later slice must
+separately connect per-request selection if product operation requires that
+semantics. S04 remains RTL-simulation-functional evidence with performance not
+measured; it is not Linux/UIO, a driver, an absolute address assignment,
+DMA/IRQ, FPGA/KV260, general Graph execution, or production security.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

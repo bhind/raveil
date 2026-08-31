@@ -13,7 +13,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
 | **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
-| **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0132/S04 local candidate; remote kickoff pending. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -135,6 +135,30 @@ review and failure preservation do not consume the two-item delivery limit.
   #79 merged as canonical commit
   `fc52e47a2770b5751b99117816bb87dff2582c01`. Issue #78 is Closed and its
   Project item is Done. This completes only T-0132/S03.
+
+- [ ] **T-0132/S04** Connect the existing three-Graph operator/runtime to the
+  accepted AXI4-Lite transport in simulation. Preserve the default
+  `graph-device run` path and add one explicit AXI simulation transport that
+  reuses the transport-neutral DAG runtime to install affine/program payloads,
+  stage input, execute, cancel, restart, and validate private output for only
+  the three byte-frozen catalogue descriptors. Bind exact sources and unchanged
+  ABIs, double RTL emission, simulator/environment/toolchain identity, the full
+  external AXI transcript, and independent oracles in an append-once private
+  receipt. "Append-once" here means writer-enforced exclusive creation, not an
+  immutable seal against the same local filesystem owner. Stop before RTL-core,
+  ABI/schema, arbitrary-Graph/opcode,
+  Linux/UIO/driver, board/FPGA, DMA/IRQ, performance/resource, Experience, or
+  external-source changes. The owner explicitly required bounded continuation
+  after the stale HCI-09 stop on 2026-08-31. External Issue/Project publication
+  was separately denied by the tool safety boundary, so the current work is a
+  local candidate on `feat/t-0132-s04-axi-selected`, not an active Project item
+  and not authorized for push until the owner explicitly approves that external
+  disclosure.
+  The local candidate passes primary RTL simulation, but its CLI option is
+  intentionally catalogue-scoped: `--graph` and `--seed` remain admission
+  inputs, while one invocation verifies the complete frozen catalogue. A
+  separately promoted later slice is required for selected per-request AXI
+  execution; S04 must not imply that behavior.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

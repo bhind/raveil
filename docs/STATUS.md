@@ -295,6 +295,43 @@ Descriptor/implementation digest promotion,
 arbitrary Graphs, Linux, absolute board mapping, KV260/FPGA, DMA/IRQ,
 performance, resources, Experience, and schema changes remain excluded.
 
+T-0132/S04 is a local-only implementation candidate after the owner explicitly
+rejected stopping at the stale HCI-09 boundary. Its narrow target is to reuse
+the accepted T-0123 transport-neutral three-Graph runtime through the accepted
+T-0132 AXI wrapper and expose that path as an explicit option on the existing
+`graph-device run` CLI. The default CLI path, three byte-frozen descriptors,
+all owned ABIs, `GraphDeviceAxi4LiteTop`, and the installed-program core remain
+unchanged. Tool safety rejected publishing the detailed work packet as a GitHub
+Issue without a new explicit external-disclosure approval; therefore no live
+Project item is active and no push is authorized. No S04 implementation or
+evidence result existed at kickoff.
+
+The local S04 candidate now implements that bridge without changing
+`GraphDeviceAxi4LiteTop`, the nested core, the three frozen descriptors, or any
+owned ABI. Forty-eight focused host tests pass. Fixed offline Docker/Verilator
+run `artifacts/graph_device_axi4lite_selected/run.jlX28a` executes the three
+catalogue Graphs through 11,444 external AXI4-Lite transactions: four runs
+complete, one cancels without output publication, the factory-default restart
+completes, and all eight malformed/busy cases fault. All four published private
+outputs equal their independent oracles. Receipt SHA-256 is
+`36744413b00b1a2ed554442e2662b72ce76832f1da87e58ec9b41e9180632798`;
+transcript SHA-256 is
+`e266bb9ac12a97613e3c041aff73b012fa421fe40a4077e21ad83ae607e6db5b`;
+the double-emitted RTL manifest remains
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+The top-level CLI also passes end to end as `run.yhxZKj` and labels the admitted
+Graph/seed separately from the fixed-catalogue execution scope. Independent
+exact-head Tester review passes all 48 focused regressions, receipt replay, and
+unit-test isolation. Exact-head Security re-review reports High 0, Medium 0,
+with one accepted Low: the same local filesystem owner can delete and recreate
+the private bundle. This is a reviewed local candidate, not an integrated
+result. Evidence is
+`rtl-simulation-functional`; performance is not measured. The finalizer now
+requires the exact canonical transcript identity and schema, recursive
+link/special-file rejection, evidence allowlists, and the ABI identity export.
+Its exclusive-create receipt is a local writer boundary, not an immutable
+same-owner or external seal.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while
