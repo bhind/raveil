@@ -521,9 +521,10 @@ def build_parser() -> argparse.ArgumentParser:
     graph_device_run.add_argument("--graph", required=True)
     graph_device_run.add_argument("--seed", type=int, required=True)
     graph_device_run.add_argument(
-        "--transport", choices=("selected-rtl", "axi4lite-sim"), default="selected-rtl",
+        "--transport", choices=("selected-rtl", "axi4lite-sim", "axi4lite-catalogue-sim"), default="selected-rtl",
         help=("selected-rtl preserves the default single-Graph path; "
-              "axi4lite-sim admits the request and validates the full frozen catalogue through AXI4-Lite"),
+              "axi4lite-sim executes the admitted request through AXI4-Lite; "
+              "axi4lite-catalogue-sim preserves the S04 full-catalogue regression"),
     )
     graph_device_run.set_defaults(handler=command_graph_device_run)
 

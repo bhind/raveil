@@ -13,7 +13,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
 | **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0132/S04 local candidate; remote kickoff pending. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0132/S05 stacked local candidate; remote kickoff pending. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -159,6 +159,21 @@ review and failure preservation do not consume the two-item delivery limit.
   inputs, while one invocation verifies the complete frozen catalogue. A
   separately promoted later slice is required for selected per-request AXI
   execution; S04 must not imply that behavior.
+
+- [ ] **T-0132/S05** Connect one admitted `--graph`/`--seed` request to the
+  existing AXI4-Lite simulation transport. Reuse S04's bridge and unchanged
+  `run_selected_dag`; prepare only repository-canonical descriptor/program,
+  deterministic input, independent direct oracle, and frozen installer
+  negatives. Preserve S04's full-catalogue transport as a regression and make
+  the default `selected-rtl` path byte-compatible. Bind the actual requested
+  Graph and seed, source/ABI/RTL/simulator/toolchain identities, strict complete
+  AXI transcript, private output, and oracle in a writer-exclusive local
+  receipt. Stop before RTL/ABI/schema/descriptor changes, arbitrary Graph or
+  opcode support, Linux/UIO/driver, absolute mapping, board/FPGA, DMA/IRQ,
+  performance/resource claims, Experience, or external-source work. This is a
+  stacked local candidate on `feat/t-0132-s05-axi-request` based on reviewed
+  local S04 commit `0b248ed`; it has no live Project item and is not authorized
+  for remote push without explicit external-disclosure approval.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

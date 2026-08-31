@@ -404,6 +404,27 @@ semantics. S04 remains RTL-simulation-functional evidence with performance not
 measured; it is not Linux/UIO, a driver, an absolute address assignment,
 DMA/IRQ, FPGA/KV260, general Graph execution, or production security.
 
+T-0132/S05 makes per-request semantics explicit without changing the hardware
+boundary. The default `selected-rtl` path remains the pre-AXI direct Verilator
+adapter; `axi4lite-catalogue-sim` names S04's fixed full-catalogue regression;
+and `axi4lite-sim` now passes the admitted repository descriptor identity and
+uint32 seed to unchanged `run_selected_dag` through a second thin instance of
+the same three-interface AXI bridge. Graph choice remains in the host runtime,
+not the bridge or RTL. The request finalizer recomputes admission, deterministic
+input, compiled program, affine payload, and direct oracle. It requires the
+fixed 507-record malformed/busy prefix plus an exact request-dependent suffix:
+reset, affine/program installation, 324 staged input words, start, terminal
+status sequence, and 256 private output reads. All records remain external
+AXI4-Lite transactions.
+
+The local receipt binds that semantic trace, request, private output, oracle,
+sources, generated inputs, owned ABIs, double RTL elaboration, simulator,
+toolchain, and fixed offline environment. As in S04, exclusive creation is not
+an immutable seal against the same filesystem owner. This remains a three-
+descriptor, three-opcode, RTL-simulation-functional path; it does not establish
+arbitrary Graph support, Linux/UIO or a driver, absolute mapping, FPGA/KV260,
+DMA/IRQ, performance, resources, production security, or silicon behavior.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

@@ -332,6 +332,38 @@ link/special-file rejection, evidence allowlists, and the ABI identity export.
 Its exclusive-create receipt is a local writer boundary, not an immutable
 same-owner or external seal.
 
+T-0132/S05 is now a stacked local implementation candidate based on reviewed
+S04 commit `0b248ed`. Its single purpose is to make the existing CLI request
+semantic real on the AXI path: the admitted canonical Graph and uint32 seed
+must be the Graph and input executed by unchanged `run_selected_dag` through
+S04's `AxiBridge`. S04's fixed-catalogue run remains a regression. No RTL,
+owned ABI, descriptor, compiler opcode, Linux, board, DMA/IRQ, performance,
+resource, or Experience boundary may change. No S05 result exists yet, and no
+live Project item or remote push is authorized under the current external-
+disclosure boundary.
+
+The local S05 candidate now executes the admitted request itself. Fifty-three
+focused request/run/S04/default/DAG tests pass. Fixed offline
+Docker/Verilator run `artifacts/graph_device_axi4lite_request/run.SxZzYl`
+executes `vertical-three-point` seed 7 through 2,976 complete AXI4-Lite records;
+its 256-word private output equals the direct oracle under output SHA-256
+`fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`.
+Top-level CLI run `run.TEtnsC` executes
+`compact-horizontal-three-point` seed 4,294,967,295 through 1,632 records and
+matches oracle/output SHA-256
+`cbf6b34838b34e76286699d3ea333575a16beecad826647ee9b2c7ebadd0ef28`.
+Both use RTL manifest
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`
+and simulator
+`e8f5b2d6ab03cc6bc737124f67b13395aa6f2b1a20130aff7c0a4d10962cc833`.
+The first RTL attempt failed before execution because the fixed container lacks
+Python; Graph identity parsing was moved to the admitted host preparation and
+the inner runner now receives only Graph ID and seed. Evidence is
+`rtl-simulation-functional`; performance is not measured. Exact-head Tester
+review passes both artifacts and all 53 focused regressions. Exact-head Security
+review reports High 0 and Medium 0; the documented same-owner receipt limitation
+remains Low. This is a reviewed local candidate, not an integrated result.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

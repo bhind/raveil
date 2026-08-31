@@ -220,6 +220,30 @@ class GraphDeviceRunTests(unittest.TestCase):
         )
         self.assertEqual(args.transport, "axi4lite-sim")
 
+    def test_cli_accepts_explicit_axi4lite_catalogue_regression_transport(self) -> None:
+        args = build_parser().parse_args(
+            ["graph-device", "run", "--graph", VERTICAL, "--seed", "7",
+             "--transport", "axi4lite-catalogue-sim"]
+        )
+        self.assertEqual(args.transport, "axi4lite-catalogue-sim")
+
+    def test_axi4lite_request_transport_passes_the_admitted_pair(self) -> None:
+        marker = (
+            "GraphDevice-AXI4LITE-REQUEST-EVIDENCE-V1 "
+            "path=artifacts/graph_device_axi4lite_request/run.Abc123 "
+            "private=1 publication=0"
+        )
+        completed = subprocess.CompletedProcess([], 0, marker + "\n", "")
+        submission = __import__("raveil.graph_device_submit", fromlist=["admit"]).admit(VERTICAL, 7, ROOT)
+        receipt = {"submission": submission, "evidence_class": "rtl-simulation-functional", "performance": "not-measured"}
+        with patch("raveil.graph_device_run.subprocess.run", return_value=completed) as invoked, \
+             patch("raveil.graph_device_run._axi_request_evidence_path", return_value=ROOT), \
+             patch("raveil.graph_device_axi4lite_request.finalize", return_value=receipt):
+            output = run(VERTICAL, 7, ROOT, transport="axi4lite-sim")
+        self.assertEqual(invoked.call_args.args[0], [str(ROOT / "hardware/chisel/run-graph-device-axi4lite-request.sh"), "--graph", VERTICAL, "--seed", "7"])
+        self.assertIn("Execution scope=one-admitted-invocation", output)
+        self.assertIn("graphs=1", output)
+
     def test_axi4lite_transport_is_explicit_about_catalogue_scope(self) -> None:
         marker = (
             "GraphDevice-AXI4LITE-SELECTED-EVIDENCE-V1 "
@@ -234,13 +258,14 @@ class GraphDeviceRunTests(unittest.TestCase):
         with patch("raveil.graph_device_run.subprocess.run", return_value=completed) as invoked, \
              patch("raveil.graph_device_run._axi_evidence_path", return_value=ROOT), \
              patch("raveil.graph_device_axi4lite_selected.finalize", return_value=receipt):
-            output = run(VERTICAL, 7, ROOT, transport="axi4lite-sim")
+            output = run(VERTICAL, 7, ROOT, transport="axi4lite-catalogue-sim")
         self.assertEqual(
             invoked.call_args.args[0],
             [str(ROOT / "hardware/chisel/run-graph-device-axi4lite-selected.sh")],
         )
         self.assertIn("Admission graph=vertical-three-point seed=7", output)
         self.assertIn("Execution scope=frozen-catalogue (not one selected invocation)", output)
+        self.assertIn("Transport=axi4lite-catalogue-sim", output)
         self.assertIn("Factory restart=PASS", output)
 
     def test_axi4lite_marker_path_is_repository_confined(self) -> None:
