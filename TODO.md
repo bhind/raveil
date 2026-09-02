@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S10 |
-| **P1 — next** | Start only after its named P0 dependency passes. | None selected; real FPGA work remains behind the ADR-0039 review and an exact board packet. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0138 |
+| **P1 — next** | Start only after its named P0 dependency passes. | A KV260 implementation task remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -255,10 +255,28 @@ review and failure preservation do not consume the two-item delivery limit.
   seed 1 and vertical-three-point seed UINT32_MAX with simulator SHA-256
   `d3fcc5b3def9f9c4cc22185e0cf49d2f3943a4cc5e510f4aebbdc93a468050b7`.
   Seventy focused regressions, shell syntax, record, diff, secret-pattern, and
-  live queue checks pass. Exact-head PR review and integration remain. Stop
+  live queue checks pass. PR #90 merged exact reviewed head `d70fe7d` as
+  canonical commit `c0c33db`; Issue #89 is Closed and its Project item is
+  Done. Stop
   before more than two requests, persistent cache/service, new Graphs/opcodes,
   RTL/ABI change, real UIO, board/FPGA, performance/resource, ASIC, silicon, or
   product claims.
+
+- [x] **T-0138** Freeze the RFC-0004/S01 KV260 transition feasibility packet
+  before any board implementation. Issue #91, branch
+  `research/t-0138-kv260-transition`, Systems Implementer, five SP, Sprint
+  S-0003, and Planning evidence own only the official-source inventory,
+  tentative reference configuration, Raveil-to-board boundary map,
+  physical-owner/Jitro split, and Go/No-Go checks. The packet recommends KV260,
+  Ubuntu Server 24.04 arm64, and Vivado ML Standard 2025.1 on a supported
+  Windows 11 x86-64 host because AMD includes Kria in the license-free 2025.1
+  Standard edition while 2026.1 requires a valid license. It does not assign
+  an address, clock, reset, DT binding, bitstream, or deployment command.
+  Checks 1--7 plus the ADR-0039 Project Manager/legal review are prerequisites
+  for a later board implementation; checks 8--12 are prerequisites for FPGA
+  functional promotion. Stop before tool installation, EULA acceptance,
+  purchase, vendor-source copying, bitstream generation, board access, FPGA
+  evidence, or performance/resource/timing claims.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

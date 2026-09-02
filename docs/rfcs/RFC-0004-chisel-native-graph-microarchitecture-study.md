@@ -122,6 +122,14 @@ Simulation, synthesis estimate, FPGA, and silicon evidence remain separate.
 Experience is excluded from the first comparison so graph-organization effects
 are isolated; it may later advise among already admitted variants.
 
+T-0138 supplies the Planning-only RFC-0004/S01 transition packet. It recommends
+KV260, Ubuntu Server 24.04 arm64, and Vivado ML Standard 2025.1 on a supported
+Windows 11 x86-64 host as the smallest tentative FPGA reference. The packet
+does not accept a board implementation. It leaves the absolute address,
+clock/reset, device-tree/UIO binding and load route unassigned and requires its
+physical inventory, host/license/boot/target capability, source closure and
+ADR-0039 legal/PM checks before a new implementation task can start.
+
 The T-0057 review identified high technical similarity to TRIPS/EDGE,
 WaveScalar and DySER, plus preliminary patent-family hits around WaveCache,
 explicit-dataflow commit/precise exceptions and multi-modal EDGE instruction
