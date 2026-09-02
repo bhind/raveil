@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **The T-0132/S01--S07 local line reaches a deterministic unbased RTL-export prerequisite; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S07 reaches a deterministic unbased RTL-export prerequisite; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
