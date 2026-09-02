@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S08 plus active S09 shared runtime-admission simulation; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S09 plus active S10 operator runtime-pair CLI; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -744,6 +744,12 @@ two different accepted requests through one compiled simulator plus rejection
 before AXI for malformed input. It may not create a persistent simulator
 service, broaden the catalogue, change RTL or an ABI, or promote evidence
 beyond RTL Simulation Functional.
+
+T-0132/S10 exposes the accepted S09 behavior through the top-level operator
+CLI for exactly two ordered requests. It must pre-admit both, independently
+revalidate both receipts, and require one common simulator identity plus
+rejection-before-AXI. It remains one build per invocation and cannot expand
+into a general batch, cache, service, performance claim, or board work.
 
 ## No calendar claim
 

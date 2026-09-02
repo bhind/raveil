@@ -964,3 +964,21 @@ contracts/graph_device_dags/vertical-three-point.json --seed 7`. Its sole
 authoritative stdout marker is the private evidence marker consumed by the
 top-level CLI; incidental build diagnostics are not displayed or treated as a
 public-data transport or performance interface.
+
+### Two-request AXI4-Lite runtime CLI
+
+Run the bounded reusable-simulator MVP with:
+
+```sh
+python3 -m raveil graph-device run-pair \
+  --graph contracts/graph_device_dags/five-point.json --seed 1 \
+  --graph contracts/graph_device_dags/vertical-three-point.json --seed 4294967295
+```
+
+Both requests are admitted before Docker starts. The command emits the current
+RTL twice, builds one Verilator executable once, runs both ordered request
+roots through that exact executable, and independently revalidates both private
+receipts and oracles. It also requires a corrupt request to fail before any AXI
+transcript. This deliberately supports exactly two requests and rebuilds for
+each invocation; it is not a persistent cache, daemon, performance result,
+real UIO, FPGA, or general-Graph interface.

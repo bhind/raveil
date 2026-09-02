@@ -483,6 +483,17 @@ AXI trace, private output, and independent oracle. A corrupted third root must
 fail without an AXI transcript. This is a single-build simulation proof, not a
 persistent cache, service, production request bundle, or hardware result.
 
+T-0132/S10 exposes that bounded proof as `graph-device run-pair`. The CLI
+requires exactly two ordered Graph/seed pairs and performs the existing frozen-
+catalogue admission for both before starting the lower runner. On return it
+confines the session marker to the expected artifact root, revalidates each
+append-once receipt against the corresponding admitted pair, requires both to
+bind the marker-named simulator SHA-256, and independently checks that the
+deliberately rejected root contains no AXI transcript. The shell marker is
+therefore routing information, not result authority. The interface remains a
+two-request, one-build simulation command rather than a batch scheduler,
+persistent runtime, or hardware service.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

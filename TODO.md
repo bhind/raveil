@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S09 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S10 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected; real FPGA work remains behind the ADR-0039 review and an exact board packet. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -240,9 +240,25 @@ review and failure preservation do not consume the two-item delivery limit.
   AXI transcript exists. Sixty-four focused regressions pass, and the ordinary
   one-request CLI also passes with byte-equal output/oracle SHA-256
   `fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`.
-  Exact-head PR review and integration remain. Stop before a persistent
+  PR #88 merged exact reviewed head `d65c480` as canonical commit `de55cac`;
+  Issue #87 is Closed and its Project item is Done. Stop before a persistent
   cache/service, Graph or opcode expansion, RTL/ABI change, real UIO,
   board/FPGA, performance/resource, ASIC, silicon, or product claims.
+
+- [x] **T-0132/S10** Expose the S09 two-request runtime path through one
+  operator-facing `python3 -m raveil graph-device run-pair` command. Issue #89,
+  branch `feat/t-0132-s10-runtime-pair-cli`, Systems Implementer, eight SP, and
+  Sprint S-0003 own the bounded slice. The command admits exactly two ordered
+  Graph/seed pairs before Docker, runs the single-build S09 path, independently
+  revalidates both receipts, requires their common simulator SHA, and verifies
+  rejection before AXI. The first actual CLI checkpoint passes for five-point
+  seed 1 and vertical-three-point seed UINT32_MAX with simulator SHA-256
+  `d3fcc5b3def9f9c4cc22185e0cf49d2f3943a4cc5e510f4aebbdc93a468050b7`.
+  Seventy focused regressions, shell syntax, record, diff, secret-pattern, and
+  live queue checks pass. Exact-head PR review and integration remain. Stop
+  before more than two requests, persistent cache/service, new Graphs/opcodes,
+  RTL/ABI change, real UIO, board/FPGA, performance/resource, ASIC, silicon, or
+  product claims.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
