@@ -42,6 +42,7 @@ from .garden import (
 )
 from .graph_device_submit import render_submission
 from .graph_device_run import run as run_graph_device
+from .graph_device_runtime_pair import run_pair as run_graph_device_pair
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -379,6 +380,11 @@ def command_graph_device_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_graph_device_run_pair(args: argparse.Namespace) -> int:
+    print(run_graph_device_pair(args.graph, args.seed))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -527,6 +533,13 @@ def build_parser() -> argparse.ArgumentParser:
               "axi4lite-catalogue-sim preserves the S04 full-catalogue regression"),
     )
     graph_device_run.set_defaults(handler=command_graph_device_run)
+    graph_device_pair = graph_device_commands.add_parser(
+        "run-pair",
+        help="run exactly two admitted requests through one AXI4-Lite simulator build",
+    )
+    graph_device_pair.add_argument("--graph", action="append", required=True)
+    graph_device_pair.add_argument("--seed", action="append", type=int, required=True)
+    graph_device_pair.set_defaults(handler=command_graph_device_run_pair)
 
     sonatine_demo = subparsers.add_parser(
         "sonatine-demo", help="run the fixed Sonatine operator demo under QEMU"

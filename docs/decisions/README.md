@@ -76,3 +76,4 @@ rewrite it.
 | [ADR-0072](ADR-0072-vendor-neutral-rtl-export-precedes-board-integration.md) | Accepted | A deterministic vendor-neutral RTL bundle precedes every board-specific Graph-device integration |
 | [ADR-0073](ADR-0073-runtime-request-admission-stays-inside-the-frozen-catalogue.md) | Accepted | One prebuilt Linux runner admits only runtime requests inside the frozen Graph catalogue |
 | [ADR-0074](ADR-0074-runtime-admission-is-shared-by-simulation-and-uio.md) | Accepted | AXI4-Lite simulation and Linux UIO share one bounded runtime request admission boundary |
+| [ADR-0075](ADR-0075-operator-runtime-pair-stays-inside-the-frozen-catalogue.md) | Accepted | The operator CLI exposes exactly two runtime requests inside the frozen catalogue |

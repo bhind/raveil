@@ -28,6 +28,12 @@ resolves it.
   complexity remains unresolved; S09 deliberately does not introduce one or
   claim a measured startup improvement.
 
+- ADR-0075 exposes exactly two ordered requests through the operator CLI. The
+  trigger and contract for a larger batch, concurrent requests, a long-lived
+  simulator process, or a persistent compiled cache remain unresolved. S10
+  must not turn the fixed pair into an accidental scheduler or performance
+  claim.
+
 - If S03 passes its three external bounded DAGs, what additional discriminator
   is required before broadening the fixed address-selector alphabet or calling
   the executor generally installable? ADR-0064 deliberately stops at five

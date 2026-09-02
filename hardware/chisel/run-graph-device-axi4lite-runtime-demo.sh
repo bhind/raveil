@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
-test "$#" = 0 || { echo 'usage: run-graph-device-axi4lite-runtime-demo.sh' >&2; exit 2; }
+test "$#" = 8 && test "$1" = --graph && test "$3" = --seed \
+  && test "$5" = --graph && test "$7" = --seed \
+  || { echo 'usage: run-graph-device-axi4lite-runtime-demo.sh --graph PATH --seed UINT32 --graph PATH --seed UINT32' >&2; exit 2; }
+first_graph=$2
+first_seed=$4
+second_graph=$6
+second_seed=$8
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 artifact_parent=$repo_root/artifacts/graph_device_axi4lite_runtime_demo
 mkdir -p "$artifact_parent"
@@ -14,13 +20,13 @@ test "$(docker image inspect --format '{{index .Config.Labels "raveil.dockerfile
 image_id=$(docker image inspect --format '{{.Id}}' "$image")
 test "$image_id" = "$expected_image_id" || { echo 'error: cached image ID differs from reviewed immutable image' >&2; exit 1; }
 
-first=$session/five-point-seed-1
-second=$session/vertical-three-point-seed-4294967295
+first=$session/request-1
+second=$session/request-2
 rejected=$session/rejected-request
 mkdir "$first" "$second" "$rejected"
 cd "$repo_root"
-python3 -m raveil.graph_device_axi4lite_request prepare --output "$first" --graph contracts/graph_device_dags/five-point.json --seed 1 >/dev/null
-python3 -m raveil.graph_device_axi4lite_request prepare --output "$second" --graph contracts/graph_device_dags/vertical-three-point.json --seed 4294967295 >/dev/null
+python3 -m raveil.graph_device_axi4lite_request prepare --output "$first" --graph "$first_graph" --seed "$first_seed" >/dev/null
+python3 -m raveil.graph_device_axi4lite_request prepare --output "$second" --graph "$second_graph" --seed "$second_seed" >/dev/null
 cp -R "$first/." "$rejected/"
 python3 - "$rejected/uio-request.bin" <<'PY'
 from pathlib import Path
@@ -39,8 +45,7 @@ docker run --rm --network none --security-opt no-new-privileges=true --platform 
   --mount "type=bind,source=$session,target=/session" \
   --workdir /repo/hardware/chisel "$image_id" \
   ./run-graph-device-axi4lite-request-in-container.sh \
-  --reject /session/rejected-request /session/five-point-seed-1 \
-  /session/vertical-three-point-seed-4294967295 \
+  --reject /session/rejected-request /session/request-1 /session/request-2 \
   > "$session/container.stdout" 2> "$session/container.stderr"
 for evidence in "$first" "$second"; do
   : > "$evidence/container.stdout"
