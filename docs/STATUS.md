@@ -479,8 +479,8 @@ and private output/oracle SHA-256 is
 No persistent cache, real UIO, FPGA, performance, resource, ASIC, silicon, or
 product result follows.
 
-T-0132/S10 is active under Issue #89 on
-`feat/t-0132-s10-runtime-pair-cli`. ADR-0075 adds the operator-facing
+T-0132/S10 is canonical through PR #90, exact head `d70fe7d`, merge
+`c0c33db`, Closed Issue #89, and a Done Project item. ADR-0075 adds the operator-facing
 `graph-device run-pair` boundary for exactly two ordered Graph/seed pairs. Both
 are admitted before the lower runner starts. The CLI then confines the returned
 session path, revalidates both append-once receipts and their order, requires
@@ -488,9 +488,24 @@ one common simulator SHA, and checks that the rejected request produced no AXI
 transcript. The first actual CLI checkpoint passes for five-point seed 1 and
 vertical-three-point seed UINT32_MAX with simulator SHA-256
 `d3fcc5b3def9f9c4cc22185e0cf49d2f3943a4cc5e510f4aebbdc93a468050b7`.
-This remains an implementation candidate and RTL Simulation Functional
-evidence only. Seventy focused regressions plus shell syntax, record, diff,
-secret-pattern, and live queue checks pass; exact-head PR review remains.
+This remains RTL Simulation Functional evidence only. Seventy focused
+regressions plus shell syntax, record, diff, secret-pattern, and live queue
+checks pass.
+
+T-0138 completes the Planning-only RFC-0004/S01 KV260 transition packet under
+Issue #91 and branch `research/t-0138-kv260-transition`. Official AMD, Canonical
+and Linux sources support a tentative KV260 plus Ubuntu Server 24.04 arm64 path
+and a 32-bit PS-to-PL control connection. Vivado ML Standard 2025.1 is the
+recommended Windows-host pin because its official device table includes all
+Kria devices and states that the Standard edition does not require a license;
+Vivado 2026.1 is not the default because AMD now requires a valid license to
+launch it. The packet maps the current relative 16 KiB AXI4-Lite/UIO contract,
+separates physical-owner and agent actions, and freezes twelve readiness and
+FPGA-functional checks. It deliberately leaves the absolute address, clock,
+reset controller, device-tree binding, bitstream/deployment route and target
+package availability unassigned. No tool was installed, EULA accepted,
+hardware purchased or accessed, vendor source copied, or FPGA/performance
+claim created.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0128 bounded operator-to-RTL vertical MVP is canonical; no Product P0 is active and T-0044 physical research remains blocked**
+State: **T-0132/S10 operator-to-RTL simulation MVP is canonical; T-0138 freezes the KV260 transition packet while T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S09 plus active S10 operator runtime-pair CLI; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S10 plus T-0138 KV260 transition planning; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -750,6 +750,16 @@ CLI for exactly two ordered requests. It must pre-admit both, independently
 revalidate both receipts, and require one common simulator identity plus
 rejection-before-AXI. It remains one build per invocation and cannot expand
 into a general batch, cache, service, performance claim, or board work.
+
+T-0138 freezes the next transition decision without starting FPGA work. Its
+tentative reference is KV260, Ubuntu Server 24.04 arm64, and Vivado ML Standard
+2025.1 on a supported Windows 11 x86-64 host. It maps the unchanged 16 KiB
+relative AXI4-Lite top to a proposed 32-bit PS HPM control path, one PL clock,
+one reviewed active-low reset, one exact UIO map and the existing polling
+runtime. The later implementation task remains unallocated until the physical
+inventory, host/license/boot/target capability, current S07 source closure and
+ADR-0039 Project Manager/legal checks pass. Address, clock, reset, DT binding,
+bitstream and load route remain deliberately unassigned.
 
 ## No calendar claim
 

@@ -9,11 +9,13 @@ resolves it.
 ## Simulation-first device path
 
 - S07 proves that the current unbased AXI4-Lite top can be exported twice to a
-  byte-identical, source-bound SystemVerilog closure. Which reviewed KV260
-  clock/reset, absolute-address, device-tree/UIO, bitstream-identity, and
-  recovery contract may consume that bundle remains unresolved and requires
-  the ADR-0039 Project Manager/legal boundary before FPGA implementation or
-  evidence.
+  byte-identical, source-bound SystemVerilog closure. T-0138 narrows the
+  tentative target to KV260, Ubuntu Server 24.04 arm64 and license-free Vivado
+  ML Standard 2025.1 on a supported Windows 11 x86-64 host. The exact
+  clock/reset, absolute address, device-tree/UIO binding, bitstream/deployment
+  identity, target package availability and recovery procedure remain
+  unresolved. Checks 1--7 in the T-0138 packet and the ADR-0039 Project
+  Manager/legal review must pass before FPGA implementation or evidence.
 
 - ADR-0073 resolves only request-specific Linux runner rebuilding for the
   frozen three-Graph catalogue. Whether a production request bundle should use
