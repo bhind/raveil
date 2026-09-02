@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None after the T-0132/S08 implementation candidate completed review. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S09 |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected; real FPGA work remains behind the ADR-0039 review and an exact board packet. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -227,6 +227,22 @@ review and failure preservation do not consume the two-item delivery limit.
   Linux image build, unchanged S05 Verilator replay, record checker, diff
   check, and independent Security re-review pass. The exact-head PR is the
   integration boundary; Issue #85 reaches Done only after merge.
+
+- [x] **T-0132/S09** Reuse ADR-0073 runtime request admission in the existing
+  AXI4-Lite Verilator bridge and prove one compiled simulator binary can run
+  two different frozen-catalogue requests. Issue #87, branch
+  `feat/t-0132-s09-runtime-sim-demo`, Systems Implementer, eight SP, and Sprint
+  S-0003 own the bounded slice. One actual local demo builds once, produces
+  identical simulator SHA-256
+  `d3fcc5b3def9f9c4cc22185e0cf49d2f3943a4cc5e510f4aebbdc93a468050b7`
+  for five-point seed 1 and vertical-three-point seed UINT32_MAX, validates
+  both independent private oracles, and rejects a corrupt request before an
+  AXI transcript exists. Sixty-four focused regressions pass, and the ordinary
+  one-request CLI also passes with byte-equal output/oracle SHA-256
+  `fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`.
+  Exact-head PR review and integration remain. Stop before a persistent
+  cache/service, Graph or opcode expansion, RTL/ABI change, real UIO,
+  board/FPGA, performance/resource, ASIC, silicon, or product claims.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

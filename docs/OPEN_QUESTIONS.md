@@ -22,6 +22,12 @@ resolves it.
   races remains unresolved; S08 does not claim adversarial filesystem-race
   resistance.
 
+- ADR-0074 proves only that one locally compiled simulator can consume two
+  requests through the shared admission boundary. Whether a persistent warm
+  simulator cache or service is worth its invalidation, isolation, and receipt
+  complexity remains unresolved; S09 deliberately does not introduce one or
+  claim a measured startup improvement.
+
 - If S03 passes its three external bounded DAGs, what additional discriminator
   is required before broadening the fixed address-selector alphabet or calling
   the executor generally installable? ADR-0064 deliberately stops at five

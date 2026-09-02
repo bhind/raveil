@@ -460,6 +460,25 @@ only; no ARM-board run, real UIO result, FPGA, performance, resource, or
 product result exists. The change becomes canonical only through its exact-head
 pull-request merge.
 
+T-0132/S09 is active under Issue #87 on
+`feat/t-0132-s09-runtime-sim-demo`. ADR-0074 requires the existing AXI4-Lite
+Verilator bridge to consume the same request-root admission as Linux UIO before
+creating a transcript or model. The first actual demo checkpoint emits the
+unchanged RTL twice, compiles one simulator once, runs five-point seed 1 and
+vertical-three-point seed UINT32_MAX through that byte-identical executable,
+and validates both private outputs against their independent oracles. The
+simulator SHA-256 is
+`d3fcc5b3def9f9c4cc22185e0cf49d2f3943a4cc5e510f4aebbdc93a468050b7`.
+A corrupt-magic request is rejected before any AXI transcript exists. This is
+still an implementation candidate and `rtl-simulation-functional` evidence.
+Sixty-four focused regressions pass. The ordinary one-request CLI also passes
+for vertical-three-point seed 7; its receipt SHA-256 is
+`f71f13ea806a4d49a70aa45120dd1509baa7e191bbbbbce6646cd10f58c11a40`,
+and private output/oracle SHA-256 is
+`fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`.
+Exact-head review and integration remain, and no persistent cache, real UIO,
+FPGA, performance, resource, ASIC, silicon, or product result follows.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

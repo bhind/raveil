@@ -6,6 +6,7 @@
 #include "graph_device_runtime.h"
 #include "graph_device_affine_runtime.h"
 #include "graph_device_dag_runtime.h"
+#include "raveil_graph_device_request.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -52,14 +53,26 @@ class AxiBridge final : public raveil::graph_device::RegisterIo {
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 4) fail("usage: VGraphDeviceAxi4LiteTop EVIDENCE_ROOT GRAPH_ID SEED");
-  char* end = nullptr; const unsigned long parsed = std::strtoul(argv[3], &end, 10);
-  if (end == argv[3] || *end != '\0' || parsed > 0xffffffffUL) fail("seed must be uint32");
-  Verilated::commandArgs(argc, argv);
-  const std::filesystem::path evidence(argv[1]); std::ofstream trace(evidence / "axi-transcript.log", std::ios::trunc);
-  if (!trace) fail("transcript open");
-  VGraphDeviceAxi4LiteTop top; AxiBridge bridge(top, trace);
-  raveil::graph_device::Axi4LiteTransport transport(bridge, RAVEIL_AXI_EXEC_BASE, RAVEIL_AXI_CONFIG_BASE, RAVEIL_AXI_PROGRAM_BASE);
-  const int result = raveil::graph_device::run_selected_dag(transport, transport, transport, evidence, argv[2], static_cast<std::uint32_t>(parsed), std::cout, std::cerr);
-  top.final(); return result;
+  if (argc != 2) fail("usage: VGraphDeviceAxi4LiteTop REQUEST_ROOT");
+  try {
+    Verilated::commandArgs(argc, argv);
+    const std::filesystem::path evidence(argv[1]);
+    // Admission deliberately precedes trace creation and model construction:
+    // malformed host input cannot produce a simulated AXI transaction.
+    const auto admitted = raveil::graph_device::admit_graph_device_request(evidence);
+    std::ofstream trace(evidence / "axi-transcript.log", std::ios::trunc);
+    if (!trace) fail("transcript open");
+    VGraphDeviceAxi4LiteTop top; AxiBridge bridge(top, trace);
+    raveil::graph_device::Axi4LiteTransport transport(
+        bridge, RAVEIL_AXI_EXEC_BASE, RAVEIL_AXI_CONFIG_BASE,
+        RAVEIL_AXI_PROGRAM_BASE);
+    const int result = raveil::graph_device::run_selected_dag(
+        transport, transport, transport, evidence, admitted.graph_id,
+        admitted.seed, std::cout, std::cerr);
+    top.final();
+    return result;
+  } catch (const std::exception& error) {
+    std::cerr << "AXI4-Lite request bridge: " << error.what() << '\n';
+    return 1;
+  }
 }

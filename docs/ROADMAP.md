@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S08 remove request-specific Linux rebuilds inside the frozen catalogue; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S08 plus active S09 shared runtime-admission simulation; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -737,6 +737,13 @@ Graph/program alphabet, change RTL or an ABI, or satisfy any board gate.
 The reviewed S08 implementation passes host admission, ARM64 build, and
 unchanged S05 Verilator replay checks. It still does not satisfy a KV260 or
 FPGA gate.
+
+T-0132/S09 is the next simulation-first product slice. It reuses the S08
+request-root admission in the AXI4-Lite Verilator bridge and must demonstrate
+two different accepted requests through one compiled simulator plus rejection
+before AXI for malformed input. It may not create a persistent simulator
+service, broaden the catalogue, change RTL or an ABI, or promote evidence
+beyond RTL Simulation Functional.
 
 ## No calendar claim
 
