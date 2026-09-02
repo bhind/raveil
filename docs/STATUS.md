@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-29
+Last updated: 2026-09-02
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -294,6 +294,139 @@ Project item is Done. No delivery item is active after closeout.
 Descriptor/implementation digest promotion,
 arbitrary Graphs, Linux, absolute board mapping, KV260/FPGA, DMA/IRQ,
 performance, resources, Experience, and schema changes remain excluded.
+
+T-0132/S04 is a local-only implementation candidate after the owner explicitly
+rejected stopping at the stale HCI-09 boundary. Its narrow target is to reuse
+the accepted T-0123 transport-neutral three-Graph runtime through the accepted
+T-0132 AXI wrapper and expose that path as an explicit option on the existing
+`graph-device run` CLI. The default CLI path, three byte-frozen descriptors,
+all owned ABIs, `GraphDeviceAxi4LiteTop`, and the installed-program core remain
+unchanged. Tool safety rejected publishing the detailed work packet as a GitHub
+Issue without a new explicit external-disclosure approval; therefore no live
+Project item is active and no push is authorized. No S04 implementation or
+evidence result existed at kickoff.
+
+The local S04 candidate now implements that bridge without changing
+`GraphDeviceAxi4LiteTop`, the nested core, the three frozen descriptors, or any
+owned ABI. Forty-eight focused host tests pass. Fixed offline Docker/Verilator
+run `artifacts/graph_device_axi4lite_selected/run.jlX28a` executes the three
+catalogue Graphs through 11,444 external AXI4-Lite transactions: four runs
+complete, one cancels without output publication, the factory-default restart
+completes, and all eight malformed/busy cases fault. All four published private
+outputs equal their independent oracles. Receipt SHA-256 is
+`36744413b00b1a2ed554442e2662b72ce76832f1da87e58ec9b41e9180632798`;
+transcript SHA-256 is
+`e266bb9ac12a97613e3c041aff73b012fa421fe40a4077e21ad83ae607e6db5b`;
+the double-emitted RTL manifest remains
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+The top-level CLI also passes end to end as `run.yhxZKj` and labels the admitted
+Graph/seed separately from the fixed-catalogue execution scope. Independent
+exact-head Tester review passes all 48 focused regressions, receipt replay, and
+unit-test isolation. Exact-head Security re-review reports High 0, Medium 0,
+with one accepted Low: the same local filesystem owner can delete and recreate
+the private bundle. This is a reviewed local candidate, not an integrated
+result. Evidence is
+`rtl-simulation-functional`; performance is not measured. The finalizer now
+requires the exact canonical transcript identity and schema, recursive
+link/special-file rejection, evidence allowlists, and the ABI identity export.
+Its exclusive-create receipt is a local writer boundary, not an immutable
+same-owner or external seal.
+
+T-0132/S05 is now a stacked local implementation candidate based on reviewed
+S04 commit `0b248ed`. Its single purpose is to make the existing CLI request
+semantic real on the AXI path: the admitted canonical Graph and uint32 seed
+must be the Graph and input executed by unchanged `run_selected_dag` through
+S04's `AxiBridge`. S04's fixed-catalogue run remains a regression. No RTL,
+owned ABI, descriptor, compiler opcode, Linux, board, DMA/IRQ, performance,
+resource, or Experience boundary may change. No S05 result exists yet, and no
+live Project item or remote push is authorized under the current external-
+disclosure boundary.
+
+The local S05 candidate now executes the admitted request itself. Fifty-three
+focused request/run/S04/default/DAG tests pass. Fixed offline
+Docker/Verilator run `artifacts/graph_device_axi4lite_request/run.SxZzYl`
+executes `vertical-three-point` seed 7 through 2,976 complete AXI4-Lite records;
+its 256-word private output equals the direct oracle under output SHA-256
+`fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`.
+Top-level CLI run `run.TEtnsC` executes
+`compact-horizontal-three-point` seed 4,294,967,295 through 1,632 records and
+matches oracle/output SHA-256
+`cbf6b34838b34e76286699d3ea333575a16beecad826647ee9b2c7ebadd0ef28`.
+Both use RTL manifest
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`
+and simulator
+`e8f5b2d6ab03cc6bc737124f67b13395aa6f2b1a20130aff7c0a4d10962cc833`.
+The first RTL attempt failed before execution because the fixed container lacks
+Python; Graph identity parsing was moved to the admitted host preparation and
+the inner runner now receives only Graph ID and seed. Evidence is
+`rtl-simulation-functional`; performance is not measured. Exact-head Tester
+review passes both artifacts and all 53 focused regressions. Exact-head Security
+review reports High 0 and Medium 0; the documented same-owner receipt limitation
+remains Low. This is a reviewed local candidate, not an integrated result.
+
+T-0132/S06 is the active local physicalization slice stacked on the reviewed
+S05 candidate. ADR-0071 accepts only a checked relative-aperture adapter and a
+Linux UIO character-device mapping of the existing 16 KiB window. The
+transport must feed unchanged `run_selected_dag`; Linux receives no admission,
+publication, Experience, recovery, or evidence-promotion authority. No S06
+implementation result, Linux build result, UIO device run, FPGA result, or
+hardware claim exists at kickoff. The slice stops before absolute mapping,
+`/dev/mem`, kernel modules, board tooling, DMA/IRQ, cache coherence, and actual
+FPGA execution.
+
+The local S06 candidate now implements that bounded route. One shared adapter
+drives both the existing Verilator AXI bridge and a Linux-only UIO mapping;
+execution, affine, and program namespaces are independently bounded. The UIO
+runner accepts only `/dev/uioN` plus one prepared request root, validates exact
+compiled request/JSON/input bytes before opening the device, binds the opened
+major:minor and 16 KiB map size to sysfs, and uses the unchanged selected DAG
+runtime. Runtime outputs now use exclusive no-follow creation rather than
+truncation.
+
+The ARM64 Linux image builds warning-free with GNU C++17 and runs the common
+address/bounds test plus Linux mapping/path negatives. One hundred ten focused
+Graph/AXI/DAG/UIO tests pass. Final exact-source RTL replay
+`artifacts/graph_device_axi4lite_request/run.Glve09` retains 2,976 AXI records,
+transcript SHA-256
+`6bef1cdcb4414a923ae42f7d8a256e966a63e8dacfdd7fcb6612ef113d1da0f8`,
+output/oracle SHA-256
+`fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`,
+and RTL manifest
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+Its request-specific generated header and receipt hash to
+`672043d4479758ae5cd20fff5f0196f19267cd856586cf94c461a6af342628e9`
+and `e638b2e75047a722b9856ed947eddc6c06b68b5700b5ec90d1c9b906b7045a0f`.
+This proves preserved RTL-simulation semantics and an ARM64 host transport
+build only. No real UIO device, ARM board execution, FPGA, bitstream,
+performance, resource, or product result exists. Final ARM64 build image ID is
+`sha256:ac1292a74048c8260543f3e34f920676648144b5c1c07e2daf8a764bb270e6e5`.
+Independent exact-head Security review reports High 0 and Medium 0; the
+remaining Low is that host negatives do not exercise adversarial race
+injection. A UIO zero return is deliberately labelled only
+`linux-uio-transport-unverified` with Graph output unpromoted and RTL/hardware
+not verified.
+
+T-0132/S07 now supplies the first deterministic handoff of the current
+Graph-device top without adopting a board toolchain. The local exporter runs
+the exact repository-owned Chisel closure twice in the existing pinned,
+offline Linux/amd64 image, requires byte-identical SystemVerilog manifests,
+copies only the complete `.sv` closure, and binds source, three ABI identities,
+relative aperture, toolchain, immutable image, and claim boundary in an
+exclusively published local bundle. Standalone verification recomputes every
+tree/file digest and rejects current-source, ABI, aperture, receipt, symlink,
+special-file, or replacement drift.
+
+The actual local bundle is
+`artifacts/graph_device_axi4lite_export/s07-candidate-v2`. Its manifest and
+receipt SHA-256 values are
+`e07662214af42343db8714965310e66476b04bbfce4b4ab5b55b1a84a3e9481d`
+and `6f2e5622ec0d42939999df6a842ee4a49f9e5e2acde5e4e13923f5ee87aef45c`;
+its double-emitted RTL manifest remains
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+This is only `rtl-export-functional-prerequisite`: board and absolute base are
+unassigned, performance is not measured, and no Vivado, KV260, UIO-device,
+FPGA, timing, resource, silicon, or product result exists. S04--S07 remain a
+stacked local candidate series rather than integrated repository state.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

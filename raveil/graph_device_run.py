@@ -23,6 +23,16 @@ _MARKER = re.compile(
     r"path=(artifacts/graph_device_selected/run\.[A-Za-z0-9]{6}) "
     r"private=1 publication=0$"
 )
+_AXI_MARKER = re.compile(
+    r"^GraphDevice-AXI4LITE-SELECTED-EVIDENCE-V1 "
+    r"path=(artifacts/graph_device_axi4lite_selected/run\.[A-Za-z0-9]{6}) "
+    r"private=1 publication=0$"
+)
+_AXI_REQUEST_MARKER = re.compile(
+    r"^GraphDevice-AXI4LITE-REQUEST-EVIDENCE-V1 "
+    r"path=(artifacts/graph_device_axi4lite_request/run\.[A-Za-z0-9]{6}) "
+    r"private=1 publication=0$"
+)
 _BOUNDARIES = (
     "partial", "order", "duplicate", "opcode", "undefined", "reserved",
     "missing_store", "busy",
@@ -176,9 +186,121 @@ def _render(receipt: dict[str, Any], trace: list[dict[str, Any]], descriptor: di
     ))
 
 
-def run(graph: str, seed: int, repository: Path | None = None) -> str:
+def _axi_evidence_path(marker: str, repository: Path) -> Path:
+    match = _AXI_MARKER.fullmatch(marker)
+    if match is None:
+        raise GraphDeviceRunError("AXI4-Lite runner marker is invalid")
+    try:
+        root = repository.resolve(strict=True)
+        candidate = root / Path(match.group(1))
+        for parent in (
+            root / "artifacts",
+            root / "artifacts/graph_device_axi4lite_selected",
+            candidate,
+        ):
+            if parent.is_symlink():
+                raise GraphDeviceRunError("AXI4-Lite evidence path contains a symbolic link")
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(root)
+    except (OSError, ValueError) as error:
+        raise GraphDeviceRunError("AXI4-Lite evidence path is invalid") from error
+    if resolved != candidate or not resolved.is_dir():
+        raise GraphDeviceRunError("AXI4-Lite evidence path is unsafe")
+    return resolved
+
+
+def _run_axi4lite(repository: Path, submission: dict[str, Any]) -> str:
+    """Run the frozen catalogue through the explicit AXI4-Lite simulation transport."""
+    from .graph_device_axi4lite_selected import GraphDeviceAxi4LiteSelectedError, finalize
+    runner = repository / "hardware/chisel/run-graph-device-axi4lite-selected.sh"
+    try:
+        result = subprocess.run([str(runner)], cwd=repository, text=True,
+                                encoding="utf-8", errors="strict", capture_output=True,
+                                check=False)
+    except (OSError, UnicodeError) as error:
+        raise GraphDeviceRunError(f"AXI4-Lite runner could not start: {error}") from error
+    markers = [line for line in result.stdout.splitlines()
+               if line.startswith("GraphDevice-AXI4LITE-SELECTED-EVIDENCE-V1")]
+    if result.returncode != 0 or len(markers) != 1:
+        raise GraphDeviceRunError("AXI4-Lite runner failed")
+    evidence = _axi_evidence_path(markers[0], repository)
+    try:
+        receipt = finalize(evidence, verify_existing=True)
+    except GraphDeviceAxi4LiteSelectedError as error:
+        raise GraphDeviceRunError(str(error)) from error
+    return "\n".join((
+        "GraphDevice-AXI4LITE-RUN-V1 status=PASS graphs=3",
+        f"Admission graph={submission['graph_id']} seed={submission['seed']}",
+        "Execution scope=frozen-catalogue (not one selected invocation)",
+        "Transport=axi4lite-catalogue-sim", "RTL=PASS", "Oracle=PASS",
+        "Private output=PASS", "Cancel=PASS", "Factory restart=PASS",
+        f"Evidence class={receipt['evidence_class']}",
+        f"Performance={receipt['performance']}",
+    ))
+
+
+def _axi_request_evidence_path(marker: str, repository: Path) -> Path:
+    match = _AXI_REQUEST_MARKER.fullmatch(marker)
+    if match is None:
+        raise GraphDeviceRunError("AXI4-Lite request runner marker is invalid")
+    try:
+        root = repository.resolve(strict=True)
+        candidate = root / Path(match.group(1))
+        for parent in (root / "artifacts", root / "artifacts/graph_device_axi4lite_request", candidate):
+            if parent.is_symlink():
+                raise GraphDeviceRunError("AXI4-Lite request evidence contains a symbolic link")
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(root)
+    except (OSError, ValueError) as error:
+        raise GraphDeviceRunError("AXI4-Lite request evidence path is invalid") from error
+    if resolved != candidate or not resolved.is_dir():
+        raise GraphDeviceRunError("AXI4-Lite request evidence path is unsafe")
+    return resolved
+
+
+def _run_axi4lite_request(repository: Path, submission: dict[str, Any]) -> str:
+    """Execute this admitted pair, rather than S04's regression catalogue."""
+    from .graph_device_axi4lite_request import GraphDeviceAxi4LiteRequestError, finalize
+    runner = repository / "hardware/chisel/run-graph-device-axi4lite-request.sh"
+    try:
+        result = subprocess.run(
+            [str(runner), "--graph", submission["graph_path"], "--seed", str(submission["seed"])],
+            cwd=repository, text=True, encoding="utf-8", errors="strict", capture_output=True, check=False,
+        )
+    except (OSError, UnicodeError) as error:
+        raise GraphDeviceRunError(f"AXI4-Lite request runner could not start: {error}") from error
+    markers = [line for line in result.stdout.splitlines() if line.startswith("GraphDevice-AXI4LITE-REQUEST-EVIDENCE-V1")]
+    if result.returncode != 0 or len(markers) != 1:
+        raise GraphDeviceRunError("AXI4-Lite request runner failed")
+    evidence = _axi_request_evidence_path(markers[0], repository)
+    try:
+        receipt = finalize(evidence, verify_existing=True)
+    except GraphDeviceAxi4LiteRequestError as error:
+        raise GraphDeviceRunError(str(error)) from error
+    if receipt["submission"] != submission:
+        raise GraphDeviceRunError("AXI4-Lite request receipt does not bind requested graph and seed")
+    return "\n".join((
+        "GraphDevice-AXI4LITE-RUN-V1 status=PASS graphs=1",
+        f"Admission graph={submission['graph_id']} seed={submission['seed']}",
+        "Execution scope=one-admitted-invocation", "Transport=axi4lite-sim",
+        "RTL=PASS", "Oracle=PASS", "Private output=PASS", "Rejected matrix=PASS",
+        f"Evidence class={receipt['evidence_class']}", f"Performance={receipt['performance']}",
+    ))
+
+
+def run(graph: str, seed: int, repository: Path | None = None, *, transport: str = "selected-rtl") -> str:
     """Run the lower selected runner and present only revalidated private evidence."""
     repo = repository or _root()
+    if transport in {"axi4lite-sim", "axi4lite-catalogue-sim"}:
+        # Admission is mandatory for both the one-request S05 path and the
+        # explicit S04 catalogue regression: arbitrary JSON is never work.
+        try:
+            submission = admit(graph, seed, repo)
+        except ValueError as error:
+            raise GraphDeviceRunError(str(error)) from error
+        return _run_axi4lite_request(repo, submission) if transport == "axi4lite-sim" else _run_axi4lite(repo, submission)
+    if transport != "selected-rtl":
+        raise GraphDeviceRunError("graph-device transport is unsupported")
     runner = repo / "hardware/chisel/run-graph-device-selected.sh"
     try:
         result = subprocess.run(

@@ -375,7 +375,7 @@ def command_graph_device_submit(args: argparse.Namespace) -> int:
 
 
 def command_graph_device_run(args: argparse.Namespace) -> int:
-    print(run_graph_device(args.graph, args.seed))
+    print(run_graph_device(args.graph, args.seed, transport=args.transport))
     return 0
 
 
@@ -520,6 +520,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     graph_device_run.add_argument("--graph", required=True)
     graph_device_run.add_argument("--seed", type=int, required=True)
+    graph_device_run.add_argument(
+        "--transport", choices=("selected-rtl", "axi4lite-sim", "axi4lite-catalogue-sim"), default="selected-rtl",
+        help=("selected-rtl preserves the default single-Graph path; "
+              "axi4lite-sim executes the admitted request through AXI4-Lite; "
+              "axi4lite-catalogue-sim preserves the S04 full-catalogue regression"),
+    )
     graph_device_run.set_defaults(handler=command_graph_device_run)
 
     sonatine_demo = subparsers.add_parser(

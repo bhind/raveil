@@ -1,8 +1,10 @@
 CC ?= cc
+CXX ?= c++
 CFLAGS ?= -std=c11 -O2 -Wall -Wextra -Werror
+CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra -Werror
 CPPFLAGS := -Iinclude -I../contracts/include
 BUILD := build
-.PHONY: all contracts-check smoke clean
+.PHONY: all contracts-check smoke graph-device-uio clean
 all: $(BUILD)/raveil-linuxd $(BUILD)/raveilctl
 $(BUILD):
 	mkdir -p $@
@@ -25,5 +27,13 @@ smoke: all
 	  test "$$(stat -c %a "$$XDG_RUNTIME_DIR/raveil-driver.sock")" = 600; \
 	  $(BUILD)/raveilctl; wait $$daemon; \
 	  test ! -e "$$XDG_RUNTIME_DIR/raveil-driver.sock"
+graph-device-uio: $(BUILD)/raveil-graph-device-uio-run
+$(BUILD)/raveil-graph-device-uio-run: src/raveil-graph-device-uio-run.cpp src/raveil_graph_device_uio.cpp ../hardware/chisel/graph_device_runtime.cpp ../hardware/chisel/graph_device_affine_runtime.cpp ../hardware/chisel/graph_device_dag_runtime.cpp | $(BUILD)
+	test -n "$(GENERATED_DIR)"
+	test -f "$(GENERATED_DIR)/graph_device_abi_generated.h"
+	test -f "$(GENERATED_DIR)/graph_device_affine_generated.h"
+	test -f "$(GENERATED_DIR)/graph_device_dag_generated.h"
+	test -f "$(GENERATED_DIR)/graph_device_uio_request_generated.h"
+	$(CXX) -Iinclude -I../hardware/chisel -I"$(GENERATED_DIR)" $(CXXFLAGS) $^ -o $@
 clean:
 	rm -rf $(BUILD)

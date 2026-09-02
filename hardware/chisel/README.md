@@ -29,6 +29,27 @@ but not Linux aarch64. Docker therefore uses CPU emulation for this first
 functional smoke. This is not a performance environment; an arm64-native
 firtool build is a separate reproducibility/cost decision.
 
+## Deterministic Graph-device RTL handoff
+
+T-0132/S07 exports the current unbased `GraphDeviceAxi4LiteTop` closure without
+running a board or vendor tool. From the repository root, choose a new path
+strictly below `artifacts/`:
+
+```sh
+mkdir -p artifacts/graph_device_axi4lite_export
+./hardware/chisel/export-graph-device-axi4lite-rtl.sh \
+  artifacts/graph_device_axi4lite_export/my-run
+./hardware/chisel/export-graph-device-axi4lite-rtl.sh --verify \
+  artifacts/graph_device_axi4lite_export/my-run
+```
+
+The exporter uses only the matching cached offline image, elaborates twice,
+requires byte-identical SystemVerilog manifests, and publishes an exclusively
+created source/ABI/aperture/toolchain-bound bundle. Success says
+`absolute_base=unassigned`, `board=unassigned`, and
+`evidence=rtl-export-functional-prerequisite`. It is not Vivado, synthesis,
+FPGA execution, timing/resource, or performance evidence.
+
 Pinned direct dependencies:
 
 - Eclipse Temurin 17 container tag `eclipse-temurin:17-jdk-jammy`;

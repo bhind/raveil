@@ -24,6 +24,40 @@ rmdir "$runtime_dir"
 The harness deliberately has no network listener, root requirement, kernel
 module, `ioctl`, `mmap`, DMA, MMIO, interrupt, or filesystem-data operation.
 
+## Bounded Graph-device UIO transport (provisional)
+
+`raveil-graph-device-uio-run` is deliberately separate from the socket
+harness.  On a Linux system with a board-specific `/dev/uioN` already exposed,
+it maps only UIO map 0 as a fixed 16 KiB relative register aperture.  It takes
+no physical address, never opens `/dev/mem`, and implements neither DMA, IRQ,
+cache management nor a kernel module.  A regular file or anonymous mapping is
+not an accepted device and cannot produce a Graph execution claim.
+
+Build the optional Linux-only runner:
+
+```sh
+python3 -m raveil.graph_device_axi4lite_request prepare \
+  --output "$evidence" \
+  --graph contracts/graph_device_dags/vertical-three-point.json --seed 7
+make -C linux graph-device-uio GENERATED_DIR="$evidence"
+linux/build/raveil-graph-device-uio-run \
+  /dev/uioN "$evidence"
+```
+
+The selected device must have `/sys/class/uio/uioN/maps/map0/size` equal to
+`0x4000`; the runner rejects every other span before mapping it.
+
+An ARM64 Linux build can be reproduced on the development host with:
+
+```sh
+docker build -f linux/Dockerfile.graph-device-uio \
+  -t raveil-graph-device-uio:local .
+```
+
+The command is only a host transport.  Successful opening is not FPGA,
+bitstream, performance, or authority evidence; actual board enablement remains
+a separate reviewed gate.
+
 From the repository root, `docker build -f linux/Dockerfile -t
 raveil-linux-driver .` builds the Linux-only sources and shared job contract.
 A non-root smoke is:

@@ -1,7 +1,7 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-08-26
+Last updated: 2026-09-02
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **T-0122 device MVP and T-0123/S01/S02 plus S03's bounded three-Graph primary evidence pass in RTL simulation; no FPGA or silicon evidence exists**
+State: **The T-0132/S01--S07 local line reaches a deterministic unbased RTL-export prerequisite; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -721,6 +721,13 @@ matched RISC-V configurations under a common cache, memory, workload,
 functional-resource, and correctness envelope. Rocket/BOOM remain candidate
 references, not adopted product code, ARM equivalents, or proof that OoO can
 be removed.
+
+T-0132/S07 exports the current 16 KiB relative AXI4-Lite Graph-device top as a
+double-emitted, source-bound SystemVerilog bundle. This closes only the
+vendor-neutral RTL handoff prerequisite. Board selection, an absolute address,
+clock/reset and pin integration, Vivado outputs, device-tree/UIO binding, and
+real output-oracle equality remain later separately reviewed FPGA work under
+ADR-0039 and ADR-0071.
 
 ## No calendar claim
 

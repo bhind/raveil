@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-08-31
+Last updated: 2026-09-02
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None selected. |
-| **P1 — next** | Start only after its named P0 dependency passes. | None selected. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0132/S07 local deterministic RTL-export candidate. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0132/S04 through S06 remain stacked local integration candidates; remote kickoff pending. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -135,6 +135,79 @@ review and failure preservation do not consume the two-item delivery limit.
   #79 merged as canonical commit
   `fc52e47a2770b5751b99117816bb87dff2582c01`. Issue #78 is Closed and its
   Project item is Done. This completes only T-0132/S03.
+
+- [ ] **T-0132/S04** Connect the existing three-Graph operator/runtime to the
+  accepted AXI4-Lite transport in simulation. Preserve the default
+  `graph-device run` path and add one explicit AXI simulation transport that
+  reuses the transport-neutral DAG runtime to install affine/program payloads,
+  stage input, execute, cancel, restart, and validate private output for only
+  the three byte-frozen catalogue descriptors. Bind exact sources and unchanged
+  ABIs, double RTL emission, simulator/environment/toolchain identity, the full
+  external AXI transcript, and independent oracles in an append-once private
+  receipt. "Append-once" here means writer-enforced exclusive creation, not an
+  immutable seal against the same local filesystem owner. Stop before RTL-core,
+  ABI/schema, arbitrary-Graph/opcode,
+  Linux/UIO/driver, board/FPGA, DMA/IRQ, performance/resource, Experience, or
+  external-source changes. The owner explicitly required bounded continuation
+  after the stale HCI-09 stop on 2026-08-31. External Issue/Project publication
+  was separately denied by the tool safety boundary, so the current work is a
+  local candidate on `feat/t-0132-s04-axi-selected`, not an active Project item
+  and not authorized for push until the owner explicitly approves that external
+  disclosure.
+  The local candidate passes primary RTL simulation, but its CLI option is
+  intentionally catalogue-scoped: `--graph` and `--seed` remain admission
+  inputs, while one invocation verifies the complete frozen catalogue. A
+  separately promoted later slice is required for selected per-request AXI
+  execution; S04 must not imply that behavior.
+
+- [ ] **T-0132/S05** Connect one admitted `--graph`/`--seed` request to the
+  existing AXI4-Lite simulation transport. Reuse S04's bridge and unchanged
+  `run_selected_dag`; prepare only repository-canonical descriptor/program,
+  deterministic input, independent direct oracle, and frozen installer
+  negatives. Preserve S04's full-catalogue transport as a regression and make
+  the default `selected-rtl` path byte-compatible. Bind the actual requested
+  Graph and seed, source/ABI/RTL/simulator/toolchain identities, strict complete
+  AXI transcript, private output, and oracle in a writer-exclusive local
+  receipt. Stop before RTL/ABI/schema/descriptor changes, arbitrary Graph or
+  opcode support, Linux/UIO/driver, absolute mapping, board/FPGA, DMA/IRQ,
+  performance/resource claims, Experience, or external-source work. This is a
+  stacked local candidate on `feat/t-0132-s05-axi-request` based on reviewed
+  local S04 commit `0b248ed`; it has no live Project item and is not authorized
+  for remote push without explicit external-disclosure approval.
+
+- [ ] **T-0132/S06** Reuse the S05 transport-neutral runtime through one Linux
+  UIO mapping without changing Graph semantics, any owned ABI, or the RTL.
+  ADR-0071 limits the implementation to a shared checked relative-aperture
+  adapter plus an explicitly supplied `/dev/uioN` character-device backend
+  that maps exactly 16 KiB at UIO offset zero. Acceptance requires exact fake
+  register-I/O address/bounds tests, anonymous-mapping lifetime tests,
+  fail-closed path/type/span negatives, a warning-free C++17 Linux build, and
+  an unchanged S05 Verilator replay after the adapter refactor. A fake mapping
+  must never report end-to-end Graph success. Stop before absolute physical
+  addresses, `/dev/mem`, kernel modules, device tree, Vivado/bitstream, XRT,
+  DMA, IRQ, cache coherence, FPGA execution, performance/resources, arbitrary
+  Graphs, Experience, or evidence promotion. This is a local stacked slice on
+  `feat/t-0132-s06-linux-uio-transport`; no remote Issue, Project transition,
+  push, or FPGA claim is authorized by the local work. The local candidate now
+  passes a warning-free ARM64 Linux build, 110 focused regressions, exact
+  request-binding/path negatives, and an unchanged-semantic S05 RTL replay at
+  `run.Glve09`. It remains unchecked because the stacked S04/S05/S06 series is
+  not integrated or remotely coordinated, and no real UIO/FPGA run exists.
+
+- [ ] **T-0132/S07** Export the current `GraphDeviceAxi4LiteTop` as one
+  deterministic, vendor-neutral SystemVerilog bundle before any board-specific
+  wrapper is attempted. ADR-0072 requires two byte-identical Chisel emissions,
+  a complete relative-aperture/ABI/source/toolchain/image receipt, exclusive
+  publication below local `artifacts/`, and standalone current-source
+  verification. The bundle deliberately leaves board and absolute base
+  unassigned and makes only an `rtl-export-functional-prerequisite` claim.
+  Stop before Vivado, XSA/XCLBIN, device tree, UIO execution, clocks/pins,
+  FPGA resources/timing, or hardware success. The local candidate on
+  `feat/t-0132-s07-rtl-export` emits and verifies
+  `artifacts/graph_device_axi4lite_export/s07-candidate-v2`; its RTL manifest is
+  byte-identical to S01--S06 at SHA-256
+  `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+  It remains unchecked until the stacked local series is integrated.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

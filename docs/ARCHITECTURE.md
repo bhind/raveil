@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-24
+Last updated: 2026-09-02
 
 ## Four-plane adaptive Harvard model
 
@@ -381,6 +381,82 @@ evidence binds the complete external AXI transaction transcript; the harness
 holds one authorized output R response and holds an admitted cancel B long
 enough for core completion, then verifies that post-B cancel still suppresses
 publication.
+
+T-0132/S04 adds a host-side AXI simulation adapter without changing the S03
+wrapper, core, or any owned ABI. One C++ bridge implements the existing
+transport-neutral execution, affine-install, and program-install interfaces by
+issuing only external AXI4-Lite reads and writes into the three relative
+windows. The unchanged DAG runtime then executes the frozen three-Graph
+catalogue, including four completed invocations, one cancellation, one
+factory-default restart through the runtime's execution reset, and the eight installer rejection cases, against one
+emitted RTL image. A private finalizer binds the complete AXI transcript,
+double RTL elaboration, simulator, toolchain, source set, independent oracles,
+and output hashes in an exclusively created local receipt. The writer refuses
+replacement, but the same filesystem owner can delete and recreate the private
+bundle; this is not an immutable external seal.
+
+The explicit `graph-device run --transport axi4lite-sim` option preserves the
+existing Graph path and seed as a fail-closed admission request, but S04 runs
+the complete fixed catalogue rather than claiming that the requested pair is a
+single selected AXI invocation. The CLI says so directly. A later slice must
+separately connect per-request selection if product operation requires that
+semantics. S04 remains RTL-simulation-functional evidence with performance not
+measured; it is not Linux/UIO, a driver, an absolute address assignment,
+DMA/IRQ, FPGA/KV260, general Graph execution, or production security.
+
+T-0132/S05 makes per-request semantics explicit without changing the hardware
+boundary. The default `selected-rtl` path remains the pre-AXI direct Verilator
+adapter; `axi4lite-catalogue-sim` names S04's fixed full-catalogue regression;
+and `axi4lite-sim` now passes the admitted repository descriptor identity and
+uint32 seed to unchanged `run_selected_dag` through a second thin instance of
+the same three-interface AXI bridge. Graph choice remains in the host runtime,
+not the bridge or RTL. The request finalizer recomputes admission, deterministic
+input, compiled program, affine payload, and direct oracle. It requires the
+fixed 507-record malformed/busy prefix plus an exact request-dependent suffix:
+reset, affine/program installation, 324 staged input words, start, terminal
+status sequence, and 256 private output reads. All records remain external
+AXI4-Lite transactions.
+
+The local receipt binds that semantic trace, request, private output, oracle,
+sources, generated inputs, owned ABIs, double RTL elaboration, simulator,
+toolchain, and fixed offline environment. As in S04, exclusive creation is not
+an immutable seal against the same filesystem owner. This remains a three-
+descriptor, three-opcode, RTL-simulation-functional path; it does not establish
+arbitrary Graph support, Linux/UIO or a driver, absolute mapping, FPGA/KV260,
+DMA/IRQ, performance, resources, production security, or silicon behavior.
+
+T-0132/S06 extracts the address calculation from the Verilator bridge into one
+transport adapter over a minimal 32-bit `RegisterIo`. It alone maps execution,
+affine-install, and program-install word offsets into the ADR-0067 namespace
+bases and rejects overflow or namespace crossing before I/O. The Verilator
+backend still emits the same external AXI transactions. A second backend opens
+only an explicit `/dev/uioN`, binds its `fstat` device identity to sysfs, checks
+map 0 is exactly 16 KiB, and exposes aligned volatile words at relative offset
+zero. Neither backend contains Graph-selection logic.
+
+The Linux runner is compiled for one prepared request. A generated header
+freezes the exact request record, canonical JSON, deterministic input bytes,
+catalogue Graph, and seed; every corresponding file must match byte-for-byte
+before the UIO device is opened. The unchanged `run_selected_dag` then owns
+installation and execution. Output creation is exclusive and no-follow, so an
+existing file or symlink cannot be truncated. This is a host transport build,
+not a dynamic admission service, driver authority, or hardware result. No
+absolute base, `/dev/mem`, DMA/IRQ, cache policy, device tree, bitstream, FPGA,
+or performance boundary is introduced. The UIO executable captures rather
+than forwards the shared runtime's simulation summary and emits only
+`linux-uio-transport-unverified`, `graph_output=unpromoted`, and explicit
+not-verified RTL/hardware labels.
+
+T-0132/S07 places a deterministic RTL-export boundary after the same unbased
+AXI4-Lite top and before every board-specific wrapper. It elaborates the exact
+Chisel source closure twice in one immutable offline environment and admits a
+bundle only when the two SystemVerilog manifests are byte-identical. The
+bundle contains the `.sv` closure, relative-aperture header, ABI identities,
+toolchain identity, source-bound receipt, and recursive manifest. It contains
+no absolute address, clock/pin constraint, device tree, bitstream container,
+vendor project, or UIO success evidence. Thus a future KV260 adapter may
+consume a fixed RTL handoff without allowing Vivado or a board shell to become
+Graph, admission, execution, or evidence authority.
 
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;

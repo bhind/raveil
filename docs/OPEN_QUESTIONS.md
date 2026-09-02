@@ -1,12 +1,19 @@
 # Open questions
 
-Last updated: 2026-08-26
+Last updated: 2026-09-02
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
 resolves it.
 
 ## Simulation-first device path
+
+- S07 proves that the current unbased AXI4-Lite top can be exported twice to a
+  byte-identical, source-bound SystemVerilog closure. Which reviewed KV260
+  clock/reset, absolute-address, device-tree/UIO, bitstream-identity, and
+  recovery contract may consume that bundle remains unresolved and requires
+  the ADR-0039 Project Manager/legal boundary before FPGA implementation or
+  evidence.
 
 - If S03 passes its three external bounded DAGs, what additional discriminator
   is required before broadening the fixed address-selector alphabet or calling
