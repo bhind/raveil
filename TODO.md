@@ -278,7 +278,7 @@ review and failure preservation do not consume the two-item delivery limit.
   purchase, vendor-source copying, bitstream generation, board access, FPGA
   evidence, or performance/resource/timing claims.
 
-- [ ] **T-0139** Add the read-only KV260 readiness preflight before any UIO
+- [x] **T-0139** Add the read-only KV260 readiness preflight before any UIO
   device access. Issue #93, branch `feat/t-0139-kv260-readiness-preflight`,
   Systems Implementer, five SP, Sprint S-0003, and Target Host Observation
   evidence own only the bounded Python inspector, CLI, tests, Linux guidance,
@@ -287,7 +287,10 @@ review and failure preservation do not consume the two-item delivery limit.
   `/dev/uioN` character device and an aligned 0x4000-byte map 0. It reads only
   fixed procfs/sysfs properties and uses `lstat`; it must not open or map the
   device, issue MMIO, load a bitstream, mutate the host, assign board details,
-  or make FPGA/performance/resource claims.
+  or make FPGA/performance/resource claims. Seven focused tests, 131
+  Graph-device regressions, bytecode compilation, CLI help, the record checker,
+  diff check, and live one-item queue audit pass. PR #94 is the integration
+  vehicle for Issue #93.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

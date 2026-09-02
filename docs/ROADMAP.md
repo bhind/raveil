@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S10 plus T-0138 KV260 transition planning; T-0139 target preflight is active; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S10 plus T-0138 KV260 transition planning and the T-0139 read-only target preflight; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
