@@ -16,12 +16,11 @@ image_id=$(docker image inspect --format '{{.Id}}' "$image")
 test "$image_id" = "$expected_image_id" || { echo 'error: cached image ID differs from reviewed immutable image' >&2; exit 1; }
 cd "$repo_root"
 python3 -m raveil.graph_device_axi4lite_request prepare --output "$evidence_root" --graph "$graph" --seed "$seed" >/dev/null
-graph_id=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="ascii"))["graph_id"])' "$evidence_root/request.json")
 printf 'schema=raveil.graph-device-axi4lite-request-environment/v1\nplatform=linux/amd64\nimage_id=%s\n' "$image_id" > "$evidence_root/environment.txt"
 docker run --rm --network none --security-opt no-new-privileges=true --platform linux/amd64 \
   --mount type=volume,source=raveil-chisel-scala-cache-v1,target=/root/.cache,readonly \
   --mount "type=bind,source=$repo_root,target=/repo,readonly" --mount "type=bind,source=$evidence_root,target=/evidence" \
-  --workdir /repo/hardware/chisel "$image_id" ./run-graph-device-axi4lite-request-in-container.sh /evidence "$graph_id" "$seed" > "$evidence_root/container.stdout" 2> "$evidence_root/container.stderr"
+  --workdir /repo/hardware/chisel "$image_id" ./run-graph-device-axi4lite-request-in-container.sh /evidence > "$evidence_root/container.stdout" 2> "$evidence_root/container.stderr"
 python3 -m raveil.graph_device_axi4lite_request finalize --evidence "$evidence_root" >/dev/null
 python3 -m raveil.graph_device_axi4lite_request verify --evidence "$evidence_root" >/dev/null
 printf 'GraphDevice-AXI4LITE-REQUEST-EVIDENCE-V1 path=artifacts/graph_device_axi4lite_request/%s private=1 publication=0\n' "$(basename "$evidence_root")"

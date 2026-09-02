@@ -40,11 +40,40 @@ class GraphDeviceAxi4LiteRequestTests(unittest.TestCase):
         self.assertIn("hardware/chisel/graph_device_axi4lite_request_verilator.cpp", SOURCE_FILES)
         self.assertIn("hardware/chisel/graph_device_axi4lite_transport.h", SOURCE_FILES)
         self.assertIn("hardware/chisel/run-graph-device-axi4lite-request.sh", SOURCE_FILES)
+        self.assertIn("hardware/chisel/run-graph-device-axi4lite-runtime-demo.sh", SOURCE_FILES)
+        self.assertIn("linux/include/raveil_graph_device_request.h", SOURCE_FILES)
+        self.assertIn("linux/src/raveil_graph_device_request.cpp", SOURCE_FILES)
         self.assertIn("request.json", GENERATED)
         self.assertIn("uio-request.bin", GENERATED)
         self.assertIn("graph_device_uio_request_generated.h", GENERATED)
         self.assertIn("graph_device_dag_generated.h", GENERATED)
         self.assertEqual(_NEGATIVE_PREFIX_LINES, 507)
+
+    def test_verilator_bridge_uses_runtime_request_admission_before_axi(self) -> None:
+        bridge = (ROOT / "hardware/chisel/graph_device_axi4lite_request_verilator.cpp").read_text()
+        admission = bridge.index("admit_graph_device_request(evidence)")
+        transcript = bridge.index('evidence / "axi-transcript.log"')
+        model = bridge.index("VGraphDeviceAxi4LiteTop top")
+        self.assertLess(admission, transcript)
+        self.assertLess(admission, model)
+        self.assertIn("if (argc != 2)", bridge)
+        self.assertNotIn("argv[2]", bridge)
+        self.assertNotIn("argv[3]", bridge)
+
+    def test_runtime_demo_reuses_one_binary_for_two_request_roots(self) -> None:
+        outer = (ROOT / "hardware/chisel/run-graph-device-axi4lite-runtime-demo.sh").read_text()
+        inner = (ROOT / "hardware/chisel/run-graph-device-axi4lite-request-in-container.sh").read_text()
+        one_request = (ROOT / "hardware/chisel/run-graph-device-axi4lite-request.sh").read_text()
+        self.assertIn("five-point-seed-1", outer)
+        self.assertIn("vertical-three-point-seed-4294967295", outer)
+        self.assertIn("same_simulator=1 rejected_before_axi=1", outer)
+        self.assertEqual(inner.count("verilator --assert --cc"), 1)
+        self.assertIn('for evidence do', inner)
+        self.assertIn('test ! -e "$reject/axi-transcript.log"', inner)
+        self.assertIn(
+            "./run-graph-device-axi4lite-request-in-container.sh /evidence",
+            one_request,
+        )
 
 
 if __name__ == "__main__":

@@ -472,6 +472,17 @@ transport remain below the same boundaries. The Linux build also rejects a
 generated DAG header that is not byte-identical to the current canonical
 descriptor-derived header.
 
+T-0132/S09 applies that same reader to the AXI4-Lite Verilator bridge. The
+bridge accepts only a request root and must finish admission before opening its
+transcript or constructing the simulated device; Graph ID and seed are no
+longer independent process authority. The ordinary one-request CLI remains,
+while a bounded runtime demo emits the unchanged RTL twice, compiles one
+simulator once, and invokes the byte-identical executable for two distinct
+request roots. Each root is still finalized against its own request, complete
+AXI trace, private output, and independent oracle. A corrupted third root must
+fail without an AXI transcript. This is a single-build simulation proof, not a
+persistent cache, service, production request bundle, or hardware result.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

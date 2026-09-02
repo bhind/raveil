@@ -44,6 +44,8 @@ SOURCE_FILES = (
     "hardware/chisel/graph_device_dag_runtime.cpp", "hardware/chisel/graph_device_axi4lite_request_verilator.cpp",
     "hardware/chisel/graph_device_axi4lite_transport.h",
     "hardware/chisel/run-graph-device-axi4lite-request.sh", "hardware/chisel/run-graph-device-axi4lite-request-in-container.sh",
+    "hardware/chisel/run-graph-device-axi4lite-runtime-demo.sh",
+    "linux/include/raveil_graph_device_request.h", "linux/src/raveil_graph_device_request.cpp",
     "contracts/graph_device_axi4lite_aperture_v1.json", "raveil/graph_device_axi4lite.py",
     "raveil/graph_device_axi4lite_request.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py",
     "raveil/graph_device_mvp.py", "raveil/graph_device_submit.py", "raveil/riscv_stencil_signature.py",
