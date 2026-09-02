@@ -15,6 +15,13 @@ resolves it.
   the ADR-0039 Project Manager/legal boundary before FPGA implementation or
   evidence.
 
+- ADR-0073 resolves only request-specific Linux runner rebuilding for the
+  frozen three-Graph catalogue. Whether a production request bundle should use
+  descriptor-relative open files, an immutable sealed directory, or another
+  mechanism to close the admission metadata/read and runtime validation/reopen
+  races remains unresolved; S08 does not claim adversarial filesystem-race
+  resistance.
+
 - If S03 passes its three external bounded DAGs, what additional discriminator
   is required before broadening the fixed address-selector alphabet or calling
   the executor generally installable? ADR-0064 deliberately stops at five

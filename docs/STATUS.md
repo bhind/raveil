@@ -430,6 +430,36 @@ integrated exact reviewed head `a6e7fa2` as canonical merge
 remain local/private; repository integration does not publish or strengthen
 them.
 
+T-0132/S08 completed implementation and exact-diff review under Issue #85,
+branch
+`feat/t-0132-s08-dynamic-admission`, Systems Implementer, eight SP, and Sprint
+S-0003. ADR-0073 fixes the slice to runtime validation of the existing
+20-byte request envelope and deterministic input within the compiled frozen
+three-Graph catalogue. The Linux runner no longer depends on a request-specific
+generated C++ header. One compiled host admission binary accepts five-point
+seed 1 and vertical-three-point seed UINT32_MAX without changing its SHA-256,
+and rejects the binding, size, catalogue, selected-input, fixed seed-1 runtime
+prerequisite, root-type, and symlink negative matrix before UIO open. The build
+also byte-compares its generated DAG header with the current canonical
+descriptor-derived header.
+
+Sixty-two primary Graph/AXI/DAG/UIO regressions and sixty independent tests
+pass. ARM64 Linux image
+`sha256:89b4bd24f6db672989059f01a12d6501aafc39ec4f22ae1a4152c6af9a0630b5`
+builds the complete runner warning-free. Unchanged S05 Verilator replay
+`artifacts/graph_device_axi4lite_request/run.VjxcvK` retains 2,976 AXI records,
+RTL manifest
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`,
+and byte-equal output/oracle SHA-256
+`fc0834021afa134f461191580efbab917368bb034f9b3cc007967dc96457037f`.
+Security re-review accepts the correction that validates the runtime's fixed
+seed-1 negative-matrix input before UIO open. The documented filesystem
+check/use race remains a non-production risk. This is host-functional dynamic
+admission, ARM64 build compatibility, and unchanged RTL-simulation evidence
+only; no ARM-board run, real UIO result, FPGA, performance, resource, or
+product result exists. The change becomes canonical only through its exact-head
+pull-request merge.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None after the T-0132/S04--S07 technical integration. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None after the T-0132/S08 implementation candidate completed review. |
 | **P1 — next** | Start only after its named P0 dependency passes. | None selected; real FPGA work remains behind the ADR-0039 review and an exact board packet. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -208,6 +208,25 @@ review and failure preservation do not consume the two-item delivery limit.
   `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
   Issue #81 and PR #82 integrated exact head `a6e7fa2` as canonical merge
   `276469a`; the private bundle itself remains local and unpublished.
+
+- [x] **T-0132/S08** Remove only the request-specific rebuild from the Linux
+  UIO runner while retaining the frozen three-Graph catalogue. ADR-0073 admits
+  the existing exact 20-byte `uio-request.bin` v1 envelope at runtime, resolves
+  its index only through the compiled generated catalogue, recomputes and
+  exact-compares every input file consumed by the selected and fixed-negative
+  runtime paths, and fails before UIO open.
+  Reuse unchanged `run_selected_dag`, ABIs, RTL, and relative 16 KiB aperture.
+  Issue #85, branch `feat/t-0132-s08-dynamic-admission`, Systems Implementer,
+  eight SP, and Sprint S-0003 own the bounded implementation. Evidence is
+  host-functional admission and ARM64 build compatibility only. Stop before
+  arbitrary Graphs/opcodes/schedules, board/Vivado/device-tree work, real UIO,
+  FPGA, performance/resources, ASIC, silicon, or product claims.
+  One compiled host binary accepts two different catalogue requests and rejects
+  malformed binding, input, runtime-prerequisite, root, and symlink cases. The
+  62-test primary regression, 60-test independent replay, warning-free ARM64
+  Linux image build, unchanged S05 Verilator replay, record checker, diff
+  check, and independent Security re-review pass. The exact-head PR is the
+  integration boundary; Issue #85 reaches Done only after merge.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
