@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S07 reaches a deterministic unbased RTL-export prerequisite; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S08 remove request-specific Linux rebuilds inside the frozen catalogue; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -728,6 +728,15 @@ vendor-neutral RTL handoff prerequisite. Board selection, an absolute address,
 clock/reset and pin integration, Vivado outputs, device-tree/UIO binding, and
 real output-oracle equality remain later separately reviewed FPGA work under
 ADR-0039 and ADR-0071.
+
+T-0132/S08 is the next software-only product slice. It may make the Linux
+runner request-independent only for the existing three catalogue Graphs and
+uint32 seeds, with strict validation before UIO open. It cannot broaden the
+Graph/program alphabet, change RTL or an ABI, or satisfy any board gate.
+
+The reviewed S08 implementation passes host admission, ARM64 build, and
+unchanged S05 Verilator replay checks. It still does not satisfy a KV260 or
+FPGA gate.
 
 ## No calendar claim
 

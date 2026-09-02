@@ -458,6 +458,20 @@ vendor project, or UIO success evidence. Thus a future KV260 adapter may
 consume a fixed RTL handoff without allowing Vivado or a board shell to become
 Graph, admission, execution, or evidence authority.
 
+T-0132/S08 removes the Linux runner's build-time request specialization without
+making the hardware or Graph language more general. A transport-independent
+host reader accepts only the fixed 20-byte request envelope, resolves its
+catalogue index through the compiled three-Graph generated header, recomputes
+the seed-derived 324-word input, and validates both selected input copies plus
+the runtime's fixed seed-1 negative-matrix input before any UIO open. The
+returned Graph ID and seed enter the unchanged `run_selected_dag`.
+`request.json` stays audit metadata rather than executable authority, so the
+runner does not acquire a JSON parser, descriptor loader, program compiler, or
+arbitrary-Graph path. RTL, ABIs, the relative aperture, and the checked UIO
+transport remain below the same boundaries. The Linux build also rejects a
+generated DAG header that is not byte-identical to the current canonical
+descriptor-derived header.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the
