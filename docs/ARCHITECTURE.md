@@ -504,6 +504,22 @@ therefore routing information, not result authority. The interface remains a
 two-request, one-build simulation command rather than a batch scheduler,
 persistent runtime, or hardware service.
 
+T-0140 adds a sibling simulation-only path rather than weakening that
+catalogue boundary. A fixed pointer-free dynamic host request carries one
+accepted affine-profile payload, one existing 32-word program-install payload
+and a uint32 seed. Its reader validates the complete bounded program and input
+before an AXI transcript or model exists. The same transport-neutral runtime
+then installs those unchanged payloads through the existing configuration and
+program namespaces, stages input and executes through the existing execution
+namespace. One pair invocation must build one generic simulator and invoke
+that exact executable for both a catalogue and a non-catalogue program.
+
+The host envelope is not an RTL or Linux UIO ABI. Descriptor compilation and
+independent oracles remain above it; the Chisel installer repeats semantic
+validation below it. This demonstrates runtime configurability only inside the
+accepted selectors, opcodes, instruction/register capacities and two affine
+profiles. It is neither dynamic scheduling nor arbitrary Graph support.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

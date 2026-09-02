@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0132/S10 operator-to-RTL simulation MVP is canonical; T-0138 freezes the KV260 transition packet and T-0139 adds a no-device-open target preflight while T-0044 physical research remains blocked**
+State: **T-0132/S10 operator-to-RTL simulation MVP and T-0139 target preflight are canonical; T-0140 verifies non-catalogue bounded runtime configuration while T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S10 plus T-0138 KV260 transition planning and the T-0139 read-only target preflight; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S10, T-0138 planning and T-0139 preflight; T-0140 bounded dynamic RTL simulation passes; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -769,6 +769,23 @@ aligned 16 KiB map 0. The marker explicitly records that no device was opened,
 no MMIO occurred and performance was not measured. This can satisfy only the
 observational portion of T-0138 check 5; it cannot satisfy authority, source,
 design, address/reset, Linux execution, functional or recovery closure.
+
+T-0140 returns the active software line to the Graph compiler/executor thesis
+while physical prerequisites remain unavailable. It must compile one
+repository-authored descriptor absent from the three-entry catalogue and run
+it beside one catalogue descriptor through one compiled AXI4-Lite simulator
+binary. It may use only the existing baseline/compact profiles, program and
+configuration installation ABIs, five selectors, three opcodes, 16
+instructions and eight registers. Oracle/fallback equality and one shared
+simulator identity are required. Passing advances only bounded runtime
+configurability; it neither opens the hardware gate nor claims generality or
+performance.
+
+The T-0140 pair now passes with catalogue `five-point` seed 1 and
+non-catalogue `center-north` seed 2. One emitted and compiled simulator is
+invoked twice, both outputs equal their independent descriptor oracles and
+software fallbacks, and malformed host input is rejected before AXI. This
+closes only the bounded simulation discriminator described above.
 
 ## No calendar claim
 

@@ -1,0 +1,14 @@
+{
+  "byte_order": "little-endian",
+  "fixed_graph_id_bytes": 32,
+  "header_bytes": 64,
+  "affine_words": 16,
+  "input_words": 324,
+  "magic": 1380210481,
+  "pointer_free": true,
+  "reserved_prefix_bytes": 32,
+  "program_words": 32,
+  "request_bytes": 1584,
+  "schema": "raveil.graph-device-dynamic-request/v1",
+  "version": 1
+}

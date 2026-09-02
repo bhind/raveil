@@ -44,6 +44,7 @@ from .graph_device_submit import render_submission
 from .graph_device_run import run as run_graph_device
 from .graph_device_runtime_pair import run_pair as run_graph_device_pair
 from .kv260_preflight import Kv260PreflightError, render_preflight
+from .graph_device_dynamic import GraphDeviceDynamicError, run_dynamic_pair
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -386,6 +387,11 @@ def command_graph_device_run_pair(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_graph_device_dynamic_run_pair(args: argparse.Namespace) -> int:
+    print(run_dynamic_pair(args.graph, args.seed))
+    return 0
+
+
 def command_kv260_preflight(args: argparse.Namespace) -> int:
     try:
         print(render_preflight(args.device))
@@ -550,6 +556,13 @@ def build_parser() -> argparse.ArgumentParser:
     graph_device_pair.add_argument("--graph", action="append", required=True)
     graph_device_pair.add_argument("--seed", action="append", type=int, required=True)
     graph_device_pair.set_defaults(handler=command_graph_device_run_pair)
+    dynamic_pair = graph_device_commands.add_parser(
+        "dynamic-run-pair",
+        help="compile exactly two bounded requests and run one shared RTL simulator twice",
+    )
+    dynamic_pair.add_argument("--descriptor", dest="graph", action="append", required=True)
+    dynamic_pair.add_argument("--seed", action="append", type=int, required=True)
+    dynamic_pair.set_defaults(handler=command_graph_device_dynamic_run_pair)
     kv260_preflight = graph_device_commands.add_parser(
         "kv260-preflight",
         help="check KV260 Linux/UIO readiness without opening the device",

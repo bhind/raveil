@@ -521,6 +521,23 @@ Seven focused tests and 131 Graph-device regression tests pass on macOS
 device inspection because the host is not Linux. No target-host PASS has been
 observed.
 
+T-0140 is verified on branch `feat/t-0140-dynamic-program-sim` under Issue #95.
+ADR-0077 connects the existing
+bounded descriptor compiler to the existing program-install ABI through a
+separate fixed host request. Its acceptance requires one catalogue and one
+non-catalogue existing-profile Graph to execute through one compiled AXI4-Lite
+Verilator binary, with independent oracle and fallback equality for both. The
+three-entry catalogue commands, Chisel RTL, three device ABIs, opcode/selector
+alphabet, affine profiles, capacities and evidence authority stay unchanged.
+The exact pair command passes for `five-point` seed 1 and non-catalogue
+`center-north` seed 2. It emits RTL once, builds simulator SHA-256
+`b20eee47e38d8a8603e3e11d8fbb0ee71113099638c0cdd42ce7f9f252fd6ba4`
+once, invokes that same binary twice, matches both independent descriptor
+oracles and software fallbacks, and rejects a corrupted request before an AXI
+transcript exists. Five focused tests and 129 Graph-device regressions pass.
+This is RTL Simulation Functional evidence only; performance was not measured,
+and no Linux device, KV260, FPGA or silicon result exists.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

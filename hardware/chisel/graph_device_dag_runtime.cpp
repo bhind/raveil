@@ -440,4 +440,36 @@ int run_selected_dag(
     return 0;
 }
 
+int run_dynamic_dag(
+    DeviceTransport& device,
+    AffineInstallTransport& affine,
+    ProgramInstallTransport& program,
+    const std::filesystem::path& root,
+    const char* graph_id,
+    const char* affine_name,
+    const std::array<std::uint32_t, 32>& payload,
+    std::uint32_t seed,
+    std::ostream& log,
+    std::ostream& errors
+) {
+    const generated::Graph graph{graph_id, affine_name, payload};
+    const affine_generated::Profile* profile = nullptr;
+    if (std::string(affine_name) == "baseline") profile = &affine_generated::kProfiles[0];
+    else if (std::string(affine_name) == "compact") profile = &affine_generated::kProfiles[1];
+    else {
+        errors << "DAG dynamic affine profile is unknown\n";
+        return 2;
+    }
+    // Keep the existing negative matrix as the preflight of the unchanged
+    // executor, then execute only the host-admitted dynamic program.
+    if (!invalid_matrix(device, affine, program, root, log, errors)
+        || !run_one(device, affine, program, graph, *profile, root, seed,
+            "complete", true, log, errors)) return 1;
+    log << "GraphDevice-DAG-DYNAMIC-RUN-V1 status=OK graph=" << graph.id
+        << " seed=" << seed << " profile=" << profile->name
+        << " oracle=host-independent fallback=runtime same_executor_rtl=1"
+        << " evidence=rtl-simulation-functional performance=not-measured\n";
+    return 0;
+}
+
 }  // namespace raveil::graph_device
