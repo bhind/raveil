@@ -295,7 +295,7 @@ Descriptor/implementation digest promotion,
 arbitrary Graphs, Linux, absolute board mapping, KV260/FPGA, DMA/IRQ,
 performance, resources, Experience, and schema changes remain excluded.
 
-T-0132/S04 is a local-only implementation candidate after the owner explicitly
+T-0132/S04 began as a local-only implementation candidate after the owner explicitly
 rejected stopping at the stale HCI-09 boundary. Its narrow target is to reuse
 the accepted T-0123 transport-neutral three-Graph runtime through the accepted
 T-0132 AXI wrapper and expose that path as an explicit option on the existing
@@ -303,8 +303,7 @@ T-0132 AXI wrapper and expose that path as an explicit option on the existing
 all owned ABIs, `GraphDeviceAxi4LiteTop`, and the installed-program core remain
 unchanged. Tool safety rejected publishing the detailed work packet as a GitHub
 Issue without a new explicit external-disclosure approval; therefore no live
-Project item is active and no push is authorized. No S04 implementation or
-evidence result existed at kickoff.
+Project item was active and no push was authorized at kickoff.
 
 The local S04 candidate now implements that bridge without changing
 `GraphDeviceAxi4LiteTop`, the nested core, the three frozen descriptors, or any
@@ -324,23 +323,22 @@ Graph/seed separately from the fixed-catalogue execution scope. Independent
 exact-head Tester review passes all 48 focused regressions, receipt replay, and
 unit-test isolation. Exact-head Security re-review reports High 0, Medium 0,
 with one accepted Low: the same local filesystem owner can delete and recreate
-the private bundle. This is a reviewed local candidate, not an integrated
-result. Evidence is
+the private bundle. This checkpoint was reviewed locally before later
+integration. Evidence is
 `rtl-simulation-functional`; performance is not measured. The finalizer now
 requires the exact canonical transcript identity and schema, recursive
 link/special-file rejection, evidence allowlists, and the ABI identity export.
 Its exclusive-create receipt is a local writer boundary, not an immutable
 same-owner or external seal.
 
-T-0132/S05 is now a stacked local implementation candidate based on reviewed
+T-0132/S05 was developed as a stacked local implementation candidate based on reviewed
 S04 commit `0b248ed`. Its single purpose is to make the existing CLI request
 semantic real on the AXI path: the admitted canonical Graph and uint32 seed
 must be the Graph and input executed by unchanged `run_selected_dag` through
 S04's `AxiBridge`. S04's fixed-catalogue run remains a regression. No RTL,
 owned ABI, descriptor, compiler opcode, Linux, board, DMA/IRQ, performance,
-resource, or Experience boundary may change. No S05 result exists yet, and no
-live Project item or remote push is authorized under the current external-
-disclosure boundary.
+resource, or Experience boundary may change. At kickoff no S05 result or live
+Project item existed and remote push remained outside the local boundary.
 
 The local S05 candidate now executes the admitted request itself. Fifty-three
 focused request/run/S04/default/DAG tests pass. Fixed offline
@@ -362,15 +360,16 @@ the inner runner now receives only Graph ID and seed. Evidence is
 `rtl-simulation-functional`; performance is not measured. Exact-head Tester
 review passes both artifacts and all 53 focused regressions. Exact-head Security
 review reports High 0 and Medium 0; the documented same-owner receipt limitation
-remains Low. This is a reviewed local candidate, not an integrated result.
+remains Low. This checkpoint was later integrated without changing those
+limitations.
 
-T-0132/S06 is the active local physicalization slice stacked on the reviewed
+T-0132/S06 was developed as a local physicalization slice stacked on the reviewed
 S05 candidate. ADR-0071 accepts only a checked relative-aperture adapter and a
 Linux UIO character-device mapping of the existing 16 KiB window. The
 transport must feed unchanged `run_selected_dag`; Linux receives no admission,
-publication, Experience, recovery, or evidence-promotion authority. No S06
-implementation result, Linux build result, UIO device run, FPGA result, or
-hardware claim exists at kickoff. The slice stops before absolute mapping,
+publication, Experience, recovery, or evidence-promotion authority. At kickoff
+no S06 implementation result, Linux build result, UIO device run, FPGA result,
+or hardware claim existed. The slice stops before absolute mapping,
 `/dev/mem`, kernel modules, board tooling, DMA/IRQ, cache coherence, and actual
 FPGA execution.
 
@@ -425,8 +424,11 @@ its double-emitted RTL manifest remains
 `209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
 This is only `rtl-export-functional-prerequisite`: board and absolute base are
 unassigned, performance is not measured, and no Vivado, KV260, UIO-device,
-FPGA, timing, resource, silicon, or product result exists. S04--S07 remain a
-stacked local candidate series rather than integrated repository state.
+FPGA, timing, resource, silicon, or product result exists. Issue #81 and PR #82
+integrated exact reviewed head `a6e7fa2` as canonical merge
+`276469a1fe55b18d6778dfe6b8a6c16bbfdbdf19`. The ignored evidence bundles
+remain local/private; repository integration does not publish or strengthen
+them.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
