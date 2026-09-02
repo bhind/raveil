@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-29
+Last updated: 2026-09-02
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -405,6 +405,28 @@ remaining Low is that host negatives do not exercise adversarial race
 injection. A UIO zero return is deliberately labelled only
 `linux-uio-transport-unverified` with Graph output unpromoted and RTL/hardware
 not verified.
+
+T-0132/S07 now supplies the first deterministic handoff of the current
+Graph-device top without adopting a board toolchain. The local exporter runs
+the exact repository-owned Chisel closure twice in the existing pinned,
+offline Linux/amd64 image, requires byte-identical SystemVerilog manifests,
+copies only the complete `.sv` closure, and binds source, three ABI identities,
+relative aperture, toolchain, immutable image, and claim boundary in an
+exclusively published local bundle. Standalone verification recomputes every
+tree/file digest and rejects current-source, ABI, aperture, receipt, symlink,
+special-file, or replacement drift.
+
+The actual local bundle is
+`artifacts/graph_device_axi4lite_export/s07-candidate-v2`. Its manifest and
+receipt SHA-256 values are
+`e07662214af42343db8714965310e66476b04bbfce4b4ab5b55b1a84a3e9481d`
+and `6f2e5622ec0d42939999df6a842ee4a49f9e5e2acde5e4e13923f5ee87aef45c`;
+its double-emitted RTL manifest remains
+`209f26facf122d6f5e39c792e4ddafc5b016bb2a924670b2b4464f9f2b2d5f6e`.
+This is only `rtl-export-functional-prerequisite`: board and absolute base are
+unassigned, performance is not measured, and no Vivado, KV260, UIO-device,
+FPGA, timing, resource, silicon, or product result exists. S04--S07 remain a
+stacked local candidate series rather than integrated repository state.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

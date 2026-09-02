@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-08-24
+Last updated: 2026-09-02
 
 ## Four-plane adaptive Harvard model
 
@@ -446,6 +446,17 @@ or performance boundary is introduced. The UIO executable captures rather
 than forwards the shared runtime's simulation summary and emits only
 `linux-uio-transport-unverified`, `graph_output=unpromoted`, and explicit
 not-verified RTL/hardware labels.
+
+T-0132/S07 places a deterministic RTL-export boundary after the same unbased
+AXI4-Lite top and before every board-specific wrapper. It elaborates the exact
+Chisel source closure twice in one immutable offline environment and admits a
+bundle only when the two SystemVerilog manifests are byte-identical. The
+bundle contains the `.sv` closure, relative-aperture header, ABI identities,
+toolchain identity, source-bound receipt, and recursive manifest. It contains
+no absolute address, clock/pin constraint, device tree, bitstream container,
+vendor project, or UIO success evidence. Thus a future KV260 adapter may
+consume a fixed RTL handoff without allowing Vivado or a board shell to become
+Graph, admission, execution, or evidence authority.
 
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
