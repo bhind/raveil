@@ -447,6 +447,16 @@ than forwards the shared runtime's simulation summary and emits only
 `linux-uio-transport-unverified`, `graph_output=unpromoted`, and explicit
 not-verified RTL/hardware labels.
 
+Before an operator attempts that transport on the tentative KV260 target, the
+separate `graph-device kv260-preflight` command may observe only the explicit
+UIO path with `lstat` and fixed device-tree, UIO-map and FPGA-manager
+properties. It requires Linux aarch64, a KV260 model, exact character-device
+and sysfs identity, and an aligned 16 KiB map 0, then reports that the device
+was not opened and MMIO was not issued. This observation is not retained as a
+capability: the UIO backend still revalidates the opened object under ADR-0071
+to close the time-of-check/time-of-use boundary. The preflight has no load,
+deployment, discovery, execution, evidence-promotion or measurement authority.
+
 T-0132/S07 places a deterministic RTL-export boundary after the same unbased
 AXI4-Lite top and before every board-specific wrapper. It elaborates the exact
 Chisel source closure twice in one immutable offline environment and admits a

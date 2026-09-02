@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0138 |
-| **P1 — next** | Start only after its named P0 dependency passes. | A KV260 implementation task remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0139 |
+| **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -277,6 +277,20 @@ review and failure preservation do not consume the two-item delivery limit.
   functional promotion. Stop before tool installation, EULA acceptance,
   purchase, vendor-source copying, bitstream generation, board access, FPGA
   evidence, or performance/resource/timing claims.
+
+- [x] **T-0139** Add the read-only KV260 readiness preflight before any UIO
+  device access. Issue #93, branch `feat/t-0139-kv260-readiness-preflight`,
+  Systems Implementer, five SP, Sprint S-0003, and Target Host Observation
+  evidence own only the bounded Python inspector, CLI, tests, Linux guidance,
+  ADR-0076 and matching canonical records. The command requires Linux aarch64,
+  a KV260 device-tree model, an FPGA-manager state, one identity-matched
+  `/dev/uioN` character device and an aligned 0x4000-byte map 0. It reads only
+  fixed procfs/sysfs properties and uses `lstat`; it must not open or map the
+  device, issue MMIO, load a bitstream, mutate the host, assign board details,
+  or make FPGA/performance/resource claims. Seven focused tests, 131
+  Graph-device regressions, bytecode compilation, CLI help, the record checker,
+  diff check, and live one-item queue audit pass. PR #94 is the integration
+  vehicle for Issue #93.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

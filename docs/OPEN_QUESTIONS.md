@@ -17,6 +17,12 @@ resolves it.
   unresolved. Checks 1--7 in the T-0138 packet and the ADR-0039 Project
   Manager/legal review must pass before FPGA implementation or evidence.
 
+- ADR-0076 defines a no-device-open observation for Linux aarch64, the KV260
+  model, FPGA-manager state and one exact UIO map. It does not answer whether
+  Ubuntu 24.04 actually exposes those leaves on the owner's board. That target
+  capability remains unverified until the physical owner runs the preflight;
+  a PASS still does not select the overlay/load route or authorize FPGA work.
+
 - ADR-0073 resolves only request-specific Linux runner rebuilding for the
   frozen three-Graph catalogue. Whether a production request bundle should use
   descriptor-relative open files, an immutable sealed directory, or another

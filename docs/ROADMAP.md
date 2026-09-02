@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0132/S10 operator-to-RTL simulation MVP is canonical; T-0138 freezes the KV260 transition packet while T-0044 physical research remains blocked**
+State: **T-0132/S10 operator-to-RTL simulation MVP is canonical; T-0138 freezes the KV260 transition packet and T-0139 adds a no-device-open target preflight while T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S10 plus T-0138 KV260 transition planning; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S10 plus T-0138 KV260 transition planning and the T-0139 read-only target preflight; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -760,6 +760,15 @@ runtime. The later implementation task remains unallocated until the physical
 inventory, host/license/boot/target capability, current S07 source closure and
 ADR-0039 Project Manager/legal checks pass. Address, clock, reset, DT binding,
 bitstream and load route remain deliberately unassigned.
+
+T-0139 is the smallest executable preparation step after that packet. It adds
+a read-only CLI preflight that can fail closed on the booted target before any
+UIO open. Passing requires Linux aarch64, a hashed KV260 device-tree model,
+bounded FPGA-manager state, an identity-matched UIO character device and one
+aligned 16 KiB map 0. The marker explicitly records that no device was opened,
+no MMIO occurred and performance was not measured. This can satisfy only the
+observational portion of T-0138 check 5; it cannot satisfy authority, source,
+design, address/reset, Linux execution, functional or recovery closure.
 
 ## No calendar claim
 

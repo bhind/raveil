@@ -43,6 +43,7 @@ from .garden import (
 from .graph_device_submit import render_submission
 from .graph_device_run import run as run_graph_device
 from .graph_device_runtime_pair import run_pair as run_graph_device_pair
+from .kv260_preflight import Kv260PreflightError, render_preflight
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -385,6 +386,15 @@ def command_graph_device_run_pair(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_kv260_preflight(args: argparse.Namespace) -> int:
+    try:
+        print(render_preflight(args.device))
+    except (Kv260PreflightError, OSError) as error:
+        print(f"kv260-preflight: {error}", file=sys.stderr)
+        return 2
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
@@ -540,6 +550,14 @@ def build_parser() -> argparse.ArgumentParser:
     graph_device_pair.add_argument("--graph", action="append", required=True)
     graph_device_pair.add_argument("--seed", action="append", type=int, required=True)
     graph_device_pair.set_defaults(handler=command_graph_device_run_pair)
+    kv260_preflight = graph_device_commands.add_parser(
+        "kv260-preflight",
+        help="check KV260 Linux/UIO readiness without opening the device",
+    )
+    kv260_preflight.add_argument(
+        "--device", required=True, help="canonical UIO character device path /dev/uioN"
+    )
+    kv260_preflight.set_defaults(handler=command_kv260_preflight)
 
     sonatine_demo = subparsers.add_parser(
         "sonatine-demo", help="run the fixed Sonatine operator demo under QEMU"

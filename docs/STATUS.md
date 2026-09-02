@@ -507,6 +507,20 @@ package availability unassigned. No tool was installed, EULA accepted,
 hardware purchased or accessed, vendor source copied, or FPGA/performance
 claim created.
 
+T-0139 implements the software-only readiness slice under Issue #93 and PR
+#94. ADR-0076 adds the operator-facing
+`graph-device kv260-preflight --device /dev/uioN` boundary. It checks Linux
+aarch64, the bounded kernel identity, a KV260 device-tree model, FPGA-manager
+state, UIO character-device/sysfs identity, and one aligned 0x4000-byte map 0.
+The implementation reads fixed procfs/sysfs leaves and uses `lstat` only; it
+does not open or map the UIO device, issue MMIO, discover another device, or
+change the target. Passing output is Host Functional target observation with
+explicit `device_opened=0`, `mmio=0`, and `performance=not-measured` labels.
+Seven focused tests and 131 Graph-device regression tests pass on macOS
+26.5.1 arm64 with Python 3.14.6; the actual host command fails closed before
+device inspection because the host is not Linux. No target-host PASS has been
+observed.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

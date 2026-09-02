@@ -47,6 +47,21 @@ linux/build/raveil-graph-device-uio-run \
 The selected device must have `/sys/class/uio/uioN/maps/map0/size` equal to
 `0x4000`; the runner rejects every other span before mapping it.
 
+On the tentative KV260 target, run the separate read-only readiness check
+before attempting the UIO runner:
+
+```sh
+python3 -m raveil graph-device kv260-preflight --device /dev/uioN
+```
+
+It requires Linux aarch64, a KV260 device-tree model, bounded FPGA-manager
+state, exact character-device/sysfs identity, and one aligned 0x4000-byte map
+0. It uses `lstat` on the explicit path and reads fixed procfs/sysfs leaves; it
+does not open or map the device, issue MMIO, load an overlay or mutate the
+host. A PASS is only `target-host-observation`, and its marker states
+`device_opened=0 mmio=0 performance=not-measured`. The later UIO runner must
+still repeat its opened-object checks.
+
 An ARM64 Linux build can be reproduced on the development host with:
 
 ```sh
