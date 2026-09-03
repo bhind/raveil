@@ -983,24 +983,26 @@ transcript. This deliberately supports exactly two requests and rebuilds for
 each invocation; it is not a persistent cache, daemon, performance result,
 real UIO, FPGA, or general-Graph interface.
 
-### Dynamic two-program request pilot
+### Dynamic one/two-program request pilot
 
 The dynamic pilot is the first path that exercises a non-catalogue program
 without changing the RTL, ISA opcodes, or installer ABIs:
 
 ```sh
-python3 -m raveil graph-device dynamic-run-pair \
-  --descriptor contracts/graph_device_dags/five-point.json --seed 1 \
-  --descriptor tests/fixtures/graph_device_dynamic/center-north.json --seed 4294967295
+python3 -m raveil graph-device dynamic-run \
+  --descriptor tests/fixtures/graph_device_dynamic/fanout-five-live.json --seed 3
 ```
 
-Python validates and compiles exactly two descriptor/seed pairs into fixed,
+`dynamic-run` admits exactly one descriptor outside the frozen catalogue. The
+existing `dynamic-run-pair` remains the two-request regression: its first
+descriptor remains catalogue-bound and its second remains non-catalogue.
+Python validates and compiles the one or two descriptor/seed pairs into fixed,
 pointer-free `request.bin` images before the runner starts. Only the existing
-`baseline` and `compact` affine profiles are admitted; the second descriptor
-must be outside the frozen catalogue. The runner elaborates and builds one
+`baseline` and `compact` affine profiles are admitted. The runner elaborates and builds one
 Verilator executable, invokes that same binary once per request, and retains a
-receipt per request binding the request, source/ABI manifest, RTL manifest,
-toolchain, simulator, AXI transcript, oracle, and fallback output. A malformed
+receipt per request binding the descriptor, program, request, source/ABI manifest,
+RTL manifest, toolchain, simulator, AXI transcript, oracle, fallback, and output.
+A malformed
 copy is rejected before the AXI transcript is created. The result is
 `rtl-simulation-functional` evidence only: it is not FPGA, UIO, silicon,
 arbitrary-Graph, resource, or performance evidence.

@@ -520,6 +520,17 @@ validation below it. This demonstrates runtime configurability only inside the
 accepted selectors, opcodes, instruction/register capacities and two affine
 profiles. It is neither dynamic scheduling nor arbitrary Graph support.
 
+T-0141 adds a one-request presentation over that same dynamic host boundary.
+The public `dynamic-run` command requires one non-catalogue descriptor; the
+existing pair command keeps its catalogue then non-catalogue ordering. Both
+commands prepare every request before starting the lower runner, and the same
+two shell runners accept only the exact `request-1` or ordered
+`request-1`/`request-2` layouts. They still generate and compile one simulator
+per command and invoke it once per request. The single receipt retains the same
+descriptor/program/request/source/ABI/RTL/toolchain/simulator/trace/oracle/
+fallback/output identity closure. `polls=` remains a host termination
+diagnostic, not an architectural cycle counter or performance observation.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

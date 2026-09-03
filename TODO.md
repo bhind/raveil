@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None after T-0140 verification; PM must pull the next ready slice after integration. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0141 |
 | **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -313,6 +313,26 @@ review and failure preservation do not consume the two-item delivery limit.
   tests, 129 Graph-device regressions, the record checker, shell syntax and
   diff check pass. Evidence is RTL Simulation Functional only; performance was
   not measured.
+
+- [x] **T-0141** Run one non-catalogue fan-out Graph through the reusable
+  dynamic simulator without carrying a catalogue Graph. Real Issue #97,
+  branch `feat/t-0141-single-dynamic-graph`, Systems Implementer, eight SP,
+  Sprint S-0003 and RTL Simulation evidence own the bounded CLI, shared-runner
+  generalization, fan-out fixture, focused tests, ADR-0078 and matching
+  records. The descriptor must compile before the runner starts; the runner
+  must emit RTL once, build once and invoke once; RTL output, descriptor oracle
+  and C++ fallback must agree; and the append-once receipt must bind every
+  descriptor/program/request/source/ABI/RTL/toolchain/simulator/trace/output
+  identity. Preserve `dynamic-run-pair`, RTL, device ABIs, opcodes, selectors,
+  affine profiles and capacities. Stop before sealing/UIO transport, a cache or
+  scheduler, general-Graph or performance claims, FPGA, ASIC or silicon. The
+  exact single CLI and the unchanged pair CLI both pass through the reviewed
+  offline image. The single marker proves one RTL emission, simulator build
+  and invocation; its RTL output, descriptor oracle and C++ fallback are
+  byte-equal. Seven focused tests, 131 Graph-device regressions, shell syntax,
+  record and diff checks pass. Independent Tester replay confirms malformed
+  request rejection before an AXI transcript. Evidence is RTL Simulation
+  Functional only; performance was not measured.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify
