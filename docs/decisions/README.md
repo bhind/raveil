@@ -78,3 +78,4 @@ rewrite it.
 | [ADR-0074](ADR-0074-runtime-admission-is-shared-by-simulation-and-uio.md) | Accepted | AXI4-Lite simulation and Linux UIO share one bounded runtime request admission boundary |
 | [ADR-0075](ADR-0075-operator-runtime-pair-stays-inside-the-frozen-catalogue.md) | Accepted | The operator CLI exposes exactly two runtime requests inside the frozen catalogue |
 | [ADR-0076](ADR-0076-read-only-kv260-preflight-precedes-device-access.md) | Accepted | A read-only KV260 target preflight must pass before any later UIO device access |
+| [ADR-0077](ADR-0077-bounded-dynamic-programs-use-existing-graph-device-abis.md) | Accepted | Runtime-compiled bounded programs use the existing Graph-device ABIs in a separate simulation path |

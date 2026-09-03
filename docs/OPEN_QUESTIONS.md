@@ -48,6 +48,13 @@ resolves it.
   neighbor selectors, three opcodes, 16 instructions, eight value registers,
   one active invocation, and one outstanding memory request. No larger opcode,
   memory, scheduling, or exception boundary is selected yet.
+
+- ADR-0077 selects the next discriminator: a repository-authored Graph absent
+  from the three-entry catalogue must compile at runtime and produce oracle-
+  equal output through the same simulator binary as one catalogue Graph,
+  without RTL or device-ABI change. T-0140 does not resolve how descriptors
+  become authorized production inputs, how a dynamic envelope is sealed for
+  Linux UIO, or what language/opcode/affine expansion would be useful.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality

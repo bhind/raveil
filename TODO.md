@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0139 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None after T-0140 verification; PM must pull the next ready slice after integration. |
 | **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -290,7 +290,29 @@ review and failure preservation do not consume the two-item delivery limit.
   or make FPGA/performance/resource claims. Seven focused tests, 131
   Graph-device regressions, bytecode compilation, CLI help, the record checker,
   diff check, and live one-item queue audit pass. PR #94 is the integration
-  vehicle for Issue #93.
+  vehicle for Issue #93 and merged as canonical commit `fd4b7c7`.
+
+- [x] **T-0140** Execute one catalogue and one non-catalogue bounded Graph
+  through one compiled AXI4-Lite simulator binary. Issue #95, branch
+  `feat/t-0140-dynamic-program-sim`, Systems Implementer, 13 SP, Sprint S-0003,
+  and RTL Simulation evidence own the fixed host request, dynamic runtime
+  harness, operator pair command, one new existing-profile fixture, focused
+  tests, ADR-0077 and matching records. Both descriptors must compile before
+  the runner starts; malformed input must fail before AXI; both private outputs
+  must equal independent descriptor oracles and software fallbacks; and both
+  receipts must bind one simulator SHA-256. Preserve the three-entry catalogue,
+  existing run commands, RTL, device ABIs, two affine profiles, five selectors,
+  three opcodes, 16-instruction capacity and eight registers. Stop before a
+  cache/service, general Graph claim, Linux device access, board/FPGA,
+  performance/resources, Experience authority, ASIC or silicon. The exact CLI
+  passes for catalogue `five-point` seed 1 and non-catalogue `center-north`
+  seed 2. One emitted simulator
+  `b20eee47e38d8a8603e3e11d8fbb0ee71113099638c0cdd42ce7f9f252fd6ba4`
+  is invoked twice; both RTL outputs equal independent oracles and fallbacks;
+  and a malformed request is rejected before any AXI transcript. Five focused
+  tests, 129 Graph-device regressions, the record checker, shell syntax and
+  diff check pass. Evidence is RTL Simulation Functional only; performance was
+  not measured.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

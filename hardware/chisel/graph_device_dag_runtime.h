@@ -3,6 +3,7 @@
 
 #include "graph_device_affine_runtime.h"
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <iosfwd>
@@ -52,6 +53,19 @@ int run_selected_dag(
     ProgramInstallTransport& program,
     const std::filesystem::path& evidence_root,
     const char* graph_id,
+    std::uint32_t seed,
+    std::ostream& log,
+    std::ostream& errors
+);
+
+int run_dynamic_dag(
+    DeviceTransport& device,
+    AffineInstallTransport& affine,
+    ProgramInstallTransport& program,
+    const std::filesystem::path& evidence_root,
+    const char* graph_id,
+    const char* affine_name,
+    const std::array<std::uint32_t, 32>& payload,
     std::uint32_t seed,
     std::ostream& log,
     std::ostream& errors
