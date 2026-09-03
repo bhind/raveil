@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 from types import SimpleNamespace
 
-from raveil.graph_device_dynamic_sealed import GraphDeviceDynamicSealError, replay, run_sealed, seal, verify
+from raveil.graph_device_dynamic_sealed import GraphDeviceDynamicSealError, run_sealed, seal, verify
 
 ROOT = Path(__file__).resolve().parents[1]
 GRAPH = "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
@@ -46,13 +46,16 @@ class GraphDeviceDynamicSealedTests(unittest.TestCase):
                 with self.assertRaises(GraphDeviceDynamicSealError):
                     verify(bundle, ROOT)
 
-    def test_replay_materializes_verified_snapshot_without_descriptor_parse(self):
+    def test_fd_materialization_uses_verified_snapshot_without_descriptor_parse(self):
         with tempfile.TemporaryDirectory() as directory, patch("raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()), patch("raveil.graph_device_dynamic_sealed._dynamic_parent", return_value=Path(directory).resolve()):
             bundle = Path(seal(GRAPH, 3, ROOT)["path"])
             verified = verify(bundle, ROOT)
-            target = Path(directory) / "replay"
-            with patch("raveil.graph_device_dynamic_sealed.verify", return_value=verified), patch("raveil.graph_device_dynamic_sealed.json.loads", side_effect=AssertionError("descriptor reparse")):
-                replay(bundle, target, ROOT)
+            target = Path(directory) / "replay"; target.mkdir()
+            fd = os.open(target, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
+            from raveil.graph_device_dynamic_sealed import _materialize_verified_at
+            with patch("raveil.graph_device_dynamic_sealed.json.loads", side_effect=AssertionError("descriptor reparse")):
+                _materialize_verified_at(fd, verified)
+            os.close(fd)
             self.assertEqual((target / "request.bin").read_bytes(), verified["request"])
 
     def test_extra_missing_symlink_and_hardlink_are_rejected(self):
@@ -118,9 +121,12 @@ class GraphDeviceDynamicSealedTests(unittest.TestCase):
             bundle = Path(seal(GRAPH, 3, ROOT)["path"])
             before = {item.name: item.read_bytes() for item in bundle.iterdir()}
             verified = verify(bundle, ROOT)
-            from raveil.graph_device_dynamic_sealed import _materialize_verified
+            from raveil.graph_device_dynamic_sealed import _materialize_verified_at
+            target = Path(directory).resolve() / "materialized"; target.mkdir()
+            fd = os.open(target, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
             with patch("raveil.graph_device_dynamic_sealed.json.loads", side_effect=AssertionError("descriptor reparse")):
-                _materialize_verified(verified, Path(directory).resolve() / "materialized")
+                _materialize_verified_at(fd, verified)
+            os.close(fd)
             self.assertEqual(before, {item.name: item.read_bytes() for item in bundle.iterdir()})
 
     def test_mocked_runner_binds_complete_raw_evidence_and_rejects_bad_output(self):
@@ -133,6 +139,8 @@ class GraphDeviceDynamicSealedTests(unittest.TestCase):
                 (request / "fallback-output-fanout-five-live-seed-3.bin").write_bytes(oracle)
                 for name in ("source.manifest", "abi.manifest", "rtl.manifest", "toolchain.txt", "device.log"):
                     (request / name).write_bytes(name.encode("ascii"))
+                from raveil.graph_device_dynamic_sealed import _expected_runner_source_manifest
+                (request / "source.manifest").write_bytes(_expected_runner_source_manifest(verify(bundle, ROOT)))
                 # These are intentionally above ordinary evidence-leaf limits.
                 (request / "axi-transcript.log").write_bytes(b"a" * 70000)
                 simulator = b"s" * 70000; (request / "simulator.bin").write_bytes(simulator)

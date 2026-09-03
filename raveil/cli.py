@@ -45,7 +45,7 @@ from .graph_device_run import run as run_graph_device
 from .graph_device_runtime_pair import run_pair as run_graph_device_pair
 from .kv260_preflight import Kv260PreflightError, render_preflight
 from .graph_device_dynamic import GraphDeviceDynamicError, run_dynamic, run_dynamic_pair
-from .graph_device_dynamic_sealed import GraphDeviceDynamicSealError, replay as replay_dynamic, run_sealed, seal as seal_dynamic
+from .graph_device_dynamic_sealed import GraphDeviceDynamicSealError, run_sealed, seal as seal_dynamic
 from .graph_device_uio_dry_run import plan as uio_dry_run_plan
 
 

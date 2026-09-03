@@ -565,10 +565,10 @@ dynamic request: descriptor and compiler sources are read through no-follow
 directory descriptors into one snapshot, every payload has an exact size and
 SHA-256 binding, `SEALED` is written last, and replay consumes only verified
 in-memory payloads in a new private root. The final-source seal is
-`65f6f633e446cbe990ca17f034d492a20820626bb0a2872d370809f42d2c465d`.
+`0beaba3fe6638516aca532104d05cf412d8b3dae0658d93397c8d45ce67b24c8`.
 The checked Linux/UIO conversion derives the unchanged 16 KiB relative
 aperture and execution/configuration/program namespaces, emits plan
-`af48e6c71c84ccc2513c87b2a60e5646005564617597aaedfdde9434bb9e6468`,
+`81f5d0d528f96627bef4d188dcd4daa6c2e9a2ed188379f78c72be52bf0caec2`,
 and reports `device_opened=0`, `mmap=0` and `mmio=0`. That is Host Functional
 evidence only. A separate real replay emits RTL once, builds simulator
 `b20eee47e38d8a8603e3e11d8fbb0ee71113099638c0cdd42ce7f9f252fd6ba4`

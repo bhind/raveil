@@ -348,7 +348,7 @@ review and failure preservation do not consume the two-item delivery limit.
   dry run reports `device_opened=0`, `mmap=0`, `mmio=0` and cannot weaken
   T-0139 or ADR-0071. Stop before actual UIO, FPGA, opcode/RTL/ABI changes,
   general-Graph or performance claims, ASIC or silicon. The final-source seal
-  is `65f6f633...c465d`; its Host Functional UIO plan is `af48e6c7...6468`
+  is `0beaba3f...b24c8`; its Host Functional UIO plan is `81f5d0d5...caec2`
   and performs no device operation. One real replay emits RTL once, builds
   simulator `b20eee47...ba4` once and invokes it once. Its descriptor oracle,
   C++ fallback and RTL output are byte-equal at `6f77bb67...62ff`; malformed
