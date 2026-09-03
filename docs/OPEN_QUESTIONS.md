@@ -65,9 +65,13 @@ resolves it.
   descriptor/source snapshot is sealed, verified into retained bytes and
   replayed without descriptor reinterpretation, while a pure UIO plan stops
   before `open`, `mmap` or MMIO. They do not authorize a device run or answer
-  which single additional opcode is useful. The next discriminator must keep
-  the transport ABIs and fixed affine/selector/capacity bounds explicit and
-  must separately justify any program-format version change.
+  which single additional opcode is useful.
+- ADR-0080 and T-0143 select only unsigned `MAX_U32` for one five-neighbor
+  dilation discriminator. Program, dynamic-request and sealed v2 admission is
+  explicit, while the transport/install ABI v1 and existing v1 program bytes
+  remain unchanged. Whether any later opcode, predicate, constant, selector,
+  schedule or broader Graph language is useful remains unresolved and requires
+  a separate discriminator and decision.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality

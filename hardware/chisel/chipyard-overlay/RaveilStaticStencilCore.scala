@@ -12,6 +12,7 @@ object RaveilBoundedProgramContract {
   val LoadOpcode = 1
   val AddOpcode = 2
   val StoreOpcode = 3
+  val MaxU32Opcode = 4
   val EastAddress = 4
   val FactoryProgram = Seq(
     0x10000000L, 0x12400000L, 0x20080000L, 0x12800000L,
@@ -162,6 +163,9 @@ class RaveilStaticStencilCore extends Module {
         }.elsewhen(opcode === RaveilBoundedProgramContract.AddOpcode.U) {
           values(destination) := (values(sourceA) +& values(sourceB))(31, 0)
           programCounter := programCounter + 1.U
+        }.elsewhen(opcode === RaveilBoundedProgramContract.MaxU32Opcode.U) {
+          values(destination) := Mux(values(sourceA) >= values(sourceB), values(sourceA), values(sourceB))
+          programCounter := programCounter + 1.U
         }.elsewhen(opcode === RaveilBoundedProgramContract.StoreOpcode.U) {
           state := storeRequest
         }.otherwise {
@@ -254,6 +258,7 @@ class RaveilStaticStencilCore extends Module {
     when(state === fetch && busyReg) {
       assert(opcode === RaveilBoundedProgramContract.LoadOpcode.U ||
         opcode === RaveilBoundedProgramContract.AddOpcode.U ||
+        opcode === RaveilBoundedProgramContract.MaxU32Opcode.U ||
         opcode === RaveilBoundedProgramContract.StoreOpcode.U)
     }
     when(state === loadResponse && io.memory.response.valid) {

@@ -93,8 +93,11 @@ def _request_bytes(program: dict[str, Any], profile: dict[str, Any], seed: int) 
     graph_id_bytes += b"\0" * (GRAPH_ID_BYTES - len(graph_id_bytes))
     if len(graph_id_bytes) != GRAPH_ID_BYTES:
         raise GraphDeviceDynamicError("graph_id is too long")
+    version = int(program["payload"][1])
+    if version not in {1, 2}:
+        raise GraphDeviceDynamicError("program version is unsupported")
     header = struct.pack(
-        "<8I", MAGIC, VERSION, HEADER_BYTES, 0 if name == "baseline" else 1,
+        "<8I", MAGIC, version, HEADER_BYTES, 0 if name == "baseline" else 1,
         seed, PROGRAM_WORDS, AFFINE_WORDS, INPUT_WORDS,
     )
     return header + b"\0" * 32 + graph_id_bytes + _word_bytes(program["payload"]) \
@@ -151,7 +154,7 @@ def prepare_request(output: Path, graph: str, seed: int, repository: Path | None
     # preparation; it is deliberately not used to dispatch this request.
     _write_new(output / "graph_device_axi4lite_aperture_generated.h", aperture_header())
     metadata = {
-        "schema": SCHEMA, "graph": graph, "graph_id": program["graph_id"],
+        "schema": SCHEMA if program["payload"][1] == 1 else "raveil.graph-device-dynamic-request/v2", "graph": graph, "graph_id": program["graph_id"],
         "affine": profile["name"], "seed": seed,
         "descriptor_sha256": hashlib.sha256(descriptor_path.read_bytes()).hexdigest(),
         "program_sha256": program["program_sha256"],

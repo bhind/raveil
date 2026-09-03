@@ -11,6 +11,7 @@ from raveil.graph_device_dynamic_sealed import GraphDeviceDynamicSealError, run_
 
 ROOT = Path(__file__).resolve().parents[1]
 GRAPH = "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
+MAX_GRAPH = "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
 
 
 class GraphDeviceDynamicSealedTests(unittest.TestCase):
@@ -36,6 +37,22 @@ class GraphDeviceDynamicSealedTests(unittest.TestCase):
             self.assertEqual(verify(bundle, ROOT)["seal_sha256"], bundle.name)
             with self.assertRaisesRegex(GraphDeviceDynamicSealError, "already exists"):
                 seal(GRAPH, 3, ROOT)
+
+    def test_v1_and_v2_seals_verify_and_schema_pair_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as directory, patch("raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()):
+            v1 = Path(seal(GRAPH, 3, ROOT)["path"])
+            v2 = Path(seal(MAX_GRAPH, 3, ROOT)["path"])
+            self.assertEqual(verify(v1, ROOT)["manifest"]["version"], 1)
+            self.assertEqual(verify(v2, ROOT)["manifest"]["version"], 2)
+            manifest = json.loads((v2 / "manifest.json").read_text("ascii"))
+            manifest["schema"] = "raveil.graph-device-dynamic-sealed/v1"
+            raw = (json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n").encode("ascii")
+            (v2 / "manifest.json").write_bytes(raw)
+            digest = hashlib.sha256(raw).hexdigest()
+            (v2 / "SEALED").write_text(digest + "\n", encoding="ascii")
+            forged = v2.with_name(digest); v2.rename(forged)
+            with self.assertRaisesRegex(GraphDeviceDynamicSealError, "version pair"):
+                verify(forged, ROOT)
 
     def test_each_inventory_byte_fails_closed(self):
         for name in ("program.bin", "affine.bin", "input.bin", "seed-1.bin", "oracle.bin", "descriptor.json", "request.bin", "source.manifest", "graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_dag_generated.h", "graph_device_axi4lite_aperture_generated.h", "manifest.json", "SEALED"):

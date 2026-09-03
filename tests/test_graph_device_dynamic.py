@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
+import shutil
 import struct
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -23,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BASELINE = "contracts/graph_device_dags/five-point.json"
 CUSTOM = "tests/fixtures/graph_device_dynamic/center-north.json"
 FANOUT = "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
+MAX_U32 = "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
 
 
 class GraphDeviceDynamicTests(unittest.TestCase):
@@ -67,6 +70,84 @@ class GraphDeviceDynamicTests(unittest.TestCase):
                 live.add(node["id"])
             maximum = max(maximum, len(live))
         self.assertEqual(maximum, 5)
+
+    def test_max_u32_cross_dilation_uses_explicit_v2_and_unsigned_oracle(self):
+        descriptor = load_descriptor(ROOT / MAX_U32)
+        program = compile_descriptor(descriptor)
+        self.assertEqual(program["payload"][1], 2)
+        self.assertEqual(program["instruction_count"], 10)
+        self.assertEqual(sum(node["op"] == "LOAD_U32" for node in descriptor["nodes"]), 5)
+        self.assertEqual(sum(node["op"] == "MAX_U32" for node in descriptor["nodes"]), 4)
+        self.assertEqual(sum(node["op"] == "STORE_U32" for node in descriptor["nodes"]), 1)
+        from raveil.graph_device_dag import graph_oracle, software_fallback
+        words = [0] * 324
+        center = 19
+        words[center], words[center - 18] = 0x80000000, 0x7fffffff
+        words[center + 18], words[center - 1], words[center + 1] = 0, 1, 0xffffffff
+        self.assertEqual(graph_oracle(descriptor, words)[0], 0xffffffff)
+        self.assertEqual(software_fallback(program, words)[0], 0xffffffff)
+        words[center], words[center - 18] = 0x80000000, 0x7fffffff
+        words[center + 18], words[center - 1], words[center + 1] = 0, 0, 0
+        self.assertEqual(graph_oracle(descriptor, words)[0], 0x80000000)
+        self.assertEqual(software_fallback(program, words)[0], 0x80000000)
+        words[center], words[center - 18] = 7, 7
+        self.assertEqual(graph_oracle(descriptor, words)[0], 7)
+        words[center], words[center - 18] = 0, 0
+        self.assertEqual(graph_oracle(descriptor, words)[0], 0)
+
+    def test_v1_payload_rejects_max_and_v2_request_pair_is_exact(self):
+        from raveil.graph_device_dynamic_sealed import _valid_program_words
+        legacy = compile_descriptor(load_descriptor(ROOT / FANOUT))["payload"]
+        self.assertTrue(_valid_program_words(legacy))
+        self.assertEqual(legacy[:4], [0x52504731, 1, 11, 8])
+        self.assertEqual(compile_descriptor(load_descriptor(ROOT / FANOUT))["program_sha256"],
+                         "ec13f9f0d376233b49b2d647088f71bf208ddea68e7a4d09732f660b9770ea39")
+        legacy[12] = (4 << 28) | (legacy[12] & 0x0fffffff)
+        self.assertFalse(_valid_program_words(legacy))
+        with tempfile.TemporaryDirectory() as directory:
+            result = prepare_request(Path(directory) / "request", MAX_U32, 3, ROOT)
+            self.assertEqual(struct.unpack_from("<I", result["request"], 4)[0], 2)
+            self.assertEqual(result["program"]["payload"][1], 2)
+
+    def test_program_wire_negative_paths_fail_closed(self):
+        from raveil.graph_device_dynamic_sealed import _valid_program_words
+        v2 = compile_descriptor(load_descriptor(ROOT / MAX_U32))["payload"]
+        for label, change in (
+            ("unknown", lambda words: words.__setitem__(17, 5 << 28)),
+            ("padding", lambda words: words.__setitem__(22, 1)),
+            ("reserved", lambda words: words.__setitem__(17, words[17] | 1)),
+            ("undefined", lambda words: words.__setitem__(17, (4 << 28) | (7 << 25) | (7 << 22) | (6 << 19))),
+            ("store-placement", lambda words: words.__setitem__(17, 3 << 28)),
+        ):
+            with self.subTest(label=label):
+                mutated = list(v2); change(mutated)
+                self.assertFalse(_valid_program_words(mutated))
+        cross = list(v2); cross[1] = 1
+        self.assertFalse(_valid_program_words(cross))
+        self.assertFalse(_valid_program_words(v2[:1] + [3] + v2[2:]))
+
+    def test_standalone_fallback_revalidates_version_and_digest(self):
+        from raveil.graph_device_dag import GraphDeviceDagError, graph_oracle, software_fallback
+        for descriptor_path in (FANOUT, MAX_U32):
+            program = compile_descriptor(load_descriptor(ROOT / descriptor_path))
+            self.assertEqual(software_fallback(program, [0] * 324), graph_oracle(load_descriptor(ROOT / descriptor_path), [0] * 324))
+            if program["payload"][1] == 2:
+                version_mutation = {**program, "payload": list(program["payload"])}
+                version_mutation["payload"][1] = 1
+                with self.assertRaises(GraphDeviceDagError):
+                    software_fallback(version_mutation, [0] * 324)
+            digest_mutation = {**program, "payload": list(program["payload"])}
+            digest_mutation["payload"][4] ^= 1
+            with self.assertRaises(GraphDeviceDagError):
+                software_fallback(digest_mutation, [0] * 324)
+
+    def test_descriptor_identifier_admission_is_bounded_ascii(self):
+        descriptor = load_descriptor(ROOT / MAX_U32)
+        for graph_id in ("", "a" * 32, "ümlaut"):
+            with self.subTest(graph_id=graph_id):
+                changed = {**descriptor, "graph_id": graph_id}
+                from raveil.graph_device_dag import GraphDeviceDagError, validate_descriptor
+                with self.assertRaises(GraphDeviceDagError): validate_descriptor(changed)
 
     def test_prepare_is_pointer_free_and_compiles_custom_graph(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -149,12 +230,63 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("simulator_built_once=1", shell)
         self.assertIn("rejected_before_axi=1", shell)
         self.assertIn("dynamic-source.manifest", shell)
+        self.assertIn("contracts/graph_device_dynamic_request_v2.json", shell)
+        self.assertIn("contracts/graph_device_program_v2.json", shell)
         self.assertLess(shell.index("dynamic-source.manifest"), shell.index("verilator --assert --cc"))
         outer = (ROOT / "hardware/chisel/run-graph-device-axi4lite-dynamic.sh").read_text()
         self.assertIn("request-1/request-2 siblings", outer)
         self.assertIn("request_count=1", outer)
         self.assertIn("set -C", outer)
         self.assertIn("container.stdout container.stderr", outer)
+
+    def test_cxx_admission_precedes_model_and_chisel_gates_v2_max(self):
+        parser = (ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp").read_text()
+        bridge = (ROOT / "hardware/chisel/graph_device_axi4lite_dynamic_verilator.cpp").read_text()
+        installer = (ROOT / "hardware/chisel/GraphDeviceProgramInstaller.scala").read_text()
+        self.assertIn("request_version == kVersionV2", parser)
+        self.assertIn("opcode == 4U", parser)
+        self.assertIn("dynamic program digest is invalid", parser)
+        self.assertLess(bridge.index("read_dynamic_graph_device_request"), bridge.index("VGraphDeviceAxi4LiteTop top"))
+        self.assertIn("MaxU32Opcode", installer)
+        self.assertIn("payloadVersion === 2.U", installer)
+        fallback = (ROOT / "hardware/chisel/graph_device_dag_runtime.cpp").read_text()
+        self.assertIn("bool valid_fallback_program", fallback)
+        self.assertIn("opcode == 4U && payload[1] == 2U", fallback)
+        self.assertLess(fallback.index("if (!valid_fallback_program(graph.payload)) return false;"),
+                        fallback.index("output.fill(0U);"))
+        from raveil.graph_device_dynamic_sealed import SOURCE_PATHS, _expected_runner_source_manifest, seal, verify
+        self.assertIn("contracts/graph_device_dynamic_request_v2.json", SOURCE_PATHS)
+        self.assertIn("contracts/graph_device_program_v2.json", SOURCE_PATHS)
+        with tempfile.TemporaryDirectory() as directory, patch("raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()):
+            sealed = Path(seal(MAX_U32, 3, ROOT)["path"])
+            expected = _expected_runner_source_manifest(verify(sealed, ROOT)).decode("ascii")
+        self.assertIn("orchestration/contracts/graph_device_dynamic_request_v2.json ", expected)
+        self.assertIn("orchestration/contracts/graph_device_program_v2.json ", expected)
+
+    def test_cxx_host_admission_rejects_digest_before_model(self):
+        compiler = shutil.which("c++") or shutil.which("g++")
+        if compiler is None:
+            self.skipTest("no C++ compiler is available for host admission regression")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            request = root / "request"
+            prepare_request(request, MAX_U32, 3, ROOT)
+            harness = root / "dynamic-request-host"
+            compile_result = subprocess.run(
+                [compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror",
+                 "-I", str(ROOT / "linux/include"), "-I", str(request),
+                 str(ROOT / "tests/graph_device_dynamic_request_host_test.cpp"),
+                 str(ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp"),
+                 "-o", str(harness)], capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(compile_result.returncode, 0, compile_result.stderr)
+            self.assertEqual(subprocess.run([str(harness), str(request)], check=False).returncode, 0)
+            raw = bytearray((request / "request.bin").read_bytes())
+            raw[96 + 4 * 4] ^= 1
+            (request / "request.bin").write_bytes(raw)
+            self.assertEqual(subprocess.run([str(harness), str(request)], check=False).returncode, 1)
+            self.assertFalse((request / "axi-transcript.log").exists())
+            self.assertFalse(any(request.glob("simulator*")))
 
 
 if __name__ == "__main__":

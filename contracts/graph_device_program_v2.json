@@ -1,0 +1,13 @@
+{
+  "schema": "raveil.graph-device-program/v2",
+  "version": 2,
+  "magic": 1380992817,
+  "payload_words": 32,
+  "instruction_capacity": 16,
+  "value_registers": 8,
+  "opcodes": {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4},
+  "digest_words": {"start": 4, "count": 8, "byte_order": "little-endian", "preimage": "LE u32 instruction_count followed by each active instruction word in program order", "algorithm": "SHA-256"},
+  "version_gate": "MAX_U32 is valid only when program version is 2; v1 byte images remain unchanged",
+  "encoding": "LOAD selector<=4; ADD_U32/MAX_U32 use two defined u32 registers; STORE_U32 is the one final instruction; inactive/reserved words are zero",
+  "semantics": "MAX_U32 compares unsigned 32-bit values"
+}

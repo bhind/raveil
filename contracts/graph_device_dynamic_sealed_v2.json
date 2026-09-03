@@ -1,0 +1,12 @@
+{
+  "schema": "raveil.graph-device-dynamic-sealed/v2",
+  "version": 2,
+  "program_version": 2,
+  "request_version": 2,
+  "seal": "sha256(canonical manifest.json); directory basename equals seal; SEALED is the seal plus newline",
+  "admission": "descriptor and sources are read once from an O_NOFOLLOW fd-rooted repository snapshot",
+  "replay": "verified in-memory payload only; descriptor is not reparsed",
+  "transport": "UIO dry-run is a plan only: no open, mmap, or MMIO",
+  "opcode_extension": {"MAX_U32": 4},
+  "non_claims": ["performance not measured", "no FPGA, ASIC, silicon, or general Graph claim"]
+}

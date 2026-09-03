@@ -559,8 +559,9 @@ profiles and capacities are unchanged. This is RTL Simulation Functional
 evidence only; instruction/liveness counts are conformance facts and
 performance was not measured.
 
-T-0142 is verified on branch `feat/t-0142-sealed-dynamic-request` under Issue
-#99. ADR-0079 adds an exact digest-named sealed inventory above the unchanged
+T-0142 is canonical through merged PR #100 at
+`151c481abdd1bed08b9a2ecc9fb28e79b7f0d46b`; Issue #99 and its Project item
+are closed and Done. ADR-0079 adds an exact digest-named sealed inventory above the unchanged
 dynamic request: descriptor and compiler sources are read through no-follow
 directory descriptors into one snapshot, every payload has an exact size and
 SHA-256 binding, `SEALED` is written last, and replay consumes only verified
@@ -581,6 +582,31 @@ receipt-bound, and malformed admission stops before AXI. Twelve focused tests,
 RTL Simulation Functional evidence only. Chisel RTL, device ABIs, opcodes,
 selectors, affine profiles and capacities are unchanged; no device was opened
 and performance was not measured.
+
+T-0143 is the sole active P0 under real Issue #101 and clean branch
+`feat/t-0143-max-u32` from canonical T-0142. Independent Librarian, Researcher
+and Security read-only selection reviews recommend exactly one `MAX_U32`
+opcode because it preserves the existing two-source/one-destination word,
+five-neighbor selectors and fixed affine shape while expressing a nonlinear
+five-neighbor dilation without constants, predicates or scheduling changes.
+ADR-0080 requires explicit program, dynamic-request and sealed v2 admission;
+v1 programs and newly generated v1 requests/seals remain accepted and
+byte-compatible, while invalid version/opcode pairs fail before model or AXI.
+The three transport/install ABIs, aperture, selectors, affine profiles,
+register/capacity bounds and one-outstanding fixed schedule remain unchanged.
+The `cross-dilation-u32` fixture compiles to five loads, four unsigned maxima
+and one store with program identity
+`418ea472ac9be5c22497259366dabf43ada7674a93536fd393e1c3c6c4e89cd3`.
+A final-source v2 bundle `196248bc...fd1c6` replays through simulator
+`ecd11c73...37662`; descriptor oracle, C++ fallback and RTL output are
+byte-equal at `46282258...60852`. A fresh v1 bundle `8e37b331...dc496` retains
+the T-0141 program `ec13f9f0...ea39` and output `6f77bb67...62ff` through the
+same simulator. The v2 UIO plan `268f793e...42f46` reports seven ABI-derived
+operations and `device_opened=0`, `mmap=0`, `mmio=0`. Thirty-six focused,
+151 Graph-device and seven T-0139 tests pass. Evidence is RTL Simulation
+Functional for replays and Host Functional for sealing/UIO planning only;
+performance, device, FPGA, CGRA/VLIW, ASIC, silicon, novelty and legal
+clearance remain unclaimed.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
