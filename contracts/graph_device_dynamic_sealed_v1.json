@@ -1,0 +1,12 @@
+{
+  "schema": "raveil.graph-device-dynamic-sealed/v1",
+  "version": 1,
+  "seal": "sha256(canonical manifest.json); directory basename equals seal; SEALED is the seal plus newline",
+  "inventory": ["SEALED", "affine.bin", "descriptor.json", "graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_axi4lite_aperture_generated.h", "graph_device_dag_generated.h", "input.bin", "manifest.json", "oracle.bin", "program.bin", "request.bin", "seed-1.bin", "source.manifest"],
+  "manifest": "closed exact-key object; every non-manifest inventory payload has size and sha256",
+  "admission": "descriptor and sources are read once from an O_NOFOLLOW fd-rooted repository snapshot",
+  "replay": "verified in-memory payload only; descriptor is not reparsed",
+  "transport": "UIO dry-run is a plan only: no open, mmap, or MMIO",
+  "evidence": ["host-functional", "rtl-simulation-functional"],
+  "non_claims": ["performance not measured", "no FPGA, ASIC, silicon, or general Graph claim"]
+}

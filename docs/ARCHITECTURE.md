@@ -531,6 +531,19 @@ descriptor/program/request/source/ABI/RTL/toolchain/simulator/trace/oracle/
 fallback/output identity closure. `polls=` remains a host termination
 diagnostic, not an architectural cycle counter or performance observation.
 
+T-0142 inserts a sealed host admission object above that unchanged dynamic
+envelope. The creator reads one repository-relative descriptor and the bounded
+compiler/source set through no-follow directory descriptors, compiles from the
+retained descriptor bytes, and exclusively publishes an exact inventory whose
+manifest digest is both directory name and final seal marker. Verification
+rechecks source, manifest, program, affine, input and request semantics and
+returns retained bytes rather than pathname authority. Simulator replay
+materializes only those bytes into a new private request root; it never parses
+the sealed descriptor and writes all output/evidence outside the sealed tree.
+The UIO dry-run is a pure Host Functional conversion derived from the existing
+aperture contract. It exposes relative namespace and payload identities but
+contains no device opener, mapper, MMIO primitive or promotion authority.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

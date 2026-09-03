@@ -45,6 +45,8 @@ from .graph_device_run import run as run_graph_device
 from .graph_device_runtime_pair import run_pair as run_graph_device_pair
 from .kv260_preflight import Kv260PreflightError, render_preflight
 from .graph_device_dynamic import GraphDeviceDynamicError, run_dynamic, run_dynamic_pair
+from .graph_device_dynamic_sealed import GraphDeviceDynamicSealError, replay as replay_dynamic, run_sealed, seal as seal_dynamic
+from .graph_device_uio_dry_run import plan as uio_dry_run_plan
 
 
 def _tuner(store: ExperienceStore) -> Tuner:
@@ -397,6 +399,21 @@ def command_graph_device_dynamic_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_graph_device_dynamic_seal(args: argparse.Namespace) -> int:
+    print(json.dumps(seal_dynamic(args.graph, args.seed, Path.cwd()), sort_keys=True))
+    return 0
+
+
+def command_graph_device_dynamic_uio_dry_run(args: argparse.Namespace) -> int:
+    print(json.dumps(uio_dry_run_plan(Path(args.sealed), args.device, Path.cwd()), sort_keys=True))
+    return 0
+
+
+def command_graph_device_dynamic_replay(args: argparse.Namespace) -> int:
+    print(json.dumps(run_sealed(Path(args.sealed), Path.cwd()), sort_keys=True))
+    return 0
+
+
 def command_kv260_preflight(args: argparse.Namespace) -> int:
     try:
         print(render_preflight(args.device))
@@ -575,6 +592,23 @@ def build_parser() -> argparse.ArgumentParser:
     dynamic_run.add_argument("--descriptor", dest="graph", required=True)
     dynamic_run.add_argument("--seed", type=int, required=True)
     dynamic_run.set_defaults(handler=command_graph_device_dynamic_run)
+    dynamic_seal = graph_device_commands.add_parser(
+        "dynamic-seal", help="compile once and exclusively seal one non-catalogue request",
+    )
+    dynamic_seal.add_argument("--descriptor", dest="graph", required=True)
+    dynamic_seal.add_argument("--seed", type=int, required=True)
+    dynamic_seal.set_defaults(handler=command_graph_device_dynamic_seal)
+    dynamic_replay = graph_device_commands.add_parser(
+        "dynamic-replay", help="materialize verified sealed payloads without descriptor reparse",
+    )
+    dynamic_replay.add_argument("--sealed", required=True)
+    dynamic_replay.set_defaults(handler=command_graph_device_dynamic_replay)
+    dynamic_uio = graph_device_commands.add_parser(
+        "dynamic-uio-dry-run", help="plan verified sealed payload transport without opening UIO",
+    )
+    dynamic_uio.add_argument("--sealed", required=True)
+    dynamic_uio.add_argument("--device", required=True)
+    dynamic_uio.set_defaults(handler=command_graph_device_dynamic_uio_dry_run)
     kv260_preflight = graph_device_commands.add_parser(
         "kv260-preflight",
         help="check KV260 Linux/UIO readiness without opening the device",

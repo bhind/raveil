@@ -798,6 +798,19 @@ continues to pass. This adds no transport authority, sealed request, opcode,
 dynamic scheduler, general-Graph or performance result and does not advance an
 FPGA or silicon gate.
 
+T-0142 places the accepted host admission boundary before either simulator or
+future transport. A repository-relative descriptor and the compiler sources
+are captured once through no-follow directory descriptors; the compiled
+program, affine configuration, seed inputs, request, oracle and generated
+headers enter one exact digest-named inventory. Verification retains bounded
+bytes and replay does not reinterpret the descriptor. The final-source bundle
+replays through one existing simulator invocation with oracle/fallback/RTL
+equality. Separately, the checked UIO conversion renders only the existing
+relative 16 KiB aperture plan and reports zero device open, mapping and MMIO.
+This closes the mutable host-request discriminator but does not authorize a
+UIO device run, opcode or RTL/ABI expansion, performance claim, FPGA or silicon
+gate.
+
 ## No calendar claim
 
 Early discussion estimated weeks for a shell/RamFS seed and roughly one to one
