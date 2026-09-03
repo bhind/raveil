@@ -611,8 +611,9 @@ Functional for replays and Host Functional for sealing/UIO planning only;
 performance, device, FPGA, CGRA/VLIW, ASIC, silicon, novelty and legal
 clearance remain unclaimed.
 
-T-0144 is the sole active P0 under real Issue #103 and clean branch
-`feat/t-0144-garden-execution-explanation` from canonical T-0143. ADR-0081
+T-0144 is canonical through merged PR #104 at
+`a4e1afcb99e450288d64bf5932b9586f4e3b0b8f`; Issue #103 and its Project item
+are closed and Done, and there is no active P0 delivery item. ADR-0081
 preserves the existing Garden snapshot and adds a separate bounded dynamic
 explanation whose lowering trace is produced and self-validated by the
 Graph-device compiler. Garden validates and projects that supplied trace; it
@@ -635,8 +636,10 @@ consumers `a2` and `a4` while retaining program `ec13f9f0...ea39`. The exact
 Garden `jjq` demo exits zero twice with byte-identical transcript
 `88f11738...9bb86`. Forty focused tests, 29 Garden tests, 153
 Graph-device tests and seven T-0139 tests pass; Python compile, record and diff
-checks pass. These are branch Host Functional facts pending exact-head review
-and integration, not new RTL execution or performance evidence.
+checks pass. Tester, Security and Performance Reviewers approved exact head
+`b31b0fa8d2518615d3b952b3dc7bfc00e08d0af7`. The same focused, Garden and
+Graph-device suites pass from the post-merge clean checkout. These are Host
+Functional facts, not new RTL execution or performance evidence.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
