@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **Canonical through T-0142 sealed host admission; T-0143 is the sole active P0 for one versioned MAX_U32 opcode while T-0044 physical research remains blocked**
+State: **Canonical through T-0143 versioned MAX_U32 execution; T-0144 is the sole active P0 for a read-only Garden execution explanation while T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical through T-0142 sealed host admission; T-0143 is the sole active P0 for one versioned MAX_U32 opcode; no FPGA or silicon evidence exists**
+State: **Canonical through T-0143 versioned MAX_U32 execution; T-0144 is the sole active P0 for a read-only Garden execution explanation; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -820,6 +820,17 @@ backward compatible; the existing transport/install ABI v1 register map and
 16 KiB aperture do not change. Passing can establish only independent
 oracle/fallback/RTL functional agreement. It cannot establish a general Graph,
 CGRA/VLIW, performance, FPGA, ASIC or silicon result.
+
+T-0144 makes that bounded vertical slice explainable without expanding its
+execution surface. The Graph-device compiler emits and verifies a deterministic
+lowering trace over descriptor dependencies, fan-out, instruction words,
+register assignment and program-order lifetime/release positions. A separate
+strict Garden explanation envelope binds that trace to affine and retained
+execution identities. Garden only validates and renders the envelope; it does
+not reconstruct compiler state, execute, access a device, mutate, approve or
+promote evidence. Passing is Host Functional presentation evidence only. The
+shown T-0143 RTL identities remain references, `performance=not-measured`, and
+`polls=` remains a termination diagnostic rather than cycles or time.
 
 ## No calendar claim
 

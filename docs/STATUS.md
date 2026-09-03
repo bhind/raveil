@@ -583,8 +583,9 @@ RTL Simulation Functional evidence only. Chisel RTL, device ABIs, opcodes,
 selectors, affine profiles and capacities are unchanged; no device was opened
 and performance was not measured.
 
-T-0143 is the sole active P0 under real Issue #101 and clean branch
-`feat/t-0143-max-u32` from canonical T-0142. Independent Librarian, Researcher
+T-0143 is canonical through merged PR #102 at
+`86a6aee3fc9bc6979981d9a1aedbcdc218453b16`; Issue #101 and its Project item
+are closed and Done. Independent Librarian, Researcher
 and Security read-only selection reviews recommend exactly one `MAX_U32`
 opcode because it preserves the existing two-source/one-destination word,
 five-neighbor selectors and fixed affine shape while expressing a nonlinear
@@ -603,10 +604,39 @@ byte-equal at `46282258...60852`. A fresh v1 bundle `8e37b331...dc496` retains
 the T-0141 program `ec13f9f0...ea39` and output `6f77bb67...62ff` through the
 same simulator. The v2 UIO plan `268f793e...42f46` reports seven ABI-derived
 operations and `device_opened=0`, `mmap=0`, `mmio=0`. Thirty-six focused,
-151 Graph-device and seven T-0139 tests pass. Evidence is RTL Simulation
+151 Graph-device and seven T-0139 tests pass. Tester, Security and Performance
+Reviewers approved exact head `a7315a0c8af9ac83a2078fef757e4b2ab609136d`.
+Evidence is RTL Simulation
 Functional for replays and Host Functional for sealing/UIO planning only;
 performance, device, FPGA, CGRA/VLIW, ASIC, silicon, novelty and legal
 clearance remain unclaimed.
+
+T-0144 is the sole active P0 under real Issue #103 and clean branch
+`feat/t-0144-garden-execution-explanation` from canonical T-0143. ADR-0081
+preserves the existing Garden snapshot and adds a separate bounded dynamic
+explanation whose lowering trace is produced and self-validated by the
+Graph-device compiler. Garden validates and projects that supplied trace; it
+does not reconstruct allocation, reread a descriptor or receipt, compile,
+execute, invoke a subprocess, access UIO, mutate state, approve, or promote
+evidence. The accepted view must explain dependencies/fan-out, exact encoded
+words, registers and program-order lifetimes/releases, affine configuration,
+retained request/source/ABI/RTL/toolchain/simulator/trace identities and
+oracle/fallback/RTL agreement. T-0144 evidence is Host Functional only; the
+displayed Phase 3 RTL Simulation Functional identities remain references.
+Performance is not measured and `polls=` remains a termination diagnostic,
+never cycles or time.
+
+The branch implementation preserves legacy Garden snapshot behavior and adds
+one strict `raveil.garden-dynamic-explanation/v1` fixture for the retained
+T-0143 cross-dilation result. Its compiler-owned lowering trace is bound at
+`76f2b6d9...96fc3`; the retained-reference manifest is
+`5524d573...76744e8`. The trace also proves the T-0141 fan-out value `a0` has
+consumers `a2` and `a4` while retaining program `ec13f9f0...ea39`. The exact
+Garden `jjq` demo exits zero twice with byte-identical transcript
+`88f11738...9bb86`. Forty focused tests, 29 Garden tests, 153
+Graph-device tests and seven T-0139 tests pass; Python compile, record and diff
+checks pass. These are branch Host Functional facts pending exact-head review
+and integration, not new RTL execution or performance evidence.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

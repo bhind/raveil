@@ -72,6 +72,12 @@ resolves it.
   remain unchanged. Whether any later opcode, predicate, constant, selector,
   schedule or broader Graph language is useful remains unresolved and requires
   a separate discriminator and decision.
+- ADR-0081 and T-0144 answer only how the accepted bounded lowering and retained
+  execution identities are projected in a read-only Garden view. The compiler
+  owns the trace and Garden has no execution or promotion authority. Whether a
+  future explanation artifact should be emitted directly beside every sealed
+  replay, receive a durable signature, or cover a broader Graph language
+  remains unresolved and requires separate authority and threat-model work.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality

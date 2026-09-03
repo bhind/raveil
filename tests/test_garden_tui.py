@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -11,6 +12,8 @@ from unittest import mock
 from raveil.cli import main
 from raveil.garden import (
     GardenBrowser,
+    GardenDynamicBrowser,
+    GardenDynamicExplanation,
     GardenSnapshot,
     _materialized_fused_plan_pair,
     render_error,
@@ -20,9 +23,22 @@ from raveil.garden import (
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/garden/minimal.json"
+DYNAMIC_FIXTURE = ROOT / "tests/fixtures/garden/dynamic-explanation.json"
 
 
 class GardenTUITests(unittest.TestCase):
+    def _dynamic_document(self) -> dict[str, object]:
+        return json.loads(DYNAMIC_FIXTURE.read_text(encoding="ascii"))
+
+    def _write_dynamic(self, value: object) -> tuple[str, Path]:
+        descriptor, name = tempfile.mkstemp(
+            prefix="dynamic-explanation-test-", suffix=".json", dir=DYNAMIC_FIXTURE.parent,
+        )
+        os.close(descriptor)
+        path = Path(name)
+        path.write_text(json.dumps(value), encoding="ascii")
+        return path.relative_to(ROOT).as_posix(), path
+
     def test_fixture_loads_through_owned_program_and_canonical_variants(self) -> None:
         snapshot = GardenSnapshot.load(FIXTURE)
         self.assertEqual(snapshot.program.program_id, "gemm_bias_relu-8x8x8")
@@ -296,6 +312,278 @@ class GardenTUITests(unittest.TestCase):
         self.assertNotIn("NativeCBackend", source)
         self.assertNotIn("SonatineQEMUBackend", source)
         self.assertNotIn("GraphExecutor", source)
+
+    def test_dynamic_explanation_is_strict_read_only_and_complete(self) -> None:
+        explanation = GardenDynamicExplanation.load(
+            "tests/fixtures/garden/dynamic-explanation.json"
+        )
+        self.assertEqual(explanation.graph_id, "cross-dilation-u32")
+        self.assertEqual(explanation.program_version, 2)
+        self.assertEqual(len(explanation.instructions), 10)
+        with self.assertRaises(TypeError):
+            explanation.identities["program_sha256"] = "0" * 64
+        rendered = GardenDynamicBrowser(explanation).render()
+        for expected in (
+            "read-only dynamic execution explanation",
+            "op=MAX_U32",
+            "encoded word: 0x10000000",
+            "assigned register: r0",
+            "zero-based program-order indices",
+            "descriptor_sha256:",
+            "program_sha256:",
+            "request_sha256:",
+            "compiler_source_sha256:",
+            "abi_sha256:",
+            "rtl_sha256:",
+            "toolchain_sha256:",
+            "simulator_sha256:",
+            "axi_trace_sha256:",
+            "agreement: oracle=fallback=RTL exact",
+            "performance=not-measured",
+            "execute=no mutate=no approve=no promote=no",
+        ):
+            self.assertIn(expected, rendered)
+        normalized = " ".join(rendered.replace("|", "").split())
+        self.assertIn("evidence class (this Garden view): host-functional", normalized)
+        self.assertIn(
+            "retained execution evidence class: rtl-simulation-functional", normalized,
+        )
+        self.assertIn(
+            "polls= is a termination diagnostic, not cycles, elapsed time, throughput, or performance",
+            normalized,
+        )
+        self.assertIn("conformance", rendered)
+        self.assertIn("transactions/output=6", rendered)
+        self.assertLessEqual(max(map(len, rendered.splitlines())), 150)
+
+    def test_dynamic_cli_demo_is_bounded_deterministic_and_keeps_navigation(self) -> None:
+        arguments = [
+            "garden", "--fixture", "tests/fixtures/garden/dynamic-explanation.json",
+            "--keys", "jjq",
+        ]
+        outputs = []
+        for _ in range(2):
+            output = io.StringIO()
+            with mock.patch("sys.stdout", output):
+                self.assertEqual(main(arguments), 0)
+            outputs.append(output.getvalue())
+        self.assertEqual(outputs[0], outputs[1])
+        self.assertIn("> [2] s op=LOAD_U32", outputs[0])
+        self.assertTrue(outputs[0].rstrip().endswith("Raveil Garden | closed"))
+        error = io.StringIO()
+        with mock.patch("sys.stderr", error):
+            self.assertEqual(main(arguments[:-1] + ["l"]), 2)
+        self.assertIn("accepts only j, k, g, G, or q", error.getvalue())
+
+    def test_dynamic_explanation_respects_all_terminal_width_boundaries(self) -> None:
+        explanation = GardenDynamicExplanation.load(
+            "tests/fixtures/garden/dynamic-explanation.json"
+        )
+        for width in (72, 119, 120, 150, 240):
+            rendered = GardenDynamicBrowser(explanation, width).render()
+            self.assertLessEqual(max(map(len, rendered.splitlines())), width)
+            self.assertEqual(rendered, GardenDynamicBrowser(explanation, width).render())
+        with self.assertRaisesRegex(ValueError, "width must be"):
+            GardenDynamicBrowser(explanation, 71)
+
+    def test_dynamic_trace_each_field_tamper_fails_before_render(self) -> None:
+        mutations = {
+            "index": lambda item: item.update(index=6),
+            "node_id": lambda item: item.update(node_id="forged"),
+            "op": lambda item: item.update(op="ADD_U32"),
+            "dependencies": lambda item: item.update(dependencies=["n", "c"]),
+            "selector": lambda item: item.update(selector="center"),
+            "fan_out": lambda item: item.update(fan_out=2),
+            "consumers": lambda item: item.update(consumers=["m3"]),
+            "encoded_word": lambda item: item.update(encoded_word=item["encoded_word"] ^ 1),
+            "source_registers": lambda item: item.update(source_registers=[1, 0]),
+            "destination_register": lambda item: item.update(destination_register=2),
+            "definition_index": lambda item: item.update(definition_index=4),
+            "last_use_index": lambda item: item.update(last_use_index=8),
+            "live_range": lambda item: item.update(live_range=[5, 8]),
+            "release_after_index": lambda item: item.update(release_after_index=8),
+        }
+        for field, mutation in mutations.items():
+            with self.subTest(field=field):
+                malformed = self._dynamic_document()
+                mutation(malformed["lowering"]["instructions"][5])
+                with self.assertRaises(ValueError):
+                    GardenDynamicExplanation.from_dict(malformed)
+
+    def test_dynamic_schema_payload_identity_and_claim_tampering_fail(self) -> None:
+        mutations = (
+            lambda value: value.update(schema="raveil.garden-dynamic-explanation/v2"),
+            lambda value: value.update(unknown=True),
+            lambda value: value.pop("affine"),
+            lambda value: value["lowering"].update(unknown=True),
+            lambda value: value["lowering"]["instructions"][0].update(unknown=True),
+            lambda value: value["identities"].pop("abi_sha256"),
+            lambda value: value["lowering"].update(program_version=1),
+            lambda value: value["program_payload"].__setitem__(0, 0),
+            lambda value: value["program_payload"].__setitem__(4, 0),
+            lambda value: value["program_payload"].__setitem__(12, value["program_payload"][12] ^ 1),
+            lambda value: value["program_payload"].__setitem__(22, 1),
+            lambda value: value["program_payload"].__setitem__(31, 1),
+            lambda value: value["identities"].update(request_sha256="0" * 64),
+            lambda value: value["agreement"].update(fallback_sha256="0" * 64),
+            lambda value: value["evidence"].update(garden_class="rtl-simulation-functional"),
+            lambda value: value.update(performance="measured"),
+            lambda value: value["polls"].update(is_cycle_measurement=True),
+            lambda value: value.update(lowering_trace_sha256="0" * 64),
+            lambda value: value.update(retained_evidence_sha256="0" * 64),
+        )
+        for mutation in mutations:
+            malformed = self._dynamic_document()
+            mutation(malformed)
+            with self.assertRaises(ValueError):
+                GardenDynamicExplanation.from_dict(malformed)
+        for identity in self._dynamic_document()["identities"]:
+            with self.subTest(identity=identity):
+                malformed = self._dynamic_document()
+                malformed["identities"][identity] = "0" * 64
+                with self.assertRaises(ValueError):
+                    GardenDynamicExplanation.from_dict(malformed)
+
+    def test_dynamic_duplicate_fields_and_wrong_optional_types_fail(self) -> None:
+        source = DYNAMIC_FIXTURE.read_text(encoding="ascii")
+        duplicate = source.replace('"schema": ', '"schema": "forged", "schema": ', 1)
+        descriptor, name = tempfile.mkstemp(
+            prefix="dynamic-explanation-duplicate-", suffix=".json",
+            dir=DYNAMIC_FIXTURE.parent,
+        )
+        os.close(descriptor)
+        path = Path(name)
+        try:
+            path.write_text(duplicate, encoding="ascii")
+            relative = path.relative_to(ROOT).as_posix()
+            with self.assertRaisesRegex(ValueError, "duplicate field"):
+                GardenDynamicExplanation.load(relative)
+        finally:
+            path.unlink(missing_ok=True)
+        for field, invalid in (
+            ("definition_index", "5"),
+            ("last_use_index", False),
+            ("live_range", [5, "7"]),
+            ("release_after_index", []),
+        ):
+            malformed = self._dynamic_document()
+            malformed["lowering"]["instructions"][5][field] = invalid
+            with self.assertRaises(ValueError):
+                GardenDynamicExplanation.from_dict(malformed)
+
+    def test_dynamic_path_and_file_admission_fail_closed(self) -> None:
+        for path in (
+            "", ".", "./tests/fixtures/garden/dynamic-explanation.json",
+            "tests/fixtures/garden/../garden/dynamic-explanation.json",
+            "README.md", str(DYNAMIC_FIXTURE),
+        ):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                GardenDynamicExplanation.load(path)
+        document = self._dynamic_document()
+        relative, leaf = self._write_dynamic(document)
+        link = leaf.with_name(leaf.name + "-link.json")
+        directory = leaf.with_name(leaf.name + "-directory.json")
+        fifo = leaf.with_name(leaf.name + "-fifo.json")
+        hardlink = leaf.with_name(leaf.name + "-hardlink.json")
+        empty = leaf.with_name(leaf.name + "-empty.json")
+        oversized = leaf.with_name(leaf.name + "-oversized.json")
+        try:
+            link.symlink_to(leaf)
+            directory.mkdir()
+            os.mkfifo(fifo)
+            os.link(leaf, hardlink)
+            empty.touch()
+            oversized.write_bytes(b"x" * (64 * 1024 + 1))
+            for candidate in (link, directory, fifo, hardlink, empty, oversized):
+                with self.subTest(candidate=candidate.name), self.assertRaises(ValueError):
+                    GardenDynamicExplanation.load(candidate.relative_to(ROOT).as_posix())
+            # The original is also rejected while it has a second hard link.
+            with self.assertRaises(ValueError):
+                GardenDynamicExplanation.load(relative)
+        finally:
+            for path in (link, fifo, hardlink, empty, oversized, leaf):
+                path.unlink(missing_ok=True)
+            if directory.exists():
+                directory.rmdir()
+
+    def test_dynamic_parent_symlink_and_read_race_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary_root = Path(temporary)
+            repository = temporary_root / "repository"
+            outside = temporary_root / "outside"
+            (outside / "fixtures/garden").mkdir(parents=True)
+            repository.mkdir()
+            (repository / "tests").symlink_to(outside, target_is_directory=True)
+            with mock.patch("raveil.garden._repository_root", return_value=repository):
+                with self.assertRaises(ValueError):
+                    GardenDynamicExplanation.load(
+                        "tests/fixtures/garden/dynamic-explanation.json"
+                    )
+        relative, leaf = self._write_dynamic(self._dynamic_document())
+        real_read = os.read
+        changed = False
+
+        def raced(descriptor: int, size: int) -> bytes:
+            nonlocal changed
+            payload = real_read(descriptor, size)
+            if not changed:
+                changed = True
+                os.utime(leaf, ns=(leaf.stat().st_atime_ns, leaf.stat().st_mtime_ns + 1_000_000))
+            return payload
+
+        try:
+            with mock.patch("raveil.garden.os.read", side_effect=raced):
+                with self.assertRaisesRegex(ValueError, "changed while read"):
+                    GardenDynamicExplanation.load(relative)
+        finally:
+            leaf.unlink(missing_ok=True)
+        relative, leaf = self._write_dynamic(self._dynamic_document())
+        replacement = leaf.with_name(leaf.name + "-opened")
+        original = leaf.read_bytes()
+        changed = False
+
+        def replaced(descriptor: int, size: int) -> bytes:
+            nonlocal changed
+            payload = real_read(descriptor, size)
+            if not changed:
+                changed = True
+                leaf.rename(replacement)
+                leaf.write_bytes(original)
+            return payload
+
+        try:
+            with mock.patch("raveil.garden.os.read", side_effect=replaced):
+                with self.assertRaisesRegex(ValueError, "changed while read"):
+                    GardenDynamicExplanation.load(relative)
+        finally:
+            leaf.unlink(missing_ok=True)
+            replacement.unlink(missing_ok=True)
+
+    def test_dynamic_missing_no_follow_capabilities_fail_before_open(self) -> None:
+        for capability in ("O_NOFOLLOW", "O_DIRECTORY"):
+            with self.subTest(capability=capability), \
+                    mock.patch.object(os, capability, None), \
+                    mock.patch("raveil.garden.os.open",
+                               side_effect=AssertionError("path touched")) as opened:
+                with self.assertRaisesRegex(
+                    ValueError, "requires O_NOFOLLOW and O_DIRECTORY",
+                ):
+                    GardenDynamicExplanation.load(
+                        "tests/fixtures/garden/dynamic-explanation.json"
+                    )
+                opened.assert_not_called()
+
+    def test_dynamic_view_never_calls_execution_or_compiler_paths(self) -> None:
+        import subprocess
+        with mock.patch.object(subprocess, "run", side_effect=AssertionError("execution")), \
+                mock.patch("raveil.garden.GraphCompiler.compile",
+                           side_effect=AssertionError("legacy compiler")), \
+                mock.patch("raveil.graph_device_dag.compile_descriptor",
+                           side_effect=AssertionError("compiler")):
+            explanation = GardenDynamicExplanation.load(
+                "tests/fixtures/garden/dynamic-explanation.json"
+            )
+            self.assertIn("read-only", GardenDynamicBrowser(explanation).render())
 
 
 if __name__ == "__main__":

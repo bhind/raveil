@@ -26,6 +26,7 @@ GRAPH_DIRECTORY = "contracts/graph_device_dags"
 GRAPH_SCHEMA = "raveil.graph-device-dag/v1"
 ARTIFACT_SCHEMA = "raveil.graph-device-dag-artifact/v1"
 RECEIPT_SCHEMA = "raveil.graph-device-dag-receipt/v1"
+LOWERING_TRACE_SCHEMA = "raveil.graph-device-lowering-trace/v1"
 EVIDENCE_CLASS = "rtl-simulation-functional"
 MAGIC = 0x52504731
 VERSION = 1
@@ -206,6 +207,129 @@ def encode_store(source: int) -> int:
     return (STORE_U32 << 28) | (source << 25)
 
 
+def _lowering_trace(
+    value: dict[str, Any],
+    instructions: Sequence[int],
+    allocations: dict[str, int],
+) -> dict[str, Any]:
+    """Describe compiler-owned allocation decisions without granting authority."""
+    uses: dict[str, list[int]] = {node["id"]: [] for node in value["nodes"]}
+    for index, node in enumerate(value["nodes"]):
+        for source in node.get("inputs", [node.get("input")]):
+            if source is not None:
+                uses[source].append(index)
+    entries: list[dict[str, Any]] = []
+    for index, (node, word) in enumerate(zip(value["nodes"], instructions)):
+        dependencies = list(node.get("inputs", [node.get("input")]))
+        dependencies = [source for source in dependencies if source is not None]
+        produces_value = node["op"] != "STORE_U32"
+        last_use = max(uses[node["id"]]) if produces_value and uses[node["id"]] else None
+        entries.append({
+            "index": index,
+            "node_id": node["id"],
+            "op": node["op"],
+            "dependencies": dependencies,
+            "selector": node.get("address"),
+            "fan_out": len(uses[node["id"]]),
+            "consumers": [value["nodes"][consumer]["id"] for consumer in uses[node["id"]]],
+            "encoded_word": int(word),
+            "source_registers": [allocations[source] for source in dependencies],
+            "destination_register": allocations[node["id"]] if produces_value else None,
+            "definition_index": index if produces_value else None,
+            "last_use_index": last_use,
+            "live_range": (
+                [index, last_use if last_use is not None else len(instructions) - 1]
+                if produces_value else None
+            ),
+            "release_after_index": last_use,
+        })
+    digest = _sha256(_word_bytes([len(instructions), *instructions]))
+    return {
+        "schema": LOWERING_TRACE_SCHEMA,
+        "graph_id": value["graph_id"],
+        "descriptor_canonical_sha256": _sha256(_canonical(value)),
+        "program_version": 2 if any(node["op"] == "MAX_U32" for node in value["nodes"]) else VERSION,
+        "instruction_count": len(instructions),
+        "program_sha256": digest,
+        "instructions": entries,
+    }
+
+
+def validate_lowering_trace(
+    value: dict[str, Any], trace: dict[str, Any], instructions: Sequence[int]
+) -> None:
+    """Fail closed unless a compiler trace exactly explains the encoded program."""
+    validate_descriptor(value)
+    expected_keys = {
+        "schema", "graph_id", "descriptor_canonical_sha256", "program_version",
+        "instruction_count", "program_sha256", "instructions",
+    }
+    if set(trace) != expected_keys or trace.get("schema") != LOWERING_TRACE_SCHEMA \
+            or trace.get("graph_id") != value["graph_id"] \
+            or trace.get("descriptor_canonical_sha256") != _sha256(_canonical(value)) \
+            or trace.get("program_version") != (
+                2 if any(node["op"] == "MAX_U32" for node in value["nodes"]) else VERSION
+            ) \
+            or trace.get("instruction_count") != len(instructions):
+        raise GraphDeviceDagError("lowering trace identity is invalid")
+    digest = _sha256(_word_bytes([len(instructions), *instructions]))
+    if trace.get("program_sha256") != digest:
+        raise GraphDeviceDagError("lowering trace program identity is invalid")
+    entries = trace.get("instructions")
+    if not isinstance(entries, list) or len(entries) != len(value["nodes"]):
+        raise GraphDeviceDagError("lowering trace instruction count is invalid")
+    uses: dict[str, list[int]] = {node["id"]: [] for node in value["nodes"]}
+    for index, node in enumerate(value["nodes"]):
+        for source in node.get("inputs", [node.get("input")]):
+            if source is not None:
+                uses[source].append(index)
+    allocations: dict[str, int] = {}
+    entry_keys = {
+        "index", "node_id", "op", "dependencies", "selector", "fan_out", "consumers",
+        "encoded_word", "source_registers", "destination_register",
+        "definition_index", "last_use_index", "live_range", "release_after_index",
+    }
+    for index, (node, word, entry) in enumerate(zip(value["nodes"], instructions, entries)):
+        if not isinstance(entry, dict) or set(entry) != entry_keys:
+            raise GraphDeviceDagError("lowering trace instruction fields are invalid")
+        dependencies = list(node.get("inputs", [node.get("input")]))
+        dependencies = [source for source in dependencies if source is not None]
+        if entry["index"] != index or entry["node_id"] != node["id"] \
+                or entry["op"] != node["op"] or entry["dependencies"] != dependencies \
+                or entry["selector"] != node.get("address") \
+                or entry["fan_out"] != len(uses[node["id"]]) \
+                or entry["consumers"] != [
+                    value["nodes"][consumer]["id"] for consumer in uses[node["id"]]
+                ] \
+                or entry["encoded_word"] != word \
+                or entry["source_registers"] != [allocations[source] for source in dependencies]:
+            raise GraphDeviceDagError("lowering trace does not match the descriptor or words")
+        produces_value = node["op"] != "STORE_U32"
+        destination = (word >> 25) & 0x7 if produces_value else None
+        last_use = max(uses[node["id"]]) if produces_value and uses[node["id"]] else None
+        if entry["destination_register"] != destination \
+                or entry["definition_index"] != (index if produces_value else None) \
+                or entry["last_use_index"] != last_use \
+                or entry["live_range"] != (
+                    [index, last_use if last_use is not None else len(instructions) - 1]
+                    if produces_value else None
+                ) \
+                or entry["release_after_index"] != last_use:
+            raise GraphDeviceDagError("lowering trace lifetime or register is invalid")
+        if node["op"] == "LOAD_U32":
+            expected_word = encode_load(destination, node["address"])
+        elif node["op"] == "ADD_U32":
+            expected_word = encode_add(destination, *entry["source_registers"])
+        elif node["op"] == "MAX_U32":
+            expected_word = encode_max(destination, *entry["source_registers"])
+        else:
+            expected_word = encode_store(entry["source_registers"][0])
+        if word != expected_word:
+            raise GraphDeviceDagError("lowering trace encoded word is invalid")
+        if produces_value:
+            allocations[node["id"]] = destination
+
+
 def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
     validate_descriptor(value)
     remaining: dict[str, int] = {node["id"]: 0 for node in value["nodes"]}
@@ -214,6 +338,7 @@ def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
             if source is not None:
                 remaining[source] += 1
     registers: dict[str, int] = {}
+    allocations: dict[str, int] = {}
     free = list(range(VALUE_REGISTERS))
     instructions: list[int] = []
     for node in value["nodes"]:
@@ -233,6 +358,7 @@ def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
             raise GraphDeviceDagError("Graph requires more than eight live values")
         destination = free.pop(0)
         registers[node["id"]] = destination
+        allocations[node["id"]] = destination
         if op == "LOAD_U32":
             instructions.append(encode_load(destination, node["address"]))
         elif op == "ADD_U32":
@@ -246,12 +372,15 @@ def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
                *digest_words, *instructions,
                *([0] * (PROGRAM_CAPACITY - len(instructions))), 0, 0, 0, 0]
     assert len(payload) == PROGRAM_WORDS
+    trace = _lowering_trace(value, instructions, allocations)
+    validate_lowering_trace(value, trace, instructions)
     return {
         "graph_id": value["graph_id"],
         "affine": value["affine"],
         "instruction_count": len(instructions),
         "instructions": instructions,
         "program_sha256": digest,
+        "lowering_trace": trace,
         "payload": payload,
         "transactions_per_output": sum(
             instruction >> 28 == LOAD_U32 for instruction in instructions) + 1,

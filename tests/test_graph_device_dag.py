@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 import tempfile
@@ -16,6 +17,7 @@ from raveil.graph_device_dag import (
     prepare,
     programs,
     software_fallback,
+    validate_lowering_trace,
 )
 from raveil.riscv_stencil_signature import input_words
 
@@ -25,6 +27,47 @@ CHISEL = ROOT / "hardware" / "chisel"
 
 
 class GraphDeviceDagTests(unittest.TestCase):
+    def test_compiler_owns_deterministic_word_bound_lowering_trace(self) -> None:
+        fanout_path = ROOT / "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
+        descriptor = json.loads(fanout_path.read_text(encoding="ascii"))
+        first = compile_descriptor(descriptor)
+        second = compile_descriptor(descriptor)
+        self.assertEqual(first["lowering_trace"], second["lowering_trace"])
+        self.assertEqual(
+            first["program_sha256"],
+            "ec13f9f0d376233b49b2d647088f71bf208ddea68e7a4d09732f660b9770ea39",
+        )
+        trace = first["lowering_trace"]
+        self.assertEqual(trace["program_sha256"], first["program_sha256"])
+        self.assertEqual(trace["instruction_count"], len(first["instructions"]))
+        a0 = next(item for item in trace["instructions"] if item["node_id"] == "a0")
+        self.assertEqual(a0["fan_out"], 2)
+        self.assertEqual(a0["consumers"], ["a2", "a4"])
+        self.assertEqual(a0["definition_index"], 5)
+        self.assertEqual(a0["last_use_index"], 9)
+        self.assertEqual(a0["live_range"], [5, 9])
+        self.assertEqual(a0["release_after_index"], 9)
+        validate_lowering_trace(descriptor, trace, first["instructions"])
+        malformed = copy.deepcopy(trace)
+        malformed["instructions"][5]["encoded_word"] ^= 1
+        with self.assertRaisesRegex(GraphDeviceDagError, "descriptor or words"):
+            validate_lowering_trace(descriptor, malformed, first["instructions"])
+
+    def test_garden_explanation_fixture_retains_exact_compiler_output(self) -> None:
+        descriptor = json.loads((
+            ROOT / "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
+        ).read_text(encoding="ascii"))
+        program = compile_descriptor(descriptor)
+        explanation = json.loads((
+            ROOT / "tests/fixtures/garden/dynamic-explanation.json"
+        ).read_text(encoding="ascii"))
+        self.assertEqual(explanation["lowering"], program["lowering_trace"])
+        self.assertEqual(explanation["program_payload"], program["payload"])
+        self.assertEqual(
+            explanation["identities"]["program_sha256"],
+            program["program_sha256"],
+        )
+
     def test_busy_mutation_prefix_allows_empty_but_rejects_completion(self) -> None:
         expected = expected_transactions(programs()[0], input_words(1))
         _require_transactions(
