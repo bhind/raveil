@@ -1009,3 +1009,33 @@ arbitrary-Graph, resource, or performance evidence.
 Any `polls=` field in the retained device log is only a bounded termination
 diagnostic. Different shapes have different work and poll counts; those values
 are not cycles, elapsed time, throughput, or a valid performance comparison.
+
+### Sealed dynamic request admission
+
+`dynamic-seal` reads a non-catalogue descriptor once through a no-follow file
+descriptor, compiles its bounded payload, and exclusively creates a closed
+sealed bundle. `SEALED` is written last and binds `manifest.json`; verification
+uses only fd-relative no-follow reads into memory. A seal is host-functional
+admission evidence, not RTL simulation, FPGA, UIO, or performance evidence.
+
+```sh
+python3 -m raveil graph-device dynamic-seal \
+  --descriptor tests/fixtures/graph_device_dynamic/fanout-five-live.json --seed 3
+```
+
+The command prints its automatically selected immutable path beneath
+`artifacts/graph_device_dynamic_sealed/<manifest-sha256>`; operators cannot
+choose an output pathname.
+
+Replay that exact verified bundle through the existing one-request RTL runner:
+
+```sh
+python3 -m raveil graph-device dynamic-replay \
+  --sealed artifacts/graph_device_dynamic_sealed/<manifest-sha256>
+```
+
+The later replay path consumes verified payload bytes rather than reparsing the
+sealed descriptor. A byte change, symlink, unexpected inventory entry, existing
+destination, or compiler-source identity drift is rejected. `performance` is
+always `not-measured`; `polls=` remains only a termination diagnostic, never a
+cycle or time value.

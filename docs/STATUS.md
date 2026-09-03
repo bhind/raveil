@@ -559,6 +559,29 @@ profiles and capacities are unchanged. This is RTL Simulation Functional
 evidence only; instruction/liveness counts are conformance facts and
 performance was not measured.
 
+T-0142 is verified on branch `feat/t-0142-sealed-dynamic-request` under Issue
+#99. ADR-0079 adds an exact digest-named sealed inventory above the unchanged
+dynamic request: descriptor and compiler sources are read through no-follow
+directory descriptors into one snapshot, every payload has an exact size and
+SHA-256 binding, `SEALED` is written last, and replay consumes only verified
+in-memory payloads in a new private root. The final-source seal is
+`0beaba3fe6638516aca532104d05cf412d8b3dae0658d93397c8d45ce67b24c8`.
+The checked Linux/UIO conversion derives the unchanged 16 KiB relative
+aperture and execution/configuration/program namespaces, emits plan
+`81f5d0d528f96627bef4d188dcd4daa6c2e9a2ed188379f78c72be52bf0caec2`,
+and reports `device_opened=0`, `mmap=0` and `mmio=0`. That is Host Functional
+evidence only. A separate real replay emits RTL once, builds simulator
+`b20eee47e38d8a8603e3e11d8fbb0ee71113099638c0cdd42ce7f9f252fd6ba4`
+once and invokes it once. The sealed oracle, C++ fallback and RTL output are
+byte-equal at SHA-256
+`6f77bb673b34cf0b1370ab8da18d377c121f0bb55bf2e934d17b2691978062ff`;
+the request, source, ABI, RTL, toolchain, simulator and AXI transcript are
+receipt-bound, and malformed admission stops before AXI. Twelve focused tests,
+143 Graph-device regressions and seven T-0139 regressions pass. This replay is
+RTL Simulation Functional evidence only. Chisel RTL, device ABIs, opcodes,
+selectors, affine profiles and capacities are unchanged; no device was opened
+and performance was not measured.
+
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits
 one ready next-Sprint item to be pulled immediately after closeout while

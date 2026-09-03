@@ -80,3 +80,4 @@ rewrite it.
 | [ADR-0076](ADR-0076-read-only-kv260-preflight-precedes-device-access.md) | Accepted | A read-only KV260 target preflight must pass before any later UIO device access |
 | [ADR-0077](ADR-0077-bounded-dynamic-programs-use-existing-graph-device-abis.md) | Accepted | Runtime-compiled bounded programs use the existing Graph-device ABIs in a separate simulation path |
 | [ADR-0078](ADR-0078-single-dynamic-graph-reuses-the-bounded-runtime.md) | Accepted | One non-catalogue dynamic Graph reuses the existing bounded simulation runtime |
+| [ADR-0079](ADR-0079-sealed-dynamic-requests-precede-transport.md) | Accepted | Verified sealed dynamic requests precede simulator replay or UIO dry-run conversion |

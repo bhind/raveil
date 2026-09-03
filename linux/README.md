@@ -62,6 +62,22 @@ host. A PASS is only `target-host-observation`, and its marker states
 `device_opened=0 mmio=0 performance=not-measured`. The later UIO runner must
 still repeat its opened-object checks.
 
+### Sealed dynamic UIO dry-run
+
+Before any future dynamic UIO transport, a sealed dynamic request can be
+converted to a relative-aperture plan without opening its named device:
+
+```sh
+python3 -m raveil graph-device dynamic-uio-dry-run \
+  --sealed artifacts/graph_device_dynamic_sealed/<manifest-sha256> --device /dev/uio0
+```
+
+The command first verifies the sealed payload inventory and compiler identity,
+then reports only the 16 KiB relative execution, affine, and program namespaces.
+It performs no `open`, `mmap`, or MMIO (`device_opened=0 mmap=0 mmio=0`). This
+is Host Functional planning evidence, not RTL simulation, FPGA/KV260, hardware
+performance, or device-success evidence.
+
 An ARM64 Linux build can be reproduced on the development host with:
 
 ```sh

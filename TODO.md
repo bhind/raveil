@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0141 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0142 |
 | **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -333,6 +333,28 @@ review and failure preservation do not consume the two-item delivery limit.
   record and diff checks pass. Independent Tester replay confirms malformed
   request rejection before an AXI transcript. Evidence is RTL Simulation
   Functional only; performance was not measured.
+
+- [x] **T-0142** Seal and verify one compiled dynamic request, replay verified
+  payloads without descriptor reinterpretation, and render a Linux/UIO dry-run
+  plan that stops before device access. Real Issue #99, branch
+  `feat/t-0142-sealed-dynamic-request`, Systems Implementer, 13 SP, Sprint
+  S-0003 and split Host Functional / RTL Simulation Functional evidence own
+  the sealed manifest/bundle, private replay, pure UIO plan, focused tests,
+  ADR-0079 and matching records. The exact closed inventory must bind the
+  descriptor snapshot, program/affine/request/input payloads, source/compiler,
+  generated headers and ABIs; one-byte mutation, symlink/path escape,
+  pre-existing output, source drift and identity races fail closed. Replay
+  consumes verified in-memory bytes and writes only a new private root. The
+  dry run reports `device_opened=0`, `mmap=0`, `mmio=0` and cannot weaken
+  T-0139 or ADR-0071. Stop before actual UIO, FPGA, opcode/RTL/ABI changes,
+  general-Graph or performance claims, ASIC or silicon. The final-source seal
+  is `0beaba3f...b24c8`; its Host Functional UIO plan is `81f5d0d5...caec2`
+  and performs no device operation. One real replay emits RTL once, builds
+  simulator `b20eee47...ba4` once and invokes it once. Its descriptor oracle,
+  C++ fallback and RTL output are byte-equal at `6f77bb67...62ff`; malformed
+  request admission stops before AXI. Twelve focused tests, 143 Graph-device
+  regressions, seven T-0139 regressions, CLI/shell, record, diff and queue
+  checks pass. Performance was not measured.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

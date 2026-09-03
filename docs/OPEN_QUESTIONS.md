@@ -61,6 +61,13 @@ resolves it.
   immutable sealing, filesystem-race closure and a dry-run conversion toward
   the Linux/UIO adapter remain unresolved and require a separate accepted host
   admission/transport decision before any device access.
+- ADR-0079 and T-0142 now resolve the local host-admission portion: one exact
+  descriptor/source snapshot is sealed, verified into retained bytes and
+  replayed without descriptor reinterpretation, while a pure UIO plan stops
+  before `open`, `mmap` or MMIO. They do not authorize a device run or answer
+  which single additional opcode is useful. The next discriminator must keep
+  the transport ABIs and fixed affine/selector/capacity bounds explicit and
+  must separately justify any program-format version change.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality
