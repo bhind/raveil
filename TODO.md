@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0144 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None |
 | **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -379,7 +379,7 @@ review and failure preservation do not consume the two-item delivery limit.
   Performance Reviewers approved exact head `a7315a0`; PR #102 squash-merged
   it as canonical `86a6aee`, Issue #101 closed and its Project item is Done.
 
-- [ ] **T-0144** Explain the bounded dynamic Graph execution in Garden without
+- [x] **T-0144** Explain the bounded dynamic Graph execution in Garden without
   giving the presentation layer compiler, execution, evidence-promotion or
   Project authority. Real Issue #103, branch
   `feat/t-0144-garden-execution-explanation`, Systems Implementer, 13 SP,
@@ -401,7 +401,10 @@ review and failure preservation do not consume the two-item delivery limit.
   two runs at `88f11738...9bb86`. Forty focused, 29 Garden, 153
   Graph-device and seven T-0139 tests pass, including `a0` fan-out consumers
   `a2`/`a4`, identity/trace/path/race negatives and no-compiler/no-execution
-  checks. Exact-head review and integration remain open.
+  checks. Tester, Security and Performance Reviewers approved exact head
+  `b31b0fa`; PR #104 squash-merged as canonical `a4e1afc`, Issue #103 closed,
+  its Project item is Done and the post-merge clean replay plus zero-active
+  queue audit pass.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

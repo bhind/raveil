@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **Canonical through T-0143 versioned MAX_U32 execution; T-0144 is the sole active P0 for a read-only Garden execution explanation while T-0044 physical research remains blocked**
+State: **Canonical through T-0144 read-only Garden execution explanation; no active P0 delivery item; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical through T-0143 versioned MAX_U32 execution; T-0144 is the sole active P0 for a read-only Garden execution explanation; no FPGA or silicon evidence exists**
+State: **Canonical through T-0144 read-only Garden execution explanation; no active P0 delivery item and no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
