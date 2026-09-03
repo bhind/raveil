@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0143 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0144 |
 | **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -375,8 +375,33 @@ review and failure preservation do not consume the two-item delivery limit.
   to 5 LOAD, 4 MAX_U32 and 1 STORE and passes sealed replay with
   oracle/fallback/RTL equality at `46282258...60852`; a fresh v1 replay retains
   program `ec13f9f0...ea39` and output `6f77bb67...62ff`. Thirty-six focused,
-  151 Graph-device and seven T-0139 tests pass. Exact-head review and
-  integration remain open.
+  151 Graph-device and seven T-0139 tests pass. Tester, Security and
+  Performance Reviewers approved exact head `a7315a0`; PR #102 squash-merged
+  it as canonical `86a6aee`, Issue #101 closed and its Project item is Done.
+
+- [ ] **T-0144** Explain the bounded dynamic Graph execution in Garden without
+  giving the presentation layer compiler, execution, evidence-promotion or
+  Project authority. Real Issue #103, branch
+  `feat/t-0144-garden-execution-explanation`, Systems Implementer, 13 SP,
+  Sprint S-0003 and Host Functional evidence own one compiler-produced
+  lowering trace, a separate strict `raveil.garden-dynamic-explanation/v1`
+  envelope, the deterministic read-only view, focused tests, ADR-0081 and
+  matching records. Preserve `raveil.garden-snapshot/v1`; Garden must validate
+  rather than reconstruct descriptor dependencies, encoded words, register
+  allocation/lifetime/free positions, fan-out, affine configuration,
+  identities, oracle/fallback/RTL agreement and non-claims. Render retained
+  Phase 3 RTL evidence as a reference only, state `performance=not-measured`,
+  and identify `polls=` solely as a termination diagnostic. Reject malformed,
+  inconsistent, tampered, symlinked, escaping or non-regular input before
+  rendering. Stop before any Garden compile/execute/subprocess/UIO/device,
+  approval/mutation/promotion, RTL/ABI/opcode change, performance measurement,
+  FPGA/KV260, general Graph, CGRA/VLIW, ASIC or silicon work. The implemented
+  strict fixture binds compiler trace `76f2b6d9...96fc3` and retained evidence
+  manifest `5524d573...76744e8`; the exact `jjq` demo is byte-identical across
+  two runs at `88f11738...9bb86`. Forty focused, 29 Garden, 153
+  Graph-device and seven T-0139 tests pass, including `a0` fan-out consumers
+  `a2`/`a4`, identity/trace/path/race negatives and no-compiler/no-execution
+  checks. Exact-head review and integration remain open.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

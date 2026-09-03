@@ -556,6 +556,26 @@ program-install, affine-install and execution transport ABIs remain v1 with
 the same relative aperture. This is a bounded nonlinear stencil path, not a
 general Graph machine or CGRA/VLIW claim.
 
+T-0144 adds a second Garden input schema for explaining this bounded dynamic
+path. The Graph-device compiler emits a deterministic lowering witness beside
+the program: descriptor dependencies and fan-out, exact encoded words, value
+register assignments, and program-order definition/last-use/release positions.
+It validates the witness against its program words and SHA-256. Garden admits
+only a bounded self-contained explanation that carries this witness, affine
+configuration, retained execution identities, three-way output agreement,
+evidence labels and non-claims. The view validates and projects the witness; it
+never invokes or reimplements the compiler/allocator and never rereads a live
+descriptor, sealed request, simulator session or receipt.
+
+The dynamic explanation loader has a separate component-wise no-follow,
+regular-file, bounded-read admission path. It rejects path escape, symlinks,
+special files, schema or identity inconsistency and observed replacement before
+rendering. This necessary fixture read does not add executor, subprocess, UIO,
+device, approval, mutation or promotion authority. T-0144 is Host Functional
+presentation evidence only; any displayed T-0143 RTL Simulation Functional
+hash is a retained reference. Program-order positions are not cycles or time,
+and `polls=` remains solely a termination diagnostic.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

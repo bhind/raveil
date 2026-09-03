@@ -37,8 +37,8 @@ from .interactive_shell import NativeInteractiveSession, run_interactive_shell
 from .workspace import NativeWorkspace
 from .command_showcase import list_showcases, mutate_showcase, prepare_showcase, run_showcase
 from .garden import (
-    GardenSnapshot, render_empty, render_error, render_key_session, run_interactive,
-    validate_render_width,
+    load_garden_view, render_empty, render_error, render_key_session,
+    run_interactive, validate_render_width,
 )
 from .graph_device_submit import render_submission
 from .graph_device_run import run as run_graph_device
@@ -352,7 +352,7 @@ def command_garden(args: argparse.Namespace) -> int:
         print(render_empty())
         return 0
     try:
-        snapshot = GardenSnapshot.load(Path(args.fixture))
+        snapshot = load_garden_view(args.fixture)
         if args.keys is not None:
             print(render_key_session(snapshot, args.keys, args.width))
             return 0

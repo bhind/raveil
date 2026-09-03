@@ -1,0 +1,16 @@
+{
+  "schema": "raveil.garden-dynamic-explanation-contract/v1",
+  "document_schema": "raveil.garden-dynamic-explanation/v1",
+  "lowering_schema": "raveil.graph-device-lowering-trace/v1",
+  "trusted_root": "tests/fixtures/garden",
+  "path_admission": "one normalized repository-relative leaf opened component-wise with O_NOFOLLOW; regular, nonempty, single-link, bounded, exact-read, and stable before/after identity",
+  "program_binding": "32-u32 payload with exact magic/version/count/register framing, SHA-256 digest words, active instructions, zero padding, and zero reserved words",
+  "lowering_binding": "SHA-256 of the canonical compiler-owned lowering trace, which itself retains canonical descriptor and encoded-program identities",
+  "projection": "Garden validates and renders compiler-owned nodes, dependencies, fan-out, words, register allocation, program-order lifetimes, affine configuration, and retained evidence identities without invoking the compiler",
+  "retained_evidence_binding": "SHA-256 of canonical affine, agreement, evidence, identities, performance, and polls references",
+  "garden_evidence_class": "host-functional",
+  "retained_execution_evidence_class": "rtl-simulation-functional",
+  "performance": "not-measured",
+  "polls": "termination diagnostic, not cycles, elapsed time, throughput, or performance",
+  "authority": "read-only presentation; no compiler, execution, simulator, UIO, device, mutation, approval, or promotion"
+}

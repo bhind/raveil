@@ -82,3 +82,4 @@ rewrite it.
 | [ADR-0078](ADR-0078-single-dynamic-graph-reuses-the-bounded-runtime.md) | Accepted | One non-catalogue dynamic Graph reuses the existing bounded simulation runtime |
 | [ADR-0079](ADR-0079-sealed-dynamic-requests-precede-transport.md) | Accepted | Verified sealed dynamic requests precede simulator replay or UIO dry-run conversion |
 | [ADR-0080](ADR-0080-max-u32-uses-versioned-program-admission.md) | Accepted | One unsigned MAX_U32 opcode uses explicit v2 program, request, and sealed admission |
+| [ADR-0081](ADR-0081-garden-projects-compiler-owned-execution-explanations.md) | Accepted | Garden validates and projects a compiler-owned bounded execution explanation without authority |
