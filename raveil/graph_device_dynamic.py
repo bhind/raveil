@@ -1,4 +1,4 @@
-"""Bounded dynamic Graph-device request preparation and two-request runner."""
+"""Bounded dynamic Graph-device request preparation and one/two-request runner."""
 
 from __future__ import annotations
 
@@ -161,13 +161,13 @@ def prepare_request(output: Path, graph: str, seed: int, repository: Path | None
             "metadata": metadata}
 
 
-def _marker(output: str, session: Path) -> str:
+def _marker(output: str, session: Path, request_count: int) -> str:
     markers = [line for line in output.splitlines() if line.startswith("GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V1")]
     if len(markers) != 1:
         raise GraphDeviceDynamicError("dynamic runner marker is missing or duplicated")
     pattern = re.compile(
-        r"GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V1 status=PASS requests=2 "
-        r"same_simulator=1 invoked_twice=1 rtl_emitted_once=1 rejected_before_axi=1 "
+        rf"GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V1 status=PASS requests={request_count} "
+        rf"same_simulator=1 invoked_{'once' if request_count == 1 else 'twice'}=1 rtl_emitted_once=1 simulator_built_once=1 rejected_before_axi=1 "
         r"simulator_sha256=[0-9a-f]{64} path=artifacts/graph_device_axi4lite_dynamic/run\.[A-Za-z0-9_]{8} "
         r"evidence=rtl-simulation-functional performance=not-measured"
     )
@@ -177,9 +177,9 @@ def _marker(output: str, session: Path) -> str:
     return markers[0]
 
 
-def run_dynamic_pair(graphs: list[str], seeds: list[int], repository: Path | None = None) -> str:
-    if len(graphs) != 2 or len(seeds) != 2:
-        raise GraphDeviceDynamicError("dynamic-run-pair requires exactly two --descriptor and two --seed values")
+def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, command: str) -> str:
+    if len(graphs) not in {1, 2} or len(graphs) != len(seeds):
+        raise GraphDeviceDynamicError(f"{command} request count is invalid")
     repo = (repository or _root()).resolve(strict=True)
     first = repo / "artifacts/graph_device_axi4lite_dynamic"
     if first.exists() and (first.is_symlink() or not first.is_dir()):
@@ -187,27 +187,25 @@ def run_dynamic_pair(graphs: list[str], seeds: list[int], repository: Path | Non
     first.mkdir(parents=True, exist_ok=True)
     import tempfile
     session = Path(tempfile.mkdtemp(prefix="run.", dir=first))
-    request_roots = [session / "request-1", session / "request-2"]
-    if graphs[0] not in CATALOGUE:
-        raise GraphDeviceDynamicError("first dynamic graph must be a frozen catalogue descriptor")
+    request_roots = [session / f"request-{index}" for index in range(1, len(graphs) + 1)]
     prepared = [prepare_request(root, graph, seed, repo) for root, graph, seed in zip(request_roots, graphs, seeds)]
-    if graphs[1] in CATALOGUE:
-        raise GraphDeviceDynamicError("second dynamic graph must be outside the frozen catalogue")
     if any(item["profile"]["name"] not in {"baseline", "compact"} for item in prepared):
         raise GraphDeviceDynamicError("dynamic profiles are restricted to baseline and compact")
     runner = repo / "hardware/chisel/run-graph-device-axi4lite-dynamic.sh"
     try:
         result = subprocess.run(
-            [str(runner), "--request", str(request_roots[0]), "--request", str(request_roots[1])],
+            [str(runner), *[part for root in request_roots for part in ("--request", str(root))]],
             cwd=repo, text=True, encoding="utf-8", errors="strict", capture_output=True, check=False,
         )
     except (OSError, UnicodeError) as error:
         raise GraphDeviceDynamicError(f"dynamic runner could not start: {error}") from error
     if result.returncode != 0:
         raise GraphDeviceDynamicError("dynamic runner failed")
-    marker = _marker(result.stdout, session)
-    if "requests=2" not in marker or "same_simulator=1" not in marker or "invoked_twice=1" not in marker:
-        raise GraphDeviceDynamicError("dynamic runner did not prove one build and two invocations")
+    marker = _marker(result.stdout, session, len(graphs))
+    invocation = "once" if len(graphs) == 1 else "twice"
+    if f"requests={len(graphs)}" not in marker or "same_simulator=1" not in marker \
+            or f"invoked_{invocation}=1" not in marker:
+        raise GraphDeviceDynamicError("dynamic runner did not prove one build and the requested invocations")
     marker_hash = re.search(r"simulator_sha256=([0-9a-f]{64})", marker)
     if marker_hash is None:
         raise GraphDeviceDynamicError("dynamic simulator identity is missing")
@@ -248,14 +246,31 @@ def run_dynamic_pair(graphs: list[str], seeds: list[int], repository: Path | Non
         except FileExistsError as error:
             raise GraphDeviceDynamicError("dynamic receipt is append-once") from error
         receipts.append(receipt)
-    if receipts[0]["simulator_sha256"] != receipts[1]["simulator_sha256"]:
+    if len(receipts) == 2 and receipts[0]["simulator_sha256"] != receipts[1]["simulator_sha256"]:
         raise GraphDeviceDynamicError("dynamic requests used different simulator binaries")
-    return "\n".join((
-        "GraphDevice-AXI4LITE-DYNAMIC-RUN-PAIR-V1 status=PASS requests=2",
-        f"Request 1 graph={prepared[0]['program']['graph_id']} seed={seeds[0]} oracle=PASS fallback=PASS",
-        f"Request 2 graph={prepared[1]['program']['graph_id']} seed={seeds[1]} oracle=PASS fallback=PASS",
+    lines = [
+        f"GraphDevice-AXI4LITE-DYNAMIC-RUN-{command.removeprefix('dynamic-run').upper().lstrip('-') or 'SINGLE'}-V1 status=PASS requests={len(graphs)}",
+        *[f"Request {index} graph={item['program']['graph_id']} seed={seed} oracle=PASS fallback=PASS"
+          for index, (item, seed) in enumerate(zip(prepared, seeds), start=1)],
         marker,
-        "Same simulator=PASS invoked_twice=PASS receipts=2",
+        f"Same simulator=PASS invoked_{invocation}=PASS receipts={len(receipts)}",
         "Evidence class=rtl-simulation-functional",
         "Performance=not-measured",
-    ))
+    ]
+    return "\n".join(lines)
+
+
+def run_dynamic(graph: str, seed: int, repository: Path | None = None) -> str:
+    if graph in CATALOGUE:
+        raise GraphDeviceDynamicError("dynamic-run graph must be outside the frozen catalogue")
+    return _run_dynamic([graph], [seed], repository, "dynamic-run")
+
+
+def run_dynamic_pair(graphs: list[str], seeds: list[int], repository: Path | None = None) -> str:
+    if len(graphs) != 2 or len(seeds) != 2:
+        raise GraphDeviceDynamicError("dynamic-run-pair requires exactly two --descriptor and two --seed values")
+    if graphs[0] not in CATALOGUE:
+        raise GraphDeviceDynamicError("first dynamic graph must be a frozen catalogue descriptor")
+    if graphs[1] in CATALOGUE:
+        raise GraphDeviceDynamicError("second dynamic graph must be outside the frozen catalogue")
+    return _run_dynamic(graphs, seeds, repository, "dynamic-run-pair")

@@ -55,6 +55,12 @@ resolves it.
   without RTL or device-ABI change. T-0140 does not resolve how descriptors
   become authorized production inputs, how a dynamic envelope is sealed for
   Linux UIO, or what language/opcode/affine expansion would be useful.
+- ADR-0078 resolves only the unnecessary catalogue companion for one dynamic
+  simulation request. It preserves the two-request proof and every existing
+  compiler/RTL/ABI/opcode/profile/capacity bound. Descriptor authorization,
+  immutable sealing, filesystem-race closure and a dry-run conversion toward
+  the Linux/UIO adapter remain unresolved and require a separate accepted host
+  admission/transport decision before any device access.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality

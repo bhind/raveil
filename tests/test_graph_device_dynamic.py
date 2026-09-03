@@ -11,14 +11,18 @@ from raveil.graph_device_dynamic import (
     HEADER_BYTES,
     MAGIC,
     REQUEST_BYTES,
+    _marker,
     prepare_request,
+    run_dynamic,
     run_dynamic_pair,
 )
+from raveil.graph_device_dag import compile_descriptor, load_descriptor
 
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = "contracts/graph_device_dags/five-point.json"
 CUSTOM = "tests/fixtures/graph_device_dynamic/center-north.json"
+FANOUT = "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
 
 
 class GraphDeviceDynamicTests(unittest.TestCase):
@@ -30,6 +34,39 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         ])
         self.assertEqual(args.graph, [BASELINE, CUSTOM])
         self.assertEqual(args.seed, [1, 0xFFFFFFFF])
+        single = build_parser().parse_args([
+            "graph-device", "dynamic-run", "--descriptor", FANOUT, "--seed", "3",
+        ])
+        self.assertEqual(single.graph, FANOUT)
+        self.assertEqual(single.seed, 3)
+
+    def test_fanout_fixture_has_exact_program_and_liveness(self):
+        descriptor = load_descriptor(ROOT / FANOUT)
+        program = compile_descriptor(descriptor)
+        self.assertEqual(program["instruction_count"], 11)
+        self.assertEqual(sum(node["op"] == "LOAD_U32" for node in descriptor["nodes"]), 5)
+        self.assertEqual(sum(node["op"] == "ADD_U32" for node in descriptor["nodes"]), 5)
+        self.assertEqual(sum(node["op"] == "STORE_U32" for node in descriptor["nodes"]), 1)
+        self.assertEqual(program["program_sha256"],
+                         "ec13f9f0d376233b49b2d647088f71bf208ddea68e7a4d09732f660b9770ea39")
+        self.assertEqual(descriptor["nodes"][8]["inputs"], ["a2", "e"])
+        self.assertEqual(descriptor["nodes"][9]["inputs"], ["a3", "a0"])
+        remaining = {node["id"]: 0 for node in descriptor["nodes"]}
+        for node in descriptor["nodes"]:
+            for source in node.get("inputs", [node.get("input")]):
+                if source is not None:
+                    remaining[source] += 1
+        live, maximum = set(), 0
+        for node in descriptor["nodes"]:
+            for source in node.get("inputs", [node.get("input")]):
+                if source is not None:
+                    remaining[source] -= 1
+                    if remaining[source] == 0:
+                        live.remove(source)
+            if node["op"] != "STORE_U32":
+                live.add(node["id"])
+            maximum = max(maximum, len(live))
+        self.assertEqual(maximum, 5)
 
     def test_prepare_is_pointer_free_and_compiles_custom_graph(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -54,6 +91,19 @@ class GraphDeviceDynamicTests(unittest.TestCase):
             )
             self.assertTrue((Path(directory) / "request/graph_device_abi_generated.h").is_file())
 
+    def test_single_marker_requires_one_build_and_one_invocation(self):
+        session = Path("artifacts/graph_device_axi4lite_dynamic/run.12345678")
+        marker = (
+            "GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V1 status=PASS requests=1 "
+            "same_simulator=1 invoked_once=1 rtl_emitted_once=1 simulator_built_once=1 "
+            "rejected_before_axi=1 simulator_sha256=" + "a" * 64 +
+            " path=artifacts/graph_device_axi4lite_dynamic/run.12345678 "
+            "evidence=rtl-simulation-functional performance=not-measured"
+        )
+        self.assertEqual(_marker(marker, session, 1), marker)
+        with self.assertRaisesRegex(GraphDeviceDynamicError, "not confined"):
+            _marker(marker.replace("simulator_built_once=1 ", ""), session, 1)
+
     def test_second_request_must_be_non_catalogue_and_count_is_exact(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaisesRegex(GraphDeviceDynamicError, "outside the frozen catalogue"):
@@ -64,6 +114,10 @@ class GraphDeviceDynamicTests(unittest.TestCase):
                 with self.assertRaisesRegex(GraphDeviceDynamicError, "exactly two"):
                     run_dynamic_pair([BASELINE], [1], ROOT)
                 invoked.assert_not_called()
+            with self.assertRaisesRegex(GraphDeviceDynamicError, "outside the frozen catalogue"):
+                with patch("raveil.graph_device_dynamic.subprocess.run") as invoked:
+                    run_dynamic(BASELINE, 3, ROOT)
+                    invoked.assert_not_called()
 
     def test_runner_marker_and_outputs_are_fully_validated(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -90,12 +144,15 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("read_input_file", parser)
         self.assertIn("verilator --assert --cc", shell)
         self.assertEqual(shell.count("verilator --assert --cc"), 1)
-        self.assertIn("invoked_twice=1", shell)
+        self.assertIn("invocation=once", shell)
+        self.assertIn("invoked_%s=1", shell)
+        self.assertIn("simulator_built_once=1", shell)
         self.assertIn("rejected_before_axi=1", shell)
         self.assertIn("dynamic-source.manifest", shell)
         self.assertLess(shell.index("dynamic-source.manifest"), shell.index("verilator --assert --cc"))
         outer = (ROOT / "hardware/chisel/run-graph-device-axi4lite-dynamic.sh").read_text()
         self.assertIn("request-1/request-2 siblings", outer)
+        self.assertIn("request_count=1", outer)
         self.assertIn("set -C", outer)
         self.assertIn("container.stdout container.stderr", outer)
 

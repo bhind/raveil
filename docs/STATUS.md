@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -537,6 +537,27 @@ oracles and software fallbacks, and rejects a corrupted request before an AXI
 transcript exists. Five focused tests and 129 Graph-device regressions pass.
 This is RTL Simulation Functional evidence only; performance was not measured,
 and no Linux device, KV260, FPGA or silicon result exists.
+
+T-0141 is verified on branch `feat/t-0141-single-dynamic-graph` under Issue
+#97. ADR-0078 adds `graph-device dynamic-run` for exactly one non-catalogue
+descriptor while the existing `dynamic-run-pair` catalogue/non-catalogue
+admission remains unchanged. The new `fanout-five-live` descriptor compiles to
+five loads, five adds and one store, has five simultaneously live values,
+reuses `a0` at `a2` and `a4`, and has program SHA-256
+`ec13f9f0d376233b49b2d647088f71bf208ddea68e7a4d09732f660b9770ea39`.
+The shared runner emits RTL once, builds simulator SHA-256
+`b20eee47e38d8a8603e3e11d8fbb0ee71113099638c0cdd42ce7f9f252fd6ba4`
+once and invokes it once. RTL output, the descriptor oracle and the C++
+fallback are byte-equal at SHA-256
+`6f77bb673b34cf0b1370ab8da18d377c121f0bb55bf2e934d17b2691978062ff`.
+The receipt binds descriptor, program, request, source, ABI, RTL, toolchain,
+simulator, AXI trace, oracle, fallback and output identities; a corrupted
+request is rejected before an AXI transcript exists. Seven focused tests and
+131 Graph-device regressions pass, and an actual pair replay also passes.
+Chisel RTL, C++ executor, device ABIs, opcode/selector alphabet, affine
+profiles and capacities are unchanged. This is RTL Simulation Functional
+evidence only; instruction/liveness counts are conformance facts and
+performance was not measured.
 
 After the accepted S-0001 owner-visible review and Keep/Problem/Try
 retrospective, the owner removed ADR-0068's Monday-only wait. ADR-0070 permits

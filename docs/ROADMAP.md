@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S10, T-0138 planning and T-0139 preflight; T-0140 bounded dynamic RTL simulation passes; no FPGA or silicon evidence exists**
+State: **Canonical T-0132/S01--S10, T-0138 planning and T-0139 preflight; T-0140 pair and T-0141 single bounded dynamic RTL simulations pass; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -786,6 +786,17 @@ non-catalogue `center-north` seed 2. One emitted and compiled simulator is
 invoked twice, both outputs equal their independent descriptor oracles and
 software fallbacks, and malformed host input is rejected before AXI. This
 closes only the bounded simulation discriminator described above.
+
+T-0141 removes the unrelated catalogue companion from the one-Graph operator
+case without weakening the bounded request. `dynamic-run` accepts exactly one
+non-catalogue descriptor, compiles it before runner startup, then uses the same
+fixed host request and shared runner. The fan-out acceptance Graph fits the
+existing five selectors, three opcodes, 16-instruction/eight-register limits
+and baseline affine profile. One emitted and built simulator invocation agrees
+with the independent descriptor oracle and C++ fallback; the pair regression
+continues to pass. This adds no transport authority, sealed request, opcode,
+dynamic scheduler, general-Graph or performance result and does not advance an
+FPGA or silicon gate.
 
 ## No calendar claim
 
