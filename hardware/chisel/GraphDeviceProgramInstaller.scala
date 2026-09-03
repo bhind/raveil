@@ -49,6 +49,7 @@ class GraphDeviceProgramInstaller extends Module {
   var defined = 0.U(RaveilBoundedProgramContract.ValueRegisters.W)
   var storeCount = 0.U(5.W)
   val instructionCount = payload(2)(4, 0)
+  val payloadVersion = payload(1)
   for (index <- 0 until RaveilBoundedProgramContract.ProgramCapacity) {
     val instruction = payload(12 + index)
     val active = index.U < instructionCount
@@ -62,12 +63,14 @@ class GraphDeviceProgramInstaller extends Module {
       instruction(21, 0) === 0.U
     val addValid = opcode === RaveilBoundedProgramContract.AddOpcode.U &&
       instruction(18, 0) === 0.U && defined(sourceA) && defined(sourceB)
+    val maxValid = opcode === RaveilBoundedProgramContract.MaxU32Opcode.U &&
+      payloadVersion === 2.U && instruction(18, 0) === 0.U && defined(sourceA) && defined(sourceB)
     val storeValid = opcode === RaveilBoundedProgramContract.StoreOpcode.U &&
       instruction(24, 0) === 0.U && defined(destination) &&
       index.U === instructionCount - 1.U
-    val valid = loadValid || addValid || storeValid
+    val valid = loadValid || addValid || maxValid || storeValid
     programValid = programValid && Mux(active, valid, instruction === 0.U)
-    val writesValue = active && (loadValid || addValid)
+    val writesValue = active && (loadValid || addValid || maxValid)
     defined = Mux(writesValue, defined | (1.U << destination), defined)
     storeCount = storeCount + Mux(active && storeValid, 1.U, 0.U)
   }
@@ -78,7 +81,7 @@ class GraphDeviceProgramInstaller extends Module {
   val payloadValid =
     payloadCountReg === RaveilBoundedProgramContract.PayloadWords.U &&
     payload(0) === RaveilBoundedProgramContract.Magic.U &&
-    payload(1) === RaveilBoundedProgramContract.Version.U &&
+    (payloadVersion === RaveilBoundedProgramContract.Version.U || payloadVersion === 2.U) &&
     instructionCount >= 2.U &&
     instructionCount <= RaveilBoundedProgramContract.ProgramCapacity.U &&
     payload(3) === RaveilBoundedProgramContract.ValueRegisters.U &&

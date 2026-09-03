@@ -78,6 +78,13 @@ It performs no `open`, `mmap`, or MMIO (`device_opened=0 mmap=0 mmio=0`). This
 is Host Functional planning evidence, not RTL simulation, FPGA/KV260, hardware
 performance, or device-success evidence.
 
+Version-2 sealed requests may contain exactly the T-0143 `MAX_U32` opcode in
+addition to the v1 LOAD/ADD/STORE alphabet. The dry-run derives the same seven
+relative ABI operations from either admitted version and still performs no
+device operation. Request/program cross-version pairs and opcode 4 under v1
+fail before a plan is returned. The program-install, affine-install and
+execution transport ABIs remain v1 and the 16 KiB aperture is unchanged.
+
 An ARM64 Linux build can be reproduced on the development host with:
 
 ```sh

@@ -544,6 +544,18 @@ The UIO dry-run is a pure Host Functional conversion derived from the existing
 aperture contract. It exposes relative namespace and payload identities but
 contains no device opener, mapper, MMIO primitive or promotion authority.
 
+T-0143 extends this bounded vertical path with exactly one unsigned
+`MAX_U32` register operation. The opcode reuses the ADD instruction's two
+source and one destination fields and adds no selector, constant, predicate,
+memory operation, scheduling state or variable latency. A version-2 program
+payload, dynamic request and sealed envelope make the changed semantic
+alphabet explicit. Version-1 programs and newly generated v1 requests/seals
+retain their bytes and accepted behavior; cross-version and unknown-opcode
+pairs fail at host admission and are checked again by the installer. The
+program-install, affine-install and execution transport ABIs remain v1 with
+the same relative aperture. This is a bounded nonlinear stencil path, not a
+general Graph machine or CGRA/VLIW claim.
+
 The post-EXP-0010 T-0044/S08 top is a separate integration prerequisite around
 that fixed executor. `RaveilStaticStencilCore` contains the Graph state machine;
 `RaveilStaticStencilTLClient` translates its bounded word requests onto the

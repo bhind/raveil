@@ -985,8 +985,10 @@ real UIO, FPGA, or general-Graph interface.
 
 ### Dynamic one/two-program request pilot
 
-The dynamic pilot is the first path that exercises a non-catalogue program
-without changing the RTL, ISA opcodes, or installer ABIs:
+The original v1 dynamic pilot is the first path that exercises a non-catalogue
+LOAD/ADD/STORE program without changing its RTL, opcode alphabet, or installer
+ABIs. T-0143 later adds the explicitly versioned MAX_U32 path described below;
+the transport/install ABI v1 remains unchanged:
 
 ```sh
 python3 -m raveil graph-device dynamic-run \
@@ -1039,3 +1041,26 @@ sealed descriptor. A byte change, symlink, unexpected inventory entry, existing
 destination, or compiler-source identity drift is rejected. `performance` is
 always `not-measured`; `polls=` remains only a termination diagnostic, never a
 cycle or time value.
+
+### Versioned MAX_U32 dynamic program
+
+T-0143 adds exactly one unsigned register operation, `MAX_U32` opcode 4. A
+descriptor containing it emits program, dynamic-request and sealed version 2;
+version 1 remains the exact LOAD/ADD/STORE encoding. Both versions continue to
+use the unchanged program-install, affine-install and execution ABIs, five
+neighbor selectors, eight value registers and 16-instruction capacity.
+
+```sh
+python3 -m raveil graph-device dynamic-run \
+  --descriptor tests/fixtures/graph_device_dynamic/cross-dilation-u32.json \
+  --seed 1
+```
+
+The fixture performs five neighbor loads, four unsigned maxima and one final
+store. Admission rejects opcode 4 in v1, unknown opcodes and request/program
+version mismatch before constructing the Verilated model or opening an AXI
+transcript. The accepted run requires descriptor oracle, C++ fallback and RTL
+output equality. This is RTL Simulation Functional evidence only. Instruction
+counts are conformance facts, `polls=` is not cycles or time, and performance,
+area and energy are not measured. No general Graph, CGRA/VLIW, UIO device,
+FPGA/KV260, ASIC or silicon result follows.

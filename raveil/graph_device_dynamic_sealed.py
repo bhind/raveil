@@ -34,10 +34,11 @@ INVENTORY = ("SEALED", "affine.bin", "descriptor.json", "graph_device_abi_genera
 PAYLOADS = tuple(name for name in INVENTORY if name not in {"SEALED", "manifest.json"})
 SOURCE_PATHS = (
     "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json",
-    "contracts/graph_device_dynamic_request_v1.json",
+    "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json",
+    "contracts/graph_device_program_v2.json",
     "contracts/graph_device_program_install_abi_v1.json",
     "contracts/graph_device_axi4lite_aperture_v1.json",
-    "contracts/graph_device_dynamic_sealed_v1.json",
+    "contracts/graph_device_dynamic_sealed_v1.json", "contracts/graph_device_dynamic_sealed_v2.json",
     "raveil/graph_device_dag.py", "raveil/graph_device_dynamic.py",
     "raveil/graph_device_dynamic_sealed.py", "raveil/riscv_stencil_signature.py",
     "raveil/graph_device_affine.py", "raveil/graph_device_axi4lite.py",
@@ -254,8 +255,9 @@ def seal(graph: str, seed: int, repository: Path) -> dict[str, Any]:
         except UnboundLocalError: pass
     if (final_source_manifest, final_source_identity) != (source_manifest, source_identity):
         raise GraphDeviceDynamicSealError("sealed compiler source changed during admission")
+    version = int(program["payload"][1])
     manifest = {
-            "schema": SCHEMA, "version": 1, "graph": graph, "graph_id": program["graph_id"],
+            "schema": SCHEMA if version == 1 else "raveil.graph-device-dynamic-sealed/v2", "version": version, "graph": graph, "graph_id": program["graph_id"],
             "seed": seed, "affine": profile["name"], "request_sha256": _sha(request),
             "descriptor_sha256": _sha(descriptor_bytes), "program_sha256": program["program_sha256"],
             "compiler_source_sha256": source_identity,
@@ -331,14 +333,14 @@ def _expected_runner_source_manifest(verified: dict[str, Any]) -> bytes:
     rows_out += [f"compiled/raveil_graph_device_dynamic_request.h {source['linux/include/raveil_graph_device_dynamic_request.h']}", f"compiled/raveil_graph_device_dynamic_request.cpp {source['linux/src/raveil_graph_device_dynamic_request.cpp']}"]
     for name in ("graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_dag_generated.h", "graph_device_axi4lite_aperture_generated.h"):
         rows_out.append(f"generated/{name} {_sha(verified['files'][name])}")
-    orchestration = ("hardware/chisel/Dockerfile", "hardware/chisel/run-graph-device-axi4lite-dynamic.sh", "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh", "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json", "contracts/graph_device_program_install_abi_v1.json", "raveil/graph_device_dynamic.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py", "raveil/graph_device_mvp.py", "raveil/static_region.py", "raveil/riscv_stencil_signature.py")
+    orchestration = ("hardware/chisel/Dockerfile", "hardware/chisel/run-graph-device-axi4lite-dynamic.sh", "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh", "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json", "contracts/graph_device_program_v2.json", "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json", "contracts/graph_device_program_install_abi_v1.json", "raveil/graph_device_dynamic.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py", "raveil/graph_device_mvp.py", "raveil/static_region.py", "raveil/riscv_stencil_signature.py")
     rows_out += [f"orchestration/{name} {source[name]}" for name in orchestration]
     return ("\n".join(sorted(rows_out)) + "\n").encode("ascii")
 
 
 def _valid_program_words(words: list[int]) -> bool:
-    """Independent v1 wire-image check; this is not descriptor lowering."""
-    if len(words) != PROGRAM_WORDS or words[0] != 0x52504731 or words[1] != 1 or words[3] != 8:
+    """Independent versioned wire-image check; this is not descriptor lowering."""
+    if len(words) != PROGRAM_WORDS or words[0] != 0x52504731 or words[1] not in {1, 2} or words[3] != 8:
         return False
     count = words[2]
     if not 2 <= count <= 16 or any(words[index] for index in range(12 + count, 32)):
@@ -351,9 +353,9 @@ def _valid_program_words(words: list[int]) -> bool:
             if index == count - 1 or ((word >> 22) & 7) > 4 or word & ((1 << 22) - 1):
                 return False
             defined.add(dst)
-        elif opcode == 2:
+        elif opcode in {2, 4}:
             left, right = (word >> 22) & 7, (word >> 19) & 7
-            if index == count - 1 or left not in defined or right not in defined or reserved:
+            if (opcode == 4 and words[1] != 2) or index == count - 1 or left not in defined or right not in defined or reserved:
                 return False
             defined.add(dst)
         elif opcode == 3:
@@ -408,7 +410,7 @@ def verify(bundle: Path, repository: Path) -> dict[str, Any]:
     except (UnicodeError, json.JSONDecodeError) as error:
         raise GraphDeviceDynamicSealError("sealed manifest is invalid") from error
     if set(manifest) != {"schema", "version", "graph", "graph_id", "seed", "affine", "request_sha256", "descriptor_sha256", "program_sha256", "compiler_source_sha256", "files"} \
-            or manifest["schema"] != SCHEMA or manifest["version"] != 1 \
+            or manifest["schema"] not in {SCHEMA, "raveil.graph-device-dynamic-sealed/v2"} or manifest["version"] not in {1, 2} \
             or type(manifest["graph"]) is not str or _relative_parts(manifest["graph"]) != Path(manifest["graph"]).parts \
             or type(manifest["graph_id"]) is not str or GRAPH_ID_RE.fullmatch(manifest["graph_id"]) is None \
             or type(manifest["seed"]) is not int or not 0 <= manifest["seed"] <= 0xffffffff \
@@ -416,6 +418,8 @@ def verify(bundle: Path, repository: Path) -> dict[str, Any]:
             or any(type(manifest[key]) is not str or SHA256_RE.fullmatch(manifest[key]) is None
                    for key in ("request_sha256", "descriptor_sha256", "program_sha256", "compiler_source_sha256")):
         raise GraphDeviceDynamicSealError("sealed manifest source identity differs")
+    if (manifest["version"] == 1) != (manifest["schema"] == SCHEMA):
+        raise GraphDeviceDynamicSealError("sealed manifest version pair differs")
     if manifest["files"] != {name: {"size": len(files[name]), "sha256": _sha(files[name])} for name in PAYLOADS}:
         raise GraphDeviceDynamicSealError("sealed payload identity differs")
     try:
@@ -443,7 +447,9 @@ def verify(bundle: Path, repository: Path) -> dict[str, Any]:
     words = list(struct.unpack("<324I", files["input.bin"]))
     if _word_bytes(input_words(manifest["seed"])) != files["input.bin"] or _word_bytes(input_words(1)) != files["seed-1.bin"]:
         raise GraphDeviceDynamicSealError("sealed input payload differs")
-    request = struct.pack("<8I", 0x52445731, 1, HEADER_BYTES, 0 if manifest["affine"] == "baseline" else 1,
+    if program[1] != manifest["version"]:
+        raise GraphDeviceDynamicSealError("sealed request/program version pair differs")
+    request = struct.pack("<8I", 0x52445731, program[1], HEADER_BYTES, 0 if manifest["affine"] == "baseline" else 1,
                           manifest["seed"], PROGRAM_WORDS, AFFINE_WORDS, INPUT_WORDS) + b"\0" * 32 \
         + manifest["graph_id"].encode("ascii") + b"\0" * (32 - len(manifest["graph_id"])) \
         + files["program.bin"] + files["affine.bin"] + files["input.bin"]

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0142 |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0143 |
 | **P1 — next** | Start only after its named P0 dependency passes. | A KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -354,7 +354,29 @@ review and failure preservation do not consume the two-item delivery limit.
   C++ fallback and RTL output are byte-equal at `6f77bb67...62ff`; malformed
   request admission stops before AXI. Twelve focused tests, 143 Graph-device
   regressions, seven T-0139 regressions, CLI/shell, record, diff and queue
-  checks pass. Performance was not measured.
+  checks pass. Exact-head Tester, Security and Performance reviews approved;
+  PR #100 squash-merged as canonical `151c481`, Issue #99 closed and its
+  Project item is Done. Performance was not measured.
+
+- [x] **T-0143** Add exactly one unsigned `MAX_U32` opcode through compiler,
+  versioned program/request/sealed admission, installer, RTL executor,
+  independent descriptor oracle and C++ fallback. Real Issue #101, branch
+  `feat/t-0143-max-u32`, Systems Implementer, 13 SP, Sprint S-0003 and split
+  RTL Simulation Functional / Host Functional evidence own the coherent
+  implementation, `cross-dilation-u32` fixture, focused tests, ADR-0080 and
+  matching records. Program v1 and newly generated v1 requests/seals must stay
+  byte-compatible; explicit v2 semantics admit opcode 4 only in the exact v2
+  version pair. Preserve the v1 transport/install ABI, five selectors, affine
+  profiles, eight registers, 16-instruction capacity, one outstanding request
+  and fixed schedule. Stop before a second opcode, predicates/constants,
+  branches/loops, variable latency, general Graph/CGRA/VLIW, device access,
+  performance claims, FPGA, ASIC or silicon. Security and Performance approval
+  are required on the exact remote head. The implemented v2 fixture compiles
+  to 5 LOAD, 4 MAX_U32 and 1 STORE and passes sealed replay with
+  oracle/fallback/RTL equality at `46282258...60852`; a fresh v1 replay retains
+  program `ec13f9f0...ea39` and output `6f77bb67...62ff`. Thirty-six focused,
+  151 Graph-device and seven T-0139 tests pass. Exact-head review and
+  integration remain open.
 
 - [x] **T-0134** Require owner-visible Sprint review before the review ceremony
   enters `Done`. ADR-0069 fixes the sequence as run, show, explain, classify

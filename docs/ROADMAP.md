@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0132/S10 operator-to-RTL simulation MVP and T-0139 target preflight are canonical; T-0140 verifies non-catalogue bounded runtime configuration while T-0044 physical research remains blocked**
+State: **Canonical through T-0142 sealed host admission; T-0143 is the sole active P0 for one versioned MAX_U32 opcode while T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical T-0132/S01--S10, T-0138 planning and T-0139 preflight; T-0140 pair and T-0141 single bounded dynamic RTL simulations pass; no FPGA or silicon evidence exists**
+State: **Canonical through T-0142 sealed host admission; T-0143 is the sole active P0 for one versioned MAX_U32 opcode; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -810,6 +810,16 @@ relative 16 KiB aperture plan and reports zero device open, mapping and MMIO.
 This closes the mutable host-request discriminator but does not authorize a
 UIO device run, opcode or RTL/ABI expansion, performance claim, FPGA or silicon
 gate.
+
+T-0143 selects exactly one useful opcode expansion: unsigned `MAX_U32` over
+the existing two-source register fields. Its five-neighbor dilation demo stays
+inside the fixed selectors, affine profiles, register/capacity limits and
+single-outstanding fixed schedule. Program, dynamic-request and sealed
+semantics gain explicit v2 admission while v1 bytes and behavior remain
+backward compatible; the existing transport/install ABI v1 register map and
+16 KiB aperture do not change. Passing can establish only independent
+oracle/fallback/RTL functional agreement. It cannot establish a general Graph,
+CGRA/VLIW, performance, FPGA, ASIC or silicon result.
 
 ## No calendar claim
 

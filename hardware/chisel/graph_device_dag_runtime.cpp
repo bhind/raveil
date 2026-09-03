@@ -205,12 +205,43 @@ bool read_output(DeviceTransport& device, Output& output, std::ostream& errors) 
     return true;
 }
 
+bool valid_fallback_program(const Payload& payload) {
+    if (payload[0] != 0x52504731U || (payload[1] != 1U && payload[1] != 2U)
+        || payload[2] < 2U || payload[2] > 16U || payload[3] != 8U) return false;
+    std::array<bool, 8> defined{};
+    unsigned stores = 0U;
+    for (std::size_t index = 0; index < 16U; ++index) {
+        const std::uint32_t instruction = payload[12U + index];
+        const bool active = index < payload[2];
+        if (!active) { if (instruction != 0U) return false; continue; }
+        const std::uint32_t opcode = instruction >> 28U;
+        const std::uint32_t destination = (instruction >> 25U) & 7U;
+        const std::uint32_t left = (instruction >> 22U) & 7U;
+        const std::uint32_t right = (instruction >> 19U) & 7U;
+        const bool load = opcode == 1U && index + 1U < payload[2]
+            && left <= 4U && (instruction & 0x003fffffU) == 0U;
+        const bool add = opcode == 2U && index + 1U < payload[2]
+            && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
+        const bool max_u32 = opcode == 4U && payload[1] == 2U && index + 1U < payload[2]
+            && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
+        const bool store = opcode == 3U && index + 1U == payload[2]
+            && (instruction & 0x01ffffffU) == 0U && defined[destination];
+        if (!(load || add || max_u32 || store)) return false;
+        if (load || add || max_u32) defined[destination] = true;
+        if (store) ++stores;
+    }
+    for (std::size_t index = 28U; index < payload.size(); ++index)
+        if (payload[index] != 0U) return false;
+    return stores == 1U;
+}
+
 bool fallback(
     const generated::Graph& graph,
     const affine_generated::Profile& affine,
     const Input& input,
     Output& output
 ) {
+    if (!valid_fallback_program(graph.payload)) return false;
     output.fill(0U);
     const std::uint32_t rows = affine.payload[2];
     const std::uint32_t columns = affine.payload[3];
@@ -236,6 +267,10 @@ bool fallback(
                 } else if (opcode == 2U) {
                     values[destination] = values[(instruction >> 22U) & 7U]
                         + values[(instruction >> 19U) & 7U];
+                } else if (opcode == 4U) {
+                    const auto left = values[(instruction >> 22U) & 7U];
+                    const auto right = values[(instruction >> 19U) & 7U];
+                    values[destination] = left >= right ? left : right;
                 } else if (opcode == 3U) {
                     output[row * output_stride + column] = values[destination];
                 } else return false;
