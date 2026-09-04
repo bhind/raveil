@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-09-02
+Last updated: 2026-09-04
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -78,6 +78,13 @@ resolves it.
   future explanation artifact should be emitted directly beside every sealed
   replay, receive a durable signature, or cover a broader Graph language
   remains unresolved and requires separate authority and threat-model work.
+- ADR-0083 and T-0145 resolve only the software handoff from an ADR-0079-
+  verified sealed-v2 request through a private projection and fake register
+  transport. The compiled ARM64 C++ adapter has no device opener at all. Real
+  KV260 device access, an unbypassable verified-bytes-to-opener handoff, target
+  package and overlay identity, recovery, and whether the projected request
+  lifetime needs a stronger same-privilege threat model remain unresolved for
+  a separately authorized physical task.
 - T-0128/S02 answers only how one S01-admitted frozen descriptor and seed
   map onto the existing program/config/execution ABIs in RTL simulation. It
   does not broaden the three accepted identities or answer the generality

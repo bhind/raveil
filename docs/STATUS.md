@@ -634,10 +634,38 @@ an empty horizon. The bounded candidate adds a canonical P1/Ready `prepare`
 transition and a separate pullable-successor audit while keeping technical PR
 integration non-blocking. The live Project acceptance audit reported one
 active and one pullable-Ready item after `prepare` set T-0145 / Issue #106 to
-P1/Ready. T-0145 is the named Product successor for the sealed dynamic Graph
-to Linux UIO handoff and remains unstarted until T-0146 integration. No
+P1/Ready. At T-0146 acceptance, T-0145 was the named but still unstarted
+Product successor for the sealed dynamic Graph to Linux UIO handoff; it was
+subsequently pulled into the no-device adapter work recorded below. No
 product, performance, device, FPGA, ASIC or silicon fact follows from this
 Host Functional governance result.
+
+T-0145 has an independently verified Host Functional implementation at
+`a82abf3dac10e048f59ec665dc7f3dea7829e121` on
+`feat/t-0145-sealed-dynamic-uio-handoff`. ADR-0083 keeps the ADR-0079 Python
+verifier as the sole sealed-bundle authority, projects retained bytes into an
+exclusive private request root, and passes that root to a Linux host adapter
+which accepts an injected `RegisterIo&`. The adapter has no `UioRegisterIo`,
+device path, opener, mapping or MMIO primitive and its ARM64 Make target emits
+only an object. The fake transport executes the existing affine/program
+installation, input stage, start, bounded poll, output read and independent
+oracle comparison; malformed binding, arbitrary unsealed roots, linked or
+drifted input and corrupt output fail closed. The sealed source manifest now
+binds both the adapter and handoff module.
+
+The first branch candidate was a standalone pathname-driven dynamic UIO
+executable. Security Review reproduced that its self-attested projection could
+bypass ADR-0079 and reach a real opener, so integration was stopped and the
+design was removed rather than papered over. Final Security Review gives GO
+only for the no-device adapter and retains NO-GO for physical wiring. An
+independent macOS arm64 run passed 31 focused dynamic, sealed, versioned and AXI
+regressions in 8.200 seconds; raw log SHA-256 is
+`44a0a90372c9fd53f5b82c3b1d372263c7cded402e106dd127153ba85cb5e4e5`.
+An offline Linux/arm64 container compiled the current adapter object with
+`-Wall -Wextra -Werror` and did not link or execute it; log SHA-256 is
+`d9c01d028d66f365be518978c7ed759fd8a8ae0cdb40f267168c9360677648bb`.
+This is not real UIO, KV260, FPGA, RTL-simulation, performance, timing, area,
+energy, production-security, product-readiness, ASIC or silicon evidence.
 
 The branch implementation preserves legacy Garden snapshot behavior and adds
 one strict `raveil.garden-dynamic-explanation/v1` fixture for the retained

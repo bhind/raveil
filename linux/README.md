@@ -85,6 +85,21 @@ device operation. Request/program cross-version pairs and opcode 4 under v1
 fail before a plan is returned. The program-install, affine-install and
 execution transport ABIs remain v1 and the 16 KiB aperture is unchanged.
 
+T-0145 adds the next no-device boundary. The ADR-0079 verifier projects one
+verified sealed-v2 request into a private request root, then a Linux host
+adapter consumes that root through an injected `RegisterIo`. The adapter has
+no UIO backend, `/dev/uioN` argument, opener, mapping or MMIO primitive; tests
+use a fake register transport to prove install, input, start, poll, output and
+oracle equality. The ARM64 build target compiles an object only:
+
+```sh
+make -C linux graph-device-dynamic-uio GENERATED_DIR="$generated"
+```
+
+It is intentionally not a runnable device command. Connecting
+`UioRegisterIo` requires a later physical task with an unbypassable verified
+handoff, fresh T-0139 observation and ADR-0071 opened-object checks.
+
 An ARM64 Linux build can be reproduced on the development host with:
 
 ```sh

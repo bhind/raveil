@@ -6,6 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdexcept>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -58,6 +59,15 @@ std::array<unsigned char, 32> sha256(const std::vector<unsigned char>& input) {
     return output;
 }
 
+std::string sha256_hex(const std::vector<unsigned char>& input) {
+    static constexpr char digits[] = "0123456789abcdef";
+    const auto digest = sha256(input);
+    std::string result;
+    result.reserve(64U);
+    for (const auto byte : digest) { result.push_back(digits[byte >> 4U]); result.push_back(digits[byte & 15U]); }
+    return result;
+}
+
 std::vector<unsigned char> read_request(const std::filesystem::path& root) {
     const auto status = std::filesystem::symlink_status(root);
     if (std::filesystem::is_symlink(status) || !std::filesystem::is_directory(status))
@@ -87,6 +97,42 @@ std::array<std::uint32_t, 324> read_input_file(const std::filesystem::path& path
     std::array<std::uint32_t, 324> words{};
     for (std::size_t index = 0; index < words.size(); ++index) words[index] = word(bytes.data() + index * 4U);
     return words;
+}
+
+std::array<std::uint32_t, 256> read_output_file(const std::filesystem::path& path) {
+    const auto status = std::filesystem::symlink_status(path);
+    if (std::filesystem::is_symlink(status) || !std::filesystem::is_regular_file(status)
+        || std::filesystem::file_size(path) != 256U * 4U)
+        throw std::runtime_error("dynamic oracle is not an exact regular file");
+    std::array<unsigned char, 256U * 4U> bytes{};
+    std::ifstream input(path, std::ios::binary);
+    input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+    if (!input || input.peek() != EOF) throw std::runtime_error("dynamic oracle read failed");
+    std::array<std::uint32_t, 256> words{};
+    for (std::size_t index = 0; index < words.size(); ++index) words[index] = word(bytes.data() + index * 4U);
+    return words;
+}
+
+std::vector<unsigned char> exact_file(const std::filesystem::path& path, std::size_t bytes) {
+    const auto status = std::filesystem::symlink_status(path);
+    if (std::filesystem::is_symlink(status) || !std::filesystem::is_regular_file(status)
+        || std::filesystem::file_size(path) != bytes)
+        throw std::runtime_error("sealed dynamic payload is not an exact regular file");
+    std::vector<unsigned char> result(bytes);
+    std::ifstream input(path, std::ios::binary);
+    input.read(reinterpret_cast<char*>(result.data()), static_cast<std::streamsize>(result.size()));
+    if (!input || input.peek() != EOF) throw std::runtime_error("sealed dynamic payload read failed");
+    return result;
+}
+
+template <std::size_t Count>
+std::vector<unsigned char> words_bytes(const std::array<std::uint32_t, Count>& words) {
+    std::vector<unsigned char> result;
+    result.reserve(Count * 4U);
+    for (const auto value : words)
+        for (unsigned shift = 0; shift < 32U; shift += 8U)
+            result.push_back(static_cast<unsigned char>(value >> shift));
+    return result;
 }
 
 void validate_input(const std::array<std::uint32_t, 324>& words, std::uint32_t seed) {
@@ -196,5 +242,33 @@ DynamicGraphDeviceRequest read_dynamic_graph_device_request(const std::filesyste
         throw std::runtime_error("dynamic input files are not bound to request");
     validate_input(seed_one_input, 1U);
     return result;
+}
+
+ProjectedDynamicGraphDeviceRequest read_projected_dynamic_graph_device_request(
+    const std::filesystem::path& root
+) {
+    const auto status = std::filesystem::symlink_status(root);
+    if (std::filesystem::is_symlink(status) || !std::filesystem::is_directory(status))
+        throw std::runtime_error("projected dynamic root must be a direct directory");
+    const auto request_bytes = exact_file(root / "request.bin", kRequestBytes);
+    const auto request = read_dynamic_graph_device_request(root);
+    if (request.program[1] != kVersionV2)
+        throw std::runtime_error("projected dynamic request must be v2");
+    const auto oracle = read_output_file(root / "request-oracle.bin");
+    const auto binding_status = std::filesystem::symlink_status(root / "seal-binding.json");
+    if (std::filesystem::is_symlink(binding_status) || !std::filesystem::is_regular_file(binding_status)
+        || std::filesystem::file_size(root / "seal-binding.json") == 0U
+        || std::filesystem::file_size(root / "seal-binding.json") > 4096U)
+        throw std::runtime_error("projected dynamic seal binding is invalid");
+    const auto binding = exact_file(root / "seal-binding.json", std::filesystem::file_size(root / "seal-binding.json"));
+    const std::string binding_text(binding.begin(), binding.end());
+    const std::string request_sha = sha256_hex(request_bytes);
+    static const std::regex binding_pattern(
+        R"bind(^\{"manifest_sha256":"([0-9a-f]{64})","request_sha256":"([0-9a-f]{64})","schema":"raveil\.graph-device-dynamic-sealed-replay/v1","seal_sha256":"([0-9a-f]{64})"\}\n$)bind");
+    std::smatch match;
+    if (!std::regex_match(binding_text, match, binding_pattern)
+        || match[1].str() != match[3].str() || match[2].str() != request_sha)
+        throw std::runtime_error("projected dynamic seal binding does not bind request identity");
+    return {request, kVersionV2, oracle};
 }
 }  // namespace raveil::graph_device

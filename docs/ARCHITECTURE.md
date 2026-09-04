@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-09-02
+Last updated: 2026-09-04
 
 ## Four-plane adaptive Harvard model
 
@@ -566,6 +566,18 @@ configuration, retained execution identities, three-way output agreement,
 evidence labels and non-claims. The view validates and projects the witness; it
 never invokes or reimplements the compiler/allocator and never rereads a live
 descriptor, sealed request, simulator session or receipt.
+
+T-0145 connects the sealed host-admission boundary to a Linux UIO-shaped
+no-device adapter. The ADR-0079 verifier remains the only consumer of a sealed
+bundle and projects its retained request, inputs, oracle, generated headers and
+canonical seal binding into a new private directory. The C++ adapter accepts
+that `VERIFIED_REQUEST_ROOT` plus an injected `RegisterIo&`; it contains no UIO
+backend, device path, opener, mapping or MMIO primitive. A test-only injected
+callback and fake register transport prove zero calls on invalid sealed input
+and the ordered install, stage, start, poll, read and oracle-equality path on
+valid input. The ARM64 adapter object is compiled but not connected to a real
+backend. This is Host Functional evidence, not device, FPGA or performance
+evidence.
 
 The dynamic explanation loader has a separate component-wise no-follow,
 regular-file, bounded-read admission path. It rejects path escape, symlinks,
