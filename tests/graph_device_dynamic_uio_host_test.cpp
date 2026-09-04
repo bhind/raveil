@@ -41,11 +41,9 @@ int main(int argc, char** argv) {
     if (argc != 2 && argc != 3) return 2;
     const auto request = raveil::graph_device::read_projected_dynamic_graph_device_request(argv[1]);
     FakeRegisterIo fake(request.oracle, argc == 3);
-    raveil::graph_device::Axi4LiteTransport transport(fake, 0U, 0x2000U, 0x3000U);
     std::ostringstream log, errors;
-    const int result = raveil::graph_device::run_dynamic_dag(
-        transport, transport, transport, request.request.graph_id.c_str(), request.request.affine.c_str(),
-        request.request.program, request.request.input, request.oracle, request.request.seed, log, errors);
+    const int result = raveil::graph_device::run_projected_dynamic_graph_host_adapter(
+        fake, argv[1], log, errors);
     if (argc == 3) { assert(result != 0); assert(errors.str().find("differs from oracle") != std::string::npos); return 0; }
     assert(result == 0); assert(errors.str().empty()); assert(fake.writes >= 324U + 48U); assert(fake.reads >= 256U);
     const auto first_program = std::find(fake.events.begin(), fake.events.end(), 0x3400U);

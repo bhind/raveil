@@ -5,8 +5,10 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <iosfwd>
 
 namespace raveil::graph_device {
+class RegisterIo;
 
 struct DynamicGraphDeviceRequest {
     std::string graph_id;
@@ -31,6 +33,10 @@ DynamicGraphDeviceRequest read_dynamic_graph_device_request(
 ProjectedDynamicGraphDeviceRequest read_projected_dynamic_graph_device_request(
     const std::filesystem::path& root
 );
+
+int run_projected_dynamic_graph_host_adapter(RegisterIo& io,
+                                             const std::filesystem::path& projected_root,
+                                             std::ostream& log, std::ostream& errors);
 
 }  // namespace raveil::graph_device
 

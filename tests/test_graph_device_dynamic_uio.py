@@ -51,6 +51,7 @@ class DynamicUioHostTests(unittest.TestCase):
             command = [compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", str(ROOT / "linux/include"),
                        "-I", str(ROOT / "hardware/chisel"), "-I", str(bundle),
                        str(ROOT / "tests/graph_device_dynamic_uio_host_test.cpp"),
+                       str(ROOT / "linux/src/raveil-graph-device-dynamic-uio-run.cpp"),
                        str(ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp"),
                        str(ROOT / "hardware/chisel/graph_device_runtime.cpp"),
                        str(ROOT / "hardware/chisel/graph_device_affine_runtime.cpp"),
