@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0147 remains the sole active integration item until its accepted branch merges; no product mutation lane is active. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | No active P0. The next Chisel/software generality slice is a material design fork; do not substitute a legacy or physical task. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -45,8 +45,11 @@ review and failure preservation do not consume the two-item delivery limit.
   Candidate `0bf42deb7c984acc2eae6479fbc64ca13e91ece6` passes 39 queue
   tests plus the existing 40-test experiment/agent-boundary suite, Python compilation,
   the record checker, diff check, a live idempotent T-0145 dry-run, and live
-  branch audit. Independent exact-head Tester review gives GO; PR #111 remains
-  the integration boundary.
+  branch audit. Independent exact-head Tester review gave GO; PR #111 was
+  the integration boundary and subsequently squash-merged as canonical
+  commit `c492642710ba5a57a63a252a01dfd17ffdea9efc`; Issue #110 is Closed,
+  the new `complete` transition recorded its evidence fields before `Done`,
+  and the ordinary queue audit passes.
 
 - [x] **T-0146** Keep a rolling P0 delivery horizon instead of treating an
   empty P0/Ready queue as idle. Real Issue #107, branch

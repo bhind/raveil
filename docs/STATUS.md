@@ -640,8 +640,9 @@ subsequently pulled into the no-device adapter work recorded below. No
 product, performance, device, FPGA, ASIC or silicon fact follows from this
 Host Functional governance result.
 
-T-0147 is the sole active P0 governance correction under real Issue #110 and
-branch `fix/t-0147-atomic-project-closeout`. T-0145 / PR #109 demonstrated that
+T-0147 is canonical through squash-merged PR #111 at
+`c492642710ba5a57a63a252a01dfd17ffdea9efc`; Issue #110 is Closed and its
+Project item is Done. T-0145 / PR #109 demonstrated that
 the canonical queue had prepare/start/review but no completion transition:
 merge closed Issue #106 while its Project item remained `Review`, so the PM had
 to write review/cycle/resource fields and move `Done` manually. The bounded
@@ -655,9 +656,10 @@ evidence text, while status safely remains Review for retry.
 Candidate `0bf42deb7c984acc2eae6479fbc64ca13e91ece6` passes 39 focused
 queue tests and the existing 40-test experiment/agent-boundary suite, Python compilation,
 the record checker, diff check, and live branch audit. An independent Tester
-approved that exact head. PR #111 is open and mergeable; T-0147 remains an
-integration-pending candidate until it merges and the new `complete` command
-successfully reconciles its closed Issue and Project item.
+approved that exact implementation head and the records-only descendant. The
+new `complete` command then successfully reconciled the closed Issue and
+Project item after merge. The ordinary live audit passes with zero active and
+zero Ready items; the horizon audit correctly identifies the missing successor.
 
 T-0145 has an independently verified Host Functional implementation at
 `a82abf3dac10e048f59ec665dc7f3dea7829e121` on
