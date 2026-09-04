@@ -6,6 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdexcept>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -262,10 +263,11 @@ ProjectedDynamicGraphDeviceRequest read_projected_dynamic_graph_device_request(
     const auto binding = exact_file(root / "seal-binding.json", std::filesystem::file_size(root / "seal-binding.json"));
     const std::string binding_text(binding.begin(), binding.end());
     const std::string request_sha = sha256_hex(request_bytes);
-    if (binding_text.find("\"schema\":\"raveil.graph-device-dynamic-sealed-replay/v1\"") == std::string::npos
-        || binding_text.find("\"request_sha256\":\"" + request_sha + "\"") == std::string::npos
-        || binding_text.find("\"seal_sha256\":\"") == std::string::npos
-        || binding_text.find("\"manifest_sha256\":\"") == std::string::npos)
+    static const std::regex binding_pattern(
+        R"bind(^\{"manifest_sha256":"([0-9a-f]{64})","request_sha256":"([0-9a-f]{64})","schema":"raveil\.graph-device-dynamic-sealed-replay/v1","seal_sha256":"([0-9a-f]{64})"\}\n$)bind");
+    std::smatch match;
+    if (!std::regex_match(binding_text, match, binding_pattern)
+        || match[1].str() != match[3].str() || match[2].str() != request_sha)
         throw std::runtime_error("projected dynamic seal binding does not bind request identity");
     return {request, kVersionV2, oracle};
 }
