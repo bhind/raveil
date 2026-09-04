@@ -3,15 +3,17 @@
 #include "graph_device_dag_runtime.h"
 
 #include <array>
+#include <algorithm>
 #include <cassert>
 #include <sstream>
+#include <vector>
 
 namespace {
 class FakeRegisterIo final : public raveil::graph_device::RegisterIo {
 public:
     explicit FakeRegisterIo(const std::array<std::uint32_t, 256>& oracle) : oracle_words_(oracle) {}
     raveil::graph_device::DeviceRead read32(std::uint32_t offset) override {
-        ++reads;
+        ++reads; events.push_back(offset | 0x80000000U);
         if (offset == 0x2014U || offset == 0x3014U) return {true, 2U};
         if (offset == 0x3018U) return {true, program_words};
         if (offset >= 0x3040U && offset < 0x3060U) return {true, program[(offset - 0x3040U) / 4U + 4U]};
@@ -20,12 +22,13 @@ public:
         return {true, 0U};
     }
     bool write32(std::uint32_t offset, std::uint32_t value) override {
-        ++writes;
+        ++writes; events.push_back(offset);
         if (offset >= 0x3400U && offset < 0x3480U) program[(offset - 0x3400U) / 4U] = value, ++program_words;
         if (offset == 16U && value == 1U) started = true;
         return true;
     }
     unsigned reads = 0U, writes = 0U, program_words = 0U;
+    std::vector<std::uint32_t> events;
 private:
     std::array<std::uint32_t, 32> program{};
     std::array<std::uint32_t, 256> oracle_words_{};
@@ -43,4 +46,10 @@ int main(int argc, char** argv) {
         transport, transport, transport, request.request.graph_id.c_str(), request.request.affine.c_str(),
         request.request.program, request.request.input, request.oracle, request.request.seed, log, errors);
     assert(result == 0); assert(errors.str().empty()); assert(fake.writes >= 324U + 48U); assert(fake.reads >= 256U);
+    const auto first_program = std::find(fake.events.begin(), fake.events.end(), 0x3400U);
+    const auto first_input = std::find(fake.events.begin(), fake.events.end(), 0x400U);
+    const auto start = std::find(first_input, fake.events.end(), 16U);
+    const auto output = std::find(fake.events.begin(), fake.events.end(), 0x80001000U);
+    assert(first_program != fake.events.end() && first_input != fake.events.end() && start != fake.events.end());
+    assert(first_program < first_input && first_input < start && start < output);
 }

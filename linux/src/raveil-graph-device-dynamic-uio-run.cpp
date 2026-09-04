@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
         std::ostringstream runtime_log;
         std::ostringstream runtime_errors;
         const int result = raveil::graph_device::run_dynamic_dag(
-            transport, transport, transport, admitted.graph_id.c_str(), admitted.affine.c_str(),
-            admitted.program, admitted.input, {}, admitted.seed,
+            transport, transport, transport, admitted.request.graph_id.c_str(), admitted.request.affine.c_str(),
+            admitted.request.program, admitted.request.input, admitted.oracle, admitted.request.seed,
             runtime_log, runtime_errors);
         if (result != 0) { std::cerr << runtime_errors.str(); return result; }
         std::cout << "GraphDevice-DYNAMIC-UIO-TRANSPORT-V1 runtime_return=0"
