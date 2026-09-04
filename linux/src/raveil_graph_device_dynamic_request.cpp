@@ -58,6 +58,15 @@ std::array<unsigned char, 32> sha256(const std::vector<unsigned char>& input) {
     return output;
 }
 
+std::string sha256_hex(const std::vector<unsigned char>& input) {
+    static constexpr char digits[] = "0123456789abcdef";
+    const auto digest = sha256(input);
+    std::string result;
+    result.reserve(64U);
+    for (const auto byte : digest) { result.push_back(digits[byte >> 4U]); result.push_back(digits[byte & 15U]); }
+    return result;
+}
+
 std::vector<unsigned char> read_request(const std::filesystem::path& root) {
     const auto status = std::filesystem::symlink_status(root);
     if (std::filesystem::is_symlink(status) || !std::filesystem::is_directory(status))
@@ -247,8 +256,17 @@ ProjectedDynamicGraphDeviceRequest read_projected_dynamic_graph_device_request(
     const auto oracle = read_output_file(root / "request-oracle.bin");
     const auto binding_status = std::filesystem::symlink_status(root / "seal-binding.json");
     if (std::filesystem::is_symlink(binding_status) || !std::filesystem::is_regular_file(binding_status)
-        || std::filesystem::file_size(root / "seal-binding.json") == 0U)
+        || std::filesystem::file_size(root / "seal-binding.json") == 0U
+        || std::filesystem::file_size(root / "seal-binding.json") > 4096U)
         throw std::runtime_error("projected dynamic seal binding is invalid");
+    const auto binding = exact_file(root / "seal-binding.json", std::filesystem::file_size(root / "seal-binding.json"));
+    const std::string binding_text(binding.begin(), binding.end());
+    const std::string request_sha = sha256_hex(request_bytes);
+    if (binding_text.find("\"schema\":\"raveil.graph-device-dynamic-sealed-replay/v1\"") == std::string::npos
+        || binding_text.find("\"request_sha256\":\"" + request_sha + "\"") == std::string::npos
+        || binding_text.find("\"seal_sha256\":\"") == std::string::npos
+        || binding_text.find("\"manifest_sha256\":\"") == std::string::npos)
+        throw std::runtime_error("projected dynamic seal binding does not bind request identity");
     return {request, kVersionV2, oracle};
 }
 }  // namespace raveil::graph_device
