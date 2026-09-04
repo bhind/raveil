@@ -20,6 +20,9 @@ closed and the next item is ready.
 - Wednesday, correction review: compare the board with actual work, preserve
   every initial estimate, record changed points and reasons, and split or
   remove scope when capacity is exceeded.
+- Before each active P0 enters task Review: require one completely prepared
+  P1/Ready successor when evidence and dependencies permit. An empty horizon
+  triggers bounded refinement; it does not delay technical integration.
 - Saturday, review and demo: run the increment from a recorded command and
   environment, show the actual output or visible interface to the owner,
   explain behavior and non-claims, route feedback, and move the review
@@ -95,10 +98,12 @@ credentials, secrets, or reset-credit identifiers.
 ## Product Backlog and refinement
 
 The Product Backlog is not an inventory of aspirations. Order it by dependency,
-priority, expected user or research value, and risk reduction. Keep at least the
-next two sprints decomposed into independently acceptable slices. Further work
-may remain an unpointed epic until refinement makes its outcome, boundary, and
-entry conditions concrete.
+priority, expected user or research value, and risk reduction. Keep one active
+P0, one completely prepared P1/Ready successor, and one forecast Backlog
+candidate when evidence permits, and keep at least the next two sprints
+decomposed into independently acceptable slices. Further work may remain an
+unpointed epic until refinement makes its outcome, boundary, and entry
+conditions concrete.
 
 A Project slice keeps its parent stable T-ID and uses a `/SNN` suffix only as a
 coordination label. It does not allocate a new canonical record identifier or
@@ -116,12 +121,22 @@ dependency invalidates the next two sprints. A refined item records:
 - a runnable demo or evidence command, even when the command is a planned path;
 - committed Sprint or forecast Sprint/date plus confidence.
 
+Run the canonical queue horizon check no later than the current P0 Review
+boundary. If no pullable Ready successor exists, the Project Manager inspects
+current code and canonical records, de-duplicates TODO, ranks no more than three
+bounded candidates, and prepares the one unambiguous successor. A material
+product fork, paid or licensed action, device access, invariant change, or
+existing HCI is escalated; an empty queue alone is not an idle condition.
+
 ## Definition of Ready and Done
 
 An item may move from `Backlog` to `Ready` only when its parent T-ID, outcome,
 dependencies, owner/support roles, initial SP, evidence class, acceptance
 boundary, demo/evidence command, and relevant non-claims are explicit. A
 blocked external approval or hardware dependency must also be visible.
+The canonical `project_queue.py prepare` transition writes this metadata and
+`Initial SP` before moving Status to `Ready`; `start` later promotes Priority
+from P1 to P0 and moves Status to `In Progress` last.
 
 An item moves to `Done` only when the increment or evidence command ran at a
 recorded revision and environment, acceptance was reviewed, failures and

@@ -9,10 +9,13 @@ from unittest.mock import patch
 from scripts.project_queue import (
     QueueError,
     ProjectQueue,
+    audit,
     audit_state,
     branch_work_id,
     closing_reference,
     missing_packet_markers,
+    prepare,
+    pullable_ready_items,
     task_id,
     review,
     start,
@@ -82,13 +85,14 @@ class FakeQueue:
         self._branch = branch
         self.edits: list[tuple[str, str, object]] = []
         self._fields = {
-            "Status": select_field("Status", "Ready", "In Progress", "Review"),
-            "Priority": select_field("Priority", "P0"),
+            "Status": select_field("Status", "Backlog", "Ready", "In Progress", "Review"),
+            "Priority": select_field("Priority", "P0", "P1"),
             "Parent T-ID": {"id": "parent", "name": "Parent T-ID", "type": "ProjectV2Field"},
             "Owner Role": select_field("Owner Role", "Chisel Implementer"),
             "Depends On": {"id": "depends", "name": "Depends On", "type": "ProjectV2Field"},
             "Sprint": {"id": "sprint", "name": "Sprint", "type": "ProjectV2IterationField"},
             "Story Points": {"id": "points", "name": "Story Points", "type": "ProjectV2Field"},
+            "Initial SP": {"id": "initial", "name": "Initial SP", "type": "ProjectV2Field"},
             "Demo Command": {"id": "demo", "name": "Demo Command", "type": "ProjectV2Field"},
             "Evidence Class": select_field("Evidence Class", "Host Functional"),
         }
@@ -151,7 +155,103 @@ def start_args(*, apply: bool = True) -> argparse.Namespace:
     )
 
 
+def prepare_args(*, apply: bool = True) -> argparse.Namespace:
+    return start_args(apply=apply)
+
+
+def audit_args(*, require_horizon: bool) -> argparse.Namespace:
+    return argparse.Namespace(
+        fixture=None,
+        check_branch=False,
+        require_horizon=require_horizon,
+    )
+
+
 class ProjectQueueAuditTest(unittest.TestCase):
+    def test_horizon_audit_fails_when_no_pullable_successor_exists(self) -> None:
+        active_issue = issue(27, "T-0125 — Playable")
+        active = item(27, active_issue["title"], "In Progress", "T-0125")
+        queue = FakeQueue({"items": [active]}, [active_issue], "feat/t-0125-playable")
+        output = io.StringIO()
+        errors = io.StringIO()
+        with redirect_stdout(output), patch("sys.stderr", errors):
+            self.assertEqual(1, audit(queue, audit_args(require_horizon=True)))
+        self.assertIn("0 pullable-Ready", output.getvalue())
+        self.assertIn("do not return idle", errors.getvalue())
+
+    def test_horizon_audit_accepts_one_complete_successor(self) -> None:
+        active_issue = issue(27, "T-0125 — Playable")
+        next_issue = issue(28, "T-0126 — Queue")
+        active = item(27, active_issue["title"], "In Progress", "T-0125")
+        successor = item(28, next_issue["title"], "Ready", "T-0126")
+        successor["priority"] = "P1"
+        successor["initial SP"] = 5
+        queue = FakeQueue(
+            {"items": [active, successor]},
+            [active_issue, next_issue],
+            "feat/t-0125-playable",
+        )
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, audit(queue, audit_args(require_horizon=True)))
+
+    def test_pullable_ready_requires_complete_p1_successor(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        ready_item = item(27, one_issue["title"], "Ready", "T-0125")
+        ready_item["priority"] = "P1"
+        ready_item["initial SP"] = 5
+        pullable, excluded = pullable_ready_items({"items": [ready_item]}, [one_issue])
+        self.assertEqual([ready_item], pullable)
+        self.assertEqual([], excluded)
+
+        ready_item["demo Command"] = ""
+        pullable, excluded = pullable_ready_items({"items": [ready_item]}, [one_issue])
+        self.assertEqual([], pullable)
+        self.assertIn("missing demo Command", excluded[0])
+
+        ready_item["demo Command"] = "./demo.sh"
+        ready_item["initial SP"] = None
+        pullable, excluded = pullable_ready_items({"items": [ready_item]}, [one_issue])
+        self.assertEqual([], pullable)
+        self.assertIn("missing initial SP", excluded[0])
+
+    def test_prepare_writes_complete_p1_metadata_before_ready(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        backlog = item(27, one_issue["title"], "Backlog", "T-0125")
+        queue = FakeQueue({"items": [backlog]}, [one_issue], "main")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, prepare(queue, prepare_args()))
+        self.assertEqual(("item-27", "Status", "Ready"), queue.edits[-1])
+        self.assertIn(("item-27", "Priority", "P1"), queue.edits[:-1])
+        self.assertIn(("item-27", "Initial SP", 5), queue.edits[:-1])
+
+    def test_prepare_accepts_new_project_item_with_unset_status(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        unclassified = item(27, one_issue["title"], "", "T-0125")
+        unclassified["status"] = None
+        queue = FakeQueue({"items": [unclassified]}, [one_issue], "main")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, prepare(queue, prepare_args()))
+        self.assertEqual(("item-27", "Status", "Ready"), queue.edits[-1])
+
+    def test_prepare_refuses_a_second_ready_successor(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        other_issue = issue(28, "T-0126 — Queue")
+        backlog = item(27, one_issue["title"], "Backlog", "T-0125")
+        ready = item(28, other_issue["title"], "Ready", "T-0126")
+        queue = FakeQueue({"items": [backlog, ready]}, [one_issue, other_issue], "main")
+        with self.assertRaisesRegex(QueueError, "existing Ready successor"):
+            prepare(queue, prepare_args())
+        self.assertEqual([], queue.edits)
+
+    def test_prepare_refuses_to_rewrite_initial_points(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        backlog = item(27, one_issue["title"], "Backlog", "T-0125")
+        backlog["initial SP"] = 8
+        queue = FakeQueue({"items": [backlog]}, [one_issue], "main")
+        with self.assertRaisesRegex(QueueError, "cannot rewrite Initial SP"):
+            prepare(queue, prepare_args())
+        self.assertEqual([], queue.edits)
+
     def test_accepts_two_real_issue_lanes_and_matching_branch(self) -> None:
         issues = [issue(27, "T-0125 — Playable"), issue(28, "T-0126 — Queue")]
         project = {

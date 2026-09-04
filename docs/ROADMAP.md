@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **Canonical through T-0144 read-only Garden execution explanation; no active P0 delivery item; T-0044 physical research remains blocked**
+State: **Canonical through T-0146 rolling P0 replenishment; T-0145 is the prepared software-only Product successor; T-0044 physical research remains blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical through T-0144 read-only Garden execution explanation; no active P0 delivery item and no FPGA or silicon evidence exists**
+State: **Canonical through T-0146; T-0145 is the prepared software-only UIO handoff successor; no FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
