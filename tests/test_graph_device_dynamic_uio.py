@@ -18,6 +18,9 @@ class DynamicUioHostTests(unittest.TestCase):
             "raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()
         ), patch("raveil.graph_device_dynamic_sealed._dynamic_parent", return_value=Path(directory).resolve()):
             bundle = Path(seal(GRAPH, 3, ROOT)["path"])
+            projected_paths = []
+            projected = handoff_verified_for_test(bundle, "/dev/uio7", ROOT,
+                lambda _device, path: projected_paths.append(path))
             before = {p.name: p.read_bytes() for p in bundle.iterdir()}
             calls = []
             projected = handoff_verified_for_test(bundle, "/dev/uio7", ROOT,
@@ -35,8 +38,11 @@ class DynamicUioHostTests(unittest.TestCase):
             self.skipTest("no C++ compiler")
         with tempfile.TemporaryDirectory() as directory, patch(
             "raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()
-        ):
+        ), patch("raveil.graph_device_dynamic_sealed._dynamic_parent", return_value=Path(directory).resolve()):
             bundle = Path(seal(GRAPH, 3, ROOT)["path"])
+            projected_paths = []
+            projected = handoff_verified_for_test(bundle, "/dev/uio7", ROOT,
+                lambda _device, path: projected_paths.append(path))
             binary = Path(directory) / "dynamic-uio-host"
             command = [compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", str(ROOT / "linux/include"),
                        "-I", str(ROOT / "hardware/chisel"), "-I", str(bundle),
@@ -47,9 +53,10 @@ class DynamicUioHostTests(unittest.TestCase):
                        str(ROOT / "hardware/chisel/graph_device_dag_runtime.cpp"), "-o", str(binary)]
             built = subprocess.run(command, text=True, capture_output=True, check=False)
             self.assertEqual(built.returncode, 0, built.stderr)
-            self.assertEqual(subprocess.run([str(binary), str(bundle)], check=False).returncode, 0)
-            raw = bytearray((bundle / "input.bin").read_bytes()); raw[0] ^= 1; (bundle / "input.bin").write_bytes(raw)
-            self.assertNotEqual(subprocess.run([str(binary), str(bundle)], check=False).returncode, 0)
+            self.assertEqual(projected, projected_paths[0])
+            self.assertEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
+            raw = bytearray((projected / "request-input.bin").read_bytes()); raw[0] ^= 1; (projected / "request-input.bin").write_bytes(raw)
+            self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
 
 
 if __name__ == "__main__":

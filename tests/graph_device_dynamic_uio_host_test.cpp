@@ -35,7 +35,7 @@ private:
 
 int main(int argc, char** argv) {
     if (argc != 2) return 2;
-    const auto request = raveil::graph_device::read_sealed_dynamic_graph_device_request(argv[1]);
+    const auto request = raveil::graph_device::read_projected_dynamic_graph_device_request(argv[1]);
     FakeRegisterIo fake(request.oracle);
     raveil::graph_device::Axi4LiteTransport transport(fake, 0U, 0x2000U, 0x3000U);
     std::ostringstream log, errors;

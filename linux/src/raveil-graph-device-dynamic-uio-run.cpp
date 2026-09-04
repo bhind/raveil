@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     try {
-        const auto admitted = raveil::graph_device::read_dynamic_graph_device_request(
+        const auto admitted = raveil::graph_device::read_projected_dynamic_graph_device_request(
             std::filesystem::path(argv[2]));
         // No device side effect is permitted before this exact sealed-v2
         // identity/version admission returns successfully.
