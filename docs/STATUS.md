@@ -640,6 +640,17 @@ subsequently pulled into the no-device adapter work recorded below. No
 product, performance, device, FPGA, ASIC or silicon fact follows from this
 Host Functional governance result.
 
+T-0147 is the sole active P0 governance correction under real Issue #110 and
+branch `fix/t-0147-atomic-project-closeout`. T-0145 / PR #109 demonstrated that
+the canonical queue had prepare/start/review but no completion transition:
+merge closed Issue #106 while its Project item remained `Review`, so the PM had
+to write review/cycle/resource fields and move `Done` manually. The bounded
+candidate adds a dry-run-by-default `complete` transition that requires the
+matching merged PR, closed complete-packet work-item Issue and Review state,
+preflights required fields, writes evidence metadata before `Done` last, and is
+idempotent after Done. This is Host Functional workflow behavior only; it adds
+no product capability or autonomous successor authority.
+
 T-0145 has an independently verified Host Functional implementation at
 `a82abf3dac10e048f59ec665dc7f3dea7829e121` on
 `feat/t-0145-sealed-dynamic-uio-handoff`. ADR-0083 keeps the ADR-0079 Python
@@ -666,6 +677,9 @@ An offline Linux/arm64 container compiled the current adapter object with
 `d9c01d028d66f365be518978c7ed759fd8a8ae0cdb40f267168c9360677648bb`.
 This is not real UIO, KV260, FPGA, RTL-simulation, performance, timing, area,
 energy, production-security, product-readiness, ASIC or silicon evidence.
+PR #109 squash-merged the accepted branch as canonical commit
+`08ead0bb909aef1a94fc44784018a95c183b06a4`; Issue #106 is Closed and its
+Project item is Done.
 
 The branch implementation preserves legacy Garden snapshot behavior and adds
 one strict `raveil.garden-dynamic-explanation/v1` fixture for the retained

@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **Canonical through T-0145's no-device sealed handoff; real UIO and T-0044 physical research remain blocked**
+State: **Canonical through T-0145's no-device sealed handoff; T-0147 corrects task closeout only; real UIO and T-0044 physical research remain blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -18,6 +18,12 @@ execution can simplify or outperform an in-order or OoO CPU. More measurement
 or process-demo work would repeat that ordering error.
 
 The corrected critical path is:
+
+T-0145 is canonical through squash-merged PR #109 at `08ead0b`; its no-device
+boundary and every physical non-claim remain unchanged. T-0147 is an active
+Host Functional governance correction for the missing atomic Project
+completion transition. It changes no product or research gate and does not
+authorize the blocked real-UIO path.
 
 The 2026-08-23 Sprint coordination audit does not reopen T-0042 or alter this
 critical path. One already-active BOOM stripped-token negative is retained as

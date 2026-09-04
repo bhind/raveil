@@ -39,8 +39,10 @@ GitHub Project mutation implementation.
   remove scope without rewriting history.
 - **Task review/integration:** validate the exact-head PR, allowlist, tests,
   records, mergeability, and technical acceptance; transition through the
-  canonical review command, merge, reconcile the task records, and verify
-  closed-Issue/`Done` agreement. Do not stop continuous Sprint delivery for a
+  canonical review command, merge, reconcile the task records, and run the
+  canonical completion command only after the Issue is closed. The completion
+  command records review outcome, observed cycle, and resource use before
+  moving `Status=Done` last. Do not stop continuous Sprint delivery for a
   per-task owner demo unless the owner or a task-specific risk gate explicitly
   requires one. Task `Done` never accepts the weekly Sprint Review ceremony.
 - **Horizon replenishment:** by the current P0 Review boundary, run the
@@ -64,8 +66,8 @@ tracked mutation. For a read-only status request, its audit section is enough.
 ## Non-negotiable boundaries
 
 - `scripts/project_queue.py` is the sole queue-transition implementation.
-  Never reproduce `prepare`, `start`, or `review` transitions with ad hoc
-  GraphQL.
+  Never reproduce `prepare`, `start`, `review`, or `complete` transitions with
+  ad hoc GraphQL.
 - Only the primary Project Manager may perform Project transitions or use
   `--apply`. Other roles validate their named packet and report evidence.
 - Run the current 10,080-minute HCI-09 usage check before a new task, subagent,
