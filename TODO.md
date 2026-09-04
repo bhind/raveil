@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | None after T-0146 integration; pull prepared T-0145 immediately. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0145 sealed dynamic UIO handoff; a real KV260 board implementation remains unallocated until T-0138 checks 1--7 and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0145 remains the active integration item until its accepted branch merges; no second mutation lane is active. |
+| **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -41,15 +41,23 @@ review and failure preservation do not consume the two-item delivery limit.
   queue/agent-boundary tests, the record checker, `git diff --check`, and a
   live audit reporting one active and one pullable-Ready delivery item.
 
-- [ ] **T-0145** Hand one verified sealed dynamic Graph to the Linux dynamic
-  UIO runner without opening a real device. Real Issue #106 is the successor
-  packet, now prepared as P1/Ready; Systems Implementer owns the future coherent mutation and
-  Tester/Security/Performance/PM remain support. Reuse T-0142 sealing,
-  T-0143 `MAX_U32`, `run_dynamic_dag`, `UioRegisterIo`, the existing three
-  ABIs and relative 16 KiB aperture. Acceptance requires pre-open identity and
-  version validation, a fake-RegisterIo full transaction/output proof, and a
-  warning-free ARM64 Linux build. Stop before real UIO/MMIO, vendor tools,
+- [x] **T-0145** Hand one verified sealed dynamic Graph to the Linux dynamic
+  UIO-shaped host adapter without opening a real device. Real Issue #106,
+  branch `feat/t-0145-sealed-dynamic-uio-handoff`, Systems Implementer and
+  Host Functional evidence own the coherent mutation; Tester, Security and PM
+  remain independent support. Reuse T-0142 sealing, T-0143 `MAX_U32` and
+  `run_dynamic_dag`; preserve the separate `UioRegisterIo`, existing three
+  ABIs and relative 16 KiB aperture. Acceptance requires verified projection
+  before an injected adapter, a fake-RegisterIo full transaction/output proof,
+  and a warning-free ARM64 Linux object build. Stop before real UIO/MMIO, vendor tools,
   board access, RTL/ABI/opcode expansion, performance, FPGA, ASIC or silicon.
+  ADR-0083 resolves the safe minimum by excluding the real opener entirely:
+  the accepted adapter takes an injected `RegisterIo&`, and the ARM64 target
+  emits only an object. Implementation head `a82abf3dac10e048f59ec665dc7f3dea7829e121`
+  passes 31 focused/regression tests and an offline ARM64 `-Wall -Wextra
+  -Werror` object compile. The initial pathname-driven executable was rejected
+  by Security Review because a self-attested projection could bypass the seal;
+  it remains in Git history and no device path survives in the accepted slice.
 
 - [x] **T-0137** Separate continuous task PR integration from the weekly
   owner-visible Sprint Review. Task review verifies exact head, allowlist,

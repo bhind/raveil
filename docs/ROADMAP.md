@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **Canonical through T-0146 rolling P0 replenishment; T-0145 is the prepared software-only Product successor; T-0044 physical research remains blocked**
+State: **Canonical through T-0145's no-device sealed handoff; real UIO and T-0044 physical research remain blocked**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -706,7 +706,7 @@ full Gate 4 planned.
 
 ## Gate 5 — hardware exploration
 
-State: **Canonical through T-0146; T-0145 is the prepared software-only UIO handoff successor; no FPGA or silicon evidence exists**
+State: **Canonical through T-0145's Host Functional no-device adapter; no real UIO, FPGA or silicon evidence exists**
 
 Profile stable software access patterns before considering an Experience
 Processing Unit, FPGA fabric, or ASIC. Hardware claims require separate
@@ -733,6 +733,15 @@ T-0132/S08 is the next software-only product slice. It may make the Linux
 runner request-independent only for the existing three catalogue Graphs and
 uint32 seeds, with strict validation before UIO open. It cannot broaden the
 Graph/program alphabet, change RTL or an ABI, or satisfy any board gate.
+
+T-0145 now carries one ADR-0079-verified sealed-v2 payload through an exclusive
+private projection and the existing transport sequence using an injected fake
+`RegisterIo`. The Linux ARM64 target compiles only the no-device adapter object;
+the slice contains no UIO backend, device path, opener, mapping or MMIO
+primitive. This closes the software handoff proof only. A future physical
+successor must separately define an unbypassable retained-bytes or descriptor
+handoff, pass T-0139 and ADR-0039 review, and then wire ADR-0071's opened-object
+checks. Gate 5 does not advance to FPGA evidence.
 
 The reviewed S08 implementation passes host admission, ARM64 build, and
 unchanged S05 Verilator replay checks. It still does not satisfy a KV260 or
