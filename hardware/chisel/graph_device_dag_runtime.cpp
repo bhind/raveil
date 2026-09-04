@@ -507,4 +507,42 @@ int run_dynamic_dag(
     return 0;
 }
 
+int run_dynamic_dag(
+    DeviceTransport& device,
+    AffineInstallTransport& affine,
+    ProgramInstallTransport& program,
+    const char* graph_id,
+    const char* affine_name,
+    const std::array<std::uint32_t, 32>& payload,
+    const std::array<std::uint32_t, 324>& input,
+    const std::array<std::uint32_t, 256>& oracle,
+    std::uint32_t seed,
+    std::ostream& log,
+    std::ostream& errors
+) {
+    const generated::Graph graph{graph_id, affine_name, payload};
+    const affine_generated::Profile* profile = nullptr;
+    if (std::string(affine_name) == "baseline") profile = &affine_generated::kProfiles[0];
+    else if (std::string(affine_name) == "compact") profile = &affine_generated::kProfiles[1];
+    else { errors << "DAG sealed dynamic affine profile is unknown\n"; return 2; }
+    Output output{};
+    std::uint32_t polls = 0U;
+    std::uint32_t status = 0U;
+    if (!valid_fallback_program(graph.payload)
+        || !reset(device, errors)
+        || !install_affine(affine, *profile, errors)
+        || !install_program(program, graph, errors)
+        || !stage_and_start(device, input, errors)
+        || !wait_terminal(device, polls, status, errors)
+        || (status & (abi::kStatusCompleted | abi::kStatusOutputValid))
+            != (abi::kStatusCompleted | abi::kStatusOutputValid)
+        || !read_output(device, output, errors)) return 1;
+    if (output != oracle) { errors << "DAG sealed dynamic output differs from oracle\n"; return 1; }
+    log << "GraphDevice-DAG-SEALED-DYNAMIC-RUN-V1 status=OK graph=" << graph.id
+        << " seed=" << seed << " profile=" << profile->name << " polls=" << polls
+        << " oracle=independent input=sealed identity=revalidated"
+        << " evidence=host-functional performance=not-measured\n";
+    return 0;
+}
+
 }  // namespace raveil::graph_device

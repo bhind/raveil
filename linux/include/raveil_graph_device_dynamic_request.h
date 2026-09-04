@@ -17,7 +17,18 @@ struct DynamicGraphDeviceRequest {
     std::array<std::uint32_t, 324> input{};
 };
 
+/** A sealed bundle is admitted as bytes, never by reparsing its descriptor. */
+struct SealedDynamicGraphDeviceRequest {
+    DynamicGraphDeviceRequest request;
+    std::uint32_t version = 0;
+    std::array<std::uint32_t, 256> oracle{};
+};
+
 DynamicGraphDeviceRequest read_dynamic_graph_device_request(
+    const std::filesystem::path& root
+);
+
+SealedDynamicGraphDeviceRequest read_sealed_dynamic_graph_device_request(
     const std::filesystem::path& root
 );
 

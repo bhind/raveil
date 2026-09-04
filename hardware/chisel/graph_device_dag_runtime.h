@@ -71,6 +71,21 @@ int run_dynamic_dag(
     std::ostream& errors
 );
 
+/** Execute an already admitted sealed request without rereading a descriptor. */
+int run_dynamic_dag(
+    DeviceTransport& device,
+    AffineInstallTransport& affine,
+    ProgramInstallTransport& program,
+    const char* graph_id,
+    const char* affine_name,
+    const std::array<std::uint32_t, 32>& payload,
+    const std::array<std::uint32_t, 324>& input,
+    const std::array<std::uint32_t, 256>& oracle,
+    std::uint32_t seed,
+    std::ostream& log,
+    std::ostream& errors
+);
+
 }  // namespace raveil::graph_device
 
 #endif

@@ -89,6 +89,42 @@ std::array<std::uint32_t, 324> read_input_file(const std::filesystem::path& path
     return words;
 }
 
+std::array<std::uint32_t, 256> read_output_file(const std::filesystem::path& path) {
+    const auto status = std::filesystem::symlink_status(path);
+    if (std::filesystem::is_symlink(status) || !std::filesystem::is_regular_file(status)
+        || std::filesystem::file_size(path) != 256U * 4U)
+        throw std::runtime_error("dynamic oracle is not an exact regular file");
+    std::array<unsigned char, 256U * 4U> bytes{};
+    std::ifstream input(path, std::ios::binary);
+    input.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+    if (!input || input.peek() != EOF) throw std::runtime_error("dynamic oracle read failed");
+    std::array<std::uint32_t, 256> words{};
+    for (std::size_t index = 0; index < words.size(); ++index) words[index] = word(bytes.data() + index * 4U);
+    return words;
+}
+
+std::vector<unsigned char> exact_file(const std::filesystem::path& path, std::size_t bytes) {
+    const auto status = std::filesystem::symlink_status(path);
+    if (std::filesystem::is_symlink(status) || !std::filesystem::is_regular_file(status)
+        || std::filesystem::file_size(path) != bytes)
+        throw std::runtime_error("sealed dynamic payload is not an exact regular file");
+    std::vector<unsigned char> result(bytes);
+    std::ifstream input(path, std::ios::binary);
+    input.read(reinterpret_cast<char*>(result.data()), static_cast<std::streamsize>(result.size()));
+    if (!input || input.peek() != EOF) throw std::runtime_error("sealed dynamic payload read failed");
+    return result;
+}
+
+template <std::size_t Count>
+std::vector<unsigned char> words_bytes(const std::array<std::uint32_t, Count>& words) {
+    std::vector<unsigned char> result;
+    result.reserve(Count * 4U);
+    for (const auto value : words)
+        for (unsigned shift = 0; shift < 32U; shift += 8U)
+            result.push_back(static_cast<unsigned char>(value >> shift));
+    return result;
+}
+
 void validate_input(const std::array<std::uint32_t, 324>& words, std::uint32_t seed) {
     const std::uint32_t multiplier = seed * 2654435761U;
     for (std::size_t index = 0; index < words.size(); ++index) {
@@ -196,5 +232,58 @@ DynamicGraphDeviceRequest read_dynamic_graph_device_request(const std::filesyste
         throw std::runtime_error("dynamic input files are not bound to request");
     validate_input(seed_one_input, 1U);
     return result;
+}
+
+SealedDynamicGraphDeviceRequest read_sealed_dynamic_graph_device_request(
+    const std::filesystem::path& root
+) {
+    const auto status = std::filesystem::symlink_status(root);
+    if (std::filesystem::is_symlink(status) || !std::filesystem::is_directory(status))
+        throw std::runtime_error("sealed dynamic root must be a direct directory");
+    const auto request_bytes = exact_file(root / "request.bin", kRequestBytes);
+    const auto program_bytes = exact_file(root / "program.bin", 32U * 4U);
+    const auto affine_bytes = exact_file(root / "affine.bin", 16U * 4U);
+    const auto input_bytes = exact_file(root / "input.bin", 324U * 4U);
+    const auto oracle = read_output_file(root / "oracle.bin");
+    if (word(request_bytes.data()) != kMagic || word(request_bytes.data() + 4U) != kVersionV2
+        || word(request_bytes.data() + 8U) != kHeaderBytes || word(request_bytes.data() + 20U) != 32U
+        || word(request_bytes.data() + 24U) != 16U || word(request_bytes.data() + 28U) != 324U)
+        throw std::runtime_error("sealed dynamic request header/version is invalid");
+    const auto profile = word(request_bytes.data() + 12U);
+    if (profile > 1U) throw std::runtime_error("sealed dynamic affine profile is invalid");
+    for (std::size_t index = 32U; index < 64U; ++index)
+        if (request_bytes[index] != 0U) throw std::runtime_error("sealed dynamic request reserved prefix is nonzero");
+    DynamicGraphDeviceRequest request;
+    request.seed = word(request_bytes.data() + 16U);
+    const unsigned char* id = request_bytes.data() + 64U;
+    std::size_t length = 0U;
+    while (length < kGraphIdBytes && id[length] != 0U) {
+        const unsigned char value = id[length];
+        if (!(value >= 'A' && value <= 'Z') && !(value >= 'a' && value <= 'z')
+            && !(value >= '0' && value <= '9') && value != '.' && value != '_' && value != '-')
+            throw std::runtime_error("sealed dynamic graph identity is invalid");
+        ++length;
+    }
+    if (length == 0U || length > 31U || id[length] != 0U)
+        throw std::runtime_error("sealed dynamic graph identity is invalid");
+    for (std::size_t index = length + 1U; index < kGraphIdBytes; ++index)
+        if (id[index] != 0U) throw std::runtime_error("sealed dynamic graph identity padding is invalid");
+    request.graph_id.assign(reinterpret_cast<const char*>(id), length);
+    request.affine = profile == 0U ? "baseline" : "compact";
+    std::size_t offset = 96U;
+    for (auto& value : request.program) { value = word(request_bytes.data() + offset); offset += 4U; }
+    for (auto& value : request.configuration) { value = word(request_bytes.data() + offset); offset += 4U; }
+    for (auto& value : request.input) { value = word(request_bytes.data() + offset); offset += 4U; }
+    const auto& canonical = request.affine == "baseline"
+        ? affine_generated::kProfiles[0] : affine_generated::kProfiles[1];
+    for (std::size_t index = 0U; index < request.configuration.size(); ++index)
+        if (request.configuration[index] != canonical.payload[index])
+            throw std::runtime_error("sealed dynamic affine payload is not canonical");
+    validate_program(request.program, kVersionV2);
+    validate_input(request.input, request.seed);
+    if (words_bytes(request.program) != program_bytes || words_bytes(request.configuration) != affine_bytes
+        || words_bytes(request.input) != input_bytes)
+        throw std::runtime_error("sealed dynamic payload identity drifted from request");
+    return {request, kVersionV2, oracle};
 }
 }  // namespace raveil::graph_device
