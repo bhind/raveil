@@ -61,6 +61,10 @@ class DynamicUioHostTests(unittest.TestCase):
                 binding.write_text(bad, encoding="ascii")
                 self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
             binding.write_text(saved_binding, encoding="ascii")
+            link = projected / "request-input.bin"; saved_input = link.read_bytes(); link.unlink(); link.symlink_to(projected / "inputs" / "seed-1.bin")
+            self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
+            link.unlink(); link.write_bytes(saved_input)
+            self.assertEqual(subprocess.run([str(binary), str(projected), "corrupt"], check=False).returncode, 0)
             raw = bytearray((projected / "request-input.bin").read_bytes()); raw[0] ^= 1; (projected / "request-input.bin").write_bytes(raw)
             self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
 
