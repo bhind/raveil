@@ -58,6 +58,18 @@ class DynamicUioHostTests(unittest.TestCase):
             raw = bytearray((projected / "request-input.bin").read_bytes()); raw[0] ^= 1; (projected / "request-input.bin").write_bytes(raw)
             self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
 
+    def test_projected_binding_and_leaf_tampering_reject(self):
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()
+        ), patch("raveil.graph_device_dynamic_sealed._dynamic_parent", return_value=Path(directory).resolve()):
+            bundle = Path(seal(GRAPH, 3, ROOT)["path"])
+            projected = handoff_verified_for_test(bundle, "/dev/uio7", ROOT, lambda *_: None)
+            binding = projected / "seal-binding.json"
+            binding.write_text(binding.read_text()[:-1] + '"x":1}\n', encoding="ascii")
+            calls = []
+            with self.assertRaises(Exception): handoff_verified_for_test(projected, "/dev/uio7", ROOT, lambda *_: calls.append(1))
+            self.assertEqual(calls, [])
+
 
 if __name__ == "__main__":
     unittest.main()
