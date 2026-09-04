@@ -55,6 +55,12 @@ class DynamicUioHostTests(unittest.TestCase):
             self.assertEqual(built.returncode, 0, built.stderr)
             self.assertEqual(projected, projected_paths[0])
             self.assertEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
+            binding = projected / "seal-binding.json"
+            saved_binding = binding.read_text("ascii")
+            for bad in (saved_binding[:-2] + ',"extra":1}\n', saved_binding.replace("a", "A", 1)):
+                binding.write_text(bad, encoding="ascii")
+                self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
+            binding.write_text(saved_binding, encoding="ascii")
             raw = bytearray((projected / "request-input.bin").read_bytes()); raw[0] ^= 1; (projected / "request-input.bin").write_bytes(raw)
             self.assertNotEqual(subprocess.run([str(binary), str(projected)], check=False).returncode, 0)
 
