@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0145 remains the active integration item until its accepted branch merges; no second mutation lane is active. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0147 remains the sole active integration item until its accepted branch merges; no product mutation lane is active. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,27 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [x] **T-0147** Make merged-task Project closeout one canonical, fail-closed
+  transition. T-0145 / PR #109 merged and its Issue closed, but the Project item
+  remained in `Review` until the PM manually moved it and filled its review,
+  cycle, and resource fields. Real Issue #110, branch
+  `fix/t-0147-atomic-project-closeout`, Project Manager, Tester support, three
+  SP, Sprint S-0002, and Host Functional governance evidence own only the queue
+  CLI, focused tests, Sprint skill/workflow, and matching records. Add one
+  dry-run-by-default `complete` command that requires the matching merged PR
+  and closed work-item Issue, preflights all fields, writes evidence text before
+  `Done` last, and is idempotent after completion. Stop before product code,
+  physical-device work, material successor selection, WIP/usage changes,
+  performance/research claims, FPGA, ASIC, or silicon. No new ADR applies: this
+  closes the executable gap in accepted ADR-0065/ADR-0082 lifecycle policy.
+  "Atomic" names the one-command, status-last finalizer, not a GitHub remote
+  transaction: a failed evidence write may leave partial text but never `Done`.
+  Candidate `0bf42deb7c984acc2eae6479fbc64ca13e91ece6` passes 39 queue
+  tests plus the existing 40-test experiment/agent-boundary suite, Python compilation,
+  the record checker, diff check, a live idempotent T-0145 dry-run, and live
+  branch audit. Independent exact-head Tester review gives GO; PR #111 remains
+  the integration boundary.
 
 - [x] **T-0146** Keep a rolling P0 delivery horizon instead of treating an
   empty P0/Ready queue as idle. Real Issue #107, branch
@@ -58,6 +79,10 @@ review and failure preservation do not consume the two-item delivery limit.
   -Werror` object compile. The initial pathname-driven executable was rejected
   by Security Review because a self-attested projection could bypass the seal;
   it remains in Git history and no device path survives in the accepted slice.
+  PR #109 squash-merged the reviewed branch as canonical commit
+  `08ead0bb909aef1a94fc44784018a95c183b06a4`; Issue #106 is Closed and its
+  Project item is Done. The post-merge Project transition was manual and is
+  the specific T-0147 automation defect, not a T-0145 product defect.
 
 - [x] **T-0137** Separate continuous task PR integration from the weekly
   owner-visible Sprint Review. Task review verifies exact head, allowlist,

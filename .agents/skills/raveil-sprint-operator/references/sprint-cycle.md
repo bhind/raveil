@@ -180,9 +180,28 @@ python3 scripts/project_queue.py audit --check-branch
 Run the task's acceptance/evidence commands at the reviewed revision. An
 incident-free PR may merge under ADR-0058 after the primary verifies the
 intended diff, current authority ancestry, acceptance, records, mergeability,
-checks, and review threads. After merge, verify that the Issue is closed and
-Project status is `Done`; automation or Project metadata alone never proves
-task completion.
+checks, and review threads. After merge, verify that the Issue is closed, then
+dry-run and apply the canonical completion transition:
+
+```sh
+python3 scripts/project_queue.py complete ISSUE --pr PR \
+  --review-outcome 'EXACT TECHNICAL ACCEPTANCE AND NON-CLAIMS' \
+  --observed-cycle 'OBSERVED DELIVERY CYCLE; LABEL UNSEALED TIME' \
+  --resource-use 'ENVIRONMENT, USAGE READING, AND EXTERNAL RESOURCES'
+python3 scripts/project_queue.py complete ISSUE --pr PR \
+  --review-outcome 'EXACT TECHNICAL ACCEPTANCE AND NON-CLAIMS' \
+  --observed-cycle 'OBSERVED DELIVERY CYCLE; LABEL UNSEALED TIME' \
+  --resource-use 'ENVIRONMENT, USAGE READING, AND EXTERNAL RESOURCES' \
+  --apply
+python3 scripts/project_queue.py audit
+```
+
+`complete` requires the merged PR to close the matching work-item Issue,
+preflights all evidence fields, writes them first, and moves `Status=Done`
+last. GitHub field edits are not one remote transaction: an intermediate
+failure may leave some evidence text updated, but the item remains Review and
+the command can be retried. It is idempotent after Done. Automation or Project
+metadata alone never proves task completion.
 
 Do not require the owner to attend or accept a demo for every ordinary task.
 Continue integrating technically accepted tasks through the Sprint unless the

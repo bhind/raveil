@@ -61,7 +61,13 @@ Last updated: 2026-08-29
   items, lifecycle/T-ID disagreement, and missing visible execution fields.
   ADR-0066 includes Sprint among those required active fields. `start` resolves
   the named configured Iteration before any remote write and records it before
-  moving status last; an unknown or missing Sprint fails closed.
+  moving status last; an unknown or missing Sprint fails closed. After a
+  verified merge closes the Issue, `project_queue.py complete ISSUE --pr PR`
+  validates the merged PR/T-ID/closing reference, records review outcome,
+  observed cycle and resource use, and moves `Done` last. Ad hoc Project field
+  edits are not a completion workflow. GitHub field edits are not
+  transactional; an intermediate failure may leave partial evidence text, but
+  status remains `Review` and a retry rewrites the fields before `Done`.
 - Treat eight SP as an under-utilization lower-bound check, 13 SP as the
   provisional committed weekly capacity, and 13--21 SP as the warm stretch
   range. Do not stop authorized work merely because a forecast SP total was
@@ -521,9 +527,12 @@ Before declaring completion, record:
 Before requesting final PR review, run
 `python3 scripts/project_queue.py review ISSUE --pr PR --apply`. It validates
 that the open PR head carries the same T-ID and that the body closes the Issue,
-then moves the item to `Review`. After merge, verify the closed Issue, `Done`
-Project status, and canonical record reconciliation; Project state never closes
-a task by itself.
+then moves the item to `Review`. After merge, verify the closed Issue and run
+`python3 scripts/project_queue.py complete ISSUE --pr PR` followed by the same
+command with `--apply`, supplying nonblank `--review-outcome`,
+`--observed-cycle`, and `--resource-use`. The transition writes those records
+before `Done` last. Re-run the queue audit and reconcile canonical records;
+Project state never closes a task by itself.
 
 Use the templates in [`templates/`](templates/).
 

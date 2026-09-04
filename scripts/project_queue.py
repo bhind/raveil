@@ -281,7 +281,7 @@ class ProjectQueue:
                 "--repo",
                 self.repository,
                 "--json",
-                "number,title,url,state,body,headRefName",
+                "number,title,url,state,body,headRefName,mergedAt",
             )
         )
 
@@ -413,6 +413,20 @@ def validate_issue_for_start(issue: dict[str, Any], branch: str) -> str:
 def validate_issue_packet(issue: dict[str, Any]) -> str:
     if issue.get("state") != "OPEN":
         raise QueueError("work item must be an open Issue")
+    if not issue_has_label(issue, "work-item"):
+        raise QueueError("Issue must carry the work-item label")
+    issue_identity = work_id(issue.get("title", ""))
+    if issue_identity is None:
+        raise QueueError("Issue title must contain a stable T-ID")
+    missing_markers = missing_packet_markers(issue.get("body", ""))
+    if missing_markers:
+        raise QueueError(f"Issue independence packet lacks: {', '.join(missing_markers)}")
+    return issue_identity
+
+
+def validate_closed_issue_packet(issue: dict[str, Any]) -> str:
+    if issue.get("state") != "CLOSED":
+        raise QueueError("completion requires a closed work-item Issue")
     if not issue_has_label(issue, "work-item"):
         raise QueueError("Issue must carry the work-item label")
     issue_identity = work_id(issue.get("title", ""))
@@ -676,6 +690,79 @@ def review(queue: ProjectQueue, args: argparse.Namespace) -> int:
     return 0
 
 
+def complete(queue: ProjectQueue, args: argparse.Namespace) -> int:
+    """Finalize one merged item with Done written last.
+
+    GitHub field edits are not transactional. A failed evidence-field write
+    may leave earlier evidence edits visible, but Status remains Review and a
+    retry safely rewrites the evidence before attempting Done again.
+    """
+    evidence_values = {
+        "Review Outcome": args.review_outcome,
+        "Observed Cycle": args.observed_cycle,
+        "Resource Use": args.resource_use,
+    }
+    for name, value in evidence_values.items():
+        if not isinstance(value, str) or not value.strip():
+            raise QueueError(f"--{name.lower().replace(' ', '-')} must be nonblank")
+
+    issue = queue.issue(args.issue)
+    issue_identity = validate_closed_issue_packet(issue)
+    pull = queue.pull_request(args.pr)
+    if pull.get("state") != "MERGED" or not pull.get("mergedAt"):
+        raise QueueError("completion requires a merged pull request")
+    if branch_work_id(pull.get("headRefName", "")) != issue_identity:
+        raise QueueError("pull-request branch T-ID does not match the Issue")
+    if not closing_reference(pull.get("body", ""), args.issue):
+        raise QueueError(f"pull request must contain Closes #{args.issue}")
+
+    project = queue.project()
+    item = queue.find_item(project, issue["url"])
+    if item is None:
+        raise QueueError("Issue is missing from the Project")
+    if item.get("status") not in {"Review", "Done"}:
+        raise QueueError("completion requires Project status Review (or idempotent Done)")
+
+    expected_target_errors = {
+        f"active Project item is not an open Issue: {issue['url']}",
+        f"closed work-item Issue is not Done in Project: {issue['url']}",
+    }
+    current_errors = [
+        error
+        for error in audit_state(project, queue.issues())
+        if error not in expected_target_errors
+    ]
+    if current_errors:
+        raise QueueError(f"current Project audit failed: {'; '.join(current_errors)}")
+
+    fields = queue.fields()
+    required_fields = (*evidence_values, "Status")
+    for name in required_fields:
+        if name not in fields:
+            raise QueueError(f"Project is missing required field {name!r}")
+    queue.option_id(fields["Status"], "Done")
+
+    if item.get("status") == "Done":
+        print(f"Issue #{args.issue} is already Done: {issue_identity}")
+        return 0
+
+    actions = tuple(
+        [f"set {name}={value}" for name, value in evidence_values.items()]
+        + ["set Status=Done last"]
+    )
+    if not args.apply:
+        print("dry-run:")
+        for action in actions:
+            print(f"- {action}")
+        return 0
+
+    for name, value in evidence_values.items():
+        queue.edit_field(item["id"], fields[name], value=value)
+    queue.edit_field(item["id"], fields["Status"], value="Done")
+    print(f"completed Issue #{args.issue}: {issue_identity} through PR #{args.pr}")
+    return 0
+
+
 def audit(queue: ProjectQueue, args: argparse.Namespace) -> int:
     if args.fixture:
         payload = json.loads(Path(args.fixture).read_text(encoding="utf-8"))
@@ -749,6 +836,15 @@ def parser() -> argparse.ArgumentParser:
     review_parser.add_argument("--pr", type=int, required=True)
     review_parser.add_argument("--apply", action="store_true")
     review_parser.set_defaults(handler=review)
+
+    complete_parser = subparsers.add_parser("complete")
+    complete_parser.add_argument("issue", type=int)
+    complete_parser.add_argument("--pr", type=int, required=True)
+    complete_parser.add_argument("--review-outcome", required=True)
+    complete_parser.add_argument("--observed-cycle", required=True)
+    complete_parser.add_argument("--resource-use", required=True)
+    complete_parser.add_argument("--apply", action="store_true")
+    complete_parser.set_defaults(handler=complete)
     return result
 
 

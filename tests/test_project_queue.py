@@ -13,6 +13,7 @@ from scripts.project_queue import (
     audit_state,
     branch_work_id,
     closing_reference,
+    complete,
     missing_packet_markers,
     prepare,
     pullable_ready_items,
@@ -85,7 +86,9 @@ class FakeQueue:
         self._branch = branch
         self.edits: list[tuple[str, str, object]] = []
         self._fields = {
-            "Status": select_field("Status", "Backlog", "Ready", "In Progress", "Review"),
+            "Status": select_field(
+                "Status", "Backlog", "Ready", "In Progress", "Review", "Done"
+            ),
             "Priority": select_field("Priority", "P0", "P1"),
             "Parent T-ID": {"id": "parent", "name": "Parent T-ID", "type": "ProjectV2Field"},
             "Owner Role": select_field("Owner Role", "Chisel Implementer"),
@@ -95,6 +98,29 @@ class FakeQueue:
             "Initial SP": {"id": "initial", "name": "Initial SP", "type": "ProjectV2Field"},
             "Demo Command": {"id": "demo", "name": "Demo Command", "type": "ProjectV2Field"},
             "Evidence Class": select_field("Evidence Class", "Host Functional"),
+            "Review Outcome": {
+                "id": "review-outcome",
+                "name": "Review Outcome",
+                "type": "ProjectV2Field",
+            },
+            "Observed Cycle": {
+                "id": "observed-cycle",
+                "name": "Observed Cycle",
+                "type": "ProjectV2Field",
+            },
+            "Resource Use": {
+                "id": "resource-use",
+                "name": "Resource Use",
+                "type": "ProjectV2Field",
+            },
+        }
+        self._pull_request = {
+            "number": 30,
+            "state": "OPEN",
+            "mergedAt": None,
+            "url": "https://github.com/bhind/raveil/pull/30",
+            "body": "Closes #27",
+            "headRefName": self._branch,
         }
 
     def issue(self, number: int) -> dict:
@@ -119,13 +145,7 @@ class FakeQueue:
         return "iteration-s-0001"
 
     def pull_request(self, number: int) -> dict:
-        return {
-            "number": number,
-            "state": "OPEN",
-            "url": f"https://github.com/bhind/raveil/pull/{number}",
-            "body": "Closes #27",
-            "headRefName": self._branch,
-        }
+        return {**self._pull_request, "number": number}
 
     @staticmethod
     def find_item(project: dict, issue_url: str) -> dict | None:
@@ -164,6 +184,17 @@ def audit_args(*, require_horizon: bool) -> argparse.Namespace:
         fixture=None,
         check_branch=False,
         require_horizon=require_horizon,
+    )
+
+
+def complete_args(*, apply: bool = True) -> argparse.Namespace:
+    return argparse.Namespace(
+        issue=27,
+        pr=30,
+        review_outcome="Accepted at exact head",
+        observed_cycle="One bounded session",
+        resource_use="Host only; no paid resources",
+        apply=apply,
     )
 
 
@@ -507,6 +538,142 @@ class ProjectQueueAuditTest(unittest.TestCase):
         with redirect_stdout(io.StringIO()):
             self.assertEqual(0, review(queue, args))
         self.assertEqual([("item-27", "Status", "Review")], queue.edits)
+
+    def test_complete_writes_evidence_before_done(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(state="MERGED", mergedAt="2026-09-04T00:00:00Z")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, complete(queue, complete_args()))
+        self.assertEqual(("item-27", "Status", "Done"), queue.edits[-1])
+        self.assertEqual(
+            ["Review Outcome", "Observed Cycle", "Resource Use"],
+            [entry[1] for entry in queue.edits[:-1]],
+        )
+
+    def test_complete_dry_run_does_not_edit(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(state="MERGED", mergedAt="2026-09-04T00:00:00Z")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, complete(queue, complete_args(apply=False)))
+        self.assertEqual([], queue.edits)
+
+    def test_complete_is_idempotent_after_done(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        done_item = item(27, closed["title"], "Done", "T-0125")
+        queue = FakeQueue({"items": [done_item]}, [closed], "main")
+        queue._pull_request.update(
+            state="MERGED",
+            mergedAt="2026-09-04T00:00:00Z",
+            headRefName="feat/t-0125-playable",
+        )
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, complete(queue, complete_args()))
+        self.assertEqual([], queue.edits)
+
+    def test_complete_rejects_open_issue_or_unmerged_pr(self) -> None:
+        open_issue = issue(27, "T-0125 — Playable")
+        review_item = item(27, open_issue["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [open_issue], "feat/t-0125-playable"
+        )
+        with self.assertRaisesRegex(QueueError, "closed work-item Issue"):
+            complete(queue, complete_args())
+        self.assertEqual([], queue.edits)
+
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        with self.assertRaisesRegex(QueueError, "merged pull request"):
+            complete(queue, complete_args())
+        self.assertEqual([], queue.edits)
+
+    def test_complete_rejects_mismatch_before_remote_edit(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(
+            state="MERGED",
+            mergedAt="2026-09-04T00:00:00Z",
+            headRefName="feat/t-0999-other",
+        )
+        with self.assertRaisesRegex(QueueError, "does not match"):
+            complete(queue, complete_args())
+        self.assertEqual([], queue.edits)
+
+    def test_complete_rejects_missing_close_reference(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(
+            state="MERGED",
+            mergedAt="2026-09-04T00:00:00Z",
+            body="Related to #27",
+        )
+        with self.assertRaisesRegex(QueueError, "must contain Closes"):
+            complete(queue, complete_args())
+        self.assertEqual([], queue.edits)
+
+    def test_complete_rejects_blank_evidence_or_wrong_status(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        backlog = item(27, closed["title"], "Backlog", "T-0125")
+        queue = FakeQueue({"items": [backlog]}, [closed], "feat/t-0125-playable")
+        queue._pull_request.update(state="MERGED", mergedAt="2026-09-04T00:00:00Z")
+        args = complete_args()
+        args.review_outcome = "  "
+        with self.assertRaisesRegex(QueueError, "review-outcome.*nonblank"):
+            complete(queue, args)
+        self.assertEqual([], queue.edits)
+
+        args.review_outcome = "Accepted"
+        with self.assertRaisesRegex(QueueError, "status Review"):
+            complete(queue, args)
+        self.assertEqual([], queue.edits)
+
+    def test_complete_preflights_fields_before_remote_edit(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(state="MERGED", mergedAt="2026-09-04T00:00:00Z")
+        del queue._fields["Resource Use"]
+        with self.assertRaisesRegex(QueueError, "missing required field"):
+            complete(queue, complete_args())
+        self.assertEqual([], queue.edits)
+
+    def test_complete_remote_evidence_failure_never_writes_done(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(state="MERGED", mergedAt="2026-09-04T00:00:00Z")
+        writes: list[str] = []
+
+        def fail_second_write(item_id: str, field: dict, *, value: object) -> None:
+            del item_id, value
+            writes.append(field["name"])
+            if field["name"] == "Observed Cycle":
+                raise QueueError("simulated remote write failure")
+
+        queue.edit_field = fail_second_write  # type: ignore[method-assign]
+        with self.assertRaisesRegex(QueueError, "simulated remote write failure"):
+            complete(queue, complete_args())
+        self.assertEqual(["Review Outcome", "Observed Cycle"], writes)
+        self.assertNotIn("Status", writes)
 
 
 if __name__ == "__main__":
