@@ -198,8 +198,10 @@ python3 scripts/project_queue.py audit
 
 `complete` requires the merged PR to close the matching work-item Issue,
 preflights all evidence fields, writes them first, and moves `Status=Done`
-last. It is idempotent after Done. Automation or Project metadata alone never
-proves task completion.
+last. GitHub field edits are not one remote transaction: an intermediate
+failure may leave some evidence text updated, but the item remains Review and
+the command can be retried. It is idempotent after Done. Automation or Project
+metadata alone never proves task completion.
 
 Do not require the owner to attend or accept a demo for every ordinary task.
 Continue integrating technically accepted tasks through the Sprint unless the

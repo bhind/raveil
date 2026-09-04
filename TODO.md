@@ -40,6 +40,8 @@ review and failure preservation do not consume the two-item delivery limit.
   physical-device work, material successor selection, WIP/usage changes,
   performance/research claims, FPGA, ASIC, or silicon. No new ADR applies: this
   closes the executable gap in accepted ADR-0065/ADR-0082 lifecycle policy.
+  "Atomic" names the one-command, status-last finalizer, not a GitHub remote
+  transaction: a failed evidence write may leave partial text but never `Done`.
 
 - [x] **T-0146** Keep a rolling P0 delivery horizon instead of treating an
   empty P0/Ready queue as idle. Real Issue #107, branch

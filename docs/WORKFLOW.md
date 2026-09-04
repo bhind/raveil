@@ -65,7 +65,9 @@ Last updated: 2026-08-29
   verified merge closes the Issue, `project_queue.py complete ISSUE --pr PR`
   validates the merged PR/T-ID/closing reference, records review outcome,
   observed cycle and resource use, and moves `Done` last. Ad hoc Project field
-  edits are not a completion workflow.
+  edits are not a completion workflow. GitHub field edits are not
+  transactional; an intermediate failure may leave partial evidence text, but
+  status remains `Review` and a retry rewrites the fields before `Done`.
 - Treat eight SP as an under-utilization lower-bound check, 13 SP as the
   provisional committed weekly capacity, and 13--21 SP as the warm stretch
   range. Do not stop authorized work merely because a forecast SP total was

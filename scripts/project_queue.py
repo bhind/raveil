@@ -691,6 +691,12 @@ def review(queue: ProjectQueue, args: argparse.Namespace) -> int:
 
 
 def complete(queue: ProjectQueue, args: argparse.Namespace) -> int:
+    """Finalize one merged item with Done written last.
+
+    GitHub field edits are not transactional. A failed evidence-field write
+    may leave earlier evidence edits visible, but Status remains Review and a
+    retry safely rewrites the evidence before attempting Done again.
+    """
     evidence_values = {
         "Review Outcome": args.review_outcome,
         "Observed Cycle": args.observed_cycle,

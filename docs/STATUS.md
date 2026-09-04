@@ -649,7 +649,9 @@ candidate adds a dry-run-by-default `complete` transition that requires the
 matching merged PR, closed complete-packet work-item Issue and Review state,
 preflights required fields, writes evidence metadata before `Done` last, and is
 idempotent after Done. This is Host Functional workflow behavior only; it adds
-no product capability or autonomous successor authority.
+no product capability or autonomous successor authority. GitHub does not make
+the field edits transactional: a mid-sequence failure can retain partial
+evidence text, while status safely remains Review for retry.
 
 T-0145 has an independently verified Host Functional implementation at
 `a82abf3dac10e048f59ec665dc7f3dea7829e121` on

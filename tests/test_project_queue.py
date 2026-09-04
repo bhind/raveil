@@ -654,6 +654,27 @@ class ProjectQueueAuditTest(unittest.TestCase):
             complete(queue, complete_args())
         self.assertEqual([], queue.edits)
 
+    def test_complete_remote_evidence_failure_never_writes_done(self) -> None:
+        closed = issue(27, "T-0125 — Playable", state="CLOSED")
+        review_item = item(27, closed["title"], "Review", "T-0125")
+        queue = FakeQueue(
+            {"items": [review_item]}, [closed], "feat/t-0125-playable"
+        )
+        queue._pull_request.update(state="MERGED", mergedAt="2026-09-04T00:00:00Z")
+        writes: list[str] = []
+
+        def fail_second_write(item_id: str, field: dict, *, value: object) -> None:
+            del item_id, value
+            writes.append(field["name"])
+            if field["name"] == "Observed Cycle":
+                raise QueueError("simulated remote write failure")
+
+        queue.edit_field = fail_second_write  # type: ignore[method-assign]
+        with self.assertRaisesRegex(QueueError, "simulated remote write failure"):
+            complete(queue, complete_args())
+        self.assertEqual(["Review Outcome", "Observed Cycle"], writes)
+        self.assertNotIn("Status", writes)
+
 
 if __name__ == "__main__":
     unittest.main()
