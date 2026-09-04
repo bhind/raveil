@@ -57,6 +57,7 @@ SOURCE_PATHS = (
     "hardware/chisel/graph_device_axi4lite_transport.h", "hardware/chisel/Dockerfile",
     "hardware/chisel/graph_device_axi4lite_dynamic_verilator.cpp",
     "linux/include/raveil_graph_device_dynamic_request.h", "linux/src/raveil_graph_device_dynamic_request.cpp",
+    "linux/src/raveil-graph-device-dynamic-uio-run.cpp", "raveil/graph_device_uio_dry_run.py",
     "raveil/static_region.py",
 )
 

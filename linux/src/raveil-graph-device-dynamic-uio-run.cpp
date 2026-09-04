@@ -1,36 +1,24 @@
 #include "raveil_graph_device_dynamic_request.h"
-#include "raveil_graph_device_uio.h"
+#include "graph_device_axi4lite_transport.h"
 #include "graph_device_dag_runtime.h"
 
 #include <filesystem>
-#include <iostream>
 #include <sstream>
 
-int main(int argc, char** argv) {
-    if (argc != 3) {
-        std::cerr << "usage: raveil-graph-device-dynamic-uio-run /dev/uioN VERIFIED_REQUEST_ROOT\n";
-        return 2;
-    }
+namespace raveil::graph_device {
+int run_projected_dynamic_graph_host_adapter(RegisterIo& io,
+                                             const std::filesystem::path& projected_root,
+                                             std::ostream& log, std::ostream& errors) {
     try {
-        const auto admitted = raveil::graph_device::read_projected_dynamic_graph_device_request(
-            std::filesystem::path(argv[2]));
-        // No device side effect is permitted before this exact sealed-v2
-        // identity/version admission returns successfully.
-        auto io = raveil::graph_device::UioRegisterIo::open_checked(argv[1]);
-        raveil::graph_device::Axi4LiteTransport transport(io, 0x0000U, 0x2000U, 0x3000U);
-        std::ostringstream runtime_log;
-        std::ostringstream runtime_errors;
-        const int result = raveil::graph_device::run_dynamic_dag(
+        const auto admitted = read_projected_dynamic_graph_device_request(projected_root);
+        Axi4LiteTransport transport(io, 0x0000U, 0x2000U, 0x3000U);
+        return run_dynamic_dag(
             transport, transport, transport, admitted.request.graph_id.c_str(), admitted.request.affine.c_str(),
             admitted.request.program, admitted.request.input, admitted.oracle, admitted.request.seed,
-            runtime_log, runtime_errors);
-        if (result != 0) { std::cerr << runtime_errors.str(); return result; }
-        std::cout << "GraphDevice-DYNAMIC-UIO-TRANSPORT-V1 runtime_return=0"
-            << " graph_output=unpromoted evidence=host-functional"
-            << " device_opened=1 hardware=not-verified performance=not-measured\n";
-        return 0;
+            log, errors);
     } catch (const std::exception& error) {
-        std::cerr << "dynamic UIO Graph-device runner: " << error.what() << '\n';
+        errors << "projected dynamic host adapter: " << error.what() << '\n';
         return 1;
     }
 }
+}  // namespace raveil::graph_device

@@ -36,12 +36,12 @@ $(BUILD)/raveil-graph-device-uio-run: src/raveil-graph-device-uio-run.cpp src/ra
 	PYTHONPATH=.. python3 -c 'from pathlib import Path; import sys; from raveil.graph_device_dag import _generated_header, compile_artifact; sys.exit(0 if Path(sys.argv[1]).read_bytes() == _generated_header(compile_artifact()) else 1)' "$(GENERATED_DIR)/graph_device_dag_generated.h"
 	$(CXX) -Iinclude -I../hardware/chisel -I"$(GENERATED_DIR)" $(CXXFLAGS) $^ -o $@
 
-graph-device-dynamic-uio: $(BUILD)/raveil-graph-device-dynamic-uio-run
-$(BUILD)/raveil-graph-device-dynamic-uio-run: src/raveil-graph-device-dynamic-uio-run.cpp src/raveil_graph_device_uio.cpp src/raveil_graph_device_dynamic_request.cpp ../hardware/chisel/graph_device_runtime.cpp ../hardware/chisel/graph_device_affine_runtime.cpp ../hardware/chisel/graph_device_dag_runtime.cpp | $(BUILD)
+graph-device-dynamic-uio: $(BUILD)/raveil-graph-device-dynamic-uio-adapter.o
+$(BUILD)/raveil-graph-device-dynamic-uio-adapter.o: src/raveil-graph-device-dynamic-uio-run.cpp | $(BUILD)
 	test -n "$(GENERATED_DIR)"
 	test -f "$(GENERATED_DIR)/graph_device_abi_generated.h"
 	test -f "$(GENERATED_DIR)/graph_device_affine_generated.h"
 	test -f "$(GENERATED_DIR)/graph_device_dag_generated.h"
-	$(CXX) -Iinclude -I../hardware/chisel -I"$(GENERATED_DIR)" $(CXXFLAGS) $^ -o $@
+	$(CXX) -Iinclude -I../hardware/chisel -I"$(GENERATED_DIR)" $(CXXFLAGS) -c $< -o $@
 clean:
 	rm -rf $(BUILD)

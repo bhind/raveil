@@ -13,6 +13,10 @@ GRAPH = "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
 
 
 class DynamicUioHostTests(unittest.TestCase):
+    def test_dynamic_adapter_has_no_device_opener(self):
+        source = (ROOT / "linux/src/raveil-graph-device-dynamic-uio-run.cpp").read_text()
+        for forbidden in ("UioRegisterIo", "open_checked", "/dev/uio", "mmap", "open("):
+            self.assertNotIn(forbidden, source)
     def test_verified_handoff_projects_bytes_once_and_invalid_never_calls_runner(self):
         with tempfile.TemporaryDirectory() as directory, patch(
             "raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()
