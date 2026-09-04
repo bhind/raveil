@@ -5,7 +5,12 @@ from pathlib import Path
 import hashlib
 import json
 import re
-from .graph_device_dynamic_sealed import verify
+import os
+import secrets
+from typing import Callable
+from .graph_device_dynamic_sealed import (_directory_flags, _materialize_verified_at,
+                                          _mkdir_open_at, _open_dynamic_parent,
+                                          _source_snapshot, verify, GraphDeviceDynamicSealError)
 from .graph_device_axi4lite import _aperture, _verify_abis
 from .graph_device_mvp import load_device_abi
 from .graph_device_affine import load_install_abi
@@ -54,3 +59,29 @@ def plan(bundle: Path, device: str, repository: Path) -> dict:
     result["non_claims"] = ["no device open", "no mmap", "no MMIO", "performance not measured"]
     result["plan_sha256"] = hashlib.sha256(json.dumps(result, sort_keys=True, separators=(",", ":")).encode("ascii")).hexdigest()
     return result
+
+
+def handoff_verified_for_test(bundle: Path, device: str, repository: Path,
+                              runner: Callable[[str, Path], None]) -> Path:
+    """Test-only handoff: verify once, project bytes privately, invoke no device code."""
+    if re.fullmatch(r"/dev/uio(0|[1-9][0-9]{0,8})", device) is None:
+        raise ValueError("UIO test device must be canonical")
+    verified = verify(bundle, repository)
+    root, root_fd = _open_dynamic_parent(Path(repository).absolute())
+    try:
+        session = "uio." + secrets.token_hex(4)
+        session_fd = _mkdir_open_at(root_fd, session)
+        try:
+            request_fd = _mkdir_open_at(session_fd, "verified-request")
+            try: _materialize_verified_at(request_fd, verified)
+            finally: os.close(request_fd)
+        finally: os.close(session_fd)
+    finally: os.close(root_fd)
+    repo_fd = os.open(Path(repository).absolute(), _directory_flags())
+    try:
+        if _source_snapshot(repo_fd)[1] != verified["manifest"]["compiler_source_sha256"]:
+            raise GraphDeviceDynamicSealError("sealed source identity drifted before test handoff")
+    finally: os.close(repo_fd)
+    projected = root / session / "verified-request"
+    runner(device, projected)
+    return projected

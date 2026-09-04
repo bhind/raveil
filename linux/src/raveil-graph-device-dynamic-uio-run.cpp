@@ -8,11 +8,11 @@
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cerr << "usage: raveil-graph-device-dynamic-uio-run /dev/uioN SEALED_ROOT\n";
+        std::cerr << "usage: raveil-graph-device-dynamic-uio-run /dev/uioN VERIFIED_REQUEST_ROOT\n";
         return 2;
     }
     try {
-        const auto admitted = raveil::graph_device::read_sealed_dynamic_graph_device_request(
+        const auto admitted = raveil::graph_device::read_dynamic_graph_device_request(
             std::filesystem::path(argv[2]));
         // No device side effect is permitted before this exact sealed-v2
         // identity/version admission returns successfully.
@@ -21,9 +21,8 @@ int main(int argc, char** argv) {
         std::ostringstream runtime_log;
         std::ostringstream runtime_errors;
         const int result = raveil::graph_device::run_dynamic_dag(
-            transport, transport, transport, admitted.request.graph_id.c_str(),
-            admitted.request.affine.c_str(), admitted.request.program,
-            admitted.request.input, admitted.oracle, admitted.request.seed,
+            transport, transport, transport, admitted.graph_id.c_str(), admitted.affine.c_str(),
+            admitted.program, admitted.input, {}, admitted.seed,
             runtime_log, runtime_errors);
         if (result != 0) { std::cerr << runtime_errors.str(); return result; }
         std::cout << "GraphDevice-DYNAMIC-UIO-TRANSPORT-V1 runtime_return=0"
