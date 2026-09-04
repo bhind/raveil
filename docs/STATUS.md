@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -626,6 +626,18 @@ oracle/fallback/RTL agreement. T-0144 evidence is Host Functional only; the
 displayed Phase 3 RTL Simulation Functional identities remain references.
 Performance is not measured and `polls=` remains a termination diagnostic,
 never cycles or time.
+
+T-0146 closes the Operations correction under real Issue #107 and branch
+`fix/t-0146-p0-auto-replenishment`. ADR-0082 corrects the observed post-T-0144
+planning gap: ADR-0070 could start an existing Ready item but did not replenish
+an empty horizon. The bounded candidate adds a canonical P1/Ready `prepare`
+transition and a separate pullable-successor audit while keeping technical PR
+integration non-blocking. The live Project acceptance audit reported one
+active and one pullable-Ready item after `prepare` set T-0145 / Issue #106 to
+P1/Ready. T-0145 is the named Product successor for the sealed dynamic Graph
+to Linux UIO handoff and remains unstarted until T-0146 integration. No
+product, performance, device, FPGA, ASIC or silicon fact follows from this
+Host Functional governance result.
 
 The branch implementation preserves legacy Garden snapshot behavior and adds
 one strict `raveil.garden-dynamic-explanation/v1` fixture for the retained

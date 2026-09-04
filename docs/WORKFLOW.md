@@ -315,9 +315,10 @@ reads the selected authoritative sections before editing.
   material Raveil change. `raveil-gate0-evidence` applies the specific
   Sonatine Microkernel Gate 0 collection procedure.
 - `raveil-sprint-operator` applies the repeatable weekly audit, kickoff,
-  continuation, Wednesday correction, executable review, closeout,
-  retrospective, and next-pull loop. It calls `project_queue.py` rather than
-  duplicating queue transitions and returns one stable phase receipt.
+  continuation, Wednesday correction, rolling-horizon replenishment,
+  executable review, closeout, retrospective, and next-pull loop. It calls
+  `project_queue.py` rather than duplicating queue transitions and returns one
+  stable phase receipt.
 - `raveil-remote-release` audits release readiness and permits remote tag and
   Release publication only after explicit owner approval. It never enables
   hosted CI/CD; current validation runs through `scripts/ci-local.sh`.
@@ -374,9 +375,10 @@ Monday is not a wait boundary. Sunday remains a bounded recovery and record-
 reconciliation buffer, not a license to add scope to the reviewed Sprint.
 
 Use `raveil-sprint-operator` for every Sprint status, kickoff, continuation,
-correction, review, closeout, retrospective, and next-pull boundary. The skill
-standardizes the audit and handoff receipt while this workflow, `SPRINTS.md`,
-the canonical records, and `project_queue.py` retain authority.
+correction, horizon replenishment, review, closeout, retrospective, and
+next-pull boundary. The skill standardizes the audit and handoff receipt while
+this workflow, `SPRINTS.md`, the canonical records, and `project_queue.py`
+retain authority.
 
 ADR-0069 makes the owner-visible review interaction a separate fail-closed
 boundary from command success. Keep the Sprint review ceremony non-Done until
@@ -410,6 +412,16 @@ demo or evidence command. Apply the Definition of Ready and Definition of Done
 in `SPRINTS.md`. Do not assign SP to both an epic and its children, and do not
 treat the configured agent roles as additional human FTE. Committed Iterations
 and low-confidence forecast dates remain visibly separate.
+
+When evidence permits, maintain one active P0 delivery item, one fully prepared
+P1/Ready successor, and one forecast Backlog candidate. Run
+`project_queue.py audit --require-horizon` no later than the active P0 Review
+boundary. Its failure starts bounded refinement and must not delay merging an
+otherwise accepted implementation PR. The Project Manager may prepare one
+unambiguous successor under current authority; a material strategic fork,
+cost/license/device action, invariant change, or existing HCI returns one
+concrete question to the owner. Zero P0 and zero Ready is an actionable
+replenishment condition, never a generic idle or finished state.
 
 Use a clean current-main clone or worktree as the normal operator entry point.
 Preserve dirty historical roots as donor/provenance worktrees; never reset,

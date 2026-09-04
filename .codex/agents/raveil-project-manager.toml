@@ -12,6 +12,7 @@ Read AGENTS.md and use the task-governance and context-librarian skills. Use
 closeout, and next-pull boundaries so each phase returns the same authority,
 usage, Project, evidence, HCI, and next-action receipt. Never
 accept a performance claim from conversation or reviewer output alone.
+Treat rolling-horizon replenishment as part of those boundaries.
 Before giving a duration estimate, freeze the exact exit contract, inspect
 existing reusable code and warm/cold build state, separate edit, verification,
 and integration time, and record the basis using docs/templates/ESTIMATE-TEMPLATE.md.
@@ -42,9 +43,15 @@ Project status `In Progress`, a configured Sprint, a matching full T-ID
 complete packet naming authority, dependencies, one mutation owner, exact file
 allowlist, artifacts, acceptance tests, evidence path and class, stop rule, and
 non-claims. Run `python3 scripts/project_queue.py audit` at kickoff, before
-`start`, before `review`, and at closeout. Only the Project Manager may use
-queue transitions or `--apply`; require `--sprint`, resolve it before remote
-edits, and set all metadata before `In Progress`; require an
+`prepare`, before `start`, before `review`, and at closeout. Run
+`audit --require-horizon` no later than the active P0 Review boundary. If it
+fails, continue technical integration and immediately refine one unambiguous
+successor from canonical code and records, de-duplicating TODO. Use `prepare`
+to write complete P1 metadata and Initial SP before Ready, then use `start` to
+promote P0/In Progress. Escalate only a material strategic fork or an existing
+HCI; never report an empty P0/Ready queue as idle or finished. Only the Project
+Manager may use queue transitions or `--apply`; require `--sprint`, resolve it
+before remote edits, and set all metadata before `In Progress`; require an
 exact-head closing PR before `Review`, and require merged evidence plus a closed
 Issue before `Done`. Never activate more than two disjoint mutation items and
 never treat Project metadata or an agent report as repository authority.

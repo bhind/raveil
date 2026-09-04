@@ -17,6 +17,7 @@ from typing import Any, Sequence
 
 
 ACTIVE_STATUSES = {"In Progress", "Review"}
+READY_STATUS = "Ready"
 WORK_ID_RE = re.compile(r"\b(T-\d{4})(?:/(S\d{2}))?\b", re.IGNORECASE)
 BRANCH_ID_RE = re.compile(r"\b(t-\d{4})(?:-(s\d{2}))?(?:-|$)", re.IGNORECASE)
 CLOSING_RE = re.compile(
@@ -403,6 +404,13 @@ class ProjectQueue:
 
 
 def validate_issue_for_start(issue: dict[str, Any], branch: str) -> str:
+    issue_identity = validate_issue_packet(issue)
+    if branch_work_id(branch) != issue_identity:
+        raise QueueError(f"branch {branch!r} does not match Issue work item {issue_identity}")
+    return task_id(issue_identity) or issue_identity
+
+
+def validate_issue_packet(issue: dict[str, Any]) -> str:
     if issue.get("state") != "OPEN":
         raise QueueError("work item must be an open Issue")
     if not issue_has_label(issue, "work-item"):
@@ -410,12 +418,57 @@ def validate_issue_for_start(issue: dict[str, Any], branch: str) -> str:
     issue_identity = work_id(issue.get("title", ""))
     if issue_identity is None:
         raise QueueError("Issue title must contain a stable T-ID")
-    if branch_work_id(branch) != issue_identity:
-        raise QueueError(f"branch {branch!r} does not match Issue work item {issue_identity}")
     missing_markers = missing_packet_markers(issue.get("body", ""))
     if missing_markers:
         raise QueueError(f"Issue independence packet lacks: {', '.join(missing_markers)}")
-    return task_id(issue_identity) or issue_identity
+    return issue_identity
+
+
+def pullable_ready_items(
+    project: dict[str, Any], issues: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Return completely prepared successor items and reasons Ready items are excluded."""
+    issue_by_url = {issue["url"]: issue for issue in issues if issue.get("url")}
+    pullable: list[dict[str, Any]] = []
+    excluded: list[str] = []
+    for item in project.get("items", []):
+        if item.get("status") != READY_STATUS:
+            continue
+        content = item.get("content", {})
+        url = content.get("url")
+        problems: list[str] = []
+        if content.get("type") != "Issue" or not url:
+            problems.append("not a real Issue")
+            issue = None
+        else:
+            issue = issue_by_url.get(url)
+            if issue is None:
+                problems.append("missing from issue inventory")
+            else:
+                if issue.get("state") != "OPEN":
+                    problems.append("Issue is not open")
+                if not issue_has_label(issue, "work-item"):
+                    problems.append("Issue lacks work-item label")
+                identity = work_id(issue.get("title", ""))
+                if identity is None:
+                    problems.append("Issue title lacks stable T-ID")
+                elif item.get("parent T-ID") != task_id(identity):
+                    problems.append("Parent T-ID differs")
+                missing = missing_packet_markers(issue.get("body", ""))
+                if missing:
+                    problems.append(f"incomplete packet: {', '.join(missing)}")
+        if item.get("priority") != "P1":
+            problems.append("Priority is not P1")
+        if item.get("initial SP") in (None, ""):
+            problems.append("missing initial SP")
+        for field in REQUIRED_ACTIVE_FIELDS:
+            if item.get(field) in (None, ""):
+                problems.append(f"missing {field}")
+        if problems:
+            excluded.append(f"{url or item.get('title')}: {', '.join(problems)}")
+        else:
+            pullable.append(item)
+    return pullable, excluded
 
 
 def validate_start_arguments(args: argparse.Namespace) -> None:
@@ -509,6 +562,89 @@ def start(queue: ProjectQueue, args: argparse.Namespace) -> int:
     return 0
 
 
+def prepare(queue: ProjectQueue, args: argparse.Namespace) -> int:
+    """Prepare one complete P1 successor and move it to Ready last."""
+    validate_start_arguments(args)
+    issue = queue.issue(args.issue)
+    issue_identity = validate_issue_packet(issue)
+    issue_tid = task_id(issue_identity) or issue_identity
+    project = queue.project()
+    item = queue.find_item(project, issue["url"])
+    if item is None:
+        raise QueueError("Issue must be linked to the Project before prepare")
+    if item.get("status") not in {None, "", "Backlog", READY_STATUS}:
+        raise QueueError(
+            "prepare requires an unset/Backlog status (or idempotent Ready)"
+        )
+    other_ready = [
+        entry
+        for entry in project.get("items", [])
+        if entry.get("status") == READY_STATUS and entry.get("id") != item.get("id")
+    ]
+    if other_ready:
+        raise QueueError("prepare requires the existing Ready successor to be resolved first")
+    current_errors = audit_state(project, queue.issues())
+    if current_errors:
+        raise QueueError(f"current Project audit failed: {'; '.join(current_errors)}")
+    existing_initial = item.get("initial SP")
+    if existing_initial not in (None, "") and int(existing_initial) != args.story_points:
+        raise QueueError("prepare cannot rewrite Initial SP")
+
+    fields = queue.fields()
+    required_fields = (
+        "Priority",
+        "Parent T-ID",
+        "Owner Role",
+        "Depends On",
+        "Sprint",
+        "Initial SP",
+        "Story Points",
+        "Demo Command",
+        "Evidence Class",
+        "Status",
+    )
+    for name in required_fields:
+        if name not in fields:
+            raise QueueError(f"Project is missing required field {name!r}")
+    if fields["Sprint"]["type"] != "ProjectV2IterationField":
+        raise QueueError("Project field 'Sprint' is not an Iteration field")
+    sprint_id = queue.iteration_id(args.sprint)
+    metadata_values = {
+        "Priority": "P1",
+        "Parent T-ID": issue_tid,
+        "Owner Role": args.owner_role,
+        "Depends On": args.depends_on,
+        "Sprint": sprint_id,
+        "Initial SP": args.story_points,
+        "Story Points": args.story_points,
+        "Demo Command": args.demo,
+        "Evidence Class": args.evidence_class,
+    }
+    for name, value in metadata_values.items():
+        if fields[name]["type"] == "ProjectV2SingleSelectField":
+            queue.option_id(fields[name], str(value))
+    queue.option_id(fields["Status"], READY_STATUS)
+
+    actions = tuple(
+        [
+            f"set {name}={args.sprint if name == 'Sprint' else value}"
+            for name, value in metadata_values.items()
+        ]
+        + ["set Status=Ready last"]
+    )
+    if not args.apply:
+        print("dry-run:")
+        for action in actions:
+            print(f"- {action}")
+        return 0
+
+    for name, value in metadata_values.items():
+        queue.edit_field(item["id"], fields[name], value=value)
+    queue.edit_field(item["id"], fields["Status"], value=READY_STATUS)
+    print(f"prepared Issue #{args.issue}: {issue_tid}")
+    return 0
+
+
 def review(queue: ProjectQueue, args: argparse.Namespace) -> int:
     issue = queue.issue(args.issue)
     issue_tid = validate_issue_for_start(issue, queue.branch())
@@ -556,7 +692,20 @@ def audit(queue: ProjectQueue, args: argparse.Namespace) -> int:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
     active = sum(item.get("status") in ACTIVE_STATUSES for item in project.get("items", []))
-    print(f"project queue audit passed: {active} active delivery item(s)")
+    ready = sum(item.get("status") == READY_STATUS for item in project.get("items", []))
+    pullable, excluded = pullable_ready_items(project, issues)
+    print(
+        "project queue audit passed: "
+        f"{active} active, {ready} Ready, {len(pullable)} pullable-Ready delivery item(s)"
+    )
+    if args.require_horizon and not pullable:
+        print(
+            "ERROR: delivery horizon is empty: replenish a complete P1 successor; do not return idle",
+            file=sys.stderr,
+        )
+        for detail in excluded:
+            print(f"ERROR: Ready item excluded: {detail}", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -570,7 +719,19 @@ def parser() -> argparse.ArgumentParser:
     audit_parser = subparsers.add_parser("audit")
     audit_parser.add_argument("--fixture")
     audit_parser.add_argument("--check-branch", action="store_true")
+    audit_parser.add_argument("--require-horizon", action="store_true")
     audit_parser.set_defaults(handler=audit)
+
+    prepare_parser = subparsers.add_parser("prepare")
+    prepare_parser.add_argument("issue", type=int)
+    prepare_parser.add_argument("--owner-role", required=True)
+    prepare_parser.add_argument("--depends-on", required=True)
+    prepare_parser.add_argument("--sprint", required=True)
+    prepare_parser.add_argument("--story-points", type=int, required=True)
+    prepare_parser.add_argument("--demo", required=True)
+    prepare_parser.add_argument("--evidence-class", required=True)
+    prepare_parser.add_argument("--apply", action="store_true")
+    prepare_parser.set_defaults(handler=prepare)
 
     start_parser = subparsers.add_parser("start")
     start_parser.add_argument("issue", type=int)

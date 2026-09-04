@@ -1,6 +1,6 @@
 ---
 name: raveil-sprint-operator
-description: Operate Raveil's weekly Sprint lifecycle by auditing the live GitHub Project, enforcing authority, usage, WIP, and evidence boundaries, and routing kickoff, continuation, correction, review, closeout, or next-pull work through the canonical queue. Use for Sprint planning, Sprint status, task pull, mid-Sprint correction, executable review, retrospective, and Sprint handoff. Do not use it to accept research claims or override repository records.
+description: Operate Raveil's weekly Sprint lifecycle and rolling P0 horizon by auditing the live GitHub Project, replenishing a bounded successor before delivery becomes idle, enforcing authority, usage, WIP, and evidence boundaries, and routing kickoff, continuation, correction, review, closeout, or next-pull work through the canonical queue. Use for Sprint planning, Sprint status, backlog replenishment, task pull, mid-Sprint correction, executable review, retrospective, and Sprint handoff. Do not use it to accept research claims or override repository records.
 ---
 
 # Raveil Sprint Operator
@@ -43,13 +43,19 @@ GitHub Project mutation implementation.
   closed-Issue/`Done` agreement. Do not stop continuous Sprint delivery for a
   per-task owner demo unless the owner or a task-specific risk gate explicitly
   requires one. Task `Done` never accepts the weekly Sprint Review ceremony.
+- **Horizon replenishment:** by the current P0 Review boundary, run the
+  pullable-Ready horizon check. If it is empty, continue technical integration
+  and immediately refine one bounded successor from canonical code and records.
+  Prepare one unambiguous successor as P1/Ready; escalate only a material
+  strategic fork or an existing HCI. An empty horizon is work, not an idle
+  result.
 - **Weekly Sprint Review:** at the scheduled ceremony, select and run the
   Sprint's representative runnable outcome or outcomes, show and explain them
   to the owner, route durable feedback, and obtain the explicit ceremony
   disposition. This is the ADR-0069 owner-visible boundary.
 - **Retrospective/next pull:** record one `Keep`, one observed `Problem`, and at
-  most one bounded `Try`. Recheck usage, WIP, dependencies, and readiness before
-  pulling the next item.
+  most one bounded `Try`. Recheck usage, WIP, dependencies, readiness, and the
+  prepared successor before pulling the next item.
 
 For phase-specific commands, receipts, and stop rules, read
 [references/sprint-cycle.md](references/sprint-cycle.md) before any remote or
@@ -58,7 +64,8 @@ tracked mutation. For a read-only status request, its audit section is enough.
 ## Non-negotiable boundaries
 
 - `scripts/project_queue.py` is the sole queue-transition implementation.
-  Never reproduce `start` or `review` transitions with ad hoc GraphQL.
+  Never reproduce `prepare`, `start`, or `review` transitions with ad hoc
+  GraphQL.
 - Only the primary Project Manager may perform Project transitions or use
   `--apply`. Other roles validate their named packet and report evidence.
 - Run the current 10,080-minute HCI-09 usage check before a new task, subagent,
@@ -80,6 +87,10 @@ tracked mutation. For a read-only status request, its audit section is enough.
   item must have a stable tracked destination before ceremony closeout.
 - Apply all HCI classes before destructive, remote, claim-bearing, paid,
   credentialed, gate-changing, or materially forked work.
+- Do not return an idle, waiting, finished, or no-next-work receipt merely
+  because P0 and Ready are empty. Run bounded replenishment first. A stop is
+  valid only for the weekly usage guard, an HCI, an exact external dependency,
+  or a genuine strategic fork that the current authority cannot decide.
 
 ## Required handoff
 

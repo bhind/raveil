@@ -11,6 +11,7 @@ From a clean current-main clone or the active task worktree, capture:
 git status --short --branch
 git rev-parse HEAD
 python3 scripts/project_queue.py audit
+python3 scripts/project_queue.py audit --require-horizon
 gh project view 1 --owner @me --format json
 gh project field-list 1 --owner @me --limit 100 --format json
 gh project item-list 1 --owner @me --limit 100 --format json
@@ -30,6 +31,10 @@ Report separately:
 Do not repair state during a status-only request unless the user also authorized
 the mutation.
 
+The ordinary audit may pass with an empty horizon so technical integration is
+never delayed. `--require-horizon` is the replenishment trigger: zero complete
+P1/Ready successors requires immediate refinement, not an idle handoff.
+
 ## Kickoff and immediate next pull
 
 1. Read current weekly Codex telemetry. It is valid only when the window is
@@ -39,9 +44,31 @@ the mutation.
 3. Confirm that no more than two independently acceptable mutation items would
    be active and that their files, artifacts, tests, and evidence do not overlap.
 4. Check Definition of Ready in `docs/SPRINTS.md`. Create or refine one real
-   `work-item` Issue with the full packet before assigning mutation.
-5. Create the dedicated branch/worktree. Put the Project item in `Ready`, then
-   dry-run and apply the canonical start command:
+   `work-item` Issue with the full packet before assigning mutation. Prepare
+   the successor through the canonical transition, which writes metadata before
+   `Ready` and keeps it P1:
+
+```sh
+python3 scripts/project_queue.py prepare ISSUE \
+  --owner-role ROLE \
+  --depends-on DEPENDENCIES \
+  --sprint S-NNNN \
+  --story-points SP \
+  --demo COMMAND \
+  --evidence-class CLASS
+python3 scripts/project_queue.py prepare ISSUE \
+  --owner-role ROLE \
+  --depends-on DEPENDENCIES \
+  --sprint S-NNNN \
+  --story-points SP \
+  --demo COMMAND \
+  --evidence-class CLASS \
+  --apply
+```
+
+5. Create the dedicated branch/worktree, then dry-run and apply the canonical
+   start command. `start` promotes the prepared P1 successor to P0 and moves
+   status last:
 
 ```sh
 python3 scripts/project_queue.py start ISSUE \
@@ -80,10 +107,45 @@ Sprint, and still matches the full T-ID, owner, allowlist, acceptance, stop
 rule, and evidence class. At each atomic commit record the exact command and
 result locally; Project status does not advance merely because a commit exists.
 
+Before the current item enters Review, run the horizon check. If it reports no
+pullable successor, begin the replenishment procedure below without delaying
+the current item's technical acceptance.
+
 If a safe bounded correction stays inside the packet, add the regression and
 continue. Apply HCI-04/HCI-07 when evidence identity cannot be reconciled or the
 same root-cause class reaches the retry boundary. Do not start unrelated work
 while waiting on an HCI.
+
+## Rolling horizon replenishment
+
+Maintain, when evidence and dependencies permit:
+
+- one active P0 delivery item;
+- one completely prepared P1/Ready successor; and
+- one forecast Backlog candidate for the following boundary.
+
+Replenish no later than the active P0 Review boundary:
+
+1. Run the ordinary queue audit and `audit --require-horizon`.
+2. If one pullable Ready item exists, retain it. Do not manufacture another
+   mutation merely to fill a number.
+3. If none exists, read current executable gaps, STATUS, TODO, ROADMAP and
+   OPEN_QUESTIONS; de-duplicate existing tasks; and rank at most three bounded
+   candidates by dependency, user/research value, and risk reduction.
+4. If one candidate is unambiguous under current authority, allocate or refine
+   its real Issue packet, link it to the Project, use `prepare`, and rerun the
+   horizon check. Candidate discovery may use read-only low-cost agents, but PM
+   retains the task decision and records.
+5. If candidates imply materially different product direction, cost, license,
+   device action, an invariant change, or another HCI, preserve the ranked
+   packet and ask the owner one concrete question. Continue safe read-only
+   work; do not report generic waiting.
+6. A missing candidate is itself a bounded planning problem. It is not evidence
+   that delivery is complete.
+
+This process never delays merging an otherwise accepted PR. Replenishment and
+technical integration are separate control paths; final PM record edits remain
+serial.
 
 ## Wednesday correction
 
@@ -127,6 +189,10 @@ Continue integrating technically accepted tasks through the Sprint unless the
 owner or an explicit task-specific risk gate requires a separate human review.
 Task merge or task `Done` does not accept the weekly Sprint Review ceremony.
 
+Run `audit --require-horizon` before or alongside this boundary. A failure
+starts replenishment but does not make an otherwise valid implementation PR
+unmergeable.
+
 ## Executable weekly Sprint Review
 
 At the scheduled weekly ceremony, choose the representative runnable outcome
@@ -137,7 +203,7 @@ and non-claims. Prose or mock output is not a runnable increment. If the new
 increment fails, demonstrate the last accepted baseline and the exact failing
 boundary without calling the item Done.
 
-Command success creates a Sprint review candidate only. Show the owner the actual
+Command success creates a review candidate only. Show the owner the actual
 output or visible interface and explain what each relevant result proves, what
 it does not prove, and what remains unfinished. Let the owner exercise a
 human-facing Playable when practical. Classify feedback as defect, new
@@ -164,18 +230,20 @@ conditions, and links in `Review Outcome` before moving status last.
 5. Record exactly one `Keep`, one evidence-backed `Problem`, and one bounded
    `Try`. Create or reuse a T-ID only when `Try` is durable actionable work; at
    most one process action enters the next Sprint.
-6. Recheck the HCI-09 weekly usage guard. Select one next pull only from work
-   whose canonical trigger, dependencies, Definition of Ready, Sprint, and WIP
-   boundaries are satisfied.
+6. Recheck the HCI-09 weekly usage guard and rolling horizon. Select one next
+   pull only from work whose canonical trigger, dependencies, Definition of
+   Ready, Sprint, and WIP boundaries are satisfied.
 
 7. When the owner accepted the review and Keep/Problem/Try are recorded, run
    the kickoff dry-run and apply immediately for that one ready item.
    Do not wait for Monday solely because the next Iteration's reporting date
    has not begun.
 
-If there is no pullable item, finish with the exact missing trigger rather than
-inventing work. A closed Sprint may be unsuccessful; truthful failure is a valid
-review outcome.
+If there is no pullable item, enter rolling horizon replenishment. Return to the
+owner only for a material strategic fork, an HCI, the verified usage stop, or an
+exact external dependency after bounded candidate discovery. Never convert an
+empty queue into a generic idle or finished handoff. A closed Sprint may still
+be unsuccessful; truthful failure remains a valid review outcome.
 
 ## Sunday recovery and remaining preparation
 
