@@ -652,6 +652,12 @@ idempotent after Done. This is Host Functional workflow behavior only; it adds
 no product capability or autonomous successor authority. GitHub does not make
 the field edits transactional: a mid-sequence failure can retain partial
 evidence text, while status safely remains Review for retry.
+Candidate `0bf42deb7c984acc2eae6479fbc64ca13e91ece6` passes 39 focused
+queue tests and the existing 40-test experiment/agent-boundary suite, Python compilation,
+the record checker, diff check, and live branch audit. An independent Tester
+approved that exact head. PR #111 is open and mergeable; T-0147 remains an
+integration-pending candidate until it merges and the new `complete` command
+successfully reconciles its closed Issue and Project item.
 
 T-0145 has an independently verified Host Functional implementation at
 `a82abf3dac10e048f59ec665dc7f3dea7829e121` on

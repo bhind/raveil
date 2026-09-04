@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0147 is the sole active governance correction; no product mutation lane is active. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0147 remains the sole active integration item until its accepted branch merges; no product mutation lane is active. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -27,7 +27,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
-- [ ] **T-0147** Make merged-task Project closeout one canonical, fail-closed
+- [x] **T-0147** Make merged-task Project closeout one canonical, fail-closed
   transition. T-0145 / PR #109 merged and its Issue closed, but the Project item
   remained in `Review` until the PM manually moved it and filled its review,
   cycle, and resource fields. Real Issue #110, branch
@@ -42,6 +42,11 @@ review and failure preservation do not consume the two-item delivery limit.
   closes the executable gap in accepted ADR-0065/ADR-0082 lifecycle policy.
   "Atomic" names the one-command, status-last finalizer, not a GitHub remote
   transaction: a failed evidence write may leave partial text but never `Done`.
+  Candidate `0bf42deb7c984acc2eae6479fbc64ca13e91ece6` passes 39 queue
+  tests plus the existing 40-test experiment/agent-boundary suite, Python compilation,
+  the record checker, diff check, a live idempotent T-0145 dry-run, and live
+  branch audit. Independent exact-head Tester review gives GO; PR #111 remains
+  the integration boundary.
 
 - [x] **T-0146** Keep a rolling P0 delivery horizon instead of treating an
   empty P0/Ready queue as idle. Real Issue #107, branch
