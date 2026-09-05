@@ -23,6 +23,7 @@ class FakeGh(Gh):
         self._issues = [{"number": 115, "title": "T-0151", "html_url": "https://github.com/bhind/raveil/issues/115", "state": "closed" if closed else "open", "closed_at": "2026-09-04T15:30:00Z" if closed else None, "labels": [{"name": "work-item"}]}]
         self._pulls = [{"number": 120, "body": "Closes #115", "merged_at": "2026-09-04T16:00:00Z"}]
     def project_items(self): self.calls.append("project"); return self._project
+    def item_cycle(self, item_id): self.calls.append("item_cycle"); return self._project["items"][0]["observed Cycle"]
     def paged(self, endpoint): self.calls.append(endpoint); return self._issues if "/issues" in endpoint else self._pulls
     def readme(self): self.calls.append("readme"); return self._readme
     def project_view(self): return {"id": "PVT_test", "readme": self._readme}
@@ -111,6 +112,28 @@ class ProjectDailyTest(unittest.TestCase):
         receipt = run_daily(args(True), gh, datetime.now(timezone.utc), lambda _: {"windowMinutes":10080, "usedPercent":52, "remainingPercent":48, "observedAt":"not-a-date"})
         self.assertFalse(receipt["success"])
         self.assertEqual(gh.calls, [])
+
+    def test_narrow_graphql_inventory_normalizes_payload_without_item_list(self):
+        calls = []
+        payload = {"data":{"user":{"projectV2":{"items":{"totalCount":1, "pageInfo":{"hasNextPage":False, "endCursor":None}, "nodes":[{"id":"PVTI_1", "content":{"__typename":"Issue", "url":"https://github.com/bhind/raveil/issues/115", "title":"T-0151"}, "status":{"name":"In Progress"}, "cycle":{"text":"prior prose"}, "review":{"text":"reviewed"}}]}}}}}
+        def runner(command, _stdin): calls.append(command); return json.dumps(payload)
+        project = Gh("bhind", "bhind/raveil", 1, runner).project_items()
+        self.assertEqual(project["items"][0]["observed Cycle"], "prior prose")
+        self.assertEqual(project["items"][0]["content"]["type"], "Issue")
+        self.assertFalse(any("item-list" in command for command in calls))
+        query = calls[0][-1].removeprefix("query=")
+        self.assertEqual(query.count("{"), query.count("}"))
+
+    def test_narrow_graphql_refuses_unbounded_partial_pages(self):
+        payload = {"data":{"user":{"projectV2":{"items":{"totalCount":1001, "pageInfo":{"hasNextPage":True, "endCursor":"next"}, "nodes":[]}}}}}
+        with self.assertRaises(DailyError):
+            Gh("bhind", "bhind/raveil", 1, lambda *_: json.dumps(payload)).project_items()
+
+    def test_apply_uses_item_preflight_then_one_batch_readback(self):
+        gh = FakeGh(); receipt = run_daily(args(True), gh, datetime.now(timezone.utc), usage)
+        self.assertTrue(receipt["success"])
+        self.assertEqual(gh.calls.count("project"), 2)
+        self.assertEqual(gh.calls.count("item_cycle"), 1)
 
 
 if __name__ == "__main__": unittest.main()

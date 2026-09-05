@@ -121,12 +121,53 @@ class Gh:
         try: return json.loads(self.runner(("gh", *args), None))
         except json.JSONDecodeError as e: raise DailyError("GitHub returned malformed JSON") from e
     def project_items(self) -> dict[str, Any]:
-        data = self.json(("project", "item-list", str(self.project), "--owner", self.owner, "--limit", str(MAX_ITEMS), "--format", "json"))
-        items = data.get("items")
-        total = data.get("totalCount")
-        if not isinstance(items, list) or not isinstance(total, int) or total > MAX_ITEMS or len(items) != total:
-            raise DailyError("Project inventory is truncated or lacks a reliable totalCount")
-        return data
+        items: list[dict[str, Any]] = []; cursor: str | None = None; total: int | None = None
+        for _ in range(10):
+            after = "null" if cursor is None else json.dumps(cursor)
+            query = """query {
+  user(login: %s) {
+    projectV2(number: %d) {
+      items(first: 100, after: %s) {
+        totalCount
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          id
+          content { __typename ... on Issue { url title } ... on DraftIssue { title } }
+          status: fieldValueByName(name: \"Status\") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+          cycle: fieldValueByName(name: \"Observed Cycle\") { ... on ProjectV2ItemFieldTextValue { text } }
+          review: fieldValueByName(name: \"Review Outcome\") { ... on ProjectV2ItemFieldTextValue { text } }
+        }
+      }
+    }
+  }
+}""" % (json.dumps(self.owner), self.project, after)
+            data = self.json(("api", "graphql", "-f", f"query={query}"))
+            try: page = data["data"]["user"]["projectV2"]["items"]
+            except (KeyError, TypeError) as error: raise DailyError("narrow Project inventory schema is missing") from error
+            nodes, page_info = page.get("nodes"), page.get("pageInfo")
+            if not isinstance(page.get("totalCount"), int) or not isinstance(nodes, list) or not isinstance(page_info, dict): raise DailyError("narrow Project inventory is malformed")
+            total = page["totalCount"] if total is None else total
+            if total != page["totalCount"] or total > MAX_ITEMS: raise DailyError("Project inventory is truncated or inconsistent")
+            for node in nodes:
+                try:
+                    content = node["content"]; typename = content["__typename"]
+                    items.append({"id": node["id"], "status": (node.get("status") or {}).get("name"), "observed Cycle": (node.get("cycle") or {}).get("text"), "review Outcome": (node.get("review") or {}).get("text"), "content": {"type": typename, "url": content.get("url"), "title": content.get("title")}})
+                except (KeyError, TypeError) as error: raise DailyError("narrow Project item schema is missing") from error
+            if not page_info.get("hasNextPage"):
+                if len(items) != total: raise DailyError("Project inventory totalCount does not match pages")
+                return {"totalCount": total, "items": items}
+            cursor = page_info.get("endCursor")
+            if not isinstance(cursor, str) or not cursor: raise DailyError("Project pagination cursor is missing")
+        raise DailyError("Project inventory reached bounded page limit")
+
+    def item_cycle(self, item_id: str) -> str:
+        query = """query { node(id: %s) { ... on ProjectV2Item { cycle: fieldValueByName(name: \"Observed Cycle\") { ... on ProjectV2ItemFieldTextValue { text } } } } }""" % json.dumps(item_id)
+        data = self.json(("api", "graphql", "-f", f"query={query}"))
+        try: value = data["data"]["node"]["cycle"]
+        except (KeyError, TypeError) as error: raise DailyError("Project item cycle preflight schema is missing") from error
+        if value is None: return ""
+        if not isinstance(value, dict) or not isinstance(value.get("text"), str): raise DailyError("Project item cycle preflight is malformed")
+        return value["text"]
     def paged(self, endpoint: str) -> list[dict[str, Any]]:
         all_rows: list[dict[str, Any]] = []
         separator = "&" if "?" in endpoint else "?"
@@ -219,8 +260,9 @@ def cell(value: object) -> str:
 
 def render_readme(now: datetime, entries: list[dict[str, Any]], notes: list[str], previous: str = "") -> str:
     day = now.astimezone(JST).date().isoformat()
-    rows = ["## Daily delivery facts", "", "| JST date | work item | Project status | GitHub event |", "|---|---|---|---|"]
+    rows = ["## Daily delivery facts", "", f"Last reconciled: {day} (Asia/Tokyo)", "", "| JST date | work item | Project status | GitHub event |", "|---|---|---|---|"]
     cutoff = now.astimezone(JST).date() - timedelta(days=13)
+    event_rows: list[tuple[str, str]] = []
     for entry in entries:
         issue, item = entry["issue"], entry["item"]
         events = [("Issue closed", issue.get("closed_at"))] + [(f"PR #{pull['number']} merged", pull.get("merged_at")) for pull in entry["pulls"]]
@@ -228,8 +270,9 @@ def render_readme(now: datetime, entries: list[dict[str, Any]], notes: list[str]
             if not timestamp: continue
             event_time = jst(timestamp)
             if datetime.fromisoformat(event_time).date() < cutoff: continue
-            rows.append(f"| {event_time[:10]} | #{issue['number']} {cell(issue.get('title', ''))} | {cell(item.get('status', ''))} | {label} at {event_time} |")
-    if not entries: rows.append(f"| {day} | — | — | no linked real work-item event |")
+            event_rows.append((event_time, f"| {event_time[:10]} | #{issue['number']} {cell(issue.get('title', ''))} | {cell(item.get('status', ''))} | {label} at {event_time} |"))
+    rows.extend(line for _, line in sorted(event_rows))
+    if not event_rows: rows.append(f"| {day} | — | — | no linked real work-item event |")
     active = [f"#{e['issue']['number']} {cell(e['issue'].get('title',''))} ({e['item'].get('status')})" for e in entries if e['item'].get('status') in {"In Progress", "Ready"}]
     rows += ["", "### Active and Ready"] + [f"- {entry}" for entry in (active or ["None observed."])]
     rows += ["", "### Findings"] + [f"- {note}" for note in (notes or ["No missing evidence or stale lifecycle found."])]
@@ -263,18 +306,18 @@ def run_daily(args: argparse.Namespace, gh: Gh, now: datetime, usage=telemetry) 
             if "Observed Cycle" not in fields: raise DailyError("Project lacks Observed Cycle field")
             project_id = gh.project_view().get("id")
             if not isinstance(project_id, str) or not project_id: raise DailyError("Project node ID is unavailable")
+            written: dict[str, str] = {}
             for entry in planned:
-                fresh = gh.project_items()
-                item = next((row for row in fresh["items"] if row.get("id") == entry["item"].get("id")), None)
-                if item is None: raise DailyError("Project item disappeared before Observed Cycle edit")
-                current = str(item.get("observed Cycle") or "")
+                item = entry["item"]
+                current = gh.item_cycle(item["id"])
                 value = replace_events(current, event_block(entry["issue"], entry["pulls"]))
                 if value == current: continue
                 gh.write_text(project_id, item["id"], fields["Observed Cycle"]["id"], value)
                 receipt["partial_edits"].append(f"Observed Cycle item {item['id']}")
-                readback = gh.project_items()
-                returned = next((row for row in readback["items"] if row.get("id") == item["id"]), {})
-                if returned.get("observed Cycle") != value: raise DailyError("Observed Cycle readback mismatch")
+                written[item["id"]] = value
+            if written:
+                readback = {row.get("id"): row.get("observed Cycle") for row in gh.project_items()["items"]}
+                if any(readback.get(item_id) != value for item_id, value in written.items()): raise DailyError("Observed Cycle batch readback mismatch")
             if updated_readme != readme:
                 current_readme = gh.readme()
                 if managed_content(current_readme) != managed_content(readme): raise DailyError("Project README managed block drifted before edit")
