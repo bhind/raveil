@@ -36,6 +36,7 @@ from .iree_import import PinnedIreeImporter
 from .interactive_shell import NativeInteractiveSession, run_interactive_shell
 from .workspace import NativeWorkspace
 from .command_showcase import list_showcases, mutate_showcase, prepare_showcase, run_showcase
+from .project import add_project_parser
 from .garden import (
     load_garden_view, render_empty, render_error, render_key_session,
     run_interactive, validate_render_width,
@@ -427,6 +428,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Raveil minimum Experience-loop prototype")
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="command", required=True)
+    add_project_parser(subparsers)
 
     garden = subparsers.add_parser("garden", help="browse one validated graph snapshot read-only")
     garden_source = garden.add_mutually_exclusive_group(required=True)

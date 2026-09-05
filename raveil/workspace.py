@@ -270,10 +270,12 @@ class NativeWorkspace:
             writable=os.access(target, os.W_OK),
         )
 
-    def mkdir(self, path: str) -> str:
+    def mkdir(self, path: str, *, mode: int = 0o777) -> str:
+        if type(mode) is not int or not 0 <= mode <= 0o777:
+            raise WorkspaceError("mkdir mode is invalid")
         parts, target = self._new_leaf(path)
         try:
-            os.mkdir(target)
+            os.mkdir(target, mode)
         except OSError as exc:
             raise WorkspaceError(f"mkdir failed: {exc.strerror}") from exc
         return self._virtual(parts)

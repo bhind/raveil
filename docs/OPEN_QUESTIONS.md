@@ -475,6 +475,15 @@ resolves it.
   authority and portability cost? General `sh -c`, arbitrary executable
   lookup, command substitution, and ambient environment inheritance remain
   unresolved, not implied follow-ups.
+- After T-0149 completes the first editable project loop, which operator
+  friction most prevents a third run: recipe authoring, Graph explanation,
+  output inspection, run selection, or the Native/Sonatine boundary? The next
+  product slice must follow observed hands-on use rather than adding commands
+  speculatively.
+- Should local run history eventually gain human labels, a compact content
+  diff, export/import, or garbage collection? T-0149 retains exact bounded
+  snapshots and hashes only. It is deliberately neither a production cache nor
+  a signed evidence store.
 - T-0103 demonstrates only immutable-by-name showcase cache entries. What
   durable artifact lineage, tool/environment/policy/workspace invalidation,
   atomic output publication, cache budget/eviction, concurrent safety, and

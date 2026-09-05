@@ -27,6 +27,9 @@ development is unreleased.
 - A bounded Native userspace Graph loop runs on GNU/Linux and macOS.
 - A separate Command Graph CLI runs allowlisted host tools inside a bounded
   workspace and checks direct/Graph result agreement.
+- The in-progress shell-first `raveil project` entry composes editable recipes,
+  Graph inspection, retained runs, run diffing, Native GEMM, Sonatine/QEMU GEMM,
+  and direct microkernel console access.
 - A Sonatine RV64 microkernel seed boots and runs under QEMU.
 - A hardwired static Graph region plus Rocket and BOOM controls have bounded
   RTL-simulation evidence.
@@ -213,6 +216,23 @@ backend's self-report is not a performance claim.
 Python 3.11 or newer is required. The core Python runtime has no third-party
 dependency.
 
+Create a project you can edit and rerun:
+
+```sh
+export PATH="$PWD/scripts:$PATH"
+raveil project init /tmp/my-raveil-project
+cd /tmp/my-raveil-project
+raveil project show logs
+raveil project run logs
+```
+
+Add another `ERROR` line to `/tmp/my-raveil-project/inputs/events.txt`, run the
+same recipe again, list the run IDs with `raveil project runs`, and compare
+them with `raveil project diff RUN_A RUN_B`. The generated project also
+contains an independent file-transform recipe and an 8-by-8 GEMM recipe. See the
+[project workspace guide](docs/guides/PROJECT_WORKSPACE.md) for Native,
+Sonatine/QEMU, console and Linux commands.
+
 Open the Native interactive session:
 
 ```sh
@@ -289,12 +309,17 @@ The QEMU path is emulation correctness only. See the
 [showcase guide](docs/guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md) for complete
 instructions and limits.
 
-## Current research path
+## Current development paths
 
-The immediate research task is T-0044: finish matched comparisons among
-ordinary CPU controls, the hardwired static Graph reference, and—only after the
-non-reinvention gate—reviewed configurable controls. Full configuration,
-compiler, memory, verification, and amortization costs remain in scope.
+The immediate product slice is T-0149: make the ordinary shell and editor the
+entry to an editable, repeatable Raveil project. Its goal is a small environment
+that invites a second and third run, not another fixed demo or a speed claim.
+
+The CPU/RTL research line remains preserved. T-0148 advances bounded signed
+relative loads in RTL simulation, while T-0044 retains the matched physical
+comparison gate. Physical research remains blocked before new data until its
+recorded common-memory inputs exist; it is not the current product critical
+path.
 
 Separately, a future Experience experiment must test whether prior evidence
 reduces search or target measurements at equal or better final quality, with

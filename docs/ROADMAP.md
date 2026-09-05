@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0148 advances bounded Graph generality in RTL simulation; real UIO and T-0044 physical research remain preserved but off the critical path**
+State: **T-0149 composes a playable shell-first workspace; T-0148 and physical research remain preserved as separate evidence lines**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -17,7 +17,15 @@ Experience hypothesis, but it cannot answer whether low-level explicit-graph
 execution can simplify or outperform an in-order or OoO CPU. More measurement
 or process-demo work would repeat that ordering error.
 
-The corrected critical path is now simulation-first:
+The immediate product-development path is now edit-run-observe-change-rerun.
+T-0149 composes the already implemented Native Command Graph, guarded GEMM,
+Sonatine/QEMU backend and microkernel console behind `raveil project`. Its
+first gate is an editable project that retains exact run inputs and outputs,
+shows the Graph, compares two user-modified runs, and performs the same command
+grammar on macOS and Linux. This is a one-to-two-week playable slice, not a
+user-research-only exercise or a performance claim.
+
+The simulation research line remains preserved rather than discarded:
 
 T-0148 removes the hardwired five-direction address alphabet without changing
 the three existing device transport ABIs. Descriptor schema v2 and

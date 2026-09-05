@@ -2,7 +2,7 @@
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
@@ -100,6 +100,28 @@ bounded join-fanout, while `|`, `&&`, and `;` retain stream, success, and
 sequence edges. `CommandGraphResult` permits publication only after exact
 semantic agreement. `CommandBenchmarkResult` is segregated development-smoke
 evidence and cannot authorize a graph result or change EXP-0004 by itself.
+
+ADR-0085 adds a project workspace above these existing paths. The project
+layer owns no executor or semantic authority: it stores versioned editable
+recipes and inputs, invokes the Command comparison or guarded GEMM path, and
+places each exact recipe/input snapshot, compiled Graph, output and result in
+a fresh run directory. Read-back verifies a local artifact manifest and record
+digest. This detects later mutation for ordinary development use but is not a
+signed audit store or OS isolation boundary.
+
+The repository POSIX launcher supplies the `raveil` command outside the
+checkout by prepending the checkout to Python's module path. Private-by-default
+project/run directories use mode `0700` and artifacts use `0600`; no-follow
+descriptor mode changes avoid mutating a replaced external path. These modes
+reduce accidental local disclosure but do not promote the workspace to hostile
+multi-user containment.
+
+The project layer also exposes the existing bounded Sonatine/QEMU GEMM adapter
+and an explicit QEMU console attachment. Command recipes never enter Sonatine;
+only GEMM dimensions 1 through 8 use its existing request envelope. Console
+bytes are interactive transport and carry no Graph, Program, Data, Experience,
+approval or publication authority. macOS and Linux share the CLI grammar, but
+their allowlisted tool identities may differ.
 
 ADR-0037 adds a separate T-0103 operator showcase above this execution path.
 It invokes the existing compiler/registry/comparison machinery for a synthetic

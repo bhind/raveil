@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 |
-| **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0149. T-0148 has a reviewed local candidate; remote integration is pending expired GitHub authentication and is not another mutation lane. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0150. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -26,6 +26,34 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [ ] **T-0150** Reconcile the stale UIO dry-run source-scan regression with
+  the accepted T-0145 no-device test handoff. Trigger only after T-0149 is
+  integrated. A separate test/fix branch must decide whether the static
+  `os.open` ban is stale or the helper belongs in a different module, retain
+  the no-real-device and no-MMIO boundary, and restore a green full discovery
+  suite. Stop before real UIO, device access, T-0149 files, performance, FPGA,
+  ASIC or silicon. No Issue, estimate or Sprint is allocated while GitHub
+  authentication is unavailable.
+
+- [ ] **T-0149** Compose the existing Native Command Graph, guarded GEMM and
+  Sonatine/QEMU paths into a shell-first editable project workspace. Local
+  branch `feat/t-0149-project-workspace`, Experience Implementer with PM
+  integration, 13 SP, Sprint S-0003, Host Functional and QEMU Emulation
+  Correctness evidence own `raveil project init|show|run|runs|diff|console`,
+  exact recipe/input snapshots, retained run outputs, integrity checks, three
+  editable examples, a repository-owned `raveil` launcher, focused tests,
+  ADR-0085 and matching records. Acceptance
+  requires a real edit-run-observe-change-rerun-diff loop, Native and
+  Sonatine/QEMU GEMM at dimensions no larger than 8, and an interactive
+  Sonatine console on macOS and Linux with the same CLI grammar. Preserve the
+  bounded Command recipe syntax and label host and QEMU evidence separately.
+  Stop before arbitrary host command execution, production cache, hostile-code
+  isolation, cross-backend speed comparison, new CPU/RTL semantics, FPGA,
+  ASIC, silicon, novelty or commercial-readiness claims. A real GitHub Issue
+  and Project transition remain pending because the current `gh` credential is
+  invalid; local implementation and verification may continue without
+  representing remote coordination as complete.
 
 - [x] **T-0148** Add versioned signed relative `LOAD_U32` coordinates to the
   simulation Graph path. Real Issue #113, branch
