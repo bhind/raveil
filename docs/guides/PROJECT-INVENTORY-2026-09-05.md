@@ -486,7 +486,7 @@ minutes, 65% used / 35% remaining. Evidence is Host Functional only.
 and required session-sync/read-boundary correction as canonical
 `75bf2757016debdfc8aa2fabcfffa5b584277ce5`. Exact candidate `01a427c` passed
 independent review; canonical code/governance blobs match the tested candidate.
-The broad T-0151 daily scheduler remains separately unfinished in
+At this pre-#120 snapshot the broad T-0151 daily scheduler remained unfinished in
 [PR #120](https://github.com/bhind/raveil/pull/120). Preserve both record sets
 during its later integration; this inventory does not accept that scheduler.
 
@@ -501,4 +501,23 @@ Post-reset reconciliation succeeded: GitHub reported 4928 remaining, the fresh
 applied, and canonical `audit --check-branch` passed. The post-merge pending
 body update above is resolved. Remaining blockers are product/research
 acceptance conditions, not missing GitHub permission or an unapplied inventory
-write. Parent T-0151 still requires its separate daily scheduler acceptance.
+write. At that snapshot parent T-0151 still required its separate daily scheduler acceptance; the subsequent #120 integration is reconciled below.
+
+## Subsequent concurrent daily closeout
+
+PR #120 then merged at `9e3a405`. Its code and both histories were retained when
+resolving the #122 record conflict. The inventory PM independently verified
+the canonical daily-script hash against the successful 32-update live receipt,
+the actual LaunchAgent configuration/last exit 0, and its successful no-repeat
+15:55:15 JST receipt. All 68 combined daily/queue/agent tests pass. Current
+main's T-0151 completion is therefore retained on inspected evidence; the
+earlier unfinished-parent descriptions above are dated pre-#120 observations.
+The canonical queue audit now passes with one active review item and one
+pullable Ready. No extra primary implementation was started.
+
+The legacy #99/PR #100 native closing-reference association is still absent
+from GitHub's API even after normalizing the PR's 18 literal newline escapes
+and preserving its existing closing reference. This remaining metadata gap is
+explicit; canonical T-0142/PR #100 evidence is linked and no historical event
+is synthesized. Broad T-0042 scope reconciliation and T-0149 predecessor/
+regression acceptance remain separate, unfinished work.

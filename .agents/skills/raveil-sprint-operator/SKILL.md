@@ -22,6 +22,16 @@ GitHub Project mutation implementation.
    evidence class, stop rule, and non-claims. State explicitly when a context
    class does not apply.
 
+## Daily operating entry
+
+Run `python3 scripts/project_daily.py` daily at 19:00 Asia/Tokyo through the
+installed local scheduler, and inspect the retained receipt. `--apply` is
+limited to factual GitHub event metadata and the marked Project daily README
+section after a fresh weekly usage check. The report separates actual
+Issue/PR dates from Sprint assignment and technical acceptance; lifecycle
+anomalies require the canonical queue. Daily maintenance never substitutes
+for immediate accepted-task closeout or explicit owner ceremony approval.
+
 ## Select one operating phase
 
 - **Audit/status:** read the live Project, run the queue audit, and report the

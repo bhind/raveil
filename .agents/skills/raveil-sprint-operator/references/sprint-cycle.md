@@ -288,3 +288,16 @@ Accepted / carried / blocked / dropped:
 HCI or none:
 Next action:
 ```
+
+## Daily factual recovery
+
+Use `python3 scripts/project_daily.py --output-dir ARTIFACT_DIRECTORY` to
+preview factual metadata and daily-delivery updates; `--apply` performs the
+bounded updates only after fresh weekly telemetry. The scheduler invokes the
+same command daily at 19:00 Asia/Tokyo and preserves receipts outside Git.
+Read actual Issue closure and PR merge times; keep original estimates,
+acceptance prose, Sprint and status untouched. Verify the readback and report
+missing evidence or lifecycle contradictions. Use `project_queue.py complete`
+for eligible technically accepted tasks; do not implement status recovery in
+the daily reporter. If two stale tasks block each other's canonical audit or
+a merged item remains In Progress, retain that exact gap for PM correction.

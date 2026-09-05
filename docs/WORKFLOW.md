@@ -576,6 +576,43 @@ strength of the claim.
 - Remote tag or GitHub Release publication still requires the
   `raveil-remote-release` workflow and explicit owner approval.
 
+## Daily Project maintenance
+
+T-0151 supplies the daily factual reconciliation path described in
+`docs/SPRINTS.md`. Run it every day and inspect its dated receipt; a scheduler
+installation alone is not successful reconciliation. A failed usage/API/
+inventory check preserves a failure receipt and does not publish a successful
+update. The local schedule is a user-owned macOS LaunchAgent, not hosted CI;
+the Mac must be available with network and existing GitHub authentication.
+After sleep, one startup/resume catch-up is sufficient; do not invent daily
+successes for missed runs.
+
+Maintain task closeout at each merge using `project_queue.py complete`.
+Daily findings about missing acceptance or multiple stale closed items go to
+PM correction through that canonical queue. The reporter may update factual
+GitHub event metadata but never chooses a new P0, marks a task/ceremony Done,
+merges a PR, or changes research authority. This implements ADR-0086 alongside the existing lifecycle and owner-review
+rules; no further authority expansion is introduced.
+
+The installed job is `com.raveil.project-daily` in the user's
+`~/Library/LaunchAgents`. Its reviewed script snapshot, installation revision
+and SHA-256 manifest, supervisor, logs, receipts and atomic schedule state are
+under `~/Library/Application Support/Raveil/project-daily`. `RunAtLoad` and
+`StartInterval=900` check the latest elapsed 19:00 Asia/Tokyo due date; the
+first available check after that time runs once. A held file lock suppresses
+concurrent invocations, failures retry no more than hourly, and only a verified
+successful reporter exit advances `last_success_due`. The process timeout is
+600 seconds. Missed dates are caught up once using real event timestamps.
+
+Inspect the launchd job with `launchctl print gui/$(id -u)/com.raveil.project-daily`
+and inspect `state/schedule.json` plus the corresponding JSON receipt in that
+installation directory. A manual replay uses its `daily-launch.py --force`;
+it retains the same usage check and readback. To pause, use
+`launchctl bootout gui/$(id -u)/com.raveil.project-daily`. Reviewed script updates
+must replace the installed snapshot and refresh its manifest; it does not pull
+or execute an unreviewed repository head automatically. No model invocation,
+new credential or hosted service is part of this local reporting job.
+
 ## Session-level Project inventory and synchronization
 
 ADR-0086 requires the primary PM (Jitro) to operate the repository-linked
