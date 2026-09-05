@@ -1,0 +1,13 @@
+{
+  "schema": "raveil.graph-device-program/v3",
+  "version": 3,
+  "magic": 1380992817,
+  "payload_words": 32,
+  "instruction_capacity": 16,
+  "value_registers": 8,
+  "opcodes": {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4},
+  "load_encoding": "opcode[31:28], destination[27:25], signed row_delta[24:20], signed column_delta[19:15], reserved[14:0]=0",
+  "relative_delta_range": [-1, 1],
+  "version_gate": "v3 admits ADD/MAX/STORE and relative LOAD; v1/v2 byte semantics unchanged",
+  "digest_words": {"start": 4, "count": 8, "byte_order": "little-endian", "algorithm": "SHA-256"}
+}

@@ -85,6 +85,12 @@ device operation. Request/program cross-version pairs and opcode 4 under v1
 fail before a plan is returned. The program-install, affine-install and
 execution transport ABIs remain v1 and the 16 KiB aperture is unchanged.
 
+The shared C++ request reader also admits the T-0148 version-3 simulation
+request after validating signed one-cell relative loads and the exact program
+digest. That does not extend the sealed/UIO path: T-0148 stops at the existing
+AXI4-Lite Verilator runner, and the version-1/2 sealed transport behavior above
+remains unchanged.
+
 T-0145 adds the next no-device boundary. The ADR-0079 verifier projects one
 verified sealed-v2 request into a private request root, then a Linux host
 adapter consumes that root through an injected `RegisterIo`. The adapter has

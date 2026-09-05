@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
@@ -42,12 +42,15 @@ resolves it.
   must not turn the fixed pair into an accidental scheduler or performance
   claim.
 
-- If S03 passes its three external bounded DAGs, what additional discriminator
-  is required before broadening the fixed address-selector alphabet or calling
-  the executor generally installable? ADR-0064 deliberately stops at five
-  neighbor selectors, three opcodes, 16 instructions, eight value registers,
-  one active invocation, and one outstanding memory request. No larger opcode,
-  memory, scheduling, or exception boundary is selected yet.
+- ADR-0084 selects the first address-generality discriminator: descriptor v2
+  and program/request v3 directly encode signed row/column deltas in each load,
+  bounded to the existing one-cell halo. T-0148 must prove all eight non-center
+  3-by-3 neighbors on one unchanged-capacity executor while retaining v1/v2
+  bytes and semantics. Whether to increase the 16-instruction capacity, add a
+  higher-arity reduction, admit a wider halo, or add constants/predicates is
+  unresolved. Nine loads plus eight binary reductions plus one store cannot
+  fit the current capacity. T-0148 now passes this bounded discriminator; it
+  does not resolve those next language choices.
 
 - ADR-0077 selects the next discriminator: a repository-authored Graph absent
   from the three-entry catalogue must compile at runtime and produce oracle-

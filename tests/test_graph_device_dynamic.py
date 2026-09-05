@@ -26,9 +26,21 @@ BASELINE = "contracts/graph_device_dags/five-point.json"
 CUSTOM = "tests/fixtures/graph_device_dynamic/center-north.json"
 FANOUT = "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
 MAX_U32 = "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
+RELATIVE = "tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json"
 
 
 class GraphDeviceDynamicTests(unittest.TestCase):
+    def test_relative_fixture_uses_explicit_v3_request(self):
+        descriptor = load_descriptor(ROOT / RELATIVE)
+        program = compile_descriptor(descriptor)
+        self.assertEqual(program["payload"][1], 3)
+        self.assertEqual(program["instruction_count"], 16)
+        with tempfile.TemporaryDirectory() as directory:
+            result = prepare_request(Path(directory) / "request", RELATIVE, 9, ROOT)
+            self.assertEqual(struct.unpack_from("<I", result["request"], 4)[0], 3)
+            self.assertEqual(result["metadata"]["schema"],
+                             "raveil.graph-device-dynamic-request/v3")
+
     def test_cli_uses_descriptor_pairs(self):
         args = build_parser().parse_args([
             "graph-device", "dynamic-run-pair",
@@ -231,7 +243,9 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("rejected_before_axi=1", shell)
         self.assertIn("dynamic-source.manifest", shell)
         self.assertIn("contracts/graph_device_dynamic_request_v2.json", shell)
+        self.assertIn("contracts/graph_device_dynamic_request_v3.json", shell)
         self.assertIn("contracts/graph_device_program_v2.json", shell)
+        self.assertIn("contracts/graph_device_program_v3.json", shell)
         self.assertLess(shell.index("dynamic-source.manifest"), shell.index("verilator --assert --cc"))
         outer = (ROOT / "hardware/chisel/run-graph-device-axi4lite-dynamic.sh").read_text()
         self.assertIn("request-1/request-2 siblings", outer)
@@ -251,12 +265,17 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("payloadVersion === 2.U", installer)
         fallback = (ROOT / "hardware/chisel/graph_device_dag_runtime.cpp").read_text()
         self.assertIn("bool valid_fallback_program", fallback)
-        self.assertIn("opcode == 4U && payload[1] == 2U", fallback)
+        self.assertIn("payload[1] == 2U || payload[1] == 3U", fallback)
+        self.assertIn("relativeInputAddress", (
+            ROOT / "hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala"
+        ).read_text())
         self.assertLess(fallback.index("if (!valid_fallback_program(graph.payload)) return false;"),
                         fallback.index("output.fill(0U);"))
         from raveil.graph_device_dynamic_sealed import SOURCE_PATHS, _expected_runner_source_manifest, seal, verify
         self.assertIn("contracts/graph_device_dynamic_request_v2.json", SOURCE_PATHS)
+        self.assertIn("contracts/graph_device_dynamic_request_v3.json", SOURCE_PATHS)
         self.assertIn("contracts/graph_device_program_v2.json", SOURCE_PATHS)
+        self.assertIn("contracts/graph_device_program_v3.json", SOURCE_PATHS)
         with tempfile.TemporaryDirectory() as directory, patch("raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()):
             sealed = Path(seal(MAX_U32, 3, ROOT)["path"])
             expected = _expected_runner_source_manifest(verify(sealed, ROOT)).decode("ascii")
@@ -287,6 +306,26 @@ class GraphDeviceDynamicTests(unittest.TestCase):
             self.assertEqual(subprocess.run([str(harness), str(request)], check=False).returncode, 1)
             self.assertFalse((request / "axi-transcript.log").exists())
             self.assertFalse(any(request.glob("simulator*")))
+
+    def test_cxx_host_admission_accepts_v3_relative_program(self):
+        compiler = shutil.which("c++") or shutil.which("g++")
+        if compiler is None:
+            self.skipTest("no C++ compiler is available for host admission regression")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            request = root / "request"
+            prepare_request(request, RELATIVE, 9, ROOT)
+            harness = root / "dynamic-request-v3-host"
+            result = subprocess.run(
+                [compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror",
+                 "-I", str(ROOT / "linux/include"), "-I", str(request),
+                 str(ROOT / "tests/graph_device_dynamic_request_host_test.cpp"),
+                 str(ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp"),
+                 "-o", str(harness)], capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(subprocess.run([str(harness), str(request)],
+                                            check=False).returncode, 0)
 
 
 if __name__ == "__main__":

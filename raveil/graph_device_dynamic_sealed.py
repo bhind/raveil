@@ -35,7 +35,8 @@ PAYLOADS = tuple(name for name in INVENTORY if name not in {"SEALED", "manifest.
 SOURCE_PATHS = (
     "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json",
     "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json",
-    "contracts/graph_device_program_v2.json",
+    "contracts/graph_device_dynamic_request_v3.json", "contracts/graph_device_program_v2.json",
+    "contracts/graph_device_program_v3.json",
     "contracts/graph_device_program_install_abi_v1.json",
     "contracts/graph_device_axi4lite_aperture_v1.json",
     "contracts/graph_device_dynamic_sealed_v1.json", "contracts/graph_device_dynamic_sealed_v2.json",
@@ -231,6 +232,11 @@ def seal(graph: str, seed: int, repository: Path) -> dict[str, Any]:
         program = compile_descriptor(descriptor)
     except (UnicodeError, ValueError, json.JSONDecodeError) as error:
         raise GraphDeviceDynamicSealError(f"sealed descriptor admission failed: {error}") from error
+    if program["payload"][1] not in {1, 2}:
+        raise GraphDeviceDynamicSealError(
+            "sealed transport admits only program versions 1 and 2; "
+            "version 3 remains simulation-only"
+        )
     profile = _profile_for(program)
     request = _request_bytes(program, profile, seed)
     payloads = {
@@ -334,7 +340,7 @@ def _expected_runner_source_manifest(verified: dict[str, Any]) -> bytes:
     rows_out += [f"compiled/raveil_graph_device_dynamic_request.h {source['linux/include/raveil_graph_device_dynamic_request.h']}", f"compiled/raveil_graph_device_dynamic_request.cpp {source['linux/src/raveil_graph_device_dynamic_request.cpp']}"]
     for name in ("graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_dag_generated.h", "graph_device_axi4lite_aperture_generated.h"):
         rows_out.append(f"generated/{name} {_sha(verified['files'][name])}")
-    orchestration = ("hardware/chisel/Dockerfile", "hardware/chisel/run-graph-device-axi4lite-dynamic.sh", "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh", "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json", "contracts/graph_device_program_v2.json", "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json", "contracts/graph_device_program_install_abi_v1.json", "raveil/graph_device_dynamic.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py", "raveil/graph_device_mvp.py", "raveil/static_region.py", "raveil/riscv_stencil_signature.py")
+    orchestration = ("hardware/chisel/Dockerfile", "hardware/chisel/run-graph-device-axi4lite-dynamic.sh", "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh", "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json", "contracts/graph_device_dynamic_request_v3.json", "contracts/graph_device_program_v2.json", "contracts/graph_device_program_v3.json", "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json", "contracts/graph_device_program_install_abi_v1.json", "raveil/graph_device_dynamic.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py", "raveil/graph_device_mvp.py", "raveil/static_region.py", "raveil/riscv_stencil_signature.py")
     rows_out += [f"orchestration/{name} {source[name]}" for name in orchestration]
     return ("\n".join(sorted(rows_out)) + "\n").encode("ascii")
 

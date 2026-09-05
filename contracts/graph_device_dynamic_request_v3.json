@@ -1,0 +1,8 @@
+{
+  "schema": "raveil.graph-device-dynamic-request/v3",
+  "version": 3,
+  "header_bytes": 64,
+  "program_words": 32,
+  "affine_words": 16,
+  "input_words": 324
+}

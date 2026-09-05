@@ -1,14 +1,14 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **Canonical through T-0145's no-device sealed handoff; T-0147 corrects task closeout only; real UIO and T-0044 physical research remain blocked**
+State: **T-0148 advances bounded Graph generality in RTL simulation; real UIO and T-0044 physical research remain preserved but off the critical path**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -17,13 +17,24 @@ Experience hypothesis, but it cannot answer whether low-level explicit-graph
 execution can simplify or outperform an in-order or OoO CPU. More measurement
 or process-demo work would repeat that ordering error.
 
-The corrected critical path is:
+The corrected critical path is now simulation-first:
+
+T-0148 removes the hardwired five-direction address alphabet without changing
+the three existing device transport ABIs. Descriptor schema v2 and
+program/request version 3 encode bounded signed row/column deltas directly in
+each `LOAD_U32`; the first exact discriminator uses all eight non-center
+neighbors in one 16-instruction unsigned-dilation program. Existing v1/v2
+programs remain byte-identical. Acceptance requires the existing one-build
+AXI4-Lite Verilator path to produce byte-equal independent-oracle, C++ fallback
+and RTL outputs. The accepted v3 output, fallback and oracle share SHA-256
+`204c0d4f...64f1`; v1, v2 and v3 runs share one simulator SHA-256
+`5be84828...f30b`. This is address generality under a bounded language, not a
+general Graph, performance or physical result.
 
 T-0145 is canonical through squash-merged PR #109 at `08ead0b`; its no-device
-boundary and every physical non-claim remain unchanged. T-0147 is an active
-Host Functional governance correction for the missing atomic Project
-completion transition. It changes no product or research gate and does not
-authorize the blocked real-UIO path.
+boundary and every physical non-claim remain unchanged. T-0147 is canonical
+through PR #111 and adds only the missing atomic Project completion transition.
+Neither authorizes the blocked real-UIO path.
 
 The 2026-08-23 Sprint coordination audit does not reopen T-0042 or alter this
 critical path. One already-active BOOM stripped-token negative is retained as

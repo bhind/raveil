@@ -63,6 +63,7 @@ class RaveilStaticStencilCore extends Module {
     val inputStride = Input(UInt(9.W))
     val outputStride = Input(UInt(9.W))
     val activeOutputs = Input(UInt(9.W))
+    val programVersion = Input(UInt(2.W))
     val programLength = Input(UInt(5.W))
     val program = Input(Vec(RaveilBoundedProgramContract.ProgramCapacity,
       UInt(32.W)))
@@ -112,14 +113,24 @@ class RaveilStaticStencilCore extends Module {
   center := (logicalRow + 1.U) * io.inputStride + logicalColumn + 1.U
   outputRowBase := logicalRow * io.outputStride
   outputAddress := 324.U + outputRowBase + logicalColumn
-  val inputAddress = Wire(UInt(10.W))
-  inputAddress := center
+  val legacyInputAddress = Wire(UInt(10.W))
+  legacyInputAddress := center
   switch(selector) {
-    is(1.U) { inputAddress := center - io.inputStride }
-    is(2.U) { inputAddress := center + io.inputStride }
-    is(3.U) { inputAddress := center - 1.U }
-    is(4.U) { inputAddress := center + 1.U }
+    is(1.U) { legacyInputAddress := center - io.inputStride }
+    is(2.U) { legacyInputAddress := center + io.inputStride }
+    is(3.U) { legacyInputAddress := center - 1.U }
+    is(4.U) { legacyInputAddress := center + 1.U }
   }
+  val relativeRow = instruction(24, 20).asSInt
+  val relativeColumn = instruction(19, 15).asSInt
+  val relativeInputAddress = Wire(SInt(16.W))
+  relativeInputAddress := center.zext +
+    (relativeRow * io.inputStride.zext) + relativeColumn
+  val relativeInputAddressUInt = relativeInputAddress.asUInt
+  val inputAddress = Mux(
+    io.programVersion === 3.U,
+    relativeInputAddressUInt(9, 0),
+    legacyInputAddress)
   val storeData = values(destination)
 
   val cancelling = io.cancel || cancelRequestedReg
@@ -255,6 +266,11 @@ class RaveilStaticStencilCore extends Module {
     assert(io.activeOutputs === io.rows * io.columns)
     assert(io.programLength >= 2.U &&
       io.programLength <= RaveilBoundedProgramContract.ProgramCapacity.U)
+    assert(io.programVersion >= 1.U && io.programVersion <= 3.U)
+    when(state === loadRequest && busyReg && io.programVersion === 3.U) {
+      assert(relativeInputAddress >= 0.S)
+      assert(relativeInputAddress < 324.S)
+    }
     when(state === fetch && busyReg) {
       assert(opcode === RaveilBoundedProgramContract.LoadOpcode.U ||
         opcode === RaveilBoundedProgramContract.AddOpcode.U ||

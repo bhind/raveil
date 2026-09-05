@@ -13,10 +13,12 @@ from raveil.graph_device_dag import (
     expected_transactions,
     finalize,
     graph_oracle,
+    load_descriptor,
     load_program_abi,
     prepare,
     programs,
     software_fallback,
+    validate_descriptor,
     validate_lowering_trace,
 )
 from raveil.riscv_stencil_signature import input_words
@@ -27,6 +29,42 @@ CHISEL = ROOT / "hardware" / "chisel"
 
 
 class GraphDeviceDagTests(unittest.TestCase):
+    def test_v3_relative_loads_cover_all_eight_neighbors(self) -> None:
+        path = ROOT / "tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json"
+        descriptor = json.loads(path.read_text(encoding="ascii"))
+        program = compile_descriptor(descriptor)
+        self.assertEqual(descriptor["schema"], "raveil.graph-device-dag/v2")
+        self.assertEqual(program["payload"][1], 3)
+        self.assertEqual(program["instruction_count"], 16)
+        addresses = [
+            node["address"] for node in descriptor["nodes"]
+            if node["op"] == "LOAD_U32"
+        ]
+        self.assertEqual(
+            {(value["row_delta"], value["column_delta"]) for value in addresses},
+            {(row, column) for row in (-1, 0, 1) for column in (-1, 0, 1)
+             if (row, column) != (0, 0)},
+        )
+        self.assertEqual(sum(node["op"] == "MAX_U32" for node in descriptor["nodes"]), 7)
+        words = input_words(9)
+        self.assertEqual(graph_oracle(descriptor, words), software_fallback(program, words))
+        self.assertEqual(len(expected_transactions(program, words)), 8 * 64 + 64)
+
+    def test_v2_descriptor_rejects_non_unit_or_malformed_coordinates(self) -> None:
+        path = ROOT / "tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json"
+        descriptor = json.loads(path.read_text(encoding="ascii"))
+        for address in (
+            {"row_delta": 2, "column_delta": 0},
+            {"row_delta": 0, "column_delta": -2},
+            {"row_delta": True, "column_delta": 0},
+            {"row_delta": 0},
+        ):
+            with self.subTest(address=address):
+                malformed = copy.deepcopy(descriptor)
+                malformed["nodes"][0]["address"] = address
+                with self.assertRaisesRegex(GraphDeviceDagError, "relative address"):
+                    validate_descriptor(malformed)
+
     def test_compiler_owns_deterministic_word_bound_lowering_trace(self) -> None:
         fanout_path = ROOT / "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
         descriptor = json.loads(fanout_path.read_text(encoding="ascii"))
@@ -113,6 +151,20 @@ class GraphDeviceDagTests(unittest.TestCase):
         source = (ROOT / "raveil/graph_device_dag.py").read_text()
         self.assertNotIn('if value["graph_id"]', source)
         self.assertNotIn('if graph_id ==', source)
+
+    def test_v1_and_v2_program_identities_remain_stable(self) -> None:
+        fanout = compile_descriptor(load_descriptor(
+            ROOT / "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
+        ))
+        dilation = compile_descriptor(load_descriptor(
+            ROOT / "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
+        ))
+        self.assertEqual(
+            fanout["program_sha256"],
+            "ec13f9f0d376233b49b2d647088f71bf208ddea68e7a4d09732f660b9770ea39",
+        )
+        self.assertEqual(fanout["payload"][1], 1)
+        self.assertEqual(dilation["payload"][1], 2)
 
     def test_direct_oracle_and_compiled_fallback_are_independent_and_equal(self) -> None:
         for descriptor, program in zip(descriptors(), programs()):

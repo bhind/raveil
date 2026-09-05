@@ -158,6 +158,7 @@ class StaticStencilRegion extends Module {
   core.io.inputStride := configInstaller.io.inputStride
   core.io.outputStride := configInstaller.io.outputStride
   core.io.activeOutputs := configInstaller.io.activeOutputs
+  core.io.programVersion := programInstaller.io.programVersion
   core.io.programLength := programInstaller.io.programLength
   core.io.program := programInstaller.io.program
   core.io.memory.pending := scratchpad.io.pending

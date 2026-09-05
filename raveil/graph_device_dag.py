@@ -24,6 +24,7 @@ from .riscv_stencil_signature import input_words
 PROGRAM_ABI_PATH = "contracts/graph_device_program_install_abi_v1.json"
 GRAPH_DIRECTORY = "contracts/graph_device_dags"
 GRAPH_SCHEMA = "raveil.graph-device-dag/v1"
+GRAPH_SCHEMA_V2 = "raveil.graph-device-dag/v2"
 ARTIFACT_SCHEMA = "raveil.graph-device-dag-artifact/v1"
 RECEIPT_SCHEMA = "raveil.graph-device-dag-receipt/v1"
 LOWERING_TRACE_SCHEMA = "raveil.graph-device-lowering-trace/v1"
@@ -51,6 +52,7 @@ SOURCE_PATHS = (
     "contracts/graph_device_install_abi_v1.json",
     PROGRAM_ABI_PATH,
     "contracts/graph_device_program_v2.json",
+    "contracts/graph_device_program_v3.json",
     *GRAPH_PATHS,
     "raveil/graph_device_dag.py",
     "raveil/graph_device_affine.py",
@@ -140,7 +142,7 @@ def source_id(root: Path | None = None) -> str:
 
 def validate_descriptor(value: dict[str, Any]) -> None:
     if set(value) != {"schema", "graph_id", "affine", "nodes"} or \
-            value.get("schema") != GRAPH_SCHEMA:
+            value.get("schema") not in {GRAPH_SCHEMA, GRAPH_SCHEMA_V2}:
         raise GraphDeviceDagError("exact descriptor keys and schema are required")
     if not isinstance(value.get("graph_id"), str) or IDENTIFIER_RE.fullmatch(value["graph_id"]) is None:
         raise GraphDeviceDagError("graph_id must be a bounded ASCII identifier")
@@ -167,9 +169,22 @@ def validate_descriptor(value: dict[str, Any]) -> None:
             raise GraphDeviceDagError("node identity or opcode is invalid")
         op = node["op"]
         if op == "LOAD_U32":
-            if set(node) != {"id", "op", "address"} or \
-                    node["address"] not in SELECTORS:
+            if value["schema"] == GRAPH_SCHEMA and (
+                set(node) != {"id", "op", "address"}
+                or node["address"] not in SELECTORS
+            ):
                 raise GraphDeviceDagError("LOAD_U32 is invalid")
+            if value["schema"] == GRAPH_SCHEMA_V2 and (
+                set(node) != {"id", "op", "address"}
+                or not isinstance(node["address"], dict)
+                or set(node["address"]) != {"row_delta", "column_delta"}
+                or any(
+                    type(node["address"][key]) is not int
+                    or not -1 <= node["address"][key] <= 1
+                    for key in ("row_delta", "column_delta")
+                )
+            ):
+                raise GraphDeviceDagError("LOAD_U32 relative address is invalid")
         elif op in {"ADD_U32", "MAX_U32"}:
             if set(node) != {"id", "op", "inputs"} or \
                     not isinstance(node["inputs"], list) or len(node["inputs"]) != 2 or \
@@ -191,8 +206,20 @@ def load_descriptor(path: Path | str) -> dict[str, Any]:
     return value
 
 
-def encode_load(destination: int, selector: str) -> int:
-    return (LOAD_U32 << 28) | (destination << 25) | (SELECTORS[selector] << 22)
+def encode_load(destination: int, selector: str | dict[str, int]) -> int:
+    if isinstance(selector, str):
+        return (LOAD_U32 << 28) | (destination << 25) | (SELECTORS[selector] << 22)
+    row, column = selector["row_delta"], selector["column_delta"]
+    return (LOAD_U32 << 28) | (destination << 25) | ((row & 0x1f) << 20) | ((column & 0x1f) << 15)
+
+
+def _signed_five(value: int) -> int:
+    value &= 0x1F
+    return value - 32 if value & 0x10 else value
+
+
+def _relative_load(word: int) -> tuple[int, int]:
+    return _signed_five(word >> 20), _signed_five(word >> 15)
 
 
 def encode_add(destination: int, source_a: int, source_b: int) -> int:
@@ -248,7 +275,11 @@ def _lowering_trace(
         "schema": LOWERING_TRACE_SCHEMA,
         "graph_id": value["graph_id"],
         "descriptor_canonical_sha256": _sha256(_canonical(value)),
-        "program_version": 2 if any(node["op"] == "MAX_U32" for node in value["nodes"]) else VERSION,
+        "program_version": (
+            3 if value["schema"] == GRAPH_SCHEMA_V2
+            else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
+            else VERSION
+        ),
         "instruction_count": len(instructions),
         "program_sha256": digest,
         "instructions": entries,
@@ -268,7 +299,9 @@ def validate_lowering_trace(
             or trace.get("graph_id") != value["graph_id"] \
             or trace.get("descriptor_canonical_sha256") != _sha256(_canonical(value)) \
             or trace.get("program_version") != (
-                2 if any(node["op"] == "MAX_U32" for node in value["nodes"]) else VERSION
+                3 if value["schema"] == GRAPH_SCHEMA_V2
+                else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
+                else VERSION
             ) \
             or trace.get("instruction_count") != len(instructions):
         raise GraphDeviceDagError("lowering trace identity is invalid")
@@ -367,7 +400,11 @@ def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
             instructions.append(encode_max(destination, *source_registers))
     digest = _sha256(_word_bytes([len(instructions), *instructions]))
     digest_words = list(struct.unpack("<8I", bytes.fromhex(digest)))
-    version = 2 if any(node["op"] == "MAX_U32" for node in value["nodes"]) else VERSION
+    version = (
+        3 if value["schema"] == GRAPH_SCHEMA_V2
+        else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
+        else VERSION
+    )
     payload = [MAGIC, version, len(instructions), VALUE_REGISTERS,
                *digest_words, *instructions,
                *([0] * (PROGRAM_CAPACITY - len(instructions))), 0, 0, 0, 0]
@@ -400,6 +437,11 @@ def _address(selector: str, center: int, stride: int) -> int:
     return center + {"center": 0, "north": -stride, "south": stride,
                      "west": -1, "east": 1}[selector]
 
+def _node_address(address: str | dict[str, int], center: int, stride: int) -> int:
+    if isinstance(address, dict):
+        return center + address["row_delta"] * stride + address["column_delta"]
+    return _address(address, center, stride)
+
 
 def graph_oracle(value: dict[str, Any], words: Sequence[int]) -> list[int]:
     validate_descriptor(value)
@@ -413,7 +455,7 @@ def graph_oracle(value: dict[str, Any], words: Sequence[int]) -> list[int]:
             values: dict[str, int] = {}
             for node in value["nodes"]:
                 if node["op"] == "LOAD_U32":
-                    values[node["id"]] = int(words[_address(
+                    values[node["id"]] = int(words[_node_address(
                         node["address"], center, affine["input_stride"])])
                 elif node["op"] == "ADD_U32":
                     values[node["id"]] = sum(values[item] for item in node["inputs"]) & 0xFFFFFFFF
@@ -432,7 +474,7 @@ def _validate_fallback_program(program: dict[str, Any]) -> list[int]:
             any(type(word) is not int or not 0 <= word <= 0xffffffff for word in payload) or \
             not isinstance(instructions, list):
         raise GraphDeviceDagError("fallback program payload is invalid")
-    if payload[0] != MAGIC or payload[1] not in {1, 2} or payload[3] != VALUE_REGISTERS:
+    if payload[0] != MAGIC or payload[1] not in {1, 2, 3} or payload[3] != VALUE_REGISTERS:
         raise GraphDeviceDagError("fallback program header is invalid")
     count = payload[2]
     if type(count) is not int or not 2 <= count <= PROGRAM_CAPACITY or \
@@ -447,13 +489,22 @@ def _validate_fallback_program(program: dict[str, Any]) -> list[int]:
     for index, word in enumerate(instructions):
         opcode, destination = word >> 28, (word >> 25) & 7
         if opcode == LOAD_U32:
-            if index == count - 1 or ((word >> 22) & 7) > 4 or word & ((1 << 22) - 1):
+            row_delta, column_delta = _relative_load(word)
+            legacy_invalid = payload[1] < 3 and (
+                ((word >> 22) & 7) > 4 or word & ((1 << 22) - 1)
+            )
+            relative_invalid = payload[1] == 3 and (
+                word & 0x7FFF
+                or row_delta not in {-1, 0, 1}
+                or column_delta not in {-1, 0, 1}
+            )
+            if index == count - 1 or legacy_invalid or relative_invalid:
                 raise GraphDeviceDagError("fallback load instruction is invalid")
             defined.add(destination)
         elif opcode in {ADD_U32, MAX_U32}:
             left, right = (word >> 22) & 7, (word >> 19) & 7
             if index == count - 1 or word & ((1 << 19) - 1) or left not in defined or right not in defined or \
-                    (opcode == MAX_U32 and payload[1] != 2):
+                    (opcode == MAX_U32 and payload[1] not in {2, 3}):
                 raise GraphDeviceDagError("fallback arithmetic instruction is invalid")
             defined.add(destination)
         elif opcode == STORE_U32:
@@ -469,6 +520,7 @@ def _validate_fallback_program(program: dict[str, Any]) -> list[int]:
 
 def software_fallback(program: dict[str, Any], words: Sequence[int]) -> list[int]:
     instructions = _validate_fallback_program(program)
+    payload = program["payload"]
     if len(words) != 324:
         raise GraphDeviceDagError("fallback input must contain exactly 324 words")
     affine = program["affine"]
@@ -483,7 +535,13 @@ def software_fallback(program: dict[str, Any], words: Sequence[int]) -> list[int
                     selector = (instruction >> 22) & 7
                     offsets = {0: 0, 1: -affine["input_stride"],
                                2: affine["input_stride"], 3: -1, 4: 1}
-                    values[destination] = int(words[center + offsets[selector]])
+                    if payload[1] >= 3:
+                        row_delta, column_delta = _relative_load(instruction)
+                        values[destination] = int(words[
+                            center + row_delta * affine["input_stride"] + column_delta
+                        ])
+                    else:
+                        values[destination] = int(words[center + offsets[selector]])
                 elif opcode == ADD_U32:
                     values[destination] = (values[(instruction >> 22) & 7] +
                                            values[(instruction >> 19) & 7]) & 0xFFFFFFFF
@@ -509,8 +567,16 @@ def expected_transactions(program: dict[str, Any], words: Sequence[int]) -> list
             for instruction in program["instructions"]:
                 opcode = instruction >> 28
                 if opcode == LOAD_U32:
+                    if program["payload"][1] >= 3:
+                        row_delta, column_delta = _relative_load(instruction)
+                        address = (
+                            center + row_delta * affine["input_stride"]
+                            + column_delta
+                        )
+                    else:
+                        address = center + offsets[(instruction >> 22) & 7]
                     result.append({"write": False,
-                                   "address": center + offsets[(instruction >> 22) & 7],
+                                   "address": address,
                                    "data": 0})
                 elif opcode == STORE_U32:
                     result.append({"write": True, "address": 324 + output_index,

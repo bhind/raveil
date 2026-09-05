@@ -579,6 +579,25 @@ valid input. The ARM64 adapter object is compiled but not connected to a real
 backend. This is Host Functional evidence, not device, FPGA or performance
 evidence.
 
+T-0148 adds a versioned address-generalization path without adding another
+device ABI. Descriptor schema v2 lowers each `LOAD_U32` address object into
+signed five-bit row and column deltas in program/request version 3. Admission
+currently accepts only `[-1,1]` in each dimension, so every request remains
+inside the existing one-cell input halo. Program versions 1 and 2 bypass these
+fields and retain their fixed center/north/south/west/east semantics. The
+program installer exposes the admitted version to the sequential executor;
+the core chooses versioned address decoding before issuing the same single
+outstanding owned-memory request. No graph identity appears in RTL.
+
+The first v3 fixture fills the 16-instruction program exactly with eight
+non-center loads, seven unsigned maxima and one store. A nine-input binary
+reduction is structurally outside the current capacity. Python walks the
+descriptor directly, the C++ fallback independently validates and interprets
+the program words, and RTL repeats fail-closed admission before execution. All
+three agree on exact private-output bytes in RTL simulation. This adds neither
+runtime scheduling nor a table/CGRA fabric and does not establish performance
+or physical behavior.
+
 The dynamic explanation loader has a separate component-wise no-follow,
 regular-file, bounded-read admission path. It rejects path escape, symlinks,
 special files, schema or identity inconsistency and observed replacement before

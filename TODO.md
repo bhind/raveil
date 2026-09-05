@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | No active P0. The next Chisel/software generality slice is a material design fork; do not substitute a legacy or physical task. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,27 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
+
+- [x] **T-0148** Add versioned signed relative `LOAD_U32` coordinates to the
+  simulation Graph path. Real Issue #113, branch
+  `feat/t-0148-relative-load-v3`, Chisel Implementer, 13 SP, Sprint S-0002 and
+  RTL Simulation evidence own descriptor schema v2, program/request v3, one
+  eight-neighbor dilation fixture, compiler/oracle, independent C++ fallback,
+  RTL admission/execution, focused regressions, ADR-0084 and matching records.
+  Version 3 embeds signed row/column deltas in each load and initially admits
+  only the existing one-cell halo `[-1,1]`; v1/v2 bytes and fixed five-selector
+  semantics remain unchanged. The exact 16-instruction fixture must pass one
+  generic AXI4-Lite Verilator image with oracle/fallback/RTL byte equality.
+  Nine-input binary reduction is excluded because it needs 18 instructions
+  under the unchanged alphabet. Stop before Garden, another opcode/version,
+  scheduler, performance/resources, device/UIO, vendor tools, FPGA, ASIC or
+  silicon. Forty-one focused compiler/request/sealed/host-C++ tests pass. The
+  eight-neighbor v3 run and a v1/v2 compatibility pair both pass one generic
+  AXI4-Lite Verilator image with simulator SHA-256 `5be84828...f30b`; the v3
+  output/oracle/fallback SHA-256 is `204c0d4f...64f1`. The RTL installer rejects
+  an out-of-halo v3 load and publishes no output. Evidence is RTL Simulation
+  Functional only and performance is not measured. The existing sealed/UIO
+  projection remains v1/v2-only and rejects v3 before bundle materialization.
 
 - [x] **T-0147** Make merged-task Project closeout one canonical, fail-closed
   transition. T-0145 / PR #109 merged and its Issue closed, but the Project item
