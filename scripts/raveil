@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+raveil_checkout=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if test -n "${PYTHONPATH:-}"; then
+    PYTHONPATH="$raveil_checkout:$PYTHONPATH"
+else
+    PYTHONPATH="$raveil_checkout"
+fi
+export PYTHONPATH
+exec python3 -m raveil "$@"

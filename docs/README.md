@@ -47,7 +47,7 @@ When records disagree, fix the weaker record using this order:
 | [RFCs](rfcs/README.md) | substantial proposals without authority | developing an unresolved architecture proposal |
 | [experiments](experiments/README.md) | reproducible evidence and claims | measuring or making a performance claim |
 | [research references](references/README.md) | draft external-source identity, provenance, and project-authored synopses | citing papers, manuals, talks, or whitepapers |
-| [guides](guides/NATIVE_COMMAND_GRAPH.md), [showcase guide](guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md), [T-0042 small-start packet](guides/T-0042-SMALL-START.md), and [task start phases](guides/TASK-START-PHASES.md) | Native operation, bounded execution packets, and WIP timing | running demos, executing T-0042, or deciding whether unfinished work may start |
+| [project workspace](guides/PROJECT_WORKSPACE.md), [Native Command Graph](guides/NATIVE_COMMAND_GRAPH.md), [showcase guide](guides/NATIVE_COMMAND_GRAPH_SHOWCASE.md), [T-0042 small-start packet](guides/T-0042-SMALL-START.md), and [task start phases](guides/TASK-START-PHASES.md) | Playable project use, Native operation, bounded execution packets, and WIP timing | editing/rerunning a project, running demos, executing T-0042, or deciding whether unfinished work may start |
 | [history](history/DESIGN-EVOLUTION.md) | non-normative design evolution | investigating why the direction changed |
 | [archive](archive/README.md) | frozen provenance material | investigating original discussion context only |
 

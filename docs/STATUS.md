@@ -39,10 +39,19 @@ T-0148's relative-load predecessor is integrated via PR #118, merge `1e17dab`,
 after current-main reconciliation and 710 passing host tests (two skips).
 The previously retained RTL functional evidence is unchanged. Issue #113
 remains open for the separate editable-Graph continuation. T-0149's technical
-predecessors are now integrated, but canonical preparation rejects its Blocked
-state. T-0153's candidate adds explicit `--unblock-reason`, persisted with
-dependencies before Ready, and passes 70 queue/daily tests. No automatic
+predecessors are now integrated. T-0153 merged through PR #127 as `6fc6881`,
+adding explicit `--unblock-reason`, persisted with dependencies before Ready,
+with 70 passing queue/daily tests. T-0149 was canonically prepared and resumed
+with its original 13 points; current-main workspace integration is active. No automatic
 dependency inference, manual status bypass or workspace completion is claimed.
+
+The resumed workspace candidate rejects nonempty initialization before
+changing directory permissions. Fourteen project regressions pass on macOS
+and network-disabled Linux. Actual Mac CLI editing changes retained log output
+2 -> 3 with a readable diff; independent file transforms, Native/QEMU GEMM,
+and QEMU console help/exit also pass. Host and QEMU evidence remain separate;
+full current-main discovery passes 730 tests with two skips and zero failures.
+Exact-head integration is pending.
 
 T-0150 is technically integrated through
 [PR #124](https://github.com/bhind/raveil/pull/124), merge `5ddf460`, implementation
@@ -789,6 +798,34 @@ energy, production-security, product-readiness, ASIC or silicon evidence.
 PR #109 squash-merged the accepted branch as canonical commit
 `08ead0bb909aef1a94fc44784018a95c183b06a4`; Issue #106 is Closed and its
 Project item is Done.
+
+T-0149 is the in-progress shell-first playable workspace slice under local
+branch `feat/t-0149-project-workspace`; live Issue/Project creation is pending
+an expired GitHub credential and is not represented as complete coordination.
+The current candidate adds `raveil project init|show|run|runs|diff|console` on
+top of the existing bounded Command Graph and GEMM backends. `init` creates
+editable log, independent-file-transform and 8-by-8 GEMM examples. Each run
+copies its exact recipe and inputs into a fresh run directory, retains the
+Graph, outputs and result, and checks its record and artifact manifest when
+read back. This is cooperative local history, not a hostile isolation or
+signed-audit boundary. Project/run directories are mode `0700`, artifacts are
+`0600`, and an fd-relative no-follow check precedes any existing-root mode
+change. The repository POSIX launcher makes `raveil project` available from
+inside a project after one explicit PATH setup.
+
+On macOS 26.5.1 arm64 with Python 3.14.6, the candidate completes one log
+input edit from two to three matching lines, preserves both outputs, and shows
+their input/output hash diff. Native 8-by-8 GEMM and the real Sonatine/QEMU
+backend both succeed. The actual QEMU console boots Sonatine, accepts `help`
+and exits through the U-mode shell. The same CLI flow, including Native GEMM,
+Sonatine/QEMU GEMM and console entry, also succeeds in the existing
+network-disabled Linux image `raveil-sonatine-graph:t-0085`. These are Host
+Functional and QEMU Emulation Correctness observations only. Thirteen project
+tests and 70 project/Command-Graph/GEMM/Sonatine focused regressions pass with
+one existing opt-in skip. The 693-test discovery run has two skips and the
+unchanged pre-existing `test_graph_device_uio_dry_run` source-scan failure; no T-0149
+file participates. Tester, Security and hands-on UX review are GO; remote
+integration remains pending.
 
 T-0148 is the verified simulation-first Graph generality slice under real Issue
 #113 and branch `feat/t-0148-relative-load-v3`. ADR-0084 keeps descriptor-v1

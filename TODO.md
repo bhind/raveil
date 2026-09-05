@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 continuation integration; T-0153 fixes the canonical Blocked recovery defect preventing T-0149 resumption. T-0148 predecessor, T-0152 regression and T-0150 are integrated, with S-0003 owner ceremony pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0149 workspace integration is active; T-0148 continuation awaits that dependency. T-0148 predecessor, T-0150, T-0152 and T-0153 are technically integrated; S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Resume T-0149 integration after T-0148 predecessor integration and T-0152 regression disposition. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -27,16 +27,17 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
 
-- [ ] **T-0153** Resume resolved Blocked items through the canonical queue,
-  [Issue #126](https://github.com/bhind/raveil/issues/126), P0/In Progress,
+- [x] **T-0153** Resume resolved Blocked items through the canonical queue,
+  [Issue #126](https://github.com/bhind/raveil/issues/126), Done,
   Project Manager, S-0003, 1 SP. After PR #118 and #125 integrated, preparing
   T-0149 still fails because `prepare` excludes Blocked. Add only an explicit
   clearing reason to canonical preparation, persisted before Ready; retain
   complete packets, Initial SP, audit and WIP checks. No inferred dependency
   completion or manual status workaround. Allowlist: queue script/test and
   STATUS/TODO/WORKFLOW/date log. Independent queue/daily tests pass 70/70.
-  Next: exact-head integration,
-  then resume T-0149 using the recorded merged dependencies.
+  Integrated through PR #127 as `6fc6881`; canonical completion succeeded.
+  Verified live recovery prepared T-0149 with the recorded merged dependencies
+  and preserved Initial SP = 13, then canonical start resumed it.
 
 [Inventory receipt](docs/guides/PROJECT-INVENTORY-2026-09-05.md) and
 [Project #1](https://github.com/users/bhind/projects/1) map each unfinished
@@ -92,16 +93,16 @@ work, not canonical product completion. Historical root changes remain intact.
   observation. Retain actual-app presentation feedback in S-0003.
 
 - [ ] **T-0149** Deliver the editable shell-first Raveil workspace, real
-  [Issue #116](https://github.com/bhind/raveil/issues/116), P0/Blocked,
+  [Issue #116](https://github.com/bhind/raveil/issues/116), P0/In Progress,
   Experience Implementer with PM integration. Local candidate `31262f1` on
   `feat/t-0149-project-workspace` contains CLI, tests, launcher and local
   ADR-0085; these are not integrated into this branch. Acceptance: actual
   Mac/Linux edit-run-change-rerun-diff loop, retained recipe/input/run history,
   Native and separately labelled QEMU correctness, exact candidate review,
   test evidence, record reconciliation and merged PR. Blockers: predecessor
-  candidate PR integration and T-0153 canonical recovery. T-0148 predecessor
+  candidate PR integration; T-0153 canonical recovery is complete. T-0148 predecessor
   is integrated in PR #118; T-0152 is resolved in PR #125.
-  Next primary product action: resolve canonical recovery and integrate the
+  Next primary product action: finish the verified current-main integration of the
   workspace candidate. Preserve original dirty
   `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
 
@@ -122,6 +123,30 @@ alongside the T-0150 visual explanation. Forecasts do not accept implementation
 or change original Sprint assignment.
 
 ## Project entry point
+
+The original local UIO defect labelled T-0150 is canonically T-0152/#117,
+now integrated. T-0150 remains the separate Garden task; retained dated logs
+preserve the earlier allocation/authentication observation.
+
+### T-0149 workspace acceptance scope
+
+  Compose the existing Native Command Graph, guarded GEMM and
+  Sonatine/QEMU paths into a shell-first editable project workspace. Local
+  branch `feat/t-0149-project-workspace`, Experience Implementer with PM
+  integration, 13 SP, Sprint S-0003, Host Functional and QEMU Emulation
+  Correctness evidence own `raveil project init|show|run|runs|diff|console`,
+  exact recipe/input snapshots, retained run outputs, integrity checks, three
+  editable examples, a repository-owned `raveil` launcher, focused tests,
+  ADR-0085 and matching records. Acceptance
+  requires a real edit-run-observe-change-rerun-diff loop, Native and
+  Sonatine/QEMU GEMM at dimensions no larger than 8, and an interactive
+  Sonatine console on macOS and Linux with the same CLI grammar. Preserve the
+  bounded Command recipe syntax and label host and QEMU evidence separately.
+  Stop before arbitrary host command execution, production cache, hostile-code
+  isolation, cross-backend speed comparison, new CPU/RTL semantics, FPGA,
+  ASIC, silicon, novelty or commercial-readiness claims. Current real Issue
+  #116 is In Progress; the earlier local authentication observation is not
+  current state and does not prevent canonical integration.
 
 ### T-0148 predecessor evidence (not whole-task completion)
 
