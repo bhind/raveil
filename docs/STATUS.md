@@ -75,6 +75,19 @@ inventories beyond 1000 items instead of accepting a partial read. Forty-seven
 queue tests pass, including eight new item/schema read-boundary tests. This correction merged through PR #121 as `75bf275` and is not a
 delivery-speed measurement.
 
+T-0151 daily reconciliation now has verified live acceptance: 32 historical
+actual-event fields plus the marked Project README were updated and read back;
+the user-local `com.raveil.project-daily` LaunchAgent then ran successfully
+with zero repeated edits. Its reviewed snapshot SHA-256 is
+`7cafd18358bc19d267cb2336dd75d26c836f7253dd59c0b6d14b938b39bd217c`.
+The job checks every 900 seconds for the latest elapsed 19:00 Asia/Tokyo due
+date, catches up when the Mac is available, retries failures hourly and retains
+receipts. It invokes no model and changes no task/Sprint lifecycle or acceptance.
+Sixty-eight daily, queue and agent-boundary regressions pass. The explicit
+Issue #99 missing API closing-reference association remains a finding, while
+canonical PR #100 evidence is preserved. Inventory integration is PR #121;
+daily implementation integration is PR #120.
+
 ## Development workflow support
 
 Repository-scoped Project Manager, three Implementer, Tester, Performance
