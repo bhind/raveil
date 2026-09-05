@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -33,6 +33,24 @@ Scarbo names remain documentation responsibility domains; their presence in a
 table does not imply that a complete integrated subsystem exists or rename an
 executable identifier.
 
+## 2026-09-05 owner-visible review
+
+The owner accepted S-0002 after navigating Garden in Mac Terminal, reviewing
+its materialized/fused explanation, and inspecting a fresh native 8x8
+GEMM+bias+ReLU result at main `82b196c`. Both native observations were
+semantically valid with checksum `ab4fc57fa8a47521`; the candidate did not
+improve the short development observation and the executor retained the
+baseline. This is host correctness/development-non-claim evidence. T-0135's
+fusion presentation was already accepted on 2026-08-29; this demonstration
+must not be counted as newly completed September implementation.
+
+T-0150 retains the owner's visual-explanation feedback. T-0151 implements the
+requested daily Project reconciliation and actual-date reporting. T-0148's
+independent relative-load candidate remains unintegrated here, with its
+owner-visible bounded-generality demonstration requested for S-0003 review
+on 2026-09-12. Ceremony acceptance neither completes these tasks nor changes
+an ADR, EXP or roadmap gate.
+
 ## 2026-09-05 Project inventory observation
 
 ADR-0086 requires initial and session-level Project synchronization. The
@@ -54,8 +72,21 @@ read with explicit GraphQL fields and cursor pagination. It retains the same
 normalized queue inputs and unchanged lifecycle validators. It refuses changing
 counts, duplicate items/cursors/fields, truncated field pages, API errors and
 inventories beyond 1000 items instead of accepting a partial read. Forty-seven
-queue tests pass, including eight new item/schema read-boundary tests. This correction is
-local pending PR integration, and is not a delivery-speed measurement.
+queue tests pass, including eight new item/schema read-boundary tests. This correction merged through PR #121 as `75bf275` and is not a
+delivery-speed measurement.
+
+T-0151 daily reconciliation now has verified live acceptance: 32 historical
+actual-event fields plus the marked Project README were updated and read back;
+the user-local `com.raveil.project-daily` LaunchAgent then ran successfully
+with zero repeated edits. Its reviewed snapshot SHA-256 is
+`7cafd18358bc19d267cb2336dd75d26c836f7253dd59c0b6d14b938b39bd217c`.
+The job checks every 900 seconds for the latest elapsed 19:00 Asia/Tokyo due
+date, catches up when the Mac is available, retries failures hourly and retains
+receipts. It invokes no model and changes no task/Sprint lifecycle or acceptance.
+Sixty-eight daily, queue and agent-boundary regressions pass. The explicit
+Issue #99 missing API closing-reference association remains a finding, while
+canonical PR #100 evidence is preserved. Inventory integration is PR #121;
+daily implementation integration is PR #120.
 
 ## Development workflow support
 

@@ -42,6 +42,28 @@ Research reviews remain milestone-driven under `docs/WORKFLOW.md`. A weekly
 sprint review may expose evidence or trigger a research review, but it cannot
 promote an EXP, close a Gate, or turn simulation into FPGA or silicon evidence.
 
+## Daily delivery reconciliation
+
+Run factual Project reconciliation every day at 19:00 Asia/Tokyo, with a
+local startup catch-up after the Mac becomes available. Also reconcile each
+accepted task immediately through `project_queue.py complete`; the daily run
+is the recovery check, not a reason to defer task closeout to Saturday.
+
+The Project Manager owns the operation. `scripts/project_daily.py` is
+read-only by default; explicit `--apply` updates observed GitHub event dates
+and a delimited daily-delivery section of the Project README. Preserve
+existing acceptance text, Initial SP, Sprint assignment and statuses. Show
+Issue-close and PR-merge times separately in JST; do not substitute the date
+of reconciliation or assume either event is the technical acceptance time.
+Incomplete inventory, missing evidence and contradictory lifecycle states
+remain named findings. Only the canonical queue may perform task lifecycle
+transitions; the daily reporter never accepts the weekly ceremony.
+
+The accepted 2026-09-05 S-0002 review routes visual Garden feedback to T-0150
+and daily reconciliation to T-0151. The owner requested the existing T-0148
+bounded Graph generality demonstration at S-0003 review on 2026-09-12. Retain
+current task state independently of that demo forecast.
+
 ## Board and WIP
 
 The GitHub Project's `Sprint Board` view is the execution Kanban. The filtered

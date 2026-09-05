@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 existing candidate review/integration and T-0151 PM operations; T-0149 is the next primary editable-workspace outcome but Blocked on integration and regression disposition. No second primary implementation starts. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 existing candidate review/integration; T-0151 PM operations accepted; T-0149 is the next primary editable-workspace outcome but Blocked on integration and regression disposition. No second primary implementation starts. |
 | **P1 — next** | Start only after its named P0 dependency passes. | T-0150 Garden feedback and T-0152 regression disposition remain unstarted. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -44,18 +44,18 @@ work, not canonical product completion. Historical root changes remain intact.
   bounded test allowlist and reproduce before mutation. Coordinate its
   disposition before T-0149 closeout. No device/MMIO or product/RTL expansion.
 
-- [ ] **T-0151** Reconcile initial inventory and daily Project delivery without
-  owner reminders. Real [Issue #115](https://github.com/bhind/raveil/issues/115),
-  P0/In Progress, PM, S-0003. ADR-0086 and branch
-  `docs/t-0151-project-inventory` own this bounded PM inventory/record slice.
-  The existing `chore/t-0151-daily-project-reconciliation` worktree owns the
-  separate daily implementation candidate and is preserved. Acceptance:
-  live inventory repairs are reread; the bounded paginated queue read and
-  existing lifecycle regressions pass; exact metadata/evidence gaps remain
-  visible; scheduler dry-run, idempotence/failure tests and actual local
-  registration/rehearsal pass before the parent is Done. Next: finish and
-  verify the existing daily implementation, then integrate both record slices
-  serially through PR with no overlapping-file loss.
+- [x] **T-0151** Reconcile initial inventory and daily Project delivery without
+  owner reminders. [Issue #115](https://github.com/bhind/raveil/issues/115),
+  PM, S-0003. ADR-0086 inventory and bounded canonical queue reads merged in
+  PR #121 (`75bf275`); PR #120 supplies the daily factual reporter and records.
+  Initial live apply updated 32 actual-event fields and the daily Project
+  README with verified readback. The installed Mac LaunchAgent rehearsal
+  exited 0 with zero repeated edits. All 68 daily/queue/agent-boundary tests
+  and the candidate record checker pass. Local schedule: first available
+  15-minute check after 19:00 Asia/Tokyo, hourly failure retry and retained
+  receipts. The API association gap for #99 remains explicitly reported;
+  canonical STATUS retains merged PR #100. Daily event facts never infer
+  task or ceremony acceptance. Preserve immediate session/task closeout.
 
 - [ ] **T-0150** Make Garden fusion changes visible at a glance, real
   [Issue #114](https://github.com/bhind/raveil/issues/114), P1/Ready after concurrent daily refinement, Experience
@@ -87,6 +87,11 @@ work, not canonical product completion. Historical root changes remain intact.
   and bounded negative matrix before merged-PR closure. Next: PR and exact
   evidence verification; no further primary implementation scope is added.
 
+
+S-0002 review was explicitly accepted on 2026-09-05. The owner requested
+the T-0148 bounded Graph-generality demo for S-0003 review on 2026-09-12 JST,
+alongside the T-0150 visual explanation. Forecasts do not accept implementation
+or change original Sprint assignment.
 
 ## Project entry point
 
