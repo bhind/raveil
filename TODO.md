@@ -4,6 +4,16 @@ Last updated: 2026-09-05
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
+  Project with progress views and standard Insights while preserving the
+  repository as authority. Issue #135 and branch
+  `chore/t-0158-project-insights` own this cross-gate Operations slice in
+  S-0003 (3 SP). Four progress fields and seven saved views are live. Verify
+  the standard Burn up and use ADR-0089's private Draft alternative for the
+  API-unavailable ideal line. The script, workflow, focused tests, first live
+  snapshot, and Burndown view are present. Install the dedicated
+  `RAVEIL_PROJECT_TOKEN` secret, verify one hosted run, then close the task.
+
 ## Start timing phases
 
 This table, together with each task's own trigger text, governs when unfinished
