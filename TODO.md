@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0154 reconciles post-merge records. T-0148, T-0149, T-0150, T-0152 and T-0153 are technically integrated; S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0155 implements dependency-based Graph scheduling. T-0156 repairs workspace shell hints independently; its implementation is verified. T-0154 is integrated; S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -27,11 +27,25 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
 
-- [ ] **T-0154** Reconcile post-merge T-0148 records, real
-  [Issue #128](https://github.com/bhind/raveil/issues/128), In Progress,
+- [x] **T-0156** Quote project paths in the printed Next command,
+  [Issue #131](https://github.com/bhind/raveil/issues/131), S-0003, 1 SP.
+  Implementation acceptance: a path containing spaces and a semicolon can be
+  copied into a POSIX shell and reaches `project show logs`. The standard
+  library supplies quoting; 28 project/Graph-project tests pass on macOS.
+  Remote integration and lifecycle acceptance are recorded in Issue #131.
+
+- [ ] **T-0155** Schedule bounded Graph nodes from dependencies,
+  [Issue #130](https://github.com/bhind/raveil/issues/130), In Progress,
+  S-0003, 3 SP. Allow forward references with stable original-order tie breaking;
+  preserve existing ordered program bytes, descriptor identity, final STORE,
+  trace validation, 16 instructions and eight registers. Sole source owner
+  works on graph_device_dag.py and its tests, independently of T-0156.
+
+- [x] **T-0154** Reconcile post-merge T-0148 records, real
+  [Issue #128](https://github.com/bhind/raveil/issues/128), Done,
   Project Manager, S-0003, 1 SP. PR #123 merged as `4cc28ed` and Issue #113
-  is closed, but current-authority records still describe its continuation as
-  active or pending. Update only TODO, STATUS, ROADMAP, OPEN_QUESTIONS and the
+  is closed; PR #129 (`92ac1ae`) reconciled the stale continuation state.
+  Updated only TODO, STATUS, ROADMAP, OPEN_QUESTIONS and the
   dated log. Preserve chronological observations and the pending S-0003 owner
   review. No executable, architecture, experiment or gate change.
 

@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -454,7 +455,7 @@ def command_project(args: argparse.Namespace) -> int:
         root = init_project(Path(args.directory))
         print(f"Created {root}")
         print(f"One-time shell setup: export PATH=\"{REPOSITORY / 'scripts'}:$PATH\"")
-        print(f"Next: cd {root} && raveil project show logs")
+        print(f"Next: cd {shlex.quote(str(root))} && raveil project show logs")
         return 0
     if action == "console":
         executable = _executable(args.qemu, "QEMU; install qemu-system-riscv64")

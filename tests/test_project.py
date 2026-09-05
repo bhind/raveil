@@ -175,6 +175,27 @@ class ProjectWorkspaceTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("nodes=3 edges=2", completed.stdout)
 
+    def test_init_next_hint_executes_for_shell_metacharacters_in_path(self) -> None:
+        target = Path(self.temporary.name) / "work space; false"
+        with patch("builtins.print") as output:
+            self.assertEqual(main(["project", "init", str(target)]), 0)
+        hint = next(
+            call.args[0].removeprefix("Next: ")
+            for call in output.call_args_list
+            if call.args[0].startswith("Next: ")
+        )
+        environment = dict(os.environ)
+        environment["PATH"] = f"{ROOT / 'scripts'}:{environment['PATH']}"
+        completed = subprocess.run(
+            ["/bin/sh", "-c", hint],
+            env=environment,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("nodes=3 edges=2", completed.stdout)
+
     def test_console_uses_the_existing_sonatine_kernel_without_shell(self) -> None:
         kernel = Path(self.temporary.name) / "sonatine.elf"
         kernel.write_bytes(b"elf")
