@@ -64,6 +64,15 @@ and daily reconciliation to T-0151. The owner requested the existing T-0148
 bounded Graph generality demonstration at S-0003 review on 2026-09-12. Retain
 current task state independently of that demo forecast.
 
+T-0150's local S-0003 candidate presents the two fusion paths side by side.
+For review, run the existing 150-column Garden command, navigate matmul/bias/
+relu with j/k, confirm both selected-stage marks and eliminated intermediate
+WRITE/READ, and toggle d for technical details. Default comparison occupies
+21 lines plus prompt; verify it visually in the owner's Mac terminal. Local
+Mac PTY and deterministic tests passed, but computer-use access to the actual
+Terminal app was denied. Preserve that distinction; no owner visual acceptance
+or Sprint ceremony completion has been inferred.
+
 ## Board and WIP
 
 The GitHub Project's `Sprint Board` view is the execution Kanban. The filtered

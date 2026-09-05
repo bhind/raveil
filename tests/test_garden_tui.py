@@ -18,6 +18,7 @@ from raveil.garden import (
     _materialized_fused_plan_pair,
     render_error,
     render_key_session,
+    run_interactive,
 )
 
 
@@ -27,6 +28,11 @@ DYNAMIC_FIXTURE = ROOT / "tests/fixtures/garden/dynamic-explanation.json"
 
 
 class GardenTUITests(unittest.TestCase):
+    def _details(self, snapshot, width=150):
+        browser = GardenBrowser(snapshot, width)
+        browser.navigate("d")
+        return browser
+
     def _dynamic_document(self) -> dict[str, object]:
         return json.loads(DYNAMIC_FIXTURE.read_text(encoding="ascii"))
 
@@ -50,6 +56,9 @@ class GardenTUITests(unittest.TestCase):
         self.assertIn("authority: observe-only execute=no mutate=no approve=no promote=no", rendered)
         self.assertIn("> 1. matmul", rendered)
         self.assertIn("evidence: host-functional claim=development-non-claim", rendered)
+        self.assertIn("Materialized:", rendered)
+        self.assertIn("Fused:", rendered)
+        rendered = self._details(snapshot).render()
         self.assertIn("Graph Navigator", rendered)
         self.assertIn("Node Inspector", rendered)
         self.assertIn("Variants / Evidence", rendered)
@@ -65,6 +74,49 @@ class GardenTUITests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "bounded step limit"):
             render_key_session(snapshot, "j" * 65)
 
+    def test_compact_fusion_screen_marks_selected_stage_and_removed_io(self) -> None:
+        browser = GardenBrowser(GardenSnapshot.load(FIXTURE), 150)
+        initial = browser.render()
+        self.assertLessEqual(len(initial.splitlines()), 24)
+        header = next(line for line in initial.splitlines() if "Materialized:" in line)
+        self.assertIn("Fused:", header)
+        self.assertIn("WRITE intermediate [512B]", initial)
+        self.assertIn("intermediate WRITE removed", initial)
+        self.assertIn("intermediate READ removed", initial)
+        self.assertIn("Intermediate plan memory: 512B -> 0B; not total Graph memory.", initial)
+        browser.navigate("j")
+        bias = browser.render()
+        self.assertIn("> bias_add", bias)
+        self.assertIn("> bias_add + relu", bias)
+        self.assertIn("its intermediate WRITE disappears", bias)
+        browser.navigate("j")
+        relu = browser.render()
+        self.assertIn("> relu", relu)
+        self.assertIn("> bias_add + relu", relu)
+        self.assertIn("its intermediate READ disappears", relu)
+        browser.navigate("d")
+        self.assertIn("program sha256=", browser.render())
+        browser.navigate("d")
+        self.assertEqual(browser.render(), relu)
+
+    def test_interactive_redraw_requires_both_streams_to_be_ttys(self) -> None:
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+        snapshot = GardenSnapshot.load(FIXTURE)
+        output = Tty()
+        self.assertEqual(run_interactive(snapshot, Tty("j\nj\nq\n"), output), 0)
+        frames = output.getvalue().split("\x1b[H\x1b[2J")
+        self.assertEqual(len(frames), 4)
+        self.assertIn("Selected matmul:", frames[1])
+        self.assertIn("Selected bias:", frames[2])
+        self.assertIn("Selected relu:", frames[3])
+        self.assertTrue(output.getvalue().endswith("Raveil Garden | closed\n"))
+        for input_stream in (Tty("j\nq\n"), io.StringIO("j\nq\n")):
+            plain_output = io.StringIO()
+            self.assertEqual(run_interactive(snapshot, input_stream, plain_output), 0)
+            self.assertNotIn("\x1b", plain_output.getvalue())
+
     def test_validated_fusion_comparison_is_data_bound_and_non_claiming(self) -> None:
         snapshot = GardenSnapshot.load(FIXTURE)
         pair = _materialized_fused_plan_pair(snapshot.variants)
@@ -79,7 +131,7 @@ class GardenTUITests(unittest.TestCase):
         self.assertEqual(materialized.memory_plan.maximum_intermediate_bytes, 512)
         self.assertEqual(fused.memory_plan.maximum_intermediate_bytes, 0)
         for width in (72, 100, 150, 240):
-            rendered = GardenBrowser(snapshot, width).render()
+            rendered = self._details(snapshot, width).render()
             normalized = " ".join(rendered.replace("|", "").split())
             compact = "".join(rendered.replace("|", "").split())
             self.assertIn(
@@ -166,7 +218,7 @@ class GardenTUITests(unittest.TestCase):
         self.assertIn("Navigation: j next", output.getvalue())
 
     def test_wide_layout_uses_three_panes_with_bounded_lines(self) -> None:
-        rendered = GardenBrowser(GardenSnapshot.load(FIXTURE), width=150).render()
+        rendered = self._details(GardenSnapshot.load(FIXTURE), width=150).render()
         first_pane_line = next(line for line in rendered.splitlines() if "Graph Navigator" in line)
         self.assertIn("Node Inspector", first_pane_line)
         self.assertIn("Variants / Evidence", first_pane_line)
@@ -178,7 +230,7 @@ class GardenTUITests(unittest.TestCase):
         self.assertEqual(len(three_pane_borders), 1)
 
     def test_narrow_layout_stacks_all_panes(self) -> None:
-        rendered = GardenBrowser(GardenSnapshot.load(FIXTURE), width=100).render()
+        rendered = self._details(GardenSnapshot.load(FIXTURE), width=100).render()
         self.assertIn("[stacked layout]", rendered)
         self.assertIn("Graph Navigator", rendered)
         self.assertIn("Node Inspector", rendered)
@@ -202,7 +254,7 @@ class GardenTUITests(unittest.TestCase):
             "X" * 256, snapshot.program, snapshot.variants, snapshot.evidence,
             ("python3 -m raveil " + "x" * 300,),
         )
-        rendered = GardenBrowser(long_snapshot, 72).render()
+        rendered = self._details(long_snapshot, 72).render()
         self.assertTrue(all(line.isprintable() for line in rendered.splitlines()))
         self.assertNotIn("\x1b", rendered)
         self.assertLessEqual(max(map(len, rendered.splitlines())), 72)
@@ -211,7 +263,8 @@ class GardenTUITests(unittest.TestCase):
         output = io.StringIO()
         with mock.patch("sys.stdin", io.StringIO()), mock.patch("sys.stdout", output):
             self.assertEqual(main(["garden", "--fixture", str(FIXTURE), "--width", "100"]), 0)
-        self.assertIn("[stacked layout]", output.getvalue())
+        self.assertIn("Materialized:", output.getvalue())
+        self.assertLessEqual(max(map(len, output.getvalue().splitlines())), 100)
         for width in ("71", "241"):
             error = io.StringIO()
             with mock.patch("sys.stderr", error):

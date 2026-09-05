@@ -35,6 +35,27 @@ executable identifier.
 
 ## 2026-09-05 owner-visible review
 
+T-0150 has a published Host Functional presentation candidate in
+[Draft PR #124](https://github.com/bhind/raveil/pull/124), implementation
+`80b2006ce41f059aa93546325459ead5f14c0764`, on
+`feat/t-0150-garden-fusion-view`. Issue #114 is Review, not Done.
+A validated materialized/fused plan pair now
+opens as two adjacent paths, with selected matmul/bias/relu stages marked in
+both plans and intermediate WRITE/READ removal called out. The existing
+512B/0B values stay bound to the matched plans and are labelled intermediate
+plan memory, not total memory or measured savings. `d` toggles the existing
+technical detail view. Without a validated pair, the existing detail browser
+remains the default. Interactive navigation clears/redraws only when input
+and output are both TTYs; non-TTY rendering stays deterministic and escape-free.
+
+The standard 150-column comparison uses 21 lines before the prompt (24 at
+the minimum 72-column width). Independent Garden/sealed-snapshot checks pass
+41/41 on macOS arm64/Python 3.14.6; actual Mac PTY at 150x32 passes j/j/q
+navigation and exits 0. Computer Use denied access to com.apple.Terminal, so
+this is not a Mac Terminal GUI visual-acceptance claim. That acceptance is
+pending for the S-0003 owner review. No Graph execution/compiler/RTL change
+or new performance evidence is introduced.
+
 The owner accepted S-0002 after navigating Garden in Mac Terminal, reviewing
 its materialized/fused explanation, and inspecting a fresh native 8x8
 GEMM+bias+ReLU result at main `82b196c`. Both native observations were
