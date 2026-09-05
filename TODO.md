@@ -40,14 +40,16 @@ review and failure preservation do not consume the two-item delivery limit.
   byte equality, initial snapshot identities and failed-run history. Stop
   before opcode/capacity/Chisel/ABI changes, arbitrary input tensors, real
   device, persistent cache or performance claims. Evidence classes: Host
-  Functional and RTL Simulation Functional. Local candidate only: Issue #113
-  remains In Progress for the original packet; its continuation-body update
-  was rejected by automatic approval review and has not been applied. No
-  third mutation lane or remote Done transition is claimed.
+  Functional and RTL Simulation Functional. The owner approved the Issue
+  update after the initial automatic-review rejection. Issue #113 now retains
+  this continuation packet, the prior packet and the concurrent PR #118
+  inventory handoff; its body was reread and verified. This update claims no
+  third mutation lane or remote Done transition.
   Local verification: three edited Graphs pass actual RTL/oracle/fallback
   equality with identical simulator/RTL hashes; 86 focused tests pass and
   independent Security review is GO. The final project display tests pass
-  26/26 on Mac and Linux. Publication/Issue integration remains unchecked.
+  26/26 on Mac and Linux. Continuation code publication/integration remains
+  unchecked; predecessor `bf81269` is reported in Draft PR #118.
 
 - [ ] **T-0150** Reconcile the stale UIO dry-run source-scan regression with
   the accepted T-0145 no-device test handoff. Trigger only after T-0149 is
