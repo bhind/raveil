@@ -35,7 +35,7 @@ PAYLOADS = tuple(name for name in INVENTORY if name not in {"SEALED", "manifest.
 SOURCE_PATHS = (
     "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json",
     "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json",
-    "contracts/graph_device_dynamic_request_v3.json", "contracts/graph_device_dynamic_request_v4.json", "contracts/graph_device_program_v2.json",
+    "contracts/graph_device_dynamic_request_v3.json", "contracts/graph_device_dynamic_request_v4.json", "contracts/graph_device_dynamic_request_v5.json", "contracts/graph_device_program_v2.json",
     "contracts/graph_device_program_v3.json", "contracts/graph_device_program_v4.json",
     "contracts/graph_device_program_install_abi_v1.json",
     "contracts/graph_device_axi4lite_aperture_v1.json",

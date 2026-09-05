@@ -17,6 +17,7 @@ constexpr std::uint32_t kVersionV1 = 1U;
 constexpr std::uint32_t kVersionV2 = 2U;
 constexpr std::uint32_t kVersionV3 = 3U;
 constexpr std::uint32_t kVersionV4 = 4U;
+constexpr std::uint32_t kVersionV5 = 5U;
 constexpr std::uint32_t kHeaderBytes = 64U;
 constexpr std::size_t kGraphIdBytes = 32U;
 constexpr std::size_t kRequestBytes = 64U + kGraphIdBytes + (32U + 16U + 324U) * 4U;
@@ -147,9 +148,10 @@ void validate_input(const std::array<std::uint32_t, 324>& words, std::uint32_t s
 }
 
 void validate_program(const std::array<std::uint32_t, 32>& payload, std::uint32_t request_version) {
-    if (payload[0] != 0x52504731U || payload[1] != request_version ||
-        (request_version != kVersionV1 && request_version != kVersionV2
-            && request_version != kVersionV3 && request_version != kVersionV4) || payload[2] < 2U
+    const std::uint32_t program_version = payload[1];
+    if (payload[0] != 0x52504731U || (request_version == kVersionV5
+            ? (program_version < kVersionV1 || program_version > kVersionV4)
+            : program_version != request_version) || payload[2] < 2U
         || payload[2] > 16U || payload[3] != 8U)
         throw std::runtime_error("dynamic program header is invalid");
     std::vector<unsigned char> digest_input;
@@ -177,18 +179,18 @@ void validate_program(const std::array<std::uint32_t, 32>& payload, std::uint32_
         const bool signed_unit_row = row_bits == 0U || row_bits == 1U || row_bits == 31U;
         const bool signed_unit_column = column_bits == 0U || column_bits == 1U
             || column_bits == 31U;
-        const bool legacy_load = request_version != kVersionV3 && request_version != kVersionV4 && selector <= 4U
+        const bool legacy_load = program_version != kVersionV3 && program_version != kVersionV4 && selector <= 4U
             && (instruction & 0x003fffffU) == 0U;
-        const bool relative_load = (request_version == kVersionV3 || request_version == kVersionV4)
+        const bool relative_load = (program_version == kVersionV3 || program_version == kVersionV4)
             && signed_unit_row && signed_unit_column
             && (instruction & 0x00007fffU) == 0U;
         const bool load = opcode == 1U && (legacy_load || relative_load);
         const bool add = opcode == 2U && (instruction & 0x0007ffffU) == 0U
             && defined[source_a] && defined[source_b];
         const bool max_u32 = opcode == 4U
-            && (request_version == kVersionV2 || request_version == kVersionV3 || request_version == kVersionV4)
+            && (program_version == kVersionV2 || program_version == kVersionV3 || program_version == kVersionV4)
             && (instruction & 0x0007ffffU) == 0U && defined[source_a] && defined[source_b];
-        const bool mul_u32 = opcode == 5U && request_version == kVersionV4
+        const bool mul_u32 = opcode == 5U && program_version == kVersionV4
             && (instruction & 0x0007ffffU) == 0U && defined[source_a] && defined[source_b];
         const bool store = opcode == 3U && (instruction & 0x01ffffffU) == 0U
             && defined[destination] && index == payload[2] - 1U;
@@ -212,7 +214,7 @@ DynamicGraphDeviceRequest read_dynamic_graph_device_request(const std::filesyste
         throw std::runtime_error("dynamic inputs must be a direct directory");
     const std::uint32_t request_version = word(bytes.data() + 4);
     if (word(bytes.data()) != kMagic || (request_version != kVersionV1
-        && request_version != kVersionV2 && request_version != kVersionV3 && request_version != kVersionV4)
+        && request_version != kVersionV2 && request_version != kVersionV3 && request_version != kVersionV4 && request_version != kVersionV5)
         || word(bytes.data() + 8) != kHeaderBytes || word(bytes.data() + 20) != 32U
         || word(bytes.data() + 24) != 16U || word(bytes.data() + 28) != 324U)
         throw std::runtime_error("dynamic request header is invalid");
@@ -250,7 +252,9 @@ DynamicGraphDeviceRequest read_dynamic_graph_device_request(const std::filesyste
         if (result.configuration[index] != canonical.payload[index])
             throw std::runtime_error("dynamic affine payload is not canonical");
     validate_program(result.program, request_version);
-    validate_input(result.input, result.seed);
+    if (request_version == kVersionV5 && result.seed != 0U)
+        throw std::runtime_error("explicit dynamic input must use seed slot zero");
+    if (request_version != kVersionV5) validate_input(result.input, result.seed);
     const auto request_input = read_input_file(root / "request-input.bin");
     const auto selected_input = read_input_file(
         root / "inputs" / ("seed-" + std::to_string(result.seed) + ".bin"));
@@ -269,7 +273,7 @@ ProjectedDynamicGraphDeviceRequest read_projected_dynamic_graph_device_request(
         throw std::runtime_error("projected dynamic root must be a direct directory");
     const auto request_bytes = exact_file(root / "request.bin", kRequestBytes);
     const auto request = read_dynamic_graph_device_request(root);
-    if (request.program[1] != kVersionV2)
+    if (word(request_bytes.data() + 4) != kVersionV2 || request.program[1] != kVersionV2)
         throw std::runtime_error("projected dynamic request must be v2");
     const auto oracle = read_output_file(root / "request-oracle.bin");
     const auto binding_status = std::filesystem::symlink_status(root / "seal-binding.json");

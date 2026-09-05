@@ -8,6 +8,11 @@ resolves it.
 
 ## Simulation-first device path
 
+- ADR-0090 selects bounded explicit user input for T-0160. Constants,
+  predicates, arbitrary dimensions and larger windows remain separate choices;
+  accepting input data does not make the language or hardware unbounded.
+  Explicit-input sealing/UIO admission remains out of scope.
+
 - S07 proves that the current unbased AXI4-Lite top can be exported twice to a
   byte-identical, source-bound SystemVerilog closure. T-0138 narrows the
   tentative target to KV260, Ubuntu Server 24.04 arm64 and license-free Vivado

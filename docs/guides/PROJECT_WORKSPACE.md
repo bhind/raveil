@@ -86,7 +86,37 @@ inactive cells. `runs/RUN_ID/generated-input.bin` retains all 324 input words.
 The descriptor and ordinary input files remain under the run's `inputs/` copy.
 `diff` reports changed nodes, the number of changed active cells, the first
 changed cell's values, and whether simulator/RTL/program hashes match.
-Input matrices are currently seed-generated, not loaded from arbitrary files.
+The original `neighborhood` recipe keeps seed-generated input.
+
+### Use your own input values
+
+New projects also include the `neighborhood-data` recipe. Its version-2
+recipe selects a JSON input file instead of a seed. Use `project show` to
+see the exact input filename, count and identity, then edit that file:
+
+```sh
+raveil project show neighborhood-data
+raveil project run neighborhood-data --backend rtl-sim
+# Edit the input JSON with your normal editor, then run again.
+raveil project run neighborhood-data --backend rtl-sim
+raveil project diff RUN_A RUN_B
+```
+
+The input object has exactly `schema: "raveil.graph-input/v1"` and `words`:
+an array of exactly 324 integers between 0 and 4294967295. No comments,
+duplicate fields, floating point or booleans are accepted; limit 64 KiB.
+Indices use the descriptor's input stride: an output cell `(r,c)` reads its
+center at `(r+1)*input_stride+c+1`. For the compact example (stride 10),
+the first center is `words[11]` and its north neighbor is `words[1]`.
+For example, values 7 and 3 produce 10 with ADD; changing 7 to 9 produces 12.
+The fixed storage includes halo and unused cells; do not shorten the array.
+
+Only a JSON basename inside `inputs/` is accepted. Every run keeps the raw
+JSON snapshot and the packed 324-word data used for execution. Input bytes and
+their receipt hash must agree before success; previous runs remain unchanged.
+Explicit runs save packed bytes as `input.bin`; old seed-based runs keep
+`generated-input.bin`. Explicit-input receipts label snapshot provenance.
+This is a simulation-only input envelope, not a new instruction or device mode.
 
 This path requires Docker running and the existing offline image/cache used by
 `graph-device dynamic-run`; it refuses network image builds. The runner

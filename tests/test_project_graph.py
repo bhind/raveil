@@ -14,13 +14,15 @@ from raveil.project_graph import compile_graph, output_text, sample_descriptor
 from raveil.riscv_stencil_signature import input_words
 
 
-def host_fixture_runner(descriptor_bytes, seed):
+def host_fixture_runner(descriptor_bytes, seed, *, input_bytes=None):
     """Supply known bytes at the runner boundary, never launch a simulator."""
     descriptor = json.loads(descriptor_bytes)
-    words = graph_oracle(descriptor, input_words(seed))
+    input_payload = input_bytes if input_bytes is not None else struct.pack("<324I", *input_words(seed))
+    input_data = struct.unpack("<324I", input_payload)
+    words = graph_oracle(descriptor, input_data)
     output = struct.pack(f"<{len(words)}I", *words)
-    return {
-        "output": output, "input": struct.pack("<324I", *input_words(seed)),
+    result = {
+        "output": output, "input": input_payload,
         "summary": "host fixture only", "evidence_directory": "/test-only",
         "receipt": {
             "descriptor_sha256": digest(descriptor_bytes),
@@ -29,6 +31,9 @@ def host_fixture_runner(descriptor_bytes, seed):
             "rtl_manifest_sha256": "b" * 64, "source_manifest_sha256": "c" * 64,
         },
     }
+    if input_bytes is not None:
+        result["receipt"].update({"input_mode": "snapshot", "input_sha256": digest(input_bytes)})
+    return result
 
 
 class ProjectGraphTests(unittest.TestCase):
@@ -42,6 +47,10 @@ class ProjectGraphTests(unittest.TestCase):
 
     def run_graph(self):
         return self.project.run("neighborhood", "rtl-sim", kernel=Path("unused"),
+                                qemu="unused", compiler="unused")
+
+    def run_graph_data(self):
+        return self.project.run("neighborhood-data", "rtl-sim", kernel=Path("unused"),
                                 qemu="unused", compiler="unused")
 
     def test_show_explains_editable_dependencies_and_coordinates(self):
@@ -105,6 +114,70 @@ class ProjectGraphTests(unittest.TestCase):
         self.assertEqual(second["status"], "succeeded", second["error"])
         self.assertNotEqual(first["inputs"]["generated_input_sha256"], second["inputs"]["generated_input_sha256"])
         self.assertEqual((self.root / "inputs/generated-input.bin").read_bytes(), b"user input")
+
+    def test_editable_input_snapshot_changes_output_and_preserves_old_run(self):
+        input_path = self.root / "inputs/neighborhood-data.json"
+        original = input_path.read_bytes()
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner) as runner:
+            first = self.run_graph_data()
+            changed = json.loads(original)
+            changed["words"][18] = 0xffffffff
+            input_path.write_text(json.dumps(changed))
+            second = self.run_graph_data()
+        self.assertEqual(first["status"], "succeeded", first["error"])
+        self.assertEqual(second["status"], "succeeded", second["error"])
+        self.assertNotEqual(first["outputs"], second["outputs"])
+        self.assertEqual((self.root / "runs" / first["run_id"] / "inputs/neighborhood-data.json").read_bytes(), original)
+        self.assertEqual(runner.call_args.kwargs["input_bytes"], struct.pack("<324I", *changed["words"]))
+        self.assertEqual(first["inputs"]["input_mode"], "snapshot")
+        self.assertIn("/neighborhood-data.json", self.project.diff(first["run_id"], second["run_id"]))
+
+    def test_explicit_input_symlink_rejected_by_show_and_run(self):
+        path = self.root / "inputs/neighborhood-data.json"
+        outside = Path(self.temporary.name) / "outside-input.json"
+        outside.write_bytes(path.read_bytes())
+        path.unlink()
+        path.symlink_to(outside)
+        with self.assertRaises((OSError, ValueError)):
+            self.project.show("neighborhood-data")
+        with patch("raveil.project_graph.run_snapshot") as runner:
+            result = self.run_graph_data()
+        self.assertEqual(result["status"], "failed")
+        runner.assert_not_called()
+
+    def test_explicit_input_receipt_or_returned_bytes_mismatch_fails_closed(self):
+        for changed in ("receipt", "returned"):
+            with self.subTest(changed=changed):
+                def incorrect(*args, **kwargs):
+                    result = host_fixture_runner(*args, **kwargs)
+                    if changed == "receipt": result["receipt"]["input_sha256"] = "f" * 64
+                    else: result["input"] = b"x" * (324 * 4)
+                    return result
+                with patch("raveil.project_graph.run_snapshot", side_effect=incorrect):
+                    result = self.run_graph_data()
+                self.assertEqual(result["status"], "failed")
+                self.assertIn("saved Graph input", result["error"])
+
+    def test_snapshot_input_malformed_or_oversized_fails_before_runner(self):
+        path = self.root / "inputs/neighborhood-data.json"
+        invalid = [
+            b'{"schema":"raveil.graph-input/v1","words":[true]}' ,
+            json.dumps({"schema": "raveil.graph-input/v1", "words": [0] * 323}).encode(),
+            b'{"schema":"raveil.graph-input/v1","words":[],"words":[]}',
+            b" " * (64 * 1024 + 1),
+        ]
+        for bad in (True, 0.5, -1, 0x100000000):
+            invalid.append(json.dumps({"schema": "raveil.graph-input/v1",
+                                       "words": [bad] + [0] * 323}).encode())
+        invalid.append(json.dumps({"schema": "raveil.graph-input/v1",
+                                   "words": [0] * 324, "extra": 1}).encode())
+        with patch("raveil.project_graph.run_snapshot") as runner:
+            for payload in invalid:
+                with self.subTest(size=len(payload)):
+                    path.write_bytes(payload)
+                    result = self.run_graph_data()
+                    self.assertEqual(result["status"], "failed")
+            runner.assert_not_called()
 
     def test_malformed_graphs_fail_before_runner_and_retain_failed_history(self):
         invalid = []

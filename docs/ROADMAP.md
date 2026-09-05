@@ -8,6 +8,11 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## 2026-09-05 operational priority reconciliation
 
+2026-09-06: T-0160 prioritizes real editable input over more fixed examples.
+Its exit is an input-edit/run/diff loop over the existing bounded simulator,
+with immutable snapshots and exact oracle/fallback/RTL output agreement.
+ADR-0090 does not widen the physical-device or research gates.
+
 The editable Raveil working environment is the next primary product outcome.
 T-0149 is integrated through PR #119 (`3fb6b5c`); Issue #116 is Done.
 T-0148's predecessor is integrated through PR #118 and its editable-Graph

@@ -29,6 +29,7 @@ from . import project_graph
 REPOSITORY = Path(__file__).resolve().parents[1]
 CONFIG = {"schema": "raveil.project/v1", "recipes": "recipes", "inputs": "inputs", "runs": "runs"}
 RECIPE_SCHEMA = "raveil.project-recipe/v1"
+GRAPH_SNAPSHOT_RECIPE_SCHEMA = "raveil.project-recipe/v2"
 RUN_SCHEMA = "raveil.project-run/v1"
 NAME = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}\Z")
 MAX_BYTES = 16 * 1024 * 1024
@@ -145,9 +146,11 @@ def init_project(directory: Path) -> Path:
         "files": {"kind": "command", "source": "sort /left.txt > /left-sorted.txt ||| sort /right.txt > /right-sorted.txt"},
         "gemm": {"kind": "gemm", "m": 8, "n": 8, "k": 8},
         "neighborhood": {"kind": "graph-device", "descriptor": "neighborhood.json", "seed": 1},
+        "neighborhood-data": {"kind": "graph-device", "descriptor": "neighborhood.json", "input": "neighborhood-data.json"},
     }
     for recipe_name, recipe in recipes.items():
-        workspace.write_text(f"recipes/{recipe_name}.json", encoded({"schema": RECIPE_SCHEMA, **recipe}).decode())
+        schema = GRAPH_SNAPSHOT_RECIPE_SCHEMA if "input" in recipe else RECIPE_SCHEMA
+        workspace.write_text(f"recipes/{recipe_name}.json", encoded({"schema": schema, **recipe}).decode())
     for filename, content in {
         "events.txt": "INFO start\nERROR failed\nERROR retry\n",
         "left.txt": "pear\napple\norange\n",
@@ -155,6 +158,8 @@ def init_project(directory: Path) -> Path:
     }.items():
         workspace.write_text(f"inputs/{filename}", content)
     workspace.write_text("inputs/neighborhood.json", encoded(project_graph.sample_descriptor()).decode())
+    workspace.write_text("inputs/neighborhood-data.json", encoded({"schema": project_graph.INPUT_SCHEMA,
+                         "words": list(range(project_graph.INPUT_WORDS))}).decode())
     workspace.write_text(".gitignore", "runs/\n")
     workspace.write_text("README.md", """# Your Raveil workspace
 
@@ -188,7 +193,10 @@ Edit inputs/neighborhood.json to change the actual bounded RTL Graph:
     raveil project run neighborhood --backend rtl-sim
 
 Change combine from ADD_U32 to MAX_U32 and run again, then diff the two IDs.
-RTL inputs are generated from recipes/neighborhood.json's seed (not text files).
+RTL inputs for neighborhood are generated from recipes/neighborhood.json's seed.
+For editable data, use recipes/neighborhood-data.json and edit
+inputs/neighborhood-data.json's exactly 324 uint32 words; its packed hash is shown
+by `raveil project show neighborhood-data`.
 The offline Docker/Verilator runner builds the same generic circuit each run;
 there is no persistent simulator cache. Raw evidence stays in repository artifacts.
 """)
@@ -210,9 +218,10 @@ class Project:
         kind = recipe.get("kind")
         fields = {"schema", "kind", "source"} if kind == "command" else {"schema", "kind", "m", "n", "k"}
         if kind == "graph-device":
-            fields = {"schema", "kind", "descriptor", "seed"}
-        if recipe.get("schema") != RECIPE_SCHEMA or set(recipe) != fields:
-            raise ValueError("recipe fields do not match project-recipe/v1")
+            snapshot = recipe.get("schema") == GRAPH_SNAPSHOT_RECIPE_SCHEMA
+            fields = {"schema", "kind", "descriptor", "input"} if snapshot else {"schema", "kind", "descriptor", "seed"}
+        if recipe.get("schema") != (GRAPH_SNAPSHOT_RECIPE_SCHEMA if kind == "graph-device" and "input" in recipe else RECIPE_SCHEMA) or set(recipe) != fields:
+            raise ValueError("recipe fields do not match its exact schema")
         if kind == "command":
             if type(recipe["source"]) is not str or not recipe["source"].strip():
                 raise ValueError("command recipe needs a nonempty source string")
@@ -226,8 +235,14 @@ class Project:
                     or "/" in descriptor or "\\" in descriptor):
                 raise ValueError("Graph descriptor must be a JSON filename inside inputs/")
             name(descriptor[:-5])
-            if type(recipe["seed"]) is not int or not 0 <= recipe["seed"] <= 0xffffffff:
+            if "seed" in recipe and (type(recipe["seed"]) is not int or not 0 <= recipe["seed"] <= 0xffffffff):
                 raise ValueError("Graph seed must be a uint32 integer")
+            if "input" in recipe:
+                input_name = recipe["input"]
+                if (type(input_name) is not str or not input_name.endswith(".json")
+                        or "/" in input_name or "\\" in input_name):
+                    raise ValueError("Graph input must be a JSON filename inside inputs/")
+                name(input_name[:-5])
         else:
             raise ValueError("recipe kind must be command, gemm or graph-device")
         return recipe
@@ -236,7 +251,10 @@ class Project:
         recipe = self.recipe(recipe_name)
         if recipe["kind"] == "graph-device":
             descriptor = read_json(NativeWorkspace(self.root / "inputs"), recipe["descriptor"])
-            return project_graph.describe(descriptor, recipe["seed"])
+            input_payload = (NativeWorkspace(self.root / "inputs").read_text(recipe["input"]).encode("utf-8")
+                             if "input" in recipe else None)
+            shown = project_graph.describe(descriptor, recipe.get("seed"), input_payload)
+            return shown + (f"\ninput file: inputs/{recipe['input']}" if input_payload is not None else "")
         if recipe["kind"] == "gemm":
             program = GraphProgram.create("gemm", recipe["m"], recipe["n"], recipe["k"])
             return (f"{recipe_name}: GEMM {program.m}x{program.n}x{program.k}\n"
@@ -301,20 +319,35 @@ class Project:
                 if type(descriptor) is not dict:
                     raise ValueError("Graph descriptor must be a JSON object")
                 program = project_graph.compile_graph(descriptor)
+                explicit_input = None
+                if "input" in recipe:
+                    raw_input = NativeWorkspace(directory / "inputs").read_text(recipe["input"]).encode("utf-8")
+                    if digest(raw_input) != snapshot_manifest["/" + recipe["input"]]:
+                        raise ValueError("Graph input snapshot changed before compilation")
+                    explicit_input = project_graph.input_bytes(raw_input)
                 write_new(directory / "graph.json", encoded(program))
                 stage.mkdir(mode=0o700)
-                executed = project_graph.run_snapshot(descriptor_bytes, recipe["seed"])
+                if explicit_input is None:
+                    executed = project_graph.run_snapshot(descriptor_bytes, recipe["seed"])
+                else:
+                    executed = project_graph.run_snapshot(descriptor_bytes, 0, input_bytes=explicit_input)
                 receipt = executed["receipt"]
                 if (receipt["descriptor_sha256"] != digest(descriptor_bytes)
                         or receipt["program_sha256"] != program["program_sha256"]
                         or receipt["output_sha256"] != digest(executed["output"])):
                     raise ValueError("RTL receipt differs from the saved Graph or output")
+                if explicit_input is not None and (executed["input"] != explicit_input
+                        or receipt.get("input_mode") != "snapshot"
+                        or receipt.get("input_sha256") != digest(explicit_input)):
+                    raise ValueError("RTL receipt differs from the saved Graph input")
                 if tree(directory / "inputs") != snapshot_manifest:
                     raise ValueError("Graph input snapshot changed during execution")
                 write_new(directory / "receipt.json", encoded(receipt))
                 write_new(directory / "stdout.txt", executed["summary"].encode())
-                write_new(directory / "generated-input.bin", executed["input"])
-                record["inputs"]["generated_input_sha256"] = digest(executed["input"])
+                write_new(directory / ("input.bin" if explicit_input is not None else "generated-input.bin"), executed["input"])
+                record["inputs"]["input_sha256" if explicit_input is not None else "generated_input_sha256"] = digest(executed["input"])
+                if explicit_input is not None:
+                    record["inputs"]["input_mode"] = "snapshot"
                 for output, payload in (("output.bin", executed["output"]),
                                         ("output.txt", project_graph.output_text(executed["output"], program))):
                     write_new(stage / output, payload)
