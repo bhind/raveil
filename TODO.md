@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -24,6 +24,38 @@ task. ADR-0061 permits at most two independently acceptable implementation
 items when their task, files, artifacts, tests, and evidence are disjoint.
 Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
+
+## S-0002 accepted review and S-0003 follow-up
+
+- [ ] **T-0151** Reconcile GitHub Project daily without owner reminders.
+  Issue #115, branch `chore/t-0151-daily-project-reconciliation`, S-0003,
+  five Initial SP, Project Manager and a named Measurement Implementer own
+  the daily factual reporter, tests, local scheduler and records. Preserve
+  existing evidence while recording actual Issue-close and PR-merge timestamps
+  in Asia/Tokyo; keep event dates separate from technical acceptance and Sprint
+  assignment. A dry-run-default command maintains only factual metadata and a
+  marked daily README section, retains run/failure receipts, checks fresh
+  weekly usage before remote writes, and reports lifecycle anomalies for the
+  existing canonical queue. It never infers task or ceremony acceptance.
+  Current work is independent of T-0148's Chisel implementation.
+- [ ] **T-0150** Make Garden fusion changes visible at a glance. Issue #114,
+  S-0003 and five Initial SP retain the owner's accepted S-0002 feedback:
+  draw the materialized and fused paths, identify the eliminated intermediate
+  write/read, highlight the selected operation, and fit/redraw the Mac Terminal
+  view. Keep technical identities secondary but inspectable, deterministic
+  non-TTY output, validated snapshot semantics and read-only authority. Require
+  actual Terminal acceptance and preserve the intermediate-plan-memory versus
+  measured-performance distinction. This is follow-up work, not a retroactive
+  condition on the accepted S-0002 ceremony.
+- [ ] **T-0148** Demonstrate bounded signed relative Graph loads through the
+  simulation path. Existing real Issue #113 and its independent Chisel branch
+  are In Progress; candidate `bf81269` is not integrated into this main-based
+  tree. The owner directed the runnable generality demo to S-0003 review on
+  2026-09-12 JST. Retain the exact Issue packet's eight-neighbor, 16-instruction,
+  unchanged transport ABI and oracle/fallback/RTL agreement boundary. Current
+  task Sprint assignment remains S-0002; demo forecast is S-0003. This forecast
+  does not accept the candidate, expand the Graph contract, or authorize a
+  physical-device or performance claim.
 
 ## Project entry point
 

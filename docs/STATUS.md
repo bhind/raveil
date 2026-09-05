@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -32,6 +32,24 @@ existing Miroirs, Pavane, La Valse, Boléro, Daphnis, Ondine, Sonatine, and
 Scarbo names remain documentation responsibility domains; their presence in a
 table does not imply that a complete integrated subsystem exists or rename an
 executable identifier.
+
+## 2026-09-05 owner-visible review
+
+The owner accepted S-0002 after navigating Garden in Mac Terminal, reviewing
+its materialized/fused explanation, and inspecting a fresh native 8x8
+GEMM+bias+ReLU result at main `82b196c`. Both native observations were
+semantically valid with checksum `ab4fc57fa8a47521`; the candidate did not
+improve the short development observation and the executor retained the
+baseline. This is host correctness/development-non-claim evidence. T-0135's
+fusion presentation was already accepted on 2026-08-29; this demonstration
+must not be counted as newly completed September implementation.
+
+T-0150 retains the owner's visual-explanation feedback. T-0151 implements the
+requested daily Project reconciliation and actual-date reporting. T-0148's
+independent relative-load candidate remains unintegrated here, with its
+owner-visible bounded-generality demonstration requested for S-0003 review
+on 2026-09-12. Ceremony acceptance neither completes these tasks nor changes
+an ADR, EXP or roadmap gate.
 
 ## Development workflow support
 
