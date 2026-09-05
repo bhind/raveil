@@ -6,6 +6,10 @@ Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
+ADR-0091 lets Garden validate and explain already-lowered program v3/v4,
+including signed relative LOAD offsets and unsigned modular multiplication.
+The renderer remains read-only and does not import or invoke the compiler.
+
 ADR-0090 introduces a simulation-only explicit-input request envelope over
 the existing Graph executor. The project snapshots confined input data;
 request admission binds its bytes. It does not add program operations or

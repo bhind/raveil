@@ -13,6 +13,10 @@ Its exit is an input-edit/run/diff loop over the existing bounded simulator,
 with immutable snapshots and exact oracle/fallback/RTL output agreement.
 ADR-0090 does not widen the physical-device or research gates.
 
+T-0160 is integrated through PR #140. T-0159 follows with read-only Garden
+explanation of the existing relative LOAD and MUL instruction set (ADR-0091).
+This improves observation, not program capacity or hardware readiness.
+
 The editable Raveil working environment is the next primary product outcome.
 T-0149 is integrated through PR #119 (`3fb6b5c`); Issue #116 is Done.
 T-0148's predecessor is integrated through PR #118 and its editable-Graph

@@ -8,6 +8,10 @@ resolves it.
 
 ## Simulation-first device path
 
+- ADR-0091 resolves read-only display admission for existing program v3/v4.
+  Exporting editable project runs directly into a retained Garden envelope
+  remains separate work; synthetic parser tests do not establish that linkage.
+
 - ADR-0090 selects bounded explicit user input for T-0160. Constants,
   predicates, arbitrary dimensions and larger windows remain separate choices;
   accepting input data does not make the language or hardware unbounded.
