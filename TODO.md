@@ -58,7 +58,7 @@ work, not canonical product completion. Historical root changes remain intact.
   task or ceremony acceptance. Preserve immediate session/task closeout.
 
 - [ ] **T-0150** Make Garden fusion changes visible at a glance, real
-  [Issue #114](https://github.com/bhind/raveil/issues/114), P0/In Progress, Experience
+  [Issue #114](https://github.com/bhind/raveil/issues/114), P0/Review, Experience
   Implementer, S-0003. Show materialized/fused plans side by side, selected-node
   impact, and eliminated intermediate writes/reads; label 512B/0B as plan
   intermediate memory. Acceptance: readable Mac Terminal redraw, deterministic
@@ -66,12 +66,12 @@ work, not canonical product completion. Historical root changes remain intact.
   and T-0144. On owner direction to delegate publication and continue work,
   pulled the existing Ready item through the canonical queue. Branch
   `feat/t-0150-garden-fusion-view` at `/private/tmp/raveil-t0150-garden` has a
-  local candidate: default side-by-side comparison with selected-stage marks,
+  published candidate in [Draft PR #124](https://github.com/bhind/raveil/pull/124): default side-by-side comparison with selected-stage marks,
   removed intermediate WRITE/READ, `d` for existing details, and redraw only
   when both streams are TTYs. Independent Garden/sealed tests pass 41/41;
   real Mac PTY navigation passes at 150x32. Mac Terminal GUI access is blocked
   by the computer-use tool, so actual app visual acceptance remains pending
-  for S-0003 review. Next: publish a draft for review, retaining this gap;
+  for S-0003 review. Next: verify actual app presentation and integrate the draft, retaining this gap;
   do not infer Done or owner acceptance from the local tests.
 
 - [ ] **T-0149** Deliver the editable shell-first Raveil workspace, real

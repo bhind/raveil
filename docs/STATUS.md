@@ -35,8 +35,11 @@ executable identifier.
 
 ## 2026-09-05 owner-visible review
 
-T-0150 has a local Host Functional presentation candidate on
-`feat/t-0150-garden-fusion-view`. A validated materialized/fused plan pair now
+T-0150 has a published Host Functional presentation candidate in
+[Draft PR #124](https://github.com/bhind/raveil/pull/124), implementation
+`80b2006ce41f059aa93546325459ead5f14c0764`, on
+`feat/t-0150-garden-fusion-view`. Issue #114 is Review, not Done.
+A validated materialized/fused plan pair now
 opens as two adjacent paths, with selected matmul/bias/relu stages marked in
 both plans and intermediate WRITE/READ removal called out. The existing
 512B/0B values stay bound to the matched plans and are labelled intermediate
