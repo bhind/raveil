@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0155 implements dependency-based Graph scheduling. T-0156 repairs workspace shell hints independently; its implementation is verified. T-0154 is integrated; S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0155 dependency scheduling and T-0156 shell-hint repair have passed implementation acceptance. Integration receipts are on their linked Issues; S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -32,14 +32,20 @@ review and failure preservation do not consume the two-item delivery limit.
   Implementation acceptance: a path containing spaces and a semicolon can be
   copied into a POSIX shell and reaches `project show logs`. The standard
   library supplies quoting; 28 project/Graph-project tests pass on macOS.
-  Remote integration and lifecycle acceptance are recorded in Issue #131.
+  Integrated through PR #132 (`3d1f786`); Issue #131 is closed and canonically Done.
 
-- [ ] **T-0155** Schedule bounded Graph nodes from dependencies,
-  [Issue #130](https://github.com/bhind/raveil/issues/130), In Progress,
+- [x] **T-0155** Schedule bounded Graph nodes from dependencies,
+  [Issue #130](https://github.com/bhind/raveil/issues/130), implementation verified,
   S-0003, 3 SP. Allow forward references with stable original-order tie breaking;
   preserve existing ordered program bytes, descriptor identity, final STORE,
   trace validation, 16 instructions and eight registers. Sole source owner
-  works on graph_device_dag.py and its tests, independently of T-0156.
+  worked on graph_device_dag.py and its tests, independently of T-0156.
+  ADR-0088 defines authoring versus execution order. All 169 Graph-device
+  regressions and 44 project-Graph/Garden regressions pass. Primary compares
+  four existing descriptors against the previous compiler with identical
+  instruction/payload/hash/trace, and checks all 120 permutations of one
+  five-value-node Graph against its previous oracle and the encoded fallback.
+  Remote integration and lifecycle acceptance are recorded in Issue #130.
 
 - [x] **T-0154** Reconcile post-merge T-0148 records, real
   [Issue #128](https://github.com/bhind/raveil/issues/128), Done,

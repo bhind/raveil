@@ -500,6 +500,10 @@ resolves it.
   a missing arithmetic operation, seed-only input data, or simulator startup
   latency? Selection requires hands-on evidence; this slice authorizes no
   broader opcode set, input protocol, persistent cache or capacity change.
+- T-0155 addresses observed authoring-order friction through ADR-0088's stable
+  topological scheduling. The existing sixteen-instruction/eight-register
+  limits remain; selection among different valid schedules to reduce register
+  pressure is a separate future question requiring an actual rejected workload.
 - Should local run history eventually gain human labels, a compact content
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor

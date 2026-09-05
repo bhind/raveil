@@ -140,6 +140,35 @@ def source_id(root: Path | None = None) -> str:
     return digest.hexdigest()
 
 
+def _dependencies(node: dict[str, Any]) -> list[str]:
+    if node["op"] in {"ADD_U32", "MAX_U32"}:
+        return list(node["inputs"])
+    if node["op"] == "STORE_U32":
+        return [node["input"]]
+    return []
+
+
+def _scheduled_nodes(nodes: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return a stable topological schedule, preferring descriptor order."""
+    positions = {node["id"]: index for index, node in enumerate(nodes)}
+    by_id = {node["id"]: node for node in nodes}
+    pending = {node["id"]: set(_dependencies(node)) for node in nodes}
+    scheduled: list[dict[str, Any]] = []
+    while pending:
+        ready = min(
+            (node_id for node_id, dependencies in pending.items() if not dependencies),
+            key=positions.__getitem__,
+            default=None,
+        )
+        if ready is None:
+            raise GraphDeviceDagError("Graph dependencies contain a cycle")
+        scheduled.append(by_id[ready])
+        del pending[ready]
+        for dependencies in pending.values():
+            dependencies.discard(ready)
+    return scheduled
+
+
 def validate_descriptor(value: dict[str, Any]) -> None:
     if set(value) != {"schema", "graph_id", "affine", "nodes"} or \
             value.get("schema") not in {GRAPH_SCHEMA, GRAPH_SCHEMA_V2}:
@@ -188,16 +217,24 @@ def validate_descriptor(value: dict[str, Any]) -> None:
         elif op in {"ADD_U32", "MAX_U32"}:
             if set(node) != {"id", "op", "inputs"} or \
                     not isinstance(node["inputs"], list) or len(node["inputs"]) != 2 or \
-                    any(source not in identifiers for source in node["inputs"]):
-                raise GraphDeviceDagError(f"{op} has an undefined operand")
+                    any(not isinstance(source, str) for source in node["inputs"]):
+                raise GraphDeviceDagError(f"{op} operands are invalid")
         else:
             if set(node) != {"id", "op", "input"} or \
-                    node["input"] not in identifiers or stores:
+                    not isinstance(node["input"], str) or stores:
                 raise GraphDeviceDagError("STORE_U32 is invalid")
             stores += 1
         identifiers.add(node["id"])
     if stores != 1 or nodes[-1]["op"] != "STORE_U32":
         raise GraphDeviceDagError("exactly one final STORE_U32 is required")
+    by_id = {node["id"]: node for node in nodes}
+    for node in nodes:
+        for source in _dependencies(node):
+            if source not in by_id:
+                raise GraphDeviceDagError(f"{node['op']} has an undefined operand")
+            if by_id[source]["op"] == "STORE_U32":
+                raise GraphDeviceDagError("STORE_U32 cannot be an operand")
+    _scheduled_nodes(nodes)
 
 
 def load_descriptor(path: Path | str) -> dict[str, Any]:
@@ -240,15 +277,14 @@ def _lowering_trace(
     allocations: dict[str, int],
 ) -> dict[str, Any]:
     """Describe compiler-owned allocation decisions without granting authority."""
-    uses: dict[str, list[int]] = {node["id"]: [] for node in value["nodes"]}
-    for index, node in enumerate(value["nodes"]):
-        for source in node.get("inputs", [node.get("input")]):
-            if source is not None:
-                uses[source].append(index)
+    nodes = _scheduled_nodes(value["nodes"])
+    uses: dict[str, list[int]] = {node["id"]: [] for node in nodes}
+    for index, node in enumerate(nodes):
+        for source in _dependencies(node):
+            uses[source].append(index)
     entries: list[dict[str, Any]] = []
-    for index, (node, word) in enumerate(zip(value["nodes"], instructions)):
-        dependencies = list(node.get("inputs", [node.get("input")]))
-        dependencies = [source for source in dependencies if source is not None]
+    for index, (node, word) in enumerate(zip(nodes, instructions)):
+        dependencies = _dependencies(node)
         produces_value = node["op"] != "STORE_U32"
         last_use = max(uses[node["id"]]) if produces_value and uses[node["id"]] else None
         entries.append({
@@ -258,7 +294,7 @@ def _lowering_trace(
             "dependencies": dependencies,
             "selector": node.get("address"),
             "fan_out": len(uses[node["id"]]),
-            "consumers": [value["nodes"][consumer]["id"] for consumer in uses[node["id"]]],
+            "consumers": [nodes[consumer]["id"] for consumer in uses[node["id"]]],
             "encoded_word": int(word),
             "source_registers": [allocations[source] for source in dependencies],
             "destination_register": allocations[node["id"]] if produces_value else None,
@@ -311,28 +347,27 @@ def validate_lowering_trace(
     entries = trace.get("instructions")
     if not isinstance(entries, list) or len(entries) != len(value["nodes"]):
         raise GraphDeviceDagError("lowering trace instruction count is invalid")
-    uses: dict[str, list[int]] = {node["id"]: [] for node in value["nodes"]}
-    for index, node in enumerate(value["nodes"]):
-        for source in node.get("inputs", [node.get("input")]):
-            if source is not None:
-                uses[source].append(index)
+    nodes = _scheduled_nodes(value["nodes"])
+    uses: dict[str, list[int]] = {node["id"]: [] for node in nodes}
+    for index, node in enumerate(nodes):
+        for source in _dependencies(node):
+            uses[source].append(index)
     allocations: dict[str, int] = {}
     entry_keys = {
         "index", "node_id", "op", "dependencies", "selector", "fan_out", "consumers",
         "encoded_word", "source_registers", "destination_register",
         "definition_index", "last_use_index", "live_range", "release_after_index",
     }
-    for index, (node, word, entry) in enumerate(zip(value["nodes"], instructions, entries)):
+    for index, (node, word, entry) in enumerate(zip(nodes, instructions, entries)):
         if not isinstance(entry, dict) or set(entry) != entry_keys:
             raise GraphDeviceDagError("lowering trace instruction fields are invalid")
-        dependencies = list(node.get("inputs", [node.get("input")]))
-        dependencies = [source for source in dependencies if source is not None]
+        dependencies = _dependencies(node)
         if entry["index"] != index or entry["node_id"] != node["id"] \
                 or entry["op"] != node["op"] or entry["dependencies"] != dependencies \
                 or entry["selector"] != node.get("address") \
                 or entry["fan_out"] != len(uses[node["id"]]) \
                 or entry["consumers"] != [
-                    value["nodes"][consumer]["id"] for consumer in uses[node["id"]]
+                    nodes[consumer]["id"] for consumer in uses[node["id"]]
                 ] \
                 or entry["encoded_word"] != word \
                 or entry["source_registers"] != [allocations[source] for source in dependencies]:
@@ -365,24 +400,23 @@ def validate_lowering_trace(
 
 def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
     validate_descriptor(value)
-    remaining: dict[str, int] = {node["id"]: 0 for node in value["nodes"]}
-    for node in value["nodes"]:
-        for source in node.get("inputs", [node.get("input")]):
-            if source is not None:
-                remaining[source] += 1
+    nodes = _scheduled_nodes(value["nodes"])
+    remaining: dict[str, int] = {node["id"]: 0 for node in nodes}
+    for node in nodes:
+        for source in _dependencies(node):
+            remaining[source] += 1
     registers: dict[str, int] = {}
     allocations: dict[str, int] = {}
     free = list(range(VALUE_REGISTERS))
     instructions: list[int] = []
-    for node in value["nodes"]:
+    for node in nodes:
         op = node["op"]
-        sources = node.get("inputs", [node.get("input")])
-        source_registers = [registers[source] for source in sources if source is not None]
+        sources = _dependencies(node)
+        source_registers = [registers[source] for source in sources]
         for source in sources:
-            if source is not None:
-                remaining[source] -= 1
-                if remaining[source] == 0:
-                    free.append(registers.pop(source))
+            remaining[source] -= 1
+            if remaining[source] == 0:
+                free.append(registers.pop(source))
         free.sort()
         if op == "STORE_U32":
             instructions.append(encode_store(source_registers[0]))
@@ -448,12 +482,13 @@ def graph_oracle(value: dict[str, Any], words: Sequence[int]) -> list[int]:
     if len(words) != 324:
         raise GraphDeviceDagError("input must contain exactly 324 words")
     affine = value["affine"]
+    nodes = _scheduled_nodes(value["nodes"])
     output = [0] * 256
     for row in range(affine["rows"]):
         for column in range(affine["columns"]):
             center = (row + 1) * affine["input_stride"] + column + 1
             values: dict[str, int] = {}
-            for node in value["nodes"]:
+            for node in nodes:
                 if node["op"] == "LOAD_U32":
                     values[node["id"]] = int(words[_node_address(
                         node["address"], center, affine["input_stride"])])
