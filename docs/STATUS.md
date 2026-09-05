@@ -19,6 +19,11 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
+T-0156 shell-quotes the destination in `project init`'s printed Next command.
+A regression executes the actual hint with a space/semicolon-containing path;
+all 28 project and project-Graph tests pass on macOS arm64/Python 3.14.6.
+T-0155 dependency-based Graph scheduling is a separate active compiler slice.
+
 T-0148/S02 is integrated on main through PR #123, merge `4cc28ed`, after
 stacking local commits `bf81269` and `31262f1` and reconciling with main
 `3fb6b5c`. ADR-0087 (originally branch-local
