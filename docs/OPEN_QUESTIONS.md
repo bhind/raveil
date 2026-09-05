@@ -1,6 +1,6 @@
 # Open questions
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
