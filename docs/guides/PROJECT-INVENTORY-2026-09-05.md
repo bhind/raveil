@@ -479,3 +479,26 @@ passes, log SHA-256
 `26ba8d1468e62ebe1cf2a29144335017b4cb98edcb8465e3e8cba53b6dcb946f`.
 Host: macOS 26.5.1 arm64, Python 3.14.6. Final weekly usage reading: 10080
 minutes, 65% used / 35% remaining. Evidence is Host Functional only.
+
+## Integration and post-merge synchronization
+
+[PR #121](https://github.com/bhind/raveil/pull/121) integrated this PM inventory
+and required session-sync/read-boundary correction as canonical
+`75bf2757016debdfc8aa2fabcfffa5b584277ce5`. Exact candidate `01a427c` passed
+independent review; canonical code/governance blobs match the tested candidate.
+The broad T-0151 daily scheduler remains separately unfinished in
+[PR #120](https://github.com/bhind/raveil/pull/120). Preserve both record sets
+during its later integration; this inventory does not accept that scheduler.
+
+The first post-merge #115-body receipt read failed because the GraphQL quota
+was already exhausted. No update was represented as successful. Pending delta:
+merged #121/main hash and the remaining #120 boundary. Permission is sufficient;
+retry follows the reported 15:53:54 JST reset. This is distinct from the
+already-successful T-0148 Review synchronization.
+
+Post-reset reconciliation succeeded: GitHub reported 4928 remaining, the fresh
+#115 integration receipt and #116 published-candidate/70-test receipt were
+applied, and canonical `audit --check-branch` passed. The post-merge pending
+body update above is resolved. Remaining blockers are product/research
+acceptance conditions, not missing GitHub permission or an unapplied inventory
+write. Parent T-0151 still requires its separate daily scheduler acceptance.

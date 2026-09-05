@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -48,6 +48,7 @@ work, not canonical product completion. Historical root changes remain intact.
   owner reminders. Real [Issue #115](https://github.com/bhind/raveil/issues/115),
   P0/In Progress, PM, S-0003. ADR-0086 and branch
   `docs/t-0151-project-inventory` own this bounded PM inventory/record slice.
+  This inventory/read correction is integrated through PR #121 at `75bf275`.
   The existing `chore/t-0151-daily-project-reconciliation` worktree owns the
   separate daily implementation candidate and is preserved. Acceptance:
   live inventory repairs are reread; the bounded paginated queue read and

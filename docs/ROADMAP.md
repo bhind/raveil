@@ -1,7 +1,7 @@
 # Raveil gated roadmap
 
 Status: planning record
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.

@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
@@ -54,8 +54,10 @@ read with explicit GraphQL fields and cursor pagination. It retains the same
 normalized queue inputs and unchanged lifecycle validators. It refuses changing
 counts, duplicate items/cursors/fields, truncated field pages, API errors and
 inventories beyond 1000 items instead of accepting a partial read. Forty-seven
-queue tests pass, including eight new item/schema read-boundary tests. This correction is
-local pending PR integration, and is not a delivery-speed measurement.
+queue tests pass, including eight new item/schema read-boundary tests. PR #121 merged the independently reviewed correction as canonical
+`75bf2757016debdfc8aa2fabcfffa5b584277ce5`. It is not a delivery-speed
+measurement. Parent T-0151 remains unfinished for the separate daily
+automation/scheduler PR #120.
 
 ## Development workflow support
 
