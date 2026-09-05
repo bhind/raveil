@@ -1,0 +1,12 @@
+{
+  "schema": "raveil.graph-device-dynamic-request/v5",
+  "version": 5,
+  "header_bytes": 64,
+  "request_bytes": 1584,
+  "program_words": 32,
+  "affine_words": 16,
+  "input_words": 324,
+  "program_versions": [1, 2, 3, 4],
+  "input_mode": "explicit-snapshot",
+  "seed": 0
+}

@@ -6,6 +6,7 @@ rewrite it.
 
 | ADR | Status | Decision |
 |---|---|---|
+| [ADR-0090](ADR-0090-graph-input-snapshots-are-simulation-only.md) | Accepted | Bounded explicit input snapshots use a simulation-only request envelope |
 | [ADR-0001](ADR-0001-four-plane-adaptive-harvard.md) | Accepted | Four-plane adaptive Harvard model |
 | [ADR-0002](ADR-0002-experience-advises-measurement-governs.md) | Accepted | Experience advises; measurement governs commit |
 | [ADR-0003](ADR-0003-risc-v-control-and-daphnis-execution.md) | Accepted | RISC-V control/fallback plus Daphnis Execution Subsystem |

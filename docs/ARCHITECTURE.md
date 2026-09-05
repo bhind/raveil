@@ -6,6 +6,11 @@ Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
+ADR-0090 introduces a simulation-only explicit-input request envelope over
+the existing Graph executor. The project snapshots confined input data;
+request admission binds its bytes. It does not add program operations or
+delegate device authority to the project or display layers.
+
 | Plane | Contents | Write authority |
 |---|---|---|
 | Program | immutable semantics, ExecutionContract, RISC-V fallback | trusted build and admission |

@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0157 extends Graph arithmetic with versioned MUL_U32. T-0155 and T-0156 are integrated; S-0003 owner ceremony remains pending. |
-| **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0160 adds editable Graph input snapshots. T-0157 is integrated; separate-session T-0158 manages Project views. S-0003 owner ceremony remains pending. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0159 read-only Graph explanations follows T-0160. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -27,9 +27,22 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
 
+- [x] **T-0160** Run Graphs with editable input snapshots,
+  [Issue #139](https://github.com/bhind/raveil/issues/139), S-0003, 5 SP.
+  Owner-requested P0 under ADR-0090: confined 324-word input, immutable run
+  snapshots, input/output diff, old seed compatibility and real offline RTL
+  oracle/fallback equality. No opcode/RTL/device/performance expansion.
+  T-0157 is integrated through PR #138 (`a0769da`). T-0159 display support
+  remains the next candidate, behind this execution-generality slice.
+  Technical acceptance: 173 Graph-device and 64 project/Garden host tests;
+  two actual offline project runs preserve history and show first output
+  10 -> 12 from an input-only edit. Full output equals oracle and fallback,
+  with identical program/simulator/RTL identities. Issue #139 tracks remote
+  integration; this checkbox does not accept a Sprint ceremony.
+
 - [ ] **T-0159** Explain relative LOAD and MUL_U32 in the existing read-only
   Garden view, [Issue #136](https://github.com/bhind/raveil/issues/136).
-  P1 successor, conditional on T-0157 integration; not active implementation.
+  P1 successor after T-0160; T-0157 is integrated. Not active implementation.
   Preserve old rendering and reject inconsistent input; no compile, execution,
   device or evidence-promotion authority. Freeze exact parser/renderer/test
   paths and accepted explanation boundary before kickoff. Host Functional,

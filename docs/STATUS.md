@@ -1,6 +1,19 @@
 # Current status
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
+
+T-0160 implements editable bounded input under ADR-0090. New project init
+includes `neighborhood-data`: project-recipe/v2 selects a confined JSON input
+with 324 uint32 words. Request v5 carries explicit data with unchanged program
+v1--v4/RTL/capacities; old seed requests remain supported and projected UIO
+rejects the new envelope. Each run retains raw JSON, packed input and results.
+Host verification passes 173 Graph-device and 64 project/Garden tests.
+Two actual offline project runs change only input[11] from 7 to 9: the first
+output changes from 10 to 12, two of 64 active cells change, and all 256 output
+words match oracle and fallback in both runs. Program, simulator and RTL
+identities match across runs; the emitted RTL also matches T-0157's RTL hash.
+Prior history remains valid. This is functional simulation, not performance
+or physical-device evidence. Issue #139 tracks remote integration separately.
 Development state: `unreleased`
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,

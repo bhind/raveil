@@ -20,6 +20,7 @@ from raveil.graph_device_dynamic import (
     run_dynamic_pair,
 )
 from raveil.graph_device_dag import compile_descriptor, load_descriptor
+from raveil.riscv_stencil_signature import input_words
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +75,55 @@ class GraphDeviceDynamicTests(unittest.TestCase):
                 struct.pack_into("<I", raw, 100, version)
                 (request / "request.bin").write_bytes(raw)
                 self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 1)
+
+    def test_v5_explicit_input_binds_slot_zero_and_keeps_program_version(self):
+        compiler = shutil.which("c++")
+        if compiler is None:
+            self.skipTest("no C++ compiler")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); request = root / "request"
+            supplied = struct.pack("<324I", *(3 * index + 7 for index in range(324)))
+            result = prepare_request(request, MAX_U32, 0, ROOT, input_bytes=supplied)
+            self.assertEqual(result["metadata"]["schema"], "raveil.graph-device-dynamic-request/v5")
+            self.assertEqual(struct.unpack_from("<I", result["request"], 4)[0], 5)
+            self.assertEqual(struct.unpack_from("<I", result["request"], 100)[0], 2)
+            self.assertEqual((request / "inputs/seed-0.bin").read_bytes(), supplied)
+            self.assertEqual((request / "inputs/seed-1.bin").read_bytes(), struct.pack("<324I", *input_words(1)))
+            harness = root / "admission"
+            built = subprocess.run([compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror",
+                "-I", str(ROOT / "linux/include"), "-I", str(request),
+                str(ROOT / "tests/graph_device_dynamic_request_host_test.cpp"),
+                str(ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp"), "-o", str(harness)], capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 0)
+            projected = subprocess.run([str(harness), str(request), "--projected"], capture_output=True, text=True)
+            self.assertEqual(projected.returncode, 1)
+            self.assertIn("projected dynamic request must be v2", projected.stderr)
+            for version, graph in ((1, BASELINE), (3, RELATIVE),
+                    (4, "tests/fixtures/graph_device_dynamic/product-neighbors-u32.json")):
+                other = root / f"program-{version}"
+                item = prepare_request(other, graph, 0, ROOT, input_bytes=supplied)
+                self.assertEqual(struct.unpack_from("<I", item["request"], 100)[0], version)
+                accepted = subprocess.run([str(harness), str(other)], capture_output=True, text=True)
+                self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            original_request = (request / "request.bin").read_bytes()
+            for offset in (4, 288):
+                raw = bytearray(original_request)
+                if offset == 4:
+                    struct.pack_into("<I", raw, 4, 2)
+                else:
+                    raw[offset] ^= 1
+                (request / "request.bin").write_bytes(raw)
+                self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 1)
+            (request / "request.bin").write_bytes(original_request)
+            for filename, offset in (("request-input.bin", 0), ("inputs/seed-0.bin", 4), ("inputs/seed-1.bin", 8)):
+                original = (request / filename).read_bytes(); corrupted = bytearray(original); corrupted[offset] ^= 1
+                (request / filename).write_bytes(corrupted)
+                self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 1, filename)
+                (request / filename).write_bytes(original)
+            raw = bytearray((request / "request.bin").read_bytes()); struct.pack_into("<I", raw, 16, 1)
+            (request / "request.bin").write_bytes(raw)
+            self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 1)
 
     def test_relative_fixture_uses_explicit_v3_request(self):
         descriptor = load_descriptor(ROOT / RELATIVE)
@@ -280,6 +330,8 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("transcript output already exists", source)
         self.assertIn("validate_program", parser)
         self.assertIn("read_input_file", parser)
+        self.assertIn("word(request_bytes.data() + 4) != kVersionV2", parser)
+        self.assertIn("kVersionV5", parser)
         self.assertIn("verilator --assert --cc", shell)
         self.assertEqual(shell.count("verilator --assert --cc"), 1)
         self.assertIn("invocation=once", shell)
@@ -289,6 +341,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("dynamic-source.manifest", shell)
         self.assertIn("contracts/graph_device_dynamic_request_v2.json", shell)
         self.assertIn("contracts/graph_device_dynamic_request_v3.json", shell)
+        self.assertIn("contracts/graph_device_dynamic_request_v5.json", shell)
         self.assertIn("contracts/graph_device_program_v2.json", shell)
         self.assertIn("contracts/graph_device_program_v3.json", shell)
         self.assertLess(shell.index("dynamic-source.manifest"), shell.index("verilator --assert --cc"))
@@ -302,7 +355,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         parser = (ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp").read_text()
         bridge = (ROOT / "hardware/chisel/graph_device_axi4lite_dynamic_verilator.cpp").read_text()
         installer = (ROOT / "hardware/chisel/GraphDeviceProgramInstaller.scala").read_text()
-        self.assertIn("request_version == kVersionV2", parser)
+        self.assertIn("program_version == kVersionV2", parser)
         self.assertIn("opcode == 4U", parser)
         self.assertIn("dynamic program digest is invalid", parser)
         self.assertLess(bridge.index("read_dynamic_graph_device_request"), bridge.index("VGraphDeviceAxi4LiteTop top"))
@@ -319,6 +372,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         from raveil.graph_device_dynamic_sealed import SOURCE_PATHS, _expected_runner_source_manifest, seal, verify
         self.assertIn("contracts/graph_device_dynamic_request_v2.json", SOURCE_PATHS)
         self.assertIn("contracts/graph_device_dynamic_request_v3.json", SOURCE_PATHS)
+        self.assertIn("contracts/graph_device_dynamic_request_v5.json", SOURCE_PATHS)
         self.assertIn("contracts/graph_device_program_v2.json", SOURCE_PATHS)
         self.assertIn("contracts/graph_device_program_v3.json", SOURCE_PATHS)
         with tempfile.TemporaryDirectory() as directory, patch("raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()):

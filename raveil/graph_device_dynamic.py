@@ -82,12 +82,15 @@ def _profile_for(program: dict[str, Any]) -> dict[str, Any]:
     return next(item for item in profiles() if item["name"] == name)
 
 
-def _request_bytes(program: dict[str, Any], profile: dict[str, Any], seed: int) -> bytes:
+def _request_bytes(program: dict[str, Any], profile: dict[str, Any], seed: int,
+                   input_bytes: bytes | None = None) -> bytes:
     graph_id = program["graph_id"]
     if not isinstance(graph_id, str) or GRAPH_ID_RE.fullmatch(graph_id) is None:
         raise GraphDeviceDynamicError("graph_id is not a bounded ASCII identifier")
     if type(seed) is not int or not 0 <= seed <= 0xFFFFFFFF:
         raise GraphDeviceDynamicError("seed is outside u32")
+    if input_bytes is not None and (seed != 0 or len(input_bytes) != INPUT_WORDS * 4):
+        raise GraphDeviceDynamicError("explicit input requires seed slot zero and exactly 324 words")
     name = profile["name"]
     graph_id_bytes = graph_id.encode("ascii") + b"\0"
     graph_id_bytes += b"\0" * (GRAPH_ID_BYTES - len(graph_id_bytes))
@@ -100,9 +103,12 @@ def _request_bytes(program: dict[str, Any], profile: dict[str, Any], seed: int) 
         "<8I", MAGIC, version, HEADER_BYTES, 0 if name == "baseline" else 1,
         seed, PROGRAM_WORDS, AFFINE_WORDS, INPUT_WORDS,
     )
+    if input_bytes is not None:
+        header = struct.pack("<8I", MAGIC, 5, HEADER_BYTES, 0 if name == "baseline" else 1,
+                             0, PROGRAM_WORDS, AFFINE_WORDS, INPUT_WORDS)
     return header + b"\0" * 32 + graph_id_bytes + _word_bytes(program["payload"]) \
         + _word_bytes(profile["payload_words"] if "payload_words" in profile
-                      else _profile_payload(profile)) + _word_bytes(input_words(seed))
+        else _profile_payload(profile)) + (input_bytes if input_bytes is not None else _word_bytes(input_words(seed)))
 
 
 def _profile_payload(profile: dict[str, Any]) -> list[int]:
@@ -121,7 +127,8 @@ def _write_new(path: Path, payload: bytes) -> None:
         stream.write(payload)
 
 
-def prepare_request(output: Path, graph: str, seed: int, repository: Path | None = None) -> dict[str, Any]:
+def prepare_request(output: Path, graph: str, seed: int, repository: Path | None = None,
+                    *, input_bytes: bytes | None = None) -> dict[str, Any]:
     repo = (repository or _root()).resolve(strict=True)
     if output.exists():
         if output.is_symlink() or not output.is_dir() or any(output.iterdir()):
@@ -134,16 +141,21 @@ def prepare_request(output: Path, graph: str, seed: int, repository: Path | None
     except (OSError, ValueError) as error:
         raise GraphDeviceDynamicError(f"descriptor admission failed: {error}") from error
     profile = _profile_for(program)
-    request = _request_bytes(program, profile, seed)
+    if input_bytes is not None and (type(input_bytes) is not bytes or len(input_bytes) != INPUT_WORDS * 4):
+        raise GraphDeviceDynamicError("explicit input must be exactly 324 packed uint32 words")
+    request = _request_bytes(program, profile, seed, input_bytes)
     inputs = output / "inputs"
     inputs.mkdir()
     _write_new(output / "request.bin", request)
-    selected_input = _word_bytes(input_words(seed))
+    selected_input = input_bytes if input_bytes is not None else _word_bytes(input_words(seed))
     _write_new(output / "request-input.bin", selected_input)
     _write_new(inputs / "seed-1.bin", _word_bytes(input_words(1)))
-    if seed != 1:
+    if input_bytes is not None:
+        _write_new(inputs / "seed-0.bin", selected_input)
+    elif seed != 1:
         _write_new(inputs / f"seed-{seed}.bin", selected_input)
-    _write_new(output / "request-oracle.bin", _word_bytes(graph_oracle(descriptor, input_words(seed))))
+    words = list(struct.unpack("<324I", selected_input))
+    _write_new(output / "request-oracle.bin", _word_bytes(graph_oracle(descriptor, words)))
     _write_new(
         output / "graph_device_abi_generated.h",
         device_abi_header(compile_device_artifact(), load_device_abi(repo)),
@@ -159,6 +171,9 @@ def prepare_request(output: Path, graph: str, seed: int, repository: Path | None
         "descriptor_sha256": hashlib.sha256(descriptor_path.read_bytes()).hexdigest(),
         "program_sha256": program["program_sha256"],
     }
+    if input_bytes is not None:
+        metadata.update({"schema": "raveil.graph-device-dynamic-request/v5",
+                         "input_mode": "snapshot", "input_sha256": hashlib.sha256(input_bytes).hexdigest()})
     _write_new(output / "request.json", (json.dumps(metadata, sort_keys=True) + "\n").encode("ascii"))
     return {"descriptor": descriptor, "program": program, "profile": profile, "request": request,
             "metadata": metadata}
@@ -181,7 +196,8 @@ def _marker(output: str, session: Path, request_count: int) -> str:
 
 
 def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, command: str,
-                 *, details: dict[str, Any] | None = None) -> str:
+                 *, input_snapshots: list[bytes | None] | None = None,
+                 details: dict[str, Any] | None = None) -> str:
     if len(graphs) not in {1, 2} or len(graphs) != len(seeds):
         raise GraphDeviceDynamicError(f"{command} request count is invalid")
     repo = (repository or _root()).resolve(strict=True)
@@ -192,7 +208,12 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
     import tempfile
     session = Path(tempfile.mkdtemp(prefix="run.", dir=first))
     request_roots = [session / f"request-{index}" for index in range(1, len(graphs) + 1)]
-    prepared = [prepare_request(root, graph, seed, repo) for root, graph, seed in zip(request_roots, graphs, seeds)]
+    if input_snapshots is None:
+        input_snapshots = [None] * len(graphs)
+    if len(input_snapshots) != len(graphs):
+        raise GraphDeviceDynamicError("dynamic input snapshot count is invalid")
+    prepared = [prepare_request(root, graph, seed, repo, input_bytes=input_bytes)
+                for root, graph, seed, input_bytes in zip(request_roots, graphs, seeds, input_snapshots)]
     if any(item["profile"]["name"] not in {"baseline", "compact"} for item in prepared):
         raise GraphDeviceDynamicError("dynamic profiles are restricted to baseline and compact")
     runner = repo / "hardware/chisel/run-graph-device-axi4lite-dynamic.sh"
@@ -214,11 +235,14 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
     if marker_hash is None:
         raise GraphDeviceDynamicError("dynamic simulator identity is missing")
     receipts = []
-    for root, item, seed in zip(request_roots, prepared, seeds):
+    for root, item, seed, input_bytes in zip(request_roots, prepared, seeds, input_snapshots):
         output = root / f"private-output-{item['program']['graph_id']}-seed-{seed}.bin"
         fallback = root / f"fallback-output-{item['program']['graph_id']}-seed-{seed}.bin"
-        expected = _word_bytes(graph_oracle(item["descriptor"], input_words(seed)))
+        expected_input = input_bytes if input_bytes is not None else _word_bytes(input_words(seed))
+        expected = _word_bytes(graph_oracle(item["descriptor"], list(struct.unpack("<324I", expected_input))))
         if (root / "request.bin").read_bytes() != item["request"] \
+                or (root / "request-input.bin").read_bytes() != expected_input \
+                or (root / "inputs" / f"seed-{seed}.bin").read_bytes() != expected_input \
                 or (root / "request-oracle.bin").read_bytes() != expected \
                 or output.read_bytes() != expected or fallback.read_bytes() != expected:
             raise GraphDeviceDynamicError("dynamic RTL/fallback output differs from independent oracle")
@@ -245,6 +269,8 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
                    "toolchain_sha256": hashlib.sha256((root / "toolchain.txt").read_bytes()).hexdigest(),
                    "trace_sha256": hashlib.sha256((root / "axi-transcript.log").read_bytes()).hexdigest(),
                    "evidence_class": "rtl-simulation-functional", "performance": "not-measured"}
+        if input_bytes is not None:
+            receipt.update({"input_mode": "snapshot", "input_sha256": hashlib.sha256(input_bytes).hexdigest()})
         try:
             _write_new(receipt_path, (json.dumps(receipt, sort_keys=True) + "\n").encode("ascii"))
         except FileExistsError as error:
@@ -269,7 +295,7 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
 
 
 def run_snapshot(descriptor_bytes: bytes, seed: int,
-                 repository: Path | None = None) -> dict[str, Any]:
+                 repository: Path | None = None, *, input_bytes: bytes | None = None) -> dict[str, Any]:
     """Run a project-owned snapshot through the unchanged dynamic admission path.
 
     Only data is copied under the repository artifact root. The repository's
@@ -287,15 +313,22 @@ def run_snapshot(descriptor_bytes: bytes, seed: int,
     path = snapshot / "descriptor.json"
     _write_new(path, descriptor_bytes)
     details: dict[str, Any] = {}
-    _run_dynamic([path.relative_to(repo).as_posix()], [seed], repo,
-                 "dynamic-run", details=details)
+    if input_bytes is None:
+        _run_dynamic([path.relative_to(repo).as_posix()], [seed], repo, "dynamic-run", details=details)
+    else:
+        _run_dynamic([path.relative_to(repo).as_posix()], [seed], repo,
+                     "dynamic-run", input_snapshots=[input_bytes], details=details)
     receipt = details["receipts"][0]
     root = details["request_roots"][0]
     output = (root / f"private-output-{receipt['graph_id']}-seed-{seed}.bin").read_bytes()
     if hashlib.sha256(output).hexdigest() != receipt["output_sha256"]:
         raise GraphDeviceDynamicError("dynamic output changed after verification")
+    expected_input = input_bytes if input_bytes is not None else _word_bytes(input_words(seed))
+    if input_bytes is not None and (receipt.get("input_mode") != "snapshot"
+                                    or receipt.get("input_sha256") != hashlib.sha256(input_bytes).hexdigest()):
+        raise GraphDeviceDynamicError("dynamic receipt does not bind explicit input")
     return {"receipt": receipt, "output": output,
-            "input": _word_bytes(input_words(seed)), "summary": details["summary"],
+            "input": expected_input, "summary": details["summary"],
             "evidence_directory": str(root)}
 
 
