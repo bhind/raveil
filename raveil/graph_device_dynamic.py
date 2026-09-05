@@ -180,7 +180,8 @@ def _marker(output: str, session: Path, request_count: int) -> str:
     return markers[0]
 
 
-def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, command: str) -> str:
+def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, command: str,
+                 *, details: dict[str, Any] | None = None) -> str:
     if len(graphs) not in {1, 2} or len(graphs) != len(seeds):
         raise GraphDeviceDynamicError(f"{command} request count is invalid")
     repo = (repository or _root()).resolve(strict=True)
@@ -260,7 +261,42 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
         "Evidence class=rtl-simulation-functional",
         "Performance=not-measured",
     ]
-    return "\n".join(lines)
+    summary = "\n".join(lines)
+    if details is not None:
+        details.update(session=session, request_roots=request_roots, receipts=receipts,
+                       summary=summary)
+    return summary
+
+
+def run_snapshot(descriptor_bytes: bytes, seed: int,
+                 repository: Path | None = None) -> dict[str, Any]:
+    """Run a project-owned snapshot through the unchanged dynamic admission path.
+
+    Only data is copied under the repository artifact root. The repository's
+    runner and compiled executor are selected independently of project files.
+    Raw transport evidence remains in that retained root.
+    """
+    import tempfile
+
+    repo = (repository or _root()).resolve(strict=True)
+    parent = repo / "artifacts/graph_device_axi4lite_dynamic"
+    if parent.is_symlink() or (parent.exists() and not parent.is_dir()):
+        raise GraphDeviceDynamicError("dynamic artifact root is unsafe")
+    parent.mkdir(parents=True, exist_ok=True)
+    snapshot = Path(tempfile.mkdtemp(prefix="snapshot.", dir=parent))
+    path = snapshot / "descriptor.json"
+    _write_new(path, descriptor_bytes)
+    details: dict[str, Any] = {}
+    _run_dynamic([path.relative_to(repo).as_posix()], [seed], repo,
+                 "dynamic-run", details=details)
+    receipt = details["receipts"][0]
+    root = details["request_roots"][0]
+    output = (root / f"private-output-{receipt['graph_id']}-seed-{seed}.bin").read_bytes()
+    if hashlib.sha256(output).hexdigest() != receipt["output_sha256"]:
+        raise GraphDeviceDynamicError("dynamic output changed after verification")
+    return {"receipt": receipt, "output": output,
+            "input": _word_bytes(input_words(seed)), "summary": details["summary"],
+            "evidence_directory": str(root)}
 
 
 def run_dynamic(graph: str, seed: int, repository: Path | None = None) -> str:

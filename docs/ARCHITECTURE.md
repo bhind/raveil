@@ -109,6 +109,17 @@ a fresh run directory. Read-back verifies a local artifact manifest and record
 digest. This detects later mutation for ordinary development use but is not a
 signed audit store or OS isolation boundary.
 
+ADR-0087 connects `graph-device` recipes to `rtl-sim` through the existing
+dynamic request compiler, offline Verilator runner and independent verifier.
+An editable descriptor under project inputs is captured once and bound to the
+input manifest, compiled program, execution receipt and retained output. A
+post-execution input-tree check rejects snapshot drift. The input remains
+deterministically generated from a uint32 seed. The full 256-word output
+window is retained alongside an active-row text view; run diff exposes program,
+simulator and RTL-manifest identities. Raw transport artifacts stay under the
+repository's dynamic evidence directory. No project path selects executable
+code, no hardware semantics change, and no persistent simulator cache is added.
+
 The repository POSIX launcher supplies the `raveil` command outside the
 checkout by prepending the checkout to Python's module path. Private-by-default
 project/run directories use mode `0700` and artifacts use `0600`; no-follow

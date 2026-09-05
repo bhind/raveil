@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0149 workspace integration is active; T-0148 continuation awaits that dependency. T-0148 predecessor, T-0150, T-0152 and T-0153 are technically integrated; S-0003 owner ceremony remains pending. |
-| **P1 — next** | Start only after its named P0 dependency passes. | Resume T-0149 integration after T-0148 predecessor integration and T-0152 regression disposition. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 continuation integration is active. T-0149, T-0148 predecessor, T-0150, T-0152 and T-0153 are technically integrated; S-0003 owner ceremony remains pending. |
+| **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -92,18 +92,18 @@ work, not canonical product completion. Historical root changes remain intact.
   succeeded after merge; this does not accept that ceremony or claim a GUI
   observation. Retain actual-app presentation feedback in S-0003.
 
-- [ ] **T-0149** Deliver the editable shell-first Raveil workspace, real
-  [Issue #116](https://github.com/bhind/raveil/issues/116), P0/In Progress,
+- [x] **T-0149** Deliver the editable shell-first Raveil workspace, real
+  [Issue #116](https://github.com/bhind/raveil/issues/116), Done,
   Experience Implementer with PM integration. Local candidate `31262f1` on
   `feat/t-0149-project-workspace` contains CLI, tests, launcher and local
-  ADR-0085; these are not integrated into this branch. Acceptance: actual
+  ADR-0085; integrated through PR #119, merge `3fb6b5c`. Acceptance: actual
   Mac/Linux edit-run-change-rerun-diff loop, retained recipe/input/run history,
   Native and separately labelled QEMU correctness, exact candidate review,
   test evidence, record reconciliation and merged PR. Blockers: predecessor
   candidate PR integration; T-0153 canonical recovery is complete. T-0148 predecessor
   is integrated in PR #118; T-0152 is resolved in PR #125.
-  Next primary product action: finish the verified current-main integration of the
-  workspace candidate. Preserve original dirty
+  Final integrated suite: 730 tests, two skips, no failures. Canonical completion
+  succeeded; S-0003 ceremony remains pending. Preserve original dirty
   `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
 
 - [ ] **T-0148** Integrate the existing signed-relative-load v3 simulation
@@ -123,6 +123,35 @@ alongside the T-0150 visual explanation. Forecasts do not accept implementation
 or change original Sprint assignment.
 
 ## Project entry point
+
+### T-0148/S02 continuation acceptance scope
+
+  Connect editable project Graphs to the existing dynamic
+  Chisel/Verilator path under ADR-0087. Owner-approved continuation of T-0148,
+  branch `feat/t-0148-project-dynamic-graph`, local worktree
+  `/private/tmp/raveil-t0148-s02`, based on reviewed local commits `bf81269`
+  and `31262f1`. The primary owns the coherent Python adapter/project/tests
+  change and record integration; Tester and Security Reviewer are read-only.
+  Acceptance: edit Graph JSON, inspect nodes/coordinates/dependencies, execute
+  through `project run neighborhood --backend rtl-sim`, change ADD to MAX and
+  a relative load, rerun, and observe retained output differences plus matching
+  simulator/RTL identities. Preserve v1/v2/v3 admission, oracle/C++ fallback/RTL
+  byte equality, initial snapshot identities and failed-run history. Stop
+  before opcode/capacity/Chisel/ABI changes, arbitrary input tensors, real
+  device, persistent cache or performance claims. Evidence classes: Host
+  Functional and RTL Simulation Functional. The owner approved the Issue
+  update after the initial automatic-review rejection. Issue #113 now retains
+  this continuation packet, the prior packet and the concurrent PR #118
+  inventory handoff; its body was reread and verified. This update claims no
+  third mutation lane or remote Done transition.
+  Local verification: three edited Graphs pass actual RTL/oracle/fallback
+  equality with identical simulator/RTL hashes; 86 focused tests pass and
+  independent Security review is GO. The final project display tests pass
+  26/26 on Mac and Linux. Continuation code publication/integration remains
+  pending in PR #123; predecessor PR #118 and workspace PR #119 are merged.
+  Current-main reconciliation passes 743 full tests (two skips), 54 independent
+  focused tests and 14 Linux parity tests. The branch-local ADR identifier is
+  explicitly reconciled as ADR-0087, preserving canonical inventory ADR-0086.
 
 The original local UIO defect labelled T-0150 is canonically T-0152/#117,
 now integrated. T-0150 remains the separate Garden task; retained dated logs
@@ -145,7 +174,7 @@ preserve the earlier allocation/authentication observation.
   Stop before arbitrary host command execution, production cache, hostile-code
   isolation, cross-backend speed comparison, new CPU/RTL semantics, FPGA,
   ASIC, silicon, novelty or commercial-readiness claims. Current real Issue
-  #116 is In Progress; the earlier local authentication observation is not
+  #116 is Done; the earlier local authentication observation is not
   current state and does not prevent canonical integration.
 
 ### T-0148 predecessor evidence (not whole-task completion)

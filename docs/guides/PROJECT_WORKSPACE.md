@@ -1,6 +1,6 @@
 # Raveil project workspace
 
-Status: T-0149 development guide
+Status: T-0149 and T-0148/S02 development guide
 
 This is the shell-first path for editing a small workload, seeing its Graph,
 running it more than once and comparing retained results. Use your normal
@@ -41,6 +41,52 @@ editor or command-line tools.
 Run history is cooperative local development evidence. The reader detects
 later artifact mutation, but this is not a signed audit log, production cache
 or hostile-code sandbox.
+
+## Edit and execute a hardware Graph in simulation
+
+New projects also contain `recipes/neighborhood.json` and
+`inputs/neighborhood.json`. The recipe selects the descriptor and uint32 seed;
+the descriptor defines the actual bounded Graph, not a catalogue demo name.
+
+```sh
+raveil project show neighborhood
+raveil project run neighborhood --backend rtl-sim
+```
+
+In your editor, change the `combine` node's `op` in
+`inputs/neighborhood.json` from `ADD_U32` to `MAX_U32`. Then:
+
+```sh
+raveil project show neighborhood
+raveil project run neighborhood --backend rtl-sim
+raveil project diff RUN_A RUN_B
+```
+
+For a third attempt, change the north load's `column_delta` from `0` to `1`
+while keeping `row_delta: -1`: it now reads the north-east neighbor. Node IDs
+are labels; the displayed coordinates determine the loaded cell. You can also
+change the recipe seed to vary the generated input grid.
+
+`run` verifies descriptor-oracle/C++-fallback/RTL byte equality and saves the
+receipt. Inspect `runs/RUN_ID/workspace/output.txt` for active rows and
+`output.bin` for the full 256-word little-endian transport window, including
+inactive cells. `runs/RUN_ID/generated-input.bin` retains all 324 input words.
+The descriptor and ordinary input files remain under the run's `inputs/` copy.
+`diff` reports changed nodes, the number of changed active cells, the first
+changed cell's values, and whether simulator/RTL/program hashes match.
+Input matrices are currently seed-generated, not loaded from arbitrary files.
+
+This path requires Docker running and the existing offline image/cache used by
+`graph-device dynamic-run`; it refuses network image builds. The runner
+rebuilds the same generic simulator per invocation, so allow a few minutes.
+It does not implement a persistent cache. This is RTL simulation correctness;
+it does not execute via Sonatine/QEMU or measure a physical FPGA.
+
+Supported Graphs retain the existing 16-instruction/eight-value limits,
+uint32 LOAD/ADD/MAX/STORE operations, baseline 16x16 or compact 8x8 profile,
+and one-cell relative halo. Unsupported Graphs fail before simulator launch
+and retain a failed project run. Detailed raw evidence stays in the printed
+repository artifact directory; the project history retains its receipt.
 
 ## Native and Sonatine GEMM
 

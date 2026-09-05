@@ -19,6 +19,50 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
+T-0148/S02 is a locally verified continuation on
+`feat/t-0148-project-dynamic-graph`, stacked on local commits `bf81269` and
+`31262f1`, now reconciled with main `3fb6b5c`. ADR-0087 (originally branch-local
+ADR-0086; identifier collision explicitly recorded) connects editable `graph-device` project recipes to the
+existing offline dynamic RTL executor via `--backend rtl-sim`. The project
+captures the descriptor once, compiles and executes those bytes, checks its
+receipt against the snapshot/program/output, retains the full input/output
+windows, and presents active rows plus changed nodes/cells in `project diff`.
+
+After integration with main `3fb6b5c`, full host discovery passes 743 tests
+with two skips and no failures. Independent focused tests pass 54/54 on Mac;
+Linux project parity passes 14/14 using the existing offline image. These are
+host/compatibility checks, not new RTL measurements. PR #123 is the remaining
+integration step; S-0003 review remains separately pending.
+
+Three actual project runs pass descriptor-oracle/C++-fallback/RTL byte equality:
+center+north addition, center/north maximum, then center/north-east maximum.
+The first edit changes 64/64 active cells, with cell (0,0) changing from
+2802362300 to 1788458059. The address edit changes 36/64 cells, with cell (0,0)
+changing to 3668339974. All three share simulator SHA-256
+`5be848283e8c0ba455b098f35c35daf2f1ea5afd3b34719660f0b2f92ca6f30b`
+and RTL-manifest SHA-256
+`13a274ff25e6b9d5c10ea225c376668d3a83ea2baef86f661a50940d892f3eb0`.
+The runner rebuilds the generic simulator each invocation; no persistent cache
+or physical/performance claim follows. Input data remains seed-generated.
+
+The primary focused suite passes 86 tests. Independent host verification
+passes 67 tests; Linux verification passes 65 with two C++-compiler-dependent
+skips in the existing container. After the final changed-node/cell display
+update, all 26 project tests pass on both macOS/Python 3.14.6 and
+network-disabled Debian 12 arm64/Python 3.11.2. Independent Security review is
+GO after a captured-snapshot mutation regression was fixed. The full-suite
+UIO source-scan failure originally recorded under local T-0150 was resolved
+as canonical T-0152 in PR #125. Integrated verification is recorded below.
+
+After explicit owner approval following the initial automatic-review
+rejection, the continuation packet and local verification handoff were written
+to Issue #113 and reread successfully. The prior packet and concurrently added
+inventory handoff are preserved verbatim. That handoff reports predecessor
+`bf81269` was published in PR #118, now merged. This continuation is published
+in PR #123; no merge or Done is asserted before final integration. The
+post-update live queue audit passes with one active and one pullable-Ready
+item. GitHub authentication is available.
+
 T-0109 reorganizes the root component summary and the canonical architecture
 map without changing executable behavior or an accepted boundary. The records
 now distinguish the portable owned thin waist, the two separate Graph surfaces,
@@ -42,8 +86,9 @@ remains open for the separate editable-Graph continuation. T-0149's technical
 predecessors are now integrated. T-0153 merged through PR #127 as `6fc6881`,
 adding explicit `--unblock-reason`, persisted with dependencies before Ready,
 with 70 passing queue/daily tests. T-0149 was canonically prepared and resumed
-with its original 13 points; current-main workspace integration is active. No automatic
-dependency inference, manual status bypass or workspace completion is claimed.
+with its original 13 points. PR #119 integrated the workspace as `3fb6b5c`;
+Issue #116 is closed and canonical completion succeeded. No automatic
+dependency inference or manual status bypass was used.
 
 The resumed workspace candidate rejects nonempty initialization before
 changing directory permissions. Fourteen project regressions pass on macOS
@@ -51,7 +96,7 @@ and network-disabled Linux. Actual Mac CLI editing changes retained log output
 2 -> 3 with a readable diff; independent file transforms, Native/QEMU GEMM,
 and QEMU console help/exit also pass. Host and QEMU evidence remain separate;
 full current-main discovery passes 730 tests with two skips and zero failures.
-Exact-head integration is pending.
+Workspace technical integration is complete; S-0003 owner ceremony remains pending.
 
 T-0150 is technically integrated through
 [PR #124](https://github.com/bhind/raveil/pull/124), merge `5ddf460`, implementation
@@ -799,9 +844,9 @@ PR #109 squash-merged the accepted branch as canonical commit
 `08ead0bb909aef1a94fc44784018a95c183b06a4`; Issue #106 is Closed and its
 Project item is Done.
 
-T-0149 is the in-progress shell-first playable workspace slice under local
-branch `feat/t-0149-project-workspace`; live Issue/Project creation is pending
-an expired GitHub credential and is not represented as complete coordination.
+T-0149 is integrated through PR #119, merge `3fb6b5c`; Issue #116 and its
+Project item are complete. Earlier authentication and publication gaps are
+historical observations, not current blockers.
 The current candidate adds `raveil project init|show|run|runs|diff|console` on
 top of the existing bounded Command Graph and GEMM backends. `init` creates
 editable log, independent-file-transform and 8-by-8 GEMM examples. Each run
@@ -824,8 +869,9 @@ Functional and QEMU Emulation Correctness observations only. Thirteen project
 tests and 70 project/Command-Graph/GEMM/Sonatine focused regressions pass with
 one existing opt-in skip. The 693-test discovery run has two skips and the
 unchanged pre-existing `test_graph_device_uio_dry_run` source-scan failure; no T-0149
-file participates. Tester, Security and hands-on UX review are GO; remote
-integration remains pending.
+file participated. That historical failure is resolved by T-0152. Final
+current-main workspace discovery passes 730 tests with two skips and no
+failures. Tester, Security and hands-on UX review are GO; integration is complete.
 
 T-0148 is the verified simulation-first Graph generality slice under real Issue
 #113 and branch `feat/t-0148-relative-load-v3`. ADR-0084 keeps descriptor-v1

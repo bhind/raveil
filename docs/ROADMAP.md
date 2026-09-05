@@ -9,11 +9,11 @@ prototype does not waive an earlier correctness or reproducibility gate.
 ## 2026-09-05 operational priority reconciliation
 
 The editable Raveil working environment is the next primary product outcome.
-T-0149 already has a local candidate and is now tracked as Issue #116, Blocked
-until predecessor/candidate PR integration and regression disposition. T-0148
-is an existing simulation candidate, not authorization for more primary RTL
-scope; T-0151 handles PM inventory/daily operations separately. T-0150 Garden
-feedback follows the usable workspace. The phase table now reflects these live
+T-0149 is integrated through PR #119 (`3fb6b5c`); Issue #116 is Done.
+T-0148's predecessor is integrated through PR #118 and its editable-Graph
+continuation is undergoing final PR #123 integration, not authorization for
+more primary RTL scope. T-0151 inventory/daily operations and T-0150 Garden
+feedback are integrated. The phase table now reflects these live
 items instead of claiming no P0. T-0147 is complete on canonical `82b196c`;
 older chronological references below to its active correction describe its
 pre-closeout state. No research gate changes in this inventory.
@@ -29,7 +29,7 @@ and physical work still requires reviewed common memory views.
 
 ## Current research reset and delivery focus
 
-State: **T-0149 composes a playable shell-first workspace; T-0148 and physical research remain preserved as separate evidence lines**
+State: **T-0148/S02 connects editable project Graphs to RTL simulation; physical research remains preserved**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -45,6 +45,13 @@ first gate is an editable project that retains exact run inputs and outputs,
 shows the Graph, compares two user-modified runs, and performs the same command
 grammar on macOS and Linux. This is a one-to-two-week playable slice, not a
 user-research-only exercise or a performance claim.
+
+The owner-selected next increment is T-0148/S02: connect that workspace to
+the existing dynamic RTL Graph executor. Its exit is an editable Graph
+operation/address change, repeated verified RTL execution, readable output
+differences and matching simulator/RTL identities. The compiler/ISA capacity
+and physical gates do not change; a broader language remains a later choice
+informed by actual authoring friction.
 
 The simulation research line remains preserved rather than discarded:
 

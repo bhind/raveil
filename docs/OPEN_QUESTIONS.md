@@ -105,9 +105,10 @@ resolves it.
   Project scope card is deferred, with T-0106/T-0044 as the existing remaining
   outcomes. PM must reconcile the intended remaining scope before any research
   resumption; neither workspace delivery nor this audit closes that question.
-- Local T-0148/T-0149 records and the daily T-0151 candidate remain outside
-  canonical main. Their integration must preserve independent edits and remap
-  the local UIO-defect T-0150 to T-0152. Historical Done draft cards have varying
+- T-0149, T-0148 predecessor and T-0151 are integrated on main; only the
+  editable-Graph PR #123 remains under integration. Independent edits are
+  preserved, the UIO defect is canonical T-0152, and the Graph decision's
+  colliding local ADR-0086 is explicitly reconciled as ADR-0087. Historical Done draft cards have varying
   evidence locators; the inventory records missing receipts rather than
   certifying them from their status alone.
 
@@ -494,6 +495,11 @@ resolves it.
   output inspection, run selection, or the Native/Sonatine boundary? The next
   product slice must follow observed hands-on use rather than adding commands
   speculatively.
+- T-0148/S02 connects authoring to the dynamic RTL path. Which observed limit
+  should the next Graph increment address first: the 16-instruction ceiling,
+  a missing arithmetic operation, seed-only input data, or simulator startup
+  latency? Selection requires hands-on evidence; this slice authorizes no
+  broader opcode set, input protocol, persistent cache or capacity change.
 - Should local run history eventually gain human labels, a compact content
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor

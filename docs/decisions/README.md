@@ -88,3 +88,4 @@ rewrite it.
 | [ADR-0084](ADR-0084-simulation-generality-precedes-physical-integration.md) | Accepted | Versioned signed relative loads advance simulation generality before physical integration |
 | [ADR-0085](ADR-0085-shell-first-project-workspaces-are-the-playable-entry.md) | Accepted | Shell-first project workspaces are the playable Raveil entry |
 | [ADR-0086](ADR-0086-project-inventory-and-session-sync-are-required.md) | Accepted | Mandatory initial inventory and same-session Project synchronization; canonical authority unchanged |
+| [ADR-0087](ADR-0087-editable-project-graphs-use-the-dynamic-rtl-path.md) | Accepted | Editable project Graphs use the existing dynamic RTL path; branch-local identifier reconciled explicitly |
