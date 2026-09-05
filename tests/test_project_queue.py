@@ -676,5 +676,129 @@ class ProjectQueueAuditTest(unittest.TestCase):
         self.assertNotIn("Status", writes)
 
 
+
+class ProjectInventoryReadTests(unittest.TestCase):
+    def node(self, identity="item-1", **content):
+        return {"id": identity, "content": {"__typename": "Issue", "id": "I_1", "number": 1,
+                "title": "T-0001 — test", "url": "https://github.com/bhind/raveil/issues/1", **content},
+                "fieldValues": {"pageInfo": {"hasNextPage": False}, "nodes": []}}
+
+    def page(self, nodes, total=None, more=False, cursor=None):
+        return {"data": {"node": {"items": {"totalCount": len(nodes) if total is None else total,
+                "nodes": nodes, "pageInfo": {"hasNextPage": more, "endCursor": cursor}}}}}
+
+    def read(self, pages):
+        queue = ProjectQueue("bhind", "bhind/raveil", 1)
+        with patch.object(queue, "project_identity", return_value="P_1"), patch(
+            "scripts.project_queue.gh_json", side_effect=pages
+        ) as query:
+            result = queue.project()
+        return result, query
+
+    def test_multiple_pages_and_queue_field_normalization(self):
+        first = self.node()
+        first["fieldValues"]["nodes"] = [
+            {"text": "T-0001 — test", "field": {"name": "Title"}},
+            {"name": "Review", "field": {"name": "Status"}},
+            {"text": "T-0001", "field": {"name": "Parent T-ID"}},
+            {"number": 0, "field": {"name": "Story Points"}},
+            {"date": "2026-09-05", "field": {"name": "Forecast Date"}},
+            {"title": "S-0003", "startDate": "2026-09-07", "duration": 7,
+             "iterationId": "it-3", "field": {"name": "Sprint"}}, {},
+        ]
+        result, query = self.read([self.page([first], 2, True, "next"),
+                                   self.page([self.node("item-2")], 2)])
+        self.assertEqual(result["totalCount"], 2)
+        row = result["items"][0]
+        self.assertEqual((row["status"], row["parent T-ID"], row["story Points"]), ("Review", "T-0001", 0))
+        self.assertEqual(row["sprint"]["iterationId"], "it-3")
+        self.assertEqual(row["content"]["type"], "Issue")
+        self.assertIn("cursor=next", query.call_args_list[1].args[0])
+
+    def test_preserves_draft_and_redacted_identity(self):
+        draft = self.node(); draft["content"] = {"__typename": "DraftIssue", "id": "D_1", "title": "T-0001", "body": "deferred"}
+        redacted = self.node("item-2"); redacted["content"] = None
+        result, _ = self.read([self.page([draft, redacted])])
+        self.assertEqual(result["items"][0]["content"]["body"], "deferred")
+        self.assertEqual(result["items"][1]["content"]["type"], "Redacted")
+
+    def test_rejects_partial_or_drifting_inventory(self):
+        cases = [
+            [self.page([self.node()], 2)],
+            [self.page([self.node()], 2, True, "a"), self.page([self.node("item-2")], 3)],
+            [self.page([self.node()], 2, True, "a"), self.page([self.node()], 2)],
+            [self.page([], 1, True, "a")],
+            [self.page([self.node()], 3, True, "a"), self.page([self.node("item-2")], 3, True, "a")],
+            [self.page([], 1001)],
+            [{"errors": [{"message": "rate limit"}], "data": {"node": None}}],
+        ]
+        for pages in cases:
+            with self.subTest(pages=pages), self.assertRaises(QueueError): self.read(pages)
+
+    def test_rejects_truncated_or_duplicate_fields(self):
+        node = self.node(); node["fieldValues"]["pageInfo"]["hasNextPage"] = True
+        with self.assertRaises(QueueError): self.read([self.page([node])])
+        node = self.node(); node["fieldValues"]["nodes"] = [{"name": "Done", "field": {"name": "Status"}}] * 2
+        with self.assertRaises(QueueError): self.read([self.page([node])])
+
+    def test_api_error_propagates_without_returning_partial_items(self):
+        with self.assertRaisesRegex(QueueError, "rate limit"):
+            self.read([self.page([self.node()], 2, True, "a"), QueueError("rate limit")])
+
+
+class ProjectFieldReadTests(unittest.TestCase):
+    def read(self, nodes, more=False):
+        queue = ProjectQueue("bhind", "bhind/raveil", 1)
+        payload = {"data": {"node": {"fields": {
+            "nodes": nodes, "pageInfo": {"hasNextPage": more}
+        }}}}
+        with patch.object(queue, "project_identity", return_value="P_1"), patch(
+            "scripts.project_queue.gh_json", return_value=payload
+        ):
+            return queue.fields()
+
+    def test_normalizes_schema_and_preserves_option_ids(self):
+        rows = [
+            {"__typename": "ProjectV2Field", "id": "F_1", "name": "Story Points"},
+            {"__typename": "ProjectV2SingleSelectField", "id": "F_2", "name": "Status",
+             "options": [{"id": "O_1", "name": "Review"}]},
+            {"__typename": "ProjectV2IterationField", "id": "F_3", "name": "Sprint"},
+        ]
+        fields = self.read(rows)
+        self.assertEqual(ProjectQueue.option_id(fields["Status"], "Review"), "O_1")
+        self.assertEqual(fields["Sprint"]["type"], "ProjectV2IterationField")
+        self.assertEqual(fields["Story Points"]["id"], "F_1")
+
+    def test_refuses_truncated_duplicate_or_malformed_schema(self):
+        field = {"__typename": "ProjectV2Field", "id": "F_1", "name": "Status"}
+        for nodes, more in [([field], True), ([field, field], False), ([{}], False)]:
+            with self.subTest(nodes=nodes, more=more), self.assertRaises(QueueError):
+                self.read(nodes, more)
+
+
+    def test_malformed_option_metadata_blocks_start_before_any_edit(self):
+        one_issue = issue(27, "T-0125 — Playable")
+        project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
+        cases = [
+            {"id": 7, "name": "Chisel Implementer"},
+            {"id": "", "name": "Chisel Implementer"},
+            {"id": "O_1", "name": 7},
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
+                bad_schema = [{"__typename": "ProjectV2SingleSelectField", "id": "F_1",
+                               "name": "Owner Role", "options": [option]}]
+                with patch.object(queue, "fields", side_effect=lambda: self.read(bad_schema)):
+                    with self.assertRaises(QueueError): start(queue, start_args())
+                self.assertEqual(queue.edits, [])
+        with self.assertRaises(QueueError):
+            self.read([{"__typename": "ProjectV2Field", "id": 7, "name": "Status"}])
+        for options in (None, "invalid", [{"id": "O_1", "name": "Review"}] * 2):
+            with self.assertRaises(QueueError):
+                self.read([{"__typename": "ProjectV2SingleSelectField", "id": "F_1",
+                            "name": "Status", "options": options}])
+
+
 if __name__ == "__main__":
     unittest.main()

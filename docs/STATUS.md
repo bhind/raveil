@@ -51,6 +51,30 @@ owner-visible bounded-generality demonstration requested for S-0003 review
 on 2026-09-12. Ceremony acceptance neither completes these tasks nor changes
 an ADR, EXP or roadmap gate.
 
+## 2026-09-05 Project inventory observation
+
+ADR-0086 requires initial and session-level Project synchronization. The
+[dated receipt](guides/PROJECT-INVENTORY-2026-09-05.md) distinguishes integrated
+main `82b196c`, local T-0148/T-0149 candidates, dirty historical T-0042 donor
+files and the independent uncommitted T-0151 daily implementation. None of
+those candidates is promoted to implemented-on-main by this inventory.
+GitHub access works through the authorized network boundary. T-0149 is now
+registered as Issue #116; the local UIO-defect/Garden T-0150 collision is
+resolved in this inventory as defect T-0152 / Issue #117 and Garden
+T-0150 / Issue #114. The donor records still need this remapping at their PR
+integration. Canonical `tests.test_graph_device_uio_dry_run` reproduces three
+tests with one failure at the blanket `os.open` source ban; no workspace code
+is involved. This is Host Functional diagnostic evidence, not device behavior.
+
+
+T-0151's inventory branch additionally replaces the queue's stock CLI Project
+read with explicit GraphQL fields and cursor pagination. It retains the same
+normalized queue inputs and unchanged lifecycle validators. It refuses changing
+counts, duplicate items/cursors/fields, truncated field pages, API errors and
+inventories beyond 1000 items instead of accepting a partial read. Forty-seven
+queue tests pass, including eight new item/schema read-boundary tests. This correction merged through PR #121 as `75bf275` and is not a
+delivery-speed measurement.
+
 ## Development workflow support
 
 Repository-scoped Project Manager, three Implementer, Tester, Performance
@@ -209,10 +233,11 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The live Project after S-0001 conditional acceptance contains 58 items and 37
+The historical Project snapshot after S-0001 conditional acceptance contained 58 items and 37
 fields: 26 Backlog, no Ready item, one Blocked, 30 Done, one In Progress, and
-no Review item. T-0132/S01 is the sole active delivery item. T-0135 remains
-Backlog and has not started. The visible Story
+no Review item. At that historical snapshot T-0132/S01 was the sole active delivery item and T-0135
+was unstarted Backlog. Current coordination is the live Project and the dated
+2026-09-05 inventory. The visible Story
 Points assigned across all historical
 Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
 retained planning items and are not the current delivery load. S-0003 is no
