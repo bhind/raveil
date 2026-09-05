@@ -35,6 +35,15 @@ executable identifier.
 
 ## 2026-09-05 owner-visible review
 
+T-0148's relative-load predecessor is integrated via PR #118, merge `1e17dab`,
+after current-main reconciliation and 710 passing host tests (two skips).
+The previously retained RTL functional evidence is unchanged. Issue #113
+remains open for the separate editable-Graph continuation. T-0149's technical
+predecessors are now integrated, but canonical preparation rejects its Blocked
+state. T-0153's candidate adds explicit `--unblock-reason`, persisted with
+dependencies before Ready, and passes 70 queue/daily tests. No automatic
+dependency inference, manual status bypass or workspace completion is claimed.
+
 T-0150 is technically integrated through
 [PR #124](https://github.com/bhind/raveil/pull/124), merge `5ddf460`, implementation
 `80b2006ce41f059aa93546325459ead5f14c0764`, on
@@ -68,7 +77,7 @@ must not be counted as newly completed September implementation.
 
 T-0150 retains the owner's visual-explanation feedback. T-0151 implements the
 requested daily Project reconciliation and actual-date reporting. T-0148's
-independent relative-load candidate remains unintegrated here, with its
+independent relative-load predecessor is now integrated, with its
 owner-visible bounded-generality demonstration requested for S-0003 review
 on 2026-09-12. Ceremony acceptance neither completes these tasks nor changes
 an ADR, EXP or roadmap gate.

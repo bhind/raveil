@@ -721,10 +721,20 @@ def prepare(queue: ProjectQueue, args: argparse.Namespace) -> int:
     item = queue.find_item(project, issue["url"])
     if item is None:
         raise QueueError("Issue must be linked to the Project before prepare")
-    if item.get("status") not in {None, "", "Backlog", READY_STATUS}:
+    status = item.get("status")
+    unblock_reason = getattr(args, "unblock_reason", "")
+    if status == "Blocked" and not unblock_reason.strip():
+        raise QueueError("prepare requires a nonblank --unblock-reason for Blocked work")
+    depends_on = args.depends_on
+    if unblock_reason.strip():
+        depends_on += f"\nUnblock reason: {unblock_reason.strip()}"
+    if status not in {None, "", "Backlog", "Blocked", READY_STATUS}:
         raise QueueError(
-            "prepare requires an unset/Backlog status (or idempotent Ready)"
+            "prepare requires an unset/Backlog/Blocked status (or idempotent Ready)"
         )
+    if status == READY_STATUS and unblock_reason.strip():
+        if item.get("depends On") != depends_on:
+            raise QueueError("prepare cannot rewrite the Ready successor unblock reason")
     other_ready = [
         entry
         for entry in project.get("items", [])
@@ -762,7 +772,7 @@ def prepare(queue: ProjectQueue, args: argparse.Namespace) -> int:
         "Priority": "P1",
         "Parent T-ID": issue_tid,
         "Owner Role": args.owner_role,
-        "Depends On": args.depends_on,
+        "Depends On": depends_on,
         "Sprint": sprint_id,
         "Initial SP": args.story_points,
         "Story Points": args.story_points,
@@ -952,6 +962,7 @@ def parser() -> argparse.ArgumentParser:
     prepare_parser.add_argument("--story-points", type=int, required=True)
     prepare_parser.add_argument("--demo", required=True)
     prepare_parser.add_argument("--evidence-class", required=True)
+    prepare_parser.add_argument("--unblock-reason", default="")
     prepare_parser.add_argument("--apply", action="store_true")
     prepare_parser.set_defaults(handler=prepare)
 

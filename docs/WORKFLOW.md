@@ -380,6 +380,13 @@ evaluate and pull one ready next-Sprint item through the canonical queue;
 Monday is not a wait boundary. Sunday remains a bounded recovery and record-
 reconciliation buffer, not a license to add scope to the reviewed Sprint.
 
+For a resolved Blocked task, the PM must retain the clearing evidence and use
+canonical `prepare --unblock-reason 'EXACT CLEARING CONDITION'` before `start`.
+The explicit reason is stored with dependency metadata before Ready; it is a
+PM statement supported by verified evidence, never inferred dependency
+completion. Existing packet, Initial SP, audit and readiness checks still
+apply. Keep that clearing reason in the dated log when starting the task.
+
 Use `raveil-sprint-operator` for every Sprint status, kickoff, continuation,
 correction, horizon replenishment, review, closeout, retrospective, and
 next-pull boundary. The skill standardizes the audit and handoff receipt while

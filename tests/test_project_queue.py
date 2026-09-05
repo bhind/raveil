@@ -15,6 +15,7 @@ from scripts.project_queue import (
     closing_reference,
     complete,
     missing_packet_markers,
+    parser,
     prepare,
     pullable_ready_items,
     task_id,
@@ -175,8 +176,10 @@ def start_args(*, apply: bool = True) -> argparse.Namespace:
     )
 
 
-def prepare_args(*, apply: bool = True) -> argparse.Namespace:
-    return start_args(apply=apply)
+def prepare_args(*, apply: bool = True, unblock_reason: str = "") -> argparse.Namespace:
+    args = start_args(apply=apply)
+    args.unblock_reason = unblock_reason
+    return args
 
 
 def audit_args(*, require_horizon: bool) -> argparse.Namespace:
@@ -282,6 +285,76 @@ class ProjectQueueAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(QueueError, "cannot rewrite Initial SP"):
             prepare(queue, prepare_args())
         self.assertEqual([], queue.edits)
+
+    def test_prepare_unblocks_with_explicit_reason_before_ready(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        blocked = item(27, one_issue["title"], "Blocked", "T-0125")
+        blocked["initial SP"] = 5
+        queue = FakeQueue({"items": [blocked]}, [one_issue], "main")
+        reason = "T-0124 dependency verified at merged PR #30"
+        args = prepare_args(unblock_reason=reason)
+        args.depends_on = "T-0124"
+        combined = f"T-0124\nUnblock reason: {reason}"
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, prepare(queue, args))
+        self.assertIn(("item-27", "Depends On", combined), queue.edits[:-1])
+        self.assertEqual(("item-27", "Status", "Ready"), queue.edits[-1])
+
+    def test_prepare_blocked_requires_nonblank_reason_without_writes(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        blocked = item(27, one_issue["title"], "Blocked", "T-0125")
+        for reason in ("", "  "):
+            with self.subTest(reason=reason):
+                queue = FakeQueue({"items": [blocked]}, [one_issue], "main")
+                with self.assertRaisesRegex(QueueError, "nonblank --unblock-reason"):
+                    prepare(queue, prepare_args(unblock_reason=reason))
+                self.assertEqual([], queue.edits)
+
+    def test_prepare_blocked_preserves_initial_points_without_writes(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        blocked = item(27, one_issue["title"], "Blocked", "T-0125")
+        blocked["initial SP"] = 8
+        queue = FakeQueue({"items": [blocked]}, [one_issue], "main")
+        with self.assertRaisesRegex(QueueError, "cannot rewrite Initial SP"):
+            prepare(queue, prepare_args(unblock_reason="dependency verified"))
+        self.assertEqual([], queue.edits)
+
+    def test_prepare_ready_retry_with_same_unblock_reason_is_idempotent(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        ready = item(27, one_issue["title"], "Ready", "T-0125")
+        ready["priority"] = "P1"
+        ready["initial SP"] = 5
+        reason = "T-0124 dependency verified at merged PR #30"
+        args = prepare_args(unblock_reason=reason)
+        args.depends_on = "T-0124"
+        combined = f"T-0124\nUnblock reason: {reason}"
+        ready["depends On"] = combined
+        queue = FakeQueue({"items": [ready]}, [one_issue], "main")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, prepare(queue, args))
+        self.assertIn(("item-27", "Depends On", combined), queue.edits[:-1])
+        self.assertEqual(("item-27", "Status", "Ready"), queue.edits[-1])
+
+    def test_prepare_rejects_invalid_status_even_with_unblock_reason(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        active = item(27, one_issue["title"], "In Progress", "T-0125")
+        queue = FakeQueue({"items": [active]}, [one_issue], "main")
+        with self.assertRaisesRegex(QueueError, "unset/Backlog/Blocked"):
+            prepare(queue, prepare_args(unblock_reason="dependency verified"))
+        self.assertEqual([], queue.edits)
+
+    def test_prepare_parser_defaults_and_accepts_unblock_reason(self) -> None:
+        common = [
+            "prepare", "27", "--owner-role", "Chisel Implementer",
+            "--depends-on", "T-0124", "--sprint", "S-0001",
+            "--story-points", "5", "--demo", "./demo.sh",
+            "--evidence-class", "Host Functional",
+        ]
+        self.assertEqual("", parser().parse_args(common).unblock_reason)
+        self.assertEqual(
+            "dependency verified",
+            parser().parse_args(common + ["--unblock-reason", "dependency verified"]).unblock_reason,
+        )
 
     def test_accepts_two_real_issue_lanes_and_matching_branch(self) -> None:
         issues = [issue(27, "T-0125 — Playable"), issue(28, "T-0126 — Queue")]
