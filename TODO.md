@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 existing candidate review/integration; T-0152 is the sole new code mutation. T-0149 remains Blocked on integration and regression disposition; T-0150 is technically integrated, with S-0003 owner ceremony pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 candidate integration is the primary work. T-0149 remains Blocked on predecessor integration; T-0152 regression is integrated and T-0150 is technically integrated, with S-0003 owner ceremony pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Resume T-0149 integration after T-0148 predecessor integration and T-0152 regression disposition. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -32,8 +32,8 @@ review and failure preservation do not consume the two-item delivery limit.
 T-ID to its item. These additions describe unintegrated candidates and live
 work, not canonical product completion. Historical root changes remain intact.
 
-- [ ] **T-0152** Reconcile the UIO no-device source-scan regression, real
-  [Issue #117](https://github.com/bhind/raveil/issues/117), P0/In Progress, Systems
+- [x] **T-0152** Reconcile the UIO no-device source-scan regression, real
+  [Issue #117](https://github.com/bhind/raveil/issues/117), Done, Systems
   Implementer with PM acceptance. This replaces only the colliding local
   T-0150 defect identifier in `feat/t-0149-project-workspace`; live T-0150
   remains Garden feedback. Reproduce `tests.test_graph_device_uio_dry_run`,
@@ -45,8 +45,8 @@ work, not canonical product completion. Historical root changes remain intact.
   `5ddf460`, limits source mutation to `tests/test_graph_device_uio_dry_run.py`.
   Candidate behavior guards pass 6 focused tests, 20 independent UIO/sealed
   tests and full discovery (704 tests, two skips, zero failures).
-  Next: exact-head PR review and integration. Coordinate its
-  disposition before T-0149 closeout. No device/MMIO or product/RTL expansion.
+  Integrated via PR #125, merge `2a4da77`; canonical completion succeeded.
+  The T-0149 regression blocker is cleared. No device/MMIO or product/RTL expansion.
 
 - [x] **T-0151** Reconcile initial inventory and daily Project delivery without
   owner reminders. [Issue #115](https://github.com/bhind/raveil/issues/115),
@@ -69,7 +69,7 @@ work, not canonical product completion. Historical root changes remain intact.
   non-TTY output, unchanged read-only/validation boundaries. Depends on T-0135
   and T-0144. On owner direction to delegate publication and continue work,
   pulled the existing Ready item through the canonical queue. Branch
-  `feat/t-0150-garden-fusion-view` at `/private/tmp/raveil-t0150-garden` has a
+  `feat/t-0150-garden-fusion-view` at `/private/tmp/raveil-t0150-garden` has an
   implementation merged in [PR #124](https://github.com/bhind/raveil/pull/124)
   as `5ddf460`: default side-by-side comparison with selected-stage marks,
   removed intermediate WRITE/READ, `d` for existing details, and redraw only
@@ -88,7 +88,7 @@ work, not canonical product completion. Historical root changes remain intact.
   Mac/Linux edit-run-change-rerun-diff loop, retained recipe/input/run history,
   Native and separately labelled QEMU correctness, exact candidate review,
   test evidence, record reconciliation and merged PR. Blockers: predecessor
-  T-0148 and candidate PR integration, plus T-0152 regression disposition.
+  T-0148 predecessor and candidate PR integration. T-0152 is resolved in PR #125.
   Next primary product action: publish/review the ordered candidate PRs and
   resolve the regression boundary. Preserve original dirty
   `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
@@ -109,6 +109,29 @@ alongside the T-0150 visual explanation. Forecasts do not accept implementation
 or change original Sprint assignment.
 
 ## Project entry point
+
+### T-0148 predecessor evidence (not whole-task completion)
+
+  Add versioned signed relative `LOAD_U32` coordinates to the
+  simulation Graph path. Real Issue #113, branch
+  `feat/t-0148-relative-load-v3`, Chisel Implementer, 13 SP, Sprint S-0002 and
+  RTL Simulation evidence own descriptor schema v2, program/request v3, one
+  eight-neighbor dilation fixture, compiler/oracle, independent C++ fallback,
+  RTL admission/execution, focused regressions, ADR-0084 and matching records.
+  Version 3 embeds signed row/column deltas in each load and initially admits
+  only the existing one-cell halo `[-1,1]`; v1/v2 bytes and fixed five-selector
+  semantics remain unchanged. The exact 16-instruction fixture must pass one
+  generic AXI4-Lite Verilator image with oracle/fallback/RTL byte equality.
+  Nine-input binary reduction is excluded because it needs 18 instructions
+  under the unchanged alphabet. Stop before Garden, another opcode/version,
+  scheduler, performance/resources, device/UIO, vendor tools, FPGA, ASIC or
+  silicon. Forty-one focused compiler/request/sealed/host-C++ tests pass. The
+  eight-neighbor v3 run and a v1/v2 compatibility pair both pass one generic
+  AXI4-Lite Verilator image with simulator SHA-256 `5be84828...f30b`; the v3
+  output/oracle/fallback SHA-256 is `204c0d4f...64f1`. The RTL installer rejects
+  an out-of-halo v3 load and publishes no output. Evidence is RTL Simulation
+  Functional only and performance is not measured. The existing sealed/UIO
+  projection remains v1/v2-only and rejects v3 before bundle materialization.
 
 - [x] **T-0147** Make merged-task Project closeout one canonical, fail-closed
   transition. T-0145 / PR #109 merged and its Issue closed, but the Project item

@@ -12,6 +12,7 @@ from raveil.graph_device_dynamic_sealed import GraphDeviceDynamicSealError, run_
 ROOT = Path(__file__).resolve().parents[1]
 GRAPH = "tests/fixtures/graph_device_dynamic/fanout-five-live.json"
 MAX_GRAPH = "tests/fixtures/graph_device_dynamic/cross-dilation-u32.json"
+RELATIVE_GRAPH = "tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json"
 
 
 class GraphDeviceDynamicSealedTests(unittest.TestCase):
@@ -53,6 +54,15 @@ class GraphDeviceDynamicSealedTests(unittest.TestCase):
             forged = v2.with_name(digest); v2.rename(forged)
             with self.assertRaisesRegex(GraphDeviceDynamicSealError, "version pair"):
                 verify(forged, ROOT)
+
+    def test_v3_is_rejected_before_sealed_transport_materialization(self):
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "raveil.graph_device_dynamic_sealed._sealed_parent",
+            return_value=Path(directory).resolve(),
+        ):
+            with self.assertRaisesRegex(GraphDeviceDynamicSealError, "version 3 remains simulation-only"):
+                seal(RELATIVE_GRAPH, 9, ROOT)
+            self.assertEqual(list(Path(directory).iterdir()), [])
 
     def test_each_inventory_byte_fails_closed(self):
         for name in ("program.bin", "affine.bin", "input.bin", "seed-1.bin", "oracle.bin", "descriptor.json", "request.bin", "source.manifest", "graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_dag_generated.h", "graph_device_axi4lite_aperture_generated.h", "manifest.json", "SEALED"):

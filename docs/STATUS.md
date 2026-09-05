@@ -88,10 +88,10 @@ integration. Canonical `tests.test_graph_device_uio_dry_run` reproduces three
 tests with one failure at the blanket `os.open` source ban; no workspace code
 is involved. This is Host Functional diagnostic evidence, not device behavior.
 
-T-0152 is now the bounded active successor on
-`fix/t-0152-uio-no-device-regression`, based on `5ddf460`. Its implementation
+T-0152 is integrated through PR #125, merge `2a4da77`, and canonically Done.
+`fix/t-0152-uio-no-device-regression` was based on `5ddf460`. Its implementation
 allowlist is the dry-run test file and serial PM records only. Runtime device
-access remains unauthorized. The test-only candidate scopes the static scan to
+access remains unauthorized. The test-only correction scopes the static scan to
 the pure planner and observes the named Python open/mapping APIs around the
 planner and injected verified handoff. It allows real repository and sealed
 file reads, rejects canonical device calls before delegation, and checks one
@@ -780,6 +780,27 @@ energy, production-security, product-readiness, ASIC or silicon evidence.
 PR #109 squash-merged the accepted branch as canonical commit
 `08ead0bb909aef1a94fc44784018a95c183b06a4`; Issue #106 is Closed and its
 Project item is Done.
+
+T-0148 is the verified simulation-first Graph generality slice under real Issue
+#113 and branch `feat/t-0148-relative-load-v3`. ADR-0084 keeps descriptor-v1
+and program/request-v1/v2 bytes and semantics unchanged while assigning
+descriptor-v2 plus program/request-v3 to signed `LOAD_U32` row/column deltas
+inside the existing 32-bit word. The admitted delta range is initially the
+existing one-cell halo `[-1,1]`; no new device ABI or AXI namespace is added.
+The acceptance fixture is exactly 16 instructions over the eight non-center
+3-by-3 neighbors. A complete nine-input binary reduction is explicitly outside
+the unchanged capacity because it needs 18 instructions. Forty-one focused tests
+pass, including Python compiler/oracle/fallback, C++ request admission and
+v1/v2 sealed regressions. The v3 run completes at output/oracle/fallback
+SHA-256 `204c0d4f6a480ecef869427d0ab4f86cecee0b2319d08ce4eab05e6eace364f1`.
+The old v1 five-point and v2 cross-dilation programs also pass back-to-back.
+All three versions use simulator SHA-256
+`5be848283e8c0ba455b098f35c35daf2f1ea5afd3b34719660f0b2f92ca6f30b`.
+The v3 RTL installer separately rejects an out-of-halo load as `FAULT` with
+`output_published=0`. This changes no performance, resource, device/UIO, FPGA,
+ASIC, silicon, novelty or patent conclusion.
+The sealed/UIO projection remains v1/v2-only: attempting to seal a v3
+descriptor is rejected before a transport bundle is materialized.
 
 The branch implementation preserves legacy Garden snapshot behavior and adds
 one strict `raveil.garden-dynamic-explanation/v1` fixture for the retained

@@ -85,5 +85,5 @@ rewrite it.
 | [ADR-0081](ADR-0081-garden-projects-compiler-owned-execution-explanations.md) | Accepted | Garden validates and projects a compiler-owned bounded execution explanation without authority |
 | [ADR-0082](ADR-0082-rolling-p0-horizon-prevents-idle-delivery.md) | Accepted | A rolling P0 horizon prepares a bounded successor before delivery becomes idle |
 | [ADR-0083](ADR-0083-verified-sealed-payloads-are-projected-before-uio-open.md) | Accepted | Verified sealed payloads enter a private projection and no-device host adapter before UIO wiring |
-
+| [ADR-0084](ADR-0084-simulation-generality-precedes-physical-integration.md) | Accepted | Versioned signed relative loads advance simulation generality before physical integration |
 | [ADR-0086](ADR-0086-project-inventory-and-session-sync-are-required.md) | Accepted | Mandatory initial inventory and same-session Project synchronization; canonical authority unchanged |

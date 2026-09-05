@@ -1064,3 +1064,25 @@ output equality. This is RTL Simulation Functional evidence only. Instruction
 counts are conformance facts, `polls=` is not cycles or time, and performance,
 area and energy are not measured. No general Graph, CGRA/VLIW, UIO device,
 FPGA/KV260, ASIC or silicon result follows.
+
+### Versioned signed relative loads
+
+T-0148 adds descriptor schema v2 and program/request version 3. Each v3
+`LOAD_U32` carries signed five-bit row and column deltas directly in the
+instruction; admission currently restricts both to `-1`, `0`, or `1`, matching
+the existing one-cell halo. Versions 1 and 2 keep their byte-identical
+center/north/south/west/east selector semantics and all three transport ABIs
+remain unchanged.
+
+```sh
+python3 -m raveil graph-device dynamic-run \
+  --descriptor tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json \
+  --seed 9
+```
+
+The exact-capacity fixture uses eight relative loads, seven unsigned maxima
+and one store. A nine-input binary reduction would require 18 instructions and
+is not claimed under the 16-instruction limit. The command requires independent
+descriptor oracle, validated C++ fallback and RTL output equality on one
+generic AXI4-Lite Verilator image. This is RTL Simulation Functional evidence;
+performance is not measured and no device, FPGA, ASIC or silicon result follows.
