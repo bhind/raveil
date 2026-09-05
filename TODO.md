@@ -4,6 +4,15 @@ Last updated: 2026-09-05
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
+  Project with progress views and standard Insights while preserving the
+  repository as authority. Issue #135 and branch
+  `chore/t-0158-project-insights` own this cross-gate Operations slice in
+  S-0003 (3 SP). Four progress fields and seven saved views are live. Verify
+  the standard Burn up and configure remaining saved Insights in the GitHub
+  UI; the public API exposes view but not chart mutation. Do not enable hosted
+  Actions or Pages without a separate owner decision.
+
 ## Start timing phases
 
 This table, together with each task's own trigger text, governs when unfinished

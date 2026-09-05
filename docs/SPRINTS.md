@@ -9,6 +9,20 @@ runnable increment every week. Project items coordinate work; they never
 override executable evidence, stable T-IDs, ROADMAP gates, accepted ADRs, or
 EXP contracts.
 
+T-0158 adds progress views: `Current iteration` (`Sprint:@current`), `Backlog`,
+`Blocked`, `By roadmap gate`, `Research and experiments`, `Recently completed`
+(Done in the previous 30 days), and `Roadmap` (unfinished items). `Record ID`
+locates a directly tracked T/EXP/RFC/ADR record; `Roadmap Gate` locates the
+canonical gate. `Parent T-ID` continues to drive queue identity, `Sprint` is
+the Iteration, `Story Points` is the current estimate, and `Owner Role` is the
+accountable role. Dates are planning metadata, not evidence timestamps.
+
+Use standard Insights first: the default historical Burn up, current charts
+grouped by Sprint or Work Type, and count or Story Points aggregation. The
+public Project API does not currently expose saved-chart creation or an ideal
+line for this user-owned Project. Do not add hosted snapshot automation or
+Pages until the owner separately approves its cost and permission boundary.
+
 ## Cadence
 
 GitHub Sprint Iterations retain Monday-through-Sunday reporting dates. Work

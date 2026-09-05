@@ -370,6 +370,13 @@ agent and no automatic external issue-tracker write.
 
 ### Weekly sprints
 
+Use T-0158's saved progress views and the standard Insights described in
+`SPRINTS.md`. `Record ID` and `Roadmap Gate` are locators into repository
+authority. A Project field or chart never changes TODO, STATUS, ROADMAP, ADR,
+RFC, EXP, evidence, or acceptance state. An ideal-line burndown requires a
+separately approved snapshot mechanism because the public Project API does not
+expose that chart configuration.
+
 Use the GitHub Project cadence in [`SPRINTS.md`](SPRINTS.md) to cap work in
 progress and require a runnable increment. Reference stable T-IDs, calculate
 initial story points at planning, and retain every estimate revision with a

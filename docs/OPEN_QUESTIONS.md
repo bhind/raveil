@@ -6,6 +6,13 @@ These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
 resolves it.
 
+- Should Raveil authorize a least-privilege hosted GitHub Action for a daily
+  ideal-versus-actual burndown, or retain standard Insights plus the existing
+  user-local T-0151 reconciliation? T-0158 confirms that saved views are
+  API-manageable but saved Insights and an ideal line are not exposed by the
+  current public user-Project API. Either choice keeps repository records
+  authoritative.
+
 ## Simulation-first device path
 
 - S07 proves that the current unbased AXI4-Lite top can be exported twice to a

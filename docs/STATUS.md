@@ -2,6 +2,23 @@
 
 Last updated: 2026-09-05
 Development state: `unreleased`
+
+## GitHub Project progress surface
+
+The private [`Raveil Weekly Sprints`](https://github.com/users/bhind/projects/1)
+Project remains the sole live coordination board under ADR-0056, ADR-0065, and
+ADR-0066. T-0158 added `Record ID`, `Roadmap Gate`, `Start Date`, and `Target
+Date` plus Current iteration, Backlog, Blocked, By roadmap gate, Research and
+experiments, Recently completed, and Roadmap views. Existing `Sprint`, `Story
+Points`, `Work Type`, `Owner Role`, `Priority`, and the more precise Raveil
+`Evidence Class` were retained rather than duplicated.
+
+GitHub's default historical Burn up is the available standard progress chart.
+The live GraphQL schema exposes saved-view mutations but no Insights-chart
+mutation, and the documented REST path returned 404 for this user-owned
+Project. Custom saved Insights and an ideal line remain unverified. No hosted
+Action, Pages site, secret, visibility change, claim, or Gate transition was
+introduced.
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`
