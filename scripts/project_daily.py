@@ -287,8 +287,8 @@ def render_readme(now: datetime, entries: list[dict[str, Any]], notes: list[str]
             event_rows.append((event_time, f"| {event_time[:10]} | #{issue['number']} {cell(issue.get('title', ''))} | {cell(item.get('status', ''))} | {label} at {event_time} |"))
     rows.extend(line for _, line in sorted(event_rows))
     if not event_rows: rows.append(f"| {day} | — | — | no linked real work-item event |")
-    active = [f"#{e['issue']['number']} {cell(e['issue'].get('title',''))} ({e['item'].get('status')})" for e in entries if e['item'].get('status') in {"In Progress", "Ready"}]
-    rows += ["", "### Active and Ready"] + [f"- {entry}" for entry in (active or ["None observed."])]
+    active = [f"#{e['issue']['number']} {cell(e['issue'].get('title',''))} ({e['item'].get('status')})" for e in entries if e['item'].get('status') in {"In Progress", "Review", "Ready"}]
+    rows += ["", "### Active, Review and Ready"] + [f"- {entry}" for entry in (active or ["None observed."])]
     rows += ["", "### Findings"] + [f"- {note}" for note in (notes or ["No missing evidence or stale lifecycle found."])]
     return "\n".join(rows)
 
