@@ -90,3 +90,4 @@ rewrite it.
 | [ADR-0086](ADR-0086-project-inventory-and-session-sync-are-required.md) | Accepted | Mandatory initial inventory and same-session Project synchronization; canonical authority unchanged |
 | [ADR-0087](ADR-0087-editable-project-graphs-use-the-dynamic-rtl-path.md) | Accepted | Editable project Graphs use the existing dynamic RTL path; branch-local identifier reconciled explicitly |
 | [ADR-0088](ADR-0088-graph-authoring-order-is-not-execution-order.md) | Accepted | Deterministic dependency scheduling admits Graph forward references while preserving ordered programs |
+| [ADR-0089](ADR-0089-private-project-burndown-uses-a-dedicated-token.md) | Accepted | A least-privilege daily Action updates aggregate ideal/actual lines only inside the private Project |

@@ -374,8 +374,12 @@ Use T-0158's saved progress views and the standard Insights described in
 `SPRINTS.md`. `Record ID` and `Roadmap Gate` are locators into repository
 authority. A Project field or chart never changes TODO, STATUS, ROADMAP, ADR,
 RFC, EXP, evidence, or acceptance state. An ideal-line burndown requires a
-separately approved snapshot mechanism because the public Project API does not
-expose that chart configuration.
+separately bounded snapshot mechanism because the public Project API does not
+expose that chart configuration. ADR-0089 authorizes only the private Draft
+updater in `.github/workflows/project-burndown.yml`; it is not general hosted
+CI/CD and has no repository write permission. Missing Project variable,
+dedicated secret, unique Sprint, complete inventory, or unique Draft fails
+closed.
 
 Use the GitHub Project cadence in [`SPRINTS.md`](SPRINTS.md) to cap work in
 progress and require a runnable increment. Reference stable T-IDs, calculate

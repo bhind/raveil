@@ -20,8 +20,11 @@ accountable role. Dates are planning metadata, not evidence timestamps.
 Use standard Insights first: the default historical Burn up, current charts
 grouped by Sprint or Work Type, and count or Story Points aggregation. The
 public Project API does not currently expose saved-chart creation or an ideal
-line for this user-owned Project. Do not add hosted snapshot automation or
-Pages until the owner separately approves its cost and permission boundary.
+line for this user-owned Project. ADR-0089 permits the bounded `Private Project
+burndown` Action to update one private Draft at 19:00 JST. It uses repository
+variable `RAVEIL_PROJECT_NUMBER` and secret `RAVEIL_PROJECT_TOKEN`. Run
+`python3 scripts/project_burndown.py --owner OWNER --project NUMBER` for a
+read-only preview and add `--apply` only for the authorized Draft update.
 
 ## Cadence
 
