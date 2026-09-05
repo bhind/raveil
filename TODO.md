@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0149. T-0148 has a reviewed local candidate; remote integration is pending expired GitHub authentication and is not another mutation lane. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148/S02 connects the reviewed T-0148 and T-0149 local candidates. T-0151 is an independent live governance lane. Remote publication of the local product stack remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | T-0150. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -27,14 +27,36 @@ review and failure preservation do not consume the two-item delivery limit.
 
 ## Project entry point
 
+- [ ] **T-0148/S02** Connect editable project Graphs to the existing dynamic
+  Chisel/Verilator path under ADR-0086. Owner-approved continuation of T-0148,
+  branch `feat/t-0148-project-dynamic-graph`, local worktree
+  `/private/tmp/raveil-t0148-s02`, based on reviewed local commits `bf81269`
+  and `31262f1`. The primary owns the coherent Python adapter/project/tests
+  change and record integration; Tester and Security Reviewer are read-only.
+  Acceptance: edit Graph JSON, inspect nodes/coordinates/dependencies, execute
+  through `project run neighborhood --backend rtl-sim`, change ADD to MAX and
+  a relative load, rerun, and observe retained output differences plus matching
+  simulator/RTL identities. Preserve v1/v2/v3 admission, oracle/C++ fallback/RTL
+  byte equality, initial snapshot identities and failed-run history. Stop
+  before opcode/capacity/Chisel/ABI changes, arbitrary input tensors, real
+  device, persistent cache or performance claims. Evidence classes: Host
+  Functional and RTL Simulation Functional. Local candidate only: Issue #113
+  remains In Progress for the original packet; its continuation-body update
+  was rejected by automatic approval review and has not been applied. No
+  third mutation lane or remote Done transition is claimed.
+  Local verification: three edited Graphs pass actual RTL/oracle/fallback
+  equality with identical simulator/RTL hashes; 86 focused tests pass and
+  independent Security review is GO. The final project display tests pass
+  26/26 on Mac and Linux. Publication/Issue integration remains unchecked.
+
 - [ ] **T-0150** Reconcile the stale UIO dry-run source-scan regression with
   the accepted T-0145 no-device test handoff. Trigger only after T-0149 is
   integrated. A separate test/fix branch must decide whether the static
   `os.open` ban is stale or the helper belongs in a different module, retain
   the no-real-device and no-MMIO boundary, and restore a green full discovery
   suite. Stop before real UIO, device access, T-0149 files, performance, FPGA,
-  ASIC or silicon. No Issue, estimate or Sprint is allocated while GitHub
-  authentication is unavailable.
+  ASIC or silicon. No Issue, estimate or Sprint has been allocated; this task
+  remains unstarted while the authorized Graph connection is completed.
 
 - [ ] **T-0149** Compose the existing Native Command Graph, guarded GEMM and
   Sonatine/QEMU paths into a shell-first editable project workspace. Local
@@ -51,8 +73,8 @@ review and failure preservation do not consume the two-item delivery limit.
   Stop before arbitrary host command execution, production cache, hostile-code
   isolation, cross-backend speed comparison, new CPU/RTL semantics, FPGA,
   ASIC, silicon, novelty or commercial-readiness claims. A real GitHub Issue
-  and Project transition remain pending because the current `gh` credential is
-  invalid; local implementation and verification may continue without
+  and Project transition remain pending; authentication has recovered but
+  remote integration is incomplete. Local implementation and verification may continue without
   representing remote coordination as complete.
 
 - [x] **T-0148** Add versioned signed relative `LOAD_U32` coordinates to the

@@ -19,6 +19,40 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
+T-0148/S02 is a locally verified continuation on
+`feat/t-0148-project-dynamic-graph`, stacked on local commits `bf81269` and
+`31262f1`. ADR-0086 connects editable `graph-device` project recipes to the
+existing offline dynamic RTL executor via `--backend rtl-sim`. The project
+captures the descriptor once, compiles and executes those bytes, checks its
+receipt against the snapshot/program/output, retains the full input/output
+windows, and presents active rows plus changed nodes/cells in `project diff`.
+
+Three actual project runs pass descriptor-oracle/C++-fallback/RTL byte equality:
+center+north addition, center/north maximum, then center/north-east maximum.
+The first edit changes 64/64 active cells, with cell (0,0) changing from
+2802362300 to 1788458059. The address edit changes 36/64 cells, with cell (0,0)
+changing to 3668339974. All three share simulator SHA-256
+`5be848283e8c0ba455b098f35c35daf2f1ea5afd3b34719660f0b2f92ca6f30b`
+and RTL-manifest SHA-256
+`13a274ff25e6b9d5c10ea225c376668d3a83ea2baef86f661a50940d892f3eb0`.
+The runner rebuilds the generic simulator each invocation; no persistent cache
+or physical/performance claim follows. Input data remains seed-generated.
+
+The primary focused suite passes 86 tests. Independent host verification
+passes 67 tests; Linux verification passes 65 with two C++-compiler-dependent
+skips in the existing container. After the final changed-node/cell display
+update, all 26 project tests pass on both macOS/Python 3.14.6 and
+network-disabled Debian 12 arm64/Python 3.11.2. Independent Security review is
+GO after a captured-snapshot mutation regression was fixed. The full-suite
+UIO source-scan failure previously recorded under T-0150 remains outside this
+slice; no new full-suite-green claim is made.
+
+The live Project audit succeeds with two existing active items (#113 and
+#115). GitHub authentication is now available. Automatic approval review
+rejected writing the continuation packet to Issue #113; the draft remains
+local and the remote packet/status has not been changed. This slice and its
+parent local commits have not been published or merged.
+
 T-0109 reorganizes the root component summary and the canonical architecture
 map without changing executable behavior or an accepted boundary. The records
 now distinguish the portable owned thin waist, the two separate Graph surfaces,
@@ -693,7 +727,9 @@ Project item is Done.
 
 T-0149 is the in-progress shell-first playable workspace slice under local
 branch `feat/t-0149-project-workspace`; live Issue/Project creation is pending
-an expired GitHub credential and is not represented as complete coordination.
+remote integration and is not represented as complete coordination. GitHub
+authentication was unavailable at implementation time and recovered during
+T-0148/S02; publication/coordination has not been completed.
 The current candidate adds `raveil project init|show|run|runs|diff|console` on
 top of the existing bounded Command Graph and GEMM backends. `init` creates
 editable log, independent-file-transform and 8-by-8 GEMM examples. Each run

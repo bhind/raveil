@@ -31,7 +31,7 @@ class ProjectWorkspaceTests(unittest.TestCase):
         self.assertEqual(json.loads((self.root / "project.json").read_text()), CONFIG)
         self.assertEqual(
             sorted(path.name for path in (self.root / "recipes").iterdir()),
-            ["files.json", "gemm.json", "logs.json"],
+            ["files.json", "gemm.json", "logs.json", "neighborhood.json"],
         )
         self.assertEqual(Project(self.root).runs(), "No runs yet. Try: project run logs")
         self.assertIn("Try adding an ERROR line", (self.root / "README.md").read_text())

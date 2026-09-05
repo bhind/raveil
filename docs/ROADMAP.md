@@ -8,7 +8,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## Current research reset and delivery focus
 
-State: **T-0149 composes a playable shell-first workspace; T-0148 and physical research remain preserved as separate evidence lines**
+State: **T-0148/S02 connects editable project Graphs to RTL simulation; physical research remains preserved**
 
 The first Experience measurement campaign began before the CPU/ISA thesis,
 matched controls, observation points, and candidate microarchitecture were
@@ -24,6 +24,13 @@ first gate is an editable project that retains exact run inputs and outputs,
 shows the Graph, compares two user-modified runs, and performs the same command
 grammar on macOS and Linux. This is a one-to-two-week playable slice, not a
 user-research-only exercise or a performance claim.
+
+The owner-selected next increment is T-0148/S02: connect that workspace to
+the existing dynamic RTL Graph executor. Its exit is an editable Graph
+operation/address change, repeated verified RTL execution, readable output
+differences and matching simulator/RTL identities. The compiler/ISA capacity
+and physical gates do not change; a broader language remains a later choice
+informed by actual authoring friction.
 
 The simulation research line remains preserved rather than discarded:
 

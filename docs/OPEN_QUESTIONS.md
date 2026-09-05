@@ -480,6 +480,11 @@ resolves it.
   output inspection, run selection, or the Native/Sonatine boundary? The next
   product slice must follow observed hands-on use rather than adding commands
   speculatively.
+- T-0148/S02 connects authoring to the dynamic RTL path. Which observed limit
+  should the next Graph increment address first: the 16-instruction ceiling,
+  a missing arithmetic operation, seed-only input data, or simulator startup
+  latency? Selection requires hands-on evidence; this slice authorizes no
+  broader opcode set, input protocol, persistent cache or capacity change.
 - Should local run history eventually gain human labels, a compact content
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor
