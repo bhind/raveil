@@ -109,7 +109,7 @@ a fresh run directory. Read-back verifies a local artifact manifest and record
 digest. This detects later mutation for ordinary development use but is not a
 signed audit store or OS isolation boundary.
 
-ADR-0086 connects `graph-device` recipes to `rtl-sim` through the existing
+ADR-0087 connects `graph-device` recipes to `rtl-sim` through the existing
 dynamic request compiler, offline Verilator runner and independent verifier.
 An editable descriptor under project inputs is captured once and bound to the
 input manifest, compiled program, execution receipt and retained output. A
