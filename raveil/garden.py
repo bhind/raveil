@@ -753,10 +753,14 @@ class GardenBrowser:
         self.snapshot = snapshot
         self.width = validate_render_width(width)
         self.selected = 0
+        self.details = False
 
     def navigate(self, key: str) -> bool:
         if key == "q":
             return False
+        if key == "d":
+            self.details = not self.details
+            return True
         if key == "j":
             self.selected = min(self.selected + 1, len(self.snapshot.program.nodes) - 1)
         elif key == "k":
@@ -766,7 +770,7 @@ class GardenBrowser:
         elif key == "G":
             self.selected = len(self.snapshot.program.nodes) - 1
         else:
-            raise ValueError("garden navigation accepts only j, k, g, G, or q")
+            raise ValueError("garden navigation accepts only j, k, g, G, d, or q")
         return True
 
     def _node_dependencies(self, node: GraphNode) -> tuple[tuple[str, ...], tuple[str, ...]]:
@@ -776,6 +780,54 @@ class GardenBrowser:
         return dependencies, external_inputs
 
     def render(self) -> str:
+        comparison = _materialized_fused_plan_pair(self.snapshot.variants)
+        if comparison is None or self.details:
+            return self._render_details()
+        materialized, fused = comparison
+        program = self.snapshot.program
+        selected = program.nodes[self.selected]
+        before = materialized.memory_plan.maximum_intermediate_bytes
+        after = fused.memory_plan.maximum_intermediate_bytes
+        def stage(label: str, operations: tuple[str, ...]) -> str:
+            return ("> " if selected.op in operations else "  ") + label
+        left = [stage("matmul", ("matmul",)), "    |",
+                stage("bias_add", ("bias_add",)),
+                f"    | WRITE intermediate [{before}B]",
+                "    | READ intermediate",
+                stage("relu", ("relu",)), "    |", "  output"]
+        right = [stage("matmul", ("matmul",)), "    |",
+                 stage("bias_add + relu", ("bias_add", "relu")),
+                 "    | intermediate WRITE removed",
+                 "    | intermediate READ removed",
+                 f"    | intermediate [{after}B]", "    |", "  output"]
+        panel_width = (self.width - 1) // 2
+        body = _join_panes([
+            _pane(f"Materialized: {materialized.variant_id}", left, panel_width),
+            _pane(f"Fused: {fused.variant_id}", right, self.width - panel_width - 1),
+        ])
+        explanation = {
+            "matmul": "matmul is unchanged. Fusion joins the following bias_add and relu stages.",
+            "bias_add": "bias_add passes its result directly to relu; its intermediate WRITE disappears.",
+            "relu": "relu consumes the bias result inside the fused stage; its intermediate READ disappears.",
+        }.get(selected.op, "Inspect dependencies in the details view.")
+        nodes = " | ".join(
+            f"{'>' if index == self.selected else ' '} {index + 1}. {node.node_id}"
+            for index, node in enumerate(program.nodes))
+        header = _wrapped_lines([
+            "Raveil Garden | read-only graph browser", nodes,
+            f"shape: {program.m}x{program.n}x{program.k} | > marks the selected stage in both plans",
+        ], self.width)
+        footer = _wrapped_lines([
+            f"Selected {selected.node_id}: {explanation}",
+            f"Intermediate plan memory: {before}B -> {after}B; not total Graph memory.",
+            "Semantic graph and result contract unchanged; plan comparison, not a measurement.",
+            f"evidence: {self.snapshot.evidence.evidence_class} claim={self.snapshot.evidence.claim_status}",
+            "authority: observe-only execute=no mutate=no approve=no promote=no",
+            "Navigation: j next | k previous | g first | G last | d details | q quit (then Enter)",
+        ], self.width)
+        return "\n".join([*header, "", *body, "", *footer])
+
+    def _render_details(self) -> str:
         program = self.snapshot.program
         selected = program.nodes[self.selected]
         dependencies, external_inputs = self._node_dependencies(selected)
@@ -866,7 +918,7 @@ class GardenBrowser:
             body = _join_panes(panes)
         footer = _wrapped_lines([
             "Commands / Status",
-            "Navigation: j next | k previous | g first | G last | q quit",
+            "Navigation: j next | k previous | g first | G last | d comparison | q quit",
             "authority: read-only; no graph execution, mutation, approval, or promotion.",
             *[f"demo: {command}" for command in self.snapshot.demo_commands],
         ], self.width)
@@ -1071,7 +1123,13 @@ def run_interactive(
         if isinstance(snapshot, GardenDynamicExplanation)
         else GardenBrowser(snapshot, width)
     )
-    output_stream.write(browser.render() + "\n")
+    redraw = input_stream.isatty() and output_stream.isatty()
+    def display() -> None:
+        if redraw:
+            output_stream.write("\x1b[H\x1b[2J")
+        output_stream.write(browser.render() + "\n")
+        output_stream.flush()
+    display()
     if not input_stream.isatty():
         return 0
     for _ in range(MAX_NAVIGATION_STEPS):
@@ -1088,6 +1146,6 @@ def run_interactive(
         except ValueError as error:
             output_stream.write(render_error(str(error)) + "\n")
             continue
-        output_stream.write(browser.render() + "\n")
+        display()
     output_stream.write(render_error("garden navigation reached the bounded step limit") + "\n")
     return 2

@@ -98,6 +98,21 @@ resolves it.
   catalogue, selector/opcode/window boundary, scheduler, or generally
   installable claim.
 
+## Project inventory scope and evidence gaps
+
+- The owner retains original broad T-0042 research as unfinished, while
+  accepted ADR-0046/main TODO close a narrower controlled-run result. The
+  Project scope card is deferred, with T-0106/T-0044 as the existing remaining
+  outcomes. PM must reconcile the intended remaining scope before any research
+  resumption; neither workspace delivery nor this audit closes that question.
+- T-0149, T-0148 predecessor and T-0151 are integrated on main; only the
+  editable-Graph PR #123 remains under integration. Independent edits are
+  preserved, the UIO defect is canonical T-0152, and the Graph decision's
+  colliding local ADR-0086 is explicitly reconciled as ADR-0087. Historical Done draft cards have varying
+  evidence locators; the inventory records missing receipts rather than
+  certifying them from their status alone.
+
+
 ## Native execution
 
 - ADR-0020 fixes the bounded job/completion envelope. ADR-0021 fixes only a

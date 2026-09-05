@@ -1,4 +1,4 @@
-# ADR-0086: Editable project Graphs use the existing dynamic RTL path
+# ADR-0087: Editable project Graphs use the existing dynamic RTL path
 
 Status: Accepted
 Date: 2026-09-05
@@ -6,6 +6,12 @@ Task: T-0148/S02
 Related: ADR-0035, ADR-0077, ADR-0078, ADR-0080, ADR-0084, ADR-0085
 
 ## Context
+
+Identifier reconciliation: this decision was drafted and accepted on the
+continuation branch as ADR-0086 before the canonical inventory decision
+acquired that identifier on main. Integration assigns ADR-0087 without
+changing the accepted design; the original remains in branch history.
+Canonical ADR-0086 continues to govern inventory and session synchronization.
 
 T-0148 supplies bounded address generality and T-0149 supplies an editable
 project workspace, but the project recipes only reach Command Graph and GEMM

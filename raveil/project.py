@@ -132,10 +132,10 @@ def init_project(directory: Path) -> Path:
     if directory.is_symlink():
         raise ValueError("project directory must not be a symlink")
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-    make_private_directory(directory)
     workspace = NativeWorkspace(directory)
     if workspace.ls():
         raise ValueError("init requires a new or empty directory")
+    make_private_directory(directory)
     for folder in ("recipes", "inputs", "runs"):
         workspace.mkdir(folder, mode=0o700)
     workspace.write_text("project.json", encoded(CONFIG).decode())
