@@ -67,6 +67,18 @@ while keeping `row_delta: -1`: it now reads the north-east neighbor. Node IDs
 are labels; the displayed coordinates determine the loaded cell. You can also
 change the recipe seed to vary the generated input grid.
 
+To multiply the two loaded neighbors, change the descriptor's `schema` to
+`raveil.graph-device-dag/v3` and the `combine` node's `op` to `MUL_U32`.
+Keep its two input IDs and the final STORE unchanged. Repeat the same
+`show`, `run --backend rtl-sim`, and `diff` commands above. This explicitly
+selects program/request v4; older descriptor schemas reject multiplication.
+The result is the unsigned product's low 32 bits (for example,
+`4294967295 * 4294967295` becomes `1`), not saturation or a 64-bit output.
+ADD and MAX remain available in this version, so their nodes can be combined
+with multiplication within the existing limits. This is the project execution
+path; Garden's retained dynamic explanation and sealed UIO admission are not
+extended to v4.
+
 `run` verifies descriptor-oracle/C++-fallback/RTL byte equality and saves the
 receipt. Inspect `runs/RUN_ID/workspace/output.txt` for active rows and
 `output.bin` for the full 256-word little-endian transport window, including
@@ -83,7 +95,8 @@ It does not implement a persistent cache. This is RTL simulation correctness;
 it does not execute via Sonatine/QEMU or measure a physical FPGA.
 
 Supported Graphs retain the existing 16-instruction/eight-value limits,
-uint32 LOAD/ADD/MAX/STORE operations, baseline 16x16 or compact 8x8 profile,
+uint32 LOAD/ADD/MAX/STORE operations (plus MUL with descriptor v3),
+baseline 16x16 or compact 8x8 profile,
 and one-cell relative halo. Unsupported Graphs fail before simulator launch
 and retain a failed project run. Detailed raw evidence stays in the printed
 repository artifact directory; the project history retains its receipt.

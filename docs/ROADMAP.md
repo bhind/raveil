@@ -58,6 +58,11 @@ rejected solely because of JSON list order. ADR-0088 adds stable topological
 scheduling within existing Graph limits. This host compiler slice does not
 change research gate state; new hardware claims retain their existing gates.
 
+T-0157 extends the bounded arithmetic alphabet with MUL_U32 under ADR-0089.
+Its exit is a versioned product Graph with host and actual RTL correctness
+agreement and old-version controls. Multiplier timing, area and FPGA mapping
+remain later evidence questions rather than consequences of simulation pass.
+
 The simulation research line remains preserved rather than discarded:
 
 T-0148 removes the hardwired five-direction address alphabet without changing

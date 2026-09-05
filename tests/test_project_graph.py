@@ -79,6 +79,20 @@ class ProjectGraphTests(unittest.TestCase):
         self.assertIn("output: 64/64 active cells changed", diff)
         self.assertIn("first changed cell (0, 0): 2802362300 -> 1788458059", diff)
 
+    def test_edit_to_v4_mul_reaches_runner_and_keeps_previous_run(self):
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            first = self.run_graph()
+            graph = json.loads(self.descriptor_path.read_text())
+            graph["schema"] = "raveil.graph-device-dag/v3"
+            graph["nodes"][2]["op"] = "MUL_U32"
+            self.descriptor_path.write_text(json.dumps(graph))
+            self.assertIn("MUL_U32", self.project.show("neighborhood"))
+            second = self.run_graph()
+        self.assertEqual(second["status"], "succeeded", second["error"])
+        self.assertEqual(compile_descriptor(graph)["payload"][1], 4)
+        self.assertEqual(self.project.load_run(first["run_id"]), first)
+        self.assertIn("MUL_U32", self.project.diff(first["run_id"], second["run_id"]))
+
     def test_seed_edit_changes_generated_input_without_overwriting_user_file(self):
         (self.root / "inputs/generated-input.bin").write_bytes(b"user input")
         with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):

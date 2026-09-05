@@ -26,7 +26,7 @@ class GraphDeviceProgramInstaller extends Module {
     val fault = Output(Bool())
     val payloadCount = Output(UInt(6.W))
     val liveDigest = Output(Vec(8, UInt(32.W)))
-    val programVersion = Output(UInt(2.W))
+    val programVersion = Output(UInt(3.W))
     val programLength = Output(UInt(5.W))
     val program = Output(Vec(RaveilBoundedProgramContract.ProgramCapacity,
       UInt(32.W)))
@@ -39,7 +39,7 @@ class GraphDeviceProgramInstaller extends Module {
   val faultReg = RegInit(false.B)
   val programLengthReg = RegInit(
     RaveilBoundedProgramContract.FactoryProgram.length.U(5.W))
-  val programVersionReg = RegInit(RaveilBoundedProgramContract.Version.U(2.W))
+  val programVersionReg = RegInit(RaveilBoundedProgramContract.Version.U(3.W))
   val programReg = RegInit(VecInit(
     RaveilBoundedProgramContract.FactoryProgram.map(_.U(32.W)) ++
       Seq.fill(RaveilBoundedProgramContract.ProgramCapacity -
@@ -61,7 +61,7 @@ class GraphDeviceProgramInstaller extends Module {
     val sourceB = instruction(21, 19)
     val selector = instruction(24, 22)
     val legacyLoadValid = opcode === RaveilBoundedProgramContract.LoadOpcode.U &&
-      payloadVersion =/= 3.U &&
+      payloadVersion =/= 3.U && payloadVersion =/= 4.U &&
       selector <= RaveilBoundedProgramContract.EastAddress.U &&
       instruction(21, 0) === 0.U
     val relativeRow = instruction(24, 20)
@@ -71,20 +71,22 @@ class GraphDeviceProgramInstaller extends Module {
     val relativeColumnValid = relativeColumn === 0.U ||
       relativeColumn === 1.U || relativeColumn === "h1f".U
     val relativeLoadValid = opcode === RaveilBoundedProgramContract.LoadOpcode.U &&
-      payloadVersion === 3.U && relativeRowValid && relativeColumnValid &&
+      (payloadVersion === 3.U || payloadVersion === 4.U) && relativeRowValid && relativeColumnValid &&
       instruction(14, 0) === 0.U
     val loadValid = legacyLoadValid || relativeLoadValid
     val addValid = opcode === RaveilBoundedProgramContract.AddOpcode.U &&
       instruction(18, 0) === 0.U && defined(sourceA) && defined(sourceB)
     val maxValid = opcode === RaveilBoundedProgramContract.MaxU32Opcode.U &&
-      (payloadVersion === 2.U || payloadVersion === 3.U) &&
+      (payloadVersion === 2.U || payloadVersion === 3.U || payloadVersion === 4.U) &&
+      instruction(18, 0) === 0.U && defined(sourceA) && defined(sourceB)
+    val mulValid = opcode === 5.U && payloadVersion === 4.U &&
       instruction(18, 0) === 0.U && defined(sourceA) && defined(sourceB)
     val storeValid = opcode === RaveilBoundedProgramContract.StoreOpcode.U &&
       instruction(24, 0) === 0.U && defined(destination) &&
       index.U === instructionCount - 1.U
-    val valid = loadValid || addValid || maxValid || storeValid
+    val valid = loadValid || addValid || maxValid || mulValid || storeValid
     programValid = programValid && Mux(active, valid, instruction === 0.U)
-    val writesValue = active && (loadValid || addValid || maxValid)
+    val writesValue = active && (loadValid || addValid || maxValid || mulValid)
     defined = Mux(writesValue, defined | (1.U << destination), defined)
     storeCount = storeCount + Mux(active && storeValid, 1.U, 0.U)
   }
@@ -96,7 +98,7 @@ class GraphDeviceProgramInstaller extends Module {
     payloadCountReg === RaveilBoundedProgramContract.PayloadWords.U &&
     payload(0) === RaveilBoundedProgramContract.Magic.U &&
     (payloadVersion === RaveilBoundedProgramContract.Version.U ||
-      payloadVersion === 2.U || payloadVersion === 3.U) &&
+      payloadVersion === 2.U || payloadVersion === 3.U || payloadVersion === 4.U) &&
     instructionCount >= 2.U &&
     instructionCount <= RaveilBoundedProgramContract.ProgramCapacity.U &&
     payload(3) === RaveilBoundedProgramContract.ValueRegisters.U &&
@@ -124,7 +126,7 @@ class GraphDeviceProgramInstaller extends Module {
   }.elsewhen(io.commit) {
     when(!faultReg && payloadValid) {
       programLengthReg := instructionCount
-      programVersionReg := payloadVersion(1, 0)
+      programVersionReg := payloadVersion(2, 0)
       for (index <- 0 until RaveilBoundedProgramContract.ProgramCapacity) {
         programReg(index) := payload(12 + index)
       }

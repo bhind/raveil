@@ -16,6 +16,7 @@ constexpr std::uint32_t kMagic = 0x52445731U;
 constexpr std::uint32_t kVersionV1 = 1U;
 constexpr std::uint32_t kVersionV2 = 2U;
 constexpr std::uint32_t kVersionV3 = 3U;
+constexpr std::uint32_t kVersionV4 = 4U;
 constexpr std::uint32_t kHeaderBytes = 64U;
 constexpr std::size_t kGraphIdBytes = 32U;
 constexpr std::size_t kRequestBytes = 64U + kGraphIdBytes + (32U + 16U + 324U) * 4U;
@@ -148,7 +149,7 @@ void validate_input(const std::array<std::uint32_t, 324>& words, std::uint32_t s
 void validate_program(const std::array<std::uint32_t, 32>& payload, std::uint32_t request_version) {
     if (payload[0] != 0x52504731U || payload[1] != request_version ||
         (request_version != kVersionV1 && request_version != kVersionV2
-            && request_version != kVersionV3) || payload[2] < 2U
+            && request_version != kVersionV3 && request_version != kVersionV4) || payload[2] < 2U
         || payload[2] > 16U || payload[3] != 8U)
         throw std::runtime_error("dynamic program header is invalid");
     std::vector<unsigned char> digest_input;
@@ -176,22 +177,24 @@ void validate_program(const std::array<std::uint32_t, 32>& payload, std::uint32_
         const bool signed_unit_row = row_bits == 0U || row_bits == 1U || row_bits == 31U;
         const bool signed_unit_column = column_bits == 0U || column_bits == 1U
             || column_bits == 31U;
-        const bool legacy_load = request_version != kVersionV3 && selector <= 4U
+        const bool legacy_load = request_version != kVersionV3 && request_version != kVersionV4 && selector <= 4U
             && (instruction & 0x003fffffU) == 0U;
-        const bool relative_load = request_version == kVersionV3
+        const bool relative_load = (request_version == kVersionV3 || request_version == kVersionV4)
             && signed_unit_row && signed_unit_column
             && (instruction & 0x00007fffU) == 0U;
         const bool load = opcode == 1U && (legacy_load || relative_load);
         const bool add = opcode == 2U && (instruction & 0x0007ffffU) == 0U
             && defined[source_a] && defined[source_b];
         const bool max_u32 = opcode == 4U
-            && (request_version == kVersionV2 || request_version == kVersionV3)
+            && (request_version == kVersionV2 || request_version == kVersionV3 || request_version == kVersionV4)
+            && (instruction & 0x0007ffffU) == 0U && defined[source_a] && defined[source_b];
+        const bool mul_u32 = opcode == 5U && request_version == kVersionV4
             && (instruction & 0x0007ffffU) == 0U && defined[source_a] && defined[source_b];
         const bool store = opcode == 3U && (instruction & 0x01ffffffU) == 0U
             && defined[destination] && index == payload[2] - 1U;
-        if (active && !(load || add || max_u32 || store)) throw std::runtime_error("dynamic program instruction is invalid");
+        if (active && !(load || add || max_u32 || mul_u32 || store)) throw std::runtime_error("dynamic program instruction is invalid");
         if (!active && instruction != 0U) throw std::runtime_error("dynamic program padding is nonzero");
-        if (load || add || max_u32) defined[destination] = true;
+        if (load || add || max_u32 || mul_u32) defined[destination] = true;
         if (store) ++stores;
     }
     for (std::size_t index = 28; index < payload.size(); ++index)
@@ -209,7 +212,7 @@ DynamicGraphDeviceRequest read_dynamic_graph_device_request(const std::filesyste
         throw std::runtime_error("dynamic inputs must be a direct directory");
     const std::uint32_t request_version = word(bytes.data() + 4);
     if (word(bytes.data()) != kMagic || (request_version != kVersionV1
-        && request_version != kVersionV2 && request_version != kVersionV3)
+        && request_version != kVersionV2 && request_version != kVersionV3 && request_version != kVersionV4)
         || word(bytes.data() + 8) != kHeaderBytes || word(bytes.data() + 20) != 32U
         || word(bytes.data() + 24) != 16U || word(bytes.data() + 28) != 324U)
         throw std::runtime_error("dynamic request header is invalid");

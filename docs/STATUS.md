@@ -19,6 +19,21 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
+T-0157 implements explicitly versioned uint32 Graph multiplication under
+ADR-0089. Descriptor v3 selects program/request v4 with MUL_U32 (low 32 bits),
+relative LOAD, ADD, MAX and final STORE, within the unchanged bounded capacity.
+The editable project path accepts it; Garden and sealed UIO keep their prior
+version boundaries. Host verification passes 172 Graph-device and 60
+project/Garden tests. A fresh offline RTL functional pair executes v4 MUL and
+the v3 control with one simulator, each matching all 256 output words against
+the descriptor oracle and C++ fallback. Evidence is retained in
+`artifacts/graph_device_axi4lite_dynamic/run.khuzrhdb`; simulator identity is
+`77660679a430d55efb0f89aa0f07ab627edae6fcfd5a610fc6398c37077f4fa7`.
+This establishes functional simulation only, not performance or physical-device
+readiness. Technical verification is complete; Issue #134 and its linked PR
+track remote integration separately.
+T-0155 scheduling is integrated via PR #133 (`459dd37`).
+
 T-0156 shell-quotes the destination in `project init`'s printed Next command.
 A regression executes the actual hint with a space/semicolon-containing path;
 all 28 project and project-Graph tests pass on macOS arm64/Python 3.14.6.

@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0155 dependency scheduling and T-0156 shell-hint repair have passed implementation acceptance. Integration receipts are on their linked Issues; S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0157 extends Graph arithmetic with versioned MUL_U32. T-0155 and T-0156 are integrated; S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,28 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
+
+- [ ] **T-0159** Explain relative LOAD and MUL_U32 in the existing read-only
+  Garden view, [Issue #136](https://github.com/bhind/raveil/issues/136).
+  P1 successor, conditional on T-0157 integration; not active implementation.
+  Preserve old rendering and reject inconsistent input; no compile, execution,
+  device or evidence-promotion authority. Freeze exact parser/renderer/test
+  paths and accepted explanation boundary before kickoff. Host Functional,
+  S-0003, 3 SP forecast; existing T-0144 remains completed predecessor.
+
+- [x] **T-0157** Add unsigned multiplication to bounded Graph arithmetic,
+  [Issue #134](https://github.com/bhind/raveil/issues/134), technically verified,
+  S-0003, 5 SP. ADR-0089 introduces descriptor v3/program-request v4 and
+  opcode 5 with low-32-bit product semantics. Acceptance requires old-version
+  compatibility, negative admission checks, host arithmetic coverage and an
+  actual offline RTL pair with the v3 control. Primary owns records/integration;
+  one low-tier implementer owns the fixed source/contract/test packet. Keep
+  existing capacities and the Garden/sealed-UIO version boundaries.
+  Local acceptance passes 172 Graph-device tests, 60 project/Garden tests and
+  a newly built same-simulator v4/v3 RTL pair with full oracle/fallback/output
+  equality. Primary took over final source integration after implementer freeze.
+  Issue #134 and its linked PR track integration; this is functional simulation
+  evidence, not Sprint ceremony acceptance.
 
 - [x] **T-0156** Quote project paths in the printed Next command,
   [Issue #131](https://github.com/bhind/raveil/issues/131), S-0003, 1 SP.
@@ -45,7 +67,7 @@ review and failure preservation do not consume the two-item delivery limit.
   four existing descriptors against the previous compiler with identical
   instruction/payload/hash/trace, and checks all 120 permutations of one
   five-value-node Graph against its previous oracle and the encoded fallback.
-  Remote integration and lifecycle acceptance are recorded in Issue #130.
+  Integrated through PR #133 (`459dd37`); Issue #130 is closed and canonically Done.
 
 - [x] **T-0154** Reconcile post-merge T-0148 records, real
   [Issue #128](https://github.com/bhind/raveil/issues/128), Done,

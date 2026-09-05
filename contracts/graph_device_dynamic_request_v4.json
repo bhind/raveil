@@ -1,0 +1,10 @@
+{
+  "schema": "raveil.graph-device-dynamic-request/v4",
+  "version": 4,
+  "header_bytes": 64,
+  "program_words": 32,
+  "affine_words": 16,
+  "input_words": 324,
+  "program_version": 4,
+  "opcode_extension": {"MUL_U32": 5}
+}

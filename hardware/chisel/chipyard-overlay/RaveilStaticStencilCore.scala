@@ -63,7 +63,7 @@ class RaveilStaticStencilCore extends Module {
     val inputStride = Input(UInt(9.W))
     val outputStride = Input(UInt(9.W))
     val activeOutputs = Input(UInt(9.W))
-    val programVersion = Input(UInt(2.W))
+    val programVersion = Input(UInt(3.W))
     val programLength = Input(UInt(5.W))
     val program = Input(Vec(RaveilBoundedProgramContract.ProgramCapacity,
       UInt(32.W)))
@@ -128,7 +128,7 @@ class RaveilStaticStencilCore extends Module {
     (relativeRow * io.inputStride.zext) + relativeColumn
   val relativeInputAddressUInt = relativeInputAddress.asUInt
   val inputAddress = Mux(
-    io.programVersion === 3.U,
+    io.programVersion >= 3.U,
     relativeInputAddressUInt(9, 0),
     legacyInputAddress)
   val storeData = values(destination)
@@ -176,6 +176,9 @@ class RaveilStaticStencilCore extends Module {
           programCounter := programCounter + 1.U
         }.elsewhen(opcode === RaveilBoundedProgramContract.MaxU32Opcode.U) {
           values(destination) := Mux(values(sourceA) >= values(sourceB), values(sourceA), values(sourceB))
+          programCounter := programCounter + 1.U
+        }.elsewhen(opcode === 5.U && io.programVersion === 4.U) {
+          values(destination) := (values(sourceA) * values(sourceB))(31, 0)
           programCounter := programCounter + 1.U
         }.elsewhen(opcode === RaveilBoundedProgramContract.StoreOpcode.U) {
           state := storeRequest
@@ -266,8 +269,8 @@ class RaveilStaticStencilCore extends Module {
     assert(io.activeOutputs === io.rows * io.columns)
     assert(io.programLength >= 2.U &&
       io.programLength <= RaveilBoundedProgramContract.ProgramCapacity.U)
-    assert(io.programVersion >= 1.U && io.programVersion <= 3.U)
-    when(state === loadRequest && busyReg && io.programVersion === 3.U) {
+    assert(io.programVersion >= 1.U && io.programVersion <= 4.U)
+    when(state === loadRequest && busyReg && io.programVersion >= 3.U) {
       assert(relativeInputAddress >= 0.S)
       assert(relativeInputAddress < 324.S)
     }
@@ -275,6 +278,7 @@ class RaveilStaticStencilCore extends Module {
       assert(opcode === RaveilBoundedProgramContract.LoadOpcode.U ||
         opcode === RaveilBoundedProgramContract.AddOpcode.U ||
         opcode === RaveilBoundedProgramContract.MaxU32Opcode.U ||
+        (opcode === 5.U && io.programVersion === 4.U) ||
         opcode === RaveilBoundedProgramContract.StoreOpcode.U)
     }
     when(state === loadResponse && io.memory.response.valid) {
