@@ -1,0 +1,15 @@
+{
+  "schema": "raveil.graph-device-program/v4",
+  "version": 4,
+  "magic": 1380992817,
+  "payload_words": 32,
+  "instruction_capacity": 16,
+  "value_registers": 8,
+  "opcodes": {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5},
+  "load_encoding": "opcode[31:28], destination[27:25], signed row_delta[24:20], signed column_delta[19:15], reserved[14:0]=0",
+  "relative_delta_range": [-1, 1],
+  "arithmetic_encoding": "binary arithmetic uses destination[27:25], source_a[24:22], source_b[21:19], reserved[18:0]=0",
+  "mul_semantics": "MUL_U32 computes the low 32 bits of the unsigned 32-bit product",
+  "version_gate": "v4 admits MUL and relative LOAD; v1/v2/v3 byte semantics unchanged",
+  "digest_words": {"start": 4, "count": 8, "byte_order": "little-endian", "algorithm": "SHA-256"}
+}

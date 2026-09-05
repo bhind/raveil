@@ -1,5 +1,7 @@
 import copy
+import hashlib
 import json
+import struct
 from pathlib import Path
 import tempfile
 import unittest
@@ -218,6 +220,44 @@ class GraphDeviceDagTests(unittest.TestCase):
         source = (ROOT / "raveil/graph_device_dag.py").read_text()
         self.assertNotIn('if value["graph_id"]', source)
         self.assertNotIn('if graph_id ==', source)
+
+    def test_v4_mul_wraps_u32_and_rejects_downgrade_or_reserved_bits(self) -> None:
+        descriptor = load_descriptor(ROOT / "tests/fixtures/graph_device_dynamic/product-neighbors-u32.json")
+        program = compile_descriptor(descriptor)
+        self.assertEqual(program["payload"][1], 4)
+        for left, right, expected in ((0, 7, 0), (1, 0xFFFFFFFF, 0xFFFFFFFF),
+                                      (0xFFFFFFFF, 0xFFFFFFFF, 1), (0xFFFFFFFF, 2, 0xFFFFFFFE)):
+            words = [0] * 324
+            words[19] = left
+            words[20] = right
+            self.assertEqual(graph_oracle(descriptor, words)[0], expected)
+            self.assertEqual(software_fallback(program, words)[0], expected)
+        downgraded = copy.deepcopy(program)
+        downgraded["payload"][1] = 3
+        with self.assertRaises(GraphDeviceDagError):
+            software_fallback(downgraded, [0] * 324)
+        reserved = copy.deepcopy(program)
+        reserved["instructions"][2] |= 1
+        reserved["payload"][12 + 2] = reserved["instructions"][2]
+        encoded = struct.pack("<5I", 4, *reserved["instructions"])
+        reserved["program_sha256"] = hashlib.sha256(encoded).hexdigest()
+        reserved["payload"][4:12] = struct.unpack("<8I", hashlib.sha256(encoded).digest())
+        with self.assertRaisesRegex(GraphDeviceDagError, "arithmetic"):
+            software_fallback(reserved, [0] * 324)
+
+    def test_mul_is_rejected_by_legacy_descriptor_schema_and_v4_allows_max(self) -> None:
+        descriptor = load_descriptor(ROOT / "tests/fixtures/graph_device_dynamic/product-neighbors-u32.json")
+        legacy = copy.deepcopy(descriptor)
+        legacy["schema"] = "raveil.graph-device-dag/v2"
+        with self.assertRaisesRegex(GraphDeviceDagError, "schema v3"):
+            validate_descriptor(legacy)
+        mixed = copy.deepcopy(descriptor)
+        mixed["nodes"].insert(-1, {"id": "m", "inputs": ["p", "c"], "op": "MAX_U32"})
+        mixed["nodes"][-1]["input"] = "m"
+        compiled = compile_descriptor(mixed)
+        self.assertEqual(compiled["payload"][1], 4)
+        self.assertEqual(graph_oracle(mixed, [3] * 324)[0], 9)
+        self.assertEqual(software_fallback(compiled, [3] * 324), graph_oracle(mixed, [3] * 324))
 
     def test_v1_and_v2_program_identities_remain_stable(self) -> None:
         fanout = compile_descriptor(load_descriptor(

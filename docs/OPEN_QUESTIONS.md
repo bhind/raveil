@@ -508,6 +508,10 @@ resolves it.
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor
   a signed evidence store.
+- T-0157 selects unsigned multiplication as the next bounded arithmetic
+  extension. Immediate constants, signed/saturating arithmetic, multiply-add
+  fusion, timing/area optimization and additional operators remain separate
+  requirements; this slice only admits the low 32 bits of two uint32 operands.
 - T-0103 demonstrates only immutable-by-name showcase cache entries. What
   durable artifact lineage, tool/environment/policy/workspace invalidation,
   atomic output publication, cache budget/eviction, concurrent safety, and

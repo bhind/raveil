@@ -115,6 +115,9 @@ ADR-0088 permits forward references between value nodes and orders execution
 by dependencies, with original descriptor order breaking ready-node ties.
 Compiler trace indices describe that emitted schedule; the original descriptor
 hash remains bound to the captured input. Ordered descriptors keep their bytes.
+ADR-0089 reserves descriptor v3 and program/request v4 for unsigned multiply
+opcode 5. Its modulo-2^32 semantics must agree across the oracle, encoded
+fallback and circuit. Existing versions and MMIO layouts retain their meaning.
 An editable descriptor under project inputs is captured once and bound to the
 input manifest, compiled program, execution receipt and retained output. A
 post-execution input-tree check rejects snapshot drift. The input remains

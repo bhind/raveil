@@ -1,4 +1,5 @@
 import json
+import hashlib
 from pathlib import Path
 import shutil
 import struct
@@ -30,6 +31,50 @@ RELATIVE = "tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json
 
 
 class GraphDeviceDynamicTests(unittest.TestCase):
+    def test_v4_cxx_admission_and_rehashed_invalid_instructions(self):
+        compiler = shutil.which("c++")
+        if compiler is None:
+            self.skipTest("no C++ compiler")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            request = root / "request"
+            result = prepare_request(request,
+                "tests/fixtures/graph_device_dynamic/product-neighbors-u32.json", 5, ROOT)
+            self.assertEqual(result["metadata"]["schema"], "raveil.graph-device-dynamic-request/v4")
+            original = (request / "request.bin").read_bytes()
+            self.assertEqual(struct.unpack_from("<I", original, 4)[0], 4)
+            harness = root / "admission"
+            built = subprocess.run([compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror",
+                "-I", str(ROOT / "linux/include"), "-I", str(request),
+                str(ROOT / "tests/graph_device_dynamic_request_host_test.cpp"),
+                str(ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp"),
+                "-o", str(harness)], capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 0)
+            mixed = json.loads((ROOT / "tests/fixtures/graph_device_dynamic/product-neighbors-u32.json").read_text())
+            mixed["nodes"].insert(-1, {"id": "m", "op": "MAX_U32", "inputs": ["p", "c"]})
+            mixed["nodes"][-1]["input"] = "m"
+            mixed_raw = bytearray(original)
+            struct.pack_into("<32I", mixed_raw, 96, *compile_descriptor(mixed)["payload"])
+            (request / "request.bin").write_bytes(mixed_raw)
+            self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 0)
+            for label, index, mask in (("reserved", 2, 1), ("invalid-relative-row", 0, 1 << 22)):
+                with self.subTest(label=label):
+                    raw = bytearray(original)
+                    words = list(struct.unpack_from("<32I", raw, 96))
+                    words[12 + index] |= mask
+                    digest = hashlib.sha256(struct.pack("<5I", words[2], *words[12:16])).digest()
+                    words[4:12] = struct.unpack("<8I", digest)
+                    struct.pack_into("<32I", raw, 96, *words)
+                    (request / "request.bin").write_bytes(raw)
+                    self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 1)
+            for version in (1, 2, 3):
+                raw = bytearray(original)
+                struct.pack_into("<I", raw, 4, version)
+                struct.pack_into("<I", raw, 100, version)
+                (request / "request.bin").write_bytes(raw)
+                self.assertEqual(subprocess.run([str(harness), str(request)]).returncode, 1)
+
     def test_relative_fixture_uses_explicit_v3_request(self):
         descriptor = load_descriptor(ROOT / RELATIVE)
         program = compile_descriptor(descriptor)

@@ -94,7 +94,7 @@ def _request_bytes(program: dict[str, Any], profile: dict[str, Any], seed: int) 
     if len(graph_id_bytes) != GRAPH_ID_BYTES:
         raise GraphDeviceDynamicError("graph_id is too long")
     version = int(program["payload"][1])
-    if version not in {1, 2, 3}:
+    if version not in {1, 2, 3, 4}:
         raise GraphDeviceDynamicError("program version is unsupported")
     header = struct.pack(
         "<8I", MAGIC, version, HEADER_BYTES, 0 if name == "baseline" else 1,
