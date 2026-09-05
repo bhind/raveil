@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | No active P0. The next Chisel/software generality slice is a material design fork; do not substitute a legacy or physical task. |
-| **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 existing candidate review/integration and T-0151 PM operations; T-0149 is the next primary editable-workspace outcome but Blocked on integration and regression disposition. No second primary implementation starts. |
+| **P1 — next** | Start only after its named P0 dependency passes. | T-0150 Garden feedback and T-0152 regression disposition remain unstarted. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -24,6 +24,69 @@ task. ADR-0061 permits at most two independently acceptable implementation
 items when their task, files, artifacts, tests, and evidence are disjoint.
 Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
+
+## 2026-09-05 inventory reconciliation
+
+[Inventory receipt](docs/guides/PROJECT-INVENTORY-2026-09-05.md) and
+[Project #1](https://github.com/users/bhind/projects/1) map each unfinished
+T-ID to its item. These additions describe unintegrated candidates and live
+work, not canonical product completion. Historical root changes remain intact.
+
+- [ ] **T-0152** Reconcile the UIO no-device source-scan regression, real
+  [Issue #117](https://github.com/bhind/raveil/issues/117), P1/Backlog, Systems
+  Implementer with PM acceptance. This replaces only the colliding local
+  T-0150 defect identifier in `feat/t-0149-project-workspace`; live T-0150
+  remains Garden feedback. Reproduce `tests.test_graph_device_uio_dry_run`,
+  distinguish descriptor-safe repository opens from forbidden device access,
+  preserve ADR-0083, and verify focused UIO/sealed tests plus full discovery.
+  Acceptance requires a justified boundary test and retained no-device
+  behavior, not simply removal of a failing assertion. Next: refine the exact
+  bounded test allowlist and reproduce before mutation. Coordinate its
+  disposition before T-0149 closeout. No device/MMIO or product/RTL expansion.
+
+- [ ] **T-0151** Reconcile initial inventory and daily Project delivery without
+  owner reminders. Real [Issue #115](https://github.com/bhind/raveil/issues/115),
+  P0/In Progress, PM, S-0003. ADR-0086 and branch
+  `docs/t-0151-project-inventory` own this bounded PM inventory/record slice.
+  The existing `chore/t-0151-daily-project-reconciliation` worktree owns the
+  separate daily implementation candidate and is preserved. Acceptance:
+  live inventory repairs are reread; the bounded paginated queue read and
+  existing lifecycle regressions pass; exact metadata/evidence gaps remain
+  visible; scheduler dry-run, idempotence/failure tests and actual local
+  registration/rehearsal pass before the parent is Done. Next: finish and
+  verify the existing daily implementation, then integrate both record slices
+  serially through PR with no overlapping-file loss.
+
+- [ ] **T-0150** Make Garden fusion changes visible at a glance, real
+  [Issue #114](https://github.com/bhind/raveil/issues/114), P1/Ready after concurrent daily refinement, Experience
+  Implementer, S-0003. Show materialized/fused plans side by side, selected-node
+  impact, and eliminated intermediate writes/reads; label 512B/0B as plan
+  intermediate memory. Acceptance: readable Mac Terminal redraw, deterministic
+  non-TTY output, unchanged read-only/validation boundaries. Depends on T-0135
+  and T-0144. Next: refine/pull after the primary editable workspace.
+
+- [ ] **T-0149** Deliver the editable shell-first Raveil workspace, real
+  [Issue #116](https://github.com/bhind/raveil/issues/116), P0/Blocked,
+  Experience Implementer with PM integration. Local candidate `31262f1` on
+  `feat/t-0149-project-workspace` contains CLI, tests, launcher and local
+  ADR-0085; these are not integrated into this branch. Acceptance: actual
+  Mac/Linux edit-run-change-rerun-diff loop, retained recipe/input/run history,
+  Native and separately labelled QEMU correctness, exact candidate review,
+  test evidence, record reconciliation and merged PR. Blockers: predecessor
+  T-0148 and candidate PR integration, plus T-0152 regression disposition.
+  Next primary product action: publish/review the ordered candidate PRs and
+  resolve the regression boundary. Preserve original dirty
+  `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
+
+- [ ] **T-0148** Integrate the existing signed-relative-load v3 simulation
+  candidate, real [Issue #113](https://github.com/bhind/raveil/issues/113),
+  Chisel Implementer with PM integration, S-0002. Local `bf81269` on
+  `feat/t-0148-relative-load-v3` is a completion candidate with local ADR-0084,
+  not canonical main acceptance. Preserve v1/v2 behavior and frozen transport
+  ABIs; verify the eight-neighbor 16-instruction oracle/fallback/RTL evidence
+  and bounded negative matrix before merged-PR closure. Next: PR and exact
+  evidence verification; no further primary implementation scope is added.
+
 
 ## Project entry point
 
