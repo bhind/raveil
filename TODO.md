@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 existing candidate review/integration; T-0150 is the sole new code mutation while reviewed product candidates are published. T-0149 remains Blocked on integration and regression disposition; T-0151 PM operations accepted. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0152 regression disposition remains unstarted. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 existing candidate review/integration; T-0152 is the sole new code mutation. T-0149 remains Blocked on integration and regression disposition; T-0150 is technically integrated, with S-0003 owner ceremony pending. |
+| **P1 — next** | Start only after its named P0 dependency passes. | Resume T-0149 integration after T-0148 predecessor integration and T-0152 regression disposition. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -33,15 +33,19 @@ T-ID to its item. These additions describe unintegrated candidates and live
 work, not canonical product completion. Historical root changes remain intact.
 
 - [ ] **T-0152** Reconcile the UIO no-device source-scan regression, real
-  [Issue #117](https://github.com/bhind/raveil/issues/117), P1/Backlog, Systems
+  [Issue #117](https://github.com/bhind/raveil/issues/117), P0/In Progress, Systems
   Implementer with PM acceptance. This replaces only the colliding local
   T-0150 defect identifier in `feat/t-0149-project-workspace`; live T-0150
   remains Garden feedback. Reproduce `tests.test_graph_device_uio_dry_run`,
   distinguish descriptor-safe repository opens from forbidden device access,
   preserve ADR-0083, and verify focused UIO/sealed tests plus full discovery.
   Acceptance requires a justified boundary test and retained no-device
-  behavior, not simply removal of a failing assertion. Next: refine the exact
-  bounded test allowlist and reproduce before mutation. Coordinate its
+  behavior, not simply removal of a failing assertion. Baseline reproduced:
+  3 tests / 1 failure. Branch `fix/t-0152-uio-no-device-regression`, base
+  `5ddf460`, limits source mutation to `tests/test_graph_device_uio_dry_run.py`.
+  Candidate behavior guards pass 6 focused tests, 20 independent UIO/sealed
+  tests and full discovery (704 tests, two skips, zero failures).
+  Next: exact-head PR review and integration. Coordinate its
   disposition before T-0149 closeout. No device/MMIO or product/RTL expansion.
 
 - [x] **T-0151** Reconcile initial inventory and daily Project delivery without
@@ -57,8 +61,8 @@ work, not canonical product completion. Historical root changes remain intact.
   canonical STATUS retains merged PR #100. Daily event facts never infer
   task or ceremony acceptance. Preserve immediate session/task closeout.
 
-- [ ] **T-0150** Make Garden fusion changes visible at a glance, real
-  [Issue #114](https://github.com/bhind/raveil/issues/114), P0/Review, Experience
+- [x] **T-0150** Make Garden fusion changes visible at a glance, real
+  [Issue #114](https://github.com/bhind/raveil/issues/114), technically Done, Experience
   Implementer, S-0003. Show materialized/fused plans side by side, selected-node
   impact, and eliminated intermediate writes/reads; label 512B/0B as plan
   intermediate memory. Acceptance: readable Mac Terminal redraw, deterministic
@@ -66,13 +70,15 @@ work, not canonical product completion. Historical root changes remain intact.
   and T-0144. On owner direction to delegate publication and continue work,
   pulled the existing Ready item through the canonical queue. Branch
   `feat/t-0150-garden-fusion-view` at `/private/tmp/raveil-t0150-garden` has a
-  published candidate in [Draft PR #124](https://github.com/bhind/raveil/pull/124): default side-by-side comparison with selected-stage marks,
+  implementation merged in [PR #124](https://github.com/bhind/raveil/pull/124)
+  as `5ddf460`: default side-by-side comparison with selected-stage marks,
   removed intermediate WRITE/READ, `d` for existing details, and redraw only
   when both streams are TTYs. Independent Garden/sealed tests pass 41/41;
   real Mac PTY navigation passes at 150x32. Mac Terminal GUI access is blocked
   by the computer-use tool, so actual app visual acceptance remains pending
-  for S-0003 review. Next: verify actual app presentation and integrate the draft, retaining this gap;
-  do not infer Done or owner acceptance from the local tests.
+  for S-0003 review. Primary exact-head technical audit and canonical completion
+  succeeded after merge; this does not accept that ceremony or claim a GUI
+  observation. Retain actual-app presentation feedback in S-0003.
 
 - [ ] **T-0149** Deliver the editable shell-first Raveil workspace, real
   [Issue #116](https://github.com/bhind/raveil/issues/116), P0/Blocked,

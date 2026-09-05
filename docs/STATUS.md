@@ -35,10 +35,11 @@ executable identifier.
 
 ## 2026-09-05 owner-visible review
 
-T-0150 has a published Host Functional presentation candidate in
-[Draft PR #124](https://github.com/bhind/raveil/pull/124), implementation
+T-0150 is technically integrated through
+[PR #124](https://github.com/bhind/raveil/pull/124), merge `5ddf460`, implementation
 `80b2006ce41f059aa93546325459ead5f14c0764`, on
-`feat/t-0150-garden-fusion-view`. Issue #114 is Review, not Done.
+`feat/t-0150-garden-fusion-view`. Issue #114 is closed and canonically Done;
+the S-0003 owner ceremony and Terminal.app GUI observation remain pending.
 A validated materialized/fused plan pair now
 opens as two adjacent paths, with selected matmul/bias/relu stages marked in
 both plans and intermediate WRITE/READ removal called out. The existing
@@ -86,6 +87,18 @@ T-0150 / Issue #114. The donor records still need this remapping at their PR
 integration. Canonical `tests.test_graph_device_uio_dry_run` reproduces three
 tests with one failure at the blanket `os.open` source ban; no workspace code
 is involved. This is Host Functional diagnostic evidence, not device behavior.
+
+T-0152 is now the bounded active successor on
+`fix/t-0152-uio-no-device-regression`, based on `5ddf460`. Its implementation
+allowlist is the dry-run test file and serial PM records only. Runtime device
+access remains unauthorized. The test-only candidate scopes the static scan to
+the pure planner and observes the named Python open/mapping APIs around the
+planner and injected verified handoff. It allows real repository and sealed
+file reads, rejects canonical device calls before delegation, and checks one
+valid runner invocation versus zero after payload tampering. Six focused tests,
+20 independent UIO/sealed tests, and full discovery (704 tests, two skips,
+zero failures) pass on macOS arm64 / Python 3.14.6. This is regression
+coverage, not a general device-isolation or alias/symlink security guarantee.
 
 
 T-0151's inventory branch additionally replaces the queue's stock CLI Project
