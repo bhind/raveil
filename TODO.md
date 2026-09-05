@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 candidate integration is the primary work. T-0149 remains Blocked on predecessor integration; T-0152 regression is integrated and T-0150 is technically integrated, with S-0003 owner ceremony pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 continuation integration; T-0153 fixes the canonical Blocked recovery defect preventing T-0149 resumption. T-0148 predecessor, T-0152 regression and T-0150 are integrated, with S-0003 owner ceremony pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Resume T-0149 integration after T-0148 predecessor integration and T-0152 regression disposition. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,17 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
+
+- [ ] **T-0153** Resume resolved Blocked items through the canonical queue,
+  [Issue #126](https://github.com/bhind/raveil/issues/126), P0/In Progress,
+  Project Manager, S-0003, 1 SP. After PR #118 and #125 integrated, preparing
+  T-0149 still fails because `prepare` excludes Blocked. Add only an explicit
+  clearing reason to canonical preparation, persisted before Ready; retain
+  complete packets, Initial SP, audit and WIP checks. No inferred dependency
+  completion or manual status workaround. Allowlist: queue script/test and
+  STATUS/TODO/WORKFLOW/date log. Independent queue/daily tests pass 70/70.
+  Next: exact-head integration,
+  then resume T-0149 using the recorded merged dependencies.
 
 [Inventory receipt](docs/guides/PROJECT-INVENTORY-2026-09-05.md) and
 [Project #1](https://github.com/users/bhind/projects/1) map each unfinished
@@ -88,19 +99,21 @@ work, not canonical product completion. Historical root changes remain intact.
   Mac/Linux edit-run-change-rerun-diff loop, retained recipe/input/run history,
   Native and separately labelled QEMU correctness, exact candidate review,
   test evidence, record reconciliation and merged PR. Blockers: predecessor
-  T-0148 predecessor and candidate PR integration. T-0152 is resolved in PR #125.
-  Next primary product action: publish/review the ordered candidate PRs and
-  resolve the regression boundary. Preserve original dirty
+  candidate PR integration and T-0153 canonical recovery. T-0148 predecessor
+  is integrated in PR #118; T-0152 is resolved in PR #125.
+  Next primary product action: resolve canonical recovery and integrate the
+  workspace candidate. Preserve original dirty
   `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
 
 - [ ] **T-0148** Integrate the existing signed-relative-load v3 simulation
   candidate, real [Issue #113](https://github.com/bhind/raveil/issues/113),
   Chisel Implementer with PM integration, S-0002. Local `bf81269` on
-  `feat/t-0148-relative-load-v3` is a completion candidate with local ADR-0084,
-  not canonical main acceptance. Preserve v1/v2 behavior and frozen transport
-  ABIs; verify the eight-neighbor 16-instruction oracle/fallback/RTL evidence
-  and bounded negative matrix before merged-PR closure. Next: PR and exact
-  evidence verification; no further primary implementation scope is added.
+  `feat/t-0148-relative-load-v3` supplies the ADR-0084 predecessor,
+  integrated in PR #118 as `1e17dab`. The editable-Graph continuation in PR #123
+  remains unmerged, so Issue #113 stays open. Preserve v1/v2 behavior and frozen transport
+  ABIs and the verified eight-neighbor 16-instruction oracle/fallback/RTL
+  evidence. Next: workspace and editable-Graph continuation integration;
+  no further primary RTL implementation scope is added.
 
 
 S-0002 review was explicitly accepted on 2026-09-05. The owner requested
