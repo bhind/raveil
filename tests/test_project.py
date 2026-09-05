@@ -58,6 +58,20 @@ class ProjectWorkspaceTests(unittest.TestCase):
             init_project(target)
         self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o700)
 
+    def test_rejected_nonempty_init_preserves_mode_and_content(self) -> None:
+        target = Path(self.temporary.name) / "existing"
+        target.mkdir(mode=0o755)
+        marker = target / "keep.txt"
+        marker.write_text("keep\n", encoding="utf-8")
+        before_mode = stat.S_IMODE(target.stat().st_mode)
+
+        with self.assertRaisesRegex(ValueError, "new or empty directory"):
+            init_project(target)
+
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), before_mode)
+        self.assertEqual(marker.read_text(encoding="utf-8"), "keep\n")
+        self.assertEqual([path.name for path in target.iterdir()], ["keep.txt"])
+
     def test_show_exposes_command_nodes_dependencies_inputs_and_outputs(self) -> None:
         rendered = Project(self.root).show("logs")
         self.assertIn("nodes=3 edges=2", rendered)

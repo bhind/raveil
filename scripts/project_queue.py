@@ -227,19 +227,115 @@ class ProjectQueue:
         self.project_number = project_number
 
     def project(self) -> dict[str, Any]:
-        return gh_json(
-            (
-                "project",
-                "item-list",
-                str(self.project_number),
-                "--owner",
-                self.owner,
-                "--limit",
-                "200",
-                "--format",
-                "json",
-            )
-        )
+        """Read only queue fields; reject partial snapshots before any transition."""
+        query = """
+        query($id: ID!, $cursor: String) {
+          node(id: $id) { ... on ProjectV2 {
+            items(first: 100, after: $cursor) {
+              totalCount pageInfo { hasNextPage endCursor }
+              nodes {
+                id
+                content {
+                  __typename
+                  ... on Issue { id number title url }
+                  ... on DraftIssue { id title body }
+                  ... on PullRequest { id number title url }
+                }
+                fieldValues(first: 100) {
+                  pageInfo { hasNextPage }
+                  nodes {
+                    ... on ProjectV2ItemFieldTextValue {
+                      text field { ... on ProjectV2Field { name } }
+                    }
+                    ... on ProjectV2ItemFieldNumberValue {
+                      number field { ... on ProjectV2Field { name } }
+                    }
+                    ... on ProjectV2ItemFieldDateValue {
+                      date field { ... on ProjectV2Field { name } }
+                    }
+                    ... on ProjectV2ItemFieldSingleSelectValue {
+                      name field { ... on ProjectV2SingleSelectField { name } }
+                    }
+                    ... on ProjectV2ItemFieldIterationValue {
+                      title startDate duration iterationId
+                      field { ... on ProjectV2IterationField { name } }
+                    }
+                  }
+                }
+              }
+            }
+          } }
+        }
+        """
+        identity = self.project_identity()
+        cursor: str | None = None
+        seen_cursors: set[str] = set()
+        seen_items: set[str] = set()
+        items: list[dict[str, Any]] = []
+        total: int | None = None
+        while True:
+            arguments = ["api", "graphql", "-f", f"query={query}", "-f", f"id={identity}"]
+            if cursor is not None:
+                arguments.extend(("-f", f"cursor={cursor}"))
+            payload = gh_json(arguments)
+            try:
+                connection = payload["data"]["node"]["items"]
+                count = connection["totalCount"]
+                page = connection["pageInfo"]
+                nodes = connection["nodes"]
+                if payload.get("errors") or type(count) is not int or not 0 <= count <= 1000:
+                    raise ValueError("invalid or oversized inventory")
+                if total is not None and total != count:
+                    raise ValueError("Project changed while paginating")
+                total = count
+                if not isinstance(nodes, list) or type(page["hasNextPage"]) is not bool:
+                    raise ValueError("malformed page")
+                for node in nodes:
+                    item_id = node["id"]
+                    if not isinstance(item_id, str) or not item_id or item_id in seen_items:
+                        raise ValueError("missing or duplicate item identity")
+                    seen_items.add(item_id)
+                    content = dict(node["content"] or {})
+                    content["type"] = content.pop("__typename", "Redacted")
+                    entry: dict[str, Any] = {
+                        "id": item_id, "title": content.get("title", "Unavailable item"),
+                        "content": content,
+                    }
+                    values = node["fieldValues"]
+                    if values["pageInfo"]["hasNextPage"] is not False:
+                        raise ValueError("truncated item fields")
+                    for value in values["nodes"]:
+                        if not value:
+                            continue  # Unused built-in fields have no selected fragments.
+                        field_name = value["field"]["name"]
+                        if not isinstance(field_name, str) or not field_name:
+                            raise ValueError("invalid field name")
+                        key = field_name[0].lower() + field_name[1:]
+                        if key == "title" and value.get("text") == entry["title"]:
+                            continue  # GitHub repeats content.title as its built-in Title field.
+                        if key in entry:
+                            raise ValueError(f"duplicate or inconsistent normalized field: {key}")
+                        if "iterationId" in value:
+                            result = {k: value[k] for k in ("title", "startDate", "duration", "iterationId")}
+                        else:
+                            kinds = [k for k in ("text", "number", "date", "name") if k in value]
+                            if len(kinds) != 1:
+                                raise ValueError("ambiguous field value")
+                            result = value[kinds[0]]
+                        entry[key] = result
+                    items.append(entry)
+                if len(items) > total:
+                    raise ValueError("inventory exceeds declared count")
+                if not page["hasNextPage"]:
+                    if len(items) != total:
+                        raise ValueError("incomplete Project inventory")
+                    return {"items": items, "totalCount": total}
+                cursor = page["endCursor"]
+                if not nodes or not isinstance(cursor, str) or not cursor or cursor in seen_cursors:
+                    raise ValueError("missing or repeated pagination cursor")
+                seen_cursors.add(cursor)
+            except (KeyError, TypeError, ValueError) as error:
+                raise QueueError(f"incomplete or inconsistent Project read: {error}") from error
 
     def issues(self) -> list[dict[str, Any]]:
         return gh_json(
@@ -302,20 +398,59 @@ class ProjectQueue:
         )["id"]
 
     def fields(self) -> dict[str, dict[str, Any]]:
-        payload = gh_json(
-            (
-                "project",
-                "field-list",
-                str(self.project_number),
-                "--owner",
-                self.owner,
-                "--limit",
-                "100",
-                "--format",
-                "json",
-            )
-        )
-        return {field["name"]: field for field in payload["fields"]}
+        query = """
+        query($id: ID!) {
+          node(id: $id) { ... on ProjectV2 {
+            fields(first: 100) {
+              pageInfo { hasNextPage }
+              nodes {
+                __typename
+                ... on ProjectV2Field { id name }
+                ... on ProjectV2SingleSelectField { id name options { id name } }
+                ... on ProjectV2IterationField { id name }
+              }
+            }
+          } }
+        }
+        """
+        payload = gh_json(("api", "graphql", "-f", f"query={query}",
+                           "-f", f"id={self.project_identity()}"))
+        try:
+            connection = payload["data"]["node"]["fields"]
+            if payload.get("errors") or connection["pageInfo"]["hasNextPage"] is not False:
+                raise ValueError("truncated Project fields")
+            result: dict[str, dict[str, Any]] = {}
+            identities: set[str] = set()
+            for node in connection["nodes"]:
+                field = dict(node)
+                field["type"] = field.pop("__typename")
+                name, identity = field["name"], field["id"]
+                if (not isinstance(name, str) or not name.strip() or name in result
+                        or not isinstance(identity, str) or not identity.strip() or identity in identities):
+                    raise ValueError("missing, malformed or duplicate Project field")
+                identities.add(identity)
+                if field["type"] not in {
+                    "ProjectV2Field", "ProjectV2SingleSelectField", "ProjectV2IterationField"
+                }:
+                    raise ValueError("unknown Project field type")
+                if field["type"] == "ProjectV2SingleSelectField":
+                    options = field["options"]
+                    if not isinstance(options, list):
+                        raise ValueError("malformed single-select options")
+                    option_names: set[str] = set()
+                    option_ids: set[str] = set()
+                    for option in options:
+                        option_name, option_identity = option["name"], option["id"]
+                        if (not isinstance(option_name, str) or not option_name.strip()
+                                or not isinstance(option_identity, str) or not option_identity.strip()
+                                or option_name in option_names or option_identity in option_ids):
+                            raise ValueError("missing, malformed or duplicate single-select option")
+                        option_names.add(option_name)
+                        option_ids.add(option_identity)
+                result[name] = field
+            return result
+        except (KeyError, TypeError, ValueError) as error:
+            raise QueueError(f"incomplete or inconsistent Project fields: {error}") from error
 
     def iteration_id(self, title: str) -> str:
         query = """
@@ -586,10 +721,20 @@ def prepare(queue: ProjectQueue, args: argparse.Namespace) -> int:
     item = queue.find_item(project, issue["url"])
     if item is None:
         raise QueueError("Issue must be linked to the Project before prepare")
-    if item.get("status") not in {None, "", "Backlog", READY_STATUS}:
+    status = item.get("status")
+    unblock_reason = getattr(args, "unblock_reason", "")
+    if status == "Blocked" and not unblock_reason.strip():
+        raise QueueError("prepare requires a nonblank --unblock-reason for Blocked work")
+    depends_on = args.depends_on
+    if unblock_reason.strip():
+        depends_on += f"\nUnblock reason: {unblock_reason.strip()}"
+    if status not in {None, "", "Backlog", "Blocked", READY_STATUS}:
         raise QueueError(
-            "prepare requires an unset/Backlog status (or idempotent Ready)"
+            "prepare requires an unset/Backlog/Blocked status (or idempotent Ready)"
         )
+    if status == READY_STATUS and unblock_reason.strip():
+        if item.get("depends On") != depends_on:
+            raise QueueError("prepare cannot rewrite the Ready successor unblock reason")
     other_ready = [
         entry
         for entry in project.get("items", [])
@@ -627,7 +772,7 @@ def prepare(queue: ProjectQueue, args: argparse.Namespace) -> int:
         "Priority": "P1",
         "Parent T-ID": issue_tid,
         "Owner Role": args.owner_role,
-        "Depends On": args.depends_on,
+        "Depends On": depends_on,
         "Sprint": sprint_id,
         "Initial SP": args.story_points,
         "Story Points": args.story_points,
@@ -817,6 +962,7 @@ def parser() -> argparse.ArgumentParser:
     prepare_parser.add_argument("--story-points", type=int, required=True)
     prepare_parser.add_argument("--demo", required=True)
     prepare_parser.add_argument("--evidence-class", required=True)
+    prepare_parser.add_argument("--unblock-reason", default="")
     prepare_parser.add_argument("--apply", action="store_true")
     prepare_parser.set_defaults(handler=prepare)
 

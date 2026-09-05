@@ -15,6 +15,7 @@ from scripts.project_queue import (
     closing_reference,
     complete,
     missing_packet_markers,
+    parser,
     prepare,
     pullable_ready_items,
     task_id,
@@ -175,8 +176,10 @@ def start_args(*, apply: bool = True) -> argparse.Namespace:
     )
 
 
-def prepare_args(*, apply: bool = True) -> argparse.Namespace:
-    return start_args(apply=apply)
+def prepare_args(*, apply: bool = True, unblock_reason: str = "") -> argparse.Namespace:
+    args = start_args(apply=apply)
+    args.unblock_reason = unblock_reason
+    return args
 
 
 def audit_args(*, require_horizon: bool) -> argparse.Namespace:
@@ -282,6 +285,76 @@ class ProjectQueueAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(QueueError, "cannot rewrite Initial SP"):
             prepare(queue, prepare_args())
         self.assertEqual([], queue.edits)
+
+    def test_prepare_unblocks_with_explicit_reason_before_ready(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        blocked = item(27, one_issue["title"], "Blocked", "T-0125")
+        blocked["initial SP"] = 5
+        queue = FakeQueue({"items": [blocked]}, [one_issue], "main")
+        reason = "T-0124 dependency verified at merged PR #30"
+        args = prepare_args(unblock_reason=reason)
+        args.depends_on = "T-0124"
+        combined = f"T-0124\nUnblock reason: {reason}"
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, prepare(queue, args))
+        self.assertIn(("item-27", "Depends On", combined), queue.edits[:-1])
+        self.assertEqual(("item-27", "Status", "Ready"), queue.edits[-1])
+
+    def test_prepare_blocked_requires_nonblank_reason_without_writes(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        blocked = item(27, one_issue["title"], "Blocked", "T-0125")
+        for reason in ("", "  "):
+            with self.subTest(reason=reason):
+                queue = FakeQueue({"items": [blocked]}, [one_issue], "main")
+                with self.assertRaisesRegex(QueueError, "nonblank --unblock-reason"):
+                    prepare(queue, prepare_args(unblock_reason=reason))
+                self.assertEqual([], queue.edits)
+
+    def test_prepare_blocked_preserves_initial_points_without_writes(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        blocked = item(27, one_issue["title"], "Blocked", "T-0125")
+        blocked["initial SP"] = 8
+        queue = FakeQueue({"items": [blocked]}, [one_issue], "main")
+        with self.assertRaisesRegex(QueueError, "cannot rewrite Initial SP"):
+            prepare(queue, prepare_args(unblock_reason="dependency verified"))
+        self.assertEqual([], queue.edits)
+
+    def test_prepare_ready_retry_with_same_unblock_reason_is_idempotent(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        ready = item(27, one_issue["title"], "Ready", "T-0125")
+        ready["priority"] = "P1"
+        ready["initial SP"] = 5
+        reason = "T-0124 dependency verified at merged PR #30"
+        args = prepare_args(unblock_reason=reason)
+        args.depends_on = "T-0124"
+        combined = f"T-0124\nUnblock reason: {reason}"
+        ready["depends On"] = combined
+        queue = FakeQueue({"items": [ready]}, [one_issue], "main")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(0, prepare(queue, args))
+        self.assertIn(("item-27", "Depends On", combined), queue.edits[:-1])
+        self.assertEqual(("item-27", "Status", "Ready"), queue.edits[-1])
+
+    def test_prepare_rejects_invalid_status_even_with_unblock_reason(self) -> None:
+        one_issue = issue(27, "T-0125 — Playable")
+        active = item(27, one_issue["title"], "In Progress", "T-0125")
+        queue = FakeQueue({"items": [active]}, [one_issue], "main")
+        with self.assertRaisesRegex(QueueError, "unset/Backlog/Blocked"):
+            prepare(queue, prepare_args(unblock_reason="dependency verified"))
+        self.assertEqual([], queue.edits)
+
+    def test_prepare_parser_defaults_and_accepts_unblock_reason(self) -> None:
+        common = [
+            "prepare", "27", "--owner-role", "Chisel Implementer",
+            "--depends-on", "T-0124", "--sprint", "S-0001",
+            "--story-points", "5", "--demo", "./demo.sh",
+            "--evidence-class", "Host Functional",
+        ]
+        self.assertEqual("", parser().parse_args(common).unblock_reason)
+        self.assertEqual(
+            "dependency verified",
+            parser().parse_args(common + ["--unblock-reason", "dependency verified"]).unblock_reason,
+        )
 
     def test_accepts_two_real_issue_lanes_and_matching_branch(self) -> None:
         issues = [issue(27, "T-0125 — Playable"), issue(28, "T-0126 — Queue")]
@@ -674,6 +747,130 @@ class ProjectQueueAuditTest(unittest.TestCase):
             complete(queue, complete_args())
         self.assertEqual(["Review Outcome", "Observed Cycle"], writes)
         self.assertNotIn("Status", writes)
+
+
+
+class ProjectInventoryReadTests(unittest.TestCase):
+    def node(self, identity="item-1", **content):
+        return {"id": identity, "content": {"__typename": "Issue", "id": "I_1", "number": 1,
+                "title": "T-0001 — test", "url": "https://github.com/bhind/raveil/issues/1", **content},
+                "fieldValues": {"pageInfo": {"hasNextPage": False}, "nodes": []}}
+
+    def page(self, nodes, total=None, more=False, cursor=None):
+        return {"data": {"node": {"items": {"totalCount": len(nodes) if total is None else total,
+                "nodes": nodes, "pageInfo": {"hasNextPage": more, "endCursor": cursor}}}}}
+
+    def read(self, pages):
+        queue = ProjectQueue("bhind", "bhind/raveil", 1)
+        with patch.object(queue, "project_identity", return_value="P_1"), patch(
+            "scripts.project_queue.gh_json", side_effect=pages
+        ) as query:
+            result = queue.project()
+        return result, query
+
+    def test_multiple_pages_and_queue_field_normalization(self):
+        first = self.node()
+        first["fieldValues"]["nodes"] = [
+            {"text": "T-0001 — test", "field": {"name": "Title"}},
+            {"name": "Review", "field": {"name": "Status"}},
+            {"text": "T-0001", "field": {"name": "Parent T-ID"}},
+            {"number": 0, "field": {"name": "Story Points"}},
+            {"date": "2026-09-05", "field": {"name": "Forecast Date"}},
+            {"title": "S-0003", "startDate": "2026-09-07", "duration": 7,
+             "iterationId": "it-3", "field": {"name": "Sprint"}}, {},
+        ]
+        result, query = self.read([self.page([first], 2, True, "next"),
+                                   self.page([self.node("item-2")], 2)])
+        self.assertEqual(result["totalCount"], 2)
+        row = result["items"][0]
+        self.assertEqual((row["status"], row["parent T-ID"], row["story Points"]), ("Review", "T-0001", 0))
+        self.assertEqual(row["sprint"]["iterationId"], "it-3")
+        self.assertEqual(row["content"]["type"], "Issue")
+        self.assertIn("cursor=next", query.call_args_list[1].args[0])
+
+    def test_preserves_draft_and_redacted_identity(self):
+        draft = self.node(); draft["content"] = {"__typename": "DraftIssue", "id": "D_1", "title": "T-0001", "body": "deferred"}
+        redacted = self.node("item-2"); redacted["content"] = None
+        result, _ = self.read([self.page([draft, redacted])])
+        self.assertEqual(result["items"][0]["content"]["body"], "deferred")
+        self.assertEqual(result["items"][1]["content"]["type"], "Redacted")
+
+    def test_rejects_partial_or_drifting_inventory(self):
+        cases = [
+            [self.page([self.node()], 2)],
+            [self.page([self.node()], 2, True, "a"), self.page([self.node("item-2")], 3)],
+            [self.page([self.node()], 2, True, "a"), self.page([self.node()], 2)],
+            [self.page([], 1, True, "a")],
+            [self.page([self.node()], 3, True, "a"), self.page([self.node("item-2")], 3, True, "a")],
+            [self.page([], 1001)],
+            [{"errors": [{"message": "rate limit"}], "data": {"node": None}}],
+        ]
+        for pages in cases:
+            with self.subTest(pages=pages), self.assertRaises(QueueError): self.read(pages)
+
+    def test_rejects_truncated_or_duplicate_fields(self):
+        node = self.node(); node["fieldValues"]["pageInfo"]["hasNextPage"] = True
+        with self.assertRaises(QueueError): self.read([self.page([node])])
+        node = self.node(); node["fieldValues"]["nodes"] = [{"name": "Done", "field": {"name": "Status"}}] * 2
+        with self.assertRaises(QueueError): self.read([self.page([node])])
+
+    def test_api_error_propagates_without_returning_partial_items(self):
+        with self.assertRaisesRegex(QueueError, "rate limit"):
+            self.read([self.page([self.node()], 2, True, "a"), QueueError("rate limit")])
+
+
+class ProjectFieldReadTests(unittest.TestCase):
+    def read(self, nodes, more=False):
+        queue = ProjectQueue("bhind", "bhind/raveil", 1)
+        payload = {"data": {"node": {"fields": {
+            "nodes": nodes, "pageInfo": {"hasNextPage": more}
+        }}}}
+        with patch.object(queue, "project_identity", return_value="P_1"), patch(
+            "scripts.project_queue.gh_json", return_value=payload
+        ):
+            return queue.fields()
+
+    def test_normalizes_schema_and_preserves_option_ids(self):
+        rows = [
+            {"__typename": "ProjectV2Field", "id": "F_1", "name": "Story Points"},
+            {"__typename": "ProjectV2SingleSelectField", "id": "F_2", "name": "Status",
+             "options": [{"id": "O_1", "name": "Review"}]},
+            {"__typename": "ProjectV2IterationField", "id": "F_3", "name": "Sprint"},
+        ]
+        fields = self.read(rows)
+        self.assertEqual(ProjectQueue.option_id(fields["Status"], "Review"), "O_1")
+        self.assertEqual(fields["Sprint"]["type"], "ProjectV2IterationField")
+        self.assertEqual(fields["Story Points"]["id"], "F_1")
+
+    def test_refuses_truncated_duplicate_or_malformed_schema(self):
+        field = {"__typename": "ProjectV2Field", "id": "F_1", "name": "Status"}
+        for nodes, more in [([field], True), ([field, field], False), ([{}], False)]:
+            with self.subTest(nodes=nodes, more=more), self.assertRaises(QueueError):
+                self.read(nodes, more)
+
+
+    def test_malformed_option_metadata_blocks_start_before_any_edit(self):
+        one_issue = issue(27, "T-0125 — Playable")
+        project = {"items": [item(27, one_issue["title"], "Ready", "T-0125")]}
+        cases = [
+            {"id": 7, "name": "Chisel Implementer"},
+            {"id": "", "name": "Chisel Implementer"},
+            {"id": "O_1", "name": 7},
+        ]
+        for option in cases:
+            with self.subTest(option=option):
+                queue = FakeQueue(project, [one_issue], "feat/t-0125-playable")
+                bad_schema = [{"__typename": "ProjectV2SingleSelectField", "id": "F_1",
+                               "name": "Owner Role", "options": [option]}]
+                with patch.object(queue, "fields", side_effect=lambda: self.read(bad_schema)):
+                    with self.assertRaises(QueueError): start(queue, start_args())
+                self.assertEqual(queue.edits, [])
+        with self.assertRaises(QueueError):
+            self.read([{"__typename": "ProjectV2Field", "id": 7, "name": "Status"}])
+        for options in (None, "invalid", [{"id": "O_1", "name": "Review"}] * 2):
+            with self.assertRaises(QueueError):
+                self.read([{"__typename": "ProjectV2SingleSelectField", "id": "F_1",
+                            "name": "Status", "options": options}])
 
 
 if __name__ == "__main__":

@@ -87,3 +87,4 @@ rewrite it.
 | [ADR-0083](ADR-0083-verified-sealed-payloads-are-projected-before-uio-open.md) | Accepted | Verified sealed payloads enter a private projection and no-device host adapter before UIO wiring |
 | [ADR-0084](ADR-0084-simulation-generality-precedes-physical-integration.md) | Accepted | Versioned signed relative loads advance simulation generality before physical integration |
 | [ADR-0085](ADR-0085-shell-first-project-workspaces-are-the-playable-entry.md) | Accepted | Shell-first project workspaces are the playable Raveil entry |
+| [ADR-0086](ADR-0086-project-inventory-and-session-sync-are-required.md) | Accepted | Mandatory initial inventory and same-session Project synchronization; canonical authority unchanged |

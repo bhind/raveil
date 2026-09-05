@@ -88,3 +88,10 @@ is in [WORKFLOW](WORKFLOW.md). Use the repository-scoped
 continuation, correction, review, closeout, retrospective, and next-pull loop.
 Remote publication uses `raveil-remote-release`; hosted CI/CD remains disabled
 by policy.
+
+## Project operations receipts
+
+[2026-09-05 Project inventory](guides/PROJECT-INVENTORY-2026-09-05.md) records
+an initial reconciliation and remaining evidence/scope gaps. Live coordination
+stays in [GitHub Project #1](https://github.com/users/bhind/projects/1), with
+mandatory session updates under ADR-0086 and WORKFLOW.

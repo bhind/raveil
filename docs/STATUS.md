@@ -33,6 +33,113 @@ Scarbo names remain documentation responsibility domains; their presence in a
 table does not imply that a complete integrated subsystem exists or rename an
 executable identifier.
 
+## 2026-09-05 owner-visible review
+
+T-0148's relative-load predecessor is integrated via PR #118, merge `1e17dab`,
+after current-main reconciliation and 710 passing host tests (two skips).
+The previously retained RTL functional evidence is unchanged. Issue #113
+remains open for the separate editable-Graph continuation. T-0149's technical
+predecessors are now integrated. T-0153 merged through PR #127 as `6fc6881`,
+adding explicit `--unblock-reason`, persisted with dependencies before Ready,
+with 70 passing queue/daily tests. T-0149 was canonically prepared and resumed
+with its original 13 points; current-main workspace integration is active. No automatic
+dependency inference, manual status bypass or workspace completion is claimed.
+
+The resumed workspace candidate rejects nonempty initialization before
+changing directory permissions. Fourteen project regressions pass on macOS
+and network-disabled Linux. Actual Mac CLI editing changes retained log output
+2 -> 3 with a readable diff; independent file transforms, Native/QEMU GEMM,
+and QEMU console help/exit also pass. Host and QEMU evidence remain separate;
+full current-main discovery passes 730 tests with two skips and zero failures.
+Exact-head integration is pending.
+
+T-0150 is technically integrated through
+[PR #124](https://github.com/bhind/raveil/pull/124), merge `5ddf460`, implementation
+`80b2006ce41f059aa93546325459ead5f14c0764`, on
+`feat/t-0150-garden-fusion-view`. Issue #114 is closed and canonically Done;
+the S-0003 owner ceremony and Terminal.app GUI observation remain pending.
+A validated materialized/fused plan pair now
+opens as two adjacent paths, with selected matmul/bias/relu stages marked in
+both plans and intermediate WRITE/READ removal called out. The existing
+512B/0B values stay bound to the matched plans and are labelled intermediate
+plan memory, not total memory or measured savings. `d` toggles the existing
+technical detail view. Without a validated pair, the existing detail browser
+remains the default. Interactive navigation clears/redraws only when input
+and output are both TTYs; non-TTY rendering stays deterministic and escape-free.
+
+The standard 150-column comparison uses 21 lines before the prompt (24 at
+the minimum 72-column width). Independent Garden/sealed-snapshot checks pass
+41/41 on macOS arm64/Python 3.14.6; actual Mac PTY at 150x32 passes j/j/q
+navigation and exits 0. Computer Use denied access to com.apple.Terminal, so
+this is not a Mac Terminal GUI visual-acceptance claim. That acceptance is
+pending for the S-0003 owner review. No Graph execution/compiler/RTL change
+or new performance evidence is introduced.
+
+The owner accepted S-0002 after navigating Garden in Mac Terminal, reviewing
+its materialized/fused explanation, and inspecting a fresh native 8x8
+GEMM+bias+ReLU result at main `82b196c`. Both native observations were
+semantically valid with checksum `ab4fc57fa8a47521`; the candidate did not
+improve the short development observation and the executor retained the
+baseline. This is host correctness/development-non-claim evidence. T-0135's
+fusion presentation was already accepted on 2026-08-29; this demonstration
+must not be counted as newly completed September implementation.
+
+T-0150 retains the owner's visual-explanation feedback. T-0151 implements the
+requested daily Project reconciliation and actual-date reporting. T-0148's
+independent relative-load predecessor is now integrated, with its
+owner-visible bounded-generality demonstration requested for S-0003 review
+on 2026-09-12. Ceremony acceptance neither completes these tasks nor changes
+an ADR, EXP or roadmap gate.
+
+## 2026-09-05 Project inventory observation
+
+ADR-0086 requires initial and session-level Project synchronization. The
+[dated receipt](guides/PROJECT-INVENTORY-2026-09-05.md) distinguishes integrated
+main `82b196c`, local T-0148/T-0149 candidates, dirty historical T-0042 donor
+files and the independent uncommitted T-0151 daily implementation. None of
+those candidates is promoted to implemented-on-main by this inventory.
+GitHub access works through the authorized network boundary. T-0149 is now
+registered as Issue #116; the local UIO-defect/Garden T-0150 collision is
+resolved in this inventory as defect T-0152 / Issue #117 and Garden
+T-0150 / Issue #114. The donor records still need this remapping at their PR
+integration. Canonical `tests.test_graph_device_uio_dry_run` reproduces three
+tests with one failure at the blanket `os.open` source ban; no workspace code
+is involved. This is Host Functional diagnostic evidence, not device behavior.
+
+T-0152 is integrated through PR #125, merge `2a4da77`, and canonically Done.
+`fix/t-0152-uio-no-device-regression` was based on `5ddf460`. Its implementation
+allowlist is the dry-run test file and serial PM records only. Runtime device
+access remains unauthorized. The test-only correction scopes the static scan to
+the pure planner and observes the named Python open/mapping APIs around the
+planner and injected verified handoff. It allows real repository and sealed
+file reads, rejects canonical device calls before delegation, and checks one
+valid runner invocation versus zero after payload tampering. Six focused tests,
+20 independent UIO/sealed tests, and full discovery (704 tests, two skips,
+zero failures) pass on macOS arm64 / Python 3.14.6. This is regression
+coverage, not a general device-isolation or alias/symlink security guarantee.
+
+
+T-0151's inventory branch additionally replaces the queue's stock CLI Project
+read with explicit GraphQL fields and cursor pagination. It retains the same
+normalized queue inputs and unchanged lifecycle validators. It refuses changing
+counts, duplicate items/cursors/fields, truncated field pages, API errors and
+inventories beyond 1000 items instead of accepting a partial read. Forty-seven
+queue tests pass, including eight new item/schema read-boundary tests. This correction merged through PR #121 as `75bf275` and is not a
+delivery-speed measurement.
+
+T-0151 daily reconciliation now has verified live acceptance: 32 historical
+actual-event fields plus the marked Project README were updated and read back;
+the user-local `com.raveil.project-daily` LaunchAgent then ran successfully
+with zero repeated edits. Its reviewed snapshot SHA-256 is
+`7cafd18358bc19d267cb2336dd75d26c836f7253dd59c0b6d14b938b39bd217c`.
+The job checks every 900 seconds for the latest elapsed 19:00 Asia/Tokyo due
+date, catches up when the Mac is available, retries failures hourly and retains
+receipts. It invokes no model and changes no task/Sprint lifecycle or acceptance.
+Sixty-eight daily, queue and agent-boundary regressions pass. The explicit
+Issue #99 missing API closing-reference association remains a finding, while
+canonical PR #100 evidence is preserved. Inventory integration is PR #121;
+daily implementation integration is PR #120.
+
 ## Development workflow support
 
 Repository-scoped Project Manager, three Implementer, Tester, Performance
@@ -191,10 +298,11 @@ validator slice, bringing S-0001 to 26 Current SP. This is an observed
 owner-authorized over-band Sprint, not a new capacity promise or stop
 condition. Sprint state remains a coordination view and cannot promote task,
 gate, decision, experiment, or evidence status.
-The live Project after S-0001 conditional acceptance contains 58 items and 37
+The historical Project snapshot after S-0001 conditional acceptance contained 58 items and 37
 fields: 26 Backlog, no Ready item, one Blocked, 30 Done, one In Progress, and
-no Review item. T-0132/S01 is the sole active delivery item. T-0135 remains
-Backlog and has not started. The visible Story
+no Review item. At that historical snapshot T-0132/S01 was the sole active delivery item and T-0135
+was unstarted Backlog. Current coordination is the live Project and the dated
+2026-09-05 inventory. The visible Story
 Points assigned across all historical
 Sprints sum to S-0001=119 and S-0002=5; these totals include completed and
 retained planning items and are not the current delivery load. S-0003 is no
