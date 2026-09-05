@@ -53,6 +53,11 @@ differences and matching simulator/RTL identities. The compiler/ISA capacity
 and physical gates do not change; a broader language remains a later choice
 informed by actual authoring friction.
 
+T-0155 follows a reproduced authoring failure: valid forward dependencies were
+rejected solely because of JSON list order. ADR-0088 adds stable topological
+scheduling within existing Graph limits. This host compiler slice does not
+change research gate state; new hardware claims retain their existing gates.
+
 The simulation research line remains preserved rather than discarded:
 
 T-0148 removes the hardwired five-direction address alphabet without changing

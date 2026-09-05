@@ -111,6 +111,10 @@ signed audit store or OS isolation boundary.
 
 ADR-0087 connects `graph-device` recipes to `rtl-sim` through the existing
 dynamic request compiler, offline Verilator runner and independent verifier.
+ADR-0088 permits forward references between value nodes and orders execution
+by dependencies, with original descriptor order breaking ready-node ties.
+Compiler trace indices describe that emitted schedule; the original descriptor
+hash remains bound to the captured input. Ordered descriptors keep their bytes.
 An editable descriptor under project inputs is captured once and bound to the
 input manifest, compiled program, execution receipt and retained output. A
 post-execution input-tree check rejects snapshot drift. The input remains

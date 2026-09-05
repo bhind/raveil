@@ -29,6 +29,73 @@ CHISEL = ROOT / "hardware" / "chisel"
 
 
 class GraphDeviceDagTests(unittest.TestCase):
+    def test_forward_references_are_stably_scheduled_without_changing_semantics(self) -> None:
+        ordered = copy.deepcopy(descriptors()[1])
+        expected = compile_descriptor(ordered)
+        nodes = ordered["nodes"]
+        permuted = copy.deepcopy(ordered)
+        permuted["graph_id"] = "forward-reference-horizontal"
+        permuted["nodes"] = [
+            nodes[2], nodes[0], nodes[1], nodes[3], nodes[4], nodes[5],
+        ]
+
+        actual = compile_descriptor(permuted)
+        self.assertEqual(actual["instruction_count"], expected["instruction_count"])
+        self.assertEqual(
+            [entry["node_id"] for entry in actual["lowering_trace"]["instructions"]],
+            [node["id"] for node in ordered["nodes"]],
+        )
+        self.assertNotEqual(
+            actual["lowering_trace"]["descriptor_canonical_sha256"],
+            expected["lowering_trace"]["descriptor_canonical_sha256"],
+        )
+        validate_lowering_trace(
+            permuted, actual["lowering_trace"], actual["instructions"]
+        )
+        words = input_words(5)
+        self.assertEqual(graph_oracle(permuted, words), graph_oracle(ordered, words))
+        self.assertEqual(graph_oracle(permuted, words), software_fallback(actual, words))
+
+    def test_forward_reference_trace_still_fails_closed(self) -> None:
+        descriptor = copy.deepcopy(descriptors()[1])
+        nodes = descriptor["nodes"]
+        descriptor["nodes"] = [
+            nodes[2], nodes[0], nodes[1], nodes[3], nodes[4], nodes[5],
+        ]
+        program = compile_descriptor(descriptor)
+        malformed = copy.deepcopy(program["lowering_trace"])
+        malformed["instructions"][0], malformed["instructions"][1] = (
+            malformed["instructions"][1], malformed["instructions"][0]
+        )
+        with self.assertRaisesRegex(GraphDeviceDagError, "descriptor or words"):
+            validate_lowering_trace(descriptor, malformed, program["instructions"])
+
+    def test_unknown_cyclic_and_store_dependencies_fail_closed(self) -> None:
+        for expected, mutate in (
+            ("node identity", lambda nodes: nodes[1].__setitem__("id", "center")),
+            ("undefined operand", lambda nodes: nodes[2].__setitem__(
+                "inputs", ["center", "missing"]
+            )),
+            ("cycle", lambda nodes: (
+                nodes[2].__setitem__("inputs", ["center", "sum1"]),
+                nodes[4].__setitem__("inputs", ["sum0", "east"]),
+            )),
+            ("cannot be an operand", lambda nodes: nodes[2].__setitem__(
+                "inputs", ["center", "store"]
+            )),
+        ):
+            with self.subTest(expected=expected):
+                descriptor = copy.deepcopy(descriptors()[1])
+                mutate(descriptor["nodes"])
+                with self.assertRaisesRegex(GraphDeviceDagError, expected):
+                    compile_descriptor(descriptor)
+        descriptor = copy.deepcopy(descriptors()[1])
+        descriptor["nodes"][-2], descriptor["nodes"][-1] = (
+            descriptor["nodes"][-1], descriptor["nodes"][-2]
+        )
+        with self.assertRaisesRegex(GraphDeviceDagError, "exactly one final"):
+            compile_descriptor(descriptor)
+
     def test_v3_relative_loads_cover_all_eight_neighbors(self) -> None:
         path = ROOT / "tests/fixtures/graph_device_dynamic/eight-neighbor-dilation-u32.json"
         descriptor = json.loads(path.read_text(encoding="ascii"))

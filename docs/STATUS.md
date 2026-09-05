@@ -19,6 +19,24 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
+T-0156 shell-quotes the destination in `project init`'s printed Next command.
+A regression executes the actual hint with a space/semicolon-containing path;
+all 28 project and project-Graph tests pass on macOS arm64/Python 3.14.6.
+T-0156 is integrated through PR #132 (`3d1f786`); Issue #131 is closed.
+
+T-0155 admits forward references between Graph value nodes and deterministically
+schedules them by dependency, using original list order to choose among ready
+nodes. ADR-0088 preserves original descriptor hashes and existing ordered
+program/trace bytes. Trace positions now describe the emitted schedule.
+The compiler keeps the final STORE, existing operation set, sixteen instructions
+and eight registers. Its direct oracle shares the dependency scheduler but
+continues to evaluate node arithmetic without decoding compiled instructions.
+Host verification passes 169 Graph-device tests and 44 project-Graph/Garden
+tests. Primary comparison preserves four existing descriptor payloads/traces
+exactly and checks 120 authoring permutations against the previous oracle and
+the encoded fallback. These are host compiler checks; retained RTL evidence
+is not relabelled as an execution of the new compiler.
+
 T-0148/S02 is integrated on main through PR #123, merge `4cc28ed`, after
 stacking local commits `bf81269` and `31262f1` and reconciling with main
 `3fb6b5c`. ADR-0087 (originally branch-local
