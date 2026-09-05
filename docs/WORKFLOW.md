@@ -593,3 +593,22 @@ PM correction through that canonical queue. The reporter may update factual
 GitHub event metadata but never chooses a new P0, marks a task/ceremony Done,
 merges a PR, or changes research authority. No additional ADR is needed for
 this bounded implementation of the existing lifecycle and owner-review rules.
+
+The installed job is `com.raveil.project-daily` in the user's
+`~/Library/LaunchAgents`. Its reviewed script snapshot, installation revision
+and SHA-256 manifest, supervisor, logs, receipts and atomic schedule state are
+under `~/Library/Application Support/Raveil/project-daily`. `RunAtLoad` and
+`StartInterval=900` check the latest elapsed 19:00 Asia/Tokyo due date; the
+first available check after that time runs once. A held file lock suppresses
+concurrent invocations, failures retry no more than hourly, and only a verified
+successful reporter exit advances `last_success_due`. The process timeout is
+600 seconds. Missed dates are caught up once using real event timestamps.
+
+Inspect the launchd job with `launchctl print gui/$(id -u)/com.raveil.project-daily`
+and inspect `state/schedule.json` plus the corresponding JSON receipt in that
+installation directory. A manual replay uses its `daily-launch.py --force`;
+it retains the same usage check and readback. To pause, use
+`launchctl bootout gui/$(id -u)/com.raveil.project-daily`. Reviewed script updates
+must replace the installed snapshot and refresh its manifest; it does not pull
+or execute an unreviewed repository head automatically. No model invocation,
+new credential or hosted service is part of this local reporting job.
