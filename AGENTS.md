@@ -187,3 +187,31 @@ read-only diagnosis, and ask one concrete question with the incident ID,
 authority, preserved evidence, options, recommendation, and exact approval
 needed. Never use this rule to bypass sandbox approval, repository authority,
 or an explicit owner instruction.
+
+## Mandatory Project inventory and session synchronization
+
+ADR-0086 makes GitHub Project #1 an obligatory daily coordination surface.
+The existing source-of-truth order above is unchanged. Jitro / the primary
+Project Manager owns reconciliation, including work performed by later agents.
+Before work, inspect TODO and the live Project for the same full T-ID, active,
+Review and Blocked items. Register approved work before implementation; reuse
+or convert the existing card. Keep the concrete outcome, priority, owner,
+acceptance, dependency/blocker, Issue/PR/branch, canonical record/evidence
+links and next action visible in existing fields or the Issue/card body.
+
+Synchronize discoveries and scope changes during the same session; record a
+blocker's cause, clearing condition and responsible owner immediately. Link
+PR, actual verification and remaining issues at Review. Use the canonical queue
+for prepare/start/review/complete, with Done only after verified acceptance,
+record reconciliation and integration. At closeout reread the live state and
+report changed item links, unresolved differences, blockers and exactly one
+next action. Never finish with only a promise to update later.
+
+Use one primary product implementation by default, currently the editable
+Raveil workspace. ADR-0061's second independent lane is a ceiling, not a target.
+Keep speculative ideas and conditional tasks explicitly deferred, without
+committed Sprint or invented tests. Preserve duplicates' history and link the
+surviving item before archive; never delete existing items during inventory.
+On API failure retain target, operation, permission/error, pending change and
+retry condition in a dated record; continue independent authorized work and
+never report unsynchronized changes as applied. Protect dirty donor worktrees.

@@ -575,3 +575,37 @@ strength of the claim.
   record reconciliation pass. Record the tag in the dated log.
 - Remote tag or GitHub Release publication still requires the
   `raveil-remote-release` workflow and explicit owner approval.
+
+## Session-level Project inventory and synchronization
+
+ADR-0086 requires the primary PM (Jitro) to operate the repository-linked
+[Project #1](https://github.com/users/bhind/projects/1) during every work session.
+Follow AGENTS and the task-governance/Sprint skills. Before implementation,
+de-duplicate full T-ID/slice across TODO, Issues, Project and branches and set
+outcome, owner, priority and acceptance. Keep canonical/evidence and
+Issue/PR/branch links, dependencies/blockers and concrete next action in the
+existing fields or item body; do not invent another live Markdown board.
+
+Update discoveries/scope during the same session; update Blocked immediately
+with cause, clearing condition and responsible work/owner. At Review link the
+PR and actual tests plus unresolved issues. Use `project_queue.py` for its
+supported lifecycle transitions, retain all completion guards, and reread after
+writes. At session end report actual item links, unresolved discrepancies,
+blockers and next action. A daily scheduler supplements these checkpoints;
+it never replaces them or supplies acceptance authority.
+
+Backlog plus an explicit deferred/保留 disposition represents conditional work
+when no dedicated Hold field exists. Ready is reserved for refined, pullable
+work. Do not assign a fake Sprint or estimate to deferred research. Use one
+primary implementation, with the editable workspace as the current intended
+product outcome; independent operations may remain separate under ADR-0061.
+Archive a duplicate only after both Issues retain the relationship and one
+surviving execution card is identified. A historical Done remains historical;
+missing evidence is an explicit verification gap, never a newly granted Done.
+
+An outage receipt states the target, failed operation, error/needed permission,
+unapplied delta and recovery action. Recheck authorized network access before
+calling a sandbox-only authentication result an expired token. Do not bypass
+the queue, fabricate success, discard local work or stop unrelated safe work.
+The [2026-09-05 inventory](guides/PROJECT-INVENTORY-2026-09-05.md) records the
+initial correction; T-0151 Issue #115 owns the separate daily automation.
