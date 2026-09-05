@@ -135,5 +135,18 @@ class ProjectDailyTest(unittest.TestCase):
         self.assertEqual(gh.calls.count("project"), 2)
         self.assertEqual(gh.calls.count("item_cycle"), 1)
 
+    def test_narrow_view_field_and_mutations_never_use_high_level_project_cli(self):
+        commands = []
+        def runner(command, _stdin):
+            commands.append(command); query = command[-1]
+            if "field(name:" in query: return json.dumps({"data":{"user":{"projectV2":{"field":{"id":"field", "name":"Observed Cycle"}}}}})
+            if "projectV2(number" in query: return json.dumps({"data":{"user":{"projectV2":{"id":"PVT", "readme":"readme"}}}})
+            return json.dumps({"data":{"updateProjectV2ItemFieldValue":{"projectV2Item":{"id":"item"}}}})
+        gh = Gh("bhind", "bhind/raveil", 1, runner)
+        self.assertEqual(gh.project_view()["id"], "PVT"); self.assertEqual(gh.fields()[0]["id"], "field")
+        gh.write_text("PVT", "item", "field", "quotes \" survive"); gh.write_readme("outside")
+        self.assertTrue(all(command[1:3] == ("api", "graphql") for command in commands))
+        self.assertTrue(any("updateProjectV2ItemFieldValue" in command[-1] for command in commands))
+
 
 if __name__ == "__main__": unittest.main()

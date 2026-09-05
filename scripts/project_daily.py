@@ -117,6 +117,7 @@ def findings(project: dict[str, Any], issues: list[dict[str, Any]], pulls: list[
 @dataclass
 class Gh:
     owner: str; repo: str; project: int; runner: Callable[[Sequence[str], str | None], str]
+    _project_id: str | None = None
     def json(self, args: Sequence[str]) -> Any:
         try: return json.loads(self.runner(("gh", *args), None))
         except json.JSONDecodeError as e: raise DailyError("GitHub returned malformed JSON") from e
@@ -178,19 +179,32 @@ class Gh:
             if len(data) < 100: return all_rows
         raise DailyError("REST inventory reached its bounded page limit")
     def project_view(self) -> dict[str, Any]:
-        return self.json(("project", "view", str(self.project), "--owner", self.owner, "--format", "json"))
+        query = """query { user(login: %s) { projectV2(number: %d) { id readme } } }""" % (json.dumps(self.owner), self.project)
+        data = self.json(("api", "graphql", "-f", f"query={query}"))
+        try: project = data["data"]["user"]["projectV2"]
+        except (KeyError, TypeError) as error: raise DailyError("narrow Project view schema is missing") from error
+        if not isinstance(project, dict) or not isinstance(project.get("id"), str) or not isinstance(project.get("readme"), str): raise DailyError("narrow Project view is malformed")
+        self._project_id = project["id"]
+        return project
     def readme(self) -> str:
         data = self.project_view()
         text = data.get("readme")
         if not isinstance(text, str): raise DailyError("Project README is unavailable")
         return text
     def fields(self) -> list[dict[str, Any]]:
-        data = self.json(("project", "field-list", str(self.project), "--owner", self.owner, "--limit", "100", "--format", "json"))
-        return data.get("fields", [])
+        query = """query { user(login: %s) { projectV2(number: %d) { field(name: \"Observed Cycle\") { ... on ProjectV2Field { id name } } } } }""" % (json.dumps(self.owner), self.project)
+        data = self.json(("api", "graphql", "-f", f"query={query}"))
+        try: field = data["data"]["user"]["projectV2"]["field"]
+        except (KeyError, TypeError) as error: raise DailyError("Observed Cycle field schema is missing") from error
+        if not isinstance(field, dict) or field.get("name") != "Observed Cycle" or not isinstance(field.get("id"), str): raise DailyError("Project lacks Observed Cycle field")
+        return [field]
     def write_text(self, project_id: str, item: str, field: str, value: str) -> None:
-        self.runner(("gh", "project", "item-edit", "--project-id", project_id, "--id", item, "--field-id", field, "--text", value), None)
+        query = """mutation { updateProjectV2ItemFieldValue(input: { projectId: %s, itemId: %s, fieldId: %s, value: { text: %s } }) { projectV2Item { id } } }""" % (json.dumps(project_id), json.dumps(item), json.dumps(field), json.dumps(value))
+        self.json(("api", "graphql", "-f", f"query={query}"))
     def write_readme(self, value: str) -> None:
-        self.runner(("gh", "project", "edit", str(self.project), "--owner", self.owner, "--readme", value), None)
+        project_id = self._project_id or self.project_view()["id"]
+        query = """mutation { updateProjectV2(input: { projectId: %s, readme: %s }) { projectV2 { id } } }""" % (json.dumps(project_id), json.dumps(value))
+        self.json(("api", "graphql", "-f", f"query={query}"))
 
 
 def telemetry(_: Callable[[Sequence[str], str | None], str], *, now: Callable[[], datetime] = lambda: datetime.now(timezone.utc), popen=subprocess.Popen) -> dict[str, Any]:
