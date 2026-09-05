@@ -19,9 +19,9 @@ Command Graph walkthrough, published from
 
 この文書は構想ではなく、現行treeで実装されている範囲だけを記録します。
 
-T-0148/S02 is a locally verified continuation on
-`feat/t-0148-project-dynamic-graph`, stacked on local commits `bf81269` and
-`31262f1`, now reconciled with main `3fb6b5c`. ADR-0087 (originally branch-local
+T-0148/S02 is integrated on main through PR #123, merge `4cc28ed`, after
+stacking local commits `bf81269` and `31262f1` and reconciling with main
+`3fb6b5c`. ADR-0087 (originally branch-local
 ADR-0086; identifier collision explicitly recorded) connects editable `graph-device` project recipes to the
 existing offline dynamic RTL executor via `--backend rtl-sim`. The project
 captures the descriptor once, compiles and executes those bytes, checks its
@@ -31,8 +31,8 @@ windows, and presents active rows plus changed nodes/cells in `project diff`.
 After integration with main `3fb6b5c`, full host discovery passes 743 tests
 with two skips and no failures. Independent focused tests pass 54/54 on Mac;
 Linux project parity passes 14/14 using the existing offline image. These are
-host/compatibility checks, not new RTL measurements. PR #123 is the remaining
-integration step; S-0003 review remains separately pending.
+host/compatibility checks, not new RTL measurements. Issue #113 is closed and
+its Project item is Done; S-0003 review remains separately pending.
 
 Three actual project runs pass descriptor-oracle/C++-fallback/RTL byte equality:
 center+north addition, center/north maximum, then center/north-east maximum.
@@ -58,10 +58,9 @@ After explicit owner approval following the initial automatic-review
 rejection, the continuation packet and local verification handoff were written
 to Issue #113 and reread successfully. The prior packet and concurrently added
 inventory handoff are preserved verbatim. That handoff reports predecessor
-`bf81269` was published in PR #118, now merged. This continuation is published
-in PR #123; no merge or Done is asserted before final integration. The
-post-update live queue audit passes with one active and one pullable-Ready
-item. GitHub authentication is available.
+`bf81269` was published in PR #118, now merged. The continuation was published
+and merged in PR #123 as `4cc28ed`; its earlier pre-merge Issue update did not
+assert completion. GitHub authentication is available.
 
 T-0109 reorganizes the root component summary and the canonical architecture
 map without changing executable behavior or an accepted boundary. The records
@@ -81,8 +80,9 @@ executable identifier.
 
 T-0148's relative-load predecessor is integrated via PR #118, merge `1e17dab`,
 after current-main reconciliation and 710 passing host tests (two skips).
-The previously retained RTL functional evidence is unchanged. Issue #113
-remains open for the separate editable-Graph continuation. T-0149's technical
+The previously retained RTL functional evidence is unchanged. PR #123 merged
+the editable-Graph continuation as `4cc28ed`; Issue #113 is closed and its
+Project item is Done. T-0149's technical
 predecessors are now integrated. T-0153 merged through PR #127 as `6fc6881`,
 adding explicit `--unblock-reason`, persisted with dependencies before Ready,
 with 70 passing queue/daily tests. T-0149 was canonically prepared and resumed

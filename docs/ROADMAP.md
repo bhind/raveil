@@ -11,7 +11,7 @@ prototype does not waive an earlier correctness or reproducibility gate.
 The editable Raveil working environment is the next primary product outcome.
 T-0149 is integrated through PR #119 (`3fb6b5c`); Issue #116 is Done.
 T-0148's predecessor is integrated through PR #118 and its editable-Graph
-continuation is undergoing final PR #123 integration, not authorization for
+continuation through PR #123 (`4cc28ed`), not authorization for
 more primary RTL scope. T-0151 inventory/daily operations and T-0150 Garden
 feedback are integrated. The phase table now reflects these live
 items instead of claiming no P0. T-0147 is complete on canonical `82b196c`;
@@ -46,8 +46,8 @@ shows the Graph, compares two user-modified runs, and performs the same command
 grammar on macOS and Linux. This is a one-to-two-week playable slice, not a
 user-research-only exercise or a performance claim.
 
-The owner-selected next increment is T-0148/S02: connect that workspace to
-the existing dynamic RTL Graph executor. Its exit is an editable Graph
+The completed T-0148/S02 increment connects that workspace to the existing
+dynamic RTL Graph executor. Its exit is an editable Graph
 operation/address change, repeated verified RTL execution, readable output
 differences and matching simulator/RTL identities. The compiler/ISA capacity
 and physical gates do not change; a broader language remains a later choice
