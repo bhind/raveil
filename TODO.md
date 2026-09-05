@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 |
-| **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 candidate integration is the primary work. T-0149 remains Blocked on predecessor integration; T-0152 regression is integrated and T-0150 is technically integrated, with S-0003 owner ceremony pending. |
+| **P1 — next** | Start only after its named P0 dependency passes. | Resume T-0149 integration after T-0148 predecessor integration and T-0152 regression disposition. No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -25,9 +25,94 @@ items when their task, files, artifacts, tests, and evidence are disjoint.
 Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
+## 2026-09-05 inventory reconciliation
+
+[Inventory receipt](docs/guides/PROJECT-INVENTORY-2026-09-05.md) and
+[Project #1](https://github.com/users/bhind/projects/1) map each unfinished
+T-ID to its item. These additions describe unintegrated candidates and live
+work, not canonical product completion. Historical root changes remain intact.
+
+- [x] **T-0152** Reconcile the UIO no-device source-scan regression, real
+  [Issue #117](https://github.com/bhind/raveil/issues/117), Done, Systems
+  Implementer with PM acceptance. This replaces only the colliding local
+  T-0150 defect identifier in `feat/t-0149-project-workspace`; live T-0150
+  remains Garden feedback. Reproduce `tests.test_graph_device_uio_dry_run`,
+  distinguish descriptor-safe repository opens from forbidden device access,
+  preserve ADR-0083, and verify focused UIO/sealed tests plus full discovery.
+  Acceptance requires a justified boundary test and retained no-device
+  behavior, not simply removal of a failing assertion. Baseline reproduced:
+  3 tests / 1 failure. Branch `fix/t-0152-uio-no-device-regression`, base
+  `5ddf460`, limits source mutation to `tests/test_graph_device_uio_dry_run.py`.
+  Candidate behavior guards pass 6 focused tests, 20 independent UIO/sealed
+  tests and full discovery (704 tests, two skips, zero failures).
+  Integrated via PR #125, merge `2a4da77`; canonical completion succeeded.
+  The T-0149 regression blocker is cleared. No device/MMIO or product/RTL expansion.
+
+- [x] **T-0151** Reconcile initial inventory and daily Project delivery without
+  owner reminders. [Issue #115](https://github.com/bhind/raveil/issues/115),
+  PM, S-0003. ADR-0086 inventory and bounded canonical queue reads merged in
+  PR #121 (`75bf275`); PR #120 supplies the daily factual reporter and records.
+  Initial live apply updated 32 actual-event fields and the daily Project
+  README with verified readback. The installed Mac LaunchAgent rehearsal
+  exited 0 with zero repeated edits. All 68 daily/queue/agent-boundary tests
+  and the candidate record checker pass. Local schedule: first available
+  15-minute check after 19:00 Asia/Tokyo, hourly failure retry and retained
+  receipts. The API association gap for #99 remains explicitly reported;
+  canonical STATUS retains merged PR #100. Daily event facts never infer
+  task or ceremony acceptance. Preserve immediate session/task closeout.
+
+- [x] **T-0150** Make Garden fusion changes visible at a glance, real
+  [Issue #114](https://github.com/bhind/raveil/issues/114), technically Done, Experience
+  Implementer, S-0003. Show materialized/fused plans side by side, selected-node
+  impact, and eliminated intermediate writes/reads; label 512B/0B as plan
+  intermediate memory. Acceptance: readable Mac Terminal redraw, deterministic
+  non-TTY output, unchanged read-only/validation boundaries. Depends on T-0135
+  and T-0144. On owner direction to delegate publication and continue work,
+  pulled the existing Ready item through the canonical queue. Branch
+  `feat/t-0150-garden-fusion-view` at `/private/tmp/raveil-t0150-garden` has an
+  implementation merged in [PR #124](https://github.com/bhind/raveil/pull/124)
+  as `5ddf460`: default side-by-side comparison with selected-stage marks,
+  removed intermediate WRITE/READ, `d` for existing details, and redraw only
+  when both streams are TTYs. Independent Garden/sealed tests pass 41/41;
+  real Mac PTY navigation passes at 150x32. Mac Terminal GUI access is blocked
+  by the computer-use tool, so actual app visual acceptance remains pending
+  for S-0003 review. Primary exact-head technical audit and canonical completion
+  succeeded after merge; this does not accept that ceremony or claim a GUI
+  observation. Retain actual-app presentation feedback in S-0003.
+
+- [ ] **T-0149** Deliver the editable shell-first Raveil workspace, real
+  [Issue #116](https://github.com/bhind/raveil/issues/116), P0/Blocked,
+  Experience Implementer with PM integration. Local candidate `31262f1` on
+  `feat/t-0149-project-workspace` contains CLI, tests, launcher and local
+  ADR-0085; these are not integrated into this branch. Acceptance: actual
+  Mac/Linux edit-run-change-rerun-diff loop, retained recipe/input/run history,
+  Native and separately labelled QEMU correctness, exact candidate review,
+  test evidence, record reconciliation and merged PR. Blockers: predecessor
+  T-0148 predecessor and candidate PR integration. T-0152 is resolved in PR #125.
+  Next primary product action: publish/review the ordered candidate PRs and
+  resolve the regression boundary. Preserve original dirty
+  `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
+
+- [ ] **T-0148** Integrate the existing signed-relative-load v3 simulation
+  candidate, real [Issue #113](https://github.com/bhind/raveil/issues/113),
+  Chisel Implementer with PM integration, S-0002. Local `bf81269` on
+  `feat/t-0148-relative-load-v3` is a completion candidate with local ADR-0084,
+  not canonical main acceptance. Preserve v1/v2 behavior and frozen transport
+  ABIs; verify the eight-neighbor 16-instruction oracle/fallback/RTL evidence
+  and bounded negative matrix before merged-PR closure. Next: PR and exact
+  evidence verification; no further primary implementation scope is added.
+
+
+S-0002 review was explicitly accepted on 2026-09-05. The owner requested
+the T-0148 bounded Graph-generality demo for S-0003 review on 2026-09-12 JST,
+alongside the T-0150 visual explanation. Forecasts do not accept implementation
+or change original Sprint assignment.
+
 ## Project entry point
 
-- [x] **T-0148** Add versioned signed relative `LOAD_U32` coordinates to the
+### T-0148 predecessor evidence (not whole-task completion)
+
+  Add versioned signed relative `LOAD_U32` coordinates to the
   simulation Graph path. Real Issue #113, branch
   `feat/t-0148-relative-load-v3`, Chisel Implementer, 13 SP, Sprint S-0002 and
   RTL Simulation evidence own descriptor schema v2, program/request v3, one

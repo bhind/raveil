@@ -63,3 +63,30 @@ silicon evidence as separate classes.
    reconcile the Project README, live counts, Ready cards, Sprint, `Review`,
    merged/closed Issue state, and `Done`. Do not mark an
    item `Done` from Project metadata, conversation, or an agent report alone.
+
+## Mandatory Project synchronization (ADR-0086)
+
+Invoke the repository `raveil-sprint-operator` correction/continuation path when
+this task includes Project mutation. Jitro / primary PM owns the live writes.
+Use Project #1 only after checking actual repository linkage. This supplements,
+and never changes, the source-of-truth order.
+
+- Kickoff: de-duplicate TODO, full T-ID/slice, Issues, PRs and branches. Approved
+  execution must have its item, owner, priority, outcome and acceptance first.
+- Same session: synchronize discoveries, scope and dependencies. Ideas stay
+  Backlog/explicitly deferred until accepted; existing fields and bodies suffice.
+- Blocked: record cause, clearing condition, responsible person/task and next
+  action; do not leave a stopped item In Progress without explanation.
+- Review: link the exact PR/branch, change summary, test results, evidence and
+  unresolved issues. Completion requires primary verification and the canonical
+  complete command after integration; no conversation/report-only Done.
+- Closeout: reread Project; reconcile TODO/STATUS/ROADMAP/OPEN_QUESTIONS and
+  relevant ADR/EXP/log; report actual changed item links, remaining differences,
+  blocker release conditions and one next pull. Preserve archived duplicates'
+  provenance. Maintain one card per full T-ID or explicit accepted child slice.
+- Outage: record target, failed operation, required permission, unapplied delta
+  and retry trigger; continue independent authorized work. A sandbox network
+  failure is not proof of an expired credential: retry the authorized operation
+  through the approved network boundary before requesting reauthentication.
+
+The dated inventory guide is a receipt, never a second live task database.

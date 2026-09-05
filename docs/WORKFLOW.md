@@ -1,6 +1,6 @@
 # Development and research workflow
 
-Last updated: 2026-08-29
+Last updated: 2026-09-05
 
 ## Before a change
 
@@ -575,3 +575,74 @@ strength of the claim.
   record reconciliation pass. Record the tag in the dated log.
 - Remote tag or GitHub Release publication still requires the
   `raveil-remote-release` workflow and explicit owner approval.
+
+## Daily Project maintenance
+
+T-0151 supplies the daily factual reconciliation path described in
+`docs/SPRINTS.md`. Run it every day and inspect its dated receipt; a scheduler
+installation alone is not successful reconciliation. A failed usage/API/
+inventory check preserves a failure receipt and does not publish a successful
+update. The local schedule is a user-owned macOS LaunchAgent, not hosted CI;
+the Mac must be available with network and existing GitHub authentication.
+After sleep, one startup/resume catch-up is sufficient; do not invent daily
+successes for missed runs.
+
+Maintain task closeout at each merge using `project_queue.py complete`.
+Daily findings about missing acceptance or multiple stale closed items go to
+PM correction through that canonical queue. The reporter may update factual
+GitHub event metadata but never chooses a new P0, marks a task/ceremony Done,
+merges a PR, or changes research authority. This implements ADR-0086 alongside the existing lifecycle and owner-review
+rules; no further authority expansion is introduced.
+
+The installed job is `com.raveil.project-daily` in the user's
+`~/Library/LaunchAgents`. Its reviewed script snapshot, installation revision
+and SHA-256 manifest, supervisor, logs, receipts and atomic schedule state are
+under `~/Library/Application Support/Raveil/project-daily`. `RunAtLoad` and
+`StartInterval=900` check the latest elapsed 19:00 Asia/Tokyo due date; the
+first available check after that time runs once. A held file lock suppresses
+concurrent invocations, failures retry no more than hourly, and only a verified
+successful reporter exit advances `last_success_due`. The process timeout is
+600 seconds. Missed dates are caught up once using real event timestamps.
+
+Inspect the launchd job with `launchctl print gui/$(id -u)/com.raveil.project-daily`
+and inspect `state/schedule.json` plus the corresponding JSON receipt in that
+installation directory. A manual replay uses its `daily-launch.py --force`;
+it retains the same usage check and readback. To pause, use
+`launchctl bootout gui/$(id -u)/com.raveil.project-daily`. Reviewed script updates
+must replace the installed snapshot and refresh its manifest; it does not pull
+or execute an unreviewed repository head automatically. No model invocation,
+new credential or hosted service is part of this local reporting job.
+
+## Session-level Project inventory and synchronization
+
+ADR-0086 requires the primary PM (Jitro) to operate the repository-linked
+[Project #1](https://github.com/users/bhind/projects/1) during every work session.
+Follow AGENTS and the task-governance/Sprint skills. Before implementation,
+de-duplicate full T-ID/slice across TODO, Issues, Project and branches and set
+outcome, owner, priority and acceptance. Keep canonical/evidence and
+Issue/PR/branch links, dependencies/blockers and concrete next action in the
+existing fields or item body; do not invent another live Markdown board.
+
+Update discoveries/scope during the same session; update Blocked immediately
+with cause, clearing condition and responsible work/owner. At Review link the
+PR and actual tests plus unresolved issues. Use `project_queue.py` for its
+supported lifecycle transitions, retain all completion guards, and reread after
+writes. At session end report actual item links, unresolved discrepancies,
+blockers and next action. A daily scheduler supplements these checkpoints;
+it never replaces them or supplies acceptance authority.
+
+Backlog plus an explicit deferred/保留 disposition represents conditional work
+when no dedicated Hold field exists. Ready is reserved for refined, pullable
+work. Do not assign a fake Sprint or estimate to deferred research. Use one
+primary implementation, with the editable workspace as the current intended
+product outcome; independent operations may remain separate under ADR-0061.
+Archive a duplicate only after both Issues retain the relationship and one
+surviving execution card is identified. A historical Done remains historical;
+missing evidence is an explicit verification gap, never a newly granted Done.
+
+An outage receipt states the target, failed operation, error/needed permission,
+unapplied delta and recovery action. Recheck authorized network access before
+calling a sandbox-only authentication result an expired token. Do not bypass
+the queue, fabricate success, discard local work or stop unrelated safe work.
+The [2026-09-05 inventory](guides/PROJECT-INVENTORY-2026-09-05.md) records the
+initial correction; T-0151 Issue #115 owns the separate daily automation.

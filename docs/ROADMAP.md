@@ -6,6 +6,27 @@ Last updated: 2026-09-05
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.
 
+## 2026-09-05 operational priority reconciliation
+
+The editable Raveil working environment is the next primary product outcome.
+T-0149 already has a local candidate and is now tracked as Issue #116, Blocked
+until predecessor/candidate PR integration and regression disposition. T-0148
+is an existing simulation candidate, not authorization for more primary RTL
+scope; T-0151 handles PM inventory/daily operations separately. T-0150 Garden
+feedback follows the usable workspace. The phase table now reflects these live
+items instead of claiming no P0. T-0147 is complete on canonical `82b196c`;
+older chronological references below to its active correction describe its
+pre-closeout state. No research gate changes in this inventory.
+
+The original broad T-0042 research remains unfinished and deferred separately
+from workspace delivery. Main's checked T-0042 records only ADR-0046's narrowed
+controlled-run result. T-0106 and T-0044 retain the remaining scientific
+outcomes; the T-0042 scope card documents this difference rather than granting
+another completion. Resume only after workspace delivery and explicit scope
+reconciliation; CPU hardening requires its existing survival/product trigger,
+and physical work still requires reviewed common memory views.
+
+
 ## Current research reset and delivery focus
 
 State: **T-0148 advances bounded Graph generality in RTL simulation; real UIO and T-0044 physical research remain preserved but off the critical path**
