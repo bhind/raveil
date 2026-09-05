@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0148 continuation integration is active. T-0149, T-0148 predecessor, T-0150, T-0152 and T-0153 are technically integrated; S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0154 reconciles post-merge records. T-0148, T-0149, T-0150, T-0152 and T-0153 are technically integrated; S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | No real-device successor is authorized; a KV260 implementation remains unallocated until T-0138 checks 1--7, an unbypassable verified-bytes handoff, and the ADR-0039 Project Manager/legal review pass. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,14 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
+
+- [ ] **T-0154** Reconcile post-merge T-0148 records, real
+  [Issue #128](https://github.com/bhind/raveil/issues/128), In Progress,
+  Project Manager, S-0003, 1 SP. PR #123 merged as `4cc28ed` and Issue #113
+  is closed, but current-authority records still describe its continuation as
+  active or pending. Update only TODO, STATUS, ROADMAP, OPEN_QUESTIONS and the
+  dated log. Preserve chronological observations and the pending S-0003 owner
+  review. No executable, architecture, experiment or gate change.
 
 - [x] **T-0153** Resume resolved Blocked items through the canonical queue,
   [Issue #126](https://github.com/bhind/raveil/issues/126), Done,
@@ -106,15 +114,16 @@ work, not canonical product completion. Historical root changes remain intact.
   succeeded; S-0003 ceremony remains pending. Preserve original dirty
   `feat/t-0106-project-workspace` as donor only. Do not reuse T-0106/ADR-0046.
 
-- [ ] **T-0148** Integrate the existing signed-relative-load v3 simulation
+- [x] **T-0148** Integrate the existing signed-relative-load v3 simulation
   candidate, real [Issue #113](https://github.com/bhind/raveil/issues/113),
   Chisel Implementer with PM integration, S-0002. Local `bf81269` on
   `feat/t-0148-relative-load-v3` supplies the ADR-0084 predecessor,
-  integrated in PR #118 as `1e17dab`. The editable-Graph continuation in PR #123
-  remains unmerged, so Issue #113 stays open. Preserve v1/v2 behavior and frozen transport
+  integrated in PR #118 as `1e17dab`. The editable-Graph continuation merged
+  through PR #123 as `4cc28ed`; Issue #113 is closed and its Project item is
+  Done. Preserve v1/v2 behavior and frozen transport
   ABIs and the verified eight-neighbor 16-instruction oracle/fallback/RTL
-  evidence. Next: workspace and editable-Graph continuation integration;
-  no further primary RTL implementation scope is added.
+  evidence. Technical integration is complete; S-0003 owner-visible review is
+  still pending. No further primary RTL implementation scope is added.
 
 
 S-0002 review was explicitly accepted on 2026-09-05. The owner requested
@@ -147,8 +156,8 @@ or change original Sprint assignment.
   Local verification: three edited Graphs pass actual RTL/oracle/fallback
   equality with identical simulator/RTL hashes; 86 focused tests pass and
   independent Security review is GO. The final project display tests pass
-  26/26 on Mac and Linux. Continuation code publication/integration remains
-  pending in PR #123; predecessor PR #118 and workspace PR #119 are merged.
+  26/26 on Mac and Linux. Continuation code publication/integration completed
+  in PR #123 as `4cc28ed`; predecessor PR #118 and workspace PR #119 are merged.
   Current-main reconciliation passes 743 full tests (two skips), 54 independent
   focused tests and 14 Linux parity tests. The branch-local ADR identifier is
   explicitly reconciled as ADR-0087, preserving canonical inventory ADR-0086.
