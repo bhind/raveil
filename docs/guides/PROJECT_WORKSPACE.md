@@ -8,6 +8,12 @@ bash/zsh, editor, Git and file tools around the `raveil project` commands.
 
 ## Create and inspect
 
+For Graph recipes, `project show NAME` prints
+`descriptor file: inputs/<actual filename>` and, for explicit input,
+`input file: inputs/<actual filename>`. These paths are relative to the
+selected project directory. Edit these files rather than inferring a filename
+from the displayed Graph ID; recipe name, Graph ID and filename may differ.
+
 From the repository root:
 
 ```sh
@@ -116,6 +122,15 @@ JSON snapshot and the packed 324-word data used for execution. Input bytes and
 their receipt hash must agree before success; previous runs remain unchanged.
 Explicit runs save packed bytes as `input.bin`; old seed-based runs keep
 `generated-input.bin`. Explicit-input receipts label snapshot provenance.
+When both successful runs use explicit input, `diff` reports the changed word
+count and first changed zero-based index with before/after uint32 values.
+Example: `input: 1/324 words changed` and
+`first changed input word [11] (zero-based): 7 -> 9`.
+Values come from checked saved JSON bound to the recorded packed-input hash,
+not today's editable file. Formatting-only changes report zero changed words
+while raw-file hash differences remain visible. Counts include halo and unused
+words; they do not establish a causal relationship with output differences.
+Seed, mixed-input and failed-run comparisons retain their previous behavior.
 This is a simulation-only input envelope, not a new instruction or device mode.
 
 This path requires Docker running and the existing offline image/cache used by

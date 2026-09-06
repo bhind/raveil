@@ -1,5 +1,7 @@
 """Host-functional adapter tests; mocked runners are not RTL evidence."""
 import json
+import contextlib
+import io
 from pathlib import Path
 import struct
 import tempfile
@@ -60,6 +62,29 @@ class ProjectGraphTests(unittest.TestCase):
         self.assertIn('"row_delta": -1', shown)
         self.assertIn("seed=1", shown)
         self.assertIn("rtl-sim", shown)
+        self.assertIn("descriptor file: inputs/neighborhood.json", shown)
+
+    def test_show_names_actual_descriptor_instead_of_inferring_from_graph_id(self):
+        renamed = self.root / "inputs/my-edited-graph.json"
+        renamed.write_bytes(self.descriptor_path.read_bytes())
+        for source in ("neighborhood", "neighborhood-data"):
+            with self.subTest(source=source):
+                recipe = json.loads((self.root / f"recipes/{source}.json").read_text())
+                recipe["descriptor"] = renamed.name
+                (self.root / "recipes/recipe-alias.json").write_text(json.dumps(recipe))
+                out = io.StringIO()
+                with patch("raveil.project_graph.run_snapshot") as runner, contextlib.redirect_stdout(out):
+                    result = main(["project", "show", "recipe-alias", "--project", str(self.root)])
+                    runner.assert_not_called()
+                self.assertEqual(result, 0)
+                shown = out.getvalue()
+                self.assertIn("graph=neighborhood", shown)
+                self.assertIn("descriptor file: inputs/my-edited-graph.json", shown)
+                self.assertNotIn(str(self.root), shown)
+                if "input" in recipe:
+                    self.assertIn("input file: inputs/neighborhood-data.json", shown)
+                else:
+                    self.assertNotIn("input file:", shown)
 
     def test_edit_changes_program_and_output_but_preserves_old_snapshot(self):
         original = self.descriptor_path.read_bytes()
@@ -131,6 +156,48 @@ class ProjectGraphTests(unittest.TestCase):
         self.assertEqual(runner.call_args.kwargs["input_bytes"], struct.pack("<324I", *changed["words"]))
         self.assertEqual(first["inputs"]["input_mode"], "snapshot")
         self.assertIn("/neighborhood-data.json", self.project.diff(first["run_id"], second["run_id"]))
+        shown = self.project.diff(first["run_id"], second["run_id"])
+        self.assertIn("input: 1/324 words changed", shown)
+        self.assertIn(f"first changed input word [18] (zero-based): {json.loads(original)['words'][18]} -> 4294967295", shown)
+
+    def test_input_diff_is_saved_semantic_and_does_not_execute(self):
+        path = self.root / "inputs/neighborhood-data.json"
+        original = json.loads(path.read_text())
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            first = self.run_graph_data()
+            path.write_text(json.dumps(original, indent=4))
+            formatted = self.run_graph_data()
+            changed = json.loads(path.read_text())
+            for index in (20, 3):
+                changed["words"][index] ^= 1
+            path.write_text(json.dumps(changed))
+            second = self.run_graph_data()
+        path.write_text("current workspace is deliberately invalid")
+        with patch("raveil.project_graph.run_snapshot") as runner, patch("raveil.project_graph.compile_graph") as compiler:
+            same = self.project.diff(first["run_id"], formatted["run_id"])
+            shown = self.project.diff(first["run_id"], second["run_id"])
+            runner.assert_not_called()
+            compiler.assert_not_called()
+        self.assertIn("input: 0/324 words changed", same)
+        self.assertNotIn("first changed input word", same)
+        self.assertIn("/neighborhood-data.json", same)
+        self.assertIn("input: 2/324 words changed", shown)
+        self.assertIn(f"first changed input word [3] (zero-based): {original['words'][3]} -> {changed['words'][3]}", shown)
+        self.assertEqual(shown, self.project.diff(first["run_id"], second["run_id"]))
+
+    def test_input_diff_preserves_legacy_and_rejects_corrupt_history(self):
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            seed = self.run_graph()
+            explicit = self.run_graph_data()
+        self.assertNotIn("words changed", self.project.diff(seed["run_id"], explicit["run_id"]))
+        self.assertNotIn("words changed", self.project.diff(seed["run_id"], seed["run_id"]))
+        with patch("raveil.project_graph.run_snapshot", side_effect=ValueError("failed fixture")):
+            failed = self.run_graph_data()
+        self.assertNotIn("words changed", self.project.diff(explicit["run_id"], failed["run_id"]))
+        saved = self.root / "runs" / explicit["run_id"] / "input.bin"
+        saved.write_bytes(b"corrupt")
+        with self.assertRaisesRegex(ValueError, "saved artifacts changed"):
+            self.project.diff(explicit["run_id"], explicit["run_id"])
 
     def test_explicit_input_symlink_rejected_by_show_and_run(self):
         path = self.root / "inputs/neighborhood-data.json"

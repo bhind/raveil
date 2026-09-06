@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import contextlib
+import io
 import os
 from pathlib import Path
 import stat
@@ -10,10 +12,13 @@ import unittest
 from unittest.mock import patch
 
 from raveil.cli import main
+from raveil.workspace import NativeWorkspace, WorkspaceError, MAX_FILE_BYTES, MAX_TEXT_READ_BYTES
 from raveil.project import (
     CONFIG,
     Project,
     RECIPE_SCHEMA,
+    digest,
+    encoded,
     init_project,
 )
 
@@ -35,6 +40,94 @@ class ProjectWorkspaceTests(unittest.TestCase):
         )
         self.assertEqual(Project(self.root).runs(), "No runs yet. Try: project run logs")
         self.assertIn("Try adding an ERROR line", (self.root / "README.md").read_text())
+
+    def test_successful_large_metadata_remains_readable_and_diffable(self) -> None:
+        for index in range(230):
+            (self.root / "inputs" / f"extra-{index:03d}.txt").write_text("small\n")
+        project = Project(self.root)
+        first = project.run("logs", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        self.assertEqual(first["status"], "succeeded")
+        path = self.root / "runs" / first["run_id"] / "record.json"
+        self.assertGreater(path.stat().st_size, MAX_FILE_BYTES)
+        self.assertEqual(project.load_run(first["run_id"]), first)
+        (self.root / "inputs" / "extra-000.txt").write_text("changed\n")
+        second = project.run("logs", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        self.assertEqual(second["status"], "succeeded")
+        self.assertNotIn("incomplete-or-invalid", project.runs())
+        self.assertIn("/extra-000.txt", project.diff(first["run_id"], second["run_id"]))
+        with self.assertRaisesRegex(WorkspaceError, "exceeds 65536"):
+            NativeWorkspace(path.parent).read_text("record.json")
+        path.write_text(path.read_text() + " ")
+        with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+            project.load_run(first["run_id"])
+
+    def test_explicit_text_read_bound_preserves_validation(self) -> None:
+        workspace = NativeWorkspace(self.root)
+        target = self.root / "bounded.txt"
+        target.write_text("abcd")
+        self.assertEqual(workspace.read_text("bounded.txt", maximum=4), "abcd")
+        with self.assertRaisesRegex(WorkspaceError, "exceeds 3"):
+            workspace.read_text("bounded.txt", maximum=3)
+        for maximum in (0, -1, True, "4", MAX_TEXT_READ_BYTES + 1):
+            with self.subTest(maximum=maximum), self.assertRaises(WorkspaceError):
+                workspace.read_text("bounded.txt", maximum=maximum)
+        (self.root / "link.txt").symlink_to(target)
+        with self.assertRaisesRegex(WorkspaceError, "symlinks"):
+            workspace.read_text("link.txt", maximum=4)
+
+    def test_run_metadata_above_project_bound_is_rejected_before_read(self) -> None:
+        from raveil.project import MAX_BYTES
+        self.assertEqual(MAX_BYTES, MAX_TEXT_READ_BYTES)
+        directory = self.root / "runs" / "oversized"
+        directory.mkdir()
+        with (directory / "record.json").open("wb") as stream:
+            stream.truncate(MAX_BYTES + 1)
+        project = Project(self.root)
+        with patch("raveil.workspace.os.read", side_effect=AssertionError("oversized read")):
+            with self.assertRaisesRegex(WorkspaceError, f"exceeds {MAX_BYTES}"):
+                project.load_run("oversized")
+
+    def test_malformed_saved_metadata_fails_cleanly_even_with_matching_checksum(self) -> None:
+        project = Project(self.root)
+        valid = project.run("logs", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        run_id = valid["run_id"]
+        directory = self.root / "runs" / run_id
+        cases = [("backend", None), ("status", []), ("recipe_name", None),
+                 ("evidence_class", {}), ("recipe", []), ("inputs", []),
+                 ("outputs", []), ("artifacts", []), ("implementation", []),
+                 ("inputs", {"/file": 3}), ("outputs", {"/file": []}),
+                 ("backend", "unknown"), ("status", "unknown"), ("backend", "rtl-sim")]
+        for key, value in cases:
+            with self.subTest(key=key, value=value):
+                record = dict(valid)
+                if value is None:
+                    del record[key]
+                else:
+                    record[key] = value
+                payload = encoded(record)
+                (directory / "record.json").write_bytes(payload)
+                (directory / "record.sha256").write_text(digest(payload) + "\n")
+                with self.assertRaisesRegex(ValueError, "invalid run record"):
+                    project.load_run(run_id)
+                self.assertIn("incomplete-or-invalid", project.runs())
+                errors = io.StringIO()
+                with contextlib.redirect_stderr(errors), contextlib.redirect_stdout(io.StringIO()):
+                    status = main(["project", "diff", run_id, run_id, "--project", str(self.root)])
+                self.assertEqual(status, 2)
+                self.assertNotIn("Traceback", errors.getvalue())
+        (directory / "record.json").write_bytes(encoded(valid))
+        (directory / "record.sha256").write_text(digest(encoded(valid)) + "\n")
+        self.assertEqual(project.load_run(run_id), valid)
+        for missing in ("simulator_sha256", "rtl_manifest_sha256", "program_sha256"):
+            record = dict(valid, backend="rtl-sim", recipe={"descriptor": "x.json"},
+                          implementation={key: "a" * 64 for key in
+                              ("simulator_sha256", "rtl_manifest_sha256", "program_sha256")})
+            del record["implementation"][missing]
+            payload = encoded(record)
+            (directory / "record.json").write_bytes(payload)
+            (directory / "record.sha256").write_text(digest(payload) + "\n")
+            with self.assertRaisesRegex(ValueError, missing):
+                project.load_run(run_id)
 
     def test_project_and_run_artifacts_are_private_even_with_umask_022(self) -> None:
         private_root = Path(self.temporary.name) / "private"
@@ -195,6 +288,27 @@ class ProjectWorkspaceTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("nodes=3 edges=2", completed.stdout)
+
+    def test_init_setup_hint_preserves_literal_checkout_and_existing_path(self) -> None:
+        for index, name in enumerate(("plain", "work space", "$RAVEIL_HINT_TEST", "quote'and\"double", "`printf expanded`", "$(printf expanded)")):
+            with self.subTest(name=name):
+                checkout = Path(self.temporary.name) / name
+                target = Path(self.temporary.name) / f"setup-{index}"
+                with patch("raveil.project.REPOSITORY", checkout), patch("builtins.print") as output:
+                    self.assertEqual(main(["project", "init", str(target)]), 0)
+                hint = next(
+                    call.args[0].removeprefix("One-time shell setup: ")
+                    for call in output.call_args_list
+                    if call.args[0].startswith("One-time shell setup: ")
+                )
+                suffix = "/usr/bin:/bin:/literal path/$unexpanded"
+                completed = subprocess.run(
+                    ["/bin/sh", "-c", hint + '\nprintf "%s" "$PATH"'],
+                    env={"PATH": suffix, "RAVEIL_HINT_TEST": "expanded"},
+                    capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                self.assertEqual(completed.stdout, f"{checkout / 'scripts'}:{suffix}")
 
     def test_console_uses_the_existing_sonatine_kernel_without_shell(self) -> None:
         kernel = Path(self.temporary.name) / "sonatine.elf"

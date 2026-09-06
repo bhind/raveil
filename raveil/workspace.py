@@ -10,6 +10,7 @@ from pathlib import Path, PurePosixPath
 
 MAX_PATH_BYTES = 4096
 MAX_FILE_BYTES = 64 * 1024
+MAX_TEXT_READ_BYTES = 16 * 1024 * 1024
 MAX_DIRECTORY_ENTRIES = 256
 
 
@@ -209,7 +210,10 @@ class NativeWorkspace:
             candidates.append(virtual + ("/" if is_directory else ""))
         return candidates
 
-    def read_text(self, path: str) -> str:
+    def read_text(self, path: str, *, maximum: int = MAX_FILE_BYTES) -> str:
+        """Read confined text with a caller-owned bound; commands use the default."""
+        if type(maximum) is not int or not 0 < maximum <= MAX_TEXT_READ_BYTES:
+            raise WorkspaceError(f"text read maximum must be an integer in 1..{MAX_TEXT_READ_BYTES}")
         parts = self._parts(path)
         target = self._walk_existing(parts)
         if not stat_module.S_ISREG(target.lstat().st_mode):
@@ -223,10 +227,10 @@ class NativeWorkspace:
                 metadata = os.fstat(descriptor)
                 if not stat_module.S_ISREG(metadata.st_mode):
                     raise WorkspaceError("cat accepts regular files only")
-                if metadata.st_size > MAX_FILE_BYTES:
-                    raise WorkspaceError(f"file exceeds {MAX_FILE_BYTES} bytes")
+                if metadata.st_size > maximum:
+                    raise WorkspaceError(f"file exceeds {maximum} bytes")
                 chunks: list[bytes] = []
-                remaining = MAX_FILE_BYTES + 1
+                remaining = maximum + 1
                 while remaining:
                     chunk = os.read(descriptor, remaining)
                     if not chunk:
@@ -240,8 +244,8 @@ class NativeWorkspace:
             raise
         except OSError as exc:
             raise WorkspaceError(f"file is unavailable: {exc.strerror}") from exc
-        if len(data) > MAX_FILE_BYTES:
-            raise WorkspaceError(f"file exceeds {MAX_FILE_BYTES} bytes")
+        if len(data) > maximum:
+            raise WorkspaceError(f"file exceeds {maximum} bytes")
         try:
             text = data.decode("utf-8")
         except UnicodeDecodeError as exc:

@@ -4,6 +4,31 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0169** Bind the tested workspace repair combination to a local Git
+  candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,
+  1 SP. Primary owns the ten-file integration packet. Base `2a0ace3` retains
+  T-0158 corrections. The five code/test files match the tested disposable
+  composite byte-for-byte and 129 host tests pass. Exact-head audit and local
+  commit remain; publication is excluded. T-0161 and T-0164 are not included.
+
+- [x] **T-0163** Explain changed saved input words in project diff,
+  [Issue #147](https://github.com/bhind/raveil/issues/147). Local technical
+  verification complete; candidate `79460b7` is preserved. Included in
+  T-0169 local integration preparation, not yet remotely integrated.
+- [x] **T-0165** Name the actual Graph descriptor file in project show,
+  [Issue #149](https://github.com/bhind/raveil/issues/149). Local candidate
+  `fd9797f` is preserved; included in T-0169, publication pending.
+- [x] **T-0166** Reject malformed saved-run metadata cleanly,
+  [Issue #152](https://github.com/bhind/raveil/issues/152). Local candidate
+  `fd30d31` is preserved; included in T-0169, publication pending.
+- [x] **T-0167** Quote literal checkout paths in shell setup advice,
+  [Issue #153](https://github.com/bhind/raveil/issues/153). Local candidate
+  `3e3222e` is preserved; included in T-0169, publication pending.
+- [x] **T-0168** Keep retained metadata readable within ADR-0096's bound,
+  [Issue #154](https://github.com/bhind/raveil/issues/154). Local candidate
+  `57fbe2e` is preserved; included in T-0169, publication pending. These
+  technical checkboxes do not accept remote integration or Sprint Review.
+
 - [x] **T-0162** Clarify delegated task acceptance under ADR-0094,
   [Issue #145](https://github.com/bhind/raveil/issues/145), S-0003, 1 SP.
   Primary owns governance records; Librarian independently audits. Define
@@ -39,7 +64,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0159 read-only Graph explanations follows integrated T-0160. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0169 local workspace integration preparation. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
