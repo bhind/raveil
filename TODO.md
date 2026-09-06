@@ -83,11 +83,14 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   [Issue #153](https://github.com/bhind/raveil/issues/153). Local candidate
   `3e3222e` is preserved; implementation integrated through T-0169 PR #159
   (`606a4f7`). This receipt-only closeout corrects stale publication metadata;
-  the literal-path shell setup regression passes.
+  the literal-path shell setup regression passes. Receipt PR #167 merged as
+  `219d46b`; Issue #153 closed and canonical Project Done verified.
 - [x] **T-0168** Keep retained metadata readable within ADR-0096's bound,
   [Issue #154](https://github.com/bhind/raveil/issues/154). Local candidate
-  `57fbe2e` is preserved; included in T-0169, publication pending. These
-  technical checkboxes do not accept remote integration or Sprint Review.
+  `57fbe2e` is preserved; implementation integrated through T-0169 PR #159
+  (`606a4f7`). This final predecessor receipt corrects stale publication
+  metadata; the large-record and bounded-read regressions pass. Task
+  completion remains separate from Sprint Review acceptance.
 
 - [x] **T-0162** Clarify delegated task acceptance under ADR-0094,
   [Issue #145](https://github.com/bhind/raveil/issues/145), S-0003, 1 SP.
