@@ -4,7 +4,7 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0164** Batch routine owner approval requests under ADR-0095,
+- [x] **T-0164** Batch routine owner approval requests under ADR-0095,
   [Issue #148](https://github.com/bhind/raveil/issues/148), S-0003, 1 SP.
   Primary owns governance records. At most one unsolicited daily packet with
   ten exact candidate/action items; independent authorized work continues.
@@ -13,7 +13,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   Owner-requested local follow-up adds a mandatory pre-stop incident/scope
   check, next-task search and same-turn first action when eligible. Publication
   was excluded from that local follow-up; later owner direction includes
-  serial reviewed integration. No runtime override is created.
+  serial reviewed integration. PR #163 merged as `5adad29`, Issue #148
+  closed and canonical Project Done verified. No runtime override is created.
 
 - [x] **T-0172** Inspect integrity-checked saved Graph output,
   [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
@@ -61,8 +62,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 - [x] **T-0163** Explain changed saved input words in project diff,
   [Issue #147](https://github.com/bhind/raveil/issues/147). Local technical
-  verification complete; candidate `79460b7` is preserved. Included in
-  T-0169 local integration preparation, not yet remotely integrated.
+  verification complete; candidate `79460b7` is preserved. Implementation
+  integrated through T-0169 PR #159 (`606a4f7`). This task's separate
+  integration-receipt PR reconciles stale records and original Issue closure;
+  it adds no implementation. Current saved-input diff regressions pass.
 - [x] **T-0165** Name the actual Graph descriptor file in project show,
   [Issue #149](https://github.com/bhind/raveil/issues/149). Local candidate
   `fd9797f` is preserved; included in T-0169, publication pending.
@@ -112,7 +115,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0164 integrates existing governance records after Garden. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | Reconcile original task receipts after completed workspace/Garden integration, starting with T-0163. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
