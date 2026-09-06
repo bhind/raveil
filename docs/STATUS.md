@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-06
 
-T-0161 adds `project garden RUN_ID` under ADR-0092: checked saved Graph runs
+T-0161 adds `project garden RUN_ID` under ADR-0093: checked saved Graph runs
 open without compilation, execution or external evidence-directory access.
 The view separates Host Functional artifact checks from historical receipt
 references. Existing T-0160 input-edit runs both open successfully; focused
@@ -33,6 +33,29 @@ identities match across runs; the emitted RTL also matches T-0157's RTL hash.
 Prior history remains valid. This is functional simulation, not performance
 or physical-device evidence. Issue #139 tracks remote integration separately.
 Development state: `unreleased`
+
+## GitHub Project progress surface
+
+The private [`Raveil Weekly Sprints`](https://github.com/users/bhind/projects/1)
+Project remains the sole live coordination board under ADR-0056, ADR-0065, and
+ADR-0066. T-0158 added `Record ID`, `Roadmap Gate`, `Start Date`, and `Target
+Date` plus Current iteration, Backlog, Blocked, By roadmap gate, Research and
+experiments, Recently completed, and Roadmap views. Existing `Sprint`, `Story
+Points`, `Work Type`, `Owner Role`, `Priority`, and the more precise Raveil
+`Evidence Class` were retained rather than duplicated.
+
+GitHub's default historical Burn up is the available standard progress chart.
+The live GraphQL schema exposes saved-view mutations but no Insights-chart
+mutation, and the documented REST path returned 404 for this user-owned
+Project. Custom saved Insights remain unavailable through the public API.
+ADR-0092 adds a bounded daily Action and private Draft alternative with two
+Mermaid ideal/actual charts and a table covering remaining issues/SP, Status,
+completion, and Work Type. The first live S-0002 snapshot observed 9 Done
+items, 43 total SP, and zero remaining items/SP. No Pages site, visibility
+change, claim, or Gate transition was introduced. The dedicated Project secret
+is installed; hosted run #34003784228 succeeded with repository contents read
+permission, masked the credential, and produced an idempotent private Draft
+update. The secret value is not stored in the repository.
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`

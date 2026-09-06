@@ -4,6 +4,16 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [x] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
+  Project with progress views and standard Insights while preserving the
+  repository as authority. Issue #135 and branch
+  `chore/t-0158-project-insights` own this cross-gate Operations slice in
+  S-0003 (3 SP). Four progress fields and seven saved views are live. Verify
+  the standard Burn up and use ADR-0092's private Draft alternative for the
+  API-unavailable ideal line. PR #137 merged as `c87944f`; the dedicated
+  `RAVEIL_PROJECT_TOKEN` secret is installed, and hosted run #34003784228
+  updated the private Draft successfully with read-only repository permission.
+
 ## Start timing phases
 
 This table, together with each task's own trigger text, governs when unfinished
@@ -12,7 +22,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0161 connects saved runs to Garden after integrated T-0159/T-0160; separate-session T-0158 manages Project views. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0161 connects saved runs to Garden after integrated T-0159/T-0160. T-0158 is complete. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -29,7 +39,7 @@ review and failure preservation do not consume the two-item delivery limit.
 
 - [x] **T-0161** Open checked saved project Graph runs in read-only Garden,
   [Issue #142](https://github.com/bhind/raveil/issues/142), S-0003, 3 SP, active.
-  Depends on integrated T-0160 and T-0159. ADR-0092 binds saved artifacts and
+  Depends on integrated T-0160 and T-0159. ADR-0093 binds saved artifacts and
   receipt references without recompiling, rerunning, traversing external
   evidence directories or inventing provenance. Primary owns project/Garden
   code, focused tests and corresponding canonical records. Acceptance: actual

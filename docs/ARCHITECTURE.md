@@ -6,7 +6,7 @@ Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
-ADR-0092 connects verified project snapshots to a separate in-memory Garden
+ADR-0093 connects verified project snapshots to a separate in-memory Garden
 view. The view validates retained lowering but treats historical execution
 receipts as references, never as a newly authenticated evidence envelope.
 

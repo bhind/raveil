@@ -8,7 +8,7 @@ resolves it.
 
 ## Simulation-first device path
 
-- ADR-0092 resolves saved project observation through a separate in-memory
+- ADR-0093 resolves saved project observation through a separate in-memory
   Garden view. Full provenance export/authentication remains separate: the
   project view does not invent missing identities or mint an execution seal.
 

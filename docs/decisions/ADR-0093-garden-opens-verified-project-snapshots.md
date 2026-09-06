@@ -1,4 +1,4 @@
-# ADR-0092: Garden opens checked project snapshots without execution
+# ADR-0093: Garden opens checked project snapshots without execution
 
 Status: Accepted
 Date: 2026-09-06
