@@ -418,6 +418,10 @@ class Project:
         if record["backend"] == "rtl-sim" and record["status"] == "succeeded":
             if type(record["recipe"].get("descriptor")) is not str:
                 raise ValueError("invalid run record: Graph descriptor must be a string")
+            if record["inputs"].get("input_mode") == "snapshot":
+                input_name = record["recipe"].get("input")
+                if type(input_name) is not str or not input_name:
+                    raise ValueError("invalid run record: snapshot input must be a nonempty string")
             for key in ("simulator_sha256", "rtl_manifest_sha256", "program_sha256"):
                 if type(record["implementation"].get(key)) is not str:
                     raise ValueError(f"invalid run record: {key} must be a string")

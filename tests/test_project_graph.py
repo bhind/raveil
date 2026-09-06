@@ -140,6 +140,29 @@ class ProjectGraphTests(unittest.TestCase):
         self.assertNotEqual(first["inputs"]["generated_input_sha256"], second["inputs"]["generated_input_sha256"])
         self.assertEqual((self.root / "inputs/generated-input.bin").read_bytes(), b"user input")
 
+    def test_snapshot_record_missing_input_name_fails_cleanly_in_cli_diff(self):
+        from raveil.project import encoded
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            valid = self.run_graph_data()
+        directory = self.root / "runs" / valid["run_id"]
+        for value in (None, [], 1, ""):
+            with self.subTest(value=value):
+                record = json.loads(json.dumps(valid))
+                if value is None:
+                    del record["recipe"]["input"]
+                else:
+                    record["recipe"]["input"] = value
+                record["recipe_sha256"] = digest(encoded(record["recipe"]))
+                payload = encoded(record)
+                (directory / "record.json").write_bytes(payload)
+                (directory / "record.sha256").write_text(digest(payload) + "\n")
+                with self.assertRaisesRegex(ValueError, "snapshot input"):
+                    self.project.load_run(valid["run_id"])
+                with contextlib.redirect_stdout(io.StringIO()), patch("sys.stderr", new_callable=io.StringIO) as error:
+                    self.assertEqual(main(["project", "diff", valid["run_id"], valid["run_id"],
+                                           "--project", str(self.root)]), 2)
+                self.assertNotIn("Traceback", error.getvalue())
+
     def test_editable_input_snapshot_changes_output_and_preserves_old_run(self):
         input_path = self.root / "inputs/neighborhood-data.json"
         original = input_path.read_bytes()

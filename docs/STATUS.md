@@ -4,12 +4,18 @@ Last updated: 2026-09-06
 
 T-0169 prepares a local Git candidate from current main `2a0ace3`, retaining
 T-0158 corrections and combining only T-0163/0165/0166/0167/0168. The five
-code/test files match the previously tested disposable composite byte-for-byte.
-The local integration passes 129 host tests. Publication and exact-head audit
-remain separate; T-0161 Garden and T-0164 governance are excluded.
+code/test files initially matched the previously tested disposable composite
+byte-for-byte. Integration review then found a missing snapshot input-name
+check between T-0163 and T-0166. The candidate adds that bounded validation
+and its CLI regression; prior composite results do not cover this correction.
+The corrected candidate passes 206 host tests including current main's
+burndown, queue and daily-processing suites.
+Publication and fresh exact-head audit remain separate; T-0161 Garden and
+T-0164 governance are excluded.
 
 The combined workspace explains actual descriptor/input paths and changed
-input words, rejects malformed retained metadata, quotes shell setup paths,
+input words, rejects malformed metadata fields consumed by the diff path,
+quotes shell setup paths,
 and admits retained record reads up to 16 MiB under ADR-0096 while ordinary
 command text remains limited to 64 KiB. No Graph opcode or RTL is changed.
 The prior disposable verification passed 129 tests on macOS and Linux arm64,
