@@ -2,6 +2,15 @@
 
 Last updated: 2026-09-06
 
+T-0171's local `project recipes` command lists sample and custom JSON recipes
+in filename order with kind and compatible backend names. Invalid entries
+remain visible as unavailable; existing bounded paths and read limits apply.
+It validates recipe metadata only, not input files, compiled Graph validity,
+installed tools or successful execution. Focused 24-test suite and actual CLI
+smoke pass. Expanded 210-test host verification passes and draft review found
+no material concern. The later owner direction includes reviewed publication;
+the reconciled integration head still requires exact-head review.
+
 T-0170 adds a local Command input-budget preflight atop T-0169 `84ff1d3`.
 Previously, 130 valid 64-KiB input files ran the logs recipe but their retained
 and working copies exceeded the final 16-MiB snapshot budget, leaving output
@@ -9,9 +18,9 @@ without a sealed record. The preflight rejects a doubled input byte/entry
 lower bound that already exceeds existing limits before run creation or tool
 execution. The same real input now leaves zero runs. It does not reserve
 generated outputs, solve every near-limit sealing failure, or provide stronger
-isolation. The expanded 207-test host suite passes; final exact-head review
-of the reconciled integration head remains pending. The later owner direction
-authorizes serial reviewed integration; the original local-only phase is over.
+isolation. The expanded 207-test host suite passes; exact integration head
+`69ad107` passed audit and merged through PR #160 as `ba5cb36`. Issue #156
+closed and canonical Project Done was verified. Sprint acceptance is separate.
 
 T-0169 prepares a local Git candidate from current main `2a0ace3`, retaining
 T-0158 corrections and combining only T-0163/0165/0166/0167/0168. The five

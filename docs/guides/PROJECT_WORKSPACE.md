@@ -20,6 +20,7 @@ From the repository root:
 export PATH="$PWD/scripts:$PATH"
 raveil project init /tmp/my-raveil-project
 cd /tmp/my-raveil-project
+raveil project recipes
 raveil project show logs
 raveil project show files
 raveil project show gemm
@@ -28,6 +29,20 @@ raveil project show gemm
 The generated `recipes/` and `inputs/` files are ordinary JSON and text. The
 Command recipes use only the bounded allowlisted syntax documented in
 `NATIVE_COMMAND_GRAPH.md`; they do not accept arbitrary shell commands.
+
+`project recipes` lists the `.json` entries in `recipes/` in filename order,
+including your own recipes. It shows their kind and compatible backend names:
+Command uses `native`, Graph uses `rtl-sim`, and GEMM also supports
+`sonatine-qemu` when all dimensions are at most 8. Invalid recipe metadata or
+unreadable entries appear as `unavailable` with an escaped diagnostic; other
+entries remain visible. Non-JSON files are ignored. Existing directory, path
+and text-size limits still apply.
+
+Discovery is read-only metadata validation: it does not compile a Command or
+hardware Graph, read referenced inputs, check installed tools, or execute a
+recipe. A listed backend is not a successful-run guarantee. Follow with
+`project show NAME` to inspect the workload and then `project run NAME` with
+the indicated backend. Use `--project DIR` when outside the project directory.
 
 ## Edit, run and compare
 
@@ -82,8 +97,9 @@ The result is the unsigned product's low 32 bits (for example,
 `4294967295 * 4294967295` becomes `1`), not saturation or a 64-bit output.
 ADD and MAX remain available in this version, so their nodes can be combined
 with multiplication within the existing limits. This is the project execution
-path; Garden's retained dynamic explanation and sealed UIO admission are not
-extended to v4.
+path. Garden's read-only dynamic explanation admits v4 under ADR-0091;
+the separate saved-project-to-Garden integration remains pending. Sealed UIO
+admission is not extended to v4 by this workflow.
 
 `run` verifies descriptor-oracle/C++-fallback/RTL byte equality and saves the
 receipt. Inspect `runs/RUN_ID/workspace/output.txt` for active rows and

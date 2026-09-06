@@ -4,7 +4,17 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0170** Reject impossible duplicated Command input budgets before
+- [ ] **T-0171** Discover workspace recipes from the CLI,
+  [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
+  Owner explicitly approved registration, implementation, tests and docs;
+  the subsequent serial-integration direction includes reviewed publication.
+  `project recipes` lists custom/sample JSON recipes,
+  kind and metadata-compatible backends, reports invalid entries and performs
+  no execution. Local candidate uses `5848e1b` as its preserved base. Focused
+  24-test suite, expanded 210-test host suite and actual CLI smoke pass.
+  Draft review found no material concern; exact-head audit precedes acceptance.
+
+- [x] **T-0170** Reject impossible duplicated Command input budgets before
   execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,
   1 SP. Original local base is T-0169 `84ff1d3`; the later owner direction
   authorizes serial reviewed integration. Preserve the
@@ -12,7 +22,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   exceed them, before creating a run or calling the executor. This is a
   lower-bound preflight, not complete generated-output reservation. Regression
   and the real 130-file reproduction pass after correction; the expanded
-  207-test host suite passes. Final exact-head review remains pending.
+  207-test host suite passes. Exact integration head `69ad107` passed audit;
+  PR #160 merged as `ba5cb36`, Issue #156 closed and Project Done verified.
 
 - [x] **T-0169** Bind the tested workspace repair combination to a local Git
   candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,

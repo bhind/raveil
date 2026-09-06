@@ -247,6 +247,26 @@ class Project:
             raise ValueError("recipe kind must be command, gemm or graph-device")
         return recipe
 
+    def recipes(self) -> str:
+        lines = []
+        for filename in self.workspace.ls("recipes"):
+            if not filename.endswith(".json"):
+                continue
+            recipe_name = filename[:-5]
+            try:
+                recipe = self.recipe(recipe_name)
+                kind = recipe["kind"]
+                backends = ["rtl-sim"] if kind == "graph-device" else ["native"]
+                if kind == "gemm" and max(recipe[key] for key in ("m", "n", "k")) <= 8:
+                    backends.append("sonatine-qemu")
+                lines.append(f"{recipe_name}: {kind}; backends={','.join(backends)}")
+            except (OSError, ValueError, RuntimeError) as error:
+                lines.append(f"{json.dumps(filename)}: unavailable; {json.dumps(str(error))}")
+        return "\n".join(lines or ["No JSON recipes found in recipes/."]) + (
+            "\nRecipe metadata only; inputs, Graph validity and installed tools are not checked."
+            "\nInspect with: project show NAME"
+        )
+
     def show(self, recipe_name: str) -> str:
         recipe = self.recipe(recipe_name)
         if recipe["kind"] == "graph-device":
@@ -547,7 +567,9 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
-    if action == "show":
+    if action == "recipes":
+        print(project.recipes())
+    elif action == "show":
         print(project.show(args.recipe))
     elif action == "runs":
         print(project.runs())
@@ -591,7 +613,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "show", "run", "runs", "diff", "console"):
+    for action in ("init", "recipes", "show", "run", "runs", "diff", "console"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
