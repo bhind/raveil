@@ -2,6 +2,18 @@
 
 Last updated: 2026-09-06
 
+The workspace repair combination, input-budget preflight, recipe discovery,
+saved-output reader and saved-project Garden are integrated in main. Current
+code passed 220 tests on macOS and offline Linux/nonroot. A fresh Native
+workspace run/edit/rerun/diff smoke produced validated logs 2 -> 3; Native
+GEMM passed the trusted baseline and abstained from optimization. Retained
+ADD/MUL Garden views were checked separately without rerunning simulation.
+
+T-0168's ADR-0096 metadata read bound is integrated through T-0169 PR #159
+(`606a4f7`); original `57fbe2e` remains provenance. This receipt-only closeout
+changes no limits or code. Both large-record and bounded-read regressions
+pass. T-0167 receipt PR #167 merged as `219d46b`; #153 closed and Project Done.
+
 T-0167 shell setup path quoting is integrated through T-0169 PR #159
 (`606a4f7`); original `3e3222e` remains provenance. This record-only closeout
 does not change shell behavior or execution permissions. The existing
