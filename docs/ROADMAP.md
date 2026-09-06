@@ -8,6 +8,10 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## 2026-09-05 operational priority reconciliation
 
+2026-09-06: after T-0159 integration, T-0161 connects saved Graph runs to
+read-only Garden. The product sequence is edit, run, inspect the saved run;
+opening the view never repeats execution or advances a hardware/research gate.
+
 2026-09-06: T-0160 prioritizes real editable input over more fixed examples.
 Its exit is an input-edit/run/diff loop over the existing bounded simulator,
 with immutable snapshots and exact oracle/fallback/RTL output agreement.

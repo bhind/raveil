@@ -1,5 +1,8 @@
 # Architecture Decision Records
 
+T-0161: [ADR-0092](ADR-0092-garden-opens-verified-project-snapshots.md)
+is Accepted; checked saved project runs open in Garden without execution.
+
 T-0159: [ADR-0091](ADR-0091-garden-explains-relative-loads-and-multiplication.md)
 is Accepted; read-only Garden explanation admission follows existing program v3/v4.
 

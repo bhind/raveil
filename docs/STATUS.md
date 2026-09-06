@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-06
 
+T-0161 adds `project garden RUN_ID` under ADR-0092: checked saved Graph runs
+open without compilation, execution or external evidence-directory access.
+The view separates Host Functional artifact checks from historical receipt
+references. Existing T-0160 input-edit runs both open successfully; focused
+project/Garden/compiler regression passes 91 tests. Actual repeated navigation
+is byte-identical, and independent review finds no blocking issue. This is not new RTL evidence.
+T-0159 is integrated through PR #141 (`9ec124d`), Issue #136 closed/Done.
+
 T-0159 extends read-only Garden explanation admission to existing program
 v3 relative LOAD and v4 MUL under ADR-0091. The inspector explains input-word
 offsets and modulo-2^32 products. Existing v1/v2 rendering and execution

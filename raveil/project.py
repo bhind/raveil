@@ -15,6 +15,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from typing import Any
 from uuid import uuid4
@@ -410,6 +411,41 @@ class Project:
             raise ValueError(f"run {run_id}: saved artifacts changed")
         return record
 
+    def garden(self, run_id: str):
+        from .garden import GardenProjectView
+
+        record = self.load_run(run_id)
+        recipe = record.get("recipe")
+        if type(recipe) is not dict or record.get("status") != "succeeded" or record.get("backend") != "rtl-sim" or recipe.get("kind") != "graph-device":
+            raise ValueError("Garden requires a successful saved graph-device rtl-sim run")
+        def captured(relative):
+            payload = self.workspace.read_text(f"runs/{name(run_id)}/{relative}").encode()
+            if digest(payload) != record["artifacts"].get("/" + relative):
+                raise ValueError("saved Garden artifact changed during capture")
+            return json.loads(payload, object_pairs_hook=_object)
+        program, receipt = captured("graph.json"), captured("receipt.json")
+        if type(program) is not dict or type(receipt) is not dict or type(record.get("result")) is not dict:
+            raise ValueError("saved Graph, receipt and result must be objects")
+        if receipt != record.get("result", {}).get("receipt"):
+            raise ValueError("saved receipt differs from run record")
+        if receipt.get("output_sha256") != record.get("outputs", {}).get("/output.bin"):
+            raise ValueError("saved output identity differs from receipt")
+        if receipt.get("output_sha256") != record["artifacts"].get("/workspace/output.bin"):
+            raise ValueError("saved output file differs from receipt")
+        descriptor_path = recipe.get("descriptor")
+        if type(descriptor_path) is not str or type(program.get("lowering_trace")) is not dict:
+            raise ValueError("saved descriptor path or lowering is invalid")
+        if receipt.get("descriptor_sha256") != record["artifacts"].get("/inputs/" + descriptor_path):
+            raise ValueError("saved descriptor identity differs from receipt")
+        descriptor = captured("inputs/" + descriptor_path)
+        canonical = json.dumps(descriptor, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+        if program.get("lowering_trace", {}).get("descriptor_canonical_sha256") != digest(canonical):
+            raise ValueError("saved lowering differs from descriptor identity")
+        view = GardenProjectView.from_saved(run_id, program, receipt)
+        if self.load_run(run_id) != record:
+            raise ValueError("saved run changed during Garden capture")
+        return view
+
     def runs(self) -> str:
         lines = []
         for run_id in self.workspace.ls("runs"):
@@ -501,6 +537,14 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
+    if action == "garden":
+        from .garden import render_key_session, run_interactive, validate_render_width
+        validate_render_width(args.width)
+        view = project.garden(args.run_id)
+        if args.keys is not None:
+            print(render_key_session(view, args.keys, args.width))
+            return 0
+        return run_interactive(view, sys.stdin, sys.stdout, args.width)
     if action == "show":
         print(project.show(args.recipe))
     elif action == "runs":
@@ -545,7 +589,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "show", "run", "runs", "diff", "console"):
+    for action in ("init", "show", "run", "runs", "diff", "console", "garden"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -559,6 +603,10 @@ def add_project_parser(subparsers: Any) -> None:
         if action == "diff":
             command.add_argument("first")
             command.add_argument("second")
+        if action == "garden":
+            command.add_argument("run_id")
+            command.add_argument("--width", type=int, default=100)
+            command.add_argument("--keys", help="bounded deterministic Garden navigation")
         if action == "run":
             command.add_argument("--backend", choices=("native", "sonatine-qemu", "rtl-sim"), default="native")
             command.add_argument("--compiler", default="cc")

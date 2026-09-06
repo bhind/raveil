@@ -8,9 +8,9 @@ resolves it.
 
 ## Simulation-first device path
 
-- ADR-0091 resolves read-only display admission for existing program v3/v4.
-  Exporting editable project runs directly into a retained Garden envelope
-  remains separate work; synthetic parser tests do not establish that linkage.
+- ADR-0092 resolves saved project observation through a separate in-memory
+  Garden view. Full provenance export/authentication remains separate: the
+  project view does not invent missing identities or mint an execution seal.
 
 - ADR-0090 selects bounded explicit user input for T-0160. Constants,
   predicates, arbitrary dimensions and larger windows remain separate choices;

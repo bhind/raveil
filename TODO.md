@@ -12,7 +12,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0159 read-only Graph explanations follows integrated T-0160; separate-session T-0158 manages Project views. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0161 connects saved runs to Garden after integrated T-0159/T-0160; separate-session T-0158 manages Project views. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -26,6 +26,18 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
+
+- [x] **T-0161** Open checked saved project Graph runs in read-only Garden,
+  [Issue #142](https://github.com/bhind/raveil/issues/142), S-0003, 3 SP, active.
+  Depends on integrated T-0160 and T-0159. ADR-0092 binds saved artifacts and
+  receipt references without recompiling, rerunning, traversing external
+  evidence directories or inventing provenance. Primary owns project/Garden
+  code, focused tests and corresponding canonical records. Acceptance: actual
+  retained-run navigation, deterministic replay, invalid snapshot rejection,
+  no execution calls and legacy regressions. Host Functional only.
+  Technical acceptance: 91 tests pass, both retained T-0160 runs open, repeated
+  navigation is identical, independent review has no blockers. Issue #142
+  tracks pending integration; this checkbox does not accept the Sprint ceremony.
 
 - [x] **T-0160** Run Graphs with editable input snapshots,
   [Issue #139](https://github.com/bhind/raveil/issues/139), S-0003, 5 SP.

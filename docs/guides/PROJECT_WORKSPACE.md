@@ -8,6 +8,24 @@ bash/zsh, editor, Git and file tools around the `raveil project` commands.
 
 ## Create and inspect
 
+### Open a saved Graph run in Garden
+
+After a successful `graph-device` run, use its printed run ID:
+
+```sh
+raveil project garden RUN_ID --project /tmp/my-raveil-project
+raveil project garden RUN_ID --project /tmp/my-raveil-project --keys jjq --width 100
+```
+
+Use j/k/g/G/q (then Enter) to navigate. Garden checks the saved artifact
+manifest and shows retained lowering and receipt identities without compiling
+or running the Graph again. The view is Host Functional; saved simulation
+agreement is a historical reference, not a new execution or authenticated seal.
+Changed files, failed runs and non-Graph runs are rejected. Existing fixture
+commands are unchanged. Substitute an actual saved run ID for `RUN_ID`.
+
+### Initialize a workspace
+
 From the repository root:
 
 ```sh

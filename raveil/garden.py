@@ -375,21 +375,9 @@ class GardenDynamicExplanation:
     def load(cls, relative: str) -> "GardenDynamicExplanation":
         return cls.from_dict(_read_dynamic_document(relative))
 
-    @classmethod
-    def from_dict(cls, raw: object) -> "GardenDynamicExplanation":
-        if type(raw) is not dict:
-            raise ValueError("dynamic explanation must be an object")
-        _require_exact_keys(
-            raw,
-            {
-                "schema", "title", "lowering", "program_payload", "affine",
-                "identities", "agreement", "evidence", "performance", "polls",
-                "lowering_trace_sha256", "retained_evidence_sha256", "demo_commands",
-            },
-            "dynamic explanation",
-        )
-        if raw["schema"] != DYNAMIC_EXPLANATION_SCHEMA:
-            raise ValueError("unsupported dynamic explanation schema")
+    @staticmethod
+    def parse_lowering(raw):
+        """Validate retained lowering only; do not manufacture execution evidence."""
         lowering = raw["lowering"]
         if type(lowering) is not dict:
             raise ValueError("dynamic lowering trace must be an object")
@@ -613,6 +601,20 @@ class GardenDynamicExplanation:
                         and other.live_range is not None \
                         and other.live_range[1] > item.index:
                     raise ValueError("dynamic value register lifetimes overlap")
+        return graph_id, version, program_sha256, lowering_trace_sha256, descriptor_canonical, tuple(parsed)
+
+    @classmethod
+    def from_dict(cls, raw: object) -> "GardenDynamicExplanation":
+        if type(raw) is not dict:
+            raise ValueError("dynamic explanation must be an object")
+        _require_exact_keys(raw, {
+            "schema", "title", "lowering", "program_payload", "affine",
+            "identities", "agreement", "evidence", "performance", "polls",
+            "lowering_trace_sha256", "retained_evidence_sha256", "demo_commands",
+        }, "dynamic explanation")
+        if raw["schema"] != DYNAMIC_EXPLANATION_SCHEMA:
+            raise ValueError("unsupported dynamic explanation schema")
+        graph_id, version, program_sha256, lowering_trace_sha256, descriptor_canonical, parsed = cls.parse_lowering(raw)
         affine = raw["affine"]
         if type(affine) is not dict:
             raise ValueError("dynamic affine profile must be an object")
@@ -939,6 +941,55 @@ class GardenBrowser:
         return "\n".join([*header, "", *body, "", *footer])
 
 
+@dataclass(frozen=True)
+class GardenProjectView:
+    """In-memory projection of checked project artifacts, not an evidence seal."""
+
+    run_id: str
+    graph_id: str
+    program_version: int
+    instructions: tuple[DynamicLoweringInstruction, ...]
+    input_stride: int
+    identities: Mapping[str, str]
+
+    @classmethod
+    def from_saved(cls, run_id, program, receipt):
+        if type(program) is not dict or type(receipt) is not dict:
+            raise ValueError("saved Graph and receipt must be objects")
+        lowering = program.get("lowering_trace")
+        trace_hash = hashlib.sha256(json.dumps(
+            lowering, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        ).encode("ascii")).hexdigest()
+        graph_id, version, program_hash, _, _, instructions = GardenDynamicExplanation.parse_lowering({
+            "lowering": lowering, "program_payload": program.get("payload"),
+            "lowering_trace_sha256": trace_hash,
+        })
+        if program.get("program_sha256") != program_hash or receipt.get("program_sha256") != program_hash:
+            raise ValueError("saved program and receipt identities differ")
+        if program.get("graph_id") != graph_id or receipt.get("graph_id") != graph_id:
+            raise ValueError("saved Graph ids differ")
+        if program.get("instruction_count") != len(instructions) or program.get("instructions") != [item.encoded_word for item in instructions]:
+            raise ValueError("saved instruction representations differ")
+        affine = program.get("affine")
+        if type(affine) is not dict or set(affine) != {"rows", "columns", "input_stride", "output_stride"}:
+            raise ValueError("invalid saved affine shape")
+        shape = tuple(affine[key] for key in ("rows", "columns", "input_stride", "output_stride"))
+        if any(type(value) is not int for value in shape) or shape not in ((8, 8, 10, 8), (16, 16, 18, 16)):
+            raise ValueError("unsupported saved affine shape")
+        if receipt.get("affine") != ("compact" if shape[0] == 8 else "baseline"):
+            raise ValueError("saved receipt affine differs")
+        if receipt.get("status") != "complete" or receipt.get("evidence_class") != "rtl-simulation-functional" or receipt.get("performance") != "not-measured":
+            raise ValueError("saved receipt is not a completed functional simulation reference")
+        identities = {key: _require_sha256(receipt.get(key), f"saved {key}") for key in (
+            "program_sha256", "output_sha256", "oracle_sha256", "fallback_sha256",
+            "simulator_sha256", "rtl_manifest_sha256", "source_manifest_sha256",
+        )}
+        if len({identities[key] for key in ("output_sha256", "oracle_sha256", "fallback_sha256")}) != 1:
+            raise ValueError("saved output agreement differs")
+        return cls(_require_text(run_id, "saved run id", maximum=80), graph_id,
+                   version, instructions, affine["input_stride"], MappingProxyType(identities))
+
+
 class GardenDynamicBrowser:
     """Read-only terminal projection of an already validated explanation."""
 
@@ -1090,6 +1141,49 @@ class GardenDynamicBrowser:
         return "\n".join([*header, "", *body, "", *footer])
 
 
+class GardenProjectBrowser(GardenDynamicBrowser):
+    """Reuse navigation, never the retained-evidence authority banner."""
+
+    def render(self) -> str:
+        view = self.explanation
+        selected = view.instructions[self.selected]
+        lines = [
+            "Raveil Garden | saved project Graph (read-only)",
+            f"run: {view.run_id}", f"graph: {view.graph_id} program v{view.program_version}",
+            "view=host-functional; saved files checked, simulation NOT rerun",
+            "recorded validation: oracle/fallback/RTL equality (saved receipt reference only)",
+            "not a seal or independent verification of the original execution",
+            "",
+        ]
+        for item in view.instructions:
+            marker = ">" if item.index == self.selected else " "
+            lines.append(f"{marker} [{item.index}] {item.node_id}: {item.op} <- {','.join(item.dependencies) or 'input'}")
+        lines.extend(["", f"selected: {selected.node_id}; encoded=0x{selected.encoded_word:08x}",
+                      f"source registers: {selected.source_registers}; destination: {selected.destination_register}"])
+        if selected.op == "LOAD_U32":
+            if view.program_version >= 3:
+                row, column = selected.selector["row_delta"], selected.selector["column_delta"]
+                lines.append(f"input word = center + ({row}) * {view.input_stride} + ({column})")
+                lines.append("center = (output row + 1) * input stride + output column + 1")
+            else:
+                lines.append(f"input selector: {selected.selector}")
+        if selected.op == "MUL_U32":
+            lines.append("unsigned product modulo 2^32; low 32 bits, not saturation")
+        lines.extend(f"saved {key}: {value}" for key, value in view.identities.items())
+        lines.extend(["performance=not-measured; missing provenance is not synthesized",
+                      "authority: observe-only execute=no mutate=no approve=no promote=no",
+                      "Navigation: j next | k previous | g first | G last | q quit"])
+        return "\n".join(_wrapped_lines(lines, self.width))
+
+
+def _browser(snapshot, width):
+    if isinstance(snapshot, GardenProjectView):
+        return GardenProjectBrowser(snapshot, width)
+    if isinstance(snapshot, GardenDynamicExplanation):
+        return GardenDynamicBrowser(snapshot, width)
+    return GardenBrowser(snapshot, width)
+
+
 def load_garden_view(path: str) -> GardenSnapshot | GardenDynamicExplanation:
     """Load dynamic input once under its stricter boundary; preserve legacy v1."""
     candidate = Path(path)
@@ -1120,17 +1214,13 @@ def render_error(message: str) -> str:
 
 
 def render_key_session(
-    snapshot: GardenSnapshot | GardenDynamicExplanation,
+    snapshot: GardenSnapshot | GardenDynamicExplanation | GardenProjectView,
     keys: str,
     width: int = DEFAULT_RENDER_WIDTH,
 ) -> str:
     if len(keys) > MAX_NAVIGATION_STEPS:
         raise ValueError("garden navigation exceeds the bounded step limit")
-    browser = (
-        GardenDynamicBrowser(snapshot, width)
-        if isinstance(snapshot, GardenDynamicExplanation)
-        else GardenBrowser(snapshot, width)
-    )
+    browser = _browser(snapshot, width)
     screens = [browser.render()]
     for key in keys:
         if not browser.navigate(key):
@@ -1141,16 +1231,12 @@ def render_key_session(
 
 
 def run_interactive(
-    snapshot: GardenSnapshot | GardenDynamicExplanation,
+    snapshot: GardenSnapshot | GardenDynamicExplanation | GardenProjectView,
     input_stream: TextIO,
     output_stream: TextIO,
     width: int = DEFAULT_RENDER_WIDTH,
 ) -> int:
-    browser = (
-        GardenDynamicBrowser(snapshot, width)
-        if isinstance(snapshot, GardenDynamicExplanation)
-        else GardenBrowser(snapshot, width)
-    )
+    browser = _browser(snapshot, width)
     redraw = input_stream.isatty() and output_stream.isatty()
     def display() -> None:
         if redraw:
