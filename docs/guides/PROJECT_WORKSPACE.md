@@ -200,10 +200,11 @@ and one-cell relative halo. Unsupported Graphs fail before simulator launch
 and retain a failed project run. Detailed raw evidence stays in the printed
 repository artifact directory; the project history retains its receipt.
 
-### Add an editable constant (T-0173)
+### Add an editable constant (T-0173 / T-0174)
 
-For a snapshot recipe such as `neighborhood-data`, replace its descriptor
-(`inputs/neighborhood.json`) with the following bounded example:
+New projects include `bias-grid`, an independent snapshot recipe. Run
+`raveil project recipes` to find it. Its descriptor `inputs/bias-grid.json`
+contains this bounded example:
 
 ```json
 {
@@ -218,8 +219,8 @@ For a snapshot recipe such as `neighborhood-data`, replace its descriptor
 }
 ```
 
-Run `raveil project show neighborhood-data`, then
-`raveil project run neighborhood-data --backend rtl-sim`. Note the run ID.
+Run `raveil project show bias-grid`, then
+`raveil project run bias-grid --backend rtl-sim`. Note the run ID.
 Edit `immediate` from 5 to 7 in your editor and run again. Use
 `raveil project output RUN_ID`, `raveil project diff FIRST SECOND` and
 `raveil project garden RUN_ID` (`j` then Enter selects the add node).
@@ -228,8 +229,12 @@ unsigned modulo-2^32 addition; overflow wraps rather than saturating.
 
 Only integer constants 0 through 4,194,303 are admitted. This is a one-source
 immediate add, not a full-width constant node. Other arithmetic can consume
-its result. Use explicit snapshot inputs: the old seeded `neighborhood`
-recipe deliberately rejects this program version. The existing instruction,
+its result. The recipe uses its own `inputs/bias-grid-data.json` (324 uint32
+words). Neither file is shared with `neighborhood`; the original examples
+stay usable. Existing projects are not upgraded or overwritten: initialize a
+new empty directory to try the starter. The old seeded `neighborhood` recipe
+deliberately rejects this program version if manually substituted there.
+The existing instruction,
 register, input/output and shape bounds remain. This is RTL simulation,
 not QEMU, native speed comparison or FPGA execution.
 

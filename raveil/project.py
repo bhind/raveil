@@ -143,6 +143,7 @@ def init_project(directory: Path) -> Path:
         workspace.mkdir(folder, mode=0o700)
     workspace.write_text("project.json", encoded(CONFIG).decode())
     recipes = {
+        "bias-grid": {"kind": "graph-device", "descriptor": "bias-grid.json", "input": "bias-grid-data.json"},
         "logs": {"kind": "command", "source": "cat /events.txt | grep ERROR | wc -l > /errors.txt"},
         "files": {"kind": "command", "source": "sort /left.txt > /left-sorted.txt ||| sort /right.txt > /right-sorted.txt"},
         "gemm": {"kind": "gemm", "m": 8, "n": 8, "k": 8},
@@ -160,6 +161,9 @@ def init_project(directory: Path) -> Path:
         workspace.write_text(f"inputs/{filename}", content)
     workspace.write_text("inputs/neighborhood.json", encoded(project_graph.sample_descriptor()).decode())
     workspace.write_text("inputs/neighborhood-data.json", encoded({"schema": project_graph.INPUT_SCHEMA,
+                         "words": list(range(project_graph.INPUT_WORDS))}).decode())
+    workspace.write_text("inputs/bias-grid.json", encoded(project_graph.sample_bias_descriptor()).decode())
+    workspace.write_text("inputs/bias-grid-data.json", encoded({"schema": project_graph.INPUT_SCHEMA,
                          "words": list(range(project_graph.INPUT_WORDS))}).decode())
     workspace.write_text(".gitignore", "runs/\n")
     workspace.write_text("README.md", """# Your Raveil workspace
@@ -198,6 +202,19 @@ RTL inputs for neighborhood are generated from recipes/neighborhood.json's seed.
 For editable data, use recipes/neighborhood-data.json and edit
 inputs/neighborhood-data.json's exactly 324 uint32 words; its packed hash is shown
 by `raveil project show neighborhood-data`.
+
+For a constant-add Graph, use the independent bias-grid starter:
+
+    raveil project recipes
+    raveil project show bias-grid
+    raveil project run bias-grid --backend rtl-sim
+
+Edit immediate from 5 to 7 in inputs/bias-grid.json and run bias-grid again.
+Compare with `raveil project diff FIRST SECOND`, inspect saved results with
+`raveil project output RUN_ID`, and browse with `raveil project garden RUN_ID`.
+Its own input file is inputs/bias-grid-data.json (324 uint32 words).
+Neither bias-grid file is shared with neighborhood. Existing projects are
+not modified by init: use a new directory rather than reinitializing your work.
 The offline Docker/Verilator runner builds the same generic circuit each run;
 there is no persistent simulator cache. Raw evidence stays in repository artifacts.
 """)

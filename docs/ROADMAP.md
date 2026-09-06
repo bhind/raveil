@@ -8,6 +8,10 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## 2026-09-05 operational priority reconciliation
 
+2026-09-06: T-0173 is integrated; T-0174 packages its existing operation as
+an independent editable starter. No new instruction, memory capacity or
+research/hardware gate is introduced by this usability increment.
+
 2026-09-06: T-0173 / ADR-0097 extends the editable simulator Graph with one
 bounded immediate-add operation. Its exit is changed-constant execution,
 oracle/fallback agreement and saved output/diff/Garden, not a larger CPU,

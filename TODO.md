@@ -4,11 +4,20 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0173** Editable bounded immediate addition end to end,
+- [ ] **T-0174** Independent snapshot-backed bias-grid starter,
+  [Issue #171](https://github.com/bhind/raveil/issues/171), S-0003, 1 SP.
+  Owner approved implementation, Project operation and normal integration.
+  Add discoverable recipe, independent descriptor/input, edit/rerun/output/
+  diff/Garden verification without changing existing examples or ISA. Primary
+  owns implementation; read-only audit and sol-low publication follow.
+
+- [x] **T-0173** Editable bounded immediate addition end to end,
   [Issue #169](https://github.com/bhind/raveil/issues/169), S-0003, 3 SP.
   Primary owns the isolated implementation under ADR-0097. Local host
   negative tests, offline RTL oracle/fallback agreement and changed-constant
-  output/diff/Garden pass; exact review/publication remain pending. Keep sealed
+  output/diff/Garden pass. Exact `aca544e` passed Vreji/primary review; PR #170
+  merged as `230cbe9`, Issue #169 closed and canonical Project Done verified.
+  Keep sealed
   admission unchanged. September 12 owner review remains a separate ceremony;
   prepare its executable demonstration and successor without claiming approval.
 

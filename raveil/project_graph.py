@@ -71,6 +71,19 @@ def sample_descriptor() -> dict[str, Any]:
     }
 
 
+def sample_bias_descriptor() -> dict[str, Any]:
+    """An independent starter using the already-admitted immediate operation."""
+    return {
+        "schema": "raveil.graph-device-dag/v4", "graph_id": "bias-grid",
+        "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+        "nodes": [
+            {"id": "center", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+            {"id": "bias", "op": "ADD_IMM_U32", "input": "center", "immediate": 5},
+            {"id": "store", "op": "STORE_U32", "input": "bias"},
+        ],
+    }
+
+
 def compile_graph(descriptor: dict[str, Any]) -> dict[str, Any]:
     try:
         program = compile_descriptor(descriptor)
@@ -95,10 +108,13 @@ def describe(descriptor: dict[str, Any], seed: int | None = None, input_payload:
         lines.append(f"  {node['id']}: {node['op']} <- {', '.join(sources) or '(input grid)'}{suffix}")
     provenance = (f"inputs: deterministic uint32 grid generated from seed={seed}" if input_payload is None
                   else describe_input(input_payload))
+    edit_hint = ("Edit immediate within [0,4194303] or the snapshot words, then rerun."
+                 if any(node["op"] == "ADD_IMM_U32" for node in descriptor["nodes"])
+                 else "Edit ADD_U32 to MAX_U32, a load coordinate within [-1,1], or the snapshot words, then rerun.")
     lines.extend((provenance,
                   "outputs: output.bin (256 little-endian uint32 words), output.txt (active rows)",
                   "backend: rtl-sim (offline Docker + Verilator; not Sonatine/QEMU)",
-                  "Edit ADD_U32 to MAX_U32, a load coordinate within [-1,1], or the snapshot words, then rerun."))
+                  edit_hint))
     return "\n".join(lines)
 
 
