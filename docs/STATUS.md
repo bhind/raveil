@@ -2,6 +2,12 @@
 
 Last updated: 2026-09-06
 
+T-0162 documents candidate-bound Librarian audit, delegated Product Owner
+acceptance and primary PM verification under ADR-0094. This is an operations
+procedure, not runtime permission enforcement. External denial remains binding;
+automatic execution approval and remote integration are not established by
+the documentation alone.
+
 T-0159 extends read-only Garden explanation admission to existing program
 v3 relative LOAD and v4 MUL under ADR-0091. The inspector explains input-word
 offsets and modulo-2^32 products. Existing v1/v2 rendering and execution
