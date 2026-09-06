@@ -2,6 +2,16 @@
 
 Last updated: 2026-09-06
 
+T-0159 extends read-only Garden explanation admission to existing program
+v3 relative LOAD and v4 MUL under ADR-0091. The inspector explains input-word
+offsets and modulo-2^32 products. Existing v1/v2 rendering and execution
+boundaries remain unchanged. Focused Garden/compiler tests pass 53/53;
+new parser examples use synthetic test envelopes, not new RTL evidence.
+Broader project/Garden/compiler regression passes 86 tests; the retained v2
+CLI demo exits zero and independent diff review finds no blockers.
+T-0160 is integrated through PR #140 (`8780fc5`), with exact reviewed tree
+equality, Issue #139 closed and Project Done. Sprint acceptance is separate.
+
 T-0160 implements editable bounded input under ADR-0090. New project init
 includes `neighborhood-data`: project-recipe/v2 selects a confined JSON input
 with 324 uint32 words. Request v5 carries explicit data with unchanged program

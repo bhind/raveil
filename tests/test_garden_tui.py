@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import replace
 import io
+import hashlib
 import json
 import os
 from pathlib import Path
 import tempfile
+import struct
 import unittest
 from unittest import mock
 
@@ -28,6 +30,80 @@ DYNAMIC_FIXTURE = ROOT / "tests/fixtures/garden/dynamic-explanation.json"
 
 
 class GardenTUITests(unittest.TestCase):
+    @staticmethod
+    def _rehash_dynamic(raw):
+        def digest(value):
+            return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")).hexdigest()
+        raw["lowering_trace_sha256"] = digest(raw["lowering"])
+        raw["retained_evidence_sha256"] = digest({key: raw[key] for key in (
+            "affine", "agreement", "evidence", "identities", "performance", "polls",
+        )})
+
+    def _relative_document(self, version=4, operation="MUL_U32"):
+        # Synthetic parser input only: these substituted identities are not RTL evidence.
+        from raveil.graph_device_dag import compile_descriptor, load_descriptor
+        descriptor = load_descriptor(ROOT / "tests/fixtures/graph_device_dynamic/product-neighbors-u32.json")
+        descriptor["schema"] = f"raveil.graph-device-dag/v{version - 1}"
+        descriptor["nodes"][2]["op"] = operation
+        program = compile_descriptor(descriptor)
+        raw = self._dynamic_document()
+        raw["lowering"] = program["lowering_trace"]
+        raw["program_payload"] = program["payload"]
+        raw["affine"]["transactions_per_output"] = program["transactions_per_output"]
+        raw["identities"]["program_sha256"] = program["program_sha256"]
+        raw["identities"]["descriptor_canonical_sha256"] = program["lowering_trace"]["descriptor_canonical_sha256"]
+        self._rehash_dynamic(raw)
+        return raw
+
+    def test_relative_load_and_mul_render_without_execution(self):
+        for version, operation in ((3, "ADD_U32"), (3, "MAX_U32"), (4, "MUL_U32"), (4, "ADD_U32")):
+            with self.subTest(version=version, operation=operation):
+                explanation = GardenDynamicExplanation.from_dict(self._relative_document(version, operation))
+                browser = GardenDynamicBrowser(explanation, 100)
+                self.assertIn("relative LOAD: row_delta=+0, column_delta=+0", browser.render())
+                self.assertIn("not byte addresses", browser.render())
+                with self.assertRaises(TypeError):
+                    explanation.instructions[0].selector["row_delta"] = 1
+                browser.navigate("j")
+                self.assertIn("column_delta=+1", browser.render())
+                browser.navigate("j")
+                self.assertIn(operation, browser.render())
+                if operation == "MUL_U32":
+                    self.assertIn("modulo 2^32", browser.render())
+                    self.assertIn("overflow wraps, not saturation", browser.render())
+
+    def test_relative_load_rejects_invalid_rehashed_selectors(self):
+        for selector in ("center", None, {}, {"row_delta": True, "column_delta": 0},
+                         {"row_delta": -2, "column_delta": 0},
+                         {"row_delta": 0, "column_delta": 1.0},
+                         {"row_delta": 0, "column_delta": 0, "extra": 1}):
+            raw = self._relative_document()
+            raw["lowering"]["instructions"][0]["selector"] = selector
+            self._rehash_dynamic(raw)
+            with self.assertRaises(ValueError):
+                GardenDynamicExplanation.from_dict(raw)
+
+    def test_relative_and_mul_reject_rehashed_encoding_and_version_mismatch(self):
+        for index, bit in ((0, 1), (1, 1 << 15), (2, 1), (2, 1 << 22)):
+            raw = self._relative_document()
+            raw["program_payload"][12 + index] ^= bit
+            raw["lowering"]["instructions"][index]["encoded_word"] ^= bit
+            words = raw["program_payload"][12:16]
+            digest = hashlib.sha256(struct.pack("<5I", 4, *words)).digest()
+            raw["program_payload"][4:12] = struct.unpack("<8I", digest)
+            raw["lowering"]["program_sha256"] = digest.hex()
+            raw["identities"]["program_sha256"] = digest.hex()
+            self._rehash_dynamic(raw)
+            with self.assertRaises(ValueError):
+                GardenDynamicExplanation.from_dict(raw)
+        for version in (1, 2, 3, 5):
+            raw = self._relative_document()
+            raw["lowering"]["program_version"] = version
+            raw["program_payload"][1] = version
+            self._rehash_dynamic(raw)
+            with self.assertRaises(ValueError):
+                GardenDynamicExplanation.from_dict(raw)
+
     def _details(self, snapshot, width=150):
         browser = GardenBrowser(snapshot, width)
         browser.navigate("d")

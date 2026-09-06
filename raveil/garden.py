@@ -31,7 +31,7 @@ MAX_RENDER_WIDTH = 240
 FUSION_TRANSFORM = "fuse:bias_add+relu"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,30}$")
-DYNAMIC_OPCODES = {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4}
+DYNAMIC_OPCODES = {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5}
 DYNAMIC_SELECTORS = {"center": 0, "north": 1, "south": 2, "west": 3, "east": 4}
 DYNAMIC_MAGIC = 0x52504731
 DYNAMIC_PAYLOAD_WORDS = 32
@@ -340,7 +340,7 @@ class DynamicLoweringInstruction:
     node_id: str
     op: str
     dependencies: tuple[str, ...]
-    selector: str | None
+    selector: str | Mapping[str, int] | None
     fan_out: int
     consumers: tuple[str, ...]
     encoded_word: int
@@ -417,7 +417,7 @@ class GardenDynamicExplanation:
             lowering["descriptor_canonical_sha256"], "canonical descriptor identity",
         )
         version = _require_integer(
-            lowering["program_version"], "dynamic program version", minimum=1, maximum=2,
+            lowering["program_version"], "dynamic program version", minimum=1, maximum=4,
         )
         count = _require_integer(
             lowering["instruction_count"], "dynamic instruction count",
@@ -464,6 +464,8 @@ class GardenDynamicExplanation:
                 raise ValueError("dynamic opcode is unsupported")
             if version == 1 and op == "MAX_U32":
                 raise ValueError("MAX_U32 requires dynamic program version 2")
+            if version < 4 and op == "MUL_U32":
+                raise ValueError("MUL_U32 requires dynamic program version 4")
             dependencies_value = value["dependencies"]
             if type(dependencies_value) is not list \
                     or any(type(item) is not str for item in dependencies_value):
@@ -475,13 +477,21 @@ class GardenDynamicExplanation:
             if any(item not in known_ids for item in dependencies):
                 raise ValueError("dynamic dependencies must precede their consumer")
             selector_value = value["selector"]
-            selector = None if selector_value is None else _require_text(
-                selector_value, "dynamic address selector", maximum=16,
-            )
+            if op == "LOAD_U32" and version >= 3:
+                if type(selector_value) is not dict or set(selector_value) != {"row_delta", "column_delta"}:
+                    raise ValueError("dynamic relative LOAD_U32 address is invalid")
+                if any(type(delta) is not int or not -1 <= delta <= 1
+                       for delta in selector_value.values()):
+                    raise ValueError("dynamic relative LOAD_U32 delta is invalid")
+                selector = MappingProxyType(dict(selector_value))
+            else:
+                selector = None if selector_value is None else _require_text(
+                    selector_value, "dynamic address selector", maximum=16,
+                )
             if op == "LOAD_U32":
-                if dependencies or selector not in DYNAMIC_SELECTORS:
+                if dependencies or (version < 3 and selector not in DYNAMIC_SELECTORS):
                     raise ValueError("dynamic LOAD_U32 topology is invalid")
-            elif op in {"ADD_U32", "MAX_U32"}:
+            elif op in {"ADD_U32", "MAX_U32", "MUL_U32"}:
                 if len(dependencies) != 2 or selector is not None:
                     raise ValueError("dynamic binary operation topology is invalid")
             else:
@@ -507,11 +517,15 @@ class GardenDynamicExplanation:
             ) != index:
                 raise ValueError("dynamic lowering word or program-order index is invalid")
             if op == "LOAD_U32":
+                address_bits = (
+                    ((selector["row_delta"] & 0x1f) << 20)
+                    | ((selector["column_delta"] & 0x1f) << 15)
+                ) if version >= 3 else (DYNAMIC_SELECTORS[selector] << 22)
                 expected_word = (
                     (DYNAMIC_OPCODES[op] << 28) | (destination << 25)
-                    | (DYNAMIC_SELECTORS[selector] << 22)
+                    | address_bits
                 ) if destination is not None else -1
-            elif op in {"ADD_U32", "MAX_U32"}:
+            elif op in {"ADD_U32", "MAX_U32", "MUL_U32"}:
                 expected_word = (
                     (DYNAMIC_OPCODES[op] << 28) | (destination << 25)
                     | (source_registers[0] << 22) | (source_registers[1] << 19)
@@ -574,7 +588,7 @@ class GardenDynamicExplanation:
             known_ids.add(node_id)
         if stores != 1:
             raise ValueError("dynamic explanation requires exactly one final store")
-        if (version == 2) != any(item.op == "MAX_U32" for item in parsed):
+        if version <= 2 and (version == 2) != any(item.op == "MAX_U32" for item in parsed):
             raise ValueError("dynamic program version does not match its opcode set")
         use_positions: dict[str, list[int]] = {item.node_id: [] for item in parsed}
         for item in parsed:
@@ -1013,6 +1027,20 @@ class GardenDynamicBrowser:
             ),
         ]
         affine = explanation.affine
+        if selected.op == "LOAD_U32" and explanation.program_version >= 3:
+            row = selected.selector["row_delta"]
+            column = selected.selector["column_delta"]
+            inspector.extend([
+                f"relative LOAD: row_delta={row:+d}, column_delta={column:+d}",
+                f"input word = center + ({row}) * {affine['input_stride']} + ({column})",
+                "center = (output row + 1) * input stride + output column + 1",
+                "offsets are uint32-word positions, not byte addresses",
+            ])
+        elif selected.op == "MUL_U32":
+            inspector.extend([
+                "unsigned multiply: result = (left * right) modulo 2^32",
+                "keep low 32 bits; overflow wraps, not saturation",
+            ])
         retained = [
             (
                 f"affine: profile={affine['profile']} rows={affine['rows']} "

@@ -1,5 +1,8 @@
 # Architecture Decision Records
 
+T-0159: [ADR-0091](ADR-0091-garden-explains-relative-loads-and-multiplication.md)
+is Accepted; read-only Garden explanation admission follows existing program v3/v4.
+
 Accepted records are historical authority. Change an accepted conclusion by
 adding a later ADR and marking the earlier record Superseded; do not silently
 rewrite it.

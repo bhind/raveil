@@ -12,8 +12,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0160 adds editable Graph input snapshots. T-0157 is integrated; separate-session T-0158 manages Project views. S-0003 owner ceremony remains pending. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0159 read-only Graph explanations follows T-0160. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0159 read-only Graph explanations follows integrated T-0160; separate-session T-0158 manages Project views. S-0003 owner ceremony remains pending. |
+| **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -40,13 +40,18 @@ review and failure preservation do not consume the two-item delivery limit.
   with identical program/simulator/RTL identities. Issue #139 tracks remote
   integration; this checkbox does not accept a Sprint ceremony.
 
-- [ ] **T-0159** Explain relative LOAD and MUL_U32 in the existing read-only
+- [x] **T-0159** Explain relative LOAD and MUL_U32 in the existing read-only
   Garden view, [Issue #136](https://github.com/bhind/raveil/issues/136).
-  P1 successor after T-0160; T-0157 is integrated. Not active implementation.
+  Active after T-0160 integrated through PR #140 (`8780fc5`). T-0157 is integrated.
   Preserve old rendering and reject inconsistent input; no compile, execution,
   device or evidence-promotion authority. Freeze exact parser/renderer/test
-  paths and accepted explanation boundary before kickoff. Host Functional,
-  S-0003, 3 SP forecast; existing T-0144 remains completed predecessor.
+  paths: `raveil/garden.py`, `tests/test_garden_tui.py`, and corresponding
+  canonical records. ADR-0091 defines the explanation boundary. Host Functional,
+  S-0003, 3 SP; existing T-0144 remains completed predecessor.
+  Focused parser/render/compiler acceptance passes 53 tests; broader
+  project/Garden/compiler regression passes 86 tests. Existing retained v2 CLI
+  demo exits zero. Independent review finds no blockers. Issue #136 tracks
+  remote integration; this checkbox is technical, not Sprint acceptance.
 
 - [x] **T-0157** Add unsigned multiplication to bounded Graph arithmetic,
   [Issue #134](https://github.com/bhind/raveil/issues/134), technically verified,
