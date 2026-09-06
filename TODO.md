@@ -72,9 +72,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   `fd9797f` is preserved; implementation integrated through T-0169 PR #159
   (`606a4f7`). This receipt-only reconciliation corrects the stale publication
   state; the actual-filename regression passes without new code or RTL.
+  Receipt PR #165 merged as `6c1890a`; Issue #149 closed and Project Done.
 - [x] **T-0166** Reject malformed saved-run metadata cleanly,
   [Issue #152](https://github.com/bhind/raveil/issues/152). Local candidate
-  `fd30d31` is preserved; included in T-0169, publication pending.
+  `fd30d31` is preserved; implementation integrated through T-0169 PR #159
+  (`606a4f7`). This receipt-only closeout corrects stale publication metadata;
+  the existing malformed-record regression passes.
 - [x] **T-0167** Quote literal checkout paths in shell setup advice,
   [Issue #153](https://github.com/bhind/raveil/issues/153). Local candidate
   `3e3222e` is preserved; included in T-0169, publication pending.

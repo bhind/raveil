@@ -2,6 +2,12 @@
 
 Last updated: 2026-09-06
 
+T-0166 saved-record metadata validation is integrated through T-0169 PR #159
+(`606a4f7`), with original `fd30d31` preserved. This receipt-only correction
+does not change code or the cooperative integrity boundary. The existing
+matching-checksum/malformed-metadata rejection regression passes.
+T-0165 receipt PR #165 merged as `6c1890a`; Issue #149 closed and Project Done.
+
 T-0165's actual descriptor/input filename hints are integrated through T-0169
 PR #159 (`606a4f7`); `fd9797f` remains provenance. This record-only closeout
 corrects the stale publication state and rechecks the existing filename test.
