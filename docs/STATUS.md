@@ -2,6 +2,13 @@
 
 Last updated: 2026-09-06
 
+T-0163's saved-input difference implementation is integrated through T-0169
+PR #159 (`606a4f7`), not publication-pending. Original `79460b7` remains
+provenance. The receipt-only reconciliation verifies existing semantic/history
+regressions without changing code or collecting new RTL evidence.
+T-0164 governance merged through PR #163 (`5adad29`), Issue #148 closed and
+canonical Project Done verified; Sprint Review remains separate.
+
 T-0164 documents one daily routine approval packet with up to ten items under
 ADR-0095. Independent authorized work continues while publication waits;
 real incidents still escalate. This is an active-session operating procedure,
