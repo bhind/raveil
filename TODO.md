@@ -8,8 +8,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,
   1 SP. Primary owns the ten-file integration packet. Base `2a0ace3` retains
   T-0158 corrections. The five code/test files match the tested disposable
-  composite byte-for-byte and 129 host tests pass. Exact-head audit and local
-  commit remain; publication is excluded. T-0161 and T-0164 are not included.
+  composite byte-for-byte and 129 host tests pass. The local commit is
+  retained; exact-head audit remains. Publication is excluded. T-0161 and
+  T-0164 are not included.
 
 - [x] **T-0163** Explain changed saved input words in project diff,
   [Issue #147](https://github.com/bhind/raveil/issues/147). Local technical
