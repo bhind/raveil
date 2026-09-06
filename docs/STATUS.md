@@ -2,6 +2,15 @@
 
 Last updated: 2026-09-06
 
+T-0164 documents one daily routine approval packet with up to ten items under
+ADR-0095. Independent authorized work continues while publication waits;
+real incidents still escalate. This is an active-session operating procedure,
+not an installed approval-batching scheduler or verified runtime automatic
+approval capability. Existing Project-maintenance scheduling is unchanged.
+The owner-requested follow-up makes the pre-stop continuation checkpoint
+explicit: scope any refusal, search eligible work, and actually begin the
+next allowed task in the same active turn. No background execution is claimed.
+
 T-0161 adds `project garden RUN_ID` under ADR-0093: checked saved Graph runs
 open without compilation, execution or external evidence-directory access.
 The view separates Host Functional artifact checks from historical receipt
@@ -10,7 +19,9 @@ deterministic retained-run navigation. Current integration retains main's
 recipes, output, input budget and metadata admission. Combined macOS host
 verification passes 220 tests, including a shared-run CLI regression. Existing
 retained ADD/MUL runs open through output and Garden; each repeated Garden
-transcript is identical. Linux/exact-head audit remains pending; no new RTL
+transcript is identical. Exact `a7ae948` also passed 220 offline Linux/nonroot
+tests and independent audit, then merged through PR #144 as `a197500`.
+Issue #142 closed and canonical Project Done was verified. No new RTL
 execution or Sprint acceptance is claimed.
 T-0159 is integrated through PR #141 (`9ec124d`), Issue #136 closed/Done.
 

@@ -4,6 +4,17 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0164** Batch routine owner approval requests under ADR-0095,
+  [Issue #148](https://github.com/bhind/raveil/issues/148), S-0003, 1 SP.
+  Primary owns governance records. At most one unsolicited daily packet with
+  ten exact candidate/action items; independent authorized work continues.
+  Real incidents remain immediate. No scheduler or runtime permission change.
+  Local verification/review precedes adding publication to the next packet.
+  Owner-requested local follow-up adds a mandatory pre-stop incident/scope
+  check, next-task search and same-turn first action when eligible. Publication
+  was excluded from that local follow-up; later owner direction includes
+  serial reviewed integration. No runtime override is created.
+
 - [x] **T-0172** Inspect integrity-checked saved Graph output,
   [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
   Owner initially approved local work; later serial-integration direction
@@ -101,7 +112,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0161 integrates saved-run Garden after T-0172. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0164 integrates existing governance records after Garden. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -127,7 +138,8 @@ review and failure preservation do not consume the two-item delivery limit.
   Technical acceptance: 91 tests pass, both retained T-0160 runs open, repeated
   navigation is identical, independent review has no blockers. Issue #142
   tracks pending integration. Current-main reconciliation passes 220 host tests
-  and repeated retained ADD/MUL views; exact-head review and Linux remain.
+  and repeated retained ADD/MUL views; exact `a7ae948` passes Linux 220 and
+  audit. PR #144 merged as `a197500`, Issue #142 closed and Project Done.
   This checkbox records local evidence, not Sprint ceremony acceptance.
 
 - [x] **T-0160** Run Graphs with editable input snapshots,
