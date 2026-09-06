@@ -193,11 +193,45 @@ It does not implement a persistent cache. This is RTL simulation correctness;
 it does not execute via Sonatine/QEMU or measure a physical FPGA.
 
 Supported Graphs retain the existing 16-instruction/eight-value limits,
-uint32 LOAD/ADD/MAX/STORE operations (plus MUL with descriptor v3),
+uint32 LOAD/ADD/MAX/STORE operations (plus MUL with descriptor v3 and
+ADD_IMM with descriptor v4),
 baseline 16x16 or compact 8x8 profile,
 and one-cell relative halo. Unsupported Graphs fail before simulator launch
 and retain a failed project run. Detailed raw evidence stays in the printed
 repository artifact directory; the project history retains its receipt.
+
+### Add an editable constant (T-0173)
+
+For a snapshot recipe such as `neighborhood-data`, replace its descriptor
+(`inputs/neighborhood.json`) with the following bounded example:
+
+```json
+{
+  "schema": "raveil.graph-device-dag/v4",
+  "graph_id": "bias-grid",
+  "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+  "nodes": [
+    {"id": "center", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+    {"id": "bias", "op": "ADD_IMM_U32", "input": "center", "immediate": 5},
+    {"id": "store", "op": "STORE_U32", "input": "bias"}
+  ]
+}
+```
+
+Run `raveil project show neighborhood-data`, then
+`raveil project run neighborhood-data --backend rtl-sim`. Note the run ID.
+Edit `immediate` from 5 to 7 in your editor and run again. Use
+`raveil project output RUN_ID`, `raveil project diff FIRST SECOND` and
+`raveil project garden RUN_ID` (`j` then Enter selects the add node).
+The saved first result stays unchanged. Garden displays the immediate and
+unsigned modulo-2^32 addition; overflow wraps rather than saturating.
+
+Only integer constants 0 through 4,194,303 are admitted. This is a one-source
+immediate add, not a full-width constant node. Other arithmetic can consume
+its result. Use explicit snapshot inputs: the old seeded `neighborhood`
+recipe deliberately rejects this program version. The existing instruction,
+register, input/output and shape bounds remain. This is RTL simulation,
+not QEMU, native speed comparison or FPGA execution.
 
 ## Native and Sonatine GEMM
 

@@ -1,0 +1,10 @@
+{
+  "schema": "raveil.graph-device-dag/v4",
+  "graph_id": "add-immediate-u32",
+  "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+  "nodes": [
+    {"id": "center", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+    {"id": "bias", "op": "ADD_IMM_U32", "input": "center", "immediate": 5},
+    {"id": "store", "op": "STORE_U32", "input": "bias"}
+  ]
+}

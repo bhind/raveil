@@ -97,14 +97,16 @@ def _request_bytes(program: dict[str, Any], profile: dict[str, Any], seed: int,
     if len(graph_id_bytes) != GRAPH_ID_BYTES:
         raise GraphDeviceDynamicError("graph_id is too long")
     version = int(program["payload"][1])
-    if version not in {1, 2, 3, 4}:
+    if version not in {1, 2, 3, 4, 5}:
         raise GraphDeviceDynamicError("program version is unsupported")
+    if version == 5 and input_bytes is None:
+        raise GraphDeviceDynamicError("program v5 requires explicit snapshot input")
     header = struct.pack(
         "<8I", MAGIC, version, HEADER_BYTES, 0 if name == "baseline" else 1,
         seed, PROGRAM_WORDS, AFFINE_WORDS, INPUT_WORDS,
     )
     if input_bytes is not None:
-        header = struct.pack("<8I", MAGIC, 5, HEADER_BYTES, 0 if name == "baseline" else 1,
+        header = struct.pack("<8I", MAGIC, 6 if version == 5 else 5, HEADER_BYTES, 0 if name == "baseline" else 1,
                              0, PROGRAM_WORDS, AFFINE_WORDS, INPUT_WORDS)
     return header + b"\0" * 32 + graph_id_bytes + _word_bytes(program["payload"]) \
         + _word_bytes(profile["payload_words"] if "payload_words" in profile
@@ -172,7 +174,7 @@ def prepare_request(output: Path, graph: str, seed: int, repository: Path | None
         "program_sha256": program["program_sha256"],
     }
     if input_bytes is not None:
-        metadata.update({"schema": "raveil.graph-device-dynamic-request/v5",
+        metadata.update({"schema": f"raveil.graph-device-dynamic-request/v{6 if program['payload'][1] == 5 else 5}",
                          "input_mode": "snapshot", "input_sha256": hashlib.sha256(input_bytes).hexdigest()})
     _write_new(output / "request.json", (json.dumps(metadata, sort_keys=True) + "\n").encode("ascii"))
     return {"descriptor": descriptor, "program": program, "profile": profile, "request": request,

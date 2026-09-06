@@ -177,8 +177,11 @@ class RaveilStaticStencilCore extends Module {
         }.elsewhen(opcode === RaveilBoundedProgramContract.MaxU32Opcode.U) {
           values(destination) := Mux(values(sourceA) >= values(sourceB), values(sourceA), values(sourceB))
           programCounter := programCounter + 1.U
-        }.elsewhen(opcode === 5.U && io.programVersion === 4.U) {
+        }.elsewhen(opcode === 5.U && (io.programVersion === 4.U || io.programVersion === 5.U)) {
           values(destination) := (values(sourceA) * values(sourceB))(31, 0)
+          programCounter := programCounter + 1.U
+        }.elsewhen(opcode === 6.U && io.programVersion === 5.U) {
+          values(destination) := (values(sourceA) +& instruction(21, 0))(31, 0)
           programCounter := programCounter + 1.U
         }.elsewhen(opcode === RaveilBoundedProgramContract.StoreOpcode.U) {
           state := storeRequest
@@ -269,7 +272,7 @@ class RaveilStaticStencilCore extends Module {
     assert(io.activeOutputs === io.rows * io.columns)
     assert(io.programLength >= 2.U &&
       io.programLength <= RaveilBoundedProgramContract.ProgramCapacity.U)
-    assert(io.programVersion >= 1.U && io.programVersion <= 4.U)
+    assert(io.programVersion >= 1.U && io.programVersion <= 5.U)
     when(state === loadRequest && busyReg && io.programVersion >= 3.U) {
       assert(relativeInputAddress >= 0.S)
       assert(relativeInputAddress < 324.S)
@@ -278,7 +281,8 @@ class RaveilStaticStencilCore extends Module {
       assert(opcode === RaveilBoundedProgramContract.LoadOpcode.U ||
         opcode === RaveilBoundedProgramContract.AddOpcode.U ||
         opcode === RaveilBoundedProgramContract.MaxU32Opcode.U ||
-        (opcode === 5.U && io.programVersion === 4.U) ||
+        (opcode === 5.U && (io.programVersion === 4.U || io.programVersion === 5.U)) ||
+        (opcode === 6.U && io.programVersion === 5.U) ||
         opcode === RaveilBoundedProgramContract.StoreOpcode.U)
     }
     when(state === loadResponse && io.memory.response.valid) {

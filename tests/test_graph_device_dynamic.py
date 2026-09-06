@@ -355,7 +355,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         parser = (ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp").read_text()
         bridge = (ROOT / "hardware/chisel/graph_device_axi4lite_dynamic_verilator.cpp").read_text()
         installer = (ROOT / "hardware/chisel/GraphDeviceProgramInstaller.scala").read_text()
-        self.assertIn("program_version == kVersionV2", parser)
+        self.assertIn("program_version >= kVersionV2 && program_version <= 5U", parser)
         self.assertIn("opcode == 4U", parser)
         self.assertIn("dynamic program digest is invalid", parser)
         self.assertLess(bridge.index("read_dynamic_graph_device_request"), bridge.index("VGraphDeviceAxi4LiteTop top"))
@@ -363,7 +363,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("payloadVersion === 2.U", installer)
         fallback = (ROOT / "hardware/chisel/graph_device_dag_runtime.cpp").read_text()
         self.assertIn("bool valid_fallback_program", fallback)
-        self.assertIn("payload[1] == 2U || payload[1] == 3U", fallback)
+        self.assertIn("payload[1] >= 2U && payload[1] <= 5U", fallback)
         self.assertIn("relativeInputAddress", (
             ROOT / "hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala"
         ).read_text())

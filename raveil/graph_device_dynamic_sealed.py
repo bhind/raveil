@@ -37,6 +37,7 @@ SOURCE_PATHS = (
     "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json",
     "contracts/graph_device_dynamic_request_v3.json", "contracts/graph_device_dynamic_request_v4.json", "contracts/graph_device_dynamic_request_v5.json", "contracts/graph_device_program_v2.json",
     "contracts/graph_device_program_v3.json", "contracts/graph_device_program_v4.json",
+    "contracts/graph_device_program_v5.json", "contracts/graph_device_dynamic_request_v6.json",
     "contracts/graph_device_program_install_abi_v1.json",
     "contracts/graph_device_axi4lite_aperture_v1.json",
     "contracts/graph_device_dynamic_sealed_v1.json", "contracts/graph_device_dynamic_sealed_v2.json",
@@ -341,6 +342,9 @@ def _expected_runner_source_manifest(verified: dict[str, Any]) -> bytes:
     for name in ("graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_dag_generated.h", "graph_device_axi4lite_aperture_generated.h"):
         rows_out.append(f"generated/{name} {_sha(verified['files'][name])}")
     orchestration = ("hardware/chisel/Dockerfile", "hardware/chisel/run-graph-device-axi4lite-dynamic.sh", "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh", "contracts/graph_device_dynamic_request_v1.json", "contracts/graph_device_dynamic_request_v2.json", "contracts/graph_device_dynamic_request_v3.json", "contracts/graph_device_dynamic_request_v4.json", "contracts/graph_device_program_v2.json", "contracts/graph_device_program_v3.json", "contracts/graph_device_program_v4.json", "contracts/graph_device_abi_v1.json", "contracts/graph_device_install_abi_v1.json", "contracts/graph_device_program_install_abi_v1.json", "raveil/graph_device_dynamic.py", "raveil/graph_device_dag.py", "raveil/graph_device_affine.py", "raveil/graph_device_mvp.py", "raveil/static_region.py", "raveil/riscv_stencil_signature.py")
+    orchestration += ("contracts/graph_device_dynamic_request_v5.json",
+                      "contracts/graph_device_dynamic_request_v6.json",
+                      "contracts/graph_device_program_v5.json")
     rows_out += [f"orchestration/{name} {source[name]}" for name in orchestration]
     return ("\n".join(sorted(rows_out)) + "\n").encode("ascii")
 

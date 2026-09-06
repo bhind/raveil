@@ -12,7 +12,11 @@ resolves it.
   Garden view. Full provenance export/authentication remains separate: the
   project view does not invent missing identities or mint an execution seal.
 
-- ADR-0090 selects bounded explicit user input for T-0160. Constants,
+- ADR-0097 selects unsigned 22-bit ADD_IMM_U32 for T-0173. Full-width or
+  source-free constants remain unresolved, as do predicates and larger shapes.
+  Program v5 / request v6 do not expand sealed UIO admission.
+
+- ADR-0090 selects bounded explicit user input for T-0160. Full-width constants,
   predicates, arbitrary dimensions and larger windows remain separate choices;
   accepting input data does not make the language or hardware unbounded.
   Explicit-input sealing/UIO admission remains out of scope.

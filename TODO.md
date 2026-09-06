@@ -4,6 +4,14 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0173** Editable bounded immediate addition end to end,
+  [Issue #169](https://github.com/bhind/raveil/issues/169), S-0003, 3 SP.
+  Primary owns the isolated implementation under ADR-0097. Complete host
+  negative tests, offline RTL oracle/fallback agreement and changed-constant
+  output/diff/Garden before technical review and integration. Keep sealed
+  admission unchanged. September 12 owner review remains a separate ceremony;
+  prepare its executable demonstration and successor without claiming approval.
+
 - [x] **T-0164** Batch routine owner approval requests under ADR-0095,
   [Issue #148](https://github.com/bhind/raveil/issues/148), S-0003, 1 SP.
   Primary owns governance records. At most one unsolicited daily packet with
