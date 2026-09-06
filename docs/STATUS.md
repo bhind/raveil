@@ -2,6 +2,11 @@
 
 Last updated: 2026-09-06
 
+T-0165's actual descriptor/input filename hints are integrated through T-0169
+PR #159 (`606a4f7`); `fd9797f` remains provenance. This record-only closeout
+corrects the stale publication state and rechecks the existing filename test.
+T-0163 receipt PR #164 merged as `3a18dcc`, Issue #147 closed and Project Done.
+
 T-0163's saved-input difference implementation is integrated through T-0169
 PR #159 (`606a4f7`), not publication-pending. Original `79460b7` remains
 provenance. The receipt-only reconciliation verifies existing semantic/history
