@@ -41,6 +41,54 @@ class ProjectWorkspaceTests(unittest.TestCase):
         self.assertEqual(Project(self.root).runs(), "No runs yet. Try: project run logs")
         self.assertIn("Try adding an ERROR line", (self.root / "README.md").read_text())
 
+    def test_recipes_lists_custom_and_sample_backends_without_execution(self) -> None:
+        recipes = self.root / "recipes"
+        (recipes / "custom.json").write_bytes((recipes / "logs.json").read_bytes())
+        large = json.loads((recipes / "gemm.json").read_text())
+        large["m"] = 9
+        (recipes / "large.json").write_text(json.dumps(large))
+        out = io.StringIO()
+        with patch("raveil.project.CommandComparison.execute") as command, \
+                patch("raveil.project_graph.run_snapshot") as simulator, \
+                patch("raveil.project.run_graph_mvp") as gemm, \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(main(["project", "recipes", "--project", str(self.root)]), 0)
+            command.assert_not_called()
+            simulator.assert_not_called()
+            gemm.assert_not_called()
+        lines = out.getvalue().splitlines()
+        self.assertEqual(lines[:7], [
+            "custom: command; backends=native", "files: command; backends=native",
+            "gemm: gemm; backends=native,sonatine-qemu", "large: gemm; backends=native",
+            "logs: command; backends=native", "neighborhood-data: graph-device; backends=rtl-sim",
+            "neighborhood: graph-device; backends=rtl-sim",
+        ])
+        self.assertIn("not checked", out.getvalue())
+        self.assertEqual(list((self.root / "runs").iterdir()), [])
+
+    def test_recipes_reports_bad_entries_and_preserves_bounded_paths(self) -> None:
+        recipes = self.root / "recipes"
+        (recipes / "broken.json").write_text("{")
+        (recipes / "bad name.json").write_text("{}")
+        (recipes / "linked.json").symlink_to(recipes / "logs.json")
+        (recipes / "folder.json").mkdir()
+        (recipes / "notes.txt").write_text("not a recipe")
+        shown = Project(self.root).recipes()
+        for filename in ("broken.json", "bad name.json", "linked.json", "folder.json"):
+            self.assertIn(f'{json.dumps(filename)}: unavailable;', shown)
+        self.assertIn("logs: command; backends=native", shown)
+        self.assertNotIn("notes.txt", shown)
+        self.assertEqual(shown, Project(self.root).recipes())
+
+    def test_recipes_empty_directory_and_unchecked_graph_input(self) -> None:
+        # Discovery validates recipe metadata, not referenced input existence.
+        (self.root / "inputs/neighborhood.json").unlink()
+        project = Project(self.root)
+        self.assertIn("neighborhood: graph-device; backends=rtl-sim", project.recipes())
+        for path in (self.root / "recipes").iterdir():
+            path.unlink()
+        self.assertIn("No JSON recipes found", project.recipes())
+
     def test_successful_large_metadata_remains_readable_and_diffable(self) -> None:
         for index in range(230):
             (self.root / "inputs" / f"extra-{index:03d}.txt").write_text("small\n")

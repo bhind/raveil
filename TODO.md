@@ -4,6 +4,15 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0171** Discover workspace recipes from the CLI,
+  [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
+  Owner explicitly approved registration, implementation, tests and docs;
+  publication is excluded. `project recipes` lists custom/sample JSON recipes,
+  kind and metadata-compatible backends, reports invalid entries and performs
+  no execution. Local candidate uses `5848e1b` as its preserved base. Focused
+  24-test suite, expanded 210-test host suite and actual CLI smoke pass.
+  Draft review found no material concern; exact-head audit precedes acceptance.
+
 - [ ] **T-0170** Reject impossible duplicated Command input budgets before
   execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,
   1 SP. Local base is T-0169 `84ff1d3`; publication is excluded. Preserve the

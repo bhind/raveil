@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-06
 
+T-0171's local `project recipes` command lists sample and custom JSON recipes
+in filename order with kind and compatible backend names. Invalid entries
+remain visible as unavailable; existing bounded paths and read limits apply.
+It validates recipe metadata only, not input files, compiled Graph validity,
+installed tools or successful execution. Focused 24-test suite and actual CLI
+smoke pass. Expanded 210-test host verification passes and draft review found
+no material concern. Exact-head audit precedes acceptance; nothing is published.
+
 T-0170 adds a local Command input-budget preflight atop T-0169 `84ff1d3`.
 Previously, 130 valid 64-KiB input files ran the logs recipe but their retained
 and working copies exceeded the final 16-MiB snapshot budget, leaving output
