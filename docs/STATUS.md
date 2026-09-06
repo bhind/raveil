@@ -2,6 +2,12 @@
 
 Last updated: 2026-09-06
 
+T-0167 shell setup path quoting is integrated through T-0169 PR #159
+(`606a4f7`); original `3e3222e` remains provenance. This record-only closeout
+does not change shell behavior or execution permissions. The existing
+literal-checkout-path regression passes. T-0166 receipt PR #166 merged as
+`1692790`; Issue #152 closed and canonical Project Done verified.
+
 T-0166 saved-record metadata validation is integrated through T-0169 PR #159
 (`606a4f7`), with original `fd30d31` preserved. This receipt-only correction
 does not change code or the cooperative integrity boundary. The existing
