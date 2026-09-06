@@ -144,6 +144,14 @@ claim.
 
 ## Continuous execution and human confirmation
 
+ADR-0094 separates read-only Librarian audit, delegated Product Owner task
+acceptance, and primary Project Manager integration verification. Record each
+against the exact candidate and current human-owner delegation. Ordinary
+in-scope revisions may be re-reviewed and accepted without another human
+checkpoint; all HCI, repository and execution-environment boundaries remain.
+Never treat a role receipt as a GitHub human review or runtime permission.
+Use the candidate-bound receipt in `docs/WORKFLOW.md` before publication.
+
 Within an owner-authorized task, agents continue through investigation, local
 editing, local commits, tests, review, record reconciliation, and the next
 accepted slice without waiting for acknowledgement. A progress update is

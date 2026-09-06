@@ -5,10 +5,76 @@ Last updated: 2026-09-06
 T-0161 adds `project garden RUN_ID` under ADR-0093: checked saved Graph runs
 open without compilation, execution or external evidence-directory access.
 The view separates Host Functional artifact checks from historical receipt
-references. Existing T-0160 input-edit runs both open successfully; focused
-project/Garden/compiler regression passes 91 tests. Actual repeated navigation
-is byte-identical, and independent review finds no blocking issue. This is not new RTL evidence.
+references. The preserved standalone candidate passed 91 focused tests and
+deterministic retained-run navigation. Current integration retains main's
+recipes, output, input budget and metadata admission. Combined macOS host
+verification passes 220 tests, including a shared-run CLI regression. Existing
+retained ADD/MUL runs open through output and Garden; each repeated Garden
+transcript is identical. Linux/exact-head audit remains pending; no new RTL
+execution or Sprint acceptance is claimed.
 T-0159 is integrated through PR #141 (`9ec124d`), Issue #136 closed/Done.
+
+T-0172's local `project output RUN_ID` displays saved successful rtl-sim Graph
+active rows after existing run-integrity checks and a hash check of the exact
+text read for display. Current input edits cannot replace historical output;
+modified, missing, failed or non-Graph runs are rejected. It does not invoke
+a compiler or simulator. Focused 26 tests and display of a retained real RTL
+result pass; expanded 214-test host regression passes. Draft review finds no
+material concern; exact `929c45b` passed audit and PR #162 merged as `b690db3`.
+Issue #158 closed and canonical Project Done was verified. No new RTL execution
+or Sprint ceremony acceptance follows.
+
+T-0171's local `project recipes` command lists sample and custom JSON recipes
+in filename order with kind and compatible backend names. Invalid entries
+remain visible as unavailable; existing bounded paths and read limits apply.
+It validates recipe metadata only, not input files, compiled Graph validity,
+installed tools or successful execution. Focused 24-test suite and actual CLI
+smoke pass. Expanded 210-test host verification passes and draft review found
+no material concern. Exact `85501ec` audit passed and PR #161 merged as
+`0c11edc`; Issue #157 closed and canonical Project Done was verified.
+
+T-0170 adds a local Command input-budget preflight atop T-0169 `84ff1d3`.
+Previously, 130 valid 64-KiB input files ran the logs recipe but their retained
+and working copies exceeded the final 16-MiB snapshot budget, leaving output
+without a sealed record. The preflight rejects a doubled input byte/entry
+lower bound that already exceeds existing limits before run creation or tool
+execution. The same real input now leaves zero runs. It does not reserve
+generated outputs, solve every near-limit sealing failure, or provide stronger
+isolation. The expanded 207-test host suite passes; exact integration head
+`69ad107` passed audit and merged through PR #160 as `ba5cb36`. Issue #156
+closed and canonical Project Done was verified. Sprint acceptance is separate.
+
+T-0169 prepares a local Git candidate from current main `2a0ace3`, retaining
+T-0158 corrections and combining only T-0163/0165/0166/0167/0168. The five
+code/test files initially matched the previously tested disposable composite
+byte-for-byte. Integration review then found a missing snapshot input-name
+check between T-0163 and T-0166. The candidate adds that bounded validation
+and its CLI regression; prior composite results do not cover this correction.
+The corrected candidate passes 206 host tests including current main's
+burndown, queue and daily-processing suites.
+Exact `84ff1d3` passes independent audit and Linux/nonroot 206-test verification.
+Following the owner's later integration instruction, T-0169 merged through
+PR #159 as `606a4f7`; Issue #155 is closed and Project Done was verified.
+T-0161 Garden and T-0164
+governance remain excluded, as do the separate T-0170/0171/0172 successors.
+
+The combined workspace explains actual descriptor/input paths and changed
+input words, rejects malformed metadata fields consumed by the diff path,
+quotes shell setup paths,
+and admits retained record reads up to 16 MiB under ADR-0096 while ordinary
+command text remains limited to 64 KiB. No Graph opcode or RTL is changed.
+The prior disposable verification passed 129 tests on macOS and Linux arm64,
+actual Native and Sonatine/QEMU GEMM with matching checksum and abstention,
+and two actual RTL runs with one input word changed (11 -> 13) and two active
+output cells changed (first 12 -> 14). Both matched oracle and fallback with
+identical program/RTL/simulator identities. Those are retained local host,
+emulation and RTL-functional receipts, not canonical-head or speed claims.
+
+T-0162 documents candidate-bound Librarian audit, delegated Product Owner
+acceptance and primary PM verification under ADR-0094. This is an operations
+procedure, not runtime permission enforcement. External denial remains binding;
+automatic execution approval and remote integration are not established by
+the documentation alone.
 
 T-0159 extends read-only Garden explanation admission to existing program
 v3 relative LOAD and v4 MUL under ADR-0091. The inspector explains input-word
@@ -55,7 +121,17 @@ items, 43 total SP, and zero remaining items/SP. No Pages site, visibility
 change, claim, or Gate transition was introduced. The dedicated Project secret
 is installed; hosted run #34003784228 succeeded with repository contents read
 permission, masked the credential, and produced an idempotent private Draft
-update. The secret value is not stored in the repository.
+update. The secret value is not stored in the repository. T-0158 is reopened:
+that run verified transport and same-day idempotence, not a moving burndown or
+the scheduled event. The corrective implementation exposes the current
+remainder in the Project card title, uses JST dates, and starts the actual line
+at the first observation instead of inventing earlier zero values; multi-day
+decrease verification and a real scheduled run remain required before Done.
+Corrected hosted manual run #34015052717 succeeded at merged revision
+`a45336c`; a read-only S-0003-date preview resolved 6 remaining Issues and 10
+remaining SP, confirming the next Iteration will not inherit S-0002's zero
+line. This verifies the hosted correction path, not the still-pending cron
+event or a live decrease between two S-0003 dates.
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`

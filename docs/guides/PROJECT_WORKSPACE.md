@@ -26,12 +26,19 @@ commands are unchanged. Substitute an actual saved run ID for `RUN_ID`.
 
 ### Initialize a workspace
 
+For Graph recipes, `project show NAME` prints
+`descriptor file: inputs/<actual filename>` and, for explicit input,
+`input file: inputs/<actual filename>`. These paths are relative to the
+selected project directory. Edit these files rather than inferring a filename
+from the displayed Graph ID; recipe name, Graph ID and filename may differ.
+
 From the repository root:
 
 ```sh
 export PATH="$PWD/scripts:$PATH"
 raveil project init /tmp/my-raveil-project
 cd /tmp/my-raveil-project
+raveil project recipes
 raveil project show logs
 raveil project show files
 raveil project show gemm
@@ -40,6 +47,20 @@ raveil project show gemm
 The generated `recipes/` and `inputs/` files are ordinary JSON and text. The
 Command recipes use only the bounded allowlisted syntax documented in
 `NATIVE_COMMAND_GRAPH.md`; they do not accept arbitrary shell commands.
+
+`project recipes` lists the `.json` entries in `recipes/` in filename order,
+including your own recipes. It shows their kind and compatible backend names:
+Command uses `native`, Graph uses `rtl-sim`, and GEMM also supports
+`sonatine-qemu` when all dimensions are at most 8. Invalid recipe metadata or
+unreadable entries appear as `unavailable` with an escaped diagnostic; other
+entries remain visible. Non-JSON files are ignored. Existing directory, path
+and text-size limits still apply.
+
+Discovery is read-only metadata validation: it does not compile a Command or
+hardware Graph, read referenced inputs, check installed tools, or execute a
+recipe. A listed backend is not a successful-run guarantee. Follow with
+`project show NAME` to inspect the workload and then `project run NAME` with
+the indicated backend. Use `--project DIR` when outside the project directory.
 
 ## Edit, run and compare
 
@@ -94,8 +115,9 @@ The result is the unsigned product's low 32 bits (for example,
 `4294967295 * 4294967295` becomes `1`), not saturation or a 64-bit output.
 ADD and MAX remain available in this version, so their nodes can be combined
 with multiplication within the existing limits. This is the project execution
-path; Garden's retained dynamic explanation and sealed UIO admission are not
-extended to v4.
+path. Garden's read-only dynamic explanation admits v4 under ADR-0091;
+saved project runs open through the separate ADR-0093 checked view. Sealed UIO
+admission is not extended to v4 by this workflow.
 
 `run` verifies descriptor-oracle/C++-fallback/RTL byte equality and saves the
 receipt. Inspect `runs/RUN_ID/workspace/output.txt` for active rows and
@@ -105,6 +127,25 @@ The descriptor and ordinary input files remain under the run's `inputs/` copy.
 `diff` reports changed nodes, the number of changed active cells, the first
 changed cell's values, and whether simulator/RTL/program hashes match.
 The original `neighborhood` recipe keeps seed-generated input.
+
+### Inspect a checked saved result
+
+```sh
+raveil project output RUN_ID
+```
+
+This read-only command accepts a successful saved `rtl-sim` Graph run. It
+checks the run record and artifact hashes, then reads the bounded saved
+`workspace/output.txt` and checks those exact bytes against both recorded
+output hashes before printing the run ID, evidence class and active rows.
+Edits to today's inputs or recipe do not change the displayed historical
+result. No compiler, backend or simulator is invoked.
+
+Changed artifacts, incomplete/failed runs and non-Graph runs fail without
+printing output rows. Use `--project DIR` outside the project directory.
+This is the existing cooperative local integrity boundary, not a signed audit
+or stronger hostile-filesystem isolation. It neither reruns validation nor
+turns retained simulation results into hardware or performance evidence.
 
 ### Use your own input values
 
@@ -134,6 +175,15 @@ JSON snapshot and the packed 324-word data used for execution. Input bytes and
 their receipt hash must agree before success; previous runs remain unchanged.
 Explicit runs save packed bytes as `input.bin`; old seed-based runs keep
 `generated-input.bin`. Explicit-input receipts label snapshot provenance.
+When both successful runs use explicit input, `diff` reports the changed word
+count and first changed zero-based index with before/after uint32 values.
+Example: `input: 1/324 words changed` and
+`first changed input word [11] (zero-based): 7 -> 9`.
+Values come from checked saved JSON bound to the recorded packed-input hash,
+not today's editable file. Formatting-only changes report zero changed words
+while raw-file hash differences remain visible. Counts include halo and unused
+words; they do not establish a causal relationship with output differences.
+Seed, mixed-input and failed-run comparisons retain their previous behavior.
 This is a simulation-only input envelope, not a new instruction or device mode.
 
 This path requires Docker running and the existing offline image/cache used by

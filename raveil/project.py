@@ -248,6 +248,26 @@ class Project:
             raise ValueError("recipe kind must be command, gemm or graph-device")
         return recipe
 
+    def recipes(self) -> str:
+        lines = []
+        for filename in self.workspace.ls("recipes"):
+            if not filename.endswith(".json"):
+                continue
+            recipe_name = filename[:-5]
+            try:
+                recipe = self.recipe(recipe_name)
+                kind = recipe["kind"]
+                backends = ["rtl-sim"] if kind == "graph-device" else ["native"]
+                if kind == "gemm" and max(recipe[key] for key in ("m", "n", "k")) <= 8:
+                    backends.append("sonatine-qemu")
+                lines.append(f"{recipe_name}: {kind}; backends={','.join(backends)}")
+            except (OSError, ValueError, RuntimeError) as error:
+                lines.append(f"{json.dumps(filename)}: unavailable; {json.dumps(str(error))}")
+        return "\n".join(lines or ["No JSON recipes found in recipes/."]) + (
+            "\nRecipe metadata only; inputs, Graph validity and installed tools are not checked."
+            "\nInspect with: project show NAME"
+        )
+
     def show(self, recipe_name: str) -> str:
         recipe = self.recipe(recipe_name)
         if recipe["kind"] == "graph-device":
@@ -255,6 +275,7 @@ class Project:
             input_payload = (NativeWorkspace(self.root / "inputs").read_text(recipe["input"]).encode("utf-8")
                              if "input" in recipe else None)
             shown = project_graph.describe(descriptor, recipe.get("seed"), input_payload)
+            shown += f"\ndescriptor file: inputs/{recipe['descriptor']}"
             return shown + (f"\ninput file: inputs/{recipe['input']}" if input_payload is not None else "")
         if recipe["kind"] == "gemm":
             program = GraphProgram.create("gemm", recipe["m"], recipe["n"], recipe["k"])
@@ -281,6 +302,18 @@ class Project:
             raise ValueError("graph-device recipes require --backend rtl-sim; other recipes use native or sonatine-qemu")
         if backend == "sonatine-qemu" and (recipe["kind"] != "gemm" or max(recipe[key] for key in ("m", "n", "k")) > 8):
             raise ValueError("sonatine-qemu accepts only GEMM dimensions 1..8; use native for command recipes")
+        if recipe["kind"] == "command":
+            # Both copies are retained in the sealed run. Reject an already
+            # impossible lower bound before creating history or executing tools.
+            # This is not a reservation for generated outputs or concurrent edits.
+            inputs = tree(self.root / "inputs")
+            input_workspace = NativeWorkspace(self.root / "inputs")
+            size = sum(input_workspace.stat(path).size for path, value in inputs.items()
+                       if value != "directory")
+            if 2 * size > MAX_BYTES:
+                raise ValueError("duplicated inputs exceed run byte budget; reduce inputs before execution")
+            if 2 * len(inputs) > MAX_ENTRIES:
+                raise ValueError("duplicated inputs exceed run entry budget; reduce inputs before execution")
         run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + uuid4().hex[:12]
         self.workspace.mkdir(f"runs/{run_id}", mode=0o700)
         directory = self.root / "runs" / run_id
@@ -397,13 +430,34 @@ class Project:
 
     def load_run(self, run_id: str) -> dict[str, Any]:
         prefix = f"runs/{name(run_id)}"
-        payload = self.workspace.read_text(f"{prefix}/record.json").encode()
+        payload = self.workspace.read_text(f"{prefix}/record.json", maximum=MAX_BYTES).encode()
         expected = self.workspace.read_text(f"{prefix}/record.sha256").strip()
         if digest(payload) != expected:
             raise ValueError(f"run {run_id}: record checksum mismatch")
         record = json.loads(payload, object_pairs_hook=_object)
         if type(record) is not dict or record.get("schema") != RUN_SCHEMA or record.get("run_id") != run_id:
             raise ValueError("invalid run record")
+        for key in ("recipe_name", "backend", "status", "evidence_class"):
+            if type(record.get(key)) is not str:
+                raise ValueError(f"invalid run record: {key} must be a string")
+        if record["backend"] not in {"native", "sonatine-qemu", "rtl-sim"} or record["status"] not in {"succeeded", "failed"}:
+            raise ValueError("invalid run record: unsupported backend or status")
+        for key in ("recipe", "inputs", "outputs", "artifacts", "implementation"):
+            if type(record.get(key)) is not dict:
+                raise ValueError(f"invalid run record: {key} must be an object")
+        for key in ("inputs", "outputs", "artifacts"):
+            if any(type(k) is not str or type(v) is not str for k, v in record[key].items()):
+                raise ValueError(f"invalid run record: {key} must map strings to strings")
+        if record["backend"] == "rtl-sim" and record["status"] == "succeeded":
+            if type(record["recipe"].get("descriptor")) is not str:
+                raise ValueError("invalid run record: Graph descriptor must be a string")
+            if record["inputs"].get("input_mode") == "snapshot":
+                input_name = record["recipe"].get("input")
+                if type(input_name) is not str or not input_name:
+                    raise ValueError("invalid run record: snapshot input must be a nonempty string")
+            for key in ("simulator_sha256", "rtl_manifest_sha256", "program_sha256"):
+                if type(record["implementation"].get(key)) is not str:
+                    raise ValueError(f"invalid run record: {key} must be a string")
         actual = tree(self.root / prefix)
         del actual["/record.json"]
         del actual["/record.sha256"]
@@ -446,6 +500,19 @@ class Project:
             raise ValueError("saved run changed during Garden capture")
         return view
 
+    def output(self, run_id: str) -> str:
+        record = self.load_run(run_id)
+        if (record["backend"] != "rtl-sim" or record["status"] != "succeeded"
+                or record["recipe"].get("kind") != "graph-device"):
+            raise ValueError("output requires a successful saved rtl-sim Graph run")
+        value = self.workspace.read_text(f"runs/{run_id}/workspace/output.txt")
+        checksum = digest(value.encode("utf-8"))
+        if (checksum != record["artifacts"].get("/workspace/output.txt")
+                or checksum != record["outputs"].get("/output.txt")):
+            raise ValueError("saved Graph output changed or differs from recorded output")
+        return (f"run={run_id} backend=rtl-sim evidence={json.dumps(record['evidence_class'])}\n"
+                "Saved active rows (integrity checked; simulation not rerun):\n" + value)
+
     def runs(self) -> str:
         lines = []
         for run_id in self.workspace.ls("runs"):
@@ -477,6 +544,18 @@ class Project:
                 lines.append(f"{key}: {json.dumps(left[key], sort_keys=True)} -> {json.dumps(right[key], sort_keys=True)}")
         if graph_pair:
             roots = [self.root / "runs" / run_id for run_id in (first, second)]
+            if all(record["inputs"].get("input_mode") == "snapshot" for record in (left, right)):
+                packed_inputs = []
+                for root, record in zip(roots, (left, right)):
+                    input_name = record["recipe"]["input"]
+                    raw = NativeWorkspace(root / "inputs").read_text(input_name).encode("utf-8")
+                    if digest(raw) != record["artifacts"].get("/inputs/" + input_name):
+                        raise ValueError("saved Graph input changed during diff")
+                    packed = project_graph.input_bytes(raw)
+                    if digest(packed) != record["inputs"].get("input_sha256"):
+                        raise ValueError("saved Graph input differs from recorded execution input")
+                    packed_inputs.append(packed)
+                lines.extend(project_graph.describe_input_changes(*packed_inputs))
             descriptors = [read_json(NativeWorkspace(root / "inputs"), record["recipe"]["descriptor"])
                            for root, record in zip(roots, (left, right))]
             lines.extend(project_graph.describe_changes(*descriptors,
@@ -523,7 +602,7 @@ def command_project(args: argparse.Namespace) -> int:
     if action == "init":
         root = init_project(Path(args.directory))
         print(f"Created {root}")
-        print(f"One-time shell setup: export PATH=\"{REPOSITORY / 'scripts'}:$PATH\"")
+        print(f"One-time shell setup: export PATH={shlex.quote(str(REPOSITORY / 'scripts'))}:\"$PATH\"")
         print(f"Next: cd {shlex.quote(str(root))} && raveil project show logs")
         return 0
     if action == "console":
@@ -545,10 +624,14 @@ def command_project(args: argparse.Namespace) -> int:
             print(render_key_session(view, args.keys, args.width))
             return 0
         return run_interactive(view, sys.stdin, sys.stdout, args.width)
-    if action == "show":
+    if action == "recipes":
+        print(project.recipes())
+    elif action == "show":
         print(project.show(args.recipe))
     elif action == "runs":
         print(project.runs())
+    elif action == "output":
+        print(project.output(args.run_id), end="")
     elif action == "diff":
         print(project.diff(args.first, args.second))
     else:
@@ -589,7 +672,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "show", "run", "runs", "diff", "console", "garden"):
+    for action in ("init", "recipes", "show", "run", "runs", "output", "diff", "console", "garden"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -607,6 +690,8 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("run_id")
             command.add_argument("--width", type=int, default=100)
             command.add_argument("--keys", help="bounded deterministic Garden navigation")
+        if action == "output":
+            command.add_argument("run_id", help="saved successful rtl-sim Graph run ID")
         if action == "run":
             command.add_argument("--backend", choices=("native", "sonatine-qemu", "rtl-sim"), default="native")
             command.add_argument("--compiler", default="cc")
