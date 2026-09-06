@@ -2,15 +2,27 @@
 
 Last updated: 2026-09-06
 
+T-0161 adds `project garden RUN_ID` under ADR-0093: checked saved Graph runs
+open without compilation, execution or external evidence-directory access.
+The view separates Host Functional artifact checks from historical receipt
+references. The preserved standalone candidate passed 91 focused tests and
+deterministic retained-run navigation. Current integration retains main's
+recipes, output, input budget and metadata admission. Combined macOS host
+verification passes 220 tests, including a shared-run CLI regression. Existing
+retained ADD/MUL runs open through output and Garden; each repeated Garden
+transcript is identical. Linux/exact-head audit remains pending; no new RTL
+execution or Sprint acceptance is claimed.
+T-0159 is integrated through PR #141 (`9ec124d`), Issue #136 closed/Done.
+
 T-0172's local `project output RUN_ID` displays saved successful rtl-sim Graph
 active rows after existing run-integrity checks and a hash check of the exact
 text read for display. Current input edits cannot replace historical output;
 modified, missing, failed or non-Graph runs are rejected. It does not invoke
 a compiler or simulator. Focused 26 tests and display of a retained real RTL
 result pass; expanded 214-test host regression passes. Draft review finds no
-material concern; exact-head audit remains separate. No new RTL execution or
-publication is claimed for that earlier local phase. The later owner direction
-now includes reviewed integration; the reconciled head requires exact audit.
+material concern; exact `929c45b` passed audit and PR #162 merged as `b690db3`.
+Issue #158 closed and canonical Project Done was verified. No new RTL execution
+or Sprint ceremony acceptance follows.
 
 T-0171's local `project recipes` command lists sample and custom JSON recipes
 in filename order with kind and compatible backend names. Invalid entries

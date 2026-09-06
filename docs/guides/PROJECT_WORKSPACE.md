@@ -8,6 +8,24 @@ bash/zsh, editor, Git and file tools around the `raveil project` commands.
 
 ## Create and inspect
 
+### Open a saved Graph run in Garden
+
+After a successful `graph-device` run, use its printed run ID:
+
+```sh
+raveil project garden RUN_ID --project /tmp/my-raveil-project
+raveil project garden RUN_ID --project /tmp/my-raveil-project --keys jjq --width 100
+```
+
+Use j/k/g/G/q (then Enter) to navigate. Garden checks the saved artifact
+manifest and shows retained lowering and receipt identities without compiling
+or running the Graph again. The view is Host Functional; saved simulation
+agreement is a historical reference, not a new execution or authenticated seal.
+Changed files, failed runs and non-Graph runs are rejected. Existing fixture
+commands are unchanged. Substitute an actual saved run ID for `RUN_ID`.
+
+### Initialize a workspace
+
 For Graph recipes, `project show NAME` prints
 `descriptor file: inputs/<actual filename>` and, for explicit input,
 `input file: inputs/<actual filename>`. These paths are relative to the
@@ -98,7 +116,7 @@ The result is the unsigned product's low 32 bits (for example,
 ADD and MAX remain available in this version, so their nodes can be combined
 with multiplication within the existing limits. This is the project execution
 path. Garden's read-only dynamic explanation admits v4 under ADR-0091;
-the separate saved-project-to-Garden integration remains pending. Sealed UIO
+saved project runs open through the separate ADR-0093 checked view. Sealed UIO
 admission is not extended to v4 by this workflow.
 
 `run` verifies descriptor-oracle/C++-fallback/RTL byte equality and saves the

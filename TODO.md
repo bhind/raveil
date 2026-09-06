@@ -4,7 +4,7 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0172** Inspect integrity-checked saved Graph output,
+- [x] **T-0172** Inspect integrity-checked saved Graph output,
   [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
   Owner initially approved local work; later serial-integration direction
   includes normal reviewed publication.
@@ -12,7 +12,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   execution; modified or unsupported histories fail closed. Local base is
   `15f918f`. Focused 26 tests and display of a retained real RTL result pass;
   expanded 214-test host regression passes. Draft review finds no material
-  concern; exact-head audit remains separate from local technical evidence.
+  concern; exact `929c45b` passed audit, PR #162 merged as `b690db3`,
+  Issue #158 closed and canonical Project Done verified.
 
 - [x] **T-0171** Discover workspace recipes from the CLI,
   [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
@@ -100,7 +101,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0169 local workspace integration preparation. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0161 integrates saved-run Garden after T-0172. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -114,6 +115,20 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
+
+- [x] **T-0161** Open checked saved project Graph runs in read-only Garden,
+  [Issue #142](https://github.com/bhind/raveil/issues/142), S-0003, 3 SP, active.
+  Depends on integrated T-0160 and T-0159. ADR-0093 binds saved artifacts and
+  receipt references without recompiling, rerunning, traversing external
+  evidence directories or inventing provenance. Primary owns project/Garden
+  code, focused tests and corresponding canonical records. Acceptance: actual
+  retained-run navigation, deterministic replay, invalid snapshot rejection,
+  no execution calls and legacy regressions. Host Functional only.
+  Technical acceptance: 91 tests pass, both retained T-0160 runs open, repeated
+  navigation is identical, independent review has no blockers. Issue #142
+  tracks pending integration. Current-main reconciliation passes 220 host tests
+  and repeated retained ADD/MUL views; exact-head review and Linux remain.
+  This checkbox records local evidence, not Sprint ceremony acceptance.
 
 - [x] **T-0160** Run Graphs with editable input snapshots,
   [Issue #139](https://github.com/bhind/raveil/issues/139), S-0003, 5 SP.

@@ -2,6 +2,7 @@
 import json
 import contextlib
 import io
+from contextlib import redirect_stdout
 from pathlib import Path
 import struct
 import tempfile
@@ -39,6 +40,93 @@ def host_fixture_runner(descriptor_bytes, seed, *, input_bytes=None):
 
 
 class ProjectGraphTests(unittest.TestCase):
+    def saved_view_run(self):
+        def completed(*args, **kwargs):
+            result = host_fixture_runner(*args, **kwargs)
+            result["receipt"].update({
+                "status": "complete", "graph_id": "neighborhood", "affine": "compact",
+                "evidence_class": "rtl-simulation-functional", "performance": "not-measured",
+                "oracle_sha256": digest(result["output"]), "fallback_sha256": digest(result["output"]),
+            })
+            return result
+        with patch("raveil.project_graph.run_snapshot", side_effect=completed):
+            return self.run_graph_data()
+
+    def test_saved_garden_never_executes_and_is_deterministic(self):
+        from raveil.garden import render_key_session
+        record = self.saved_view_run()
+        before = self.project.load_run(record["run_id"])
+        with patch("raveil.project_graph.run_snapshot", side_effect=AssertionError("must not execute")), \
+             patch("raveil.project_graph.compile_graph", side_effect=AssertionError("must not compile")), \
+             patch("raveil.project.subprocess.call", side_effect=AssertionError("must not launch")):
+            first = render_key_session(self.project.garden(record["run_id"]), "jjq", 100)
+            second = render_key_session(self.project.garden(record["run_id"]), "jjq", 100)
+            self.assertEqual(first, second)
+            self.assertIn("simulation NOT rerun", first)
+            self.assertIn("input word = center + (-1) * 10 + (0)", first)
+            self.assertIn("saved receipt reference only", first)
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(main(["project", "garden", record["run_id"], "--project", str(self.root), "--keys", "jjq", "--width", "100"]), 0)
+            self.assertEqual(out.getvalue(), first + "\n")
+        self.assertEqual(self.project.load_run(record["run_id"]), before)
+
+    def test_recipes_output_and_garden_share_saved_run_without_execution(self):
+        record = self.saved_view_run()
+        run_id = record["run_id"]
+        before = self.project.load_run(run_id)
+        with patch("raveil.project_graph.run_snapshot", side_effect=AssertionError("must not execute")), \
+             patch("raveil.project_graph.compile_graph", side_effect=AssertionError("must not compile")):
+            for arguments, expected in (
+                (["recipes"], "neighborhood-data: graph-device; backends=rtl-sim"),
+                (["output", run_id], "Saved active rows"),
+                (["garden", run_id, "--keys", "jjq"], "saved project Graph"),
+            ):
+                with self.subTest(arguments=arguments), redirect_stdout(io.StringIO()) as out:
+                    self.assertEqual(main(["project", *arguments, "--project", str(self.root)]), 0)
+                    self.assertIn(expected, out.getvalue())
+        self.assertEqual(self.project.load_run(run_id), before)
+
+    def test_saved_garden_rejects_changed_artifacts_and_non_graph_runs(self):
+        record = self.saved_view_run()
+        path = self.root / "runs" / record["run_id"] / "graph.json"
+        path.write_text("{}")
+        with self.assertRaisesRegex(ValueError, "artifacts changed"):
+            self.project.garden(record["run_id"])
+        record = self.saved_view_run()
+        for replacement in ({**record, "status": "failed"}, {**record, "backend": "native"},
+                            {**record, "recipe": {"kind": "command"}}):
+            with patch.object(self.project, "load_run", return_value=replacement):
+                with self.assertRaisesRegex(ValueError, "successful saved"):
+                    self.project.garden(record["run_id"])
+
+    def test_saved_garden_rejects_inconsistent_receipt_and_capture_race(self):
+        record = self.saved_view_run()
+        with patch.object(self.project, "load_run", side_effect=[record, {**record, "status": "failed"}]):
+            with self.assertRaisesRegex(ValueError, "changed during Garden capture"):
+                self.project.garden(record["run_id"])
+
+        inconsistent = {**record, "outputs": {"/output.bin": "0" * 64}}
+        with patch.object(self.project, "load_run", return_value=inconsistent):
+            with self.assertRaisesRegex(ValueError, "output identity"):
+                self.project.garden(record["run_id"])
+
+    def test_saved_garden_rejects_missing_or_conflicting_receipt_fields(self):
+        from raveil.garden import GardenProjectView
+        record = self.saved_view_run()
+        graph = json.loads((self.root / "runs" / record["run_id"] / "graph.json").read_text())
+        for key, value in (("oracle_sha256", "0" * 64), ("affine", "baseline"),
+                           ("graph_id", "other"), ("performance", "fast"),
+                           ("status", "failed"), ("simulator_sha256", None)):
+            receipt = {**record["result"]["receipt"], key: value}
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                GardenProjectView.from_saved(record["run_id"], graph, receipt)
+
+    def test_saved_garden_cli_rejects_tampering_cleanly(self):
+        record = self.saved_view_run()
+        (self.root / "runs" / record["run_id"] / "receipt.json").write_text("{")
+        with redirect_stdout(io.StringIO()), patch("sys.stderr", new_callable=io.StringIO):
+            self.assertEqual(main(["project", "garden", record["run_id"], "--project", str(self.root), "--keys", "q"]), 2)
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
