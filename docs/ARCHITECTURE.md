@@ -6,6 +6,10 @@ Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
+ADR-0093 connects verified project snapshots to a separate in-memory Garden
+view. The view validates retained lowering but treats historical execution
+receipts as references, never as a newly authenticated evidence envelope.
+
 ADR-0091 lets Garden validate and explain already-lowered program v3/v4,
 including signed relative LOAD offsets and unsigned modular multiplication.
 The renderer remains read-only and does not import or invoke the compiler.

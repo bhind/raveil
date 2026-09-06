@@ -45,6 +45,19 @@ def describe_input(payload: bytes) -> str:
     return f"inputs: snapshot JSON (324 uint32 words, sha256={hashlib.sha256(packed).hexdigest()})"
 
 
+def describe_input_changes(first: bytes, second: bytes) -> list[str]:
+    """Describe checked packed inputs, without execution or causal claims."""
+    if len(first) != INPUT_WORDS * 4 or len(second) != INPUT_WORDS * 4:
+        raise ValueError("saved Graph input must contain 324 uint32 words")
+    before, after = (struct.unpack("<324I", payload) for payload in (first, second))
+    changed = [index for index in range(INPUT_WORDS) if before[index] != after[index]]
+    lines = [f"input: {len(changed)}/{INPUT_WORDS} words changed"]
+    if changed:
+        index = changed[0]
+        lines.append(f"first changed input word [{index}] (zero-based): {before[index]} -> {after[index]}")
+    return lines
+
+
 def sample_descriptor() -> dict[str, Any]:
     return {
         "schema": "raveil.graph-device-dag/v2", "graph_id": "neighborhood",

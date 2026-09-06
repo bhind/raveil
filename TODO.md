@@ -12,7 +12,70 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   Local verification/review precedes adding publication to the next packet.
   Owner-requested local follow-up adds a mandatory pre-stop incident/scope
   check, next-task search and same-turn first action when eligible. Publication
-  remains excluded from that follow-up.
+  was excluded from that local follow-up; later owner direction includes
+  serial reviewed integration. No runtime override is created.
+
+- [x] **T-0172** Inspect integrity-checked saved Graph output,
+  [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
+  Owner initially approved local work; later serial-integration direction
+  includes normal reviewed publication.
+  `project output RUN_ID` reads successful saved rtl-sim Graph results without
+  execution; modified or unsupported histories fail closed. Local base is
+  `15f918f`. Focused 26 tests and display of a retained real RTL result pass;
+  expanded 214-test host regression passes. Draft review finds no material
+  concern; exact `929c45b` passed audit, PR #162 merged as `b690db3`,
+  Issue #158 closed and canonical Project Done verified.
+
+- [x] **T-0171** Discover workspace recipes from the CLI,
+  [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
+  Owner explicitly approved registration, implementation, tests and docs;
+  the subsequent serial-integration direction includes reviewed publication.
+  `project recipes` lists custom/sample JSON recipes,
+  kind and metadata-compatible backends, reports invalid entries and performs
+  no execution. Local candidate uses `5848e1b` as its preserved base. Focused
+  24-test suite, expanded 210-test host suite and actual CLI smoke pass.
+  Exact `85501ec` audit found no material concern; PR #161 merged as
+  `0c11edc`, Issue #157 closed and canonical Project Done verified.
+
+- [x] **T-0170** Reject impossible duplicated Command input budgets before
+  execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,
+  1 SP. Original local base is T-0169 `84ff1d3`; the later owner direction
+  authorizes serial reviewed integration. Preserve the
+  existing byte/entry bounds and reject when the two input copies alone
+  exceed them, before creating a run or calling the executor. This is a
+  lower-bound preflight, not complete generated-output reservation. Regression
+  and the real 130-file reproduction pass after correction; the expanded
+  207-test host suite passes. Exact integration head `69ad107` passed audit;
+  PR #160 merged as `ba5cb36`, Issue #156 closed and Project Done verified.
+
+- [x] **T-0169** Bind the tested workspace repair combination to a local Git
+  candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,
+  1 SP. Primary owns the ten-file integration packet. Base `2a0ace3` retains
+  T-0158 corrections. The original combination passed 205 tests; review
+  identified a missing snapshot input-name check at the T-0163/T-0166 seam.
+  The bounded correction and CLI regression pass the expanded 206-test suite;
+  exact `84ff1d3` audit found no material concern. The owner subsequently
+  directed serial main integration. PR #159 merged as `606a4f7`; Issue #155
+  is closed and canonical completion set Project Done. T-0161 and T-0164
+  are not included; Sprint Review remains separate.
+
+- [x] **T-0163** Explain changed saved input words in project diff,
+  [Issue #147](https://github.com/bhind/raveil/issues/147). Local technical
+  verification complete; candidate `79460b7` is preserved. Included in
+  T-0169 local integration preparation, not yet remotely integrated.
+- [x] **T-0165** Name the actual Graph descriptor file in project show,
+  [Issue #149](https://github.com/bhind/raveil/issues/149). Local candidate
+  `fd9797f` is preserved; included in T-0169, publication pending.
+- [x] **T-0166** Reject malformed saved-run metadata cleanly,
+  [Issue #152](https://github.com/bhind/raveil/issues/152). Local candidate
+  `fd30d31` is preserved; included in T-0169, publication pending.
+- [x] **T-0167** Quote literal checkout paths in shell setup advice,
+  [Issue #153](https://github.com/bhind/raveil/issues/153). Local candidate
+  `3e3222e` is preserved; included in T-0169, publication pending.
+- [x] **T-0168** Keep retained metadata readable within ADR-0096's bound,
+  [Issue #154](https://github.com/bhind/raveil/issues/154). Local candidate
+  `57fbe2e` is preserved; included in T-0169, publication pending. These
+  technical checkboxes do not accept remote integration or Sprint Review.
 
 - [x] **T-0162** Clarify delegated task acceptance under ADR-0094,
   [Issue #145](https://github.com/bhind/raveil/issues/145), S-0003, 1 SP.
@@ -49,7 +112,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0164 approval batching is active. T-0161 and T-0163 publication remain pending separately; neither is integrated. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0164 integrates existing governance records after Garden. T-0158 retains its future observation conditions. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
@@ -63,6 +126,21 @@ Project Manager record integration and PR merge remain serial. Read-only
 review and failure preservation do not consume the two-item delivery limit.
 
 ## 2026-09-05 inventory reconciliation
+
+- [x] **T-0161** Open checked saved project Graph runs in read-only Garden,
+  [Issue #142](https://github.com/bhind/raveil/issues/142), S-0003, 3 SP, active.
+  Depends on integrated T-0160 and T-0159. ADR-0093 binds saved artifacts and
+  receipt references without recompiling, rerunning, traversing external
+  evidence directories or inventing provenance. Primary owns project/Garden
+  code, focused tests and corresponding canonical records. Acceptance: actual
+  retained-run navigation, deterministic replay, invalid snapshot rejection,
+  no execution calls and legacy regressions. Host Functional only.
+  Technical acceptance: 91 tests pass, both retained T-0160 runs open, repeated
+  navigation is identical, independent review has no blockers. Issue #142
+  tracks pending integration. Current-main reconciliation passes 220 host tests
+  and repeated retained ADD/MUL views; exact `a7ae948` passes Linux 220 and
+  audit. PR #144 merged as `a197500`, Issue #142 closed and Project Done.
+  This checkbox records local evidence, not Sprint ceremony acceptance.
 
 - [x] **T-0160** Run Graphs with editable input snapshots,
   [Issue #139](https://github.com/bhind/raveil/issues/139), S-0003, 5 SP.

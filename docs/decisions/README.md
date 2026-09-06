@@ -3,6 +3,9 @@
 T-0164: [ADR-0095](ADR-0095-batched-owner-approval-requests.md) batches routine
 approval requests without changing permission or incident boundaries.
 
+T-0161: [ADR-0093](ADR-0093-garden-opens-verified-project-snapshots.md)
+is Accepted; checked saved project runs open in Garden without execution.
+
 T-0162: [ADR-0094](ADR-0094-delegated-product-acceptance.md) defines delegated
 task acceptance without overriding execution permissions.
 
