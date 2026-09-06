@@ -5,7 +5,9 @@ Last updated: 2026-09-06
 T-0174 adds an independent bias-grid starter to new projects. Its descriptor
 and 324-word input file are separate from neighborhood. Local 257-test host
 verification and a fresh actual RTL +5 -> +7 edit/run/output/diff/Garden loop
-pass; final Linux/exact-candidate review and integration are pending. Both
+pass. Exact `442b426` passes257 macOS tests and257 offline Linux tests with
+five compiler-dependent skips; Vreji reports no material concern. Integration
+is pending. Both
 outputs equal the independent oracle and C++ fallback. It reuses ADR-0097
 without a new ISA or runtime boundary; no physical/performance claim follows.
 
