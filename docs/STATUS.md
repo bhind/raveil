@@ -2,6 +2,15 @@
 
 Last updated: 2026-09-06
 
+T-0172's local `project output RUN_ID` displays saved successful rtl-sim Graph
+active rows after existing run-integrity checks and a hash check of the exact
+text read for display. Current input edits cannot replace historical output;
+modified, missing, failed or non-Graph runs are rejected. It does not invoke
+a compiler or simulator. Focused 26 tests and display of a retained real RTL
+result pass; expanded 214-test host regression passes. Draft review finds no
+material concern; exact-head audit remains separate. No new RTL execution or
+publication is claimed.
+
 T-0171's local `project recipes` command lists sample and custom JSON recipes
 in filename order with kind and compatible backend names. Invalid entries
 remain visible as unavailable; existing bounded paths and read limits apply.

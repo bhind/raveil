@@ -55,6 +55,60 @@ class ProjectGraphTests(unittest.TestCase):
         return self.project.run("neighborhood-data", "rtl-sim", kernel=Path("unused"),
                                 qemu="unused", compiler="unused")
 
+    def test_output_displays_saved_rows_after_edit_without_execution(self):
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            record = self.run_graph_data()
+        run_id = record["run_id"]
+        saved = self.root / "runs" / run_id / "workspace/output.txt"
+        original = saved.read_text()
+        self.descriptor_path.write_text("invalid current descriptor")
+        (self.root / "inputs/neighborhood-data.json").write_text("invalid current input")
+        out = io.StringIO()
+        with patch("raveil.project_graph.run_snapshot") as runner, \
+                patch("raveil.project_graph.compile_graph") as compiler, \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(main(["project", "output", run_id, "--project", str(self.root)]), 0)
+            runner.assert_not_called()
+            compiler.assert_not_called()
+        self.assertIn(f"run={run_id}", out.getvalue())
+        self.assertIn("simulation not rerun", out.getvalue())
+        self.assertTrue(out.getvalue().endswith(original))
+        self.assertEqual(saved.read_text(), original)
+        self.assertEqual(len(list((self.root / "runs").iterdir())), 1)
+
+    def test_output_rejects_changed_artifact_without_printing_rows(self):
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            record = self.run_graph()
+        run_id = record["run_id"]
+        (self.root / "runs" / run_id / "workspace/output.txt").write_text("changed output\n")
+        out, error = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(error):
+            self.assertEqual(main(["project", "output", run_id, "--project", str(self.root)]), 2)
+        self.assertEqual(out.getvalue(), "")
+        self.assertIn("saved artifacts changed", error.getvalue())
+
+    def test_output_rechecks_bytes_after_record_validation(self):
+        with patch("raveil.project_graph.run_snapshot", side_effect=host_fixture_runner):
+            record = self.run_graph()
+        run_id = record["run_id"]
+        verified = self.project.load_run(run_id)
+        (self.root / "runs" / run_id / "workspace/output.txt").write_text("changed after admission\n")
+        with patch.object(self.project, "load_run", return_value=verified):
+            with self.assertRaisesRegex(ValueError, "saved Graph output changed"):
+                self.project.output(run_id)
+
+    def test_output_rejects_failed_non_graph_and_missing_runs(self):
+        native = self.project.run("logs", "native", kernel=Path("unused"), qemu="unused", compiler="unused")
+        self.descriptor_path.write_text("{}")
+        failed = self.run_graph()
+        for run_id in (native["run_id"], failed["run_id"], "missing", "../outside"):
+            with self.subTest(run_id=run_id):
+                out, error = io.StringIO(), io.StringIO()
+                with contextlib.redirect_stdout(out), contextlib.redirect_stderr(error):
+                    self.assertEqual(main(["project", "output", run_id, "--project", str(self.root)]), 2)
+                self.assertEqual(out.getvalue(), "")
+                self.assertNotIn("Traceback", error.getvalue())
+
     def test_show_explains_editable_dependencies_and_coordinates(self):
         shown = self.project.show("neighborhood")
         self.assertIn("nodes=4 edges=3 instructions=4/16", shown)

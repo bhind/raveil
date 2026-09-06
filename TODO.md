@@ -4,6 +4,15 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0172** Inspect integrity-checked saved Graph output,
+  [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
+  Owner approved registration, implementation, tests and docs, not publication.
+  `project output RUN_ID` reads successful saved rtl-sim Graph results without
+  execution; modified or unsupported histories fail closed. Local base is
+  `15f918f`. Focused 26 tests and display of a retained real RTL result pass;
+  expanded 214-test host regression passes. Draft review finds no material
+  concern; exact-head audit remains separate from local technical evidence.
+
 - [ ] **T-0171** Discover workspace recipes from the CLI,
   [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
   Owner explicitly approved registration, implementation, tests and docs;
