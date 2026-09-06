@@ -281,6 +281,18 @@ class Project:
             raise ValueError("graph-device recipes require --backend rtl-sim; other recipes use native or sonatine-qemu")
         if backend == "sonatine-qemu" and (recipe["kind"] != "gemm" or max(recipe[key] for key in ("m", "n", "k")) > 8):
             raise ValueError("sonatine-qemu accepts only GEMM dimensions 1..8; use native for command recipes")
+        if recipe["kind"] == "command":
+            # Both copies are retained in the sealed run. Reject an already
+            # impossible lower bound before creating history or executing tools.
+            # This is not a reservation for generated outputs or concurrent edits.
+            inputs = tree(self.root / "inputs")
+            input_workspace = NativeWorkspace(self.root / "inputs")
+            size = sum(input_workspace.stat(path).size for path, value in inputs.items()
+                       if value != "directory")
+            if 2 * size > MAX_BYTES:
+                raise ValueError("duplicated inputs exceed run byte budget; reduce inputs before execution")
+            if 2 * len(inputs) > MAX_ENTRIES:
+                raise ValueError("duplicated inputs exceed run entry budget; reduce inputs before execution")
         run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + uuid4().hex[:12]
         self.workspace.mkdir(f"runs/{run_id}", mode=0o700)
         directory = self.root / "runs" / run_id

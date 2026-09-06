@@ -2,6 +2,17 @@
 
 Last updated: 2026-09-06
 
+T-0170 adds a local Command input-budget preflight atop T-0169 `84ff1d3`.
+Previously, 130 valid 64-KiB input files ran the logs recipe but their retained
+and working copies exceeded the final 16-MiB snapshot budget, leaving output
+without a sealed record. The preflight rejects a doubled input byte/entry
+lower bound that already exceeds existing limits before run creation or tool
+execution. The same real input now leaves zero runs. It does not reserve
+generated outputs, solve every near-limit sealing failure, or provide stronger
+isolation. The expanded 207-test host suite passes; final exact-head review
+of the reconciled integration head remains pending. The later owner direction
+authorizes serial reviewed integration; the original local-only phase is over.
+
 T-0169 prepares a local Git candidate from current main `2a0ace3`, retaining
 T-0158 corrections and combining only T-0163/0165/0166/0167/0168. The five
 code/test files initially matched the previously tested disposable composite
@@ -11,8 +22,9 @@ and its CLI regression; prior composite results do not cover this correction.
 The corrected candidate passes 206 host tests including current main's
 burndown, queue and daily-processing suites.
 Exact `84ff1d3` passes independent audit and Linux/nonroot 206-test verification.
-Following the owner's later integration instruction, T-0169 resumes PR
-preparation; publication is not yet verified. T-0161 Garden and T-0164
+Following the owner's later integration instruction, T-0169 merged through
+PR #159 as `606a4f7`; Issue #155 is closed and Project Done was verified.
+T-0161 Garden and T-0164
 governance remain excluded, as do the separate T-0170/0171/0172 successors.
 
 The combined workspace explains actual descriptor/input paths and changed

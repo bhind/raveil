@@ -4,15 +4,26 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0169** Bind the tested workspace repair combination to a local Git
+- [ ] **T-0170** Reject impossible duplicated Command input budgets before
+  execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,
+  1 SP. Original local base is T-0169 `84ff1d3`; the later owner direction
+  authorizes serial reviewed integration. Preserve the
+  existing byte/entry bounds and reject when the two input copies alone
+  exceed them, before creating a run or calling the executor. This is a
+  lower-bound preflight, not complete generated-output reservation. Regression
+  and the real 130-file reproduction pass after correction; the expanded
+  207-test host suite passes. Final exact-head review remains pending.
+
+- [x] **T-0169** Bind the tested workspace repair combination to a local Git
   candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,
   1 SP. Primary owns the ten-file integration packet. Base `2a0ace3` retains
   T-0158 corrections. The original combination passed 205 tests; review
   identified a missing snapshot input-name check at the T-0163/T-0166 seam.
   The bounded correction and CLI regression pass the expanded 206-test suite;
   exact `84ff1d3` audit found no material concern. The owner subsequently
-  directed serial main integration; PR preparation resumes under normal
-  runtime review and branch protections. T-0161 and T-0164 are not included.
+  directed serial main integration. PR #159 merged as `606a4f7`; Issue #155
+  is closed and canonical completion set Project Done. T-0161 and T-0164
+  are not included; Sprint Review remains separate.
 
 - [x] **T-0163** Explain changed saved input words in project diff,
   [Issue #147](https://github.com/bhind/raveil/issues/147). Local technical
