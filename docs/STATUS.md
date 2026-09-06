@@ -10,8 +10,10 @@ check between T-0163 and T-0166. The candidate adds that bounded validation
 and its CLI regression; prior composite results do not cover this correction.
 The corrected candidate passes 206 host tests including current main's
 burndown, queue and daily-processing suites.
-Publication and fresh exact-head audit remain separate; T-0161 Garden and
-T-0164 governance are excluded.
+Exact `84ff1d3` passes independent audit and Linux/nonroot 206-test verification.
+Following the owner's later integration instruction, T-0169 resumes PR
+preparation; publication is not yet verified. T-0161 Garden and T-0164
+governance remain excluded, as do the separate T-0170/0171/0172 successors.
 
 The combined workspace explains actual descriptor/input paths and changed
 input words, rejects malformed metadata fields consumed by the diff path,
