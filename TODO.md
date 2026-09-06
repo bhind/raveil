@@ -4,6 +4,15 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0170** Reject impossible duplicated Command input budgets before
+  execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,
+  1 SP. Local base is T-0169 `84ff1d3`; publication is excluded. Preserve the
+  existing byte/entry bounds and reject when the two input copies alone
+  exceed them, before creating a run or calling the executor. This is a
+  lower-bound preflight, not complete generated-output reservation. Regression
+  and the real 130-file reproduction pass after correction; the expanded
+  207-test host suite passes. Final exact-head review remains pending.
+
 - [ ] **T-0169** Bind the tested workspace repair combination to a local Git
   candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,
   1 SP. Primary owns the ten-file integration packet. Base `2a0ace3` retains

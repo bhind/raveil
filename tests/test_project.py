@@ -61,6 +61,25 @@ class ProjectWorkspaceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "checksum mismatch"):
             project.load_run(first["run_id"])
 
+    def test_duplicate_input_budget_rejected_before_execution_or_history(self) -> None:
+        from raveil.project import tree
+        manifest = tree(self.root / "inputs")
+        size = sum((self.root / "inputs" / path.lstrip("/")).stat().st_size
+                   for path, value in manifest.items() if value != "directory")
+        for field, limit in (("MAX_BYTES", 2 * size - 1),
+                             ("MAX_ENTRIES", 2 * len(manifest) - 1)):
+            with self.subTest(field=field), patch("raveil.project." + field, limit), \
+                    patch("raveil.project.CommandComparison.execute",
+                          side_effect=AssertionError("execution started before budget rejection")) as execute:
+                error = io.StringIO()
+                with contextlib.redirect_stderr(error):
+                    result = main(["project", "run", "logs", "--project", str(self.root)])
+                self.assertEqual(result, 2)
+                self.assertIn("duplicated inputs exceed run", error.getvalue())
+                self.assertNotIn("Traceback", error.getvalue())
+                execute.assert_not_called()
+                self.assertEqual(list((self.root / "runs").iterdir()), [])
+
     def test_explicit_text_read_bound_preserves_validation(self) -> None:
         workspace = NativeWorkspace(self.root)
         target = self.root / "bounded.txt"
