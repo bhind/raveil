@@ -464,6 +464,19 @@ class Project:
             raise ValueError(f"run {run_id}: saved artifacts changed")
         return record
 
+    def output(self, run_id: str) -> str:
+        record = self.load_run(run_id)
+        if (record["backend"] != "rtl-sim" or record["status"] != "succeeded"
+                or record["recipe"].get("kind") != "graph-device"):
+            raise ValueError("output requires a successful saved rtl-sim Graph run")
+        value = self.workspace.read_text(f"runs/{run_id}/workspace/output.txt")
+        checksum = digest(value.encode("utf-8"))
+        if (checksum != record["artifacts"].get("/workspace/output.txt")
+                or checksum != record["outputs"].get("/output.txt")):
+            raise ValueError("saved Graph output changed or differs from recorded output")
+        return (f"run={run_id} backend=rtl-sim evidence={json.dumps(record['evidence_class'])}\n"
+                "Saved active rows (integrity checked; simulation not rerun):\n" + value)
+
     def runs(self) -> str:
         lines = []
         for run_id in self.workspace.ls("runs"):
@@ -573,6 +586,8 @@ def command_project(args: argparse.Namespace) -> int:
         print(project.show(args.recipe))
     elif action == "runs":
         print(project.runs())
+    elif action == "output":
+        print(project.output(args.run_id), end="")
     elif action == "diff":
         print(project.diff(args.first, args.second))
     else:
@@ -613,7 +628,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "run", "runs", "diff", "console"):
+    for action in ("init", "recipes", "show", "run", "runs", "output", "diff", "console"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -627,6 +642,8 @@ def add_project_parser(subparsers: Any) -> None:
         if action == "diff":
             command.add_argument("first")
             command.add_argument("second")
+        if action == "output":
+            command.add_argument("run_id", help="saved successful rtl-sim Graph run ID")
         if action == "run":
             command.add_argument("--backend", choices=("native", "sonatine-qemu", "rtl-sim"), default="native")
             command.add_argument("--compiler", default="cc")

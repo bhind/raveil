@@ -2,14 +2,24 @@
 
 Last updated: 2026-09-06
 
+T-0172's local `project output RUN_ID` displays saved successful rtl-sim Graph
+active rows after existing run-integrity checks and a hash check of the exact
+text read for display. Current input edits cannot replace historical output;
+modified, missing, failed or non-Graph runs are rejected. It does not invoke
+a compiler or simulator. Focused 26 tests and display of a retained real RTL
+result pass; expanded 214-test host regression passes. Draft review finds no
+material concern; exact-head audit remains separate. No new RTL execution or
+publication is claimed for that earlier local phase. The later owner direction
+now includes reviewed integration; the reconciled head requires exact audit.
+
 T-0171's local `project recipes` command lists sample and custom JSON recipes
 in filename order with kind and compatible backend names. Invalid entries
 remain visible as unavailable; existing bounded paths and read limits apply.
 It validates recipe metadata only, not input files, compiled Graph validity,
 installed tools or successful execution. Focused 24-test suite and actual CLI
 smoke pass. Expanded 210-test host verification passes and draft review found
-no material concern. The later owner direction includes reviewed publication;
-the reconciled integration head still requires exact-head review.
+no material concern. Exact `85501ec` audit passed and PR #161 merged as
+`0c11edc`; Issue #157 closed and canonical Project Done was verified.
 
 T-0170 adds a local Command input-budget preflight atop T-0169 `84ff1d3`.
 Previously, 130 valid 64-KiB input files ran the logs recipe but their retained

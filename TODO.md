@@ -4,7 +4,17 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0171** Discover workspace recipes from the CLI,
+- [ ] **T-0172** Inspect integrity-checked saved Graph output,
+  [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
+  Owner initially approved local work; later serial-integration direction
+  includes normal reviewed publication.
+  `project output RUN_ID` reads successful saved rtl-sim Graph results without
+  execution; modified or unsupported histories fail closed. Local base is
+  `15f918f`. Focused 26 tests and display of a retained real RTL result pass;
+  expanded 214-test host regression passes. Draft review finds no material
+  concern; exact-head audit remains separate from local technical evidence.
+
+- [x] **T-0171** Discover workspace recipes from the CLI,
   [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
   Owner explicitly approved registration, implementation, tests and docs;
   the subsequent serial-integration direction includes reviewed publication.
@@ -12,7 +22,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   kind and metadata-compatible backends, reports invalid entries and performs
   no execution. Local candidate uses `5848e1b` as its preserved base. Focused
   24-test suite, expanded 210-test host suite and actual CLI smoke pass.
-  Draft review found no material concern; exact-head audit precedes acceptance.
+  Exact `85501ec` audit found no material concern; PR #161 merged as
+  `0c11edc`, Issue #157 closed and canonical Project Done verified.
 
 - [x] **T-0170** Reject impossible duplicated Command input budgets before
   execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,

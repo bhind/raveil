@@ -110,6 +110,25 @@ The descriptor and ordinary input files remain under the run's `inputs/` copy.
 changed cell's values, and whether simulator/RTL/program hashes match.
 The original `neighborhood` recipe keeps seed-generated input.
 
+### Inspect a checked saved result
+
+```sh
+raveil project output RUN_ID
+```
+
+This read-only command accepts a successful saved `rtl-sim` Graph run. It
+checks the run record and artifact hashes, then reads the bounded saved
+`workspace/output.txt` and checks those exact bytes against both recorded
+output hashes before printing the run ID, evidence class and active rows.
+Edits to today's inputs or recipe do not change the displayed historical
+result. No compiler, backend or simulator is invoked.
+
+Changed artifacts, incomplete/failed runs and non-Graph runs fail without
+printing output rows. Use `--project DIR` outside the project directory.
+This is the existing cooperative local integrity boundary, not a signed audit
+or stronger hostile-filesystem isolation. It neither reruns validation nor
+turns retained simulation results into hardware or performance evidence.
+
 ### Use your own input values
 
 New projects also include the `neighborhood-data` recipe. Its version-2
