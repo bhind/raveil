@@ -66,9 +66,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   integrated through T-0169 PR #159 (`606a4f7`). This task's separate
   integration-receipt PR reconciles stale records and original Issue closure;
   it adds no implementation. Current saved-input diff regressions pass.
+  Receipt PR #164 merged as `3a18dcc`; Issue #147 closed and Project Done.
 - [x] **T-0165** Name the actual Graph descriptor file in project show,
   [Issue #149](https://github.com/bhind/raveil/issues/149). Local candidate
-  `fd9797f` is preserved; included in T-0169, publication pending.
+  `fd9797f` is preserved; implementation integrated through T-0169 PR #159
+  (`606a4f7`). This receipt-only reconciliation corrects the stale publication
+  state; the actual-filename regression passes without new code or RTL.
 - [x] **T-0166** Reject malformed saved-run metadata cleanly,
   [Issue #152](https://github.com/bhind/raveil/issues/152). Local candidate
   `fd30d31` is preserved; included in T-0169, publication pending.
