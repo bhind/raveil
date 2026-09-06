@@ -9,7 +9,8 @@ modified, missing, failed or non-Graph runs are rejected. It does not invoke
 a compiler or simulator. Focused 26 tests and display of a retained real RTL
 result pass; expanded 214-test host regression passes. Draft review finds no
 material concern; exact-head audit remains separate. No new RTL execution or
-publication is claimed.
+publication is claimed for that earlier local phase. The later owner direction
+now includes reviewed integration; the reconciled head requires exact audit.
 
 T-0171's local `project recipes` command lists sample and custom JSON recipes
 in filename order with kind and compatible backend names. Invalid entries
@@ -17,7 +18,8 @@ remain visible as unavailable; existing bounded paths and read limits apply.
 It validates recipe metadata only, not input files, compiled Graph validity,
 installed tools or successful execution. Focused 24-test suite and actual CLI
 smoke pass. Expanded 210-test host verification passes and draft review found
-no material concern. Exact-head audit precedes acceptance; nothing is published.
+no material concern. Exact `85501ec` audit passed and PR #161 merged as
+`0c11edc`; Issue #157 closed and canonical Project Done was verified.
 
 T-0170 adds a local Command input-budget preflight atop T-0169 `84ff1d3`.
 Previously, 130 valid 64-KiB input files ran the logs recipe but their retained
@@ -26,8 +28,9 @@ without a sealed record. The preflight rejects a doubled input byte/entry
 lower bound that already exceeds existing limits before run creation or tool
 execution. The same real input now leaves zero runs. It does not reserve
 generated outputs, solve every near-limit sealing failure, or provide stronger
-isolation. The expanded 207-test host suite passes; final exact-head review
-remains pending and nothing is published.
+isolation. The expanded 207-test host suite passes; exact integration head
+`69ad107` passed audit and merged through PR #160 as `ba5cb36`. Issue #156
+closed and canonical Project Done was verified. Sprint acceptance is separate.
 
 T-0169 prepares a local Git candidate from current main `2a0ace3`, retaining
 T-0158 corrections and combining only T-0163/0165/0166/0167/0168. The five
@@ -37,8 +40,11 @@ check between T-0163 and T-0166. The candidate adds that bounded validation
 and its CLI regression; prior composite results do not cover this correction.
 The corrected candidate passes 206 host tests including current main's
 burndown, queue and daily-processing suites.
-Publication and fresh exact-head audit remain separate; T-0161 Garden and
-T-0164 governance are excluded.
+Exact `84ff1d3` passes independent audit and Linux/nonroot 206-test verification.
+Following the owner's later integration instruction, T-0169 merged through
+PR #159 as `606a4f7`; Issue #155 is closed and Project Done was verified.
+T-0161 Garden and T-0164
+governance remain excluded, as do the separate T-0170/0171/0172 successors.
 
 The combined workspace explains actual descriptor/input paths and changed
 input words, rejects malformed metadata fields consumed by the diff path,

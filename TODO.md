@@ -6,39 +6,46 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 - [ ] **T-0172** Inspect integrity-checked saved Graph output,
   [Issue #158](https://github.com/bhind/raveil/issues/158), S-0003, 1 SP.
-  Owner approved registration, implementation, tests and docs, not publication.
+  Owner initially approved local work; later serial-integration direction
+  includes normal reviewed publication.
   `project output RUN_ID` reads successful saved rtl-sim Graph results without
   execution; modified or unsupported histories fail closed. Local base is
   `15f918f`. Focused 26 tests and display of a retained real RTL result pass;
   expanded 214-test host regression passes. Draft review finds no material
   concern; exact-head audit remains separate from local technical evidence.
 
-- [ ] **T-0171** Discover workspace recipes from the CLI,
+- [x] **T-0171** Discover workspace recipes from the CLI,
   [Issue #157](https://github.com/bhind/raveil/issues/157), S-0003, 1 SP.
   Owner explicitly approved registration, implementation, tests and docs;
-  publication is excluded. `project recipes` lists custom/sample JSON recipes,
+  the subsequent serial-integration direction includes reviewed publication.
+  `project recipes` lists custom/sample JSON recipes,
   kind and metadata-compatible backends, reports invalid entries and performs
   no execution. Local candidate uses `5848e1b` as its preserved base. Focused
   24-test suite, expanded 210-test host suite and actual CLI smoke pass.
-  Draft review found no material concern; exact-head audit precedes acceptance.
+  Exact `85501ec` audit found no material concern; PR #161 merged as
+  `0c11edc`, Issue #157 closed and canonical Project Done verified.
 
-- [ ] **T-0170** Reject impossible duplicated Command input budgets before
+- [x] **T-0170** Reject impossible duplicated Command input budgets before
   execution, [Issue #156](https://github.com/bhind/raveil/issues/156), S-0003,
-  1 SP. Local base is T-0169 `84ff1d3`; publication is excluded. Preserve the
+  1 SP. Original local base is T-0169 `84ff1d3`; the later owner direction
+  authorizes serial reviewed integration. Preserve the
   existing byte/entry bounds and reject when the two input copies alone
   exceed them, before creating a run or calling the executor. This is a
   lower-bound preflight, not complete generated-output reservation. Regression
   and the real 130-file reproduction pass after correction; the expanded
-  207-test host suite passes. Final exact-head review remains pending.
+  207-test host suite passes. Exact integration head `69ad107` passed audit;
+  PR #160 merged as `ba5cb36`, Issue #156 closed and Project Done verified.
 
-- [ ] **T-0169** Bind the tested workspace repair combination to a local Git
+- [x] **T-0169** Bind the tested workspace repair combination to a local Git
   candidate, [Issue #155](https://github.com/bhind/raveil/issues/155), S-0003,
   1 SP. Primary owns the ten-file integration packet. Base `2a0ace3` retains
   T-0158 corrections. The original combination passed 205 tests; review
   identified a missing snapshot input-name check at the T-0163/T-0166 seam.
   The bounded correction and CLI regression pass the expanded 206-test suite;
-  fresh exact-head audit remains.
-  Publication is excluded. T-0161 and T-0164 are not included.
+  exact `84ff1d3` audit found no material concern. The owner subsequently
+  directed serial main integration. PR #159 merged as `606a4f7`; Issue #155
+  is closed and canonical completion set Project Done. T-0161 and T-0164
+  are not included; Sprint Review remains separate.
 
 - [x] **T-0163** Explain changed saved input words in project diff,
   [Issue #147](https://github.com/bhind/raveil/issues/147). Local technical
