@@ -380,6 +380,12 @@ class GraphDeviceDynamicTests(unittest.TestCase):
             expected = _expected_runner_source_manifest(verify(sealed, ROOT)).decode("ascii")
         self.assertIn("orchestration/contracts/graph_device_dynamic_request_v2.json ", expected)
         self.assertIn("orchestration/contracts/graph_device_program_v2.json ", expected)
+        for name in ("graph_device_dynamic_request_v5.json", "graph_device_dynamic_request_v6.json",
+                     "graph_device_program_v5.json"):
+            self.assertIn(f"contracts/{name}", SOURCE_PATHS)
+            self.assertIn(f"orchestration/contracts/{name} ", expected)
+            runner = (ROOT / "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh").read_text()
+            self.assertIn(f"contracts/{name}", runner)
 
     def test_cxx_host_admission_rejects_digest_before_model(self):
         compiler = shutil.which("c++") or shutil.which("g++")

@@ -64,6 +64,15 @@ class GraphDeviceDynamicSealedTests(unittest.TestCase):
                 seal(RELATIVE_GRAPH, 9, ROOT)
             self.assertEqual(list(Path(directory).iterdir()), [])
 
+    def test_v5_snapshot_graph_cannot_materialize_sealed_transport(self):
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "raveil.graph_device_dynamic_sealed._sealed_parent",
+            return_value=Path(directory).resolve(),
+        ):
+            with self.assertRaisesRegex(GraphDeviceDynamicSealError, "only program versions 1 and 2"):
+                seal("tests/fixtures/graph_device_dynamic/add-immediate-u32.json", 0, ROOT)
+            self.assertEqual(list(Path(directory).iterdir()), [])
+
     def test_each_inventory_byte_fails_closed(self):
         for name in ("program.bin", "affine.bin", "input.bin", "seed-1.bin", "oracle.bin", "descriptor.json", "request.bin", "source.manifest", "graph_device_abi_generated.h", "graph_device_affine_generated.h", "graph_device_dag_generated.h", "graph_device_axi4lite_aperture_generated.h", "manifest.json", "SEALED"):
             with self.subTest(name=name), tempfile.TemporaryDirectory() as directory, patch("raveil.graph_device_dynamic_sealed._sealed_parent", return_value=Path(directory).resolve()):
