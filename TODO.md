@@ -26,6 +26,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   idempotence: the first S-0002 observations were already zero, the card title
   did not expose changing values, scheduled execution had not yet occurred,
   and no multi-day decreasing-remainder integration test existed.
+  PR #150 merged the correction as `a45336c`; 76 tests and corrected hosted
+  run #34015052717 pass. Keep the task open until an actual `schedule` event
+  and two live S-0003 observations establish a decreasing or truthfully flat
+  actual line.
 
 ## Start timing phases
 

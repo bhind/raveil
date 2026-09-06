@@ -59,6 +59,11 @@ the scheduled event. The corrective implementation exposes the current
 remainder in the Project card title, uses JST dates, and starts the actual line
 at the first observation instead of inventing earlier zero values; multi-day
 decrease verification and a real scheduled run remain required before Done.
+Corrected hosted manual run #34015052717 succeeded at merged revision
+`a45336c`; a read-only S-0003-date preview resolved 6 remaining Issues and 10
+remaining SP, confirming the next Iteration will not inherit S-0002's zero
+line. This verifies the hosted correction path, not the still-pending cron
+event or a live decrease between two S-0003 dates.
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`
