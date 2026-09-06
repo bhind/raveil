@@ -1,0 +1,28 @@
+name: Private Project burndown
+
+on:
+  schedule:
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: private-project-burndown
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require dedicated Project token
+        env:
+          RAVEIL_PROJECT_TOKEN: ${{ secrets.RAVEIL_PROJECT_TOKEN }}
+        run: test -n "$RAVEIL_PROJECT_TOKEN"
+      - name: Update private Project burndown
+        env:
+          GH_TOKEN: ${{ secrets.RAVEIL_PROJECT_TOKEN }}
+        run: python3 scripts/project_burndown.py --owner "${{ github.repository_owner }}" --project "${{ vars.RAVEIL_PROJECT_NUMBER }}" --apply

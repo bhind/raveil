@@ -622,6 +622,10 @@ scan found no generated evidence, build output, IDE state, credentials, or
 machine-local paths. The actual IntelliJ `Remote Debug` type was verified;
 IDE-driven attachment is not a Gate 0 claim.
 
+ADR-0092's later private Project burndown Action is reporting automation only.
+It does not build, test, release, collect experiment evidence, or reopen Gate
+0, and therefore does not change the deferred general hosted CI/CD boundary.
+
 ## Gate 1 — real Experience boundary
 
 State: **Falsified (closed negative)**
