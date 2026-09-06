@@ -2,7 +2,15 @@
 
 Last updated: 2026-09-06
 
-T-0173 has a locally verified immediate-add candidate, not main integration.
+T-0174 adds an independent bias-grid starter to new projects. Its descriptor
+and 324-word input file are separate from neighborhood. Local 257-test host
+verification and a fresh actual RTL +5 -> +7 edit/run/output/diff/Garden loop
+pass; final Linux/exact-candidate review and integration are pending. Both
+outputs equal the independent oracle and C++ fallback. It reuses ADR-0097
+without a new ISA or runtime boundary; no physical/performance claim follows.
+
+T-0173 is integrated through PR #170 as `230cbe9`; Issue #169 is closed and
+canonical Project completion succeeded after explicit owner authorization.
 ADR-0097 connects program v5 / descriptor v4 / trace v2 / snapshot request v6
 through compiler, C++ and Chisel execution, saved output/diff and Garden.
 The editable +5 -> +7 loop passes with 64/64 active outputs changed by +2;
@@ -14,9 +22,10 @@ arm64/nonroot passes the same suite with five C++-compiler-dependent skips.
 The RTL image separately compiled/executed the C++ runtime during actual
 simulation; it lacks Python, so a Python host-suite rerun there was unavailable.
 Vreji's sealed-exclusion and source-inventory regression requests are covered.
-Final exact-candidate audit and publication remain pending; a runtime refusal
-on public scope clarification has not been bypassed. Evidence is functional
-RTL simulation, not speed, physical support or owner ceremony acceptance.
+Vreji audited exact `aca544e` with no material concern. Earlier publication and
+Project-transition refusals were resolved by explicit subsequent owner approval,
+not bypassed. Evidence is functional RTL simulation, not speed, physical support
+or owner ceremony acceptance.
 
 The workspace repair combination, input-budget preflight, recipe discovery,
 saved-output reader and saved-project Garden are integrated in main. Current

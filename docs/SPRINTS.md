@@ -34,10 +34,10 @@ preserved output, diff and Garden semantics. Technical runs are retained in
 the September 6 log; rerun/show/explain at the ceremony and obtain the owner's
 disposition. Do not treat these pre-review runs as ceremony acceptance.
 After that disposition, record one Keep/Problem/Try and immediately pull the
-ready successor after usage/WIP checks. Current refinement recommends a
-separate snapshot-backed immediate starter so users need not overwrite the
-descriptor shared by the original neighborhood examples; it is not yet an
-admitted or implemented successor.
+ready successor after usage/WIP checks. The owner subsequently approved
+T-0174 for immediate delivery in S-0003: a separate snapshot-backed starter
+avoids overwriting the descriptor shared by the neighborhood examples.
+That task authorization does not accept or advance the review ceremony.
 
 GitHub Sprint Iterations retain Monday-through-Sunday reporting dates. Work
 does not wait for Monday when the preceding review and retrospective have

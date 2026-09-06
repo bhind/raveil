@@ -36,7 +36,7 @@ class ProjectWorkspaceTests(unittest.TestCase):
         self.assertEqual(json.loads((self.root / "project.json").read_text()), CONFIG)
         self.assertEqual(
             sorted(path.name for path in (self.root / "recipes").iterdir()),
-            ["files.json", "gemm.json", "logs.json", "neighborhood-data.json", "neighborhood.json"],
+            ["bias-grid.json", "files.json", "gemm.json", "logs.json", "neighborhood-data.json", "neighborhood.json"],
         )
         self.assertEqual(Project(self.root).runs(), "No runs yet. Try: project run logs")
         self.assertIn("Try adding an ERROR line", (self.root / "README.md").read_text())
@@ -57,7 +57,8 @@ class ProjectWorkspaceTests(unittest.TestCase):
             simulator.assert_not_called()
             gemm.assert_not_called()
         lines = out.getvalue().splitlines()
-        self.assertEqual(lines[:7], [
+        self.assertEqual(lines[:8], [
+            "bias-grid: graph-device; backends=rtl-sim",
             "custom: command; backends=native", "files: command; backends=native",
             "gemm: gemm; backends=native,sonatine-qemu", "large: gemm; backends=native",
             "logs: command; backends=native", "neighborhood-data: graph-device; backends=rtl-sim",

@@ -13,7 +13,7 @@ from raveil.cli import main
 from raveil.graph_device_dag import compile_descriptor, graph_oracle
 from raveil.graph_device_dynamic import run_snapshot
 from raveil.project import Project, digest, init_project
-from raveil.project_graph import compile_graph, output_text, sample_descriptor
+from raveil.project_graph import compile_graph, output_text, sample_descriptor, sample_bias_descriptor
 from raveil.riscv_stencil_signature import input_words
 
 
@@ -40,6 +40,62 @@ def host_fixture_runner(descriptor_bytes, seed, *, input_bytes=None):
 
 
 class ProjectGraphTests(unittest.TestCase):
+    def test_bias_starter_has_independent_editable_files(self):
+        recipe = json.loads((self.root / "recipes/bias-grid.json").read_text())
+        self.assertEqual(recipe, {"schema": "raveil.project-recipe/v2", "kind": "graph-device",
+                                  "descriptor": "bias-grid.json", "input": "bias-grid-data.json"})
+        shown = self.project.show("bias-grid")
+        self.assertIn("immediate=5", shown)
+        self.assertIn("Edit immediate within [0,4194303]", shown)
+        self.assertIn("descriptor file: inputs/bias-grid.json", shown)
+        self.assertIn("input file: inputs/bias-grid-data.json", shown)
+        original_graph = self.descriptor_path.read_bytes()
+        original_data = (self.root / "inputs/neighborhood-data.json").read_bytes()
+        generated = sample_bias_descriptor()
+        generated["nodes"][1]["immediate"] = 7
+        (self.root / "inputs/bias-grid.json").write_text(json.dumps(generated))
+        data = json.loads((self.root / "inputs/bias-grid-data.json").read_text())
+        data["words"][11] = 99
+        (self.root / "inputs/bias-grid-data.json").write_text(json.dumps(data))
+        self.assertEqual(self.descriptor_path.read_bytes(), original_graph)
+        self.assertEqual((self.root / "inputs/neighborhood-data.json").read_bytes(), original_data)
+        self.assertEqual(sample_bias_descriptor()["nodes"][1]["immediate"], 5)
+        self.assertEqual(compile_graph(sample_descriptor())["payload"][1], 3)
+        self.assertEqual(compile_graph(sample_bias_descriptor())["payload"][1], 5)
+        with self.assertRaisesRegex(ValueError, "new or empty"):
+            init_project(self.root)
+        self.assertEqual(json.loads((self.root / "inputs/bias-grid.json").read_text()), generated)
+
+    def test_bias_edit_run_diff_and_garden_keep_first_snapshot(self):
+        # Synthetic host runner: actual RTL acceptance is recorded separately.
+        def completed(*args, **kwargs):
+            result = host_fixture_runner(*args, **kwargs)
+            result["receipt"].update({
+                "status": "complete", "graph_id": "bias-grid", "affine": "compact",
+                "evidence_class": "rtl-simulation-functional", "performance": "not-measured",
+                "oracle_sha256": digest(result["output"]), "fallback_sha256": digest(result["output"]),
+            })
+            return result
+        def run():
+            return self.project.run("bias-grid", "rtl-sim", kernel=Path("unused"), qemu="unused", compiler="unused")
+        with patch("raveil.project_graph.run_snapshot", side_effect=completed):
+            first = run()
+            path = self.root / "inputs/bias-grid.json"
+            graph = json.loads(path.read_text())
+            graph["nodes"][1]["immediate"] = 7
+            path.write_text(json.dumps(graph))
+            second = run()
+        first_output = self.project.output(first["run_id"])
+        self.assertIn("16 17 18 19", first_output)
+        self.assertIn("18 19 20 21", self.project.output(second["run_id"]))
+        diff = self.project.diff(first["run_id"], second["run_id"])
+        self.assertIn("input: 0/324 words changed", diff)
+        self.assertIn("16 -> 18", diff)
+        from raveil.garden import render_key_session
+        with patch("raveil.project_graph.run_snapshot", side_effect=AssertionError("read-only")):
+            self.assertIn("unsigned immediate: 7", render_key_session(self.project.garden(second["run_id"]), "jq", 100))
+        self.assertEqual(self.project.output(first["run_id"]), first_output)
+
     def saved_view_run(self):
         def completed(*args, **kwargs):
             result = host_fixture_runner(*args, **kwargs)
