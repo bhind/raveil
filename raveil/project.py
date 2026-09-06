@@ -254,6 +254,7 @@ class Project:
             input_payload = (NativeWorkspace(self.root / "inputs").read_text(recipe["input"]).encode("utf-8")
                              if "input" in recipe else None)
             shown = project_graph.describe(descriptor, recipe.get("seed"), input_payload)
+            shown += f"\ndescriptor file: inputs/{recipe['descriptor']}"
             return shown + (f"\ninput file: inputs/{recipe['input']}" if input_payload is not None else "")
         if recipe["kind"] == "gemm":
             program = GraphProgram.create("gemm", recipe["m"], recipe["n"], recipe["k"])
@@ -396,13 +397,34 @@ class Project:
 
     def load_run(self, run_id: str) -> dict[str, Any]:
         prefix = f"runs/{name(run_id)}"
-        payload = self.workspace.read_text(f"{prefix}/record.json").encode()
+        payload = self.workspace.read_text(f"{prefix}/record.json", maximum=MAX_BYTES).encode()
         expected = self.workspace.read_text(f"{prefix}/record.sha256").strip()
         if digest(payload) != expected:
             raise ValueError(f"run {run_id}: record checksum mismatch")
         record = json.loads(payload, object_pairs_hook=_object)
         if type(record) is not dict or record.get("schema") != RUN_SCHEMA or record.get("run_id") != run_id:
             raise ValueError("invalid run record")
+        for key in ("recipe_name", "backend", "status", "evidence_class"):
+            if type(record.get(key)) is not str:
+                raise ValueError(f"invalid run record: {key} must be a string")
+        if record["backend"] not in {"native", "sonatine-qemu", "rtl-sim"} or record["status"] not in {"succeeded", "failed"}:
+            raise ValueError("invalid run record: unsupported backend or status")
+        for key in ("recipe", "inputs", "outputs", "artifacts", "implementation"):
+            if type(record.get(key)) is not dict:
+                raise ValueError(f"invalid run record: {key} must be an object")
+        for key in ("inputs", "outputs", "artifacts"):
+            if any(type(k) is not str or type(v) is not str for k, v in record[key].items()):
+                raise ValueError(f"invalid run record: {key} must map strings to strings")
+        if record["backend"] == "rtl-sim" and record["status"] == "succeeded":
+            if type(record["recipe"].get("descriptor")) is not str:
+                raise ValueError("invalid run record: Graph descriptor must be a string")
+            if record["inputs"].get("input_mode") == "snapshot":
+                input_name = record["recipe"].get("input")
+                if type(input_name) is not str or not input_name:
+                    raise ValueError("invalid run record: snapshot input must be a nonempty string")
+            for key in ("simulator_sha256", "rtl_manifest_sha256", "program_sha256"):
+                if type(record["implementation"].get(key)) is not str:
+                    raise ValueError(f"invalid run record: {key} must be a string")
         actual = tree(self.root / prefix)
         del actual["/record.json"]
         del actual["/record.sha256"]
@@ -441,6 +463,18 @@ class Project:
                 lines.append(f"{key}: {json.dumps(left[key], sort_keys=True)} -> {json.dumps(right[key], sort_keys=True)}")
         if graph_pair:
             roots = [self.root / "runs" / run_id for run_id in (first, second)]
+            if all(record["inputs"].get("input_mode") == "snapshot" for record in (left, right)):
+                packed_inputs = []
+                for root, record in zip(roots, (left, right)):
+                    input_name = record["recipe"]["input"]
+                    raw = NativeWorkspace(root / "inputs").read_text(input_name).encode("utf-8")
+                    if digest(raw) != record["artifacts"].get("/inputs/" + input_name):
+                        raise ValueError("saved Graph input changed during diff")
+                    packed = project_graph.input_bytes(raw)
+                    if digest(packed) != record["inputs"].get("input_sha256"):
+                        raise ValueError("saved Graph input differs from recorded execution input")
+                    packed_inputs.append(packed)
+                lines.extend(project_graph.describe_input_changes(*packed_inputs))
             descriptors = [read_json(NativeWorkspace(root / "inputs"), record["recipe"]["descriptor"])
                            for root, record in zip(roots, (left, right))]
             lines.extend(project_graph.describe_changes(*descriptors,
@@ -487,7 +521,7 @@ def command_project(args: argparse.Namespace) -> int:
     if action == "init":
         root = init_project(Path(args.directory))
         print(f"Created {root}")
-        print(f"One-time shell setup: export PATH=\"{REPOSITORY / 'scripts'}:$PATH\"")
+        print(f"One-time shell setup: export PATH={shlex.quote(str(REPOSITORY / 'scripts'))}:\"$PATH\"")
         print(f"Next: cd {shlex.quote(str(root))} && raveil project show logs")
         return 0
     if action == "console":

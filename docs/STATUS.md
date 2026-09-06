@@ -2,6 +2,31 @@
 
 Last updated: 2026-09-06
 
+T-0169 prepares a local Git candidate from current main `2a0ace3`, retaining
+T-0158 corrections and combining only T-0163/0165/0166/0167/0168. The five
+code/test files initially matched the previously tested disposable composite
+byte-for-byte. Integration review then found a missing snapshot input-name
+check between T-0163 and T-0166. The candidate adds that bounded validation
+and its CLI regression; prior composite results do not cover this correction.
+The corrected candidate passes 206 host tests including current main's
+burndown, queue and daily-processing suites.
+Exact `84ff1d3` passes independent audit and Linux/nonroot 206-test verification.
+Following the owner's later integration instruction, T-0169 resumes PR
+preparation; publication is not yet verified. T-0161 Garden and T-0164
+governance remain excluded, as do the separate T-0170/0171/0172 successors.
+
+The combined workspace explains actual descriptor/input paths and changed
+input words, rejects malformed metadata fields consumed by the diff path,
+quotes shell setup paths,
+and admits retained record reads up to 16 MiB under ADR-0096 while ordinary
+command text remains limited to 64 KiB. No Graph opcode or RTL is changed.
+The prior disposable verification passed 129 tests on macOS and Linux arm64,
+actual Native and Sonatine/QEMU GEMM with matching checksum and abstention,
+and two actual RTL runs with one input word changed (11 -> 13) and two active
+output cells changed (first 12 -> 14). Both matched oracle and fallback with
+identical program/RTL/simulator identities. Those are retained local host,
+emulation and RTL-functional receipts, not canonical-head or speed claims.
+
 T-0162 documents candidate-bound Librarian audit, delegated Product Owner
 acceptance and primary PM verification under ADR-0094. This is an operations
 procedure, not runtime permission enforcement. External denial remains binding;
