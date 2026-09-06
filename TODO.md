@@ -77,10 +77,13 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   [Issue #152](https://github.com/bhind/raveil/issues/152). Local candidate
   `fd30d31` is preserved; implementation integrated through T-0169 PR #159
   (`606a4f7`). This receipt-only closeout corrects stale publication metadata;
-  the existing malformed-record regression passes.
+  the existing malformed-record regression passes. Receipt PR #166 merged
+  as `1692790`; Issue #152 closed and canonical Project Done verified.
 - [x] **T-0167** Quote literal checkout paths in shell setup advice,
   [Issue #153](https://github.com/bhind/raveil/issues/153). Local candidate
-  `3e3222e` is preserved; included in T-0169, publication pending.
+  `3e3222e` is preserved; implementation integrated through T-0169 PR #159
+  (`606a4f7`). This receipt-only closeout corrects stale publication metadata;
+  the literal-path shell setup regression passes.
 - [x] **T-0168** Keep retained metadata readable within ADR-0096's bound,
   [Issue #154](https://github.com/bhind/raveil/issues/154). Local candidate
   `57fbe2e` is preserved; included in T-0169, publication pending. These
