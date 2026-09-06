@@ -1,5 +1,8 @@
 # Architecture Decision Records
 
+T-0173: [ADR-0097](ADR-0097-bounded-graph-immediate-addition.md) adds bounded
+unsigned immediate addition with explicit program/request/trace versioning.
+
 T-0164: [ADR-0095](ADR-0095-batched-owner-approval-requests.md) batches routine
 approval requests without changing permission or incident boundaries.
 

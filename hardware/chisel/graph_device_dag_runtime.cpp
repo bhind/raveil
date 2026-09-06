@@ -207,7 +207,7 @@ bool read_output(DeviceTransport& device, Output& output, std::ostream& errors) 
 
 bool valid_fallback_program(const Payload& payload) {
     if (payload[0] != 0x52504731U
-        || (payload[1] != 1U && payload[1] != 2U && payload[1] != 3U && payload[1] != 4U)
+        || (payload[1] < 1U || payload[1] > 5U)
         || payload[2] < 2U || payload[2] > 16U || payload[3] != 8U) return false;
     std::array<bool, 8> defined{};
     unsigned stores = 0U;
@@ -225,25 +225,27 @@ bool valid_fallback_program(const Payload& payload) {
             || row_bits == 31U;
         const bool signed_unit_column = column_bits == 0U
             || column_bits == 1U || column_bits == 31U;
-        const bool legacy_load = payload[1] != 3U && payload[1] != 4U && left <= 4U
+        const bool legacy_load = payload[1] < 3U && left <= 4U
             && (instruction & 0x003fffffU) == 0U;
-        const bool relative_load = (payload[1] == 3U || payload[1] == 4U) && signed_unit_row
+        const bool relative_load = (payload[1] >= 3U && payload[1] <= 5U) && signed_unit_row
             && signed_unit_column && (instruction & 0x00007fffU) == 0U;
         const bool load = opcode == 1U && index + 1U < payload[2]
             && (legacy_load || relative_load);
         const bool add = opcode == 2U && index + 1U < payload[2]
             && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
         const bool max_u32 = opcode == 4U
-            && (payload[1] == 2U || payload[1] == 3U || payload[1] == 4U)
+            && (payload[1] >= 2U && payload[1] <= 5U)
             && index + 1U < payload[2]
             && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
-        const bool mul_u32 = opcode == 5U && payload[1] == 4U
+        const bool mul_u32 = opcode == 5U && (payload[1] == 4U || payload[1] == 5U)
             && index + 1U < payload[2]
             && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
+        const bool immediate = opcode == 6U && payload[1] == 5U
+            && index + 1U < payload[2] && defined[left];
         const bool store = opcode == 3U && index + 1U == payload[2]
             && (instruction & 0x01ffffffU) == 0U && defined[destination];
-        if (!(load || add || max_u32 || mul_u32 || store)) return false;
-        if (load || add || max_u32 || mul_u32) defined[destination] = true;
+        if (!(load || add || max_u32 || mul_u32 || immediate || store)) return false;
+        if (load || add || max_u32 || mul_u32 || immediate) defined[destination] = true;
         if (store) ++stores;
     }
     for (std::size_t index = 28U; index < payload.size(); ++index)
@@ -273,7 +275,7 @@ bool fallback(
                 const std::uint32_t destination = (instruction >> 25U) & 7U;
                 if (opcode == 1U) {
                     std::uint32_t address = center;
-                    if (graph.payload[1] == 3U || graph.payload[1] == 4U) {
+                    if (graph.payload[1] >= 3U && graph.payload[1] <= 5U) {
                         const auto signed_five = [](std::uint32_t value) {
                             return (value & 16U) != 0U
                                 ? static_cast<std::int32_t>(value) - 32
@@ -307,6 +309,9 @@ bool fallback(
                 } else if (opcode == 5U) {
                     values[destination] = values[(instruction >> 22U) & 7U]
                         * values[(instruction >> 19U) & 7U];
+                } else if (opcode == 6U) {
+                    values[destination] = values[(instruction >> 22U) & 7U]
+                        + (instruction & 0x003fffffU);
                 } else if (opcode == 3U) {
                     output[row * output_stride + column] = values[destination];
                 } else return false;

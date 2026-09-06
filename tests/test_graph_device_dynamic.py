@@ -355,7 +355,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         parser = (ROOT / "linux/src/raveil_graph_device_dynamic_request.cpp").read_text()
         bridge = (ROOT / "hardware/chisel/graph_device_axi4lite_dynamic_verilator.cpp").read_text()
         installer = (ROOT / "hardware/chisel/GraphDeviceProgramInstaller.scala").read_text()
-        self.assertIn("program_version == kVersionV2", parser)
+        self.assertIn("program_version >= kVersionV2 && program_version <= 5U", parser)
         self.assertIn("opcode == 4U", parser)
         self.assertIn("dynamic program digest is invalid", parser)
         self.assertLess(bridge.index("read_dynamic_graph_device_request"), bridge.index("VGraphDeviceAxi4LiteTop top"))
@@ -363,7 +363,7 @@ class GraphDeviceDynamicTests(unittest.TestCase):
         self.assertIn("payloadVersion === 2.U", installer)
         fallback = (ROOT / "hardware/chisel/graph_device_dag_runtime.cpp").read_text()
         self.assertIn("bool valid_fallback_program", fallback)
-        self.assertIn("payload[1] == 2U || payload[1] == 3U", fallback)
+        self.assertIn("payload[1] >= 2U && payload[1] <= 5U", fallback)
         self.assertIn("relativeInputAddress", (
             ROOT / "hardware/chisel/chipyard-overlay/RaveilStaticStencilCore.scala"
         ).read_text())
@@ -380,6 +380,12 @@ class GraphDeviceDynamicTests(unittest.TestCase):
             expected = _expected_runner_source_manifest(verify(sealed, ROOT)).decode("ascii")
         self.assertIn("orchestration/contracts/graph_device_dynamic_request_v2.json ", expected)
         self.assertIn("orchestration/contracts/graph_device_program_v2.json ", expected)
+        for name in ("graph_device_dynamic_request_v5.json", "graph_device_dynamic_request_v6.json",
+                     "graph_device_program_v5.json"):
+            self.assertIn(f"contracts/{name}", SOURCE_PATHS)
+            self.assertIn(f"orchestration/contracts/{name} ", expected)
+            runner = (ROOT / "hardware/chisel/run-graph-device-axi4lite-dynamic-in-container.sh").read_text()
+            self.assertIn(f"contracts/{name}", runner)
 
     def test_cxx_host_admission_rejects_digest_before_model(self):
         compiler = shutil.which("c++") or shutil.which("g++")

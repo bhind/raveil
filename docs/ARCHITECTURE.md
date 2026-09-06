@@ -6,6 +6,11 @@ Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
+ADR-0097 adds program v5 unsigned 22-bit immediate addition, descriptor v4
+and trace v2. Snapshot-only request v6 carries this bounded program to the
+same simulator execution path. Garden validates/displays the immediate;
+sealed admission, memory windows and capacity are unchanged.
+
 ADR-0093 connects verified project snapshots to a separate in-memory Garden
 view. The view validates retained lowering but treats historical execution
 receipts as references, never as a newly authenticated evidence envelope.

@@ -28,6 +28,17 @@ read-only preview and add `--apply` only for the authorized Draft update.
 
 ## Cadence
 
+S-0003 September 12 review preparation: T-0173's representative increment is
+editing an immediate from 5 to 7, rerunning a snapshot Graph, then showing
+preserved output, diff and Garden semantics. Technical runs are retained in
+the September 6 log; rerun/show/explain at the ceremony and obtain the owner's
+disposition. Do not treat these pre-review runs as ceremony acceptance.
+After that disposition, record one Keep/Problem/Try and immediately pull the
+ready successor after usage/WIP checks. Current refinement recommends a
+separate snapshot-backed immediate starter so users need not overwrite the
+descriptor shared by the original neighborhood examples; it is not yet an
+admitted or implemented successor.
+
 GitHub Sprint Iterations retain Monday-through-Sunday reporting dates. Work
 does not wait for Monday when the preceding review and retrospective have
 closed and the next item is ready.

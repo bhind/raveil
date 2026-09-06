@@ -8,6 +8,12 @@ prototype does not waive an earlier correctness or reproducibility gate.
 
 ## 2026-09-05 operational priority reconciliation
 
+2026-09-06: T-0173 / ADR-0097 extends the editable simulator Graph with one
+bounded immediate-add operation. Its exit is changed-constant execution,
+oracle/fallback agreement and saved output/diff/Garden, not a larger CPU,
+physical-device readiness or a performance gate. The September 12 owner
+Sprint Review remains distinct from technical task integration.
+
 2026-09-06: after T-0159 integration, T-0161 connects saved Graph runs to
 read-only Garden. The product sequence is edit, run, inspect the saved run;
 opening the view never repeats execution or advances a hardware/research gate.

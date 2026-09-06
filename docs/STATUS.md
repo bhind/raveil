@@ -2,6 +2,22 @@
 
 Last updated: 2026-09-06
 
+T-0173 has a locally verified immediate-add candidate, not main integration.
+ADR-0097 connects program v5 / descriptor v4 / trace v2 / snapshot request v6
+through compiler, C++ and Chisel execution, saved output/diff and Garden.
+The editable +5 -> +7 loop passes with 64/64 active outputs changed by +2;
+input bytes are unchanged and prior output is preserved. Both runs agree with
+independent oracle and C++ fallback. A same-simulator pair passes maximum
+immediate overflow with mixed ADD/MAX/MUL and the old v4 MUL control.
+Final code/test candidate `098d2d3` passes 255 macOS tests. Offline Linux
+arm64/nonroot passes the same suite with five C++-compiler-dependent skips.
+The RTL image separately compiled/executed the C++ runtime during actual
+simulation; it lacks Python, so a Python host-suite rerun there was unavailable.
+Vreji's sealed-exclusion and source-inventory regression requests are covered.
+Final exact-candidate audit and publication remain pending; a runtime refusal
+on public scope clarification has not been bypassed. Evidence is functional
+RTL simulation, not speed, physical support or owner ceremony acceptance.
+
 The workspace repair combination, input-budget preflight, recipe discovery,
 saved-output reader and saved-project Garden are integrated in main. Current
 code passed 220 tests on macOS and offline Linux/nonroot. A fresh Native

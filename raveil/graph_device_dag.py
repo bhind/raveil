@@ -26,21 +26,25 @@ GRAPH_DIRECTORY = "contracts/graph_device_dags"
 GRAPH_SCHEMA = "raveil.graph-device-dag/v1"
 GRAPH_SCHEMA_V2 = "raveil.graph-device-dag/v2"
 GRAPH_SCHEMA_V3 = "raveil.graph-device-dag/v3"
+GRAPH_SCHEMA_V4 = "raveil.graph-device-dag/v4"
 ARTIFACT_SCHEMA = "raveil.graph-device-dag-artifact/v1"
 RECEIPT_SCHEMA = "raveil.graph-device-dag-receipt/v1"
 LOWERING_TRACE_SCHEMA = "raveil.graph-device-lowering-trace/v1"
+LOWERING_TRACE_SCHEMA_V2 = "raveil.graph-device-lowering-trace/v2"
 EVIDENCE_CLASS = "rtl-simulation-functional"
 MAGIC = 0x52504731
 VERSION = 1
 MAX_U32 = 4
 MUL_U32 = 5
+ADD_IMM_U32 = 6
+MAX_IMMEDIATE = (1 << 22) - 1
 PROGRAM_WORDS = 32
 PROGRAM_CAPACITY = 16
 VALUE_REGISTERS = 8
 LOAD_U32 = 1
 ADD_U32 = 2
 STORE_U32 = 3
-OPS = {"LOAD_U32", "ADD_U32", "MAX_U32", "MUL_U32", "STORE_U32"}
+OPS = {"LOAD_U32", "ADD_U32", "MAX_U32", "MUL_U32", "ADD_IMM_U32", "STORE_U32"}
 SELECTORS = {"center": 0, "north": 1, "south": 2, "west": 3, "east": 4}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,30}$")
@@ -56,6 +60,7 @@ SOURCE_PATHS = (
     "contracts/graph_device_program_v2.json",
     "contracts/graph_device_program_v3.json",
     "contracts/graph_device_program_v4.json",
+    "contracts/graph_device_program_v5.json",
     *GRAPH_PATHS,
     "raveil/graph_device_dag.py",
     "raveil/graph_device_affine.py",
@@ -146,7 +151,7 @@ def source_id(root: Path | None = None) -> str:
 def _dependencies(node: dict[str, Any]) -> list[str]:
     if node["op"] in {"ADD_U32", "MAX_U32", "MUL_U32"}:
         return list(node["inputs"])
-    if node["op"] == "STORE_U32":
+    if node["op"] in {"STORE_U32", "ADD_IMM_U32"}:
         return [node["input"]]
     return []
 
@@ -174,7 +179,7 @@ def _scheduled_nodes(nodes: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def validate_descriptor(value: dict[str, Any]) -> None:
     if set(value) != {"schema", "graph_id", "affine", "nodes"} or \
-            value.get("schema") not in {GRAPH_SCHEMA, GRAPH_SCHEMA_V2, GRAPH_SCHEMA_V3}:
+            value.get("schema") not in {GRAPH_SCHEMA, GRAPH_SCHEMA_V2, GRAPH_SCHEMA_V3, GRAPH_SCHEMA_V4}:
         raise GraphDeviceDagError("exact descriptor keys and schema are required")
     if not isinstance(value.get("graph_id"), str) or IDENTIFIER_RE.fullmatch(value["graph_id"]) is None:
         raise GraphDeviceDagError("graph_id must be a bounded ASCII identifier")
@@ -200,15 +205,16 @@ def validate_descriptor(value: dict[str, Any]) -> None:
                 node["id"] in identifiers or node.get("op") not in OPS:
             raise GraphDeviceDagError("node identity or opcode is invalid")
         op = node["op"]
-        if op == "MUL_U32" and value["schema"] != GRAPH_SCHEMA_V3:
+        if op == "MUL_U32" and value["schema"] not in {GRAPH_SCHEMA_V3, GRAPH_SCHEMA_V4}:
             raise GraphDeviceDagError("MUL_U32 requires graph schema v3")
         if op == "LOAD_U32":
             if value["schema"] == GRAPH_SCHEMA and (
                 set(node) != {"id", "op", "address"}
+                or not isinstance(node["address"], str)
                 or node["address"] not in SELECTORS
             ):
                 raise GraphDeviceDagError("LOAD_U32 is invalid")
-            if value["schema"] in {GRAPH_SCHEMA_V2, GRAPH_SCHEMA_V3} and (
+            if value["schema"] in {GRAPH_SCHEMA_V2, GRAPH_SCHEMA_V3, GRAPH_SCHEMA_V4} and (
                 set(node) != {"id", "op", "address"}
                 or not isinstance(node["address"], dict)
                 or set(node["address"]) != {"row_delta", "column_delta"}
@@ -219,6 +225,13 @@ def validate_descriptor(value: dict[str, Any]) -> None:
                 )
             ):
                 raise GraphDeviceDagError("LOAD_U32 relative address is invalid")
+        elif op == "ADD_IMM_U32":
+            if value["schema"] != GRAPH_SCHEMA_V4 or \
+                    set(node) != {"id", "op", "input", "immediate"} or \
+                    not isinstance(node["input"], str) or \
+                    type(node["immediate"]) is not int or \
+                    not 0 <= node["immediate"] <= MAX_IMMEDIATE:
+                raise GraphDeviceDagError("ADD_IMM_U32 requires schema v4 and an unsigned 22-bit immediate")
         elif op in {"ADD_U32", "MAX_U32", "MUL_U32"}:
             if set(node) != {"id", "op", "inputs"} or \
                     not isinstance(node["inputs"], list) or len(node["inputs"]) != 2 or \
@@ -279,6 +292,18 @@ def encode_store(source: int) -> int:
     return (STORE_U32 << 28) | (source << 25)
 
 
+def encode_add_immediate(destination: int, source: int, immediate: int) -> int:
+    return (ADD_IMM_U32 << 28) | (destination << 25) | (source << 22) | immediate
+
+
+def _program_version(value: dict[str, Any]) -> int:
+    return (5 if value["schema"] == GRAPH_SCHEMA_V4
+            else 4 if value["schema"] == GRAPH_SCHEMA_V3
+            else 3 if value["schema"] == GRAPH_SCHEMA_V2
+            else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
+            else VERSION)
+
+
 def _lowering_trace(
     value: dict[str, Any],
     instructions: Sequence[int],
@@ -313,18 +338,14 @@ def _lowering_trace(
                 if produces_value else None
             ),
             "release_after_index": last_use,
+            **({"immediate": node.get("immediate")} if _program_version(value) == 5 else {}),
         })
     digest = _sha256(_word_bytes([len(instructions), *instructions]))
     return {
-        "schema": LOWERING_TRACE_SCHEMA,
+        "schema": LOWERING_TRACE_SCHEMA_V2 if _program_version(value) == 5 else LOWERING_TRACE_SCHEMA,
         "graph_id": value["graph_id"],
         "descriptor_canonical_sha256": _sha256(_canonical(value)),
-        "program_version": (
-            4 if value["schema"] == GRAPH_SCHEMA_V3
-            else 3 if value["schema"] == GRAPH_SCHEMA_V2
-            else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
-            else VERSION
-        ),
+        "program_version": _program_version(value),
         "instruction_count": len(instructions),
         "program_sha256": digest,
         "instructions": entries,
@@ -340,15 +361,11 @@ def validate_lowering_trace(
         "schema", "graph_id", "descriptor_canonical_sha256", "program_version",
         "instruction_count", "program_sha256", "instructions",
     }
-    if set(trace) != expected_keys or trace.get("schema") != LOWERING_TRACE_SCHEMA \
+    trace_schema = LOWERING_TRACE_SCHEMA_V2 if _program_version(value) == 5 else LOWERING_TRACE_SCHEMA
+    if set(trace) != expected_keys or trace.get("schema") != trace_schema \
             or trace.get("graph_id") != value["graph_id"] \
             or trace.get("descriptor_canonical_sha256") != _sha256(_canonical(value)) \
-            or trace.get("program_version") != (
-                4 if value["schema"] == GRAPH_SCHEMA_V3
-                else 3 if value["schema"] == GRAPH_SCHEMA_V2
-                else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
-                else VERSION
-            ) \
+            or trace.get("program_version") != _program_version(value) \
             or trace.get("instruction_count") != len(instructions):
         raise GraphDeviceDagError("lowering trace identity is invalid")
     digest = _sha256(_word_bytes([len(instructions), *instructions]))
@@ -368,9 +385,15 @@ def validate_lowering_trace(
         "encoded_word", "source_registers", "destination_register",
         "definition_index", "last_use_index", "live_range", "release_after_index",
     }
+    if _program_version(value) == 5:
+        entry_keys.add("immediate")
     for index, (node, word, entry) in enumerate(zip(nodes, instructions, entries)):
         if not isinstance(entry, dict) or set(entry) != entry_keys:
             raise GraphDeviceDagError("lowering trace instruction fields are invalid")
+        if _program_version(value) == 5 and (
+                entry["immediate"] != node.get("immediate") or
+                type(entry["immediate"]) is not type(node.get("immediate"))):
+            raise GraphDeviceDagError("lowering trace immediate is invalid")
         dependencies = _dependencies(node)
         if entry["index"] != index or entry["node_id"] != node["id"] \
                 or entry["op"] != node["op"] or entry["dependencies"] != dependencies \
@@ -402,6 +425,8 @@ def validate_lowering_trace(
             expected_word = encode_max(destination, *entry["source_registers"])
         elif node["op"] == "MUL_U32":
             expected_word = encode_mul(destination, *entry["source_registers"])
+        elif node["op"] == "ADD_IMM_U32":
+            expected_word = encode_add_immediate(destination, entry["source_registers"][0], node["immediate"])
         else:
             expected_word = encode_store(entry["source_registers"][0])
         if word != expected_word:
@@ -444,16 +469,13 @@ def compile_descriptor(value: dict[str, Any]) -> dict[str, Any]:
             instructions.append(encode_add(destination, *source_registers))
         elif op == "MAX_U32":
             instructions.append(encode_max(destination, *source_registers))
+        elif op == "ADD_IMM_U32":
+            instructions.append(encode_add_immediate(destination, source_registers[0], node["immediate"]))
         else:
             instructions.append(encode_mul(destination, *source_registers))
     digest = _sha256(_word_bytes([len(instructions), *instructions]))
     digest_words = list(struct.unpack("<8I", bytes.fromhex(digest)))
-    version = (
-        4 if value["schema"] == GRAPH_SCHEMA_V3
-        else 3 if value["schema"] == GRAPH_SCHEMA_V2
-        else 2 if any(node["op"] == "MAX_U32" for node in value["nodes"])
-        else VERSION
-    )
+    version = _program_version(value)
     payload = [MAGIC, version, len(instructions), VALUE_REGISTERS,
                *digest_words, *instructions,
                *([0] * (PROGRAM_CAPACITY - len(instructions))), 0, 0, 0, 0]
@@ -513,6 +535,8 @@ def graph_oracle(value: dict[str, Any], words: Sequence[int]) -> list[int]:
                     values[node["id"]] = max(values[item] for item in node["inputs"])
                 elif node["op"] == "MUL_U32":
                     values[node["id"]] = (values[node["inputs"][0]] * values[node["inputs"][1]]) & 0xFFFFFFFF
+                elif node["op"] == "ADD_IMM_U32":
+                    values[node["id"]] = (values[node["input"]] + node["immediate"]) & 0xFFFFFFFF
                 else:
                     output[row * affine["output_stride"] + column] = values[node["input"]]
     return output
@@ -526,7 +550,7 @@ def _validate_fallback_program(program: dict[str, Any]) -> list[int]:
             any(type(word) is not int or not 0 <= word <= 0xffffffff for word in payload) or \
             not isinstance(instructions, list):
         raise GraphDeviceDagError("fallback program payload is invalid")
-    if payload[0] != MAGIC or payload[1] not in {1, 2, 3, 4} or payload[3] != VALUE_REGISTERS:
+    if payload[0] != MAGIC or payload[1] not in {1, 2, 3, 4, 5} or payload[3] != VALUE_REGISTERS:
         raise GraphDeviceDagError("fallback program header is invalid")
     count = payload[2]
     if type(count) is not int or not 2 <= count <= PROGRAM_CAPACITY or \
@@ -556,9 +580,13 @@ def _validate_fallback_program(program: dict[str, Any]) -> list[int]:
         elif opcode in {ADD_U32, MAX_U32, MUL_U32}:
             left, right = (word >> 22) & 7, (word >> 19) & 7
             if index == count - 1 or word & ((1 << 19) - 1) or left not in defined or right not in defined or \
-                    ((opcode == MAX_U32 and payload[1] not in {2, 3, 4}) or
-                     (opcode == MUL_U32 and payload[1] != 4)):
+                    ((opcode == MAX_U32 and payload[1] not in {2, 3, 4, 5}) or
+                     (opcode == MUL_U32 and payload[1] not in {4, 5})):
                 raise GraphDeviceDagError("fallback arithmetic instruction is invalid")
+            defined.add(destination)
+        elif opcode == ADD_IMM_U32:
+            if payload[1] != 5 or index == count - 1 or ((word >> 22) & 7) not in defined:
+                raise GraphDeviceDagError("fallback immediate instruction is invalid")
             defined.add(destination)
         elif opcode == STORE_U32:
             if index != count - 1 or word & ((1 << 25) - 1) or destination not in defined:
@@ -603,6 +631,8 @@ def software_fallback(program: dict[str, Any], words: Sequence[int]) -> list[int
                                               values[(instruction >> 19) & 7])
                 elif opcode == MUL_U32:
                     values[destination] = (values[(instruction >> 22) & 7] * values[(instruction >> 19) & 7]) & 0xFFFFFFFF
+                elif opcode == ADD_IMM_U32:
+                    values[destination] = (values[(instruction >> 22) & 7] + (instruction & MAX_IMMEDIATE)) & 0xFFFFFFFF
                 elif opcode == STORE_U32:
                     output[row * affine["output_stride"] + column] = values[destination]
                 else:
@@ -636,7 +666,7 @@ def expected_transactions(program: dict[str, Any], words: Sequence[int]) -> list
                 elif opcode == STORE_U32:
                     result.append({"write": True, "address": 324 + output_index,
                                    "data": oracle[output_index]})
-                elif opcode in {ADD_U32, MAX_U32, MUL_U32}:
+                elif opcode in {ADD_U32, MAX_U32, MUL_U32, ADD_IMM_U32}:
                     pass
                 else:
                     raise GraphDeviceDagError("program contains an unknown opcode")

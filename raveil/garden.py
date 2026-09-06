@@ -31,7 +31,7 @@ MAX_RENDER_WIDTH = 240
 FUSION_TRANSFORM = "fuse:bias_add+relu"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,30}$")
-DYNAMIC_OPCODES = {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5}
+DYNAMIC_OPCODES = {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5, "ADD_IMM_U32": 6}
 DYNAMIC_SELECTORS = {"center": 0, "north": 1, "south": 2, "west": 3, "east": 4}
 DYNAMIC_MAGIC = 0x52504731
 DYNAMIC_PAYLOAD_WORDS = 32
@@ -350,6 +350,7 @@ class DynamicLoweringInstruction:
     last_use_index: int | None
     live_range: tuple[int, int] | None
     release_after_index: int | None
+    immediate: int | None = None
 
 
 @dataclass(frozen=True)
@@ -390,7 +391,8 @@ class GardenDynamicExplanation:
             },
             "dynamic lowering trace",
         )
-        if lowering["schema"] != LOWERING_TRACE_SCHEMA:
+        expected_schema = "raveil.graph-device-lowering-trace/v2" if lowering["program_version"] == 5 else LOWERING_TRACE_SCHEMA
+        if lowering["schema"] != expected_schema:
             raise ValueError("unsupported dynamic lowering trace schema")
         lowering_trace_sha256 = _require_sha256(
             raw["lowering_trace_sha256"], "dynamic lowering trace identity",
@@ -405,7 +407,7 @@ class GardenDynamicExplanation:
             lowering["descriptor_canonical_sha256"], "canonical descriptor identity",
         )
         version = _require_integer(
-            lowering["program_version"], "dynamic program version", minimum=1, maximum=4,
+            lowering["program_version"], "dynamic program version", minimum=1, maximum=5,
         )
         count = _require_integer(
             lowering["instruction_count"], "dynamic instruction count",
@@ -437,6 +439,8 @@ class GardenDynamicExplanation:
             "definition_index", "last_use_index", "live_range", "release_after_index",
         }
         parsed: list[DynamicLoweringInstruction] = []
+        if version == 5:
+            entry_keys.add("immediate")
         known_ids: set[str] = set()
         allocations: dict[str, int] = {}
         stores = 0
@@ -444,6 +448,7 @@ class GardenDynamicExplanation:
             if type(value) is not dict:
                 raise ValueError("dynamic lowering instruction must be an object")
             _require_exact_keys(value, entry_keys, "dynamic lowering instruction")
+            immediate = value.get("immediate")
             node_id = _require_identifier(value["node_id"], "dynamic node id")
             if node_id in known_ids:
                 raise ValueError("dynamic node identifiers must be unique")
@@ -454,6 +459,12 @@ class GardenDynamicExplanation:
                 raise ValueError("MAX_U32 requires dynamic program version 2")
             if version < 4 and op == "MUL_U32":
                 raise ValueError("MUL_U32 requires dynamic program version 4")
+            if op == "ADD_IMM_U32":
+                if version != 5:
+                    raise ValueError("ADD_IMM_U32 requires dynamic program version 5")
+                immediate = _require_integer(immediate, "unsigned immediate", maximum=(1 << 22) - 1)
+            elif immediate is not None:
+                raise ValueError("only ADD_IMM_U32 may carry an immediate")
             dependencies_value = value["dependencies"]
             if type(dependencies_value) is not list \
                     or any(type(item) is not str for item in dependencies_value):
@@ -482,6 +493,9 @@ class GardenDynamicExplanation:
             elif op in {"ADD_U32", "MAX_U32", "MUL_U32"}:
                 if len(dependencies) != 2 or selector is not None:
                     raise ValueError("dynamic binary operation topology is invalid")
+            elif op == "ADD_IMM_U32":
+                if len(dependencies) != 1 or selector is not None:
+                    raise ValueError("dynamic immediate operation topology is invalid")
             else:
                 stores += 1
                 if len(dependencies) != 1 or selector is not None or index != count - 1:
@@ -518,6 +532,9 @@ class GardenDynamicExplanation:
                     (DYNAMIC_OPCODES[op] << 28) | (destination << 25)
                     | (source_registers[0] << 22) | (source_registers[1] << 19)
                 ) if destination is not None and len(source_registers) == 2 else -1
+            elif op == "ADD_IMM_U32":
+                expected_word = ((6 << 28) | (destination << 25)
+                                 | (source_registers[0] << 22) | immediate) if destination is not None else -1
             else:
                 expected_word = (
                     (DYNAMIC_OPCODES[op] << 28) | (source_registers[0] << 25)
@@ -571,7 +588,7 @@ class GardenDynamicExplanation:
             parsed.append(DynamicLoweringInstruction(
                 index, node_id, op, dependencies, selector,
                 fan_out, consumers, word, source_registers, destination, definition,
-                last_use, live_range, release,
+                last_use, live_range, release, immediate,
             ))
             known_ids.add(node_id)
         if stores != 1:
@@ -1087,6 +1104,11 @@ class GardenDynamicBrowser:
                 "center = (output row + 1) * input stride + output column + 1",
                 "offsets are uint32-word positions, not byte addresses",
             ])
+        elif selected.op == "ADD_IMM_U32":
+            inspector.extend([
+                f"unsigned immediate: {selected.immediate}",
+                "result = (source + immediate) modulo 2^32; overflow wraps",
+            ])
         elif selected.op == "MUL_U32":
             inspector.extend([
                 "unsigned multiply: result = (left * right) modulo 2^32",
@@ -1169,6 +1191,8 @@ class GardenProjectBrowser(GardenDynamicBrowser):
                 lines.append(f"input selector: {selected.selector}")
         if selected.op == "MUL_U32":
             lines.append("unsigned product modulo 2^32; low 32 bits, not saturation")
+        if selected.op == "ADD_IMM_U32":
+            lines.append(f"unsigned immediate: {selected.immediate}; result = (source + immediate) modulo 2^32")
         lines.extend(f"saved {key}: {value}" for key, value in view.identities.items())
         lines.extend(["performance=not-measured; missing provenance is not synthesized",
                       "authority: observe-only execute=no mutate=no approve=no promote=no",

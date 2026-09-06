@@ -90,6 +90,8 @@ def describe(descriptor: dict[str, Any], seed: int | None = None, input_payload:
     for node in descriptor["nodes"]:
         sources = node.get("inputs", [node["input"]] if "input" in node else [])
         suffix = f" address={json.dumps(node['address'], sort_keys=True)}" if "address" in node else ""
+        if "immediate" in node:
+            suffix += f" immediate={node['immediate']} (unsigned; addition modulo 2^32)"
         lines.append(f"  {node['id']}: {node['op']} <- {', '.join(sources) or '(input grid)'}{suffix}")
     provenance = (f"inputs: deterministic uint32 grid generated from seed={seed}" if input_payload is None
                   else describe_input(input_payload))
