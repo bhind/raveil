@@ -4,12 +4,14 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0174** Independent snapshot-backed bias-grid starter,
+- [x] **T-0174** Independent snapshot-backed bias-grid starter,
   [Issue #171](https://github.com/bhind/raveil/issues/171), S-0003, 1 SP.
   Owner approved implementation, Project operation and normal integration.
   Add discoverable recipe, independent descriptor/input, edit/rerun/output/
   diff/Garden verification without changing existing examples or ISA. Primary
-  owns implementation; read-only audit and sol-low publication follow.
+  owns implementation. Vreji audited and sol-low published exact `2f2bdcd`;
+  PR #172 merged as `ae717f9`, Issue #171 closed and canonical Project Done
+  verified. September 12 Sprint Review remains separate.
 
 - [x] **T-0173** Editable bounded immediate addition end to end,
   [Issue #169](https://github.com/bhind/raveil/issues/169), S-0003, 3 SP.
