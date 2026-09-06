@@ -6,9 +6,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 - [ ] **T-0173** Editable bounded immediate addition end to end,
   [Issue #169](https://github.com/bhind/raveil/issues/169), S-0003, 3 SP.
-  Primary owns the isolated implementation under ADR-0097. Complete host
+  Primary owns the isolated implementation under ADR-0097. Local host
   negative tests, offline RTL oracle/fallback agreement and changed-constant
-  output/diff/Garden before technical review and integration. Keep sealed
+  output/diff/Garden pass; exact review/publication remain pending. Keep sealed
   admission unchanged. September 12 owner review remains a separate ceremony;
   prepare its executable demonstration and successor without claiming approval.
 
