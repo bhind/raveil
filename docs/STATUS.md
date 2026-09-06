@@ -53,7 +53,12 @@ items, 43 total SP, and zero remaining items/SP. No Pages site, visibility
 change, claim, or Gate transition was introduced. The dedicated Project secret
 is installed; hosted run #34003784228 succeeded with repository contents read
 permission, masked the credential, and produced an idempotent private Draft
-update. The secret value is not stored in the repository.
+update. The secret value is not stored in the repository. T-0158 is reopened:
+that run verified transport and same-day idempotence, not a moving burndown or
+the scheduled event. The corrective implementation exposes the current
+remainder in the Project card title, uses JST dates, and starts the actual line
+at the first observation instead of inventing earlier zero values; multi-day
+decrease verification and a real scheduled run remain required before Done.
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`

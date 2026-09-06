@@ -8,13 +8,15 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 import json
 import subprocess
 from typing import Any, Callable, Sequence
+from zoneinfo import ZoneInfo
 
 
 TITLE = "Raveil iteration burndown"
+JST = ZoneInfo("Asia/Tokyo")
 START = "<!-- raveil-burndown-data:"
 END = ":raveil-burndown-data -->"
 ACTIVE = {"Backlog", "Ready", "In Progress", "Blocked", "Review"}
@@ -112,12 +114,12 @@ def snapshot(project: dict[str, Any], today: date) -> tuple[dict[str, Any], dict
     selected, draft_id, old_body = [], "", ""
     for node in project["items"]["nodes"]:
         content = node.get("content") or {}
-        if content.get("__typename") == "DraftIssue" and content.get("title") == TITLE:
+        if content.get("__typename") == "DraftIssue" and content.get("title", "").startswith(TITLE):
             if draft_id:
                 raise BurndownError("duplicate burndown drafts")
             draft_id, old_body = content["id"], content.get("body") or ""
         value = node.get("sprint") or {}
-        if value.get("title") == iteration["title"] and content.get("title") != TITLE:
+        if value.get("title") == iteration["title"] and not content.get("title", "").startswith(TITLE):
             selected.append(node)
     status = Counter((node.get("status") or {}).get("name") or "Unset" for node in selected)
     work = Counter((node.get("work") or {}).get("name") or "Unset" for node in selected)
@@ -140,6 +142,13 @@ def merge(history: list[dict[str, Any]], point: dict[str, Any]) -> list[dict[str
     return sorted(kept, key=lambda row: (row["iteration"], row["date"]))[-180:]
 
 
+def draft_title(point: dict[str, Any]) -> str:
+    return (
+        f"{TITLE} — {point['iteration']}: {point['remainingIssues']} issues / "
+        f"{point['remainingPoints']:g} SP ({point['date']})"
+    )
+
+
 def render(iteration: dict[str, Any], history: list[dict[str, Any]]) -> str:
     rows = [row for row in history if row["iteration"] == iteration["title"]]
     start = date.fromisoformat(iteration["startDate"])
@@ -148,11 +157,15 @@ def render(iteration: dict[str, Any], history: list[dict[str, Any]]) -> str:
     initial_points = max((row["scopePoints"] for row in rows), default=0)
     labels, issues, points, ideal_issues, ideal_points = [], [], [], [], []
     by_day = {row["date"]: row for row in rows}
-    last = rows[0] if rows else {"remainingIssues": 0, "remainingPoints": 0}
-    for offset in range(duration):
+    first_observed = date.fromisoformat(rows[0]["date"])
+    last_observed = date.fromisoformat(rows[-1]["date"])
+    first_offset = max(0, (first_observed - start).days)
+    last_offset = min(duration - 1, (last_observed - start).days)
+    last = rows[0]
+    for offset in range(first_offset, last_offset + 1):
         day = start + timedelta(days=offset)
         last = by_day.get(day.isoformat(), last)
-        labels.append(day.strftime("%a")); issues.append(last["remainingIssues"]); points.append(last["remainingPoints"])
+        labels.append(day.strftime("%m-%d")); issues.append(last["remainingIssues"]); points.append(last["remainingPoints"])
         fraction = (duration - 1 - offset) / max(duration - 1, 1)
         ideal_issues.append(round(initial_issues * fraction, 2)); ideal_points.append(round(initial_points * fraction, 2))
     latest = rows[-1]
@@ -164,7 +177,7 @@ def render(iteration: dict[str, Any], history: list[dict[str, Any]]) -> str:
         "  line [" + ", ".join(map(str, ideal_issues)) + "]", "  line [" + ", ".join(map(str, issues)) + "]", "```", "",
         "```mermaid", "xychart-beta", f"  x-axis [{', '.join(labels)}]", "  y-axis \"Remaining SP\" 0 --> " + str(max(initial_points, 1)),
         "  line [" + ", ".join(map(str, ideal_points)) + "]", "  line [" + ", ".join(map(str, points)) + "]", "```", "",
-        "Lines are ideal then actual. Missing days carry the latest observed value.", "",
+        "Lines are ideal then actual. The chart starts at the first observation; missing observed days carry the latest value.", "",
         "| Date | Remaining issues | Remaining SP | Completed | Status composition | Work type composition |", "|---|---:|---:|---:|---|---|",
     ]
     for row in rows:
@@ -182,17 +195,23 @@ def update(owner: str, project_number: int, today: date, apply: bool, runner=run
         raise BurndownError(f"missing unique Project draft {TITLE!r}")
     history = merge(parse_history(old_body), point)
     body = render(iteration, history)
-    if apply and body != old_body:
-        query = f'''mutation {{ updateProjectV2DraftIssue(input:{{draftIssueId:{json.dumps(draft_id)},body:{json.dumps(body)}}}) {{ draftIssue {{ id }} }} }}'''
+    title = draft_title(point)
+    old_title = next(
+        node["content"]["title"] for node in project["items"]["nodes"]
+        if (node.get("content") or {}).get("id") == draft_id
+    )
+    changed = body != old_body or title != old_title
+    if apply and changed:
+        query = f'''mutation {{ updateProjectV2DraftIssue(input:{{draftIssueId:{json.dumps(draft_id)},title:{json.dumps(title)},body:{json.dumps(body)}}}) {{ draftIssue {{ id }} }} }}'''
         graphql(runner, query)
-    return {"changed": body != old_body, "applied": apply, "iteration": iteration["title"], "snapshot": point}
+    return {"changed": changed, "applied": apply, "iteration": iteration["title"], "snapshot": point}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--owner", required=True)
     parser.add_argument("--project", required=True, type=int)
-    parser.add_argument("--date", type=date.fromisoformat, default=datetime.now(timezone.utc).date())
+    parser.add_argument("--date", type=date.fromisoformat, default=datetime.now(JST).date())
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     result = update(args.owner, args.project, args.date, args.apply)

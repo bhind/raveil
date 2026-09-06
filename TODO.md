@@ -13,7 +13,7 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   Product Owner acceptance is recorded. Issue #145 tracks remote integration;
   this checkbox does not claim runtime automatic approval or Sprint acceptance.
 
-- [x] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
+- [ ] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
   Project with progress views and standard Insights while preserving the
   repository as authority. Issue #135 and branch
   `chore/t-0158-project-insights` own this cross-gate Operations slice in
@@ -22,6 +22,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   API-unavailable ideal line. PR #137 merged as `c87944f`; the dedicated
   `RAVEIL_PROJECT_TOKEN` secret is installed, and hosted run #34003784228
   updated the private Draft successfully with read-only repository permission.
+  Reopened on 2026-09-06 because that verification covered only same-day
+  idempotence: the first S-0002 observations were already zero, the card title
+  did not expose changing values, scheduled execution had not yet occurred,
+  and no multi-day decreasing-remainder integration test existed.
 
 ## Start timing phases
 
