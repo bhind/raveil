@@ -2,6 +2,15 @@
 
 Last updated: 2026-09-06
 
+T-0164 documents one daily routine approval packet with up to ten items under
+ADR-0095. Independent authorized work continues while publication waits;
+real incidents still escalate. This is an active-session operating procedure,
+not an installed approval-batching scheduler or verified runtime automatic
+approval capability. Existing Project-maintenance scheduling is unchanged.
+The owner-requested follow-up makes the pre-stop continuation checkpoint
+explicit: scope any refusal, search eligible work, and actually begin the
+next allowed task in the same active turn. No background execution is claimed.
+
 T-0162 documents candidate-bound Librarian audit, delegated Product Owner
 acceptance and primary PM verification under ADR-0094. This is an operations
 procedure, not runtime permission enforcement. External denial remains binding;

@@ -1,5 +1,8 @@
 # Architecture Decision Records
 
+T-0164: [ADR-0095](ADR-0095-batched-owner-approval-requests.md) batches routine
+approval requests without changing permission or incident boundaries.
+
 T-0162: [ADR-0094](ADR-0094-delegated-product-acceptance.md) defines delegated
 task acceptance without overriding execution permissions.
 

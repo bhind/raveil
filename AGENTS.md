@@ -152,6 +152,13 @@ checkpoint; all HCI, repository and execution-environment boundaries remain.
 Never treat a role receipt as a GitHub human review or runtime permission.
 Use the candidate-bound receipt in `docs/WORKFLOW.md` before publication.
 
+ADR-0095 batches routine human approval requests: at most one unsolicited
+packet per Asia/Tokyo calendar day, with at most ten exact candidate/action
+items. Queue ordinary publication waits instead of repeatedly prompting.
+Continue independent authorized work within WIP and dependency limits. Real
+incidents still escalate promptly; silence never grants approval. This is
+request cadence, not a scheduler or a permission override.
+
 Within an owner-authorized task, agents continue through investigation, local
 editing, local commits, tests, review, record reconciliation, and the next
 accepted slice without waiting for acknowledgement. A progress update is

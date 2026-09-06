@@ -184,6 +184,79 @@ Request the missing external authorization through the normal mechanism.
 No receipt overrides a runtime refusal, repository protection or HCI.
 Do not claim automation works merely because this procedure is documented.
 
+### Routine approval batching (ADR-0095)
+
+The primary PM keeps a pending-approval section on each affected Issue,
+including exact candidate, action, audit receipt, dependency and reason.
+Use Blocked for externally approval-blocked integration, without calling the
+task Done. Local technical acceptance and remote integration remain distinct.
+
+Request routine human approvals in at most one unsolicited packet per
+Asia/Tokyo calendar day, containing no more than ten items. Do not wait to
+fill ten; carry excess items to the next packet in dependency/priority order.
+Record the last request date and packet contents in a local dated receipt or
+existing Issue records so another session does not repeat the request.
+Only the primary PM sends the consolidated request, not individual workers.
+Owner-requested approval reviews may occur earlier; ordinary status questions
+do not count as approval requests or consent.
+
+Each numbered item names repository, T-ID/Issue/PR, exact commit and branch,
+requested operations (push, PR, merge separately), concise change/risk summary,
+Librarian audit, delegated PO acceptance, PM checks and blocking dependencies.
+The owner may approve all or selected numbered items. Silence, passage of a
+day, ten accumulated items or approval of one item never approves the rest.
+An approval is bound to the stated scope and candidate; changed heads need
+fresh audit/acceptance and an updated pending item when human approval was
+exact-head-only. Before merge reread actual remote checks and dependencies.
+
+While routine publication waits, continue tests, fixes, audits and independent
+already authorized tasks within existing WIP limits. Do not assume an unmerged
+dependency is delivered, invent a new P0, expand authority or repeatedly retry
+a denied action. A runtime denial remains binding; queue a routine missing-
+consent request rather than immediately asking the same question again.
+
+Substantive HCI matters (destructive actions, secrets, spending, evidence or
+gate ambiguity, material scope/strategy changes and other existing incidents)
+still require prompt escalation. Stop only affected actions. If no authorized
+independent work remains, preserve a truthful blocked receipt, not invented
+background progress. Routine waits alone do not justify another same-day ask.
+
+This cadence is operated during active sessions. No scheduled job, push
+notification, guaranteed daily wake-up or automatic permission grant is
+installed for approval batching. Existing Project-maintenance scheduling is
+unchanged. Do not change runtime security settings to implement batching.
+
+### Mandatory pre-stop continuation checkpoint
+
+Before ending a continuous-delivery turn, the primary must check whether
+stopping is necessary. Record a short operational receipt, not merely a
+promise to continue:
+
+1. Identify any substantive incident and the exact affected operation or
+   evidence. A task boundary, empty Ready column, routine approval wait or
+   isolated tool refusal is not automatically a whole-project incident.
+2. Preserve any denial and stop that operation. Check separately for
+   unaffected authorized work; never evade the denied action through another
+   agent, transport, new branch or indirect replay.
+3. Read the live Project and authoritative task triggers. Select the next
+   eligible existing task in priority/dependency order. If none is Ready,
+   perform bounded backlog refinement under the Sprint operator procedure.
+   Do not promote gated research, invent features or expand authority just
+   to keep working.
+4. When an eligible task exists and no incident prevents it, prepare/start
+   through the canonical queue and perform its first concrete action in the
+   same active turn. Read-only verification may proceed on an existing
+   candidate without pretending that its publication blocker was cleared.
+5. Report the actual task/action in a progress update. Do not end the turn
+   with only "next task identified" or "will continue" while that action can
+   safely proceed. When no permitted work remains after bounded search,
+   state the exact remaining authority/dependency condition, not a fabricated
+   incident or a claim of background work.
+
+This is an active-session delivery rule, not a persistent worker, scheduled
+wakeup or automatic permission grant. Existing WIP, incident, cadence and
+scope boundaries remain unchanged. Task completion alone is not a stop rule.
+
 ### HCI-04: evidence-integrity ambiguity
 
 Confirmation is required when source, authority, toolchain, manifest, resource,

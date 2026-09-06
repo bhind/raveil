@@ -4,6 +4,16 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0164** Batch routine owner approval requests under ADR-0095,
+  [Issue #148](https://github.com/bhind/raveil/issues/148), S-0003, 1 SP.
+  Primary owns governance records. At most one unsolicited daily packet with
+  ten exact candidate/action items; independent authorized work continues.
+  Real incidents remain immediate. No scheduler or runtime permission change.
+  Local verification/review precedes adding publication to the next packet.
+  Owner-requested local follow-up adds a mandatory pre-stop incident/scope
+  check, next-task search and same-turn first action when eligible. Publication
+  remains excluded from that follow-up.
+
 - [x] **T-0162** Clarify delegated task acceptance under ADR-0094,
   [Issue #145](https://github.com/bhind/raveil/issues/145), S-0003, 1 SP.
   Primary owns governance records; Librarian independently audits. Define
@@ -39,7 +49,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0159 read-only Graph explanations follows integrated T-0160. S-0003 owner ceremony remains pending. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0164 approval batching is active. T-0161 and T-0163 publication remain pending separately; neither is integrated. S-0003 owner ceremony remains pending. |
 | **P1 — next** | Start only after its named P0 dependency passes. | Replenish one bounded successor after Garden review. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
