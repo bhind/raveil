@@ -4,6 +4,13 @@ Last updated: 2026-09-06
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0162** Clarify delegated task acceptance under ADR-0094,
+  [Issue #145](https://github.com/bhind/raveil/issues/145), S-0003, 1 SP.
+  Primary owns governance records; Librarian independently audits. Define
+  candidate-bound acceptance, PM integration verification and external denial
+  handling without runtime permission changes. Verification and PR integration
+  remain pending; no change to the blocked T-0161 publication is implied.
+
 - [x] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
   Project with progress views and standard Insights while preserving the
   repository as authority. Issue #135 and branch

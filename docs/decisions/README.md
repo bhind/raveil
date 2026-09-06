@@ -1,5 +1,8 @@
 # Architecture Decision Records
 
+T-0162: [ADR-0094](ADR-0094-delegated-product-acceptance.md) defines delegated
+task acceptance without overriding execution permissions.
+
 T-0159: [ADR-0091](ADR-0091-garden-explains-relative-loads-and-multiplication.md)
 is Accepted; read-only Garden explanation admission follows existing program v3/v4.
 

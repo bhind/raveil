@@ -148,6 +148,42 @@ allows it without a separate acknowledgement checkpoint.
 Creating an isolated local worktree, local branch, local atomic commit, ignored
 build product, or new append-only local artifact is not an HCI.
 
+### Candidate-bound delegated acceptance (ADR-0094)
+
+For already authorized work: Librarian audit -> delegated Product Owner
+acceptance -> primary PM verification -> permitted publication/integration.
+The human owner's current delegation is the authority source. The Librarian
+remains read-only; PM keeps final verification and serial integration. Disclose
+combined roles. Never impersonate an independent or human GitHub reviewer.
+
+Record this receipt at each candidate boundary:
+
+- repository, real Issue/T-ID, branch, exact commit/tree/base and action;
+- owner delegation source, scope, exclusions and current validity;
+- exact audited revision, reviewer, findings and unresolved concerns;
+- test/record commands, environment, exits and evidence locations;
+- delegated Product Owner accept/reject/escalate disposition and conditions;
+- primary scope/HCI/evidence verification and live remote observations;
+- actual publication result and exact remote-head readback.
+
+Receipts are candidate-bound records, not cryptographic signatures or seals.
+Changed heads require renewed audit and acceptance. Human reconfirmation is
+not needed for ordinary in-scope revisions while delegation remains current
+and PM revalidates HCI status. A material concern or scope expansion escalates.
+
+Before push verify local evidence, destination and known remote constraints;
+do not demand or invent CI results for an unpublished head. After push read
+back that exact head and its checks/threads. Before merge satisfy ADR-0058;
+pending, failed or unknown checks never count as passed. Explicitly record
+when no checks exist. A previous head's results do not certify a new head.
+
+Execution permissions are separate. Preserve a denial and stop that action;
+do not modify security configuration, hide the denial from another agent,
+or use equivalent indirect operations. Continue independent authorized work.
+Request the missing external authorization through the normal mechanism.
+No receipt overrides a runtime refusal, repository protection or HCI.
+Do not claim automation works merely because this procedure is documented.
+
 ### HCI-04: evidence-integrity ambiguity
 
 Confirmation is required when source, authority, toolchain, manifest, resource,
