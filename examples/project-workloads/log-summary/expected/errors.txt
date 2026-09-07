@@ -1,0 +1,2 @@
+ERROR bad-request
+ERROR disk-full

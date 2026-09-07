@@ -4,6 +4,13 @@ Last updated: 2026-09-07
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0177** Run a useful file-processing recipe pack,
+  [Issue #175](https://github.com/bhind/raveil/issues/175), S-0003, 3 SP.
+  Add copied-before-use synthetic log-summary and duplicate-inventory projects,
+  manual expected outputs, edit/rerun/diff and missing-input failure coverage.
+  Branch `feat/t-0177-workload-pack`, Experience Implementer, Host Functional.
+  Existing tools, grammar, executor, schemas and init samples remain unchanged.
+
 - [ ] **T-0176** Find the saved run I want to inspect,
   [Issue #174](https://github.com/bhind/raveil/issues/174), S-0003, 2 SP.
   Add optional exact recipe/backend/status filters to `project runs`; preserve
