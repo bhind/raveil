@@ -1,0 +1,5 @@
+{
+  "schema": "raveil.project-recipe/v1",
+  "kind": "command",
+  "source": "cat /missing.log > /missing-copy.txt"
+}

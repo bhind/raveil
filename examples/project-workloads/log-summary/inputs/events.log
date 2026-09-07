@@ -1,0 +1,5 @@
+INFO startup
+ERROR disk-full
+WARN retrying
+ERROR bad-request
+INFO shutdown

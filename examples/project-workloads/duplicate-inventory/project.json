@@ -1,0 +1,6 @@
+{
+  "schema": "raveil.project/v1",
+  "recipes": "recipes",
+  "inputs": "inputs",
+  "runs": "runs"
+}

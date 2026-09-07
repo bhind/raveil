@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-07
 
+T-0177 adds two copied-before-use synthetic project fixtures: ERROR-log
+summarization and duplicate inventory normalization. Both use only the existing
+Command Graph grammar and native comparison path with manually specified
+outputs. The log fixture also demonstrates edit/rerun/diff preservation and a
+missing-input failure with no output publication. Issue #175, S-0003, 3 SP and
+branch `feat/t-0177-workload-pack` own Host Functional evidence. No executor,
+schema, init sample, performance, isolation or hardware change follows.
+
 T-0176 adds exact recipe, backend and status filters to the saved-run listing.
 Unfiltered ordering and invalid-entry visibility remain unchanged; filtered
 inspection executes no recipe and writes no history. Issue #174 and branch
