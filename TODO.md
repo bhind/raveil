@@ -4,6 +4,13 @@ Last updated: 2026-09-07
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0190** Show recipe, descriptor and input relationships during
+  discovery, [Issue #208](https://github.com/bhind/raveil/issues/208), S-0003,
+  2 SP. Extend only `Project.recipes` so graph-device rows expose their exact
+  recipe, descriptor, seed or input-data path from admitted metadata. Branch
+  `feat/t-0190-recipe-relations`, Experience Implementer, Host Functional.
+  No referenced-input read, compilation, execution or mutation is in scope.
+
 - [ ] **T-0177** Run a useful file-processing recipe pack,
   [Issue #175](https://github.com/bhind/raveil/issues/175), S-0003, 3 SP.
   Add copied-before-use synthetic log-summary and duplicate-inventory projects,
