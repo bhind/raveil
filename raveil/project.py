@@ -530,15 +530,33 @@ class Project:
         return (f"run={run_id} backend=rtl-sim evidence={json.dumps(record['evidence_class'])}\n"
                 "Saved active rows (integrity checked; simulation not rerun):\n" + value)
 
-    def runs(self) -> str:
+    def runs(self, *, recipe: str | None = None, backend: str | None = None,
+             status: str | None = None) -> str:
+        if recipe is not None:
+            recipe = name(recipe)
+        if backend is not None and backend not in {"native", "sonatine-qemu", "rtl-sim"}:
+            raise ValueError("run backend filter is invalid")
+        if status is not None and status not in {"succeeded", "failed"}:
+            raise ValueError("run status filter is invalid")
         lines = []
         for run_id in self.workspace.ls("runs"):
             try:
                 record = self.load_run(run_id)
+                if recipe is not None and record["recipe_name"] != recipe:
+                    continue
+                if backend is not None and record["backend"] != backend:
+                    continue
+                if status is not None and record["status"] != status:
+                    continue
                 lines.append(f"{run_id} {record['recipe_name']} {record['backend']} {record['status']}")
             except (OSError, ValueError, KeyError) as error:
-                lines.append(f"{run_id} incomplete-or-invalid: {error}")
-        return "\n".join(lines) or "No runs yet. Try: project run logs"
+                if recipe is None and backend is None and status is None:
+                    lines.append(f"{run_id} incomplete-or-invalid: {error}")
+        if lines:
+            return "\n".join(lines)
+        if recipe is not None or backend is not None or status is not None:
+            return "No runs match the selected filters."
+        return "No runs yet. Try: project run logs"
 
     def _preview(self, run_id: str, group: str, item: str) -> str | None:
         if not item.startswith("/"):
@@ -646,7 +664,8 @@ def command_project(args: argparse.Namespace) -> int:
     elif action == "show":
         print(project.show(args.recipe))
     elif action == "runs":
-        print(project.runs())
+        print(project.runs(recipe=args.recipe_filter, backend=args.backend_filter,
+                           status=args.status_filter))
     elif action == "output":
         print(project.output(args.run_id), end="")
     elif action == "diff":
@@ -709,6 +728,11 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--keys", help="bounded deterministic Garden navigation")
         if action == "output":
             command.add_argument("run_id", help="saved successful rtl-sim Graph run ID")
+        if action == "runs":
+            command.add_argument("--recipe", dest="recipe_filter", help="exact saved recipe name")
+            command.add_argument("--backend", dest="backend_filter",
+                                 choices=("native", "sonatine-qemu", "rtl-sim"))
+            command.add_argument("--status", dest="status_filter", choices=("succeeded", "failed"))
         if action == "run":
             command.add_argument("--backend", choices=("native", "sonatine-qemu", "rtl-sim"), default="native")
             command.add_argument("--compiler", default="cc")

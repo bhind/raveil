@@ -69,6 +69,7 @@ raveil project run logs
 printf 'ERROR changed\n' >> inputs/events.txt
 raveil project run logs
 raveil project runs
+raveil project runs --recipe logs --backend native --status succeeded
 raveil project diff RUN_A RUN_B
 ```
 
@@ -80,6 +81,13 @@ editor or command-line tools.
 Run history is cooperative local development evidence. The reader detects
 later artifact mutation, but this is not a signed audit log, production cache
 or hostile-code sandbox.
+
+`project runs` accepts optional exact `--recipe`, `--backend`, and `--status`
+filters. Filters may be combined and do not execute recipes or modify saved
+runs. The unfiltered view continues to expose incomplete or invalid entries;
+filtered views omit entries whose checked metadata cannot match. Valid status
+values are `succeeded` and `failed`, and backend names use the same three
+bounded project backends shown by `project recipes`.
 
 ## Edit and execute a hardware Graph in simulation
 

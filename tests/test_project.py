@@ -110,6 +110,52 @@ class ProjectWorkspaceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "checksum mismatch"):
             project.load_run(first["run_id"])
 
+    def test_runs_filters_exact_metadata_without_execution_or_writes(self) -> None:
+        project = Project(self.root)
+        first = project.run("logs", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        second = project.run("files", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        invalid = self.root / "runs" / "0000-invalid"
+        invalid.mkdir()
+        (invalid / "record.json").write_text("{")
+        before = sorted((path.relative_to(self.root), path.stat().st_mtime_ns)
+                        for path in self.root.rglob("*") if path.is_file())
+
+        with patch("raveil.project.CommandComparison.execute") as command, \
+                patch("raveil.project_graph.run_snapshot") as simulator, \
+                patch("raveil.project.run_graph_mvp") as gemm:
+            self.assertEqual(project.runs(recipe="logs"),
+                             f"{first['run_id']} logs native succeeded")
+            self.assertEqual(project.runs(recipe="files", backend="native", status="succeeded"),
+                             f"{second['run_id']} files native succeeded")
+            self.assertEqual(project.runs(backend="rtl-sim"),
+                             "No runs match the selected filters.")
+            command.assert_not_called()
+            simulator.assert_not_called()
+            gemm.assert_not_called()
+
+        unfiltered = project.runs().splitlines()
+        self.assertTrue(unfiltered[0].startswith("0000-invalid incomplete-or-invalid:"))
+        self.assertNotIn("succeeded", unfiltered[0])
+        self.assertEqual(before, sorted((path.relative_to(self.root), path.stat().st_mtime_ns)
+                                       for path in self.root.rglob("*") if path.is_file()))
+
+    def test_runs_cli_filters_and_rejects_invalid_values_cleanly(self) -> None:
+        project = Project(self.root)
+        record = project.run("logs", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(main(["project", "runs", "--project", str(self.root),
+                                   "--recipe", "logs", "--backend", "native",
+                                   "--status", "succeeded"]), 0)
+        self.assertEqual(out.getvalue().strip(), f"{record['run_id']} logs native succeeded")
+
+        error = io.StringIO()
+        with contextlib.redirect_stderr(error):
+            self.assertEqual(main(["project", "runs", "--project", str(self.root),
+                                   "--recipe", "../escape"]), 2)
+        self.assertIn("name must contain", error.getvalue())
+        self.assertNotIn("Traceback", error.getvalue())
+
     def test_duplicate_input_budget_rejected_before_execution_or_history(self) -> None:
         from raveil.project import tree
         manifest = tree(self.root / "inputs")
