@@ -277,7 +277,13 @@ class Project:
                 backends = ["rtl-sim"] if kind == "graph-device" else ["native"]
                 if kind == "gemm" and max(recipe[key] for key in ("m", "n", "k")) <= 8:
                     backends.append("sonatine-qemu")
-                lines.append(f"{recipe_name}: {kind}; backends={','.join(backends)}")
+                details = [f"recipe=recipes/{filename}"]
+                if kind == "graph-device":
+                    details.append(f"descriptor=inputs/{recipe['descriptor']}")
+                    details.append(f"input=inputs/{recipe['input']}" if "input" in recipe
+                                   else f"seed={recipe['seed']}")
+                lines.append(f"{recipe_name}: {kind}; backends={','.join(backends)}; "
+                             + "; ".join(details))
             except (OSError, ValueError, RuntimeError) as error:
                 lines.append(f"{json.dumps(filename)}: unavailable; {json.dumps(str(error))}")
         return "\n".join(lines or ["No JSON recipes found in recipes/."]) + (

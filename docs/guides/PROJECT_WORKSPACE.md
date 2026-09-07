@@ -56,6 +56,14 @@ unreadable entries appear as `unavailable` with an escaped diagnostic; other
 entries remain visible. Non-JSON files are ignored. Existing directory, path
 and text-size limits still apply.
 
+Each valid row names its exact `recipes/` file. Graph-device rows additionally
+name the referenced `inputs/` descriptor and either the explicit input-data
+file or the numeric seed. This makes shared metadata visible before editing:
+`neighborhood` and `neighborhood-data` share `inputs/neighborhood.json`, while
+`bias-grid` has its own descriptor and input-data file. The listing derives
+these relationships from validated recipe metadata only; it does not open the
+referenced files.
+
 Discovery is read-only metadata validation: it does not compile a Command or
 hardware Graph, read referenced inputs, check installed tools, or execute a
 recipe. A listed backend is not a successful-run guarantee. Follow with

@@ -58,11 +58,14 @@ class ProjectWorkspaceTests(unittest.TestCase):
             gemm.assert_not_called()
         lines = out.getvalue().splitlines()
         self.assertEqual(lines[:8], [
-            "bias-grid: graph-device; backends=rtl-sim",
-            "custom: command; backends=native", "files: command; backends=native",
-            "gemm: gemm; backends=native,sonatine-qemu", "large: gemm; backends=native",
-            "logs: command; backends=native", "neighborhood-data: graph-device; backends=rtl-sim",
-            "neighborhood: graph-device; backends=rtl-sim",
+            "bias-grid: graph-device; backends=rtl-sim; recipe=recipes/bias-grid.json; descriptor=inputs/bias-grid.json; input=inputs/bias-grid-data.json",
+            "custom: command; backends=native; recipe=recipes/custom.json",
+            "files: command; backends=native; recipe=recipes/files.json",
+            "gemm: gemm; backends=native,sonatine-qemu; recipe=recipes/gemm.json",
+            "large: gemm; backends=native; recipe=recipes/large.json",
+            "logs: command; backends=native; recipe=recipes/logs.json",
+            "neighborhood-data: graph-device; backends=rtl-sim; recipe=recipes/neighborhood-data.json; descriptor=inputs/neighborhood.json; input=inputs/neighborhood-data.json",
+            "neighborhood: graph-device; backends=rtl-sim; recipe=recipes/neighborhood.json; descriptor=inputs/neighborhood.json; seed=1",
         ])
         self.assertIn("not checked", out.getvalue())
         self.assertEqual(list((self.root / "runs").iterdir()), [])
@@ -85,7 +88,11 @@ class ProjectWorkspaceTests(unittest.TestCase):
         # Discovery validates recipe metadata, not referenced input existence.
         (self.root / "inputs/neighborhood.json").unlink()
         project = Project(self.root)
-        self.assertIn("neighborhood: graph-device; backends=rtl-sim", project.recipes())
+        shown = project.recipes()
+        self.assertIn("neighborhood: graph-device; backends=rtl-sim", shown)
+        self.assertIn("recipe=recipes/neighborhood.json; descriptor=inputs/neighborhood.json; seed=1", shown)
+        self.assertIn("recipe=recipes/neighborhood-data.json; descriptor=inputs/neighborhood.json; input=inputs/neighborhood-data.json", shown)
+        self.assertIn("recipe=recipes/bias-grid.json; descriptor=inputs/bias-grid.json; input=inputs/bias-grid-data.json", shown)
         for path in (self.root / "recipes").iterdir():
             path.unlink()
         self.assertIn("No JSON recipes found", project.recipes())

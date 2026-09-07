@@ -2,6 +2,13 @@
 
 Last updated: 2026-09-07
 
+T-0190 extends `project recipes` with exact recipe paths and, for graph-device
+recipes, descriptor plus seed or input-data relationships. Shared neighborhood
+metadata and independent bias-grid files are visible without reading referenced
+inputs, compiling or executing. Issue #208, S-0003, 2 SP and branch
+`feat/t-0190-recipe-relations` own Host Functional evidence. No Graph validity,
+performance, cache, isolation or hardware claim follows.
+
 T-0177 adds two copied-before-use synthetic project fixtures: ERROR-log
 summarization and duplicate inventory normalization. Both use only the existing
 Command Graph grammar and native comparison path with manually specified
