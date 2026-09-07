@@ -1,8 +1,16 @@
 # Raveil TODO
 
-Last updated: 2026-09-06
+Last updated: 2026-09-07
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
+
+- [ ] **T-0176** Find the saved run I want to inspect,
+  [Issue #174](https://github.com/bhind/raveil/issues/174), S-0003, 2 SP.
+  Add optional exact recipe/backend/status filters to `project runs`; preserve
+  deterministic unfiltered history and invalid-entry visibility. The active
+  branch is `feat/t-0176-run-filters`, owned by Experience Implementer with
+  Host Functional evidence. No execution, saved-run write, cache or
+  performance claim is in scope.
 
 - [x] **T-0174** Independent snapshot-backed bias-grid starter,
   [Issue #171](https://github.com/bhind/raveil/issues/171), S-0003, 1 SP.

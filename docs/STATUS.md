@@ -1,6 +1,12 @@
 # Current status
 
-Last updated: 2026-09-06
+Last updated: 2026-09-07
+
+T-0176 adds exact recipe, backend and status filters to the saved-run listing.
+Unfiltered ordering and invalid-entry visibility remain unchanged; filtered
+inspection executes no recipe and writes no history. Issue #174 and branch
+`feat/t-0176-run-filters` own the S-0003 Host Functional slice. No cache,
+performance, isolation or Graph-semantics claim follows.
 
 T-0174 adds an independent bias-grid starter to new projects. Its descriptor
 and 324-word input file are separate from neighborhood. Local 257-test host
