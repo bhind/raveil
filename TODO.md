@@ -4,7 +4,7 @@ Last updated: 2026-09-09
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0044/S00** Qualify a public configurable comparison candidate,
+- [x] **T-0044/S00** Qualify a public configurable comparison candidate,
   [Issue #190](https://github.com/bhind/raveil/issues/190), S-0003, 5 current
   SP from 2 initial SP. Exact-revision Planning review found no adoptable
   backend. OpenASIP v2.2 is the sole bounded simulator-first feasibility-spike
@@ -19,6 +19,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   publication parity and one independently demonstrated contract-lifetime or
   authority property.
   That feasibility spike cannot close ADR-0049's later full-cost comparison.
+  Exact `e5610ff` passed 826 tests, record and diff checks, independent review
+  and Vreji audit. PR #237 merged as `8c6fb00`; Issue #190 closed and canonical
+  Project Done was verified.
 
 - [x] **T-0181** Choose the next arithmetic or predicate from a rejected
   workload, [Issue #180](https://github.com/bhind/raveil/issues/180), S-0003,

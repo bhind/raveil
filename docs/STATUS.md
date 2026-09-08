@@ -2,8 +2,8 @@
 
 Last updated: 2026-09-09
 
-T-0044/S00 has a bounded source-qualification completion candidate pending
-review and integration. Three public candidates were inspected at
+T-0044/S00 completed a bounded source qualification through PR #237, merged to
+canonical main as `8c6fb00`. Three public candidates were inspected at
 exact revisions. None is adopted or established as Raveil evidence. OpenASIP
 v2.2 is the only feasibility-spike candidate because one described TTA machine
 can receive separately compiled program images and the project exposes compiler,
@@ -17,6 +17,10 @@ full-cost comparison. It must still prove CPU/candidate lifecycle parity and an
 independent contract-lifetime/authority criterion before any gate result.
 This is Planning evidence only: no source import, build, simulation, experiment
 freeze, architecture adoption, PPA, FPGA, ASIC, silicon, patent or FTO result.
+Exact `e5610ff` passed 826 tests in 119.555 seconds with two skips, the record
+checker, `git diff --check`, independent review and Vreji audit. Issue #190 is
+closed and its Project item is Done. T-0044 remains open; the separate OpenASIP
+feasibility spike has not been created, authorized or executed.
 
 T-0181 is a Planning-only Graph extension decision spike. Three rejected
 fixtures preserve exact current failures and 14 hand-calculated vectors for a
