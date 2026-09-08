@@ -11,6 +11,10 @@ instructions while retaining eager execution and one unconditional final
 STORE. No opcode is implemented or accepted: descriptor v4, program v5 and
 request v6 remain unchanged and reject the proposals. No performance or
 hardware evidence follows.
+Exact planning candidate `ed32f61` passed 826 tests, executable vector checks,
+independent review and Vreji audit. PR #235 merged to canonical main as
+`69589f0`; Issue #180 is closed and its Project item is Done. The unresolved
+implementation decision remains open and requires a separate accepted ADR.
 
 T-0185 implements a copied-before-use bounded Graph workload staging pack. Its
 two fixed 8x8 examples are cross-neighborhood binary dilation and unsigned
