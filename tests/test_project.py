@@ -166,11 +166,28 @@ class ProjectWorkspaceTests(unittest.TestCase):
             return original(path, data, created)
 
         with patch("raveil.project.write_new", side_effect=fail_second):
-            with self.assertRaisesRegex(ValueError, "before recipe publication"):
+            with self.assertRaisesRegex(ValueError, "recipe publication"):
                 project.fork("bias-grid", "interrupted")
         for relative in ("recipes/interrupted.json", "inputs/interrupted-descriptor.json",
                          "inputs/interrupted-input.json"):
             self.assertFalse((self.root / relative).exists())
+
+        original_write = os.write
+        destination = self.root / "recipes/partial.json"
+        visible_during_write = []
+
+        def fail_during_recipe_write(descriptor, data):
+            original_write(descriptor, data[:1])
+            visible_during_write.append(destination.exists())
+            raise OSError("injected partial recipe write")
+
+        with patch("raveil.project.os.write", side_effect=fail_during_recipe_write):
+            with self.assertRaisesRegex(ValueError, "recipe publication"):
+                project.fork("logs", "partial")
+        self.assertEqual(visible_during_write, [False])
+        self.assertFalse(destination.exists())
+        self.assertFalse(any(path.name.startswith(".partial.")
+                             for path in (self.root / "recipes").iterdir()))
 
     def test_fork_cli_rejects_traversal_and_existing_destination_cleanly(self) -> None:
         project = Project(self.root)

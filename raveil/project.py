@@ -297,8 +297,15 @@ class Project:
         try:
             for relative, payload in payloads:
                 write_new(self.root / relative, payload, created)
-            # The admitted recipe is the visibility/commit marker and is last.
-            write_new(self.root / recipe_path, encoded(copied_recipe), created)
+            # Write the admitted recipe under a non-discoverable name, then
+            # publish a complete hard link without replacing an existing path.
+            recipe_temp = self.root / "recipes" / f".{destination_name}.{uuid4().hex}.fork"
+            write_new(recipe_temp, encoded(copied_recipe), created)
+            recipe_identity = created[-1][1]
+            final_recipe = self.root / recipe_path
+            os.link(recipe_temp, final_recipe, follow_symlinks=False)
+            created.append((final_recipe, recipe_identity))
+            recipe_temp.unlink()
         except OSError as error:
             retained: list[str] = []
             for path, identity in reversed(created):
@@ -315,7 +322,7 @@ class Project:
             if retained:
                 raise RuntimeError("fork failed and newly created files require manual recovery: "
                                    + ", ".join(sorted(retained))) from error
-            raise ValueError(f"fork failed before recipe publication: {error}") from error
+            raise ValueError(f"fork failed during atomic recipe publication: {error}") from error
         return (f"Forked {source_name} -> {destination_name}\nCreated: "
                 + ", ".join("/" + path for path in destinations))
 

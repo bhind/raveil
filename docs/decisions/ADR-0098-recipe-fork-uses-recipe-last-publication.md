@@ -10,10 +10,12 @@ Related: ADR-0085, ADR-0096
 The bounded `project fork SOURCE DESTINATION` operation preflights the admitted
 source recipe, every referenced Graph descriptor/input byte and every confined
 destination before writing. It creates copied Graph inputs with exclusive new
-file creation, rewrites only the copied recipe's references, and creates the
-destination recipe last. The recipe is the visibility commit marker because
-project discovery starts in `recipes/`; an absent recipe cannot execute orphan
-inputs.
+file creation and rewrites only the copied recipe's references. It writes the
+recipe completely under a non-discoverable temporary name, then publishes it
+last through an atomic no-clobber hard link. The complete recipe is the
+visibility commit marker because project discovery starts at `recipes/*.json`;
+an absent recipe cannot execute orphan inputs and readers cannot observe a
+partial destination recipe.
 
 If a caught write failure occurs, Raveil removes only destination files whose
 device/inode identity matches a file newly created by that invocation. It never
@@ -24,10 +26,12 @@ This is a cooperative single-user, single-writer operation. Do not run two fork
 operations concurrently in one workspace, modify destinations while fork is
 running, or use a synchronizing/shared directory as a concurrent mutation
 surface. An operating-system crash or power loss can leave an orphan copied
-input or a partial unavailable recipe. Before reusing that destination name,
-inspect the named `recipes/` and `inputs/` paths; use a fresh destination when
-ownership is uncertain. This is an operating constraint, not a filesystem
-transaction, hostile-writer defense or sandbox.
+input or a non-discoverable partial temporary `.fork` file; a crash after the
+atomic link can leave the complete destination plus its temporary hard link.
+Before reusing that destination name, inspect the named `recipes/` and
+`inputs/` paths; use a fresh destination when ownership is uncertain. This is
+an operating constraint, not a filesystem transaction, hostile-writer defense
+or sandbox.
 
 ## Alternatives and consequences
 
@@ -51,7 +55,8 @@ journal design in a superseding ADR.
 
 Test command and Graph recipe copies, rewritten independent references, source
 and past-run byte preservation, existing destination, traversal, symlink and
-missing-source rejection, and injected caught-failure cleanup. Demonstrate a
+missing-source rejection, mid-recipe-write invisibility and injected
+caught-failure cleanup. Demonstrate a
 copied Graph edit affecting only the copy. The accepted demonstration runs the
 source and edited copy through the same existing generic RTL simulator and
 requires both outputs to match their descriptor oracle and C++ fallback. This

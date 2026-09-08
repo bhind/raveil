@@ -89,9 +89,11 @@ check. The source and saved runs are not modified.
 Fork is a cooperative **single-user, single-writer** operation. Do not run two
 forks concurrently in one project, edit its destination paths while it runs,
 or treat a synchronized/shared directory as a concurrent writer surface. The
-recipe is published last and caught failures clean only files created by that
-invocation. A crash or power loss can still leave orphan `inputs/` files or an
-unavailable partial recipe. Inspect `recipes/DESTINATION.json` and
+complete recipe is published atomically and last; caught failures clean only
+files created by that invocation. A crash or power loss can still leave orphan
+`inputs/` files, a non-discoverable partial temporary recipe, or a complete
+destination plus its temporary hard link. Inspect
+`recipes/DESTINATION.json`, non-JSON `.DESTINATION.*.fork` files and
 `inputs/DESTINATION-*.json` before reusing a name; when ownership is uncertain,
 use a fresh destination name. This is not a general filesystem transaction,
 crash-recovery journal, hostile-writer boundary or sandbox. See ADR-0098.
