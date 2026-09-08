@@ -726,6 +726,14 @@ def command_project(args: argparse.Namespace) -> int:
             print(render_key_session(view, args.keys, args.width))
             return 0
         return run_interactive(view, sys.stdin, sys.stdout, args.width)
+    if action == "check":
+        from .project_preflight import check
+        status, rendered = check(project, args.recipe, args.backend,
+                                 repository=REPOSITORY,
+                                 kernel=Path(args.sonatine_kernel).resolve(),
+                                 compiler=args.compiler, qemu=args.qemu)
+        print(rendered)
+        return status
     if action == "recipes":
         print(project.recipes())
     elif action == "fork":
@@ -777,7 +785,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "run", "runs", "output", "diff", "console", "garden"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -786,7 +794,7 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("target", choices=("sonatine",))
         else:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
-        if action in {"show", "run"}:
+        if action in {"show", "check", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
         if action == "fork":
             command.add_argument("source", help="admitted source recipe name")
@@ -805,9 +813,9 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--backend", dest="backend_filter",
                                  choices=("native", "sonatine-qemu", "rtl-sim"))
             command.add_argument("--status", dest="status_filter", choices=("succeeded", "failed"))
-        if action == "run":
+        if action in {"check", "run"}:
             command.add_argument("--backend", choices=("native", "sonatine-qemu", "rtl-sim"), default="native")
             command.add_argument("--compiler", default="cc")
-        if action in {"run", "console"}:
+        if action in {"check", "run", "console"}:
             command.add_argument("--sonatine-kernel", default=str(REPOSITORY / "sonatine/build/sonatine.elf"))
             command.add_argument("--qemu", default="qemu-system-riscv64")

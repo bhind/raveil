@@ -2,6 +2,19 @@
 
 Last updated: 2026-09-08
 
+T-0179 implements a non-executing `project check RECIPE --backend BACKEND`
+preflight. It reports recipe, input, admission and tool availability separately
+and returns failure when a required known prerequisite is absent. Its header
+reports `known_prerequisites`, never execution readiness; actual execution
+readiness remains `not-checked`. Command
+admission reuses the bounded compiler through a registry that never invokes
+`--version`; Graph admission reuses the existing descriptor and snapshot
+validators. The command creates no run or output and starts no compiler, QEMU,
+Docker, RTL, network, device or installer action. The RTL runner must be a
+non-symlink executable regular file. Docker daemon/image state and future
+execution success remain explicitly not checked. Issue #177, S-0003,
+3 SP and branch `feat/t-0179-project-preflight` own Host Functional evidence.
+
 T-0178 implements bounded recipe forks with recipe-last publication under
 ADR-0098. Graph forks copy descriptor/input files and rewrite only the new
 recipe; Command/GEMM forks copy their admitted recipe. Caught failures remove

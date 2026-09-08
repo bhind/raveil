@@ -4,6 +4,14 @@ Last updated: 2026-09-08
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0179** Explain recipe readiness before launching a backend,
+  [Issue #177](https://github.com/bhind/raveil/issues/177), S-0003, 3 SP.
+  Add a read-only `project check` with separate recipe, input, admission and
+  tool results. Branch `feat/t-0179-project-preflight`, Experience Implementer,
+  Host Functional. It must not invoke workload tools or backends, create a run,
+  build, fetch, simulate, open a device or install anything. Docker daemon and
+  immutable-image readiness remain explicitly not checked.
+
 - [x] **T-0178** Fork an editable recipe without overwriting its source,
   [Issue #176](https://github.com/bhind/raveil/issues/176), S-0003, 3 SP.
   ADR-0098 fixes recipe-last, exclusive creation and identity-checked cleanup
