@@ -16,3 +16,4 @@ inconclusive, and superseded experiments remain available.
 | [EXP-0008](EXP-0008-static-full-campaign.md) | Completed remotely durable; advance-partial-latency-traffic | RTL simulation latency/traffic campaign | 256-input matrix and 20-file durable promotion pass; energy, timing, area, IP, and other organizations remain open |
 | [EXP-0009](EXP-0009-static-physical-proxy-screening.md) | Completed; pause-boundary | partitioned synthesis estimate | 20 ns matrix complete; Graph meets, Rocket misses, area ratio below no-go |
 | [EXP-0010](EXP-0010-common-40ns-physical-timing-followup.md) | Completed; advance-to-integrated-physical | partitioned synthesis estimate | Fixed 40 ns pair meets; area ratio below no-go; whole-system boundary remains |
+| [EXP-0012](EXP-0012-openasip-three-program-feasibility.md) | In progress | Host Functional external simulator | One frozen OpenASIP ADF passes three distinct programs; RTL/configuration-cost and durable-artifact gates remain |
