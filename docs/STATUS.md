@@ -2,6 +2,22 @@
 
 Last updated: 2026-09-09
 
+T-0044/S00 has a bounded source-qualification completion candidate pending
+review and integration. Three public candidates were inspected at
+exact revisions. None is adopted or established as Raveil evidence. OpenASIP
+v2.2 is the only feasibility-spike candidate because one described TTA machine
+can receive separately compiled program images and the project exposes compiler,
+simulator and RTL-generation stages. Raveil has not built it or demonstrated
+three programs. OpenEdgeCGRA is stopped before source use because its manifest
+refers to a `LICENSE.md` that is absent at the fixed revision, in addition to
+unresolved build and contract gaps. Apache VTA has a bounded driver and
+instruction-stream interface but remains a tensor-specific public control.
+Even a successful OpenASIP feasibility spike would not close ADR-0049's
+full-cost comparison. It must still prove CPU/candidate lifecycle parity and an
+independent contract-lifetime/authority criterion before any gate result.
+This is Planning evidence only: no source import, build, simulation, experiment
+freeze, architecture adoption, PPA, FPGA, ASIC, silicon, patent or FTO result.
+
 T-0181 is a Planning-only Graph extension decision spike. Three rejected
 fixtures preserve exact current failures and 14 hand-calculated vectors for a
 full-width/source-free constant, unsigned saturating subtraction and an

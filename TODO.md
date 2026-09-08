@@ -4,6 +4,22 @@ Last updated: 2026-09-09
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0044/S00** Qualify a public configurable comparison candidate,
+  [Issue #190](https://github.com/bhind/raveil/issues/190), S-0003, 5 current
+  SP from 2 initial SP. Exact-revision Planning review found no adoptable
+  backend. OpenASIP v2.2 is the sole bounded simulator-first feasibility-spike
+  candidate; OpenEdgeCGRA is stopped by an absent referenced license file and
+  reproducibility gaps, while Apache VTA remains a tensor-specific control.
+  No code was imported or built. Branch
+  `docs/t-0044-s00-configurable-candidate`, Researcher, Planning. Before any
+  adapter work, create and accept a separate task that pins a Linux container,
+  freezes one ADF/RTL identity and stops unless three distinct programs run on
+  it with bounded configuration-cost and Raveil-owned lifecycle receipts plus
+  CPU/candidate rejection, cancellation, unpublished-failure, fallback and
+  publication parity and one independently demonstrated contract-lifetime or
+  authority property.
+  That feasibility spike cannot close ADR-0049's later full-cost comparison.
+
 - [x] **T-0181** Choose the next arithmetic or predicate from a rejected
   workload, [Issue #180](https://github.com/bhind/raveil/issues/180), S-0003,
   3 SP. Three exact rejected programs cover source-free/full-width constants,
