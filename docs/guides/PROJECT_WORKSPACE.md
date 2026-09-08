@@ -67,8 +67,37 @@ referenced files.
 Discovery is read-only metadata validation: it does not compile a Command or
 hardware Graph, read referenced inputs, check installed tools, or execute a
 recipe. A listed backend is not a successful-run guarantee. Follow with
-`project show NAME` to inspect the workload and then `project run NAME` with
-the indicated backend. Use `--project DIR` when outside the project directory.
+`project show NAME` to inspect the workload, `project check NAME --backend
+BACKEND` to inspect known prerequisites, and then `project run NAME` with the
+indicated backend. Use `--project DIR` when outside the project directory.
+
+### Check before running
+
+```sh
+raveil project check logs --backend native
+raveil project check bias-grid --backend rtl-sim
+raveil project check gemm --backend sonatine-qemu
+```
+
+`project check` prints four ordered results: recipe schema, referenced input,
+backend admission and relevant local tools. `pass` means that read-only check
+succeeded; `fail` prevents readiness; `not-applicable` means the area does not
+apply or could not safely follow an earlier failure; `not-checked` is never a
+pass. Exit status is zero only when every required check passes.
+
+The header says `known_prerequisites=true|false` and always says
+`execution_readiness=not-checked`. A zero exit status and
+`KNOWN-PREREQUISITES-PASS` are useful for local scripting, but they do not mean
+that execution is ready or will succeed.
+
+The check parses and validates bounded recipes without invoking even a tool's
+`--version`. Native GEMM checks the compiler and source path; Sonatine checks
+the QEMU and kernel paths; RTL simulation checks the Docker CLI, Dockerfile and
+an executable non-symlink runner. It does not contact the Docker daemon or
+prove that the immutable
+image is cached. It creates no run, output or reservation and performs no
+build, network fetch, simulation, device open or installation. Files can change
+afterward, so `run` repeats authoritative validation and may still fail.
 
 ### Fork an editable recipe
 
