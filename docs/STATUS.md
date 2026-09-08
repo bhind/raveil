@@ -7,8 +7,10 @@ ADR-0098. Graph forks copy descriptor/input files and rewrite only the new
 recipe; Command/GEMM forks copy their admitted recipe. Caught failures remove
 only invocation-created identity-matching files. The documented operating
 boundary is single-user/single-writer; crash leftovers and hostile concurrency
-are not hidden. Issue #176, S-0003, 3 SP and branch
-`feat/t-0178-recipe-fork` own Host Functional evidence.
+are not hidden. Exact commits `9118fa4` and `6b85bd7` passed 805 tests, scoped
+reverification and independent review; PR #229 merged as `85e17d6`, Issue #176
+closed and Project Done was verified. Evidence is Host Functional plus the
+recorded RTL-simulation-functional demonstration, never performance or silicon.
 
 T-0190 extends `project recipes` with exact recipe paths and, for graph-device
 recipes, descriptor plus seed or input-data relationships. Shared neighborhood
