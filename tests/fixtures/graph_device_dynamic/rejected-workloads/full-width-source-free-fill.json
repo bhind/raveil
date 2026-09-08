@@ -1,0 +1,39 @@
+{
+  "schema": "raveil.rejected-graph-workload/v1",
+  "candidate": "CONST_U32",
+  "program": "fill every output with 0xF1234567",
+  "selection": "deferred",
+  "current_attempts": [
+    {
+      "expected_error": "node identity or opcode is invalid",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "full-width-source-free-fill",
+        "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+        "nodes": [
+          {"id": "alarm", "op": "CONST_U32", "value": 4045620583},
+          {"id": "store", "op": "STORE_U32", "input": "alarm"}
+        ]
+      }
+    },
+    {
+      "expected_error": "ADD_IMM_U32 requires schema v4 and an unsigned 22-bit immediate",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "full-width-immediate-attempt",
+        "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+        "nodes": [
+          {"id": "input", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+          {"id": "alarm", "op": "ADD_IMM_U32", "input": "input", "immediate": 4045620583},
+          {"id": "store", "op": "STORE_U32", "input": "alarm"}
+        ]
+      }
+    }
+  ],
+  "truth_vectors": [
+    {"literal": 0, "output": 0},
+    {"literal": 4194303, "output": 4194303},
+    {"literal": 4194304, "output": 4194304},
+    {"literal": 4294967295, "output": 4294967295}
+  ]
+}

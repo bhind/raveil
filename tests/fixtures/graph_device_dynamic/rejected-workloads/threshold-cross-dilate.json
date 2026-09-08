@@ -1,0 +1,49 @@
+{
+  "schema": "raveil.rejected-graph-workload/v1",
+  "candidate": "GE_IMM_U32",
+  "program": "threshold raw intensity then cross-dilate binary occupancy",
+  "selection": "recommended-for-a-separate-implementation-decision",
+  "threshold": 100,
+  "current_attempts": [
+    {
+      "expected_error": "node identity or opcode is invalid",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "threshold-cross-dilate",
+        "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+        "nodes": [
+          {"id": "c", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+          {"id": "n", "op": "LOAD_U32", "address": {"row_delta": -1, "column_delta": 0}},
+          {"id": "s", "op": "LOAD_U32", "address": {"row_delta": 1, "column_delta": 0}},
+          {"id": "w", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": -1}},
+          {"id": "e", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 1}},
+          {"id": "pc", "op": "GE_IMM_U32", "input": "c", "immediate": 100},
+          {"id": "pn", "op": "GE_IMM_U32", "input": "n", "immediate": 100},
+          {"id": "ps", "op": "GE_IMM_U32", "input": "s", "immediate": 100},
+          {"id": "pw", "op": "GE_IMM_U32", "input": "w", "immediate": 100},
+          {"id": "pe", "op": "GE_IMM_U32", "input": "e", "immediate": 100},
+          {"id": "ns", "op": "MAX_U32", "inputs": ["pn", "ps"]},
+          {"id": "we", "op": "MAX_U32", "inputs": ["pw", "pe"]},
+          {"id": "ring", "op": "MAX_U32", "inputs": ["ns", "we"]},
+          {"id": "occupied", "op": "MAX_U32", "inputs": ["pc", "ring"]},
+          {"id": "store", "op": "STORE_U32", "input": "occupied"}
+        ]
+      }
+    }
+  ],
+  "truth_vectors": [
+    {"input": 0, "threshold": 100, "output": 0},
+    {"input": 99, "threshold": 100, "output": 0},
+    {"input": 100, "threshold": 100, "output": 1},
+    {"input": 101, "threshold": 100, "output": 1},
+    {"input": 4294967295, "threshold": 100, "output": 1},
+    {"input": 4194303, "threshold": 4194303, "output": 1}
+  ],
+  "proposed_rejection_vectors": [
+    {"case": "boolean-threshold", "immediate": true, "source_defined": true, "program_version": 6, "expected": "reject"},
+    {"case": "negative-threshold", "immediate": -1, "source_defined": true, "program_version": 6, "expected": "reject"},
+    {"case": "overwide-threshold", "immediate": 4194304, "source_defined": true, "program_version": 6, "expected": "reject"},
+    {"case": "undefined-source", "immediate": 100, "source_defined": false, "program_version": 6, "expected": "reject"},
+    {"case": "old-program-version", "immediate": 100, "source_defined": true, "program_version": 5, "expected": "reject"}
+  ]
+}

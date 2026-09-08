@@ -1,12 +1,20 @@
 # Open questions
 
-Last updated: 2026-09-05
+Last updated: 2026-09-09
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
 resolves it.
 
 ## Simulation-first device path
+
+- T-0181 planning compares three concrete rejected programs and recommends
+  `GE_IMM_U32` as the single next candidate because threshold-plus-cross-
+  dilation fits 15/16 instructions without conditional effects or a ternary
+  allocator. This is not an accepted opcode: descriptor v4/program v5/request
+  v6 still reject it. A separate task and ADR must accept exact versioned
+  semantics before compiler or RTL work. Full-width/source-free constants,
+  saturating subtraction and general SELECT remain deferred.
 
 - ADR-0093 resolves saved project observation through a separate in-memory
   Garden view. Full provenance export/authentication remains separate: the
