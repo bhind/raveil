@@ -4,12 +4,14 @@ Last updated: 2026-09-08
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0178** Fork an editable recipe without overwriting its source,
+- [x] **T-0178** Fork an editable recipe without overwriting its source,
   [Issue #176](https://github.com/bhind/raveil/issues/176), S-0003, 3 SP.
   ADR-0098 fixes recipe-last, exclusive creation and identity-checked cleanup
   under an owner-approved single-user/single-writer operating constraint.
-  Branch `feat/t-0178-recipe-fork`, Experience Implementer, Host Functional.
-  General transactions, crash recovery and hostile concurrency are excluded.
+  Exact `9118fa4` plus atomic-publication fix `6b85bd7` passed Vreji and
+  primary review; PR #229 merged as `85e17d6`, Issue #176 closed and canonical
+  Project Done was verified. General transactions, crash recovery and hostile
+  concurrency remain excluded.
 
 - [ ] **T-0190** Show recipe, descriptor and input relationships during
   discovery, [Issue #208](https://github.com/bhind/raveil/issues/208), S-0003,
