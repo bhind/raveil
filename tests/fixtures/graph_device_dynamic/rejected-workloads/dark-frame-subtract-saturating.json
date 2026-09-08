@@ -1,0 +1,29 @@
+{
+  "schema": "raveil.rejected-graph-workload/v1",
+  "candidate": "SUB_SAT_U32",
+  "program": "dark-frame correction max(sample - dark, 0)",
+  "selection": "deferred",
+  "current_attempts": [
+    {
+      "expected_error": "node identity or opcode is invalid",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "dark-frame-subtract-saturating",
+        "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+        "nodes": [
+          {"id": "sample", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+          {"id": "dark", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": -1}},
+          {"id": "corrected", "op": "SUB_SAT_U32", "inputs": ["sample", "dark"]},
+          {"id": "store", "op": "STORE_U32", "input": "corrected"}
+        ]
+      }
+    }
+  ],
+  "truth_vectors": [
+    {"inputs": [0, 0], "output": 0},
+    {"inputs": [3, 5], "output": 0},
+    {"inputs": [5, 3], "output": 2},
+    {"inputs": [4294967295, 1], "output": 4294967294},
+    {"inputs": [4294967295, 4294967295], "output": 0}
+  ]
+}

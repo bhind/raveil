@@ -1,6 +1,16 @@
 # Current status
 
-Last updated: 2026-09-08
+Last updated: 2026-09-09
+
+T-0181 is a Planning-only Graph extension decision spike. Three rejected
+fixtures preserve exact current failures and 14 hand-calculated vectors for a
+full-width/source-free constant, unsigned saturating subtraction and an
+unsigned immediate comparison. The current recommendation is only
+`GE_IMM_U32`, which would make threshold-plus-cross-dilation fit 15/16
+instructions while retaining eager execution and one unconditional final
+STORE. No opcode is implemented or accepted: descriptor v4, program v5 and
+request v6 remain unchanged and reject the proposals. No performance or
+hardware evidence follows.
 
 T-0185 implements a copied-before-use bounded Graph workload staging pack. Its
 two fixed 8x8 examples are cross-neighborhood binary dilation and unsigned
