@@ -37,6 +37,12 @@ Edit a `0` to `1` in the active footprint of
 `inputs/cross-dilate-binary-input.json`, then run it again. Use the printed run
 identifiers:
 
+The first 100 words are a row-major 10x10 grid. Active coordinate `(row,
+column)`, counted from zero, is word `(row + 1) * 10 + column + 1`; its outer
+row and column are halo. For the repository input, the demonstrated edit is
+`word[23]` from `0` to `1`. It changes 3 of the 64 active outputs. Words 100
+through 323 are transport padding, so editing them does not change the output.
+
 ```sh
 python3 -m raveil project output FIRST_RUN --project "$DEMO"
 python3 -m raveil project output SECOND_RUN --project "$DEMO"
@@ -62,7 +68,11 @@ python3 -m raveil project run sensor-energy-bias --backend rtl-sim --project "$D
 ## Deliberate limits and next questions
 
 Both examples are fixed 8x8 snapshots with exactly 324 uint32 input words and
-one output. They add no opcode, capacity, backend or CLI. Signed and saturating
-arithmetic and threshold/select remain T-0181 candidates. Multiple output
-streams remain T-0183. A full 3x3 dilation needs 18 instructions and exceeds
-the current 16-instruction capacity; capacity and tiling remain T-0184.
+one output. They add no opcode, capacity, backend or CLI. A Sobel edge filter
+needs signed subtraction, and thresholded occupancy needs predicate/select;
+those realistic rejected variants remain T-0181 candidates. One sensor pass
+that emits both raw squared energy and biased energy needs two output identities
+and violates the current exactly-one-final-STORE rule; multi-output Graphs
+remain T-0183. A full 3x3 dilation needs nine loads, eight MAX operations and a
+store (18 instructions), exceeding the current 16-instruction capacity;
+capacity and tiling remain T-0184.

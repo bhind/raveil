@@ -4,9 +4,12 @@ These checks use independent domain formulas and are not RTL evidence.
 """
 import json
 from pathlib import Path
+import shutil
+import tempfile
 import unittest
 
 from raveil.graph_device_dag import compile_descriptor, graph_oracle, software_fallback
+from raveil.project import Project, init_project
 from raveil.project_graph import input_bytes
 
 
@@ -67,6 +70,20 @@ class GraphWorkloadExampleTests(unittest.TestCase):
             self.assertEqual(set(recipe), {"schema", "kind", "descriptor", "input"})
             self.assertTrue((PACK / "inputs" / recipe["descriptor"]).is_file())
             self.assertTrue((PACK / "inputs" / recipe["input"]).is_file())
+
+    def test_pack_stages_through_existing_project_discovery_and_show(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "workspace"
+            init_project(root)
+            for folder in ("recipes", "inputs"):
+                for source in (PACK / folder).iterdir():
+                    shutil.copyfile(source, root / folder / source.name)
+            project = Project(root)
+            listed = project.recipes()
+            self.assertIn("cross-dilate-binary: graph-device; backends=rtl-sim", listed)
+            self.assertIn("sensor-energy-bias: graph-device; backends=rtl-sim", listed)
+            self.assertIn("instructions=10/16", project.show("cross-dilate-binary"))
+            self.assertIn("instructions=4/16", project.show("sensor-energy-bias"))
 
     def test_cross_dilation_matches_independent_domain_oracle(self):
         descriptor, words = self.descriptor_and_words("cross-dilate-binary")
