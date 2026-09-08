@@ -22,20 +22,22 @@ canonical main as `8c6fb00`. Three public candidates were inspected at
 exact revisions. None is adopted or established as Raveil evidence. OpenASIP
 v2.2 is the only feasibility-spike candidate because one described TTA machine
 can receive separately compiled program images and the project exposes compiler,
-simulator and RTL-generation stages. Raveil has not built it or demonstrated
-three programs. OpenEdgeCGRA is stopped before source use because its manifest
+simulator and RTL-generation stages. T-0044/S00 itself did not build it or
+demonstrate three programs. OpenEdgeCGRA is stopped before source use because
+its manifest
 refers to a `LICENSE.md` that is absent at the fixed revision, in addition to
 unresolved build and contract gaps. Apache VTA has a bounded driver and
 instruction-stream interface but remains a tensor-specific public control.
-Even a successful OpenASIP feasibility spike would not close ADR-0049's
-full-cost comparison. It must still prove CPU/candidate lifecycle parity and an
-independent contract-lifetime/authority criterion before any gate result.
-This is Planning evidence only: no source import, build, simulation, experiment
-freeze, architecture adoption, PPA, FPGA, ASIC, silicon, patent or FTO result.
+Even the subsequently successful bounded OpenASIP feasibility spike does not
+close ADR-0049's full-cost comparison. It must still prove CPU/candidate
+lifecycle parity and an independent contract-lifetime/authority criterion
+before any gate result. The T-0044/S00 result is Planning evidence only: no
+source import, build, simulation, experiment freeze, architecture adoption,
+PPA, FPGA, ASIC, silicon, patent or FTO result.
 Exact `e5610ff` passed 826 tests in 119.555 seconds with two skips, the record
 checker, `git diff --check`, independent review and Vreji audit. Issue #190 is
-closed and its Project item is Done. T-0044 remains open; the separate OpenASIP
-feasibility spike has not been created, authorized or executed.
+closed and its Project item is Done. T-0044 remains open; its later OpenASIP
+feasibility spike is the separately governed T-0191/EXP-0012 result above.
 
 T-0181 is a Planning-only Graph extension decision spike. Three rejected
 fixtures preserve exact current failures and 14 hand-calculated vectors for a
