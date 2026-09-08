@@ -4,6 +4,15 @@ Last updated: 2026-09-08
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0185** Apply bounded Graphs to real grid-processing tasks,
+  [Issue #184](https://github.com/bhind/raveil/issues/184), S-0003, 3 SP.
+  Add a copied-before-use staging pack for 8x8 cross-neighborhood binary
+  dilation and unsigned sensor-energy-plus-bias. Prove both against independent
+  domain formulas, the compiler oracle, software fallback and actual RTL; show
+  edit/rerun/output/diff/Garden through the existing Project CLI. No new opcode,
+  backend, capacity or performance claim. Branch
+  `feat/t-0185-graph-workload-examples`, Experience Implementer, RTL Simulation.
+
 - [x] **T-0179** Explain recipe readiness before launching a backend,
   [Issue #177](https://github.com/bhind/raveil/issues/177), S-0003, 3 SP.
   Add a read-only `project check` with separate recipe, input, admission and

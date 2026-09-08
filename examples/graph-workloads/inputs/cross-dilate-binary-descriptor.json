@@ -1,0 +1,17 @@
+{
+  "schema": "raveil.graph-device-dag/v4",
+  "graph_id": "cross-dilate-binary",
+  "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+  "nodes": [
+    {"id": "center", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+    {"id": "north", "op": "LOAD_U32", "address": {"row_delta": -1, "column_delta": 0}},
+    {"id": "south", "op": "LOAD_U32", "address": {"row_delta": 1, "column_delta": 0}},
+    {"id": "west", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": -1}},
+    {"id": "east", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 1}},
+    {"id": "north-south", "op": "MAX_U32", "inputs": ["north", "south"]},
+    {"id": "west-east", "op": "MAX_U32", "inputs": ["west", "east"]},
+    {"id": "ring", "op": "MAX_U32", "inputs": ["north-south", "west-east"]},
+    {"id": "dilated", "op": "MAX_U32", "inputs": ["center", "ring"]},
+    {"id": "store", "op": "STORE_U32", "input": "dilated"}
+  ]
+}
