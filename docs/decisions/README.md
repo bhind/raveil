@@ -108,3 +108,4 @@ rewrite it.
 | [ADR-0088](ADR-0088-graph-authoring-order-is-not-execution-order.md) | Accepted | Deterministic dependency scheduling admits Graph forward references while preserving ordered programs |
 | [ADR-0089](ADR-0089-graph-multiplication-is-versioned-u32.md) | Accepted | Versioned unsigned multiplication with explicit modulo arithmetic and independent execution checks |
 | [ADR-0092](ADR-0092-private-project-burndown-uses-a-dedicated-token.md) | Accepted | A least-privilege daily Action updates aggregate ideal/actual lines only inside the private Project |
+| [ADR-0098](ADR-0098-recipe-fork-uses-recipe-last-publication.md) | Accepted | Recipe forks publish the recipe last under a documented single-writer operating constraint |

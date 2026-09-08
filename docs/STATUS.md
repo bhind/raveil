@@ -1,6 +1,14 @@
 # Current status
 
-Last updated: 2026-09-07
+Last updated: 2026-09-08
+
+T-0178 implements bounded recipe forks with recipe-last publication under
+ADR-0098. Graph forks copy descriptor/input files and rewrite only the new
+recipe; Command/GEMM forks copy their admitted recipe. Caught failures remove
+only invocation-created identity-matching files. The documented operating
+boundary is single-user/single-writer; crash leftovers and hostile concurrency
+are not hidden. Issue #176, S-0003, 3 SP and branch
+`feat/t-0178-recipe-fork` own Host Functional evidence.
 
 T-0190 extends `project recipes` with exact recipe paths and, for graph-device
 recipes, descriptor plus seed or input-data relationships. Shared neighborhood

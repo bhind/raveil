@@ -6,6 +6,7 @@ import io
 import os
 from pathlib import Path
 import stat
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -21,6 +22,7 @@ from raveil.project import (
     encoded,
     init_project,
 )
+from raveil import project as project_module
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -96,6 +98,91 @@ class ProjectWorkspaceTests(unittest.TestCase):
         for path in (self.root / "recipes").iterdir():
             path.unlink()
         self.assertIn("No JSON recipes found", project.recipes())
+
+    def test_fork_command_recipe_runs_without_changing_source_or_past_run(self) -> None:
+        project = Project(self.root)
+        before = project.run("logs", "native", kernel=Path("missing"), qemu="missing", compiler="cc")
+        run_root = self.root / "runs" / before["run_id"]
+        run_bytes = {path.relative_to(run_root): path.read_bytes()
+                     for path in run_root.rglob("*") if path.is_file()}
+        source = (self.root / "recipes/logs.json").read_bytes()
+
+        rendered = project.fork("logs", "my-logs")
+        self.assertIn("Forked logs -> my-logs", rendered)
+        self.assertEqual((self.root / "recipes/logs.json").read_bytes(), source)
+        copied = project.run("my-logs", "native", kernel=Path("missing"),
+                             qemu="missing", compiler="cc")
+        self.assertEqual(copied["status"], "succeeded")
+        self.assertEqual(run_bytes, {path.relative_to(run_root): path.read_bytes()
+                                    for path in run_root.rglob("*") if path.is_file()})
+
+    def test_fork_graph_copies_independent_descriptor_and_input(self) -> None:
+        project = Project(self.root)
+        source_recipe = (self.root / "recipes/bias-grid.json").read_bytes()
+        source_descriptor = (self.root / "inputs/bias-grid.json").read_bytes()
+        source_input = (self.root / "inputs/bias-grid-data.json").read_bytes()
+        project.fork("bias-grid", "my-bias")
+
+        copied = json.loads((self.root / "recipes/my-bias.json").read_text())
+        self.assertEqual(copied["descriptor"], "my-bias-descriptor.json")
+        self.assertEqual(copied["input"], "my-bias-input.json")
+        self.assertEqual((self.root / "inputs/my-bias-descriptor.json").read_bytes(), source_descriptor)
+        self.assertEqual((self.root / "inputs/my-bias-input.json").read_bytes(), source_input)
+
+        descriptor = json.loads((self.root / "inputs/my-bias-descriptor.json").read_text())
+        descriptor["nodes"][1]["immediate"] = 7
+        (self.root / "inputs/my-bias-descriptor.json").write_text(json.dumps(descriptor))
+        self.assertIn("immediate=7", project.show("my-bias"))
+        self.assertIn("immediate=5", project.show("bias-grid"))
+        self.assertEqual((self.root / "recipes/bias-grid.json").read_bytes(), source_recipe)
+        self.assertEqual((self.root / "inputs/bias-grid.json").read_bytes(), source_descriptor)
+        self.assertEqual((self.root / "inputs/bias-grid-data.json").read_bytes(), source_input)
+
+    def test_fork_preflight_and_caught_failure_publish_no_recipe(self) -> None:
+        project = Project(self.root)
+        linked = self.root / "inputs/my-bias-descriptor.json"
+        linked.symlink_to(self.root / "inputs/bias-grid.json")
+        with self.assertRaisesRegex(ValueError, "destination already exists"):
+            project.fork("bias-grid", "my-bias")
+        self.assertFalse((self.root / "recipes/my-bias.json").exists())
+        linked.unlink()
+
+        (self.root / "inputs/bias-grid-data.json").unlink()
+        with self.assertRaisesRegex(ValueError, "does not exist"):
+            project.fork("bias-grid", "missing-source")
+        self.assertFalse((self.root / "recipes/missing-source.json").exists())
+        self.assertFalse((self.root / "inputs/missing-source-descriptor.json").exists())
+        shutil.copyfile(self.root / "inputs/neighborhood-data.json",
+                        self.root / "inputs/bias-grid-data.json")
+
+        original = project_module.write_new
+        calls = 0
+
+        def fail_second(path, data, created=None):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected publication failure")
+            return original(path, data, created)
+
+        with patch("raveil.project.write_new", side_effect=fail_second):
+            with self.assertRaisesRegex(ValueError, "before recipe publication"):
+                project.fork("bias-grid", "interrupted")
+        for relative in ("recipes/interrupted.json", "inputs/interrupted-descriptor.json",
+                         "inputs/interrupted-input.json"):
+            self.assertFalse((self.root / relative).exists())
+
+    def test_fork_cli_rejects_traversal_and_existing_destination_cleanly(self) -> None:
+        project = Project(self.root)
+        project.fork("logs", "copy")
+        for source, destination, message in (("../logs", "new", "name must contain"),
+                                              ("logs", "copy", "destination already exists")):
+            error = io.StringIO()
+            with contextlib.redirect_stderr(error):
+                self.assertEqual(main(["project", "fork", source, destination,
+                                       "--project", str(self.root)]), 2)
+            self.assertIn(message, error.getvalue())
+            self.assertNotIn("Traceback", error.getvalue())
 
     def test_successful_large_metadata_remains_readable_and_diffable(self) -> None:
         for index in range(230):
