@@ -4,7 +4,7 @@ Last updated: 2026-09-09
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0181** Choose the next arithmetic or predicate from a rejected
+- [x] **T-0181** Choose the next arithmetic or predicate from a rejected
   workload, [Issue #180](https://github.com/bhind/raveil/issues/180), S-0003,
   3 SP. Three exact rejected programs cover source-free/full-width constants,
   saturating subtraction and threshold/select. The Planning recommendation is
@@ -12,6 +12,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   eager value semantics and no conditional effect. No compiler or RTL mutation
   is authorized; adoption requires a separate accepted task and ADR. Branch
   `docs/t-0181-graph-extension-decision`, Researcher, Planning.
+  Exact `ed32f61` passed 826 tests, the semantic-vector checker, independent
+  review and Vreji audit. PR #235 merged as `69589f0`; Issue #180 closed and
+  canonical Project Done was verified. This completes the recommendation only,
+  not `GE_IMM_U32` adoption or implementation.
 
 - [x] **T-0185** Apply bounded Graphs to real grid-processing tasks,
   [Issue #184](https://github.com/bhind/raveil/issues/184), S-0003, 3 SP.
