@@ -169,8 +169,12 @@ resolves it.
   token-ready successor is evaluated as existing VLIW/CGRA/dataflow mechanism,
   not Raveil novelty. Which source-, revision-, license-, provenance-, and
   IP-risk-reviewed public implementation is the smallest faithful T-0044
-  control and possible Daphnis adapter? Selection remains open; public access or
-  an OSS license alone is not patent clearance.
+  control and possible Daphnis adapter? T-0044/S00 now retains OpenASIP v2.2 as
+  the sole bounded feasibility-spike candidate, not an adopted adapter. Can a
+  pinned Linux build execute three distinct programs on one frozen ADF/RTL
+  identity while exposing full program/configuration costs and preserving a
+  Raveil-owned effect/fallback boundary? Public access or an OSS license alone
+  is not patent clearance.
 - Which three semantically distinct operation graphs provide the smallest
   no-RTL-regeneration test of temporal configurability, memory behavior, and
   contract parity without expanding into a general OoO/dataflow engine?
