@@ -467,6 +467,13 @@ acceptance, and merge remain one serial Project Manager boundary.
    parity, and accounts for compilation/configuration/PPA cost. Failure stops
    custom Graph hardware but preserves Raveil as a portable contract/runtime
    over existing CPU and reviewed configurable backends.
+   T-0044/S00 retains OpenASIP v2.2 only as a bounded feasibility-spike
+   candidate. T-0191 must first prove three topology- and memory-distinct
+   programs on one frozen ADF/generated-RTL identity in a supported Linux
+   simulator and preserve CPU/candidate lifecycle parity plus an independent
+   Raveil authority property. Even success remains pre-gate Host Functional
+   evidence; installation, compilation, configuration, execution, fallback
+   and PPA-proxy comparison still require a later preregistered slice.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
