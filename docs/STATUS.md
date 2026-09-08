@@ -2,6 +2,17 @@
 
 Last updated: 2026-09-08
 
+T-0185 implements a copied-before-use bounded Graph workload staging pack. Its
+two fixed 8x8 examples are cross-neighborhood binary dilation and unsigned
+sensor-energy-plus-bias modulo 2^32. Both retain the exact 324-word snapshot
+transport and existing Project/RTL path; no opcode, backend or capacity changes.
+Host tests compare independent domain formulas with the descriptor oracle and
+installed-program software fallback. Three actual RTL simulation runs passed all
+three output checks. A one-word occupancy edit changed three active output
+cells while preserving the program, simulator and RTL identities; saved output,
+diff and Garden inspection passed. No performance, FPGA, silicon,
+sensor-calibration or general-workload claim follows.
+
 T-0179 implements a non-executing `project check RECIPE --backend BACKEND`
 preflight. It reports recipe, input, admission and tool availability separately
 and returns failure when a required known prerequisite is absent. Its header
