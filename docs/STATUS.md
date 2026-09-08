@@ -2,14 +2,20 @@
 
 Last updated: 2026-09-09
 
-T-0191 is the Ready, unexecuted successor to T-0044/S00. Its only candidate is
-exact OpenASIP v2.2 on pinned supported Linux. The task must keep one frozen
-ADF/generated-RTL identity while compiling and simulating three operation-graph
-and memory-distinct programs, expose bounded configuration costs, exercise
-CPU/candidate lifecycle parity and independently demonstrate one Raveil-owned
-contract-lifetime or authority property. No build, adapter, program receipt or
-new experiment evidence exists yet. Registration does not adopt OpenASIP,
-authorize device work, or close T-0044/ADR-0049.
+T-0191 is In Progress. EXP-0012 built exact OpenASIP v2.2 and llvmtce revisions
+in a pinned linux/amd64 image and used one frozen ADF to compile and simulate
+three volatile-input, topology-distinct programs. All independent uint32
+oracles matched; retained private TPEFs and disassembly passed explicit load
+and multiply witnesses. Raveil-owned tests cover cancellation, failure and
+oracle-mismatch fallback, unpublished candidate output and publication
+authority on the actual simulator entrypoint. Two independent VHDL generations
+from that ADF produced the same timestamp-normalized ten-file tree identity;
+TPEF sizes and n=1 host load diagnostics are recorded without device-time or
+performance meaning. This is partial Host Functional evidence only. An
+approved durable raw-artifact destination, in-flight cancellation parity and
+independent closeout review remain open.
+It does not adopt OpenASIP, authorize device work, establish performance/PPA,
+or close T-0044/ADR-0049.
 
 T-0044/S00 completed a bounded source qualification through PR #237, merged to
 canonical main as `8c6fb00`. Three public candidates were inspected at

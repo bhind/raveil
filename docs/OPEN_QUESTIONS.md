@@ -174,7 +174,11 @@ resolves it.
   pinned Linux build execute three distinct programs on one frozen ADF/RTL
   identity while exposing full program/configuration costs and preserving a
   Raveil-owned effect/fallback boundary? Public access or an OSS license alone
-  is not patent clearance.
+  is not patent clearance. EXP-0012 answers only the frozen-ADF simulator and
+  Raveil publication/fallback portions positively, and records a normalized
+  generated-VHDL identity plus bounded TPEF/load diagnostics. Durable evidence,
+  in-flight cancellation parity and patent/FTO questions
+  remain open.
 - Which three semantically distinct operation graphs provide the smallest
   no-RTL-regeneration test of temporal configurability, memory behavior, and
   contract parity without expanding into a general OoO/dataflow engine?

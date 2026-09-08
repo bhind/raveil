@@ -1,0 +1,22 @@
+{
+  "schema": "raveil.t0191-openasip-source-receipt/v1",
+  "task": "T-0191",
+  "evidence_class": "planning-source-build",
+  "observed_at": "2026-09-08T16:43:11Z",
+  "platform": "linux/amd64",
+  "build_target": "sources",
+  "build_exit": 0,
+  "local_image_id": "sha256:46c4391c2b2da55f99c68c20954d9cf891f820d1700318b2564f2799760f71b3",
+  "base_image": "ubuntu@sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316",
+  "ubuntu_snapshot": "20260908T000000Z",
+  "openasip_revision": "f2282048f4c78d18190a9b77e7497e29a164721d",
+  "openasip_license_sha256": "9e110c983fbf1706a5ece26c186531714e6749cf9241336e91ab67d2dbaccdef",
+  "llvm_revision": "b47e651cc052ba9e097701efa8840e8f3081c84d",
+  "machine_path": "openasip/data/mach/minimal.adf",
+  "machine_sha256": "1b290e9d90cfe93397200b356979ba3f2bf8da3df56b5e27e879483b5a976b5c",
+  "package_receipt_sha256": "0a5ac4c758099b4efe7f587c57a493e9b2c71d08ba62fd75595851b8ed8dff01",
+  "package_count": 592,
+  "toolchain_built": false,
+  "simulator_run": false,
+  "publication": false
+}

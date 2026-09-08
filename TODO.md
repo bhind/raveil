@@ -12,7 +12,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   regenerating that identity. Record program/configuration costs, independent
   oracles and CPU/candidate lifecycle parity, and independently demonstrate
   one Raveil contract-lifetime or authority property. No upstream source is
-  copied into Raveil. Passing remains pre-gate Host Functional evidence and
+  copied into Raveil. EXP-0012 now passes the three-program frozen-ADF and
+  Raveil publication-authority portions, normalized generated-VHDL identity,
+  TPEF sizes and bounded host load diagnostics. Durable raw-artifact promotion,
+  in-flight cancellation parity and independent closeout
+  review remain. Passing remains pre-gate Host Functional evidence and
   cannot close T-0044 or ADR-0049's later full-cost comparison. Branch
   `research/t-0191-openasip-three-graphs`, Systems Implementer with Researcher,
   Vreji, Security Reviewer, Tester and PM review.

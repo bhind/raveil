@@ -474,6 +474,12 @@ acceptance, and merge remain one serial Project Manager boundary.
    Raveil authority property. Even success remains pre-gate Host Functional
    evidence; installation, compilation, configuration, execution, fallback
    and PPA-proxy comparison still require a later preregistered slice.
+   EXP-0012 now passes the frozen-ADF three-program simulator witness and the
+   Raveil-owned publication/fallback authority portion. It also fixes a
+   timestamp-normalized generated-VHDL identity, TPEF payload sizes and bounded
+   host load diagnostics. T-0191 remains open at durable raw evidence,
+   in-flight cancellation parity and independent closeout
+   review; no later comparison gate is unlocked.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

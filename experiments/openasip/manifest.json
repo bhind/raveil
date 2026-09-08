@@ -1,0 +1,72 @@
+{
+  "schema": "raveil.t0191-openasip-input/v1",
+  "task": "T-0191",
+  "evidence_class": "host-functional-external-simulator",
+  "upstream": {
+    "url": "https://github.com/cpc/openasip.git",
+    "revision": "f2282048f4c78d18190a9b77e7497e29a164721d",
+    "license_locator": "LICENSE.txt"
+  },
+  "llvm": {
+    "url": "https://github.com/cpc/llvmtce.git",
+    "revision": "b47e651cc052ba9e097701efa8840e8f3081c84d"
+  },
+  "machine": {
+    "upstream_path": "openasip/data/mach/minimal.adf",
+    "sha256": "1b290e9d90cfe93397200b356979ba3f2bf8da3df56b5e27e879483b5a976b5c"
+  },
+  "programs": [
+    "programs/neighborhood.c",
+    "programs/elementwise.c",
+    "programs/reduction.c"
+  ],
+  "program_receipts": {
+    "programs/neighborhood.c": {
+      "bytes": 557,
+      "sha256": "450407030c7494f7b6b8e26fb7616bc7cacbf3105d828028370c331752e0b755",
+      "topology": "two-dimensional-five-point-neighborhood",
+      "dependence": "independent-output-accumulation",
+      "access_footprint": "volatile-4x4-u32-offset-loads",
+      "input_bytes": 64,
+      "result_bytes": 4
+    },
+    "programs/elementwise.c": {
+      "bytes": 305,
+      "sha256": "94ee129818135a4e88a613c7c10b26d1fb48f8f686402f214e268edf0446c648",
+      "topology": "one-dimensional-elementwise",
+      "dependence": "independent-input-transform",
+      "access_footprint": "volatile-8xu32-linear-loads",
+      "input_bytes": 32,
+      "result_bytes": 4
+    },
+    "programs/reduction.c": {
+      "bytes": 328,
+      "sha256": "bc1606281562eb863af3ae5a0821420edfc2279eecb1c8aec693c59b355359b8",
+      "topology": "one-dimensional-reduction",
+      "dependence": "loop-carried-accumulator",
+      "access_footprint": "volatile-12xu32-linear-loads",
+      "input_bytes": 48,
+      "result_bytes": 4
+    }
+  },
+  "container": {
+    "platform": "linux/amd64",
+    "base_image": "ubuntu@sha256:1e0a86e57d247923571b75e0aaf48a1449cf8c543d51fb3e07a4a7d7bfa79316",
+    "base_identity_source": "https://hub.docker.com/v2/repositories/library/ubuntu/tags/24.04",
+    "identity_observed_at": "2026-09-09",
+    "status": "pinned"
+  },
+  "authority": {
+    "upstream_output_private_until_oracle": true,
+    "cpu_fallback_owned": true,
+    "publication_owned_by_raveil": true
+  },
+  "non_claims": [
+    "manifest-alone-is-not-build-evidence",
+    "manifest-alone-is-not-simulation-evidence",
+    "no-rtl-evidence",
+    "no-performance-evidence",
+    "no-adoption",
+    "no-patent-or-fto-clearance"
+  ]
+}
