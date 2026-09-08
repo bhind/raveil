@@ -70,6 +70,34 @@ recipe. A listed backend is not a successful-run guarantee. Follow with
 `project show NAME` to inspect the workload and then `project run NAME` with
 the indicated backend. Use `--project DIR` when outside the project directory.
 
+### Fork an editable recipe
+
+Create an independent editable copy with a new confined name:
+
+```sh
+raveil project fork bias-grid my-bias
+raveil project show my-bias
+```
+
+Command and GEMM forks copy the admitted recipe. Graph-device forks also copy
+the referenced descriptor and explicit input data, then rewrite only the new
+recipe. Seed-based Graph recipes copy their descriptor and retain the seed.
+Existing destinations, traversal, symlinks and unavailable or admission-invalid
+referenced paths are rejected; descriptor/input semantics remain a `show`/`run`
+check. The source and saved runs are not modified.
+
+Fork is a cooperative **single-user, single-writer** operation. Do not run two
+forks concurrently in one project, edit its destination paths while it runs,
+or treat a synchronized/shared directory as a concurrent writer surface. The
+complete recipe is published atomically and last; caught failures clean only
+files created by that invocation. A crash or power loss can still leave orphan
+`inputs/` files, a non-discoverable partial temporary recipe, or a complete
+destination plus its temporary hard link. Inspect
+`recipes/DESTINATION.json`, non-JSON `.DESTINATION.*.fork` files and
+`inputs/DESTINATION-*.json` before reusing a name; when ownership is uncertain,
+use a fresh destination name. This is not a general filesystem transaction,
+crash-recovery journal, hostile-writer boundary or sandbox. See ADR-0098.
+
 ## Edit, run and compare
 
 ```sh

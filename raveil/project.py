@@ -46,10 +46,14 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def write_new(path: Path, data: bytes) -> None:
+def write_new(path: Path, data: bytes,
+              created: list[tuple[Path, tuple[int, int]]] | None = None) -> None:
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
     descriptor = os.open(path, flags, 0o600)
     try:
+        metadata = os.fstat(descriptor)
+        if created is not None:
+            created.append((path, (metadata.st_dev, metadata.st_ino)))
         view = memoryview(data)
         while view:
             written = os.write(descriptor, view)
@@ -264,6 +268,63 @@ class Project:
         else:
             raise ValueError("recipe kind must be command, gemm or graph-device")
         return recipe
+
+    def fork(self, source_name: str, destination_name: str) -> str:
+        source_name, destination_name = name(source_name), name(destination_name)
+        if source_name == destination_name:
+            raise ValueError("fork destination must differ from its source")
+        recipe = self.recipe(source_name)
+        copied_recipe = dict(recipe)
+        payloads: list[tuple[str, bytes]] = []
+        if recipe["kind"] == "graph-device":
+            inputs = NativeWorkspace(self.root / "inputs")
+            descriptor_name = f"{destination_name}-descriptor.json"
+            payloads.append((f"inputs/{descriptor_name}",
+                             inputs.read_text(recipe["descriptor"], maximum=MAX_BYTES).encode("utf-8")))
+            copied_recipe["descriptor"] = descriptor_name
+            if "input" in recipe:
+                input_name = f"{destination_name}-input.json"
+                payloads.append((f"inputs/{input_name}",
+                                 inputs.read_text(recipe["input"], maximum=MAX_BYTES).encode("utf-8")))
+                copied_recipe["input"] = input_name
+        recipe_path = f"recipes/{destination_name}.json"
+        destinations = [path for path, _ in payloads] + [recipe_path]
+        for relative in destinations:
+            if os.path.lexists(self.root / relative):
+                raise ValueError(f"fork destination already exists: /{relative}")
+
+        created: list[tuple[Path, tuple[int, int]]] = []
+        try:
+            for relative, payload in payloads:
+                write_new(self.root / relative, payload, created)
+            # Write the admitted recipe under a non-discoverable name, then
+            # publish a complete hard link without replacing an existing path.
+            recipe_temp = self.root / "recipes" / f".{destination_name}.{uuid4().hex}.fork"
+            write_new(recipe_temp, encoded(copied_recipe), created)
+            recipe_identity = created[-1][1]
+            final_recipe = self.root / recipe_path
+            os.link(recipe_temp, final_recipe, follow_symlinks=False)
+            created.append((final_recipe, recipe_identity))
+            recipe_temp.unlink()
+        except OSError as error:
+            retained: list[str] = []
+            for path, identity in reversed(created):
+                try:
+                    metadata = path.lstat()
+                    if (metadata.st_dev, metadata.st_ino) != identity:
+                        retained.append(str(path.relative_to(self.root)))
+                        continue
+                    path.unlink()
+                except FileNotFoundError:
+                    pass
+                except OSError:
+                    retained.append(str(path.relative_to(self.root)))
+            if retained:
+                raise RuntimeError("fork failed and newly created files require manual recovery: "
+                                   + ", ".join(sorted(retained))) from error
+            raise ValueError(f"fork failed during atomic recipe publication: {error}") from error
+        return (f"Forked {source_name} -> {destination_name}\nCreated: "
+                + ", ".join("/" + path for path in destinations))
 
     def recipes(self) -> str:
         lines = []
@@ -667,6 +728,8 @@ def command_project(args: argparse.Namespace) -> int:
         return run_interactive(view, sys.stdin, sys.stdout, args.width)
     if action == "recipes":
         print(project.recipes())
+    elif action == "fork":
+        print(project.fork(args.source, args.destination))
     elif action == "show":
         print(project.show(args.recipe))
     elif action == "runs":
@@ -714,7 +777,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "run", "runs", "output", "diff", "console", "garden"):
+    for action in ("init", "recipes", "show", "fork", "run", "runs", "output", "diff", "console", "garden"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -725,6 +788,9 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
         if action in {"show", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
+        if action == "fork":
+            command.add_argument("source", help="admitted source recipe name")
+            command.add_argument("destination", help="new confined recipe name")
         if action == "diff":
             command.add_argument("first")
             command.add_argument("second")
