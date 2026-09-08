@@ -12,6 +12,10 @@ three output checks. A one-word occupancy edit changed three active output
 cells while preserving the program, simulator and RTL identities; saved output,
 diff and Garden inspection passed. No performance, FPGA, silicon,
 sensor-calibration or general-workload claim follows.
+Exact candidate commits `2f20d3a` and `0bad97c` passed independent review and
+Vreji audit; PR #233 merged to canonical main as `e2192ae`. Issue #184 is
+closed and its Project item is Done. Saturday Sprint Review remains a separate
+owner-visible ceremony, not a condition of ordinary task integration.
 
 T-0179 implements a non-executing `project check RECIPE --backend BACKEND`
 preflight. It reports recipe, input, admission and tool availability separately
