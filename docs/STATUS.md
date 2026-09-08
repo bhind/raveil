@@ -2,6 +2,15 @@
 
 Last updated: 2026-09-09
 
+T-0191 is the Ready, unexecuted successor to T-0044/S00. Its only candidate is
+exact OpenASIP v2.2 on pinned supported Linux. The task must keep one frozen
+ADF/generated-RTL identity while compiling and simulating three operation-graph
+and memory-distinct programs, expose bounded configuration costs, exercise
+CPU/candidate lifecycle parity and independently demonstrate one Raveil-owned
+contract-lifetime or authority property. No build, adapter, program receipt or
+new experiment evidence exists yet. Registration does not adopt OpenASIP,
+authorize device work, or close T-0044/ADR-0049.
+
 T-0044/S00 completed a bounded source qualification through PR #237, merged to
 canonical main as `8c6fb00`. Three public candidates were inspected at
 exact revisions. None is adopted or established as Raveil evidence. OpenASIP

@@ -4,6 +4,19 @@ Last updated: 2026-09-09
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [ ] **T-0191** Prove one frozen OpenASIP machine across three Graphs,
+  [Issue #239](https://github.com/bhind/raveil/issues/239), S-0003, 8 SP.
+  Build exact OpenASIP v2.2 only in a pinned supported Linux environment,
+  freeze one ADF/generated-RTL identity, then compile and simulate a
+  neighborhood transform, elementwise multiply/add chain and reduction without
+  regenerating that identity. Record program/configuration costs, independent
+  oracles and CPU/candidate lifecycle parity, and independently demonstrate
+  one Raveil contract-lifetime or authority property. No upstream source is
+  copied into Raveil. Passing remains pre-gate Host Functional evidence and
+  cannot close T-0044 or ADR-0049's later full-cost comparison. Branch
+  `research/t-0191-openasip-three-graphs`, Systems Implementer with Researcher,
+  Vreji, Security Reviewer, Tester and PM review.
+
 - [x] **T-0044/S00** Qualify a public configurable comparison candidate,
   [Issue #190](https://github.com/bhind/raveil/issues/190), S-0003, 5 current
   SP from 2 initial SP. Exact-revision Planning review found no adoptable
