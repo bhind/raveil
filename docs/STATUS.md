@@ -12,8 +12,10 @@ admission reuses the bounded compiler through a registry that never invokes
 validators. The command creates no run or output and starts no compiler, QEMU,
 Docker, RTL, network, device or installer action. The RTL runner must be a
 non-symlink executable regular file. Docker daemon/image state and future
-execution success remain explicitly not checked. Issue #177, S-0003,
-3 SP and branch `feat/t-0179-project-preflight` own Host Functional evidence.
+execution success remain explicitly not checked. Exact `e8bdd68` passed 820
+tests plus security and Vreji review; PR #231 merged as `3537b74`, Issue #177
+closed and canonical Project Done was verified. Evidence is Host Functional
+only.
 
 T-0178 implements bounded recipe forks with recipe-last publication under
 ADR-0098. Graph forks copy descriptor/input files and rewrite only the new
