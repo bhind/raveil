@@ -17,7 +17,10 @@ raveil project garden RUN_ID --project /tmp/my-raveil-project
 raveil project garden RUN_ID --project /tmp/my-raveil-project --keys jjq --width 100
 ```
 
-Use j/k/g/G/q (then Enter) to navigate. Garden checks the saved artifact
+Enter a displayed zero-based instruction number directly, or use j/k/g/G/q
+(then Enter), to navigate a saved Graph. The fixture Garden uses its displayed
+one-based stage numbers and additionally supports d for details. Invalid input
+keeps the last valid Graph and selection visible. Garden checks the saved artifact
 manifest and shows retained lowering and receipt identities without compiling
 or running the Graph again. The view is Host Functional; saved simulation
 agreement is a historical reference, not a new execution or authenticated seal.
