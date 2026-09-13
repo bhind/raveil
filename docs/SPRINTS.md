@@ -28,16 +28,18 @@ read-only preview and add `--apply` only for the authorized Draft update.
 
 ## Cadence
 
-S-0003 September 12 review preparation: T-0173's representative increment is
-editing an immediate from 5 to 7, rerunning a snapshot Graph, then showing
-preserved output, diff and Garden semantics. Technical runs are retained in
-the September 6 log; rerun/show/explain at the ceremony and obtain the owner's
-disposition. Do not treat these pre-review runs as ceremony acceptance.
-After that disposition, record one Keep/Problem/Try and immediately pull the
-ready successor after usage/WIP checks. The owner subsequently approved
-T-0174 for immediate delivery in S-0003: a separate snapshot-backed starter
-avoids overwriting the descriptor shared by the neighborhood examples.
-That task authorization does not accept or advance the review ceremony.
+S-0003 received an owner-visible `Conditional Accept` on 2026-09-13 JST. The
+review demonstrated actual edit/run/inspect/diff loops for native log
+processing, native GEMM, bias-grid immediate 5 to 7 through actual RTL
+simulation, and neighborhood `ADD_U32` to `MAX_U32` through actual RTL
+simulation. It also showed saved-run Garden, the materialized/fused plan, and a
+missing-input failure with no output publication. Keep: retain actual editable
+loops rather than fixed playback. Problem: numbered Garden stages invited an
+unsupported numeric command and invalid input replaced the useful view with a
+misleading error. Try: deliver T-0192 early in S-0004 while retaining j/k
+navigation and deterministic rendering. Issue #242 and its Product Backlog
+item contain the accepted condition; completing the ceremony does not complete
+that follow-up task.
 
 GitHub Sprint Iterations retain Monday-through-Sunday reporting dates. Work
 does not wait for Monday when the preceding review and retrospective have
@@ -87,19 +89,17 @@ Incomplete inventory, missing evidence and contradictory lifecycle states
 remain named findings. Only the canonical queue may perform task lifecycle
 transitions; the daily reporter never accepts the weekly ceremony.
 
-The accepted 2026-09-05 S-0002 review routes visual Garden feedback to T-0150
-and daily reconciliation to T-0151. The owner requested the existing T-0148
-bounded Graph generality demonstration at S-0003 review on 2026-09-12. Retain
-current task state independently of that demo forecast.
+The accepted 2026-09-05 S-0002 review routed visual Garden feedback to T-0150
+and daily reconciliation to T-0151. The S-0003 bounded Graph-generality review
+is now conditionally accepted; its remaining visual interaction feedback is
+T-0192, not an open S-0003 ceremony.
 
-T-0150's local S-0003 candidate presents the two fusion paths side by side.
-For review, run the existing 150-column Garden command, navigate matmul/bias/
-relu with j/k, confirm both selected-stage marks and eliminated intermediate
-WRITE/READ, and toggle d for technical details. Default comparison occupies
-21 lines plus prompt; verify it visually in the owner's Mac terminal. Local
-Mac PTY and deterministic tests passed, but computer-use access to the actual
-Terminal app was denied. Preserve that distinction; no owner visual acceptance
-or Sprint ceremony completion has been inferred.
+T-0150's two fusion paths were shown in the owner's Mac terminal during the
+S-0003 review. The materialized plan exposed a 512-byte intermediate WRITE and
+READ; the fused plan showed both transfers removed while retaining the same
+semantic Graph and result contract. This was a plan comparison, not a
+performance measurement. Owner interaction exposed T-0192's stage-numbering
+affordance defect.
 
 ## Board and WIP
 
