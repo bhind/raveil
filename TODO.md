@@ -22,13 +22,16 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   Vreji, Security Reviewer, Tester and PM review.
 
 - [ ] **T-0192** Make Garden stage numbering match navigation,
-  [Issue #242](https://github.com/bhind/raveil/issues/242), P1, 2 SP, S-0004
-  candidate. The S-0003 owner review showed that rendered `[0]`, `[1]`, `[2]`
+  [Issue #242](https://github.com/bhind/raveil/issues/242), P0, 2 SP, S-0004,
+  In Progress on `fix/t-0192-garden-navigation`. The S-0003 owner review showed
+  that rendered `[0]`, `[1]`, `[2]`
   labels invite direct numeric selection, although Garden accepts only
   `j`, `k`, `g`, `G`, `d`, and `q`; entering `1` then replaces a valid view
   with the misleading message `No graph state was accepted.` Prefer bounded
-  one-digit selection when the stage count permits it, or remove/restyle the
-  numeric affordance. Fixture and saved-project Garden must remain equivalent,
+  one-digit selection when the stage count permits it. The fixture view uses
+  its displayed one-based numbers; dynamic and saved-project views use their
+  displayed zero-based instruction indices. Fixture and saved-project Garden
+  must remain equivalent,
   invalid input must preserve the accepted Graph view, and a deterministic test
   must cover the owner-observed `1`. Experience Implementer, Host Functional.
   No execution, compiler, RTL, performance or device change is in scope.

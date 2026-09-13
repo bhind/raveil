@@ -91,9 +91,22 @@ class ProjectGraphTests(unittest.TestCase):
         diff = self.project.diff(first["run_id"], second["run_id"])
         self.assertIn("input: 0/324 words changed", diff)
         self.assertIn("16 -> 18", diff)
-        from raveil.garden import render_key_session
+        from raveil.garden import render_key_session, run_interactive
         with patch("raveil.project_graph.run_snapshot", side_effect=AssertionError("read-only")):
-            self.assertIn("unsigned immediate: 7", render_key_session(self.project.garden(second["run_id"]), "jq", 100))
+            saved = self.project.garden(second["run_id"])
+            self.assertIn("unsigned immediate: 7", render_key_session(saved, "jq", 100))
+            self.assertIn("unsigned immediate: 7", render_key_session(saved, "1q", 100))
+            class Tty(io.StringIO):
+                def isatty(self):
+                    return True
+            output = Tty()
+            self.assertEqual(run_interactive(saved, Tty("1\nx\nq\n"), output, 100), 0)
+            invalid_frame = next(
+                frame for frame in output.getvalue().split("\x1b[H\x1b[2J")
+                if "Invalid navigation:" in frame
+            )
+            self.assertIn("selected: bias", invalid_frame)
+            self.assertNotIn("No graph state was accepted", invalid_frame)
         self.assertEqual(self.project.output(first["run_id"]), first_output)
 
     def saved_view_run(self):

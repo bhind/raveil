@@ -14,6 +14,17 @@ The GitHub Project records the review and retrospective and marks the S-0003
 ceremony Done. This is Host Functional and RTL Simulation Functional evidence;
 it is not performance, FPGA, ASIC or silicon evidence.
 
+T-0192 is In Progress for S-0004. Garden now accepts the stage or instruction
+number already rendered on screen when the complete range fits one decimal
+digit. The fixture comparison therefore selects stages with `1` through `N`;
+dynamic and saved-project execution explanations select their displayed
+zero-based `[0]` through `[N-1]` indices. Existing j/k/g/G navigation, d where
+supported, q, deterministic rendering and read-only authority remain intact.
+An invalid command redraws the last valid Graph and selection with a bounded
+navigation diagnostic instead of claiming that no Graph state was accepted.
+Focused fixture, dynamic, saved-project and Project regressions are passing;
+independent review and integration remain. Evidence is Host Functional only.
+
 T-0191 is In Progress. EXP-0012 built exact OpenASIP v2.2 and llvmtce revisions
 in a pinned linux/amd64 image and used one frozen ADF to compile and simulate
 three volatile-input, topology-distinct programs. All independent uint32

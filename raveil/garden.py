@@ -802,9 +802,27 @@ class GardenBrowser:
             self.selected = 0
         elif key == "G":
             self.selected = len(self.snapshot.program.nodes) - 1
+        elif key.isascii() and key.isdecimal() and len(self.snapshot.program.nodes) <= 9:
+            displayed = int(key)
+            if not 1 <= displayed <= len(self.snapshot.program.nodes):
+                raise ValueError(
+                    f"garden stage number must be 1-{len(self.snapshot.program.nodes)}"
+                )
+            self.selected = displayed - 1
         else:
-            raise ValueError("garden navigation accepts only j, k, g, G, d, or q")
+            numeric = "a displayed stage number, " if len(self.snapshot.program.nodes) <= 9 else ""
+            raise ValueError(f"garden navigation accepts {numeric}j, k, g, G, d, or q")
         return True
+
+    def _navigation_help(self) -> str:
+        numeric = (
+            f"1-{len(self.snapshot.program.nodes)} select | "
+            if len(self.snapshot.program.nodes) <= 9 else ""
+        )
+        return (
+            f"Navigation: {numeric}j next | k previous | g first | G last | "
+            "d details | q quit (then Enter)"
+        )
 
     def _node_dependencies(self, node: GraphNode) -> tuple[tuple[str, ...], tuple[str, ...]]:
         producers = {item.output: item.node_id for item in self.snapshot.program.nodes}
@@ -856,7 +874,7 @@ class GardenBrowser:
             "Semantic graph and result contract unchanged; plan comparison, not a measurement.",
             f"evidence: {self.snapshot.evidence.evidence_class} claim={self.snapshot.evidence.claim_status}",
             "authority: observe-only execute=no mutate=no approve=no promote=no",
-            "Navigation: j next | k previous | g first | G last | d details | q quit (then Enter)",
+            self._navigation_help(),
         ], self.width)
         return "\n".join([*header, "", *body, "", *footer])
 
@@ -951,7 +969,7 @@ class GardenBrowser:
             body = _join_panes(panes)
         footer = _wrapped_lines([
             "Commands / Status",
-            "Navigation: j next | k previous | g first | G last | d comparison | q quit",
+            self._navigation_help().replace("d details", "d comparison"),
             "authority: read-only; no graph execution, mutation, approval, or promotion.",
             *[f"demo: {command}" for command in self.snapshot.demo_commands],
         ], self.width)
@@ -1031,9 +1049,32 @@ class GardenDynamicBrowser:
             self.selected = 0
         elif key == "G":
             self.selected = len(self.explanation.instructions) - 1
+        elif (
+            key.isascii()
+            and key.isdecimal()
+            and len(self.explanation.instructions) <= 10
+        ):
+            displayed = int(key)
+            if displayed >= len(self.explanation.instructions):
+                raise ValueError(
+                    "garden instruction number must be 0-"
+                    f"{len(self.explanation.instructions) - 1}"
+                )
+            self.selected = displayed
         else:
-            raise ValueError("garden navigation accepts only j, k, g, G, or q")
+            numeric = (
+                "a displayed instruction number, "
+                if len(self.explanation.instructions) <= 10 else ""
+            )
+            raise ValueError(f"garden navigation accepts {numeric}j, k, g, G, or q")
         return True
+
+    def _navigation_help(self) -> str:
+        numeric = (
+            f"0-{len(self.explanation.instructions) - 1} select | "
+            if len(self.explanation.instructions) <= 10 else ""
+        )
+        return f"Navigation: {numeric}j next | k previous | g first | G last | q quit"
 
     def render(self) -> str:
         explanation = self.explanation
@@ -1156,7 +1197,7 @@ class GardenDynamicBrowser:
             body = _join_panes(panes)
         footer = _wrapped_lines([
             "Commands / Status",
-            "Navigation: j next | k previous | g first | G last | q quit",
+            self._navigation_help(),
             "authority: read-only; no compiler, execution, simulator, UIO, device, mutation, approval, or promotion.",
             *[f"demo: {command}" for command in explanation.demo_commands],
         ], self.width)
@@ -1196,7 +1237,7 @@ class GardenProjectBrowser(GardenDynamicBrowser):
         lines.extend(f"saved {key}: {value}" for key, value in view.identities.items())
         lines.extend(["performance=not-measured; missing provenance is not synthesized",
                       "authority: observe-only execute=no mutate=no approve=no promote=no",
-                      "Navigation: j next | k previous | g first | G last | q quit"])
+                      self._navigation_help()])
         return "\n".join(_wrapped_lines(lines, self.width))
 
 
@@ -1262,10 +1303,12 @@ def run_interactive(
 ) -> int:
     browser = _browser(snapshot, width)
     redraw = input_stream.isatty() and output_stream.isatty()
-    def display() -> None:
+    def display(message: str | None = None) -> None:
         if redraw:
             output_stream.write("\x1b[H\x1b[2J")
         output_stream.write(browser.render() + "\n")
+        if message is not None:
+            output_stream.write(f"Invalid navigation: {message}\n")
         output_stream.flush()
     display()
     if not input_stream.isatty():
@@ -1282,7 +1325,7 @@ def run_interactive(
                 output_stream.write("Raveil Garden | closed\n")
                 return 0
         except ValueError as error:
-            output_stream.write(render_error(str(error)) + "\n")
+            display(str(error))
             continue
         display()
     output_stream.write(render_error("garden navigation reached the bounded step limit") + "\n")

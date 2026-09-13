@@ -150,6 +150,16 @@ class GardenTUITests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "bounded step limit"):
             render_key_session(snapshot, "j" * 65)
 
+    def test_displayed_fixture_stage_numbers_select_that_stage(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        browser = GardenBrowser(snapshot)
+        browser.navigate("2")
+        self.assertIn("Selected bias:", browser.render())
+        browser.navigate("3")
+        self.assertIn("Selected relu:", browser.render())
+        with self.assertRaisesRegex(ValueError, "stage number must be 1-3"):
+            browser.navigate("0")
+
     def test_compact_fusion_screen_marks_selected_stage_and_removed_io(self) -> None:
         browser = GardenBrowser(GardenSnapshot.load(FIXTURE), 150)
         initial = browser.render()
@@ -192,6 +202,19 @@ class GardenTUITests(unittest.TestCase):
             plain_output = io.StringIO()
             self.assertEqual(run_interactive(snapshot, input_stream, plain_output), 0)
             self.assertNotIn("\x1b", plain_output.getvalue())
+
+    def test_interactive_invalid_input_preserves_the_valid_graph_view(self) -> None:
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+
+        snapshot = GardenSnapshot.load(FIXTURE)
+        output = Tty()
+        self.assertEqual(run_interactive(snapshot, Tty("2\nx\nq\n"), output), 0)
+        frames = output.getvalue().split("\x1b[H\x1b[2J")
+        invalid_frame = next(frame for frame in frames if "Invalid navigation:" in frame)
+        self.assertIn("Selected bias:", invalid_frame)
+        self.assertNotIn("No graph state was accepted", invalid_frame)
 
     def test_validated_fusion_comparison_is_data_bound_and_non_claiming(self) -> None:
         snapshot = GardenSnapshot.load(FIXTURE)
@@ -291,7 +314,7 @@ class GardenTUITests(unittest.TestCase):
             exit_code = main(["garden", "--fixture", str(FIXTURE)])
         self.assertEqual(exit_code, 0)
         self.assertEqual(output.getvalue().count("Raveil Garden | read-only graph browser"), 1)
-        self.assertIn("Navigation: j next", output.getvalue())
+        self.assertIn("Navigation: 1-3 select | j next", output.getvalue())
 
     def test_wide_layout_uses_three_panes_with_bounded_lines(self) -> None:
         rendered = self._details(GardenSnapshot.load(FIXTURE), width=150).render()
@@ -499,10 +522,14 @@ class GardenTUITests(unittest.TestCase):
         self.assertEqual(outputs[0], outputs[1])
         self.assertIn("> [2] s op=LOAD_U32", outputs[0])
         self.assertTrue(outputs[0].rstrip().endswith("Raveil Garden | closed"))
+        numbered = io.StringIO()
+        with mock.patch("sys.stdout", numbered):
+            self.assertEqual(main(arguments[:-1] + ["2q"]), 0)
+        self.assertIn("> [2] s op=LOAD_U32", numbered.getvalue())
         error = io.StringIO()
         with mock.patch("sys.stderr", error):
             self.assertEqual(main(arguments[:-1] + ["l"]), 2)
-        self.assertIn("accepts only j, k, g, G, or q", error.getvalue())
+        self.assertIn("accepts a displayed instruction number", error.getvalue())
 
     def test_dynamic_explanation_respects_all_terminal_width_boundaries(self) -> None:
         explanation = GardenDynamicExplanation.load(
