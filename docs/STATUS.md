@@ -1,6 +1,18 @@
 # Current status
 
-Last updated: 2026-09-09
+Last updated: 2026-09-13
+
+S-0003 received the owner's `Conditional Accept` on 2026-09-13 JST. The
+owner-visible review exercised an editable native log Graph twice, native
+GEMM, the materialized-versus-fused Garden plan, two actual RTL bias-grid runs
+with immediate 5 then 7, two actual RTL neighborhood runs with `ADD_U32` then
+`MAX_U32`, saved-run Garden, output/diff inspection, and a missing-input
+failure that published no output. The accepted condition is T-0192 / Issue
+#242: Garden's numeric-looking stage labels must match its navigation or stop
+looking selectable, and invalid input must preserve the last valid Graph view.
+The GitHub Project records the review and retrospective and marks the S-0003
+ceremony Done. This is Host Functional and RTL Simulation Functional evidence;
+it is not performance, FPGA, ASIC or silicon evidence.
 
 T-0191 is In Progress. EXP-0012 built exact OpenASIP v2.2 and llvmtce revisions
 in a pinned linux/amd64 image and used one frozen ADF to compile and simulate
@@ -98,7 +110,9 @@ recipes, descriptor plus seed or input-data relationships. Shared neighborhood
 metadata and independent bias-grid files are visible without reading referenced
 inputs, compiling or executing. Issue #208, S-0003, 2 SP and branch
 `feat/t-0190-recipe-relations` own Host Functional evidence. No Graph validity,
-performance, cache, isolation or hardware claim follows.
+performance, cache, isolation or hardware claim follows. Exact `c49c363` was
+integrated by PR #228 as `68d7253`; Issue #208 is closed and canonical Project
+status is Done.
 
 T-0177 adds two copied-before-use synthetic project fixtures: ERROR-log
 summarization and duplicate inventory normalization. Both use only the existing
@@ -106,13 +120,17 @@ Command Graph grammar and native comparison path with manually specified
 outputs. The log fixture also demonstrates edit/rerun/diff preservation and a
 missing-input failure with no output publication. Issue #175, S-0003, 3 SP and
 branch `feat/t-0177-workload-pack` own Host Functional evidence. No executor,
-schema, init sample, performance, isolation or hardware change follows.
+schema, init sample, performance, isolation or hardware change follows. Exact
+`a73d095` was integrated by PR #227 as `4dd044b`; Issue #175 is closed and
+canonical Project status is Done.
 
 T-0176 adds exact recipe, backend and status filters to the saved-run listing.
 Unfiltered ordering and invalid-entry visibility remain unchanged; filtered
 inspection executes no recipe and writes no history. Issue #174 and branch
 `feat/t-0176-run-filters` own the S-0003 Host Functional slice. No cache,
-performance, isolation or Graph-semantics claim follows.
+performance, isolation or Graph-semantics claim follows. Exact `8f15a01` was
+integrated by PR #226 as `69b6177`; Issue #174 is closed and canonical Project
+status is Done.
 
 T-0174 adds an independent bias-grid starter to new projects. Its descriptor
 and 324-word input file are separate from neighborhood. Local 257-test host
