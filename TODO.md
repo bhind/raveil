@@ -239,7 +239,7 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   Product Owner acceptance is recorded. Issue #145 tracks remote integration;
   this checkbox does not claim runtime automatic approval or Sprint acceptance.
 
-- [ ] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
+- [x] **T-0158** Extend the existing private `Raveil Weekly Sprints` GitHub
   Project with progress views and standard Insights while preserving the
   repository as authority. Issue #135 and branch
   `chore/t-0158-project-insights` own this cross-gate Operations slice in
@@ -253,9 +253,14 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   did not expose changing values, scheduled execution had not yet occurred,
   and no multi-day decreasing-remainder integration test existed.
   PR #150 merged the correction as `a45336c`; 76 tests and corrected hosted
-  run #34015052717 pass. Keep the task open until an actual `schedule` event
-  and two live S-0003 observations establish a decreasing or truthfully flat
-  actual line.
+  run #34015052717 pass. Seven consecutive successful `schedule` events from
+  hosted runs #34035639139 through #34695878177 then retained five S-0003
+  observations from September 8 through 12. The card title exposes the latest
+  `3 issues / 11 SP`; the actual issue line is truthfully flat at 3, and the SP
+  line preserves the September 9 scope increase from 6 to 11 before remaining
+  flat. This satisfies the reopened live-schedule and multi-day conditions.
+  Final Issue closure and canonical Project completion are recorded through
+  the T-0158 closeout PR; no productivity claim follows.
 
 ## Start timing phases
 
@@ -265,7 +270,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0191 remains the active research lane. T-0158 retains its actual-schedule observation condition. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0191 remains the active research lane. After T-0158 closeout frees the second slot, T-0192 is the prepared product successor. |
 | **P1 — next** | Start only after its named P0 dependency passes. | T-0192 is the owner-reviewed S-0003 feedback successor for early S-0004 delivery. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |

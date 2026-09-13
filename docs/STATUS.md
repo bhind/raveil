@@ -326,17 +326,24 @@ items, 43 total SP, and zero remaining items/SP. No Pages site, visibility
 change, claim, or Gate transition was introduced. The dedicated Project secret
 is installed; hosted run #34003784228 succeeded with repository contents read
 permission, masked the credential, and produced an idempotent private Draft
-update. The secret value is not stored in the repository. T-0158 is reopened:
+update. The secret value is not stored in the repository. T-0158 was reopened:
 that run verified transport and same-day idempotence, not a moving burndown or
 the scheduled event. The corrective implementation exposes the current
 remainder in the Project card title, uses JST dates, and starts the actual line
 at the first observation instead of inventing earlier zero values; multi-day
-decrease verification and a real scheduled run remain required before Done.
+decrease verification and a real scheduled run were required before Done.
 Corrected hosted manual run #34015052717 succeeded at merged revision
 `a45336c`; a read-only S-0003-date preview resolved 6 remaining Issues and 10
-remaining SP, confirming the next Iteration will not inherit S-0002's zero
-line. This verifies the hosted correction path, not the still-pending cron
-event or a live decrease between two S-0003 dates.
+remaining SP, confirming the next Iteration would not inherit S-0002's zero
+line. Seven consecutive successful `schedule` runs, #34035639139 through
+#34695878177, subsequently established the real hosted trigger. The private
+Draft retains five S-0003 observations from September 8 through 12: remaining
+Issues are truthfully flat at 3; remaining SP records the September 9 scope
+increase from 6 to 11 and is then flat at 11. Its current title is
+`Raveil iteration burndown — S-0003: 3 issues / 11 SP (2026-09-12)`. T-0158's
+reopened acceptance conditions are therefore satisfied. This is live GitHub
+governance evidence only, not a delivery-productivity or hardware-performance
+claim.
 Latest feature release: `v0.0000000000001` (`10^-13`), immutable historical seed
 Current Pre-release: `v0.0000000000002`, T-0092 Sonatine operator demo,
 published from `d59873cb8e27bf033b32a2a72d2fa3d04576dc79`
