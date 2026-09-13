@@ -193,10 +193,53 @@ class OpenAsipFeasibilityTest(unittest.TestCase):
         accepted = lifecycle.admit(private)
         self.assertTrue(accepted["published"])
         self.assertEqual(accepted["publication_authority"], "raveil")
+        self.assertEqual(accepted["results"], lifecycle.EXPECTED)
+        self.assertNotIn("programs", accepted)
         private["programs"]["reduction"]["result_u32"] ^= 1
         rejected = lifecycle.admit(private)
         self.assertEqual(rejected["status"], "fallback")
         self.assertEqual(rejected["backend"], "cpu-oracle")
+
+    def test_publication_projects_only_reviewed_fields_and_private_identity(self) -> None:
+        lifecycle = load_module("t0191_lifecycle_projection", SPIKE / "lifecycle.py")
+        private_path = "/private/tmp/raveil-t0191-private-work"
+        private = {
+            "published": False,
+            "programs": {
+                name: {
+                    "result_u32": value,
+                    "compile_argv": [f"type=bind,src={private_path},dst=/evidence"],
+                }
+                for name, value in lifecycle.EXPECTED.items()
+            },
+            "host_platform": "private-host-fingerprint",
+            "candidate_controlled_claim": "unreviewed",
+        }
+        accepted = lifecycle.admit(private)
+        rendered = json.dumps(accepted, sort_keys=True)
+        self.assertEqual(set(accepted), {
+            "task", "status", "backend", "results",
+            "private_candidate_receipt_sha256", "publication_authority", "published",
+        })
+        self.assertEqual(accepted["results"], lifecycle.EXPECTED)
+        self.assertNotIn(private_path, rendered)
+        self.assertNotIn("private-host-fingerprint", rendered)
+        self.assertNotIn("unreviewed", rendered)
+
+    def test_cpu_fallback_projects_only_results_and_private_identity(self) -> None:
+        lifecycle = load_module("t0191_lifecycle_cpu_projection", SPIKE / "lifecycle.py")
+        cpu = {
+            "backend": "native-cpu",
+            "programs": {
+                name: {"observed_u32": value} for name, value in lifecycle.EXPECTED.items()
+            },
+            "private_host_path": "/private/tmp/raveil-cpu-private",
+        }
+        accepted = lifecycle.actual_cpu_fallback("candidate-failed", lambda: cpu)
+        self.assertTrue(accepted["published"])
+        self.assertEqual(accepted["results"], lifecycle.EXPECTED)
+        self.assertNotIn("cpu_receipt", accepted)
+        self.assertNotIn("/private/tmp", json.dumps(accepted, sort_keys=True))
 
     def test_cancel_and_failure_do_not_leak_candidate_output(self) -> None:
         lifecycle = load_module("t0191_lifecycle_fail", SPIKE / "lifecycle.py")
@@ -214,6 +257,59 @@ class OpenAsipFeasibilityTest(unittest.TestCase):
         self.assertEqual(calls, 1)
         self.assertEqual(failed["status"], "fallback")
         self.assertNotIn("candidate failed", json.dumps(failed))
+
+    def test_inflight_cancel_wins_before_candidate_publication(self) -> None:
+        lifecycle = load_module("t0191_lifecycle_inflight", SPIKE / "lifecycle.py")
+        cancelling = False
+        calls = 0
+
+        def candidate():  # type: ignore[no-untyped-def]
+            nonlocal cancelling, calls
+            calls += 1
+            cancelling = True
+            return {
+                "published": False,
+                "programs": {
+                    name: {"result_u32": value}
+                    for name, value in lifecycle.EXPECTED.items()
+                },
+            }
+
+        receipt = lifecycle.execute(
+            candidate,
+            cancel_requested=lambda: cancelling,
+        )
+        self.assertEqual(calls, 1)
+        self.assertEqual(receipt["status"], "cancelled")
+        self.assertTrue(receipt["candidate_started"])
+        self.assertFalse(receipt["published"])
+        self.assertNotIn("programs", receipt)
+
+    def test_inflight_cancel_also_wins_over_candidate_failure(self) -> None:
+        lifecycle = load_module("t0191_lifecycle_cancel_failure", SPIKE / "lifecycle.py")
+        cancelling = False
+        fallback_calls = 0
+
+        def candidate():  # type: ignore[no-untyped-def]
+            nonlocal cancelling
+            cancelling = True
+            raise RuntimeError("private candidate detail")
+
+        def fallback():  # type: ignore[no-untyped-def]
+            nonlocal fallback_calls
+            fallback_calls += 1
+            return {"backend": "native-cpu", "programs": {}}
+
+        receipt = lifecycle.execute(
+            candidate,
+            cancel_requested=lambda: cancelling,
+            cpu_fallback=fallback,
+        )
+        self.assertEqual(receipt["status"], "cancelled")
+        self.assertTrue(receipt["candidate_started"])
+        self.assertFalse(receipt["published"])
+        self.assertEqual(fallback_calls, 0)
+        self.assertNotIn("private candidate detail", json.dumps(receipt))
 
     def test_real_runner_cancels_before_start_without_docker(self) -> None:
         result = subprocess.run(
@@ -306,11 +402,15 @@ class OpenAsipFeasibilityTest(unittest.TestCase):
                 },
                 "programs": programs,
             }
-            authorized = dict(private)
-            authorized.update({
-                "backend": "openasip-ttasim", "status": "accepted",
+            authorized = {
+                "task": "T-0191", "status": "accepted",
+                "backend": "openasip-ttasim",
+                "results": {
+                    name: programs[name]["result_u32"] for name in verifier.EXPECTED
+                },
+                "private_candidate_receipt_sha256": verifier.receipt_sha256(private),
                 "publication_authority": "raveil", "published": True,
-            })
+            }
             (root / "run-receipt.json").write_text(json.dumps(private), encoding="utf-8")
             (root / "authorized-receipt.json").write_text(json.dumps(authorized), encoding="utf-8")
             self.assertTrue(verifier.verify_run(root)["verified"])

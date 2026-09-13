@@ -11,7 +11,10 @@ execute the C inputs and does not start Docker. The separate explicit
 with a cleared environment. The pinned Linux image and hardened explicit
 `--simulate` path are present. The default command remains fail-closed.
 Simulator output begins unpublished; `lifecycle.py` owns oracle admission,
-cancellation, fallback and publication. An optional private evidence directory
+cancellation, fallback and publication. Its public accepted receipts are fixed
+projections of reviewed results plus a canonical private-receipt SHA-256; raw
+argv, host paths, platform identity and arbitrary candidate fields remain
+private. An optional private evidence directory
 retains TPEFs, disassembly and raw logs with a marker-last receipt.
 `verify_evidence.py` rehashes the exact run or RTL file set and rejects missing,
 extra, symlinked, corrupted or authority-inconsistent evidence.

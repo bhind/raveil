@@ -14,12 +14,20 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   one Raveil contract-lifetime or authority property. No upstream source is
   copied into Raveil. EXP-0012 now passes the three-program frozen-ADF and
   Raveil publication-authority portions, normalized generated-VHDL identity,
-  TPEF sizes and bounded host load diagnostics. Durable raw-artifact promotion,
-  in-flight cancellation parity and independent closeout
-  review remain. Passing remains pre-gate Host Functional evidence and
-  cannot close T-0044 or ADR-0049's later full-cost comparison. Branch
-  `research/t-0191-openasip-three-graphs`, Systems Implementer with Researcher,
-  Vreji, Security Reviewer, Tester and PM review.
+  TPEF sizes and bounded host load diagnostics. External-process interruption,
+  durable raw-artifact promotion and independent
+  closeout review remain. The lifecycle boundary now proves that a cooperative
+  cancellation observed after candidate start wins over success or failure
+  before publication, invokes no fallback and exposes no candidate payload.
+  Accepted candidate and CPU-fallback receipts are strict public projections:
+  they expose only reviewed results and a canonical SHA-256 identity of the
+  private receipt, never candidate-controlled fields, host argv, paths or
+  platform fingerprints.
+  Passing remains pre-gate Host Functional evidence and
+  cannot close T-0044 or ADR-0049's later full-cost comparison. Cooperative
+  cancellation integration branch `test/t-0191-cooperative-cancel-integration`,
+  Systems Implementer with Researcher, Vreji, Security Reviewer, Tester and PM
+  review.
 
 - [x] **T-0192** Make Garden stage numbering match navigation,
   [Issue #242](https://github.com/bhind/raveil/issues/242), S-0004, 2 SP. The

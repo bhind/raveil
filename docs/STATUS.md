@@ -37,8 +37,17 @@ authority on the actual simulator entrypoint. Two independent VHDL generations
 from that ADF produced the same timestamp-normalized ten-file tree identity;
 TPEF sizes and n=1 host load diagnostics are recorded without device-time or
 performance meaning. This is partial Host Functional evidence only. An
-approved durable raw-artifact destination, in-flight cancellation parity and
-independent closeout review remain open.
+approved durable raw-artifact destination, external-process interruption and
+independent closeout review remain open. A cooperative cancellation observed
+after candidate start now wins before publication over both candidate success
+and candidate failure; the receipt exposes no private result and fallback is
+not invoked. This is a lifecycle-boundary property, not proof that an OpenASIP
+container process can yet be interrupted while running.
+Accepted candidate and CPU-fallback receipts are now strict public projections
+containing reviewed results plus a canonical private-receipt SHA-256. Raw
+candidate fields, Docker argv, absolute host paths and host-platform data stay
+private. This closes the publication-projection concern for this lifecycle
+slice; it does not promote or make the private evidence durable.
 It does not adopt OpenASIP, authorize device work, establish performance/PPA,
 or close T-0044/ADR-0049.
 
