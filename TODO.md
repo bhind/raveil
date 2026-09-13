@@ -21,9 +21,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   `research/t-0191-openasip-three-graphs`, Systems Implementer with Researcher,
   Vreji, Security Reviewer, Tester and PM review.
 
-- [ ] **T-0192** Make Garden stage numbering match navigation,
-  [Issue #242](https://github.com/bhind/raveil/issues/242), P0, 2 SP, S-0004,
-  In Progress on `fix/t-0192-garden-navigation`. The S-0003 owner review showed
+- [x] **T-0192** Make Garden stage numbering match navigation,
+  [Issue #242](https://github.com/bhind/raveil/issues/242), S-0004, 2 SP. The
+  S-0003 owner review showed
   that rendered `[0]`, `[1]`, `[2]`
   labels invite direct numeric selection, although Garden accepts only
   `j`, `k`, `g`, `G`, `d`, and `q`; entering `1` then replaces a valid view
@@ -34,7 +34,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   must remain equivalent,
   invalid input must preserve the accepted Graph view, and a deterministic test
   must cover the owner-observed `1`. Experience Implementer, Host Functional.
-  No execution, compiler, RTL, performance or device change is in scope.
+  Exact `d2c1186` passed 100 focused and 845 full tests with two skips,
+  independent Vreji and Tester review, the record checker and diff check.
+  PR #245 merged as `cbba88f`; Issue #242 is closed and canonical Project Done
+  was verified. No execution, compiler, RTL, performance or device change is
+  in scope.
 
 - [x] **T-0044/S00** Qualify a public configurable comparison candidate,
   [Issue #190](https://github.com/bhind/raveil/issues/190), S-0003, 5 current
@@ -273,8 +277,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0191 remains the active research lane. After T-0158 closeout frees the second slot, T-0192 is the prepared product successor. |
-| **P1 — next** | Start only after its named P0 dependency passes. | T-0192 is the owner-reviewed S-0003 feedback successor for early S-0004 delivery. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0191 remains the active research lane. T-0192 is complete. |
+| **P1 — next** | Start only after its named P0 dependency passes. | No prepared product successor remains after T-0192; run canonical horizon replenishment. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
