@@ -50,7 +50,15 @@ The actual simulator entrypoint now runs through the Raveil-owned lifecycle
 boundary. Cancellation-before-start does not invoke the candidate, candidate
 failure or oracle mismatch selects the actual native-CPU fallback, candidate output
 begins unpublished, and only Raveil changes an oracle-matching receipt to
-published. In-flight cancellation parity remains unproved.
+published. A cooperative cancellation observed after candidate start wins over
+both a returned private result and candidate failure before publication. Its
+cancelled receipt contains no program payload, and CPU fallback is not invoked.
+Accepted candidate and CPU-fallback receipts are strict public projections.
+They contain reviewed result words and the canonical SHA-256 of the private
+receipt, but exclude raw program records, compiler/simulator argv, absolute
+host paths, host-platform data and arbitrary candidate-supplied fields.
+This proves lifecycle-boundary parity; it does not yet terminate a running
+external compiler or simulator process.
 
 `generateprocessor` plus the recorded same-image repair produced ten VHDL
 files totalling 76,211 bytes from the same ADF. Two independent generations
@@ -71,8 +79,8 @@ configuration time or performance measurements.
 
 This answers the narrow three-program simulator feasibility question
 positively. It does **not** complete T-0191. A durable approved raw-artifact
-destination, in-flight cancellation parity, and independent
-final review remain open.
+destination, external-process interruption, and independent final review remain
+open.
 
 The counters above are not latency, throughput, memory/cache traffic or a
 cross-backend comparison. Host integration duration includes Docker and host

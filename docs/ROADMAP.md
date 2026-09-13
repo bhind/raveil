@@ -477,9 +477,14 @@ acceptance, and merge remain one serial Project Manager boundary.
    EXP-0012 now passes the frozen-ADF three-program simulator witness and the
    Raveil-owned publication/fallback authority portion. It also fixes a
    timestamp-normalized generated-VHDL identity, TPEF payload sizes and bounded
-   host load diagnostics. T-0191 remains open at durable raw evidence,
-   in-flight cancellation parity and independent closeout
-   review; no later comparison gate is unlocked.
+   host load diagnostics. Its lifecycle boundary now demonstrates cooperative
+   cancel-wins after candidate start and before publication, without candidate
+   payload or fallback. Its accepted public receipts are strict reviewed-field
+   projections linked to private evidence by canonical SHA-256; private argv,
+   host paths, platform data and arbitrary candidate fields are not published.
+   T-0191 remains open at durable raw evidence,
+   external-process interruption and independent closeout review; no later
+   comparison gate is unlocked.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

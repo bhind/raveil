@@ -176,9 +176,13 @@ resolves it.
   Raveil-owned effect/fallback boundary? Public access or an OSS license alone
   is not patent clearance. EXP-0012 answers only the frozen-ADF simulator and
   Raveil publication/fallback portions positively, and records a normalized
-  generated-VHDL identity plus bounded TPEF/load diagnostics. Durable evidence,
-  in-flight cancellation parity and patent/FTO questions
-  remain open.
+  generated-VHDL identity plus bounded TPEF/load diagnostics. Cooperative
+  cancel-wins is proven at the lifecycle publication boundary, but interruption
+  of a running external compiler/simulator process, durable evidence and
+  patent/FTO questions remain open.
+  Accepted lifecycle receipts now project only reviewed results and the
+  canonical private-receipt identity; this does not resolve those remaining
+  questions or authorize publication of the private raw receipt.
 - Which three semantically distinct operation graphs provide the smallest
   no-RTL-regeneration test of temporal configurability, memory behavior, and
   contract parity without expanding into a general OoO/dataflow engine?

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from generate_rtl import EXPECTED_FILES, normalized_digest
-from lifecycle import EXPECTED
+from lifecycle import EXPECTED, receipt_sha256
 from verify_manifest import MANIFEST, ROOT, load_manifest
 
 
@@ -46,11 +46,14 @@ def verify_run(root: Path) -> dict[str, Any]:
         and private.get("published") is False
     ):
         raise ValueError("candidate receipt crossed the publication boundary")
-    expected_authorized = dict(private)
-    expected_authorized.update({
-        "backend": "openasip-ttasim", "status": "accepted",
+    expected_authorized = {
+        "task": "T-0191", "status": "accepted", "backend": "openasip-ttasim",
+        "results": {
+            name: private["programs"][name]["result_u32"] for name in EXPECTED
+        },
+        "private_candidate_receipt_sha256": receipt_sha256(private),
         "publication_authority": "raveil", "published": True,
-    })
+    }
     if authorized != expected_authorized:
         raise ValueError("authorized receipt is incomplete")
     implementation = private.get("implementation_sha256")

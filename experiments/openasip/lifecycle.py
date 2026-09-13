@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
+import hashlib
+import json
 from typing import Any, Callable
 
 import oracle
@@ -15,10 +16,17 @@ EXPECTED = {
 }
 
 
-def cancelled_receipt() -> dict[str, Any]:
+def receipt_sha256(receipt: dict[str, Any]) -> str:
+    encoded = json.dumps(
+        receipt, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+    ).encode("ascii")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def cancelled_receipt(*, candidate_started: bool = False) -> dict[str, Any]:
     return {
         "task": "T-0191", "status": "cancelled", "backend": None,
-        "candidate_started": False, "published": False,
+        "candidate_started": candidate_started, "published": False,
     }
 
 
@@ -42,14 +50,28 @@ def actual_cpu_fallback(
             "published": False,
         }
     programs = cpu.get("programs")
-    if cpu.get("backend") != "native-cpu" or not isinstance(programs, dict):
+    if (
+        cpu.get("backend") != "native-cpu"
+        or not isinstance(programs, dict)
+        or set(programs) != set(EXPECTED)
+    ):
         raise RuntimeError("CPU fallback envelope is invalid")
     for name, expected in EXPECTED.items():
         if programs.get(name, {}).get("observed_u32") != expected:
             raise RuntimeError("CPU fallback oracle mismatch")
+    try:
+        private_identity = receipt_sha256(cpu)
+    except (TypeError, ValueError):
+        return {
+            "task": "T-0191", "status": "failed", "backend": None,
+            "candidate_failure": reason, "cpu_fallback": "invalid-receipt",
+            "published": False,
+        }
     return {
         "task": "T-0191", "status": "fallback", "backend": "native-cpu",
-        "candidate_failure": reason, "cpu_receipt": cpu,
+        "candidate_failure": reason,
+        "results": {name: programs[name]["observed_u32"] for name in EXPECTED},
+        "private_cpu_receipt_sha256": private_identity,
         "publication_authority": "raveil", "published": True,
     }
 
@@ -66,26 +88,35 @@ def admit(candidate: dict[str, Any], *, cancelled: bool = False) -> dict[str, An
         record = programs.get(name)
         if not isinstance(record, dict) or record.get("result_u32") != expected:
             return fallback_receipt(f"candidate-oracle-rejected:{name}")
-    accepted = deepcopy(candidate)
-    accepted["status"] = "accepted"
-    accepted["backend"] = "openasip-ttasim"
-    accepted["publication_authority"] = "raveil"
-    accepted["published"] = True
-    return accepted
+    try:
+        private_identity = receipt_sha256(candidate)
+    except (TypeError, ValueError):
+        return fallback_receipt("candidate-receipt-not-canonical")
+    return {
+        "task": "T-0191", "status": "accepted", "backend": "openasip-ttasim",
+        "results": {name: programs[name]["result_u32"] for name in EXPECTED},
+        "private_candidate_receipt_sha256": private_identity,
+        "publication_authority": "raveil", "published": True,
+    }
 
 
 def execute(
     candidate: Callable[[], dict[str, Any]], *, cancelled: bool = False,
     cpu_fallback: Callable[[], dict[str, Any]] | None = None,
+    cancel_requested: Callable[[], bool] | None = None,
 ) -> dict[str, Any]:
-    if cancelled:
+    if cancelled or (cancel_requested is not None and cancel_requested()):
         return cancelled_receipt()
     try:
         private_receipt = candidate()
     except Exception:
+        if cancel_requested is not None and cancel_requested():
+            return cancelled_receipt(candidate_started=True)
         if cpu_fallback is None:
             return fallback_receipt("candidate-execution-failed")
         return actual_cpu_fallback("candidate-execution-failed", cpu_fallback)
+    if cancel_requested is not None and cancel_requested():
+        return cancelled_receipt(candidate_started=True)
     result = admit(private_receipt)
     if result.get("status") == "fallback" and cpu_fallback is not None:
         return actual_cpu_fallback(str(result["candidate_failure"]), cpu_fallback)
