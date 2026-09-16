@@ -1,6 +1,20 @@
 # Current status
 
-Last updated: 2026-09-13
+Last updated: 2026-09-16
+
+T-0121 is In Progress in S-0004 (5 SP), following owner-approved promotion.
+Its bounded ASCII Graph Canvas is implemented locally: fixture details (`d`),
+dynamic explanations and saved-project views expose admitted dependency edges,
+external inputs and outputs with selected-node markers. Repeated boxes denote
+the same node; arrows do not imply execution order. LOAD selectors and the
+STORE output are explicit in dynamic/saved views. The compact fusion comparison
+is preserved. Focused Garden/project tests pass; review and integration remain
+pending. The canonical Project prepare/start transitions succeeded on 2026-09-16.
+
+T-0191's cooperative cancellation/public receipt projection slice is already
+integrated in main `58de6bc` (second parent `c0dc979`). PR #247 remained OPEN
+after the merge API inconsistency; on 2026-09-16 its stale metadata was closed
+after ancestry and identical-tree verification. Issue #239 remains In Progress.
 
 S-0003 received the owner's `Conditional Accept` on 2026-09-13 JST. The
 owner-visible review exercised an editable native log Graph twice, native

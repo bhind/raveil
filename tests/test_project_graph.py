@@ -95,6 +95,11 @@ class ProjectGraphTests(unittest.TestCase):
         with patch("raveil.project_graph.run_snapshot", side_effect=AssertionError("read-only")):
             saved = self.project.garden(second["run_id"])
             self.assertIn("unsigned immediate: 7", render_key_session(saved, "jq", 100))
+            self.assertIn("Directed Canvas", render_key_session(saved, "jq", 100))
+            self.assertIn(">>[bias:ADD_IMM_U32]<<", render_key_session(saved, "1q", 100))
+            self.assertIn("[EXT:input:row+0,col+0] --input:row+0,col+0--> [center:LOAD_U32]", render_key_session(saved, "1q", 100))
+            self.assertIn("[store:STORE_U32] --store--> [OUT:store]", render_key_session(saved, "1q", 100))
+            self.assertNotIn("[OUT:center]", render_key_session(saved, "1q", 100))
             self.assertIn("unsigned immediate: 7", render_key_session(saved, "1q", 100))
             class Tty(io.StringIO):
                 def isatty(self):

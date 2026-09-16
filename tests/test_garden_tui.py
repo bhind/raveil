@@ -21,7 +21,9 @@ from raveil.garden import (
     render_error,
     render_key_session,
     run_interactive,
+    render_graph_canvas,
 )
+from raveil.graph_mvp import GraphNode
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -184,6 +186,51 @@ class GardenTUITests(unittest.TestCase):
         self.assertIn("program sha256=", browser.render())
         browser.navigate("d")
         self.assertEqual(browser.render(), relu)
+
+    def test_directed_canvas_shows_external_inputs_forks_joins_and_outputs(self) -> None:
+        nodes = (
+            GraphNode("source", "load", ("input",), "value"),
+            GraphNode("left", "op", ("value",), "left_value"),
+            GraphNode("right", "op", ("value",), "right_value"),
+            GraphNode("join", "op", ("left_value", "right_value"), "result"),
+        )
+        for width in (72, 100, 240):
+            with self.subTest(width=width):
+                canvas = "\n".join(render_graph_canvas(nodes, "join", width))
+                self.assertIn("[EXT:input] --input--> [source:load]", canvas)
+                self.assertIn("[source:load] --value--> [left:op]", canvas)
+                self.assertIn("[source:load] --value--> [right:op]", canvas)
+                self.assertIn("[left:op] --left_value--> >>[join:op]<<", canvas)
+                self.assertIn("[right:op] --right_value--> >>[join:op]<<", canvas)
+                self.assertIn(">>[join:op]<< --result--> [OUT:result]", canvas)
+                self.assertLessEqual(max(map(len, canvas.splitlines())), width)
+
+    def test_directed_canvas_indents_a_wrapped_long_edge(self) -> None:
+        name = "source-identifier-that-needs-wrapping"
+        nodes = (
+            GraphNode(name, "load", ("external-input-that-needs-wrapping",), "value"),
+            GraphNode("sink", "store", ("value",), "result"),
+        )
+        lines = render_graph_canvas(nodes, name, 72)
+        self.assertTrue(any(line.startswith("    ") for line in lines))
+        self.assertLessEqual(max(map(len, lines)), 72)
+
+    def test_canvas_is_present_and_selection_tracks_fixture_and_dynamic_views(self) -> None:
+        snapshot = GardenSnapshot.load(FIXTURE)
+        fixture_browser = GardenBrowser(snapshot, 100)
+        fixture_browser.navigate("j")
+        fixture_browser.navigate("d")
+        self.assertIn("Directed Canvas", fixture_browser.render())
+        self.assertIn(">>[bias:bias_add]<<", fixture_browser.render())
+        dynamic_browser = GardenDynamicBrowser(
+            GardenDynamicExplanation.load(DYNAMIC_FIXTURE.relative_to(ROOT).as_posix()), 100,
+        )
+        dynamic_browser.navigate("j")
+        self.assertIn("Directed Canvas", dynamic_browser.render())
+        self.assertIn(">>[n:LOAD_U32]<<", dynamic_browser.render())
+        self.assertIn("[EXT:input:center] --input:center--> [c:LOAD_U32]", dynamic_browser.render())
+        self.assertIn("[store:STORE_U32] --store--> [OUT:store]", dynamic_browser.render())
+        self.assertNotIn("[OUT:c]", dynamic_browser.render())
 
     def test_interactive_redraw_requires_both_streams_to_be_ttys(self) -> None:
         class Tty(io.StringIO):

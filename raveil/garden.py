@@ -144,11 +144,14 @@ def _wrapped_lines(items: list[str], width: int) -> list[str]:
     return lines
 
 
-def _pane(title: str, items: list[str], width: int) -> list[str]:
+def _pane(
+    title: str, items: list[str], width: int, *, prewrapped: bool = False,
+) -> list[str]:
     interior = width - 2
     heading = f"[ {title} ]"
     top = "+" + heading[:interior].ljust(interior, "-") + "+"
-    body = ["|" + line.ljust(interior) + "|" for line in _wrapped_lines(items, interior)]
+    content = items if prewrapped else _wrapped_lines(items, interior)
+    body = ["|" + line.ljust(interior) + "|" for line in content]
     return [top, *body, "+" + "-" * interior + "+"]
 
 
@@ -164,6 +167,74 @@ def _join_panes(panes: list[list[str]]) -> list[str]:
             pane[-1],
         ])
     return [" ".join(pane[index] for pane in aligned) for index in range(body_height + 2)]
+
+
+def render_graph_canvas(
+    nodes: tuple[GraphNode, ...], selected_node_id: str, width: int,
+    *, external_inputs: Mapping[str, tuple[str, ...]] | None = None,
+    final_nodes: frozenset[str] | None = None,
+) -> list[str]:
+    """Render renderer-only directed edges from already admitted node data.
+
+    Repeating a producer box on every edge is intentional: it keeps forks and
+    joins legible in the narrow deterministic layout without a terminal layout
+    dependency.  This is presentation only; GraphProgram remains the owner of
+    graph admission and semantics.
+    """
+    producers = {node.output: node for node in nodes}
+    consumed = {item for node in nodes for item in node.inputs}
+
+    def box(node: GraphNode) -> str:
+        label = f"{node.node_id}:{node.op}"
+        return f">>[{label}]<<" if node.node_id == selected_node_id else f"[{label}]"
+
+    canvas = [
+        "directed canvas: arrows are admitted data dependencies, not execution order",
+        "repeated boxes name the same node; >>[node:op]<< is selected",
+    ]
+    for node in nodes:
+        target = box(node)
+        inputs = node.inputs
+        if external_inputs is not None and node.node_id in external_inputs:
+            inputs = external_inputs[node.node_id]
+        for item in inputs:
+            source = box(producers[item]) if item in producers else f"[EXT:{item}]"
+            canvas.append(f"{source} --{item}--> {target}")
+    for node in nodes:
+        if (final_nodes is not None and node.node_id in final_nodes) or (
+                final_nodes is None and node.output not in consumed):
+            canvas.append(f"{box(node)} --{node.output}--> [OUT:{node.output}]")
+    lines: list[str] = []
+    for item in canvas:
+        lines.extend(textwrap.wrap(
+            item, width=width, break_long_words=True, break_on_hyphens=False,
+            subsequent_indent="    ",
+        ) or [""])
+    return lines
+
+
+def _dynamic_canvas_projection(
+    instructions: tuple[DynamicLoweringInstruction, ...],
+) -> tuple[tuple[GraphNode, ...], Mapping[str, tuple[str, ...]], frozenset[str]]:
+    """Project admitted lowering fields to renderer data without changing them."""
+    nodes = tuple(
+        GraphNode(item.node_id, item.op, item.dependencies, item.node_id)
+        for item in instructions
+    )
+    external: dict[str, tuple[str, ...]] = {}
+    for item in instructions:
+        if item.op == "LOAD_U32" and not item.dependencies:
+            if type(item.selector) is str:
+                label = f"input:{item.selector}"
+            else:
+                label = (
+                    f"input:row{item.selector['row_delta']:+d},"
+                    f"col{item.selector['column_delta']:+d}"
+                )
+            external[item.node_id] = (label,)
+    return nodes, MappingProxyType(external), frozenset(
+        item.node_id for item in instructions if item.op == "STORE_U32"
+    )
 
 
 def _reject_duplicate_object_pairs(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -967,13 +1038,18 @@ class GardenBrowser:
                 body.extend(pane)
         else:
             body = _join_panes(panes)
+        canvas = _pane(
+            "Directed Canvas",
+            render_graph_canvas(program.nodes, selected.node_id, self.width - 2),
+            self.width, prewrapped=True,
+        )
         footer = _wrapped_lines([
             "Commands / Status",
             self._navigation_help().replace("d details", "d comparison"),
             "authority: read-only; no graph execution, mutation, approval, or promotion.",
             *[f"demo: {command}" for command in self.snapshot.demo_commands],
         ], self.width)
-        return "\n".join([*header, "", *body, "", *footer])
+        return "\n".join([*header, "", *canvas, "", *body, "", *footer])
 
 
 @dataclass(frozen=True)
@@ -1195,13 +1271,24 @@ class GardenDynamicBrowser:
                 body.extend(pane)
         else:
             body = _join_panes(panes)
+        canvas_nodes, external_inputs, final_nodes = _dynamic_canvas_projection(
+            explanation.instructions,
+        )
+        canvas = _pane(
+            "Directed Canvas",
+            render_graph_canvas(
+                canvas_nodes, selected.node_id, self.width - 2,
+                external_inputs=external_inputs, final_nodes=final_nodes,
+            ),
+            self.width, prewrapped=True,
+        )
         footer = _wrapped_lines([
             "Commands / Status",
             self._navigation_help(),
             "authority: read-only; no compiler, execution, simulator, UIO, device, mutation, approval, or promotion.",
             *[f"demo: {command}" for command in explanation.demo_commands],
         ], self.width)
-        return "\n".join([*header, "", *body, "", *footer])
+        return "\n".join([*header, "", *canvas, "", *body, "", *footer])
 
 
 class GardenProjectBrowser(GardenDynamicBrowser):
@@ -1218,6 +1305,18 @@ class GardenProjectBrowser(GardenDynamicBrowser):
             "not a seal or independent verification of the original execution",
             "",
         ]
+        canvas_nodes, external_inputs, final_nodes = _dynamic_canvas_projection(
+            view.instructions,
+        )
+        lines.extend(_pane(
+            "Directed Canvas",
+            render_graph_canvas(
+                canvas_nodes, selected.node_id, self.width - 2,
+                external_inputs=external_inputs, final_nodes=final_nodes,
+            ),
+            self.width, prewrapped=True,
+        ))
+        lines.append("")
         for item in view.instructions:
             marker = ">" if item.index == self.selected else " "
             lines.append(f"{marker} [{item.index}] {item.node_id}: {item.op} <- {','.join(item.dependencies) or 'input'}")
