@@ -1,15 +1,19 @@
 # Current status
 
-Last updated: 2026-09-16
+Last updated: 2026-09-17
 
-T-0121 is In Progress in S-0004 (5 SP), following owner-approved promotion.
-Its bounded ASCII Graph Canvas is implemented locally: fixture details (`d`),
+T-0121 implementation is integrated through PR #248 as `be01910` in S-0004
+(5 SP), following owner-approved promotion. Its bounded ASCII Graph Canvas
+is available in fixture details (`d`),
 dynamic explanations and saved-project views expose admitted dependency edges,
 external inputs and outputs with selected-node markers. Repeated boxes denote
 the same node; arrows do not imply execution order. LOAD selectors and the
 STORE output are explicit in dynamic/saved views. The compact fusion comparison
-is preserved. Focused Garden/project tests pass; review and integration remain
-pending. The canonical Project prepare/start transitions succeeded on 2026-09-16.
+is preserved. Candidate `9fe3483` passed 73 focused tests, independent Tester
+and Vreji review, record and diff checks. Delegated Product Owner acceptance
+and PM verification are recorded on PR #248; owner-visible demonstration is
+reserved for Sprint Review. Issue #179 is closed and canonical Project Done
+was confirmed through `project_queue.py complete` on 2026-09-17.
 
 T-0191's cooperative cancellation/public receipt projection slice is already
 integrated in main `58de6bc` (second parent `c0dc979`). PR #247 remained OPEN

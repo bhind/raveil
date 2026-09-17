@@ -1570,15 +1570,17 @@ preserve the earlier allocation/authentication observation.
   This remains `host-functional` and `development-non-claim`; it cannot imply
   graph execution, performance, RTL, FPGA, ASIC, or silicon behavior.
 
-- [ ] **T-0121** Navigate dependencies, forks and joins in a bounded ASCII
+- [x] **T-0121** Navigate dependencies, forks and joins in a bounded ASCII
   Graph Canvas, [Issue #179](https://github.com/bhind/raveil/issues/179).
-  Owner-approved P1, S-0004, 5 SP; Project In Progress on 2026-09-16.
+  Owner-approved P1, S-0004, 5 SP; implementation merged through PR #248
+  as `be01910` on 2026-09-17.
   Keep the dependency-free CLI, existing numeric navigation, fusion comparison,
   and 72--240-column contract. Cover fixture, dynamic and saved-project views.
   No compiler, schema, execution, RTL or performance change. The old `d59bbc7`
   draft remains provenance; current implementation branch is
-  `feat/t-0121-ascii-canvas`. Evidence is Host Functional; review and integration
-  remain pending.
+  `feat/t-0121-ascii-canvas`. Evidence is Host Functional; 73 focused tests,
+  independent Tester/Vreji review and delegated acceptance passed for
+  `9fe3483`. Owner-visible demonstration remains on the Sprint Review agenda.
 
 ## Delivery line — active GNU/Linux userspace MVP
 
