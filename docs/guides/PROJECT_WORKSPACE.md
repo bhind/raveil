@@ -302,6 +302,10 @@ Edit `immediate` from 5 to 7 in your editor and run again. Use
 `raveil project garden RUN_ID` (`j` then Enter selects the add node).
 The saved first result stays unchanged. Garden displays the immediate and
 unsigned modulo-2^32 addition; overflow wraps rather than saturating.
+Its dependency-free directed canvas repeats each admitted data edge, making
+external inputs, forks, joins, final outputs, and the selected node visible at
+every supported width. It is a read-only projection of the saved graph; it
+does not rerun or reinterpret the program.
 
 Only integer constants 0 through 4,194,303 are admitted. This is a one-source
 immediate add, not a full-width constant node. Other arithmetic can consume

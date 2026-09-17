@@ -539,10 +539,11 @@ the same observe-only snapshot, compiler-validation, and authority boundary.
 Its 40-test clean acceptance, independent review, and reproducible static
 capture are complete. It does not change any research or hardware gate.
 
-T-0121 is a deferred P2 follow-up. Its local Graph Canvas draft is preserved,
-but the project will reconsider Garden as an actual Linux/macOS TUI, including
-library, color, focus, and graph-layout choices, after the critical path. The
-canonical dependency-free Garden CLI remains available meanwhile.
+T-0121 is owner-promoted to P1 in S-0004 for a bounded directed ASCII Graph
+Canvas inside the existing dependency-free Garden CLI. It exposes admitted
+inputs, dependencies, forks, joins and outputs while preserving navigation
+and the read-only boundary. Native TUI libraries, color and platform-specific
+input remain deferred. This Playable refinement does not change a research gate.
 
 ## High-priority demo extension — Sonatine native operator shell
 

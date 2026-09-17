@@ -1570,13 +1570,15 @@ preserve the earlier allocation/authentication observation.
   This remains `host-functional` and `development-non-claim`; it cannot imply
   graph execution, performance, RTL, FPGA, ASIC, or silicon behavior.
 
-- [ ] **T-0121** Reconsider Garden as an actual Linux/macOS TUI after the
-  critical path. The dependency-free ASCII CLI remains canonical and usable;
-  a local-only directed Graph Canvas draft is preserved at `d59bbc7` but is
-  neither independently accepted nor merged. Re-refine the interface and
-  dependency policy before resuming, including whether a native TUI library,
-  color, focus, and a real graph layout are worth the platform restriction.
-  Keep this P2 and unscheduled; do not displace T-0044.
+- [ ] **T-0121** Navigate dependencies, forks and joins in a bounded ASCII
+  Graph Canvas, [Issue #179](https://github.com/bhind/raveil/issues/179).
+  Owner-approved P1, S-0004, 5 SP; Project In Progress on 2026-09-16.
+  Keep the dependency-free CLI, existing numeric navigation, fusion comparison,
+  and 72--240-column contract. Cover fixture, dynamic and saved-project views.
+  No compiler, schema, execution, RTL or performance change. The old `d59bbc7`
+  draft remains provenance; current implementation branch is
+  `feat/t-0121-ascii-canvas`. Evidence is Host Functional; review and integration
+  remain pending.
 
 ## Delivery line — active GNU/Linux userspace MVP
 
