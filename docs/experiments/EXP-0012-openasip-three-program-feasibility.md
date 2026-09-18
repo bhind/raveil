@@ -78,6 +78,18 @@ configuration time or performance measurements.
 
 ## Interpretation and remaining gate
 
+### Separately authorized recollection, 2026-09-19
+
+The owner authorized new run `20260919-recollection-01` after the incident below.
+It uses the same fixed ADF and image; RTL was generated and verified before
+program compilation. The normalized tree again matches the frozen identity.
+All three oracles match (170/740/374); strict verification passes 26 run files
+and 13 RTL files. New hashes and exact commands are in the 2026-09-19 log.
+The evidence and source archive reside in persistent ignored repository storage,
+not temporary directories. This is a new local Host Functional collection, not
+recovery of old receipts or remotely verified durable evidence. Historical
+results remain unchanged. Final acceptance and remote preservation remain open.
+
 ### Evidence availability incident, 2026-09-18
 
 The historical local run directory is empty; the generated-RTL directory has

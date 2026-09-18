@@ -1,8 +1,16 @@
 # Current status
 
-Last updated: 2026-09-18
+Last updated: 2026-09-19
 
-T-0191 evidence promotion is paused at an evidence-identity incident. The
+T-0191 owner-authorized separate recollection `20260919-recollection-01`
+passed three simulator oracles (170/740/374) and strict 26-file run / 13-file
+RTL verification. Evidence and a source snapshot are retained under ignored
+persistent `artifacts/research/EXP-0012/`, outside temporary storage. See the
+2026-09-19 log for exact new hashes. Historical missing bundles remain missing;
+this is new Host Functional evidence, not their recovery. Remote durability
+and final acceptance remain open; the task is In Progress.
+
+The historical T-0191 evidence promotion paused at an evidence-identity incident. The
 2026-09-18 inventory found the historical local run directory empty and the
 generated-RTL directory missing its receipt. Both strict evidence-verifier
 commands reject these directories. Historical EXP-0012 results remain recorded,

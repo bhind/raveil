@@ -1,15 +1,19 @@
 # Raveil TODO
 
-Last updated: 2026-09-18
+Last updated: 2026-09-19
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
 - [ ] **T-0191** Prove one frozen OpenASIP machine across three Graphs,
   [Issue #239](https://github.com/bhind/raveil/issues/239), S-0003, 8 SP.
-  Evidence-promotion blocker (2026-09-18): historical local run/RTL receipts
+  Historical evidence-promotion blocker (2026-09-18): local run/RTL receipts
   were not found and strict verification fails. PM must recover the exact old
   bundles or obtain approval for a separate newly identified collection, never
   replace historical hashes with rerun output. Preserve remaining files.
+  Owner approved separate recollection on 2026-09-19: new persistent run
+  `20260919-recollection-01` passes all three oracles and 26/13-file verification.
+  Preserve its source snapshot; finish independent review and approved remote
+  preservation without claiming the missing old bundles were recovered.
   Build exact OpenASIP v2.2 only in a pinned supported Linux environment,
   freeze one ADF/generated-RTL identity, then compile and simulate a
   neighborhood transform, elementwise multiply/add chain and reduction without
