@@ -2,8 +2,9 @@
 
 Last updated: 2026-09-18
 
-T-0191 external-process cancellation hardening is implemented locally and
-awaits final review/integration. The runner creates one uniquely named
+T-0191 external-process cancellation hardening is integrated through PR #250
+as `5491bc7`. Candidate `2658b0a` passed 29 focused tests, 860 full tests (two
+skips), Security and Vreji review. The runner creates one uniquely named
 container, accepts only a returned full container ID, verifies its exit status,
 and stops/removes that exact container. Cancellation is latched; timeouts and
 cleanup uncertainty deny publication and CPU fallback. Failed create without
