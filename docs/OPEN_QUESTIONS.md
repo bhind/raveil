@@ -1,8 +1,9 @@
 # Open questions
 
-- T-0191 (2026-09-19): separate recollection is owner-authorized and locally
-  verified in persistent storage. Which approved private remote destination
-  should retain the new bundle? Local retention alone is not remote durability.
+- T-0191 remote-location question resolved 2026-09-19: the separately
+  authorized recollection is copied to the existing private research-data
+  destination and download-verified. Historical bundle availability below
+  remains a provenance limitation, not a claim of recovery.
 
 - T-0191 / EXP-0012 evidence availability (2026-09-18): can the historical
   hash-matching raw bundles be recovered from an existing private backup?

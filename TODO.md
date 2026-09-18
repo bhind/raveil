@@ -4,8 +4,14 @@ Last updated: 2026-09-19
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
-- [ ] **T-0191** Prove one frozen OpenASIP machine across three Graphs,
+- [x] **T-0191** Prove one frozen OpenASIP machine across three Graphs,
   [Issue #239](https://github.com/bhind/raveil/issues/239), S-0003, 8 SP.
+  Technical closeout 2026-09-19: all seven criteria reviewed, new 40-file
+  persistent recollection copied immutably to approved private Drive and
+  download-verified with zero differences. Final local acceptance is bounded
+  Host Functional only; PR #253 owns integration and canonical Done transition.
+  Earlier partial-slice conditions below are retained as chronology, not active
+  blockers. Historical missing bundles were not recovered. No T-0044 gate closes.
   Historical evidence-promotion blocker (2026-09-18): local run/RTL receipts
   were not found and strict verification fails. PM must recover the exact old
   bundles or obtain approval for a separate newly identified collection, never

@@ -5,17 +5,21 @@ Last updated: 2026-09-19
 Next bounded successor T-0180 / Issue #178 is prepared as P1/Ready in S-0005
 (3 SP, Planning): saved-run export contract and inspection fixture only.
 The S-0004 Garden demo runs numeric selection and directed dependency view;
-owner Sprint Review disposition remains pending. T-0191 remote preservation
-currently fails at existing Drive OAuth `invalid_grant`; no upload or final
-task closure is claimed. Exact safe cleanup/retry instructions are now documented.
+owner Sprint Review disposition remains pending. Drive authentication is restored.
+T-0191's 40-file recollection was copied immutably and download-checked with zero
+differences. Safe cleanup/retry is documented. Independent review found all
+seven technical acceptance criteria satisfied, conditional on remote verification;
+the primary accepts this bounded Host Functional task for integration/closeout.
 
 T-0191 owner-authorized separate recollection `20260919-recollection-01`
 passed three simulator oracles (170/740/374) and strict 26-file run / 13-file
 RTL verification. Evidence and a source snapshot are retained under ignored
 persistent `artifacts/research/EXP-0012/`, outside temporary storage. See the
 2026-09-19 log for exact new hashes. Historical missing bundles remain missing;
-this is new Host Functional evidence, not their recovery. Remote durability
-and final acceptance remain open; the task is In Progress.
+this is new Host Functional evidence, not their recovery. Its verified remote
+copy is `Raveil/research-data/EXP-0012/20260919-recollection-01`.
+Earlier open-condition paragraphs below describe preceding partial slices;
+the current closeout supersedes those conditions, not historical results.
 
 The historical T-0191 evidence promotion paused at an evidence-identity incident. The
 2026-09-18 inventory found the historical local run directory empty and the

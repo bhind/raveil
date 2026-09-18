@@ -78,6 +78,16 @@ configuration time or performance measurements.
 
 ## Interpretation and remaining gate
 
+### Bounded task closeout, 2026-09-19
+
+All seven T-0191 acceptance criteria received independent conditional GO;
+the remaining remote-preservation condition passed for the new collection:
+immutable copy followed by download check, 40 matching payload files and zero
+differences. The primary accepts this bounded functional task. The historical
+missing collection remains unavailable. Earlier remaining-condition paragraphs
+below are historical; no performance, adoption, novelty or T-0044 gate decision
+is made. Final marker verification and integration receipts are in the dated log.
+
 ### Separately authorized recollection, 2026-09-19
 
 The owner authorized new run `20260919-recollection-01` after the incident below.

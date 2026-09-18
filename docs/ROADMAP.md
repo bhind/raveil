@@ -490,7 +490,8 @@ acceptance, and merge remain one serial Project Manager boundary.
    or authority for a separate new collection, not substitution of old hashes.
    Owner-authorized separate recollection on 2026-09-19 now passes local
    run/RTL verification in persistent storage; old bundles remain unavailable.
-   Remote preservation and final review remain. No later comparison gate is unlocked.
+   Remote preservation and final technical review passed on 2026-09-19 for
+   the separate recollection. No later comparison gate is unlocked.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison
