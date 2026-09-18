@@ -4,6 +4,24 @@ This directory is an experiment-private adapter scaffold for exact OpenASIP
 v2.2. It does not vendor OpenASIP or grant it Raveil execution, effect, or
 publication authority.
 
+## Cancellation request
+
+The authorized simulator entrypoint accepts `--cancel-file PATH`. Create that
+file to request cancellation; once observed, the request is latched for the
+invocation even if the file is removed. Use a separate path for each run.
+This is an operator control for the local experiment, not multi-user isolation.
+The existing `--cancel-before-start` option remains available.
+
+An interrupted candidate must not publish results or invoke CPU fallback.
+If owned-process cleanup cannot be verified, the lifecycle returns an
+unpublished failure instead of reporting successful cancellation. Do not infer
+Docker/compiler/simulator termination from the absence of a result alone.
+If Docker create fails before returning a valid ID, ownership is uncertain.
+The runner denies publication and leaves reconciliation to the operator; it
+does not remove a container by guessed or generated name. An orphaned container
+may remain in this error case. Direct compiler/ttasim cancellation evidence is
+still pending; the container-only interruption test does not establish it.
+
 The first boundary is `./run_three_programs.sh --preflight`. It performs only
 static identity and independent-oracle calculations: it does not compile or
 execute the C inputs and does not start Docker. The separate explicit

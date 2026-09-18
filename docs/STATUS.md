@@ -1,6 +1,15 @@
 # Current status
 
-Last updated: 2026-09-17
+Last updated: 2026-09-18
+
+T-0191 external-process cancellation hardening is implemented locally and
+awaits final review/integration. The runner creates one uniquely named
+container, accepts only a returned full container ID, verifies its exit status,
+and stops/removes that exact container. Cancellation is latched; timeouts and
+cleanup uncertainty deny publication and CPU fallback. Failed create without
+a verified ID preserves uncertainty and never deletes by name. Focused tests
+pass, but the direct compiler/ttasim cancellation witness remains unverified:
+process observation did not succeed. This is not completion of T-0191.
 
 T-0121 implementation is integrated through PR #248 as `be01910` in S-0004
 (5 SP), following owner-approved promotion. Its bounded ASCII Graph Canvas

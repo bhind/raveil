@@ -7,7 +7,9 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SPIKE = ROOT / "experiments" / "openasip"
@@ -324,6 +326,156 @@ class OpenAsipFeasibilityTest(unittest.TestCase):
         self.assertEqual(receipt["status"], "cancelled")
         self.assertFalse(receipt["candidate_started"])
         self.assertFalse(receipt["published"])
+
+    def test_owned_external_process_is_terminated_and_reaped_on_cancel(self) -> None:
+        simulator = load_module("t0191_external_cancel", SPIKE / "simulate.py")
+        with tempfile.TemporaryDirectory() as value:
+            marker = Path(value) / "completed"
+            started = time.monotonic()
+            checks = 0
+
+            def cancel_requested() -> bool:
+                nonlocal checks
+                checks += 1
+                return checks >= 3
+
+            with self.assertRaisesRegex(
+                simulator.ExternalProcessCancelled, "cancelled and reaped"
+            ):
+                simulator.run(
+                    [
+                        sys.executable, "-c",
+                        "import pathlib,time; time.sleep(5); "
+                        f"pathlib.Path({str(marker)!r}).write_text('late')",
+                    ],
+                    timeout=10,
+                    cancel_requested=cancel_requested,
+                )
+            self.assertLess(time.monotonic() - started, 2)
+            time.sleep(0.1)
+            self.assertFalse(marker.exists())
+
+    def test_cancel_probe_failure_reaps_child_and_fails_closed(self) -> None:
+        simulator = load_module("t0191_probe_failure", SPIKE / "simulate.py")
+        with tempfile.TemporaryDirectory() as value:
+            marker = Path(value) / "completed"
+            with self.assertRaisesRegex(
+                simulator.ExternalProcessCleanupError, "probe failed"
+            ):
+                simulator.run(
+                    [
+                        sys.executable, "-c",
+                        "import pathlib,time; time.sleep(5); "
+                        f"pathlib.Path({str(marker)!r}).write_text('late')",
+                    ],
+                    timeout=10,
+                    cancel_requested=lambda: (_ for _ in ()).throw(OSError("gone")),
+                )
+            time.sleep(0.1)
+            self.assertFalse(marker.exists())
+
+    def test_owned_container_cancel_stops_and_removes_only_created_id(self) -> None:
+        simulator = load_module("t0191_container_lifecycle", SPIKE / "simulate.py")
+        container_id = "a" * 64
+        create = subprocess.CompletedProcess([simulator.DOCKER], 0, container_id + "\n", "")
+        cancelled = simulator.ExternalProcessCancelled("external process cancelled and reaped")
+        states = [
+            subprocess.CompletedProcess([], 0, "true\n", ""),
+            subprocess.CompletedProcess([], 0, container_id + "\n", ""),
+            subprocess.CompletedProcess([], 0, "false\n", ""),
+            subprocess.CompletedProcess([], 0, container_id + "\n", ""),
+        ]
+        with mock.patch.object(simulator, "run", side_effect=[create, cancelled]) as runner, \
+             mock.patch.object(simulator.subprocess, "run", side_effect=states) as cleanup:
+            with self.assertRaises(simulator.ExternalProcessCancelled):
+                simulator.run_container(
+                    [simulator.DOCKER, "run", "--rm", simulator.IMAGE, "sleep", "10"],
+                    cancel_requested=lambda: True,
+                )
+        self.assertEqual(
+            runner.call_args_list[0].args[0][0:5],
+            [simulator.DOCKER, "create", "--name", runner.call_args_list[0].args[0][3], "--label"],
+        )
+        self.assertRegex(runner.call_args_list[0].args[0][3], r"^raveil-t0191-[0-9a-f]{32}$")
+        self.assertEqual(runner.call_args_list[0].args[0][5:], ["raveil.task=T-0191", simulator.IMAGE, "sleep", "10"])
+        self.assertEqual(
+            runner.call_args_list[1].args[0],
+            [simulator.DOCKER, "start", "--attach", container_id],
+        )
+        self.assertEqual(
+            [call.args[0] for call in cleanup.call_args_list],
+            [
+                [simulator.DOCKER, "inspect", "--format", "{{.State.Running}}", container_id],
+                [simulator.DOCKER, "stop", "--time", "2", container_id],
+                [simulator.DOCKER, "inspect", "--format", "{{.State.Running}}", container_id],
+                [simulator.DOCKER, "rm", container_id],
+            ],
+        )
+
+    def test_owned_container_requires_verified_zero_exit(self) -> None:
+        simulator = load_module("t0191_container_exit", SPIKE / "simulate.py")
+        container_id = "b" * 64
+        created = subprocess.CompletedProcess([simulator.DOCKER], 0, container_id + "\n", "")
+        started = subprocess.CompletedProcess([simulator.DOCKER], 0, "output", "")
+        states = [
+            subprocess.CompletedProcess([], 0, "false 7\n", ""),
+            subprocess.CompletedProcess([], 0, "false\n", ""),
+            subprocess.CompletedProcess([], 0, container_id + "\n", ""),
+        ]
+        with mock.patch.object(simulator, "run", side_effect=[created, started]), \
+             mock.patch.object(simulator.subprocess, "run", side_effect=states):
+            with self.assertRaises(subprocess.CalledProcessError) as error:
+                simulator.run_container([simulator.DOCKER, "run", simulator.IMAGE, "false"])
+        self.assertEqual(error.exception.returncode, 7)
+
+    def test_cleanup_uncertainty_neither_falls_back_nor_publishes(self) -> None:
+        lifecycle = load_module("t0191_cleanup_uncertain", SPIKE / "lifecycle.py")
+        fallback_calls = 0
+
+        def fallback():  # type: ignore[no-untyped-def]
+            nonlocal fallback_calls
+            fallback_calls += 1
+            return {"backend": "native-cpu", "programs": {}}
+
+        receipt = lifecycle.execute(
+            lambda: (_ for _ in ()).throw(lifecycle.ExternalProcessCleanupError("unknown")),
+            cpu_fallback=fallback,
+        )
+        self.assertEqual(receipt["status"], "failed")
+        self.assertFalse(receipt["published"])
+        self.assertEqual(fallback_calls, 0)
+
+    def test_external_timeout_neither_falls_back_nor_publishes(self) -> None:
+        lifecycle = load_module("t0191_timeout_boundary", SPIKE / "lifecycle.py")
+        fallback = mock.Mock()
+        receipt = lifecycle.execute(
+            lambda: (_ for _ in ()).throw(subprocess.TimeoutExpired("owned", 1)),
+            cpu_fallback=fallback,
+        )
+        self.assertEqual(receipt["status"], "failed")
+        self.assertFalse(receipt["published"])
+        fallback.assert_not_called()
+
+    def test_create_failure_never_cleans_an_unproven_container(self) -> None:
+        simulator = load_module("t0191_create_conflict", SPIKE / "simulate.py")
+        for error in (subprocess.CalledProcessError(1, ["docker", "create"]),
+                      subprocess.TimeoutExpired(["docker", "create"], 5)):
+            with self.subTest(error=type(error).__name__), \
+                 mock.patch.object(simulator, "run", side_effect=error), \
+                 mock.patch.object(simulator, "_cleanup_container") as cleanup:
+                with self.assertRaises(simulator.ExternalProcessCleanupError):
+                    simulator.run_container([simulator.DOCKER, "run", simulator.IMAGE, "true"])
+                cleanup.assert_not_called()
+
+    def test_cancel_file_latches_after_removal(self) -> None:
+        runner = load_module("t0191_authorized_cancel_latch", SPIKE / "run_authorized.py")
+        with tempfile.TemporaryDirectory() as value:
+            path = Path(value) / "cancel"
+            path.write_text("cancel", encoding="utf-8")
+            requested = runner.CancelFile(path)
+            self.assertTrue(requested())
+            path.unlink()
+            self.assertTrue(requested())
 
     def test_real_runner_uses_native_cpu_fallback_on_candidate_failure(self) -> None:
         result = subprocess.run(

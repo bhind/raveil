@@ -19,6 +19,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   closeout review remain. The lifecycle boundary now proves that a cooperative
   cancellation observed after candidate start wins over success or failure
   before publication, invokes no fallback and exposes no candidate payload.
+  External-process hardening is now a local candidate on
+  `test/t-0191-cancel-recovery`; timeout and cleanup-uncertainty regressions
+  deny fallback/publication. Direct compiler/ttasim cancellation observation
+  remains unverified; do not close that requirement from the container-only
+  witness or mocked tests.
   Accepted candidate and CPU-fallback receipts are strict public projections:
   they expose only reviewed results and a canonical SHA-256 identity of the
   private receipt, never candidate-controlled fields, host argv, paths or
