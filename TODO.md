@@ -1,6 +1,6 @@
 # Raveil TODO
 
-Last updated: 2026-09-13
+Last updated: 2026-09-18
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -14,16 +14,17 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   one Raveil contract-lifetime or authority property. No upstream source is
   copied into Raveil. EXP-0012 now passes the three-program frozen-ADF and
   Raveil publication-authority portions, normalized generated-VHDL identity,
-  TPEF sizes and bounded host load diagnostics. External-process interruption,
+  TPEF sizes and bounded host load diagnostics. Verified evidence preservation,
   durable raw-artifact promotion and independent
   closeout review remain. The lifecycle boundary now proves that a cooperative
   cancellation observed after candidate start wins over success or failure
   before publication, invokes no fallback and exposes no candidate payload.
   External-process hardening merged through PR #250 as `5491bc7` from
   `test/t-0191-cancel-recovery`; timeout and cleanup-uncertainty regressions
-  deny fallback/publication. Direct compiler/ttasim cancellation observation
-  remains unverified; do not close that requirement from the container-only
-  witness or mocked tests.
+  deny fallback/publication. Corrected `check_cancellation.py` now observes
+  real compiler and execution-ttasim processes, then confirms unpublished
+  cancellation and owned-container absence. Independent final acceptance and
+  durable raw evidence remain; no instruction-progress or performance claim.
   Accepted candidate and CPU-fallback receipts are strict public projections:
   they expose only reviewed results and a canonical SHA-256 identity of the
   private receipt, never candidate-controlled fields, host argv, paths or

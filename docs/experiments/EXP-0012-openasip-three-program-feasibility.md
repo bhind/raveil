@@ -57,8 +57,9 @@ Accepted candidate and CPU-fallback receipts are strict public projections.
 They contain reviewed result words and the canonical SHA-256 of the private
 receipt, but exclude raw program records, compiler/simulator argv, absolute
 host paths, host-platform data and arbitrary candidate-supplied fields.
-This proves lifecycle-boundary parity; it does not yet terminate a running
-external compiler or simulator process.
+That historical lifecycle receipt proves lifecycle-boundary parity; it did not
+itself establish termination of a running external compiler or simulator.
+The subsequent process-lifecycle witness is recorded below.
 
 `generateprocessor` plus the recorded same-image repair produced ten VHDL
 files totalling 76,211 bytes from the same ADF. Two independent generations
@@ -85,9 +86,18 @@ observe actual `oacc` and `ttasim` before cancellation did not establish that
 observation; neither is a successful compiler/simulator cancellation witness.
 The implementation does not retroactively change the frozen historical receipts.
 
+Subsequent diagnosis found the observation failure: `docker top -eo args`
+returns `Couldn't find PID field in ps output`. The corrected witness requests
+`pid,args`, requires a numeric PID and the target executable, and fails on
+unexpected observation errors. Both `oacc` and `ttasim` then passed: observed
+process, unpublished cancelled receipt, and owned container absent. The ttasim
+case explicitly excludes the load-only probe and selects `SIM_SCRIPT`.
+This is Host Functional process-lifecycle evidence only, not proof of simulated
+instruction progress, timing or full-task acceptance.
+
 This answers the narrow three-program simulator feasibility question
 positively. It does **not** complete T-0191. A durable approved raw-artifact
-destination, external-process interruption, and independent final review remain
+destination and independent final review remain
 open.
 
 The counters above are not latency, throughput, memory/cache traffic or a

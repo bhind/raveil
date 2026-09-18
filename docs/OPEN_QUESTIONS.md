@@ -177,9 +177,11 @@ resolves it.
   is not patent clearance. EXP-0012 answers only the frozen-ADF simulator and
   Raveil publication/fallback portions positively, and records a normalized
   generated-VHDL identity plus bounded TPEF/load diagnostics. Cooperative
-  cancel-wins is proven at the lifecycle publication boundary, but interruption
-  of a running external compiler/simulator process, durable evidence and
-  patent/FTO questions remain open.
+  cancel-wins is proven at the lifecycle publication boundary. The corrected
+  PID-bearing Docker observer now witnesses real compiler/execution-ttasim
+  process cancellation and container absence. Durable evidence, independent
+  final acceptance and patent/FTO questions remain open; this does not show
+  simulated instruction progress before cancellation.
   Accepted lifecycle receipts now project only reviewed results and the
   canonical private-receipt identity; this does not resolve those remaining
   questions or authorize publication of the private raw receipt.

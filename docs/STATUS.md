@@ -9,8 +9,14 @@ container, accepts only a returned full container ID, verifies its exit status,
 and stops/removes that exact container. Cancellation is latched; timeouts and
 cleanup uncertainty deny publication and CPU fallback. Failed create without
 a verified ID preserves uncertainty and never deletes by name. Focused tests
-pass, but the direct compiler/ttasim cancellation witness remains unverified:
-process observation did not succeed. This is not completion of T-0191.
+pass. A subsequent local witness now observes the actual `oacc` and execution
+`ttasim` process before requesting cancellation, verifies an unpublished
+cancelled receipt and confirms the owned container is absent. Earlier failed
+observations used `docker top -eo args`, which Docker rejects without a PID
+column. The corrected witness uses `pid,args` and reports observation errors.
+This bounded process-lifecycle result does not prove simulator instruction
+progress or performance and does not complete T-0191; durable evidence and
+independent final closeout remain.
 
 T-0121 implementation is integrated through PR #248 as `be01910` in S-0004
 (5 SP), following owner-approved promotion. Its bounded ASCII Graph Canvas

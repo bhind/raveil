@@ -482,8 +482,10 @@ acceptance, and merge remain one serial Project Manager boundary.
    payload or fallback. Its accepted public receipts are strict reviewed-field
    projections linked to private evidence by canonical SHA-256; private argv,
    host paths, platform data and arbitrary candidate fields are not published.
-   T-0191 remains open at durable raw evidence,
-   external-process interruption and independent closeout review; no later
+   A corrected process observer demonstrates cancellation after observing real
+   compiler and execution-ttasim processes, with no published output and owned
+   container absence. T-0191 remains open at durable raw evidence and
+   independent closeout review; no later
    comparison gate is unlocked.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the

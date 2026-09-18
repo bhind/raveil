@@ -29,6 +29,24 @@ def load_module(name: str, path: Path):  # type: ignore[no-untyped-def]
 
 
 class OpenAsipFeasibilityTest(unittest.TestCase):
+    def test_cancellation_observer_requires_pid_and_reports_api_errors(self):
+        witness = load_module("t0191_observer", SPIKE / "check_cancellation.py")
+        with mock.patch.object(witness.subprocess, "run") as run:
+            run.return_value = subprocess.CompletedProcess([], 0, "PID COMMAND\n123 /opt/openasip/bin/oacc -O3\n", "")
+            self.assertTrue(witness.observe("a" * 64, "oacc"))
+            self.assertEqual(run.call_args.args[0][-2:], ["-eo", "pid,args"])
+            run.return_value = subprocess.CompletedProcess([], 1, "", "Couldn't find PID field in ps output")
+            with self.assertRaisesRegex(RuntimeError, "observation failed"):
+                witness.observe("a" * 64, "oacc")
+            run.return_value = subprocess.CompletedProcess([], 1, "", "container is not running")
+            self.assertFalse(witness.observe("a" * 64, "oacc"))
+
+    def test_cancellation_observer_excludes_load_only_probe(self):
+        witness = load_module("t0191_observer_stage", SPIKE / "check_cancellation.py")
+        command = ["/opt/openasip/bin/ttasim", "-e"]
+        self.assertFalse(witness.target_stage(command + [witness.simulate.LOAD_SCRIPT], "ttasim"))
+        self.assertTrue(witness.target_stage(command + [witness.simulate.SIM_SCRIPT], "ttasim"))
+
     def test_source_receipt_matches_manifest_and_is_non_claiming(self) -> None:
         manifest = json.loads((SPIKE / "manifest.json").read_text())
         receipt = json.loads((SPIKE / "source-receipt.json").read_text())
