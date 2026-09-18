@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from typing import Any, Callable
 
 import oracle
@@ -14,6 +15,14 @@ EXPECTED = {
     "elementwise": oracle.elementwise(),
     "reduction": oracle.reduction(),
 }
+
+
+class ExternalProcessCancelled(RuntimeError):
+    """An owned external candidate was stopped and its cleanup verified."""
+
+
+class ExternalProcessCleanupError(RuntimeError):
+    """An owned external candidate may remain alive; never publish or fall back."""
 
 
 def receipt_sha256(receipt: dict[str, Any]) -> str:
@@ -43,6 +52,14 @@ def actual_cpu_fallback(
 ) -> dict[str, Any]:
     try:
         cpu = cpu_fallback()
+    except ExternalProcessCancelled:
+        return cancelled_receipt(candidate_started=True)
+    except (ExternalProcessCleanupError, subprocess.TimeoutExpired):
+        return {
+            "task": "T-0191", "status": "failed", "backend": None,
+            "candidate_failure": "external-process-cleanup-uncertain",
+            "published": False,
+        }
     except Exception:
         return {
             "task": "T-0191", "status": "failed", "backend": None,
@@ -109,6 +126,14 @@ def execute(
         return cancelled_receipt()
     try:
         private_receipt = candidate()
+    except ExternalProcessCancelled:
+        return cancelled_receipt(candidate_started=True)
+    except (ExternalProcessCleanupError, subprocess.TimeoutExpired):
+        return {
+            "task": "T-0191", "status": "failed", "backend": None,
+            "candidate_failure": "external-process-cleanup-uncertain",
+            "published": False,
+        }
     except Exception:
         if cancel_requested is not None and cancel_requested():
             return cancelled_receipt(candidate_started=True)

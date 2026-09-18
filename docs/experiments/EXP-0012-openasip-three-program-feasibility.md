@@ -77,6 +77,14 @@ configuration time or performance measurements.
 
 ## Interpretation and remaining gate
 
+The 2026-09-18 local runner candidate adds exact-ID owned-container cleanup,
+latched cancellation, checked exit status and no-publication/no-fallback on
+timeout or cleanup uncertainty. A prior normal three-program run still matched
+170/740/374 and a container-only sleep interruption was observed. Attempts to
+observe actual `oacc` and `ttasim` before cancellation did not establish that
+observation; neither is a successful compiler/simulator cancellation witness.
+The implementation does not retroactively change the frozen historical receipts.
+
 This answers the narrow three-program simulator feasibility question
 positively. It does **not** complete T-0191. A durable approved raw-artifact
 destination, external-process interruption, and independent final review remain
