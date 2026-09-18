@@ -485,8 +485,10 @@ acceptance, and merge remain one serial Project Manager boundary.
    A corrected process observer demonstrates cancellation after observing real
    compiler and execution-ttasim processes, with no published output and owned
    container absence. T-0191 remains open at durable raw evidence and
-   independent closeout review; no later
-   comparison gate is unlocked.
+   independent closeout review. The 2026-09-18 inventory could not recover
+   historical local run/RTL receipts; promotion requires exact-bundle recovery
+   or authority for a separate new collection, not substitution of old hashes.
+   No later comparison gate is unlocked.
 6. **T-0106 — conditional attribution hardening:** only after T-0044 survival
    or an accepted untrusted/concurrent product requirement, complete the
    general ADR-0045 token lifecycle matrix. It is not on the first-comparison

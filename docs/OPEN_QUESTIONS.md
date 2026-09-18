@@ -1,5 +1,10 @@
 # Open questions
 
+- T-0191 / EXP-0012 evidence availability (2026-09-18): can the historical
+  hash-matching raw bundles be recovered from an existing private backup?
+  Local run/RTL receipt verification fails. Otherwise a separately authorized,
+  newly identified collection is needed; it cannot replace historical evidence.
+
 Last updated: 2026-09-09
 
 These items are intentionally unresolved. A conversation hypothesis does not

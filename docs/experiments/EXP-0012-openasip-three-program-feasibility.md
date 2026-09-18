@@ -78,6 +78,17 @@ configuration time or performance measurements.
 
 ## Interpretation and remaining gate
 
+### Evidence availability incident, 2026-09-18
+
+The historical local run directory is empty; the generated-RTL directory has
+remaining RTL content but no `rtl-receipt.json`. Strict run and RTL verification
+both fail on missing receipts. The recorded historical hashes and observations
+above remain provenance, not a currently reverified or durable bundle. No cause
+of the missing files is established. Do not regenerate files under those old
+identities. Recover hash-matching originals, or obtain authority for a separately
+identified new collection and retain the historical availability failure.
+Promotion and final acceptance are blocked on this distinction.
+
 The 2026-09-18 local runner candidate adds exact-ID owned-container cleanup,
 latched cancellation, checked exit status and no-publication/no-fallback on
 timeout or cleanup uncertainty. A prior normal three-program run still matched

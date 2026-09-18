@@ -6,6 +6,10 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 - [ ] **T-0191** Prove one frozen OpenASIP machine across three Graphs,
   [Issue #239](https://github.com/bhind/raveil/issues/239), S-0003, 8 SP.
+  Evidence-promotion blocker (2026-09-18): historical local run/RTL receipts
+  were not found and strict verification fails. PM must recover the exact old
+  bundles or obtain approval for a separate newly identified collection, never
+  replace historical hashes with rerun output. Preserve remaining files.
   Build exact OpenASIP v2.2 only in a pinned supported Linux environment,
   freeze one ADF/generated-RTL identity, then compile and simulate a
   neighborhood transform, elementwise multiply/add chain and reduction without
