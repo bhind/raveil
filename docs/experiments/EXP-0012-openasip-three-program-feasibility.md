@@ -85,9 +85,18 @@ observe actual `oacc` and `ttasim` before cancellation did not establish that
 observation; neither is a successful compiler/simulator cancellation witness.
 The implementation does not retroactively change the frozen historical receipts.
 
+Subsequent diagnosis found the observation failure: `docker top -eo args`
+returns `Couldn't find PID field in ps output`. The corrected witness requests
+`pid,args`, requires a numeric PID and the target executable, and fails on
+unexpected observation errors. Both `oacc` and `ttasim` then passed: observed
+process, unpublished cancelled receipt, and owned container absent. The ttasim
+case explicitly excludes the load-only probe and selects `SIM_SCRIPT`.
+This is Host Functional process-lifecycle evidence only, not proof of simulated
+instruction progress, timing or full-task acceptance.
+
 This answers the narrow three-program simulator feasibility question
 positively. It does **not** complete T-0191. A durable approved raw-artifact
-destination, external-process interruption, and independent final review remain
+destination and independent final review remain
 open.
 
 The counters above are not latency, throughput, memory/cache traffic or a

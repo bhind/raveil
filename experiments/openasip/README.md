@@ -19,8 +19,20 @@ Docker/compiler/simulator termination from the absence of a result alone.
 If Docker create fails before returning a valid ID, ownership is uncertain.
 The runner denies publication and leaves reconciliation to the operator; it
 does not remove a container by guessed or generated name. An orphaned container
-may remain in this error case. Direct compiler/ttasim cancellation evidence is
-still pending; the container-only interruption test does not establish it.
+may remain in this error case.
+
+Reproduce the bounded real-process cancellation checks with the existing pinned
+image (no image build or pull):
+
+```sh
+python3 experiments/openasip/check_cancellation.py oacc
+python3 experiments/openasip/check_cancellation.py ttasim
+```
+
+The witness observes a numeric PID plus target executable before requesting
+cancellation, checks the unpublished receipt and container absence, and
+excludes ttasim's load-only probe. It verifies process lifecycle only, not
+simulated instruction progress or performance. Missing observation is a failure.
 
 The first boundary is `./run_three_programs.sh --preflight`. It performs only
 static identity and independent-oracle calculations: it does not compile or
