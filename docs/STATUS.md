@@ -1,6 +1,35 @@
 # Current status
 
-Last updated: 2026-09-18
+Last updated: 2026-09-19
+
+Next bounded successor T-0180 / Issue #178 is prepared as P1/Ready in S-0005
+(3 SP, Planning): saved-run export contract and inspection fixture only.
+The S-0004 Garden demo runs numeric selection and directed dependency view;
+owner Sprint Review disposition remains pending. Drive authentication is restored.
+T-0191's 40-file recollection was copied immutably and download-checked with zero
+differences. Safe cleanup/retry is documented. Independent review found all
+seven technical acceptance criteria satisfied, conditional on remote verification;
+the primary accepts this bounded Host Functional task for integration/closeout.
+
+T-0191 owner-authorized separate recollection `20260919-recollection-01`
+passed three simulator oracles (170/740/374) and strict 26-file run / 13-file
+RTL verification. Evidence and a source snapshot are retained under ignored
+persistent `artifacts/research/EXP-0012/`, outside temporary storage. See the
+2026-09-19 log for exact new hashes. Historical missing bundles remain missing;
+this is new Host Functional evidence, not their recovery. Its verified remote
+copy is `Raveil/research-data/EXP-0012/20260919-recollection-01`.
+Earlier open-condition paragraphs below describe preceding partial slices;
+the current closeout supersedes those conditions, not historical results.
+
+The historical T-0191 evidence promotion paused at an evidence-identity incident. The
+2026-09-18 inventory found the historical local run directory empty and the
+generated-RTL directory missing its receipt. Both strict evidence-verifier
+commands reject these directories. Historical EXP-0012 results remain recorded,
+but their original bundles are not currently reverified or durably promoted.
+Recovery requires the original hash-matching bundles or an explicitly separate
+new collection; rerunning cannot repair the historical receipt identity.
+No deletion cause is established. Process-observation checks are independently
+integrated through PR #252 (`3f26f07`); that result does not recover old bundles.
 
 T-0191 external-process cancellation hardening is integrated through PR #250
 as `5491bc7`. Candidate `2658b0a` passed 29 focused tests, 860 full tests (two
@@ -71,12 +100,13 @@ authority on the actual simulator entrypoint. Two independent VHDL generations
 from that ADF produced the same timestamp-normalized ten-file tree identity;
 TPEF sizes and n=1 host load diagnostics are recorded without device-time or
 performance meaning. This is partial Host Functional evidence only. An
-approved durable raw-artifact destination, external-process interruption and
-independent closeout review remain open. A cooperative cancellation observed
+approved durable raw-artifact destination and independent closeout review remain
+open. External-process interruption was subsequently verified as described above.
+A cooperative cancellation observed
 after candidate start now wins before publication over both candidate success
 and candidate failure; the receipt exposes no private result and fallback is
-not invoked. This is a lifecycle-boundary property, not proof that an OpenASIP
-container process can yet be interrupted while running.
+not invoked. That historical receipt established a lifecycle-boundary property;
+the later process-observation witness separately covers running processes.
 Accepted candidate and CPU-fallback receipts are now strict public projections
 containing reviewed results plus a canonical private-receipt SHA-256. Raw
 candidate fields, Docker argv, absolute host paths and host-platform data stay

@@ -78,6 +78,39 @@ configuration time or performance measurements.
 
 ## Interpretation and remaining gate
 
+### Bounded task closeout, 2026-09-19
+
+All seven T-0191 acceptance criteria received independent conditional GO;
+the remaining remote-preservation condition passed for the new collection:
+immutable copy followed by download check, 40 matching payload files and zero
+differences. The primary accepts this bounded functional task. The historical
+missing collection remains unavailable. Earlier remaining-condition paragraphs
+below are historical; no performance, adoption, novelty or T-0044 gate decision
+is made. Final marker verification and integration receipts are in the dated log.
+
+### Separately authorized recollection, 2026-09-19
+
+The owner authorized new run `20260919-recollection-01` after the incident below.
+It uses the same fixed ADF and image; RTL was generated and verified before
+program compilation. The normalized tree again matches the frozen identity.
+All three oracles match (170/740/374); strict verification passes 26 run files
+and 13 RTL files. New hashes and exact commands are in the 2026-09-19 log.
+The evidence and source archive reside in persistent ignored repository storage,
+not temporary directories. This is a new local Host Functional collection, not
+recovery of old receipts or remotely verified durable evidence. Historical
+results remain unchanged. Final acceptance and remote preservation remain open.
+
+### Evidence availability incident, 2026-09-18
+
+The historical local run directory is empty; the generated-RTL directory has
+only empty directory structure and no `rtl-receipt.json`. Strict run and RTL verification
+both fail on missing receipts. The recorded historical hashes and observations
+above remain provenance, not a currently reverified or durable bundle. No cause
+of the missing files is established. Do not regenerate files under those old
+identities. Recover hash-matching originals, or obtain authority for a separately
+identified new collection and retain the historical availability failure.
+Promotion and final acceptance are blocked on this distinction.
+
 The 2026-09-18 local runner candidate adds exact-ID owned-container cleanup,
 latched cancellation, checked exit status and no-publication/no-fallback on
 timeout or cleanup uncertainty. A prior normal three-program run still matched
