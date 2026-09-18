@@ -57,8 +57,9 @@ Accepted candidate and CPU-fallback receipts are strict public projections.
 They contain reviewed result words and the canonical SHA-256 of the private
 receipt, but exclude raw program records, compiler/simulator argv, absolute
 host paths, host-platform data and arbitrary candidate-supplied fields.
-This proves lifecycle-boundary parity; it does not yet terminate a running
-external compiler or simulator process.
+That historical lifecycle receipt proves lifecycle-boundary parity; it did not
+itself establish termination of a running external compiler or simulator.
+The subsequent process-lifecycle witness is recorded below.
 
 `generateprocessor` plus the recorded same-image repair produced ten VHDL
 files totalling 76,211 bytes from the same ADF. Two independent generations
