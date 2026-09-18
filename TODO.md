@@ -12,7 +12,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   replace historical hashes with rerun output. Preserve remaining files.
   Owner approved separate recollection on 2026-09-19: new persistent run
   `20260919-recollection-01` passes all three oracles and 26/13-file verification.
-  Preserve its source snapshot; finish independent review and approved remote
+  Existing Drive connection returns `invalid_grant`; owner reconnection is
+  needed before remote verification. Preserve its source snapshot; finish independent review and approved remote
   preservation without claiming the missing old bundles were recovered.
   Build exact OpenASIP v2.2 only in a pinned supported Linux environment,
   freeze one ADF/generated-RTL identity, then compile and simulate a
@@ -300,7 +301,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
 | **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0191 remains the active research lane. T-0192 is complete. |
-| **P1 — next** | Start only after its named P0 dependency passes. | No prepared product successor remains after T-0192; run canonical horizon replenishment. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
+| **P1 — next** | Start only after its named dependencies pass. | T-0180 / Issue #178 is prepared for S-0005 at 3 SP: saved-run export boundary design and inspection fixture only. No real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |

@@ -2,6 +2,13 @@
 
 Last updated: 2026-09-19
 
+Next bounded successor T-0180 / Issue #178 is prepared as P1/Ready in S-0005
+(3 SP, Planning): saved-run export contract and inspection fixture only.
+The S-0004 Garden demo runs numeric selection and directed dependency view;
+owner Sprint Review disposition remains pending. T-0191 remote preservation
+currently fails at existing Drive OAuth `invalid_grant`; no upload or final
+task closure is claimed. Exact safe cleanup/retry instructions are now documented.
+
 T-0191 owner-authorized separate recollection `20260919-recollection-01`
 passed three simulator oracles (170/740/374) and strict 26-file run / 13-file
 RTL verification. Evidence and a source snapshot are retained under ignored

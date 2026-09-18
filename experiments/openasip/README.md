@@ -21,6 +21,36 @@ The runner denies publication and leaves reconciliation to the operator; it
 does not remove a container by guessed or generated name. An orphaned container
 may remain in this error case.
 
+### Cleanup and retry
+
+After a successful cancellation witness, no cleanup is necessary: the checker
+has verified absence of its exact owned container. Preserve every evidence
+directory, including failed attempts. Retry with a new nonexistent evidence
+directory and a new cancellation-file path; never reuse a sealed directory.
+
+If creation returned no verified ID, do not delete by name or run Docker prune.
+Use `docker ps -a --no-trunc` for read-only inventory, then
+`docker inspect <full-container-id>` for a suspected container. Names alone
+are not ownership evidence. Correlate image, creation time, command and mounts
+with the failed invocation. If ownership cannot be established, retain the
+container and escalate to the operator; no automatic removal or retry is safe.
+Only after the operator confirms the exact full ID belongs to this invocation,
+use `docker stop --time 2 <full-container-id>` and
+`docker rm <full-container-id>`, then verify absence with
+`docker container ls -aq --no-trunc --filter id=<full-container-id>`.
+Never target other containers. Resume the explicit simulate command with a new
+evidence directory only after uncertainty is resolved.
+
+For an ordinary failed run whose owned-container cleanup succeeded, retry:
+
+```sh
+sh experiments/openasip/run_three_programs.sh --simulate --evidence-dir <new-persistent-directory>
+python3 experiments/openasip/verify_evidence.py run <new-persistent-directory>
+```
+
+An accepted CPU fallback is not simulator success: require backend
+`openasip-ttasim` and strict evidence verification for this feasibility task.
+
 Reproduce the bounded real-process cancellation checks with the existing pinned
 image (no image build or pull):
 
