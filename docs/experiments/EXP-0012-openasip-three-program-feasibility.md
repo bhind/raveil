@@ -81,7 +81,7 @@ configuration time or performance measurements.
 ### Evidence availability incident, 2026-09-18
 
 The historical local run directory is empty; the generated-RTL directory has
-remaining RTL content but no `rtl-receipt.json`. Strict run and RTL verification
+only empty directory structure and no `rtl-receipt.json`. Strict run and RTL verification
 both fail on missing receipts. The recorded historical hashes and observations
 above remain provenance, not a currently reverified or durable bundle. No cause
 of the missing files is established. Do not regenerate files under those old
