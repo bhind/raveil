@@ -558,6 +558,8 @@ resolves it.
   T-0184 now supplies actual rejection probes, but their register failures
   include unreachable values and do not establish intrinsic register demand.
   Advisory preflight hints are selected; capacity/reuse/tiling remain undecided.
+  T-0195 implements those hints without changing acceptance; this does not
+  resolve the separate GE_IMM_U32 opcode proposal or authorize T-0182.
 - Should local run history eventually gain human labels, a compact content
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor

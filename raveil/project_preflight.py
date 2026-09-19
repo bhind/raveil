@@ -159,8 +159,39 @@ def _gemm_admission(recipe: dict[str, Any]) -> str:
 
 
 def _graph_admission(descriptor: dict[str, Any]) -> str:
-    program = project_graph.compile_graph(descriptor)
+    try:
+        program = project_graph.compile_graph(descriptor)
+    except ValueError as error:
+        hint = _graph_pressure_hint(descriptor, str(error))
+        if hint:
+            raise ValueError(f"{error}; hint (advisory only): {hint} Recheck after editing; admission is unchanged.") from error
+        raise
     return f"Graph {program['graph_id']} transport profile admitted"
+
+
+def _graph_pressure_hint(descriptor: dict[str, Any], error: str) -> str | None:
+    """Explain exact known failures; never rewrite, retry or admit a Graph."""
+    if error == "node count is outside the bounded program":
+        nodes = descriptor.get("nodes")
+        count = f"{len(nodes)} nodes supplied; " if type(nodes) is list else ""
+        return (count + "the current program permits 2..16 nodes, one instruction per node. "
+                "Review the per-cell expression; spatial tiling alone does not reduce its instruction count.")
+    return {
+        "Graph requires more than eight live values":
+            "The allocator has eight value registers. Unused results can retain slots, and ready-node "
+            "author order can affect allocation. Inspect unused nodes and consider placing consumers "
+            "earlier where dependencies allow; this is not proof that hardware needs more registers.",
+        "affine shape escapes the bounded windows":
+            "Rows/columns must be 1..16; input_stride >= columns+2 and output_stride >= columns. "
+            "Input/output addresses must fit 324/256 words. The project transport additionally requires "
+            "8x8 strides10/8 or 16x16 strides18/16; inspect shape and both strides together.",
+        "LOAD_U32 relative address is invalid":
+            "Use integer row_delta and column_delta in [-1,1], with exactly those two address fields. "
+            "The current LOAD contract has a one-cell halo; a wider offset is not supported.",
+        "dynamic request must use the baseline or compact affine profile":
+            "A compiler-valid shape may still fail transport admission. Use 8x8 with input/output "
+            "strides10/8 or 16x16 with strides18/16; arbitrary compiler-valid profiles are not runnable here.",
+    }.get(error)
 
 
 def _tools(recipe: dict[str, Any], backend: str, *, repository: Path, kernel: Path,

@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-19
 
+T-0195 / Issue #259 adds advisory known-Graph-rejection hints to existing
+project preflight. Original failure text and admission stay authoritative;
+unknown errors remain unchanged. No compiler, payload, trace, schema, ABI or
+capacity change. All 82 preflight/project/Graph tests pass; independent review
+is GO. Real CLI demos for the 18-node and retained-register examples both
+retain exit 2 and actions/runs_created=0 while showing the advisory explanation.
+Technically accepted for integration, not a Sprint ceremony acceptance.
+
 T-0184 / Issue #183 retains 17 planning probes against the unchanged Graph
 compiler: six admissions and eleven exact rejections, with three oracle/fallback
 seeds per admitted case. An author-order pair differs in admission but not

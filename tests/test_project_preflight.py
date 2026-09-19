@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import json
 from pathlib import Path
 import subprocess
 import tempfile
@@ -12,6 +13,8 @@ from raveil.cli import main
 from raveil.native_backend import NativeCBackend
 from raveil.project import Project, init_project
 from raveil.project_preflight import Probes, check
+from raveil.project_preflight import _graph_admission
+from raveil.project_graph import compile_graph
 from raveil.sonatine_backend import SonatineQEMUBackend
 
 
@@ -59,6 +62,51 @@ class ProjectPreflightTests(unittest.TestCase):
         self.assertIn("no workload, tool invocation, run, build, network, simulation, device or install action", report)
         self.assertEqual(before, project_snapshot(self.root))
         self.assertEqual(list((self.root / "runs").iterdir()), [])
+
+    def test_pressure_fixtures_keep_admission_and_files_unchanged(self) -> None:
+        fixtures = Path(__file__).parent / "fixtures/graph_pressure/cases.json"
+        cases = json.loads(fixtures.read_text())["cases"]
+        self.assertEqual(len(cases), 17)
+        for case in cases:
+            with self.subTest(case=case["id"]):
+                descriptor = case["descriptor"]
+                (self.root / "inputs/bias-grid.json").write_text(json.dumps(descriptor))
+                before = project_snapshot(self.root)
+                if case["expected"] == "admitted":
+                    original_program = compile_graph(descriptor)
+                with self.no_execution():
+                    status, report = check(self.project, "bias-grid", "rtl-sim", repository=Path("/repo"),
+                                           kernel=Path("/kernel"), compiler="cc", qemu="qemu", probes=self.probes)
+                self.assertEqual(status, 0 if case["expected"] == "admitted" else 2)
+                if status == 0:
+                    self.assertNotIn("hint (advisory only)", report)
+                    self.assertEqual(compile_graph(descriptor), original_program)
+                else:
+                    self.assertIn("admission: fail - " + case["error"], report)
+                    self.assertIn("hint (advisory only)", report)
+                    self.assertIn("admission is unchanged", report)
+                self.assertEqual(project_snapshot(self.root), before)
+                self.assertEqual(list((self.root / "runs").iterdir()), [])
+
+    def test_pressure_unknown_error_and_transport_boundary(self) -> None:
+        with patch("raveil.project_preflight.project_graph.compile_graph", side_effect=ValueError("unknown")):
+            with self.assertRaisesRegex(ValueError, "^unknown$"):
+                _graph_admission({})
+        descriptor = json.loads((self.root / "inputs/bias-grid.json").read_text())
+        descriptor["affine"]["rows"] = 7
+        with self.assertRaisesRegex(ValueError, "compiler-valid shape may still fail transport admission"):
+            _graph_admission(descriptor)
+
+    def test_pressure_register_hint_is_not_a_hardware_or_success_claim(self) -> None:
+        fixtures = Path(__file__).parent / "fixtures/graph_pressure/cases.json"
+        descriptor = next(case["descriptor"] for case in json.loads(fixtures.read_text())["cases"]
+                          if case["id"] == "retained9")
+        with self.assertRaises(ValueError) as caught:
+            _graph_admission(descriptor)
+        message = str(caught.exception)
+        self.assertIn("Unused results can retain slots", message)
+        self.assertIn("not proof that hardware needs more registers", message)
+        self.assertIn("admission is unchanged", message)
 
     def test_default_command_tool_probe_reuses_fixed_registry_search(self) -> None:
         with patch("raveil.project_preflight.ToolRegistry._candidate",

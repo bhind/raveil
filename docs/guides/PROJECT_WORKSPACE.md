@@ -1,5 +1,23 @@
 # Raveil project workspace
 
+## When a Graph is rejected
+
+`project check RECIPE --backend rtl-sim --project WORK` keeps the original
+admission error and adds an advisory hint for known instruction-count,
+register-allocation, shape/stride/window, relative-address and transport-profile
+failures. For example, 18 nodes do not fit the current 16-instruction program;
+spatial tiling alone does not reduce a per-cell expression's instruction count.
+
+An eight-register rejection may include slots retained by unused results or
+descriptor-order effects. Inspect the descriptor; it is not proof of intrinsic
+hardware register demand. Editing the order does not guarantee success.
+Compiler-valid shapes must also match the project's 8x8 strides10/8 or 16x16
+strides18/16 transport profile. Unknown errors are not guessed at.
+
+Hints do not modify files, prune/reorder nodes, retry, execute or change admission.
+Re-run `project check` after manually editing; a failed check remains failed.
+Even a passing check reports execution readiness as not checked.
+
 ## Inspect and selectively export saved files
 
 ```sh
