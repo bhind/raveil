@@ -1,0 +1,6 @@
+{
+  "schema": "raveil.project-recipe/v2",
+  "kind": "graph-device",
+  "descriptor": "threshold-cross-dilate-descriptor.json",
+  "input": "threshold-cross-dilate-input.json"
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "raveil.graph-device-dag/v5",
+  "graph_id": "threshold-grid",
+  "affine": {"rows": 8, "columns": 8, "input_stride": 10, "output_stride": 8},
+  "nodes": [
+    {"id": "center", "op": "LOAD_U32", "address": {"row_delta": 0, "column_delta": 0}},
+    {"id": "threshold", "op": "GE_IMM_U32", "input": "center", "immediate": 100},
+    {"id": "store", "op": "STORE_U32", "input": "threshold"}
+  ]
+}

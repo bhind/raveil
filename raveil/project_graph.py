@@ -104,12 +104,13 @@ def describe(descriptor: dict[str, Any], seed: int | None = None, input_payload:
         sources = node.get("inputs", [node["input"]] if "input" in node else [])
         suffix = f" address={json.dumps(node['address'], sort_keys=True)}" if "address" in node else ""
         if "immediate" in node:
-            suffix += f" immediate={node['immediate']} (unsigned; addition modulo 2^32)"
+            semantics = "unsigned source >= threshold yields 1, otherwise 0" if node["op"] == "GE_IMM_U32" else "unsigned; addition modulo 2^32"
+            suffix += f" immediate={node['immediate']} ({semantics})"
         lines.append(f"  {node['id']}: {node['op']} <- {', '.join(sources) or '(input grid)'}{suffix}")
     provenance = (f"inputs: deterministic uint32 grid generated from seed={seed}" if input_payload is None
                   else describe_input(input_payload))
     edit_hint = ("Edit immediate within [0,4194303] or the snapshot words, then rerun."
-                 if any(node["op"] == "ADD_IMM_U32" for node in descriptor["nodes"])
+                 if any(node["op"] in {"ADD_IMM_U32", "GE_IMM_U32"} for node in descriptor["nodes"])
                  else "Edit ADD_U32 to MAX_U32, a load coordinate within [-1,1], or the snapshot words, then rerun.")
     lines.extend((provenance,
                   "outputs: output.bin (256 little-endian uint32 words), output.txt (active rows)",

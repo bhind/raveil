@@ -2,6 +2,18 @@
 
 Last updated: 2026-09-19
 
+T-0182 / Issue #181 implements GE_IMM_U32 under owner-approved ADR-0101.
+Descriptor v5/program v6/request v7 add unsigned threshold-to-0/1 semantics;
+the 16-instruction/eight-register/single-STORE bounds and sealed UIO gate stay
+unchanged. Actual 15-instruction threshold/cross-dilation runs at 100 and 150
+have byte-equal 256-word oracle/fallback/RTL outputs and the same simulator
+identity. Ten of 64 active cells change; the old snapshot retains threshold100.
+The same final binary also passes old ADD_IMM program v5. Direct RTL installer
+negative controls reject old/unknown versions, undefined source and reserved
+load bits. Independent implementation review is GO; final tests and evidence
+locators are in the September 19 log. Technical task acceptance is not Sprint
+Review acceptance or a hardware/performance claim.
+
 T-0195 / Issue #259 adds advisory known-Graph-rejection hints to existing
 project preflight. Original failure text and admission stay authoritative;
 unknown errors remain unchanged. No compiler, payload, trace, schema, ABI or

@@ -1,0 +1,15 @@
+{
+  "schema": "raveil.graph-device-program/v6",
+  "version": 6,
+  "magic": 1380992817,
+  "payload_words": 32,
+  "instruction_capacity": 16,
+  "value_registers": 8,
+  "opcodes": {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5, "ADD_IMM_U32": 6, "GE_IMM_U32": 7},
+  "legacy_encoding": "unchanged from program v5",
+  "comparison_encoding": "opcode[31:28]=7, destination[27:25], source[24:22], unsigned immediate[21:0]",
+  "immediate_range": [0, 4194303],
+  "comparison_semantics": "unsigned source >= immediate yields uint32 1, otherwise 0; eager, no conditional effects",
+  "version_gate": "v6 alone admits GE_IMM_U32; v1-v5 retain their original bytes and semantics",
+  "digest_words": {"start": 4, "count": 8, "byte_order": "little-endian", "algorithm": "SHA-256"}
+}

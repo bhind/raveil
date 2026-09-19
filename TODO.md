@@ -4,6 +4,13 @@ Last updated: 2026-09-19
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [x] **T-0182** Execute unsigned threshold comparison end to end, Issue #181,
+  S-0005, 5 SP. Owner-approved ADR-0101; compiler/oracle/fallback/Chisel/Garden
+  and editable threshold-cross-dilation sample. Technically accepted for
+  integration: final same-binary old/new output checks, 100-to-150 edit/diff,
+  immutable prior snapshot and direct installer negatives pass. Capacity and
+  sealed UIO unchanged. See September 19 log for host and RTL evidence.
+
 - [x] **T-0193** Preview and selectively export saved-run files, Issue #255,
   S-0005, 5 SP. Owner-authorized successor to T-0180. ADR-0100 binds explicit
   selection and preview hash to a labelled JSON/base64 derivative; no importer.
@@ -342,7 +349,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
 | **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0195 advisory preflight hints; T-0184 is integrated. |
-| **P1 — next** | Start only after its named dependencies pass. | T-0182 remains non-Ready until an accepted opcode ADR, exact allowlist and RTL budget exist. No capacity/RTL/ISA change or real-device successor is implied by preflight work; KV260 remains gated by T-0138 and ADR-0039. |
+| **P1 — next** | Start only after its named dependencies pass. | After T-0182, existing T-0187 / Issue #187 is the recommended planning-only successor for observed repeated-build friction. Its remote preparation was rejected by execution-policy review pending explicit owner approval; it is not Ready or active. No runtime cache, capacity or device action is authorized by that recommendation. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
