@@ -227,6 +227,35 @@ bounded project backends shown by `project recipes`.
 
 ## Edit and execute a hardware Graph in simulation
 
+### Optional compiled simulator reuse (T-0196)
+
+Set `RAVEIL_SIMULATOR_REUSE=1` for successive local `--backend rtl-sim`
+invocations. Unset it or use `RAVEIL_SIMULATOR_REUSE=0` for a fresh build.
+Only the compiled simulator and build provenance are reused, never input,
+output, admission, RTL execution or oracle verification. Changed source,
+generated headers, pinned image or dependency contents invalidate reuse.
+
+```sh
+RAVEIL_SIMULATOR_REUSE=1 python3 -m raveil project run neighborhood --backend rtl-sim
+# Edit inputs/neighborhood.json, then repeat the same command.
+```
+
+An eligible hit reports `build_reused=1 simulator_built_once=0` (the marker
+prints these fields in the opposite order). A separate
+`artifacts/graph_device_axi4lite_dynamic/run.XXXXXXXX/build-reuse-receipt.json`
+records the key, dependency identity, hit and build count; the execution
+receipt retains its existing schema. Zero builds does not mean zero execution
+or a measured speedup: hashing/copying still costs work.
+
+The private repository cache holds at most eight bundles (16 MiB payload plus
+at most 8 KiB manifest per entry). A full cache
+falls back to a fresh build without deleting entries. Corrupt or unsafe entries
+fail closed; use explicit fresh mode to continue while preserving them for
+inspection. This is cooperative same-user development storage, not a sandbox,
+signed distribution channel or production cache. No daemon or network fetch.
+
+### Editable example
+
 New projects also contain `recipes/neighborhood.json` and
 `inputs/neighborhood.json`. The recipe selects the descriptor and uint32 seed;
 the descriptor defines the actual bounded Graph, not a catalogue demo name.

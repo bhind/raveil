@@ -9,11 +9,13 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   acceleration roadmap. Planning selects binary-build reuse with fresh
   execution, not batch-as-interactive-speedup or daemon. Independent review GO;
   24 focused tests pass. Technically accepted for integration.
-- [ ] **T-0196** Reuse an identity-validated compiled simulator for edited
-  Graph runs, Issue #263. Bounded successor to T-0187; proposed5SP. Require
+- [x] **T-0196** Reuse an identity-validated compiled simulator for edited
+  Graph runs, Issue #263, S-0005, 5 SP, ADR-0102. Implemented
   unchanged build identity, atomic bounded private entries, fresh oracle/RTL
   execution, honest hit/miss receipts and actual zero-build warm demo.
   No result cache, daemon, device access or performance claim.
+  Technically accepted: 98 regressions, independent GO, actual cold/warm
+  one-build/zero-build and fresh changed-output checks pass. Not a timing claim.
 
 - [x] **T-0182** Execute unsigned threshold comparison end to end, Issue #181,
   S-0005, 5 SP. Owner-approved ADR-0101; compiler/oracle/fallback/Chisel/Garden

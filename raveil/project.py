@@ -762,7 +762,7 @@ def command_project(args: argparse.Namespace) -> int:
         print(project.diff(args.first, args.second))
     else:
         if args.backend == "rtl-sim":
-            print("Running Graph through offline Docker/Verilator; building the generic simulator may take a few minutes.", flush=True)
+            print("Running Graph through offline Docker/Verilator; verifying build identity when reuse is enabled, otherwise building the simulator. Execution and output checks always run.", flush=True)
         record = project.run(args.recipe, args.backend, kernel=Path(args.sonatine_kernel).resolve(),
                              qemu=args.qemu, compiler=args.compiler)
         print(f"run={record['run_id']} status={record['status']} backend={record['backend']} evidence={record['evidence_class']}")

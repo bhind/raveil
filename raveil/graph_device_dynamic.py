@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import struct
@@ -181,13 +182,14 @@ def prepare_request(output: Path, graph: str, seed: int, repository: Path | None
             "metadata": metadata}
 
 
-def _marker(output: str, session: Path, request_count: int) -> str:
-    markers = [line for line in output.splitlines() if line.startswith("GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V1")]
+def _marker(output: str, session: Path, request_count: int, *, reused: bool = False) -> str:
+    markers = [line for line in output.splitlines() if line.startswith("GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V")]
     if len(markers) != 1:
         raise GraphDeviceDynamicError("dynamic runner marker is missing or duplicated")
+    build_fields = "rtl_emitted_once=0 simulator_built_once=0 build_reused=1" if reused else "rtl_emitted_once=1 simulator_built_once=1"
     pattern = re.compile(
-        rf"GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V1 status=PASS requests={request_count} "
-        rf"same_simulator=1 invoked_{'once' if request_count == 1 else 'twice'}=1 rtl_emitted_once=1 simulator_built_once=1 rejected_before_axi=1 "
+        rf"GraphDevice-AXI4LITE-DYNAMIC-EVIDENCE-V{2 if reused else 1} status=PASS requests={request_count} "
+        rf"same_simulator=1 invoked_{'once' if request_count == 1 else 'twice'}=1 {build_fields} rejected_before_axi=1 "
         r"simulator_sha256=[0-9a-f]{64} path=artifacts/graph_device_axi4lite_dynamic/run\.[A-Za-z0-9_]{8} "
         r"evidence=rtl-simulation-functional performance=not-measured"
     )
@@ -219,6 +221,16 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
     if any(item["profile"]["name"] not in {"baseline", "compact"} for item in prepared):
         raise GraphDeviceDynamicError("dynamic profiles are restricted to baseline and compact")
     runner = repo / "hardware/chisel/run-graph-device-axi4lite-dynamic.sh"
+    reuse = None
+    mode = os.environ.get("RAVEIL_SIMULATOR_REUSE", "0")
+    if mode not in {"0", "1"}:
+        raise GraphDeviceDynamicError("RAVEIL_SIMULATOR_REUSE must be 0 or 1")
+    if mode == "1":
+        from . import graph_device_build_cache as build_cache
+        try:
+            reuse = build_cache.prepare(repo, session, request_roots[0])
+        except (OSError, ValueError) as error:
+            raise GraphDeviceDynamicError(f"build reuse rejected: {error}") from error
     try:
         result = subprocess.run(
             [str(runner), *[part for root in request_roots for part in ("--request", str(root))]],
@@ -228,7 +240,7 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
         raise GraphDeviceDynamicError(f"dynamic runner could not start: {error}") from error
     if result.returncode != 0:
         raise GraphDeviceDynamicError("dynamic runner failed")
-    marker = _marker(result.stdout, session, len(graphs))
+    marker = _marker(result.stdout, session, len(graphs), reused=bool(reuse and reuse["hit"]))
     invocation = "once" if len(graphs) == 1 else "twice"
     if f"requests={len(graphs)}" not in marker or "same_simulator=1" not in marker \
             or f"invoked_{invocation}=1" not in marker:
@@ -280,6 +292,11 @@ def _run_dynamic(graphs: list[str], seeds: list[int], repository: Path | None, c
         receipts.append(receipt)
     if len(receipts) == 2 and receipts[0]["simulator_sha256"] != receipts[1]["simulator_sha256"]:
         raise GraphDeviceDynamicError("dynamic requests used different simulator binaries")
+    if reuse is not None:
+        try:
+            build_cache.finish(reuse, repo, session, request_roots[0])
+        except (OSError, ValueError) as error:
+            raise GraphDeviceDynamicError(f"build reuse closeout rejected: {error}") from error
     lines = [
         f"GraphDevice-AXI4LITE-DYNAMIC-RUN-{command.removeprefix('dynamic-run').upper().lstrip('-') or 'SINGLE'}-V1 status=PASS requests={len(graphs)}",
         *[f"Request {index} graph={item['program']['graph_id']} seed={seed} oracle=PASS fallback=PASS"
