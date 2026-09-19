@@ -1,6 +1,6 @@
 # Bounded Graph workload staging pack
 
-The staging pack in `examples/graph-workloads/` contains two small computations
+The staging pack in `examples/graph-workloads/` contains three small computations
 that can be copied into an ordinary Raveil project, edited, rerun and compared.
 They use the existing Graph compiler, runtime request and RTL simulator. They
 are functional examples, not representative performance benchmarks.
@@ -65,12 +65,39 @@ python3 -m raveil project show sensor-energy-bias --project "$DEMO"
 python3 -m raveil project run sensor-energy-bias --backend rtl-sim --project "$DEMO"
 ```
 
+## Editable threshold followed by cross dilation
+
+`threshold-cross-dilate` uses descriptor v5 / program v6. Five unsigned
+`GE_IMM_U32` comparisons turn raw intensity values into 0 or 1; four MAX
+operations then combine the center and its four neighbors. This fits 15 of
+16 instructions and uses the same fixed input/output windows.
+
+```sh
+python3 -m raveil project show threshold-cross-dilate --project "$DEMO"
+python3 -m raveil project run threshold-cross-dilate --backend rtl-sim --project "$DEMO"
+```
+
+The starting input contains three isolated values, 100, 120 and 200. At
+threshold 100, each creates a five-cell cross: 15 output cells are 1.
+Edit all five `immediate` fields in
+`inputs/threshold-cross-dilate-descriptor.json` from 100 to 150, then run
+again. Only 200 now passes, leaving five output cells equal to 1. Ten cells
+change from 1 to 0; the input snapshot itself is unchanged. Use the same
+`project output`, `project diff` and `project garden` commands above with
+the printed run IDs. The original saved run must remain unchanged.
+
+Garden explains the comparison as unsigned `source >= threshold`, not a
+branch: every load and the final STORE still execute. Thresholds range from
+0 through 4194303; 0 passes every uint32 input, including the zero halo.
+Negative, fractional, boolean or larger thresholds are rejected, not clamped.
+This path is RTL simulation only and does not admit the program to sealed UIO.
+
 ## Deliberate limits and next questions
 
-Both examples are fixed 8x8 snapshots with exactly 324 uint32 input words and
-one output. They add no opcode, capacity, backend or CLI. A Sobel edge filter
-needs signed subtraction, and thresholded occupancy needs predicate/select;
-those realistic rejected variants remain T-0181 candidates. One sensor pass
+All examples are fixed 8x8 snapshots with exactly 324 uint32 input words and
+one output. T-0182 adds only the comparison opcode under ADR-0101, not capacity,
+another backend or CLI. A Sobel edge filter still needs signed subtraction;
+general SELECT and full-width constants remain deferred. One sensor pass
 that emits both raw squared energy and biased energy needs two output identities
 and violates the current exactly-one-final-STORE rule; multi-output Graphs
 remain T-0183. A full 3x3 dilation needs nine loads, eight MAX operations and a

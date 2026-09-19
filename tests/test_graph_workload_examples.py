@@ -60,9 +60,9 @@ class GraphWorkloadExampleTests(unittest.TestCase):
         self.assertEqual(graph_oracle(descriptor, words), expected)
         self.assertEqual(software_fallback(program, words), expected)
 
-    def test_pack_has_exactly_two_snapshot_recipes(self):
+    def test_pack_has_exactly_three_snapshot_recipes(self):
         names = sorted(path.name for path in (PACK / "recipes").glob("*.json"))
-        self.assertEqual(names, ["cross-dilate-binary.json", "sensor-energy-bias.json"])
+        self.assertEqual(names, ["cross-dilate-binary.json", "sensor-energy-bias.json", "threshold-cross-dilate.json"])
         for name in names:
             recipe = json.loads((PACK / "recipes" / name).read_text(encoding="ascii"))
             self.assertEqual(recipe["schema"], "raveil.project-recipe/v2")
@@ -84,6 +84,7 @@ class GraphWorkloadExampleTests(unittest.TestCase):
             self.assertIn("sensor-energy-bias: graph-device; backends=rtl-sim", listed)
             self.assertIn("instructions=10/16", project.show("cross-dilate-binary"))
             self.assertIn("instructions=4/16", project.show("sensor-energy-bias"))
+            self.assertIn("instructions=15/16", project.show("threshold-cross-dilate"))
 
     def test_cross_dilation_matches_independent_domain_oracle(self):
         descriptor, words = self.descriptor_and_words("cross-dilate-binary")

@@ -6,6 +6,11 @@ Last updated: 2026-09-05
 
 ## Four-plane adaptive Harvard model
 
+ADR-0101 adds value-producing unsigned GE_IMM_U32 in descriptor v5/program v6,
+carried only by explicit-snapshot request v7. The result is canonical uint32
+0/1. Scheduling remains eager, the final STORE unconditional, and admission
+retains 16 instructions/eight registers. No sealed UIO version is added.
+
 ADR-0097 adds program v5 unsigned 22-bit immediate addition, descriptor v4
 and trace v2. Snapshot-only request v6 carries this bounded program to the
 same simulator execution path. Garden validates/displays the immediate;

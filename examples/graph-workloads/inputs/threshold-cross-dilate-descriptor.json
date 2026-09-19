@@ -1,0 +1,119 @@
+{
+  "schema": "raveil.graph-device-dag/v5",
+  "graph_id": "threshold-cross-dilate",
+  "affine": {
+    "rows": 8,
+    "columns": 8,
+    "input_stride": 10,
+    "output_stride": 8
+  },
+  "nodes": [
+    {
+      "id": "center",
+      "op": "LOAD_U32",
+      "address": {
+        "row_delta": 0,
+        "column_delta": 0
+      }
+    },
+    {
+      "id": "center-hit",
+      "op": "GE_IMM_U32",
+      "input": "center",
+      "immediate": 100
+    },
+    {
+      "id": "north",
+      "op": "LOAD_U32",
+      "address": {
+        "row_delta": -1,
+        "column_delta": 0
+      }
+    },
+    {
+      "id": "north-hit",
+      "op": "GE_IMM_U32",
+      "input": "north",
+      "immediate": 100
+    },
+    {
+      "id": "south",
+      "op": "LOAD_U32",
+      "address": {
+        "row_delta": 1,
+        "column_delta": 0
+      }
+    },
+    {
+      "id": "south-hit",
+      "op": "GE_IMM_U32",
+      "input": "south",
+      "immediate": 100
+    },
+    {
+      "id": "west",
+      "op": "LOAD_U32",
+      "address": {
+        "row_delta": 0,
+        "column_delta": -1
+      }
+    },
+    {
+      "id": "west-hit",
+      "op": "GE_IMM_U32",
+      "input": "west",
+      "immediate": 100
+    },
+    {
+      "id": "east",
+      "op": "LOAD_U32",
+      "address": {
+        "row_delta": 0,
+        "column_delta": 1
+      }
+    },
+    {
+      "id": "east-hit",
+      "op": "GE_IMM_U32",
+      "input": "east",
+      "immediate": 100
+    },
+    {
+      "id": "ns",
+      "op": "MAX_U32",
+      "inputs": [
+        "north-hit",
+        "south-hit"
+      ]
+    },
+    {
+      "id": "we",
+      "op": "MAX_U32",
+      "inputs": [
+        "west-hit",
+        "east-hit"
+      ]
+    },
+    {
+      "id": "neighbors",
+      "op": "MAX_U32",
+      "inputs": [
+        "ns",
+        "we"
+      ]
+    },
+    {
+      "id": "dilated",
+      "op": "MAX_U32",
+      "inputs": [
+        "center-hit",
+        "neighbors"
+      ]
+    },
+    {
+      "id": "store",
+      "op": "STORE_U32",
+      "input": "dilated"
+    }
+  ]
+}

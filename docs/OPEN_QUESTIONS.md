@@ -24,13 +24,12 @@ resolves it.
 
 ## Simulation-first device path
 
-- T-0181 planning compares three concrete rejected programs and recommends
-  `GE_IMM_U32` as the single next candidate because threshold-plus-cross-
-  dilation fits 15/16 instructions without conditional effects or a ternary
-  allocator. This is not an accepted opcode: descriptor v4/program v5/request
-  v6 still reject it. A separate task and ADR must accept exact versioned
-  semantics before compiler or RTL work. Full-width/source-free constants,
-  saturating subtraction and general SELECT remain deferred.
+- T-0182 / ADR-0101 resolves the T-0181 opcode choice as unsigned GE_IMM_U32,
+  descriptor v5/program v6/request v7, simulation only. Threshold-plus-cross-
+  dilation fits 15/16 instructions without conditional effects. Old versions
+  still reject the opcode. Full-width/source-free constants, saturating
+  subtraction and general SELECT remain deferred; implementation verification
+  is recorded separately in STATUS.
 
 - ADR-0093 resolves saved project observation through a separate in-memory
   Garden view. Full provenance export/authentication remains separate: the
@@ -558,8 +557,9 @@ resolves it.
   T-0184 now supplies actual rejection probes, but their register failures
   include unreachable values and do not establish intrinsic register demand.
   Advisory preflight hints are selected; capacity/reuse/tiling remain undecided.
-  T-0195 implements those hints without changing acceptance; this does not
-  resolve the separate GE_IMM_U32 opcode proposal or authorize T-0182.
+  T-0195 implements those hints without changing acceptance. The subsequent
+  owner-approved ADR-0101 separately authorizes T-0182 comparison work, not
+  register/capacity changes.
 - Should local run history eventually gain human labels, a compact content
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor

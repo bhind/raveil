@@ -11,6 +11,9 @@ T-0184's register rejects include unused retained results; no physical capacity
 increase follows. Advisory preflight feedback is the selected next increment;
 scheduling/tiling/ABI changes remain deferred architectural choices.
 T-0195 implements that advisory feedback only; preflight failure remains failure.
+T-0182 / ADR-0101 now authorizes bounded unsigned comparison for the editable
+simulation workspace. Its exit is threshold edit/run/diff/Garden plus exact
+oracle/fallback/RTL agreement, not a capacity or physical/performance gate.
 
 Status: planning record
 Last updated: 2026-09-05

@@ -31,7 +31,7 @@ MAX_RENDER_WIDTH = 240
 FUSION_TRANSFORM = "fuse:bias_add+relu"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,30}$")
-DYNAMIC_OPCODES = {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5, "ADD_IMM_U32": 6}
+DYNAMIC_OPCODES = {"LOAD_U32": 1, "ADD_U32": 2, "STORE_U32": 3, "MAX_U32": 4, "MUL_U32": 5, "ADD_IMM_U32": 6, "GE_IMM_U32": 7}
 DYNAMIC_SELECTORS = {"center": 0, "north": 1, "south": 2, "west": 3, "east": 4}
 DYNAMIC_MAGIC = 0x52504731
 DYNAMIC_PAYLOAD_WORDS = 32
@@ -462,7 +462,10 @@ class GardenDynamicExplanation:
             },
             "dynamic lowering trace",
         )
-        expected_schema = "raveil.graph-device-lowering-trace/v2" if lowering["program_version"] == 5 else LOWERING_TRACE_SCHEMA
+        version = _require_integer(
+            lowering["program_version"], "dynamic program version", minimum=1, maximum=6,
+        )
+        expected_schema = "raveil.graph-device-lowering-trace/v2" if version >= 5 else LOWERING_TRACE_SCHEMA
         if lowering["schema"] != expected_schema:
             raise ValueError("unsupported dynamic lowering trace schema")
         lowering_trace_sha256 = _require_sha256(
@@ -476,9 +479,6 @@ class GardenDynamicExplanation:
         graph_id = _require_identifier(lowering["graph_id"], "dynamic graph id")
         descriptor_canonical = _require_sha256(
             lowering["descriptor_canonical_sha256"], "canonical descriptor identity",
-        )
-        version = _require_integer(
-            lowering["program_version"], "dynamic program version", minimum=1, maximum=5,
         )
         count = _require_integer(
             lowering["instruction_count"], "dynamic instruction count",
@@ -510,7 +510,7 @@ class GardenDynamicExplanation:
             "definition_index", "last_use_index", "live_range", "release_after_index",
         }
         parsed: list[DynamicLoweringInstruction] = []
-        if version == 5:
+        if version >= 5:
             entry_keys.add("immediate")
         known_ids: set[str] = set()
         allocations: dict[str, int] = {}
@@ -530,12 +530,12 @@ class GardenDynamicExplanation:
                 raise ValueError("MAX_U32 requires dynamic program version 2")
             if version < 4 and op == "MUL_U32":
                 raise ValueError("MUL_U32 requires dynamic program version 4")
-            if op == "ADD_IMM_U32":
-                if version != 5:
-                    raise ValueError("ADD_IMM_U32 requires dynamic program version 5")
+            if op in {"ADD_IMM_U32", "GE_IMM_U32"}:
+                if version not in ({6} if op == "GE_IMM_U32" else {5, 6}):
+                    raise ValueError(f"{op} requires its supported dynamic program version")
                 immediate = _require_integer(immediate, "unsigned immediate", maximum=(1 << 22) - 1)
             elif immediate is not None:
-                raise ValueError("only ADD_IMM_U32 may carry an immediate")
+                raise ValueError("only ADD_IMM_U32 or GE_IMM_U32 may carry an immediate")
             dependencies_value = value["dependencies"]
             if type(dependencies_value) is not list \
                     or any(type(item) is not str for item in dependencies_value):
@@ -564,7 +564,7 @@ class GardenDynamicExplanation:
             elif op in {"ADD_U32", "MAX_U32", "MUL_U32"}:
                 if len(dependencies) != 2 or selector is not None:
                     raise ValueError("dynamic binary operation topology is invalid")
-            elif op == "ADD_IMM_U32":
+            elif op in {"ADD_IMM_U32", "GE_IMM_U32"}:
                 if len(dependencies) != 1 or selector is not None:
                     raise ValueError("dynamic immediate operation topology is invalid")
             else:
@@ -603,8 +603,8 @@ class GardenDynamicExplanation:
                     (DYNAMIC_OPCODES[op] << 28) | (destination << 25)
                     | (source_registers[0] << 22) | (source_registers[1] << 19)
                 ) if destination is not None and len(source_registers) == 2 else -1
-            elif op == "ADD_IMM_U32":
-                expected_word = ((6 << 28) | (destination << 25)
+            elif op in {"ADD_IMM_U32", "GE_IMM_U32"}:
+                expected_word = ((DYNAMIC_OPCODES[op] << 28) | (destination << 25)
                                  | (source_registers[0] << 22) | immediate) if destination is not None else -1
             else:
                 expected_word = (
@@ -1231,6 +1231,12 @@ class GardenDynamicBrowser:
                 "unsigned multiply: result = (left * right) modulo 2^32",
                 "keep low 32 bits; overflow wraps, not saturation",
             ])
+        elif selected.op == "GE_IMM_U32":
+            inspector.extend([
+                f"unsigned threshold: {selected.immediate}",
+                "result = 1 if unsigned source >= threshold, otherwise 0",
+                "eager value comparison; no load or STORE is skipped",
+            ])
         retained = [
             (
                 f"affine: profile={affine['profile']} rows={affine['rows']} "
@@ -1333,6 +1339,9 @@ class GardenProjectBrowser(GardenDynamicBrowser):
             lines.append("unsigned product modulo 2^32; low 32 bits, not saturation")
         if selected.op == "ADD_IMM_U32":
             lines.append(f"unsigned immediate: {selected.immediate}; result = (source + immediate) modulo 2^32")
+        if selected.op == "GE_IMM_U32":
+            lines.append(f"unsigned threshold: {selected.immediate}; result = 1 if source >= threshold, otherwise 0")
+            lines.append("eager comparison; no conditional effects or skipped STORE")
         lines.extend(f"saved {key}: {value}" for key, value in view.identities.items())
         lines.extend(["performance=not-measured; missing provenance is not synthesized",
                       "authority: observe-only execute=no mutate=no approve=no promote=no",

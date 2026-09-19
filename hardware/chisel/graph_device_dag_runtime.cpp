@@ -207,7 +207,7 @@ bool read_output(DeviceTransport& device, Output& output, std::ostream& errors) 
 
 bool valid_fallback_program(const Payload& payload) {
     if (payload[0] != 0x52504731U
-        || (payload[1] < 1U || payload[1] > 5U)
+        || (payload[1] < 1U || payload[1] > 6U)
         || payload[2] < 2U || payload[2] > 16U || payload[3] != 8U) return false;
     std::array<bool, 8> defined{};
     unsigned stores = 0U;
@@ -227,25 +227,27 @@ bool valid_fallback_program(const Payload& payload) {
             || column_bits == 1U || column_bits == 31U;
         const bool legacy_load = payload[1] < 3U && left <= 4U
             && (instruction & 0x003fffffU) == 0U;
-        const bool relative_load = (payload[1] >= 3U && payload[1] <= 5U) && signed_unit_row
+        const bool relative_load = (payload[1] >= 3U && payload[1] <= 6U) && signed_unit_row
             && signed_unit_column && (instruction & 0x00007fffU) == 0U;
         const bool load = opcode == 1U && index + 1U < payload[2]
             && (legacy_load || relative_load);
         const bool add = opcode == 2U && index + 1U < payload[2]
             && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
         const bool max_u32 = opcode == 4U
-            && (payload[1] >= 2U && payload[1] <= 5U)
+            && (payload[1] >= 2U && payload[1] <= 6U)
             && index + 1U < payload[2]
             && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
-        const bool mul_u32 = opcode == 5U && (payload[1] == 4U || payload[1] == 5U)
+        const bool mul_u32 = opcode == 5U && (payload[1] == 4U || payload[1] == 5U || payload[1] == 6U)
             && index + 1U < payload[2]
             && (instruction & 0x0007ffffU) == 0U && defined[left] && defined[right];
-        const bool immediate = opcode == 6U && payload[1] == 5U
+        const bool immediate = opcode == 6U && (payload[1] == 5U || payload[1] == 6U)
             && index + 1U < payload[2] && defined[left];
         const bool store = opcode == 3U && index + 1U == payload[2]
             && (instruction & 0x01ffffffU) == 0U && defined[destination];
-        if (!(load || add || max_u32 || mul_u32 || immediate || store)) return false;
-        if (load || add || max_u32 || mul_u32 || immediate) defined[destination] = true;
+        const bool comparison = opcode == 7U && payload[1] == 6U
+            && index + 1U < payload[2] && defined[left];
+        if (!(load || add || max_u32 || mul_u32 || immediate || comparison || store)) return false;
+        if (load || add || max_u32 || mul_u32 || immediate || comparison) defined[destination] = true;
         if (store) ++stores;
     }
     for (std::size_t index = 28U; index < payload.size(); ++index)
@@ -275,7 +277,7 @@ bool fallback(
                 const std::uint32_t destination = (instruction >> 25U) & 7U;
                 if (opcode == 1U) {
                     std::uint32_t address = center;
-                    if (graph.payload[1] >= 3U && graph.payload[1] <= 5U) {
+                    if (graph.payload[1] >= 3U && graph.payload[1] <= 6U) {
                         const auto signed_five = [](std::uint32_t value) {
                             return (value & 16U) != 0U
                                 ? static_cast<std::int32_t>(value) - 32
@@ -314,6 +316,9 @@ bool fallback(
                         + (instruction & 0x003fffffU);
                 } else if (opcode == 3U) {
                     output[row * output_stride + column] = values[destination];
+                } else if (opcode == 7U) {
+                    values[destination] = values[(instruction >> 22U) & 7U]
+                        >= (instruction & 0x003fffffU) ? 1U : 0U;
                 } else return false;
             }
         }
@@ -389,6 +394,45 @@ bool malformed_relative_case(
     log << "GraphDevice-DAG-V3-NEGATIVE-V1 delta-out-of-halo=FAULT"
         << " output_published=0\n";
     return true;
+}
+
+bool malformed_comparison_cases(
+    DeviceTransport& device,
+    ProgramInstallTransport& installer,
+    const Payload& accepted,
+    std::ostream& log,
+    std::ostream& errors
+) {
+    if (accepted[1] != 6U) return true;
+    // Exercise installer admission directly, independently of host parsing.
+    // First source is register 0; register 7 is intentionally never defined.
+    for (unsigned kind = 0; kind < 4U; ++kind) {
+        Payload malformed = accepted;
+        malformed[2] = 3U;
+        for (unsigned index = 12U; index < malformed.size(); ++index) malformed[index] = 0U;
+        malformed[12] = 0x10000000U;
+        malformed[13] = 0x70000064U;
+        malformed[14] = 0x30000000U;
+        if (kind == 0U) malformed[1] = 5U;
+        if (kind == 1U) malformed[1] = 7U;
+        if (kind == 2U) malformed[13] |= 7U << 22U;
+        if (kind == 3U) malformed[12] |= 1U;
+        if (!reset(device, errors)
+            || !installer.write_program_word(program_abi::kRegControl,
+                program_abi::kControlClear)) return false;
+        for (std::uint32_t index = 0; index < malformed.size(); ++index) {
+            if (!installer.write_program_word(program_abi::kPayloadBase + index,
+                    malformed[index])) return false;
+        }
+        if (!installer.write_program_word(program_abi::kRegControl,
+                program_abi::kControlCommit) || !expect_fault(installer)) {
+            errors << "DAG v6 comparison negative failed kind=" << kind << '\n';
+            return false;
+        }
+    }
+    log << "GraphDevice-DAG-V6-NEGATIVE-V1 old-version=FAULT unknown-version=FAULT"
+        << " undefined-source=FAULT reserved-load=FAULT output_published=0\n";
+    return reset(device, errors);
 }
 
 bool invalid_matrix(
@@ -569,6 +613,7 @@ int run_dynamic_dag(
     // executor, then execute only the host-admitted dynamic program.
     if (!invalid_matrix(device, affine, program, root, log, errors)
         || !malformed_relative_case(device, program, payload, log, errors)
+        || !malformed_comparison_cases(device, program, payload, log, errors)
         || !run_one(device, affine, program, graph, *profile, root, seed,
             "complete", true, log, errors)) return 1;
     log << "GraphDevice-DAG-DYNAMIC-RUN-V1 status=OK graph=" << graph.id

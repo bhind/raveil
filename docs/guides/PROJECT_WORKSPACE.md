@@ -338,11 +338,15 @@ it does not execute via Sonatine/QEMU or measure a physical FPGA.
 
 Supported Graphs retain the existing 16-instruction/eight-value limits,
 uint32 LOAD/ADD/MAX/STORE operations (plus MUL with descriptor v3 and
-ADD_IMM with descriptor v4),
+ADD_IMM with descriptor v4 and unsigned GE_IMM comparison with descriptor v5),
 baseline 16x16 or compact 8x8 profile,
 and one-cell relative halo. Unsupported Graphs fail before simulator launch
 and retain a failed project run. Detailed raw evidence stays in the printed
 repository artifact directory; the project history retains its receipt.
+
+For threshold-to-0/1 followed by neighborhood dilation, stage the editable
+`threshold-cross-dilate` example from [Graph workloads](GRAPH_WORKLOADS.md).
+Its simulation-only program v6 is not admitted by sealed UIO.
 
 ### Add an editable constant (T-0173 / T-0174)
 
