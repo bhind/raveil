@@ -2,6 +2,13 @@
 
 Last updated: 2026-09-19
 
+T-0180 / Issue #178 has started on S-0005 (3 SP, Planning). A saved-run export
+boundary draft identifies existing loader/snapshot constraints; an actual native
+log-run inspection fixture exposes unrelated inputs in the saved snapshot.
+Byte accounting, rule validation and independent review remain pending. No export/import
+runtime exists from this task. Owner-directed ADR-0099 changes ordinary Drive
+preservation to weekly batches without weakening local checks or promotion.
+
 Next bounded successor T-0180 / Issue #178 is prepared as P1/Ready in S-0005
 (3 SP, Planning): saved-run export contract and inspection fixture only.
 The S-0004 Garden demo runs numeric selection and directed dependency view;

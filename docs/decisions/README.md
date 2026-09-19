@@ -21,6 +21,7 @@ rewrite it.
 
 | ADR | Status | Decision |
 |---|---|---|
+| [ADR-0099](ADR-0099-weekly-drive-preservation.md) | Accepted | Weekly Drive batches; immediate local persistence and unchanged promotion checks |
 | [ADR-0090](ADR-0090-graph-input-snapshots-are-simulation-only.md) | Accepted | Bounded explicit input snapshots use a simulation-only request envelope |
 | [ADR-0001](ADR-0001-four-plane-adaptive-harvard.md) | Accepted | Four-plane adaptive Harvard model |
 | [ADR-0002](ADR-0002-experience-advises-measurement-governs.md) | Accepted | Experience advises; measurement governs commit |
