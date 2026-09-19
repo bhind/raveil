@@ -28,6 +28,11 @@ read-only preview and add `--apply` only for the authorized Draft update.
 
 ## Cadence
 
+ADR-0099 batches ordinary Drive preservation once weekly, normally before
+Saturday Review. Save and verify locally on every run; do not upload per task.
+PM tracks pending bundles and records the immutable/download-verified batch.
+Failures do not stop independent delivery; remote-required promotion waits.
+
 S-0003 received an owner-visible `Conditional Accept` on 2026-09-13 JST. The
 review demonstrated actual edit/run/inspect/diff loops for native log
 processing, native GEMM, bias-grid immediate 5 to 7 through actual RTL

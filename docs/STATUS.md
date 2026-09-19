@@ -2,8 +2,17 @@
 
 Last updated: 2026-09-19
 
-Next bounded successor T-0180 / Issue #178 is prepared as P1/Ready in S-0005
-(3 SP, Planning): saved-run export contract and inspection fixture only.
+T-0180 / Issue #178 is technically complete on S-0005 (3 SP, Planning). A saved-run export
+boundary draft identifies existing loader/snapshot constraints; an actual native
+log-run inspection fixture exposes unrelated inputs in the saved snapshot.
+Exact byte accounting and five planning-fixture checks pass. Planning review
+identified and resolved implicit-directory accounting. The owner requested
+preview/selective-export implementation as a separate follow-up. No export/import
+runtime exists from this task. Owner-directed ADR-0099 changes ordinary Drive
+preservation to weekly batches without weakening local checks or promotion.
+
+T-0180 integration closes design only; the successor must preserve explicit
+selection and derivative lineage rather than export a whole run silently.
 The S-0004 Garden demo runs numeric selection and directed dependency view;
 owner Sprint Review disposition remains pending. Drive authentication is restored.
 T-0191's 40-file recollection was copied immutably and download-checked with zero

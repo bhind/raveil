@@ -1,0 +1,31 @@
+{
+  "backend": "native",
+  "inspection_only": true,
+  "members": {
+    "/graph.json": "c7f6dda8db45e35b9bf89b1a17807c8ac9b650fe7f6d8b8178bfdf418297a3e7",
+    "/inputs": "directory",
+    "/inputs/bias-grid-data.json": "03374d7a3cc62c1eee66e7ed24e705aa8fb8251be42eb85c18fae6eccf5fb0b3",
+    "/inputs/bias-grid.json": "1b04d47eee48f282a486fb79853e13bef2007f329d9c8fe95595dc308bafcd84",
+    "/inputs/events.txt": "f7eb4d991c3224bf11bdd3e00b6204c80597df2f6f5b1923539147031ac05db7",
+    "/inputs/left.txt": "65377ec8d9be4785c3c235c9bfae0517f8427db012810afd85470ea95023d2f3",
+    "/inputs/neighborhood-data.json": "03374d7a3cc62c1eee66e7ed24e705aa8fb8251be42eb85c18fae6eccf5fb0b3",
+    "/inputs/neighborhood.json": "1686c8c7b70ed1fdc69a071189ab68ec54945fa20afc25098daea6729592fd1e",
+    "/inputs/right.txt": "792a7c622ebefe117cd7e06fe9ab6c8342d269f8fc6f95c5a4b8a7af42245850",
+    "/recipe.json": "f666d778b68bb1578e05bba51e654c7d1e84589e41a4ee95c58b19f9b7edf5ef",
+    "/record.json": "521d2f5188f307e118cd7f47bddfc934fe3daada6c88fed2eaf6befa879d3de8",
+    "/record.sha256": "55b1c7e34354f3bc228c0938470671bfa8f9bd28265c2a530aef8d846540d6a3",
+    "/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspace": "directory",
+    "/workspace/bias-grid-data.json": "03374d7a3cc62c1eee66e7ed24e705aa8fb8251be42eb85c18fae6eccf5fb0b3",
+    "/workspace/bias-grid.json": "1b04d47eee48f282a486fb79853e13bef2007f329d9c8fe95595dc308bafcd84",
+    "/workspace/errors.txt": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+    "/workspace/events.txt": "f7eb4d991c3224bf11bdd3e00b6204c80597df2f6f5b1923539147031ac05db7",
+    "/workspace/left.txt": "65377ec8d9be4785c3c235c9bfae0517f8427db012810afd85470ea95023d2f3",
+    "/workspace/neighborhood-data.json": "03374d7a3cc62c1eee66e7ed24e705aa8fb8251be42eb85c18fae6eccf5fb0b3",
+    "/workspace/neighborhood.json": "1686c8c7b70ed1fdc69a071189ab68ec54945fa20afc25098daea6729592fd1e",
+    "/workspace/right.txt": "792a7c622ebefe117cd7e06fe9ab6c8342d269f8fc6f95c5a4b8a7af42245850"
+  },
+  "run_id": "20260919T045403Z-e64a4000a996",
+  "schema": "raveil.project-export-inspection-draft/v1",
+  "status": "succeeded"
+}

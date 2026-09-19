@@ -1,5 +1,10 @@
 # Development and research workflow
 
+Drive preservation cadence is governed by ADR-0099: weekly batches, normally
+before Saturday Review, with immediate persistent local retention/verification.
+Do not upload per task. Remote-required promotion waits for a verified batch;
+ordinary independent work continues. No scheduler is installed by this rule.
+
 Last updated: 2026-09-05
 
 ## Before a change
