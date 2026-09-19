@@ -10,6 +10,7 @@ or hardware/performance gate.
 T-0184's register rejects include unused retained results; no physical capacity
 increase follows. Advisory preflight feedback is the selected next increment;
 scheduling/tiling/ABI changes remain deferred architectural choices.
+T-0195 implements that advisory feedback only; preflight failure remains failure.
 
 Status: planning record
 Last updated: 2026-09-05
