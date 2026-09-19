@@ -701,6 +701,10 @@ def _kernel(kernel: Path) -> None:
 
 def command_project(args: argparse.Namespace) -> int:
     action = args.project_action
+    if action == "inspect-export":
+        from .project_export import inspect_export
+        print(encoded(inspect_export(Path(args.bundle))).decode(), end="")
+        return 0
     if action == "init":
         root = init_project(Path(args.directory))
         print(f"Created {root}")
@@ -794,11 +798,13 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
             command.add_argument("directory")
+        elif action == "inspect-export":
+            command.add_argument("bundle", help="selected-file derivative JSON; inspect only, never extract")
         elif action == "console":
             command.add_argument("target", choices=("sonatine",))
         else:

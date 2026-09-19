@@ -5,6 +5,8 @@ No archive reader, importer, network access, execution, or authenticity claim.
 from __future__ import annotations
 
 import base64
+import binascii
+import json
 import os
 from pathlib import Path
 import stat
@@ -21,6 +23,112 @@ WARNINGS = [
     "This derivative is not an authenticated experiment or replayable full run.",
     "Single-writer cooperative workspace only; no hostile concurrent isolation.",
 ]
+
+
+def _object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate export JSON field")
+        result[key] = value
+    return result
+
+
+def _reject_constant(value):
+    raise ValueError("non-finite export JSON number")
+
+
+def _sha256(value):
+    if (type(value) is not str or len(value) != 64
+            or any(c not in "0123456789abcdef" for c in value)):
+        raise ValueError("invalid export SHA-256")
+    return value
+
+
+def inspect_export(source: Path):
+    """Check an untrusted derivative's internal consistency; never extract it."""
+    if not getattr(os, "O_NOFOLLOW", 0):
+        raise ValueError("no-follow reads are unavailable on this platform")
+    fd = os.open(source, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    try:
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise ValueError("export inspection requires a non-linked regular file")
+        if before.st_size > MAX_EXPORT_BYTES:
+            raise ValueError("encoded export exceeds 24 MiB")
+        chunks, remaining = [], MAX_EXPORT_BYTES + 1
+        while remaining:
+            chunk = os.read(fd, min(remaining, 65536))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        raw = b"".join(chunks)
+        after = os.fstat(fd)
+        if (len(raw) > MAX_EXPORT_BYTES or len(raw) != before.st_size
+                or (before.st_size, before.st_mtime_ns, before.st_ctime_ns)
+                != (after.st_size, after.st_mtime_ns, after.st_ctime_ns)):
+            raise ValueError("export changed during inspection or exceeds byte budget")
+    finally:
+        os.close(fd)
+    try:
+        bundle = json.loads(raw.decode("utf-8"), object_pairs_hook=_object,
+                            parse_constant=_reject_constant)
+    except (UnicodeError, RecursionError) as exc:
+        raise ValueError("invalid export JSON encoding or nesting") from exc
+    keys = {"schema", "kind", "authenticated", "replayable_full_run", "source_run_id",
+            "source_record_sha256", "source_preview_sha256", "omitted_count", "files", "warnings"}
+    if type(bundle) is not dict or set(bundle) != keys:
+        raise ValueError("unexpected export envelope fields")
+    if (bundle["schema"] != SCHEMA or bundle["kind"] != "selected-file-derivative"
+            or bundle["authenticated"] is not False or bundle["replayable_full_run"] is not False
+            or bundle["warnings"] != WARNINGS):
+        raise ValueError("unsupported export schema or claims")
+    if type(bundle["source_run_id"]) is not str:
+        raise ValueError("invalid export source run ID")
+    name(bundle["source_run_id"])
+    for key in ("source_record_sha256", "source_preview_sha256"):
+        _sha256(bundle[key])
+    omitted = bundle["omitted_count"]
+    files = bundle["files"]
+    if (type(omitted) is not int or not 0 <= omitted <= MAX_ENTRIES
+            or type(files) is not list or not 1 <= len(files) <= MAX_ENTRIES
+            or len(files) + omitted > MAX_ENTRIES):
+        raise ValueError("invalid export member count")
+    inventory, paths, directories, total = [], set(), set(), 0
+    for member in files:
+        if type(member) is not dict or set(member) != {"path", "bytes", "sha256", "base64"}:
+            raise ValueError("unexpected export member fields")
+        path = member_name(member["path"])
+        folded = path.casefold()
+        if folded in paths or path in LINEAGE_ONLY:
+            raise ValueError("duplicate or lineage-only export member")
+        paths.add(folded)
+        directories.update("/".join(folded.split("/")[:i])
+                           for i in range(1, len(folded.split("/"))))
+        if paths & directories or len(paths) + len(directories) + omitted > MAX_ENTRIES:
+            raise ValueError("export path collision or entry budget exceeded")
+        size = member["bytes"]
+        if type(size) is not int or not 0 <= size <= MAX_BYTES - total:
+            raise ValueError("invalid export decoded byte count")
+        payload = member["base64"]
+        if type(payload) is not str or len(payload) != 4 * ((size + 2) // 3):
+            raise ValueError("invalid export base64 length")
+        try:
+            decoded = base64.b64decode(payload, validate=True)
+        except (ValueError, binascii.Error) as exc:
+            raise ValueError("invalid export base64") from exc
+        if (len(decoded) != size or digest(decoded) != _sha256(member["sha256"])
+                or base64.b64encode(decoded).decode("ascii") != payload):
+            raise ValueError("export payload length/hash/encoding mismatch")
+        total += size
+        inventory.append({"path": path, "bytes": size, "sha256": member["sha256"]})
+    return {"schema": "raveil.selected-run-inspection/v1", "internal_integrity": "consistent",
+            "authenticated": False, "replayable_full_run": False, "source_verified": False,
+            "bundle_sha256": digest(raw), "selected_count": len(files),
+            "selected_bytes": total, "omitted_count": omitted, "files": inventory,
+            "warnings": ["Self-contained hashes do not authenticate the sender or source run.",
+                         "No files were extracted, imported or executed."]}
 
 
 def member_name(value: str) -> str:

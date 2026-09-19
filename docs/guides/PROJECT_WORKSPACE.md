@@ -30,6 +30,26 @@ plus parent directories; encoded JSON is capped at 24 MiB. Use normal tools to
 inspect the JSON, not a nonexistent Raveil import command. Weekly Drive cadence
 is unchanged.
 
+### Inspect a received derivative without extracting it
+
+```sh
+python3 -m raveil project inspect-export /absolute/new-selected.json
+```
+
+No project directory or original run is needed. The command reads one bounded
+regular JSON file, checks the strict envelope and each selected payload's
+length/SHA-256, and lists paths and sizes without printing or writing contents.
+It rejects duplicate JSON fields/members, path collisions, noncanonical base64,
+unsupported claims, malformed/oversized input, links and special files.
+
+`internal_integrity: consistent` means only that the supplied bytes agree with
+their supplied hashes. A sender can replace both: this does not authenticate
+the sender, verify the source run, prove an oracle result or establish safety.
+The source hashes are unverified labels. Nothing is extracted, imported or
+executed; `source_verified`, `authenticated` and `replayable_full_run` stay false.
+Use the same cooperative no-concurrent-edit rule as export. This is not a
+hostile-filesystem sandbox or a secret scanner.
+
 Status: T-0149 and T-0148/S02 development guide
 
 This is the shell-first path for editing a small workload, seeing its Graph,

@@ -2,6 +2,13 @@
 
 Last updated: 2026-09-19
 
+T-0194 / Issue #256 adds standalone read-only `project inspect-export` for
+ADR-0100 derivatives: bounded JSON/schema, member, base64, length and hash
+checks without source-run access, extraction or execution. All 85 focused and
+regression tests pass, independent security review is GO, and the actual
+T-0193 two-byte export passes inspection. Technically accepted for integration.
+Internal consistency never establishes authenticity or a verified source run.
+
 T-0193 / Issue #255 implements preview-bound selected-file export under
 ADR-0100. New CLI paths inspect saved members without executing and write only
 explicit selected payloads to a private derivative JSON outside the project.
