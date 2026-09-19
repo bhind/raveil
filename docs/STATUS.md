@@ -2,6 +2,15 @@
 
 Last updated: 2026-09-19
 
+T-0187 / Issue #187 is technically accepted for integration on S-0005, preserving
+Initial SP3. The reviewed planning decision selects compiled simulator reuse, not
+result reuse or a daemon; see `research/reviews/simulator-reuse-decision.md`.
+The retained T-0182 before/after binaries/manifests/headers are byte-identical
+while requests/results differ. Existing runtime-pair/dynamic tests pass24/24.
+Independent review is GO after correcting two stale document dates. T-0196 /
+Issue #263 owns implementation next. No cache implementation or measured
+startup reduction exists from T-0187.
+
 T-0182 / Issue #181 implements GE_IMM_U32 under owner-approved ADR-0101.
 Descriptor v5/program v6/request v7 add unsigned threshold-to-0/1 semantics;
 the 16-instruction/eight-register/single-STORE bounds and sealed UIO gate stay

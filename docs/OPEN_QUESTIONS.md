@@ -1,5 +1,11 @@
 # Open questions
 
+T-0187 selects a bounded compiled-binary reuse successor, T-0196, following
+explicit owner continuation. Exact identity, dependency cache, safe publication,
+hit/miss receipts and fallback require its implementation ADR and tests.
+The planning decision adds neither runtime caching nor a daemon. Existing
+two-request batching does not remove per-edit rebuilds after an old run exists.
+
 T-0193 / ADR-0100 resolves initial saved-run sharing as explicit preview-bound
 selected-file derivatives. Authenticated replay, archive import, automatic
 privacy redaction and hostile-concurrency isolation remain out of scope.
@@ -16,7 +22,7 @@ remain unverified labels, not an authenticity or replay resolution.
   Local run/RTL receipt verification fails. Otherwise a separately authorized,
   newly identified collection is needed; it cannot replace historical evidence.
 
-Last updated: 2026-09-09
+Last updated: 2026-09-19
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP
