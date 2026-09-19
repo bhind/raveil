@@ -555,6 +555,9 @@ resolves it.
   topological scheduling. The existing sixteen-instruction/eight-register
   limits remain; selection among different valid schedules to reduce register
   pressure is a separate future question requiring an actual rejected workload.
+  T-0184 now supplies actual rejection probes, but their register failures
+  include unreachable values and do not establish intrinsic register demand.
+  Advisory preflight hints are selected; capacity/reuse/tiling remain undecided.
 - Should local run history eventually gain human labels, a compact content
   diff, export/import, or garbage collection? T-0149 retains exact bounded
   snapshots and hashes only. It is deliberately neither a production cache nor

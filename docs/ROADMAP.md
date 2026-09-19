@@ -7,6 +7,9 @@ T-0194 is the bounded read-only verification successor, not an importer.
 After that usability boundary, T-0184 returns to editable Graph capacity
 pressure: actual rejected inputs inform one proposal, with no changed bounds
 or hardware/performance gate.
+T-0184's register rejects include unused retained results; no physical capacity
+increase follows. Advisory preflight feedback is the selected next increment;
+scheduling/tiling/ABI changes remain deferred architectural choices.
 
 Status: planning record
 Last updated: 2026-09-05

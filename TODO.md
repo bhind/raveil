@@ -17,11 +17,19 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   executing, importing a run or inferring authenticity. All 85 focused/regression
   tests pass; independent security review GO and actual export inspection pass.
 
-- [ ] **T-0184** Choose one bounded capacity follow-up from real compiler
-  pressure, Issue #183. Planning successor after T-0194; T-0185 and T-0155
+- [x] **T-0184** Choose one bounded capacity follow-up from real compiler
+  pressure, Issue #183. Technically accepted for integration after T-0194; T-0185 and T-0155
   dependencies are complete. Preserve rejection fixtures for instruction,
   live-register, shape/stride and halo limits; compare schedule/reuse/tiling
-  without changing code or machine bounds. At most one proposed next slice.
+  without changing code or machine bounds. Seventeen probes and 28 existing
+  regressions pass. One proposed next slice: actionable project-check hints,
+  not capacity/scheduler changes. Independent planning review GO. Fixture
+  verification also passes under Python -O; compiler remains unchanged.
+
+- [ ] **T-0195** Explain known Graph pressure failures in project check, Issue #259.
+  S-0005, 2 SP, successor to T-0184. Advisory hints only; original failures,
+  acceptance, payloads, schemas and machine bounds remain unchanged. No auto
+  edit, pruning or execution. Implement after T-0184 integration.
 
 - [x] **T-0180** Specify a bounded saved-run export boundary, Issue #178,
   S-0005, 3 SP, technically accepted for integration. Member/limit/threat rules are recorded in
@@ -332,8 +340,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0194 technical integration; T-0193 is integrated. |
-| **P1 — next** | Start only after its named dependencies pass. | T-0184: planning-only Graph rejection fixtures/report, S-0005, 3 SP, after T-0194. No capacity/RTL/ISA change or real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0184 technical planning integration; T-0194 is integrated. |
+| **P1 — next** | Start only after its named dependencies pass. | T-0195: advisory project-check hints, S-0005, 2 SP, after T-0184. No capacity/RTL/ISA change or real-device successor is authorized; KV260 remains gated by T-0138 and ADR-0039. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |

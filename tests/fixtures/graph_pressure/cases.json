@@ -1,0 +1,1210 @@
+{
+  "schema": "raveil.graph-pressure-fixtures/v1",
+  "cases": [
+    {
+      "id": "chain16",
+      "dimension": "instructions",
+      "expected": "admitted",
+      "error": null,
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "chain16",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "a0",
+            "op": "ADD_IMM_U32",
+            "input": "x",
+            "immediate": 1
+          },
+          {
+            "id": "a1",
+            "op": "ADD_IMM_U32",
+            "input": "a0",
+            "immediate": 1
+          },
+          {
+            "id": "a2",
+            "op": "ADD_IMM_U32",
+            "input": "a1",
+            "immediate": 1
+          },
+          {
+            "id": "a3",
+            "op": "ADD_IMM_U32",
+            "input": "a2",
+            "immediate": 1
+          },
+          {
+            "id": "a4",
+            "op": "ADD_IMM_U32",
+            "input": "a3",
+            "immediate": 1
+          },
+          {
+            "id": "a5",
+            "op": "ADD_IMM_U32",
+            "input": "a4",
+            "immediate": 1
+          },
+          {
+            "id": "a6",
+            "op": "ADD_IMM_U32",
+            "input": "a5",
+            "immediate": 1
+          },
+          {
+            "id": "a7",
+            "op": "ADD_IMM_U32",
+            "input": "a6",
+            "immediate": 1
+          },
+          {
+            "id": "a8",
+            "op": "ADD_IMM_U32",
+            "input": "a7",
+            "immediate": 1
+          },
+          {
+            "id": "a9",
+            "op": "ADD_IMM_U32",
+            "input": "a8",
+            "immediate": 1
+          },
+          {
+            "id": "a10",
+            "op": "ADD_IMM_U32",
+            "input": "a9",
+            "immediate": 1
+          },
+          {
+            "id": "a11",
+            "op": "ADD_IMM_U32",
+            "input": "a10",
+            "immediate": 1
+          },
+          {
+            "id": "a12",
+            "op": "ADD_IMM_U32",
+            "input": "a11",
+            "immediate": 1
+          },
+          {
+            "id": "a13",
+            "op": "ADD_IMM_U32",
+            "input": "a12",
+            "immediate": 1
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "a13"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chain17",
+      "dimension": "instructions",
+      "expected": "rejected",
+      "error": "node count is outside the bounded program",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "chain17",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "a0",
+            "op": "ADD_IMM_U32",
+            "input": "x",
+            "immediate": 1
+          },
+          {
+            "id": "a1",
+            "op": "ADD_IMM_U32",
+            "input": "a0",
+            "immediate": 1
+          },
+          {
+            "id": "a2",
+            "op": "ADD_IMM_U32",
+            "input": "a1",
+            "immediate": 1
+          },
+          {
+            "id": "a3",
+            "op": "ADD_IMM_U32",
+            "input": "a2",
+            "immediate": 1
+          },
+          {
+            "id": "a4",
+            "op": "ADD_IMM_U32",
+            "input": "a3",
+            "immediate": 1
+          },
+          {
+            "id": "a5",
+            "op": "ADD_IMM_U32",
+            "input": "a4",
+            "immediate": 1
+          },
+          {
+            "id": "a6",
+            "op": "ADD_IMM_U32",
+            "input": "a5",
+            "immediate": 1
+          },
+          {
+            "id": "a7",
+            "op": "ADD_IMM_U32",
+            "input": "a6",
+            "immediate": 1
+          },
+          {
+            "id": "a8",
+            "op": "ADD_IMM_U32",
+            "input": "a7",
+            "immediate": 1
+          },
+          {
+            "id": "a9",
+            "op": "ADD_IMM_U32",
+            "input": "a8",
+            "immediate": 1
+          },
+          {
+            "id": "a10",
+            "op": "ADD_IMM_U32",
+            "input": "a9",
+            "immediate": 1
+          },
+          {
+            "id": "a11",
+            "op": "ADD_IMM_U32",
+            "input": "a10",
+            "immediate": 1
+          },
+          {
+            "id": "a12",
+            "op": "ADD_IMM_U32",
+            "input": "a11",
+            "immediate": 1
+          },
+          {
+            "id": "a13",
+            "op": "ADD_IMM_U32",
+            "input": "a12",
+            "immediate": 1
+          },
+          {
+            "id": "a14",
+            "op": "ADD_IMM_U32",
+            "input": "a13",
+            "immediate": 1
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "a14"
+          }
+        ]
+      }
+    },
+    {
+      "id": "eight-neighbor-dilation",
+      "dimension": "instructions",
+      "expected": "admitted",
+      "error": null,
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "eight-neighbor-dilation",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "l0",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": -1,
+              "column_delta": -1
+            }
+          },
+          {
+            "id": "l1",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": -1,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l2",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": -1,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "l3",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": -1
+            }
+          },
+          {
+            "id": "l4",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "l5",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": -1
+            }
+          },
+          {
+            "id": "l6",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l7",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "m1",
+            "op": "MAX_U32",
+            "inputs": [
+              "l0",
+              "l1"
+            ]
+          },
+          {
+            "id": "m2",
+            "op": "MAX_U32",
+            "inputs": [
+              "m1",
+              "l2"
+            ]
+          },
+          {
+            "id": "m3",
+            "op": "MAX_U32",
+            "inputs": [
+              "m2",
+              "l3"
+            ]
+          },
+          {
+            "id": "m4",
+            "op": "MAX_U32",
+            "inputs": [
+              "m3",
+              "l4"
+            ]
+          },
+          {
+            "id": "m5",
+            "op": "MAX_U32",
+            "inputs": [
+              "m4",
+              "l5"
+            ]
+          },
+          {
+            "id": "m6",
+            "op": "MAX_U32",
+            "inputs": [
+              "m5",
+              "l6"
+            ]
+          },
+          {
+            "id": "m7",
+            "op": "MAX_U32",
+            "inputs": [
+              "m6",
+              "l7"
+            ]
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "m7"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nine-cell-dilation",
+      "dimension": "instructions",
+      "expected": "rejected",
+      "error": "node count is outside the bounded program",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "nine-cell-dilation",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "l0",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": -1,
+              "column_delta": -1
+            }
+          },
+          {
+            "id": "l1",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": -1,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l2",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": -1,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "l3",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": -1
+            }
+          },
+          {
+            "id": "l4",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l5",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "l6",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": -1
+            }
+          },
+          {
+            "id": "l7",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l8",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "m1",
+            "op": "MAX_U32",
+            "inputs": [
+              "l0",
+              "l1"
+            ]
+          },
+          {
+            "id": "m2",
+            "op": "MAX_U32",
+            "inputs": [
+              "m1",
+              "l2"
+            ]
+          },
+          {
+            "id": "m3",
+            "op": "MAX_U32",
+            "inputs": [
+              "m2",
+              "l3"
+            ]
+          },
+          {
+            "id": "m4",
+            "op": "MAX_U32",
+            "inputs": [
+              "m3",
+              "l4"
+            ]
+          },
+          {
+            "id": "m5",
+            "op": "MAX_U32",
+            "inputs": [
+              "m4",
+              "l5"
+            ]
+          },
+          {
+            "id": "m6",
+            "op": "MAX_U32",
+            "inputs": [
+              "m5",
+              "l6"
+            ]
+          },
+          {
+            "id": "m7",
+            "op": "MAX_U32",
+            "inputs": [
+              "m6",
+              "l7"
+            ]
+          },
+          {
+            "id": "m8",
+            "op": "MAX_U32",
+            "inputs": [
+              "m7",
+              "l8"
+            ]
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "m8"
+          }
+        ]
+      }
+    },
+    {
+      "id": "retained8",
+      "dimension": "registers",
+      "expected": "admitted",
+      "error": null,
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "retained8",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "l0",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l1",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l2",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l3",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l4",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l5",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l6",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l7",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "l7"
+          }
+        ]
+      }
+    },
+    {
+      "id": "retained9",
+      "dimension": "registers",
+      "expected": "rejected",
+      "error": "Graph requires more than eight live values",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "retained9",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "l0",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l1",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l2",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l3",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l4",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l5",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l6",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l7",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l8",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "l8"
+          }
+        ]
+      }
+    },
+    {
+      "id": "late-consumer",
+      "dimension": "schedule",
+      "expected": "rejected",
+      "error": "Graph requires more than eight live values",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "late-consumer",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "l0",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l1",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l2",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l3",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l4",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l5",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l6",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l7",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l8",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "sum",
+            "op": "ADD_U32",
+            "inputs": [
+              "l0",
+              "l1"
+            ]
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "sum"
+          }
+        ]
+      }
+    },
+    {
+      "id": "early-consumer",
+      "dimension": "schedule",
+      "expected": "admitted",
+      "error": null,
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "early-consumer",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "l0",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l1",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "sum",
+            "op": "ADD_U32",
+            "inputs": [
+              "l0",
+              "l1"
+            ]
+          },
+          {
+            "id": "l2",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l3",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l4",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l5",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l6",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l7",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "l8",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "sum"
+          }
+        ]
+      }
+    },
+    {
+      "id": "shape16",
+      "dimension": "shape",
+      "expected": "admitted",
+      "error": null,
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "shape16",
+        "affine": {
+          "rows": 16,
+          "columns": 16,
+          "input_stride": 18,
+          "output_stride": 16
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rows17",
+      "dimension": "shape",
+      "expected": "rejected",
+      "error": "affine shape escapes the bounded windows",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "rows17",
+        "affine": {
+          "rows": 17,
+          "columns": 16,
+          "input_stride": 18,
+          "output_stride": 16
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "columns17",
+      "dimension": "shape",
+      "expected": "rejected",
+      "error": "affine shape escapes the bounded windows",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "columns17",
+        "affine": {
+          "rows": 8,
+          "columns": 17,
+          "input_stride": 19,
+          "output_stride": 17
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-stride9",
+      "dimension": "stride",
+      "expected": "rejected",
+      "error": "affine shape escapes the bounded windows",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "input-stride9",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 9,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "input-window",
+      "dimension": "stride",
+      "expected": "rejected",
+      "error": "affine shape escapes the bounded windows",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "input-window",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 37,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "output-stride7",
+      "dimension": "stride",
+      "expected": "rejected",
+      "error": "affine shape escapes the bounded windows",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "output-stride7",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 7
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "output-window",
+      "dimension": "stride",
+      "expected": "rejected",
+      "error": "affine shape escapes the bounded windows",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "output-window",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 40
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 0,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "halo1",
+      "dimension": "halo",
+      "expected": "admitted",
+      "error": null,
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "halo1",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 1,
+              "column_delta": 1
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "halo2",
+      "dimension": "halo",
+      "expected": "rejected",
+      "error": "LOAD_U32 relative address is invalid",
+      "descriptor": {
+        "schema": "raveil.graph-device-dag/v4",
+        "graph_id": "halo2",
+        "affine": {
+          "rows": 8,
+          "columns": 8,
+          "input_stride": 10,
+          "output_stride": 8
+        },
+        "nodes": [
+          {
+            "id": "x",
+            "op": "LOAD_U32",
+            "address": {
+              "row_delta": 2,
+              "column_delta": 0
+            }
+          },
+          {
+            "id": "store",
+            "op": "STORE_U32",
+            "input": "x"
+          }
+        ]
+      }
+    }
+  ]
+}
