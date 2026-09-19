@@ -1,5 +1,35 @@
 # Raveil project workspace
 
+## Inspect and selectively export saved files
+
+```sh
+python3 -m raveil project export-preview RUN_ID --project WORK
+python3 -m raveil project export-preview RUN_ID --project WORK --member workspace/errors.txt
+python3 -m raveil project export RUN_ID /absolute/new-selected.json --project WORK --member workspace/errors.txt --expect-preview HASH_FROM_SELECTED_PREVIEW --acknowledge-sensitive-data
+```
+
+The first command lists files, byte counts, hashes and warnings without selecting
+anything or showing file contents. Repeat `--member` for each exact saved-run
+relative path you intend to copy; use the hash from that same selection's
+preview. A changed source or selection requires another preview. There are no
+wildcards, automatic recommendations or default whole-run export.
+
+Inspect file names and sensitivity yourself: snapshots may contain unrelated
+inputs and the tool does not detect secrets. The new private JSON file contains
+only selected base64 payloads, minimal source hashes and omitted count. It is
+a labelled derivative, not an authenticated experiment or replayable full run.
+`record.json` and `record.sha256` are lineage-only and cannot be selected;
+the preview marks them non-selectable. The command does not upload, execute,
+extract or import. Platforms without no-follow reads fail closed.
+
+Destination must be new, outside WORK, with existing non-symlink parent paths.
+No overwrite is allowed. Stop editing the source and destination directories
+during preview/export: this is the existing cooperative single-writer boundary,
+not a hostile-concurrency sandbox. Maximum source size is 16 MiB / 1024 files
+plus parent directories; encoded JSON is capped at 24 MiB. Use normal tools to
+inspect the JSON, not a nonexistent Raveil import command. Weekly Drive cadence
+is unchanged.
+
 Status: T-0149 and T-0148/S02 development guide
 
 This is the shell-first path for editing a small workload, seeing its Graph,
