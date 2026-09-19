@@ -18,7 +18,8 @@ provide cooperative integrity, not authenticity or an experiment seal.
   files. Include record/checksum and required input/output snapshots, not
   external simulator binaries, credentials, unrelated recipes or raw evidence
   outside the run. Missing provenance is labelled, never reconstructed.
-- At most 1024 entries and 16 MiB total uncompressed content, aligning with
+- At most 1024 entries (files plus unique parent directories) and 16 MiB
+  total uncompressed content, aligning with
   existing snapshot bounds. Member counts/bytes/hashes precede any extraction.
 - Canonical relative names only: reject absolute paths, parent traversal,
   duplicate names, symlinks, hardlinks, special files and case-fold collisions.
@@ -65,7 +66,10 @@ explicit selective-disclosure and lineage semantics are accepted.
 the two directory entries are not payload files. The fixture checker verifies
 file-set agreement, total byte accounting and candidate ASCII relative-member
 rules, including negative traversal/absolute-path/duplicate/size/type cases.
-Run `python3 tests/fixtures/project_export/check_inspection.py -v` (4 tests).
+Run `python3 tests/fixtures/project_export/check_inspection.py -v` (5 tests).
+The model counts implied unique directories as well as files and rejects a
+file/directory prefix conflict. Future archive handling must count actual
+headers too, rejecting duplicates and unexpected directories before extraction.
 The explicit candidate payload is those 20 fixture members, not an automatic
 allowlist for arbitrary runs; review is required and this example must not be
 shared blindly because it includes unrelated inputs.

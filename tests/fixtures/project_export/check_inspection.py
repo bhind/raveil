@@ -10,7 +10,7 @@ ROOT = Path(__file__).parent
 def check(entries):
     if type(entries) is not list or len(entries) > 1024:
         raise ValueError("entry budget")
-    seen, total = set(), 0
+    seen, directories, total = set(), set(), 0
     for entry in entries:
         if type(entry) is not dict or set(entry) != {"path", "bytes", "sha256"}:
             raise ValueError("member fields")
@@ -22,11 +22,15 @@ def check(entries):
         if name.casefold() in seen:
             raise ValueError("duplicate member")
         seen.add(name.casefold())
+        parts = name.casefold().split("/")
+        directories.update("/".join(parts[:i]) for i in range(1, len(parts)))
         if type(size) is not int or size < 0:
             raise ValueError("byte count")
         if type(digest) is not str or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
             raise ValueError("digest")
         total += size
+    if seen & directories or len(seen) + len(directories) > 1024:
+        raise ValueError("directory conflict or total member budget")
     if total > 16 * 1024 * 1024:
         raise ValueError("byte budget")
     return total
@@ -46,7 +50,7 @@ def inspected_entries():
 
 
 class InspectionTests(unittest.TestCase):
-    def test_actual_snapshot(self):
+    def test_retained_metadata_consistency(self):
         entries = inspected_entries()
         self.assertEqual(len(entries), 20)
         self.assertIn("inputs/left.txt", {e["path"] for e in entries})
@@ -70,6 +74,13 @@ class InspectionTests(unittest.TestCase):
                 check([dict(base, **override)])
         with self.assertRaises(ValueError):
             check([base] * 1025)
+
+    def test_directory_budget_and_file_conflict(self):
+        base = inspected_entries()[0]
+        with self.assertRaises(ValueError):
+            check([dict(base, path=f"d{i}/f", bytes=0) for i in range(513)])
+        with self.assertRaises(ValueError):
+            check([dict(base, path="a"), dict(base, path="a/b")])
 
 
 if __name__ == "__main__":

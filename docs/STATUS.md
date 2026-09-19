@@ -5,7 +5,7 @@ Last updated: 2026-09-19
 T-0180 / Issue #178 has started on S-0005 (3 SP, Planning). A saved-run export
 boundary draft identifies existing loader/snapshot constraints; an actual native
 log-run inspection fixture exposes unrelated inputs in the saved snapshot.
-Exact byte accounting and four planning-fixture checks now pass; independent
+Exact byte accounting and five planning-fixture checks now pass; independent
 review and the adopt/defer decision remain pending. No export/import
 runtime exists from this task. Owner-directed ADR-0099 changes ordinary Drive
 preservation to weekly batches without weakening local checks or promotion.
