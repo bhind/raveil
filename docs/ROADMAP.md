@@ -4,6 +4,9 @@ Playable successor T-0193 / ADR-0100 adds explicit preview and selected-file
 derivatives after T-0180. No archive import, research promotion or device gate
 is implied; the project remains simulation-first.
 T-0194 is the bounded read-only verification successor, not an importer.
+After that usability boundary, T-0184 returns to editable Graph capacity
+pressure: actual rejected inputs inform one proposal, with no changed bounds
+or hardware/performance gate.
 
 Status: planning record
 Last updated: 2026-09-05

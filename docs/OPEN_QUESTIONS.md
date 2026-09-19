@@ -3,6 +3,8 @@
 T-0193 / ADR-0100 resolves initial saved-run sharing as explicit preview-bound
 selected-file derivatives. Authenticated replay, archive import, automatic
 privacy redaction and hostile-concurrency isolation remain out of scope.
+T-0194 checks a derivative's self-contained consistency only; source hashes
+remain unverified labels, not an authenticity or replay resolution.
 
 - T-0191 remote-location question resolved 2026-09-19: the separately
   authorized recollection is copied to the existing private research-data
