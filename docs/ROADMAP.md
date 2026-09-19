@@ -1,5 +1,10 @@
 # Raveil gated roadmap
 
+T-0183's concrete next capability is two named results via bounded host
+composition, registered as T-0197 / Issue #266. Complete its planning review,
+then alternate the T-0186 standard-IR increment and T-0197 implementation;
+do not extend hardware STORE effects merely to obtain two useful outputs.
+
 T-0196 now demonstrates one cold build followed by zero warm builds with fresh
 changed Graph execution (RTL Simulation only). Next is T-0183's concrete
 multi-output decision, then T-0186's standard-IR increment; physical backend

@@ -4,6 +4,15 @@ Last updated: 2026-09-19
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [x] **T-0183** Decide bounded multi-result Graph semantics, Issue #182,
+  S-0005, 3 SP. Selects host composition of one/two existing single-output
+  children; no hardware STORE extension. Six planning vectors and 37 existing
+  regressions pass; independent GO. Technically accepted for integration.
+- [ ] **T-0197** Compose two named Graph results from one frozen input,
+  Issue #266, proposed 5 SP, following T-0183 and T-0196. New parent record
+  and implementation ADR; retain child evidence on failure but publish a
+  complete result set only after both pass. No runtime implementation yet.
+
 - [x] **T-0187** Select a bounded simulator reuse path, Issue #187, S-0005,
   original3SP preserved. Owner explicitly authorized continuation and the
   acceleration roadmap. Planning selects binary-build reuse with fresh

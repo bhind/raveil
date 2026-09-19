@@ -9,7 +9,7 @@ daemon, sealed-UIO expansion, hardware-performance or hostile-isolation claim.
 
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
-Last updated: 2026-09-05
+Last updated: 2026-09-19
 
 ## Four-plane adaptive Harvard model
 

@@ -2,6 +2,12 @@
 
 Last updated: 2026-09-19
 
+T-0183 / Issue #182 is technically accepted after T-0196, S-0005, 3 SP. Planning
+selects bounded host composition for raw/biased sensor results rather than
+new hardware STORE authority. The current zero/two-STORE rejections remain;
+43 compiler/oracle/regression tests pass; independent review GO. T-0197 / Issue #266 is the registered
+implementation successor, not a completed runtime capability.
+
 T-0196 / Issue #263 is technically accepted for integration on S-0005, 5 SP,
 after merged T-0187 PR #264. ADR-0102 adds opt-in bounded compiled-simulator
 reuse. All 98 focused regressions pass (21 cache tests); independent review GO.
