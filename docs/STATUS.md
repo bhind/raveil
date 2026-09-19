@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-19
 
+T-0184 / Issue #183 retains 17 planning probes against the unchanged Graph
+compiler: six admissions and eleven exact rejections, with three oracle/fallback
+seeds per admitted case. An author-order pair differs in admission but not
+direct-oracle output. Register failures include unused values; they do not
+prove intrinsic hardware-register demand. Center-inclusive 3x3 dilation has
+18 instructions and exceeds the current 16-instruction budget. See
+`research/reviews/graph-capacity-pressure.md`. No capacity/runtime change.
+
 T-0194 / Issue #256 adds standalone read-only `project inspect-export` for
 ADR-0100 derivatives: bounded JSON/schema, member, base64, length and hash
 checks without source-run access, extraction or execution. All 85 focused and
