@@ -6,9 +6,9 @@ Checkboxes are execution state, not priority. Every material task has a stable I
 
 - [ ] **T-0180** Specify a bounded saved-run export boundary, Issue #178,
   S-0005, 3 SP, In Progress. Draft member/limit/threat rules are recorded in
-  `docs/research/reviews/workspace-export-boundary.md`. Next: inspect an actual
-  saved-run fixture now retained; add byte accounting and rule validation; independent review
-  and adopt/defer recommendation follow. No runtime export/import authority.
+  `docs/research/reviews/workspace-export-boundary.md`. Actual saved-run fixture,
+  20-file/24,097-byte accounting and four planning checks pass. Independent
+  review and adopt/defer disposition remain. No runtime export/import authority.
 
 - [x] **T-0191** Prove one frozen OpenASIP machine across three Graphs,
   [Issue #239](https://github.com/bhind/raveil/issues/239), S-0003, 8 SP.

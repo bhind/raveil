@@ -1,0 +1,26 @@
+{
+  "schema": "raveil.project-export-size-inspection/v1",
+  "bytes": {
+    "graph.json": 2958,
+    "inputs/bias-grid-data.json": 2863,
+    "inputs/bias-grid.json": 511,
+    "inputs/events.txt": 36,
+    "inputs/left.txt": 18,
+    "inputs/neighborhood-data.json": 2863,
+    "inputs/neighborhood.json": 666,
+    "inputs/right.txt": 15,
+    "recipe.json": 130,
+    "record.json": 6998,
+    "record.sha256": 65,
+    "stdout.txt": 0,
+    "workspace/bias-grid-data.json": 2863,
+    "workspace/bias-grid.json": 511,
+    "workspace/errors.txt": 2,
+    "workspace/events.txt": 36,
+    "workspace/left.txt": 18,
+    "workspace/neighborhood-data.json": 2863,
+    "workspace/neighborhood.json": 666,
+    "workspace/right.txt": 15
+  },
+  "total_bytes": 24097
+}

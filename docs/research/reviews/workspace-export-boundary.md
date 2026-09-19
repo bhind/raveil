@@ -60,6 +60,22 @@ a bounded archive enables replay but increases disclosure and extraction risk.
 Recommendation: adopt inspection-only preview first, defer archive import until
 explicit selective-disclosure and lineage semantics are accepted.
 
-Test the proposed member rules against the retained example, add exact byte
-accounting and independent review, then request adopt/defer. No
-implementation adoption is implied by this draft.
+`native-logs-sizes.json` records exact inspected sizes for 20 regular files
+(24,097 bytes);
+the two directory entries are not payload files. The fixture checker verifies
+file-set agreement, total byte accounting and candidate ASCII relative-member
+rules, including negative traversal/absolute-path/duplicate/size/type cases.
+Run `python3 tests/fixtures/project_export/check_inspection.py -v` (4 tests).
+The explicit candidate payload is those 20 fixture members, not an automatic
+allowlist for arbitrary runs; review is required and this example must not be
+shared blindly because it includes unrelated inputs.
+
+The checker only validates metadata. It does not read an archive or enforce
+filesystem link safety, actual decompression sizes, extraction confinement,
+privacy redaction, stale-schema migration or import conflict handling. These
+remain mandatory requirements for any later importer. Stored hashes are not
+signatures. No production export/import implementation is adopted here.
+
+Decision requested: adopt a bounded inspection preview as the next product
+slice; defer automatic archive export/import until selective disclosure and
+lineage semantics are settled. Independent review remains pending.
