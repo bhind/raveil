@@ -1,6 +1,6 @@
 # T-0180: Saved-run export boundary (draft)
 
-Status: In progress, Planning only
+Status: Design delivered, Planning only
 Date: 2026-09-19
 
 ## Scope
@@ -80,6 +80,8 @@ privacy redaction, stale-schema migration or import conflict handling. These
 remain mandatory requirements for any later importer. Stored hashes are not
 signatures. No production export/import implementation is adopted here.
 
-Decision requested: adopt a bounded inspection preview as the next product
-slice; defer automatic archive export/import until selective disclosure and
-lineage semantics are settled. Independent review remains pending.
+Recommendation: adopt a bounded inspection preview as the next product
+slice; defer automatic archive import. The owner authorized steps 1–6 including
+a separate preview/selective-export successor on 2026-09-19. That successor
+must define derivative lineage and explicit file selection before implementation.
+Planning review identified the implicit-directory budget gap, now corrected.
