@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-19
 
+T-0196 / Issue #263 is technically accepted for integration on S-0005, 5 SP,
+after merged T-0187 PR #264. ADR-0102 adds opt-in bounded compiled-simulator
+reuse. All 98 focused regressions pass (21 cache tests); independent review GO.
+Actual cold threshold and warm ADD Graphs share the same binary and build key:
+one build then zero builds, with fresh all-256-word oracle/fallback/RTL equality
+and 64 changed output words. This is RTL Simulation functional evidence, not
+an elapsed speedup claim. Raw evidence is retained outside temporary storage.
+
 T-0187 / Issue #187 is technically accepted for integration on S-0005, preserving
 Initial SP3. The reviewed planning decision selects compiled simulator reuse, not
 result reuse or a daemon; see `research/reviews/simulator-reuse-decision.md`.

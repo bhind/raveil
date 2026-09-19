@@ -1,5 +1,11 @@
 # Open questions
 
+T-0196 resolves whether a compiled simulator can serve changed Graphs without
+rebuilding: the actual cold/warm functional check passes. Wall-clock benefit
+is still unknown: bounded dependency hashing/copying adds overhead. Do not
+claim faster interaction from build counts alone or expand this into an open-
+ended measurement project. Next user-program decisions remain T-0183/T-0186.
+
 T-0187 selects a bounded compiled-binary reuse successor, T-0196, following
 explicit owner continuation. Exact identity, dependency cache, safe publication,
 hit/miss receipts and fallback require its implementation ADR and tests.

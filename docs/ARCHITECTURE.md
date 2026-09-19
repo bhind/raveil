@@ -1,5 +1,12 @@
 # Intended Raveil architecture
 
+ADR-0102 adds optional local compiled-simulator reuse to the dynamic simulation
+runner, below project semantics. Full source/header/image/dependency identity
+selects a bounded cooperative private bundle; only build artifacts are reused.
+Each request retains admission, RTL/fallback execution and independent oracle
+verification. A separate build-reuse receipt records hit/miss; no result cache,
+daemon, sealed-UIO expansion, hardware-performance or hostile-isolation claim.
+
 Status: intended architecture; only the subset in
 [`STATUS.md`](STATUS.md) is implemented
 Last updated: 2026-09-05
