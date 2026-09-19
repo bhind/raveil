@@ -1,5 +1,21 @@
 # Raveil gated roadmap
 
+## Owner-directed acceleration sequence (2026-09-19)
+
+Short term: finish T-0187's bounded decision and implement T-0196 to avoid a
+repeat compiler build on an unchanged build identity while executing every
+edited request afresh. Then use T-0183 for one concrete multi-result workload
+and T-0186 for one additional standard-IR import. Each step must end in an
+editable runnable example, not only a measurement or planning framework.
+
+Longer term: resolve actual scheduling, per-cell expression and spatial tiling
+limits separately from T-0184 evidence; compose existing bounded executions
+before expanding hardware limits. Preserve contract/oracle semantics into
+FPGA integration; RISC-V extension/ASIC remains an evidence-gated later choice.
+No physical-device purchase, new service or performance gate is authorized by
+this delivery ordering. Details and tradeoffs:
+`research/reviews/simulator-reuse-decision.md`. SP is relative risk, not dates.
+
 Playable successor T-0193 / ADR-0100 adds explicit preview and selected-file
 derivatives after T-0180. No archive import, research promotion or device gate
 is implied; the project remains simulation-first.
@@ -16,7 +32,7 @@ simulation workspace. Its exit is threshold edit/run/diff/Garden plus exact
 oracle/fallback/RTL agreement, not a capacity or physical/performance gate.
 
 Status: planning record
-Last updated: 2026-09-05
+Last updated: 2026-09-19
 
 Gates are evidence requirements, not calendar promises. Passing a later-looking
 prototype does not waive an earlier correctness or reproducibility gate.

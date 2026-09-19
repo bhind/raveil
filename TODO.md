@@ -4,6 +4,17 @@ Last updated: 2026-09-19
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
+- [x] **T-0187** Select a bounded simulator reuse path, Issue #187, S-0005,
+  original3SP preserved. Owner explicitly authorized continuation and the
+  acceleration roadmap. Planning selects binary-build reuse with fresh
+  execution, not batch-as-interactive-speedup or daemon. Independent review GO;
+  24 focused tests pass. Technically accepted for integration.
+- [ ] **T-0196** Reuse an identity-validated compiled simulator for edited
+  Graph runs, Issue #263. Bounded successor to T-0187; proposed5SP. Require
+  unchanged build identity, atomic bounded private entries, fresh oracle/RTL
+  execution, honest hit/miss receipts and actual zero-build warm demo.
+  No result cache, daemon, device access or performance claim.
+
 - [x] **T-0182** Execute unsigned threshold comparison end to end, Issue #181,
   S-0005, 5 SP. Owner-approved ADR-0101; compiler/oracle/fallback/Chisel/Garden
   and editable threshold-cross-dilation sample. Technically accepted for
@@ -349,7 +360,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
 | **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0195 advisory preflight hints; T-0184 is integrated. |
-| **P1 — next** | Start only after its named dependencies pass. | After T-0182, existing T-0187 / Issue #187 is the recommended planning-only successor for observed repeated-build friction. Its remote preparation was rejected by execution-policy review pending explicit owner approval; it is not Ready or active. No runtime cache, capacity or device action is authorized by that recommendation. |
+| **P1 — next** | Start only after its named dependencies pass. | Owner explicitly authorized T-0187 and accelerated generalization. Prepare T-0196 bounded compiled-build reuse after the decision review; then T-0183 multi-output decision and T-0186 one standard-IR workload. Physical gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
