@@ -1,5 +1,10 @@
 # Open questions
 
+T-0183 proposes obtaining two named results by composing existing single-output
+Graphs with one frozen input and all-or-incomplete parent publication. This
+does not share child arithmetic or widen STORE authority. T-0197 owns the new
+runtime/record contract after review; hardware multi-STORE remains deferred.
+
 T-0196 resolves whether a compiled simulator can serve changed Graphs without
 rebuilding: the actual cold/warm functional check passes. Wall-clock benefit
 is still unknown: bounded dependency hashing/copying adds overhead. Do not
