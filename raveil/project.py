@@ -718,6 +718,15 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
+    if action in {"export-preview", "export"}:
+        from .project_export import preview, export_selected
+        if action == "export-preview":
+            result = preview(project, args.run_id, args.member)
+        else:
+            result = export_selected(project, args.run_id, args.member, Path(args.destination),
+                                     args.expect_preview, args.acknowledge_sensitive_data)
+        print(encoded(result).decode(), end="")
+        return 0
     if action == "garden":
         from .garden import render_key_session, run_interactive, validate_render_width
         validate_render_width(args.width)
@@ -785,7 +794,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -799,6 +808,14 @@ def add_project_parser(subparsers: Any) -> None:
         if action == "fork":
             command.add_argument("source", help="admitted source recipe name")
             command.add_argument("destination", help="new confined recipe name")
+        if action in {"export-preview", "export"}:
+            command.add_argument("run_id")
+            command.add_argument("--member", action="append", required=action == "export",
+                                 help="exact relative saved-run file; repeat to select more")
+        if action == "export":
+            command.add_argument("destination", help="new JSON file outside the source project")
+            command.add_argument("--expect-preview", required=True)
+            command.add_argument("--acknowledge-sensitive-data", action="store_true")
         if action == "diff":
             command.add_argument("first")
             command.add_argument("second")

@@ -2,6 +2,16 @@
 
 Last updated: 2026-09-19
 
+T-0193 / Issue #255 implements preview-bound selected-file export under
+ADR-0100. New CLI paths inspect saved members without executing and write only
+explicit selected payloads to a private derivative JSON outside the project.
+Original records are lineage-only and cannot be selected; omitted names/content
+are not copied. All 76 focused/regression tests pass on macOS arm64 / Python
+3.14.6. An actual 20-file, 24,097-byte run yielded only the selected 2-byte
+`errors.txt`, with 19 members omitted and mode 0600. Independent review passes
+the cooperative-only boundary; technical integration remains separate from
+Sprint Review acceptance. No import, authenticity or security sandbox is added.
+
 T-0180 / Issue #178 is technically complete on S-0005 (3 SP, Planning). A saved-run export
 boundary draft identifies existing loader/snapshot constraints; an actual native
 log-run inspection fixture exposes unrelated inputs in the saved snapshot.
