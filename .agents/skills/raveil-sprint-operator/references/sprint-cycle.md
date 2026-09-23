@@ -37,8 +37,8 @@ P1/Ready successors requires immediate refinement, not an idle handoff.
 
 ## Kickoff and immediate next pull
 
-1. Read current weekly Codex telemetry. It is valid only when the window is
-   10,080 minutes. Record timestamp, used percentage, and `100 - used` remaining.
+1. Apply owner authority and resource permissions. ADR-0104 removes weekly
+   quota gating; do not request or invent a usage reading.
 2. Choose one Sprint goal and one executable demo. Order candidates by current
    P0 authority, dependencies, user/research value, and risk reduction.
 3. Confirm that no more than two independently acceptable mutation items would
@@ -249,7 +249,7 @@ conditions, and links in `Review Outcome` before moving status last.
 5. Record exactly one `Keep`, one evidence-backed `Problem`, and one bounded
    `Try`. Create or reuse a T-ID only when `Try` is durable actionable work; at
    most one process action enters the next Sprint.
-6. Recheck the HCI-09 weekly usage guard and rolling horizon. Select one next
+6. Recheck task authority, resource permissions and the rolling horizon. Select one next
    pull only from work whose canonical trigger, dependencies, Definition of
    Ready, Sprint, and WIP boundaries are satisfied.
 
@@ -280,7 +280,7 @@ Use this stable handoff shape:
 ```text
 Phase / Sprint:
 Authority / branch / T-ID:
-Usage window / observed-at / remaining:
+Resource use / permissions (weekly quota not required under ADR-0104):
 Project audit / active WIP:
 Commands and exit status:
 Evidence class:
@@ -293,7 +293,7 @@ Next action:
 
 Use `python3 scripts/project_daily.py --output-dir ARTIFACT_DIRECTORY` to
 preview factual metadata and daily-delivery updates; `--apply` performs the
-bounded updates only after fresh weekly telemetry. The scheduler invokes the
+bounded updates within owner authority and resource permissions. The scheduler invokes the
 same command daily at 19:00 Asia/Tokyo and preserves receipts outside Git.
 Read actual Issue closure and PR merge times; keep original estimates,
 acceptance prose, Sprint and status untouched. Verify the readback and report

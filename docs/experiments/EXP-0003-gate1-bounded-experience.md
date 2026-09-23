@@ -1,6 +1,8 @@
 # EXP-0003: Gate 1 bounded Experience on native C and TVM
 
-Status: In progress
+Status: Completed
+Outcome: preregistered hypothesis falsified; Gate 1 closed negative. The final
+conclusion below governs; intermediate pilot interpretations remain historical.
 Evidence class: silicon
 Date: 2026-08-08
 

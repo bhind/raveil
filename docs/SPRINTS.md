@@ -150,14 +150,10 @@ upper range, re-estimate WIP, lane load, and token/resource budget before
 pulling more work. Carry-over is explicitly recommitted without rewriting
 Initial SP.
 
-ADR-0060 adds a separate service-cost guard that is not expressed in SP. Check
-current weekly Codex usage before pulling a new task, assigning a subagent, or
-starting a long-running job, and at the next task boundary. A verified weekly
-remaining value below five percent stops new work; exactly five percent may
-continue cautiously. Missing or unverifiable weekly telemetry fails closed for
-new costly work. `Resource Use` may record the observation time, 10,080-minute
-window, used percentage, and remaining percentage, but never account IDs,
-credentials, secrets, or reset-credit identifiers.
+ADR-0104 removes the weekly Codex quota gate by explicit owner instruction.
+No weekly quota reading or missing-telemetry pause is required. Preserve actual
+resource use and relative SP accounting without inventing usage percentages.
+Paid resources, platform limits, WIP and other HCI boundaries remain separate.
 
 ## Product Backlog and refinement
 

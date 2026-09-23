@@ -1,5 +1,10 @@
 # Task start phases and work-in-progress handling
 
+2026-09-26: ADR-0103 and TODO's current focus supersede the historical
+"current reset" below. T-0199 / #268 integrates the research reset; T-0200 is
+its single research successor. T-0183 and T-0195/0196 are complete. T-0197 /
+#266 and T-0186 are deferred product work. ADR-0104 removes quota gating only.
+
 Status: active planning guide
 Date: 2026-08-24
 Authority: TODO task assignments, ROADMAP gates, accepted ADRs

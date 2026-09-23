@@ -1,0 +1,131 @@
+{
+  "boundary_alphabet_cases": 16819,
+  "different_threshold_counterexample": true,
+  "evidence_class": "host-functional-and-analytical-counts",
+  "functional_input_cases": 91,
+  "hardware_advantage_established": false,
+  "real_model_weights_tested": false,
+  "rows": [
+    {
+      "before": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 15,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 5,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "d8f9c8858591758db32260bc00315e8a274e69be16a2a2acb8a53efab28c1aa5"
+      },
+      "known_control": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 11,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 1,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "8dda976058bd18976b30bad77adc9106eeb2bd5e7aeb17db31896fbd0ef4df8b"
+      },
+      "threshold": 0
+    },
+    {
+      "before": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 15,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 5,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "658dbfcde31c4534d7d22f77af09139e4ded0a3ffd1cb22432ea88b7bb478666"
+      },
+      "known_control": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 11,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 1,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "ce5ca128d3df3d5b913680a6627551c9a6455136ba967715b3f0eaeaddbc8c98"
+      },
+      "threshold": 1
+    },
+    {
+      "before": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 15,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 5,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "b4a10405cf7d58f64ea05b7e684699195ad4b5cd59dc8fe9e40313d77c7bbabc"
+      },
+      "known_control": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 11,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 1,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "442075c89ad3032aae6a63f786b6e01bc2ee778f1c8981fd217156c11d8754ad"
+      },
+      "threshold": 100
+    },
+    {
+      "before": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 15,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 5,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "f53b14a2b3671c85807edefb3cf36349effef5c517a8eb7019dbe7cf488d0453"
+      },
+      "known_control": {
+        "fixed_install_payload_bytes": 128,
+        "instruction_count": 11,
+        "logical_load_store_bytes_64_cells": 1536,
+        "ops_per_cell": {
+          "GE_IMM_U32": 1,
+          "LOAD_U32": 5,
+          "MAX_U32": 4,
+          "STORE_U32": 1
+        },
+        "program_sha256": "a83da85ccf00c126f76c0e1066243f286096b3dadfd9ffdd92544356b4f55c2b"
+      },
+      "threshold": 4194303
+    }
+  ],
+  "rtl_executed": false,
+  "schema": "raveil.constant-work-preflight/v1",
+  "source_sha256": {
+    "docs/research/probes/constant_work_baseline.py": "1a9ffa7c7da19bfc652e45e3f48be120bf881b450db180387c380325a963d83c",
+    "examples/graph-workloads/inputs/threshold-cross-dilate-descriptor.json": "9a08e093f10857c811630a67d5c137d9fb2547a4df4f07f4d39d6dadf2e3fed7",
+    "examples/graph-workloads/inputs/threshold-cross-dilate-input.json": "c5dd1402518670d683fd3c0bbd6e8b407582f1f9907db09412904390b41bea0f",
+    "raveil/graph_device_affine.py": "983f7100b61e77878f16a00fa8c04426faea015504167e41579e42c028972018",
+    "raveil/graph_device_dag.py": "02d1b6ba3bb6248ed2b884155306280435a651b98f0c71b7ffe49bf93fcf37a5",
+    "raveil/graph_device_mvp.py": "d6b4de7b445e6a381405a5ca0058e3453279ba198225fd6a8970af12d4722a71",
+    "raveil/riscv_stencil_signature.py": "e1739f89dd25f9995e2964d82d47b43baaa01886009098035e6147d2be3eafed"
+  },
+  "timing_measured": false,
+  "treatment": "known monotone threshold/max identity; not novel"
+}

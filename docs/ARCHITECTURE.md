@@ -1,5 +1,24 @@
 # Intended Raveil architecture
 
+## Research-priority boundary — ADR-0103
+
+The next research question is whether declared immutable function information
+can reduce required work beyond known optimization controls. This does not
+select a new Daphnis microarchitecture or change the four-plane architecture.
+See [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
+and [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md).
+
+Any future specialization of immutable object contents must produce a derived
+Graph artifact through the existing trusted admission path, binding the source
+object identity/version and numerical contract. Data stays non-executable;
+immutable input bytes do not grant installation authority. Changed weights
+invalidate their specialization. A run snapshot alone does not make inputs
+constant across future runs. These are requirements for a future contract,
+not implemented tensor-binding or production optimizer capabilities.
+
+The T-0199 known-control probe is an isolated research artifact; it never
+rewrites an admitted user graph or installs its comparison descriptor.
+
 ADR-0102 adds optional local compiled-simulator reuse to the dynamic simulation
 runner, below project semantics. Full source/header/image/dependency identity
 selects a bounded cooperative private bundle; only build artifacts are reused.

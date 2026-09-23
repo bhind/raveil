@@ -1,5 +1,13 @@
 # Architecture Decision Records
 
+[ADR-0104](ADR-0104-remove-weekly-quota-gating.md) retires weekly quota gating
+under the explicit September 26 owner instruction; all other permissions remain.
+
+[ADR-0103](ADR-0103-work-reduction-precedes-new-execution-hardware.md) records
+the owner-directed work-reduction-first research priority. Accepted direction;
+T-0199 / #268 owns integration. No new execution architecture
+or experiment result is accepted.
+
 T-0173: [ADR-0097](ADR-0097-bounded-graph-immediate-addition.md) adds bounded
 unsigned immediate addition with explicit program/request/trace versioning.
 

@@ -138,9 +138,9 @@ claim.
   weekly capacity, and 13--21 SP as the warm stretch range. These planning
   bands are not hard stops: authorized work continues while its dependency,
   WIP, resource-budget, and ADR-0051 Human-confirmation boundaries remain
-  satisfied. ADR-0060 is an independent cost guard: do not start new work when
-  verified weekly Codex usage remaining is below five percent. Record
-  role-packet counts and resource use separately from SP.
+  satisfied. ADR-0104 removes weekly Codex quota gating by explicit owner instruction.
+  Do not request quota readings or stop work because telemetry is absent or
+  low. Record actual role-packet counts and resource use separately from SP.
 
 ## Continuous execution and human confirmation
 
@@ -177,21 +177,13 @@ of **Human-confirmation incident** (HCI) that require a stop:
   IP-risk implications;
 - a material design fork, more than two recoveries at one boundary, the same
   root-cause class failing twice, or an unapproved resource/estimate overrun.
-- verified weekly Codex usage remaining below five percent, or unavailable,
-  stale, malformed, or ambiguous weekly telemetry before a new costly action.
 
-For the ADR-0060 weekly guard, use only a current Codex account reading whose
-weekly window is 10,080 minutes. Compute `remaining = 100 - usedPercent`.
-Exactly five percent remaining may continue cautiously; below five percent
-must pause before a new task, subagent, long-running build or verification,
-remote update, or merge. Preserve the smallest safe receipt for work already
-running, start no downstream work, and notify the owner. If the reading is
-unavailable or cannot be verified as current weekly telemetry, do not claim
-that the guard is being monitored and do not start a new costly action. A
-verified reading of at least five percent resumes ordinary authorized work.
-Using reset credits, purchasing capacity, changing a service plan, or bypassing
-the guard requires separate explicit owner authority. Never record account IDs,
-credentials, secrets, or reset-credit identifiers in project records.
+ADR-0104 supersedes ADR-0060's weekly usage guard and HCI-09. The owner
+explicitly instructed on 2026-09-26 that weekly remaining usage need no longer
+be considered. Do not require weekly telemetry or use quota as a work/merge
+stop. This does not authorize buying capacity, consuming paid reset credits,
+changing plans, bypassing platform limits or any other existing HCI boundary.
+Never fabricate telemetry or record credentials/account identifiers.
 
 Ordinary build and test failures, bounded fixes inside assigned files,
 regression tests, local branches/worktrees/commits, candidate-independent

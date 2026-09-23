@@ -1,5 +1,12 @@
 # Raveil project records
 
+Current research priority: [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
+[RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md), and the
+[T-0199 restart review (historical filename)](research/reviews/2026-09-23-T-0197-research-restart.md).
+The [28-claim audit](research/reviews/2026-09-20-T-0057-atomic-claim-matrix.md)
+is retained with its original checkout scope; the September 23 review explains
+which proposals are deferred. TODO's current focus governs the next pull.
+
 This directory is the single entry point for Raveil's current design,
 implementation state, evidence, and project memory.
 
