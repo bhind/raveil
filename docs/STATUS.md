@@ -1,6 +1,6 @@
 # Current status
 
-## Research restart — local candidate, 2026-09-23
+## Research restart — verified workload packet, 2026-09-26
 
 T-0199 applies the owner's research-priority reset through ADR-0103/RFC-0007,
 without changing production compiler, admission, oracle, schemas or RTL.
@@ -13,24 +13,38 @@ count is 15 versus 11, while installation payload stays 128 bytes and logical
 load/store traffic stays 1,536 bytes for 64 outputs. These are host functional
 checks and analytical counts, not timing, RTL or hardware advantage evidence.
 
-The current bounded examples do not contain a declared immutable trained-weight
-tensor interface. T-0200 must choose that workload/contract before any proposed
-specialization mechanism or claim-bearing collection. No novel mechanism is
-implemented; Experience performance and Groq superiority remain unestablished.
-The September 20 audit was of `7c38a36`; it does not invalidate or replace later
-mainline functionality and EXP evidence. EXP-0003 remains closed negative.
+T-0200 now supplies a separate offline research probe for one real trained
+operator: pinned Pythia-14M layer-0 input projection, unchanged F16 W512x128
+and b512 widened to F32. Its exact integer oracle checks a predeclared rational
+roundoff envelope. Eight synthetic vectors pass serial F32, actual optimized
+Accelerate SGEMV and a fresh-bias repeat: 12,288 output-component checks.
+The oracle self-test validates all 63,488 finite binary16 encodings and twelve
+boundary cases, and rejects three deliberately invalid outputs. See the [workload packet](research/reviews/T-0200-immutable-affine-workload.md)
+and [receipt](research/receipts/T-0200-workload.json).
 
-Integration update (2026-09-26): latest main `bdfac7f` includes T-0183 / PR #267.
-T-0199 / Issue #268 is technically verified for integration after explicit
-code/config/test scope approval; 142 scoped tests pass.
-T-0200 / Issue #269 is its Backlog successor. Daily Project synchronization
-no longer starts a Codex quota process or requires usage telemetry. Other
-inventory, lifecycle, existing-prose preservation and readback checks remain. Prior local
-T-0197/T-0198 reservations are historical only; live T-0197 / #266 remains the
-separate multi-result implementation. Network access is restored and the owner
-removed weekly quota gating (ADR-0104). Verification and exact integration
-state are recorded in [the September 26 log](log/2026-09-26.md). No new runtime,
-RTL or representative immutable-weight capability is implemented by this reset.
+Extract hashes are locally verified; the complete upstream model hash is not.
+Only 140,592 bytes of exact HTTP ranges were acquired. No raw weights are in
+Git. Source W+b is 132,096 bytes and widened resident W+b is 264,192 bytes;
+these are logical counts, not physical transfer measurements. Inputs remain
+synthetic; the original full-model numerical behavior and representative
+activation corpus are unverified. Fixed-parameter compiler controls remain
+unimplemented. There is no new optimization or speed/energy/area result.
+The production uint32 Graph interface and RTL are unchanged.
+
+Integration: T-0199 / #268 is closed/Done after PR #270, merge `3d804e8`;
+142 scoped checks passed. T-0200 / #269 is technically verified, with normal
+PR integration and canonical completion still required. A next compiler-control
+Issue was not created: automatic approval review rejected registration as scope
+expansion. Its proposal remains uncommissioned pending owner approval.
+The owner postponed the S-0005 weekly Sprint Review, with no replacement date
+or ceremony acceptance. Ordinary task delivery continues separately.
+
+No novel mechanism is implemented; Experience performance and Groq superiority
+remain unestablished. EXP-0003 remains closed negative. The September 20 audit
+was of `7c38a36` and does not replace later mainline/EXP evidence. Historical
+T-0197/T-0198 reservations do not change live T-0197 / #266. ADR-0104 removes
+weekly quota gating; other permissions and evidence boundaries remain. See
+[the September 26 log](log/2026-09-26.md) for commands and review provenance.
 
 Last updated: 2026-09-26
 

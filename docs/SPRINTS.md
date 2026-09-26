@@ -26,6 +26,20 @@ variable `RAVEIL_PROJECT_NUMBER` and secret `RAVEIL_PROJECT_TOKEN`. Run
 `python3 scripts/project_burndown.py --owner OWNER --project NUMBER` for a
 read-only preview and add `--apply` only for the authorized Draft update.
 
+## Owner-directed S-0005 Review deferral — 2026-09-26
+
+The owner reports limited work this week and explicitly postpones the weekly
+Sprint Review while directing task delivery to continue. S-0005 remains the
+2026-09-21 through 2026-09-27 reporting iteration. The ceremony has no new date,
+no demo/retrospective result and no Accept/Conditional Accept/Done disposition.
+Project #1 retains a separate non-Done ceremony card; no SP is awarded.
+
+This one-week scheduling instruction does not cancel future weekly reviews or
+change scientific gates. Continue accepted work independently: T-0199 merged
+as PR #270; T-0200 / #269 is the current workload/baseline slice. Reschedule the
+owner-visible ceremony when the owner supplies timing/readiness; do not stop
+technical task integration on its attendance or invent an automatic acceptance.
+
 ## Cadence
 
 ADR-0099 batches ordinary Drive preservation once weekly, normally before
@@ -65,7 +79,7 @@ closed and the next item is ready.
 - Saturday, retrospective: record one useful observation in each of `Keep`,
   `Problem`, and `Try`. At most one process-improvement action enters the next
   sprint so process work cannot consume the product.
-- Immediately after accepted review and retrospective: recheck usage, WIP,
+- Immediately after accepted review and retrospective: recheck authority, WIP,
   dependencies, Definition of Ready, and the real-Issue packet, then pull one
   ready item into its configured next Sprint through the canonical queue.
 - Sunday, recovery and handoff: reconcile records and Project state, retain a

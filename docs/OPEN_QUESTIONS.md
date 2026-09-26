@@ -1,10 +1,16 @@
 # Open questions
 
-## Owner-directed research restart — 2026-09-23
+## Owner-directed research restart — 2026-09-26
 
-- T-0200: which one real immutable-parameter workload and numerical contract
-  should be pinned? Current bounded graph immediates and mutable snapshots are
-  insufficient evidence for trained-weight specialization.
+- T-0200 pins Pythia-14M layer-0 W512x128+b512 and an isolated F16-input /
+  F32-output affine contract. What behavior remains after ordinary fixed-
+  parameter compiler controls? Those controls are unimplemented and their
+  successor registration awaits owner approval after automatic review rejection.
+- How will a later evaluation acquire representative activation provenance and
+  validate full-model quality? Current eight inputs are synthetic, parameter
+  and input holdouts remain untouched, and finite tests are not universal proof.
+- Before timing, how will library/build/threading/dispatch, warm/cold costs,
+  specialization code/data and replacement costs be sealed under a new EXP?
 - Which optimization survives ordinary constant specialization and the closest
   applicable da4ml/Mirage/constant-matrix baseline? No residual treatment is
   defined yet; known threshold/max interchange is only a control.
@@ -13,9 +19,10 @@
   probe reduces neither its installation payload nor logical memory traffic.
 - Does any benefit remain when the same transformed function is run on a strong
   conventional/Groq-like backend? If not, do not infer a hardware contribution.
-- Integration: source access and ID collision are resolved; T-0199 / #268 owns
-  review/PR integration and T-0200 owns the next workload packet. Weekly quota
-  telemetry is no longer required under the owner's ADR-0104 instruction.
+- Integration: T-0199 / #268 is merged/Done; T-0200 owns the workload packet
+  and its PR completion. Weekly quota telemetry is no longer required.
+  S-0005 ceremony date/disposition remains open after owner-directed deferral;
+  task integration must not invent ceremony acceptance.
 
 [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
 sets the research order. T-0183 is complete; T-0197 / #266 and T-0186 remain deferred product work; old next-pull
