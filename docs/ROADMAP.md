@@ -1,16 +1,22 @@
 # Raveil gated roadmap
 
-## Current owner-directed priority — 2026-09-23
+## Current owner-directed priority — 2026-09-26
 
 [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
 reorders the next research work: T-0199 policy/known-control preflight,
-T-0200 one immutable-parameter workload with strong controls, then a separately
+T-0200 one immutable-parameter workload/reference packet, conventional fixed-parameter
+controls, then a separately
 specified residual mechanism and complete-cost comparison. New hardware is
 conditional on that evidence. Partial evaluation is prior art, not a finding
 of novelty. No existing Gate or EXP threshold is weakened or closed.
 
-The preflight is reproducible; T-0199 / #268 now integrates it against fresh
-main. T-0183 planning is complete; T-0197 / #266 and T-0186 remain deferred
+T-0199 / #268 is integrated through PR #270. T-0200 verifies the pinned
+trained affine operator with an exact oracle and ordinary optimized BLAS.
+Known fixed-parameter compiler controls remain the next uncommissioned
+candidate; automatic review requires owner approval before its Issue creation.
+No residual mechanism, performance collection or new hardware is authorized
+by this functional packet. The owner postponed S-0005 weekly Review without
+changing ordinary task delivery or accepting the ceremony. T-0183 planning is complete; T-0197 / #266 and T-0186 remain deferred
 product work. The latter may support the selected workload when justified.
 Other pivot suggestions are preserved alternatives, not parallel priorities.
 T-0044 physical blockers remain separate. ADR-0104 removes quota gating only.

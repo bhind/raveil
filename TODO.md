@@ -7,28 +7,38 @@ selects work reduction from immutable function information as a hypothesis,
 with known compiler optimizations as mandatory controls. Existing completed
 work and product functionality remain intact.
 
-- [x] **T-0199** Technically verified for PR integration: integrate the research direction, backlog and known algebraic
-  control; [Issue #268](https://github.com/bhind/raveil/issues/268), S-0005,
-  3 SP, Project Manager owns all tracked mutation. Scope approval is resolved; code/config/tests now remove quota gating.
-  142 scoped tests and the independent daily-sync check pass.
-  Technical result is verified; remote Done follows only the PR merge/readback. The local probe passes
-  91 input cases; 15-to-11 instructions does not reduce its 128-byte install
-  payload or 1,536 logical memory bytes. Latest main includes T-0183. PR integration and final Project readback remain the delivery boundary.
-- [ ] **T-0200** [Issue #269](https://github.com/bhind/raveil/issues/269),
-  Backlog until T-0199 integration: pin one immutable-parameter workload and strong baseline under
-  [RFC-0007](docs/rfcs/RFC-0007-immutable-function-work-reduction.md).
-  Exit: source/revision/license and hashes, immutable/mutable split, numerical
-  contract, independent oracle, development/holdout split, full cost ledger,
-  and closest applicable standard/published control. Select a bounded real
-  workload before choosing a transform; no contrived post-hoc weights. This
-  packet does not authorize a novel optimizer, quantization, EXP collection or
-  new hardware. Successor to T-0199; PM owns the contract.
+- [x] **T-0199** Integrated through [PR #270](https://github.com/bhind/raveil/pull/270),
+  merge `3d804e8`; Issue #268 closed and Project Done. ADR-0103/RFC-0007
+  and ADR-0104 are integrated; 142 scoped checks passed. The known algebraic
+  control reduces 15 to 11 instructions, but neither its 128-byte installation
+  nor 1,536 logical memory bytes. No novel mechanism or hardware advantage.
+- [x] **T-0200** [Issue #269](https://github.com/bhind/raveil/issues/269), S-0005,
+  3 SP: technically verified workload/reference packet, pending PR integration.
+  [Pinned trained affine operator](docs/research/reviews/T-0200-immutable-affine-workload.md):
+  Pythia-14M layer-0 W512x128+b512, unchanged F16 parameters, F32 result under
+  a predeclared rational error bound. Eight synthetic commissioning vectors
+  pass exact-oracle checks for serial F32, optimized Accelerate and fresh-bias
+  repeat (12,288 component checks). Source hashes, license, numerical contract,
+  untouched holdout intent and logical-byte ledger are recorded. No activation
+  corpus, fixed-parameter compiler control, timing or new mechanism is supplied.
+  Task Done follows only verified merge and canonical completion.
 
-**Ordering:** T-0199 integration → T-0200 workload/baseline → only then a
-mechanism-specific comparison. T-0183 planning is complete. Its T-0197 / #266
-multi-result implementation stays Backlog/P2; T-0186 remains queued. An import
-must be justified by the workload. T-0044 physical gates and T-0106's triggers
-are unchanged. Other proposed pivots and Experience expansion remain deferred.
+**Next candidate (not commissioned):** ordinary fixed-parameter compiler
+controls under the same numerical contract. This is required before selecting
+any residual mechanism. Automatic approval review rejected creating the new
+successor Issue as scope expansion on September 26; no Issue or stable task ID
+was allocated, and no successor implementation began. Owner approval is needed
+for that registration. This does not block T-0200 technical integration.
+
+**Ordering:** integrated T-0199 → T-0200 workload/reference packet → known
+fixed-parameter controls → only then a mechanism-specific comparison.
+T-0183 planning is complete. T-0197 / #266 multi-result implementation stays
+Backlog/P2; T-0186 remains queued. T-0044 physical gates and T-0106 triggers are
+unchanged. Other pivots and Experience expansion remain deferred.
+
+**Sprint Review:** owner postponed S-0005 weekly Review on September 26.
+No replacement date or ceremony acceptance was supplied. Ordinary delivery
+continues; the ceremony remains non-Done, with no retrospective invented.
 
 **Identity:** the September 23 local T-0197/T-0198 reservations were never live
 Issues. The former collided with #266; T-0199/T-0200 replace those research IDs.
@@ -408,8 +418,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0199 / #268 is active; scope blocker resolved, verification/PR integration in progress. T-0195/0196 are integrated at the cached base. |
-| **P1 — next** | Start only after its named dependencies pass. | T-0200 immutable-workload/baseline packet after T-0199. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0200 / #269 owns workload/reference verification and PR integration; T-0199 is merged/Done. T-0195/0196 are integrated at the cached base. |
+| **P1 — next** | Start only after its named dependencies pass. | Next candidate is conventional fixed-parameter controls; successor registration requires owner approval after automatic review rejection. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
