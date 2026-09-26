@@ -1,5 +1,26 @@
 # Open questions
 
+## Owner-directed research restart — 2026-09-23
+
+- T-0200: which one real immutable-parameter workload and numerical contract
+  should be pinned? Current bounded graph immediates and mutable snapshots are
+  insufficient evidence for trained-weight specialization.
+- Which optimization survives ordinary constant specialization and the closest
+  applicable da4ml/Mirage/constant-matrix baseline? No residual treatment is
+  defined yet; known threshold/max interchange is only a control.
+- Do reduced operations also reduce complete execution cost after parameter,
+  configuration, storage, physical movement and lifecycle overhead? The T-0199
+  probe reduces neither its installation payload nor logical memory traffic.
+- Does any benefit remain when the same transformed function is run on a strong
+  conventional/Groq-like backend? If not, do not infer a hardware contribution.
+- Integration: source access and ID collision are resolved; T-0199 / #268 owns
+  review/PR integration and T-0200 owns the next workload packet. Weekly quota
+  telemetry is no longer required under the owner's ADR-0104 instruction.
+
+[ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
+sets the research order. T-0183 is complete; T-0197 / #266 and T-0186 remain deferred product work; old next-pull
+references below are preserved context, not competing active priorities.
+
 T-0183 proposes obtaining two named results by composing existing single-output
 Graphs with one frozen input and all-or-incomplete parent publication. This
 does not share child arithmetic or widen STORE authority. T-0197 owns the new
@@ -33,7 +54,7 @@ remain unverified labels, not an authenticity or replay resolution.
   Local run/RTL receipt verification fails. Otherwise a separately authorized,
   newly identified collection is needed; it cannot replace historical evidence.
 
-Last updated: 2026-09-19
+Last updated: 2026-09-26
 
 These items are intentionally unresolved. A conversation hypothesis does not
 become implementation authority until an Accepted ADR or reproducible EXP

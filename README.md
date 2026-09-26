@@ -1,5 +1,10 @@
 # Raveil
 
+Research direction (2026-09-23): establish work reduction beyond known compiler
+controls before selecting new execution hardware. See [the current backlog](TODO.md)
+and [ADR-0103](docs/decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md).
+This is a research hypothesis, not a Groq performance or novelty claim.
+
 > Experience-guided, authority-bounded Graph execution across replaceable
 > software and hardware backends.
 

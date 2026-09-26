@@ -1,6 +1,38 @@
 # Current status
 
-Last updated: 2026-09-19
+## Research restart — local candidate, 2026-09-23
+
+T-0199 applies the owner's research-priority reset through ADR-0103/RFC-0007,
+without changing production compiler, admission, oracle, schemas or RTL.
+The read-only [known-control probe](research/probes/constant_work_baseline.py)
+checks the existing threshold/cross-dilation example against an equivalent
+hand-authored standard algebraic control. All 91 full-input cases and 16,819
+boundary-alphabet tuples pass; each full case checks both graphs and both
+encoded fallbacks against a direct independent specification. Instruction
+count is 15 versus 11, while installation payload stays 128 bytes and logical
+load/store traffic stays 1,536 bytes for 64 outputs. These are host functional
+checks and analytical counts, not timing, RTL or hardware advantage evidence.
+
+The current bounded examples do not contain a declared immutable trained-weight
+tensor interface. T-0200 must choose that workload/contract before any proposed
+specialization mechanism or claim-bearing collection. No novel mechanism is
+implemented; Experience performance and Groq superiority remain unestablished.
+The September 20 audit was of `7c38a36`; it does not invalidate or replace later
+mainline functionality and EXP evidence. EXP-0003 remains closed negative.
+
+Integration update (2026-09-26): latest main `bdfac7f` includes T-0183 / PR #267.
+T-0199 / Issue #268 is technically verified for integration after explicit
+code/config/test scope approval; 142 scoped tests pass.
+T-0200 / Issue #269 is its Backlog successor. Daily Project synchronization
+no longer starts a Codex quota process or requires usage telemetry. Other
+inventory, lifecycle, existing-prose preservation and readback checks remain. Prior local
+T-0197/T-0198 reservations are historical only; live T-0197 / #266 remains the
+separate multi-result implementation. Network access is restored and the owner
+removed weekly quota gating (ADR-0104). Verification and exact integration
+state are recorded in [the September 26 log](log/2026-09-26.md). No new runtime,
+RTL or representative immutable-weight capability is implemented by this reset.
+
+Last updated: 2026-09-26
 
 T-0183 / Issue #182 is technically accepted after T-0196, S-0005, 3 SP. Planning
 selects bounded host composition for raw/biased sensor results rather than
@@ -739,7 +771,7 @@ T-0131 adds the repository-scoped `raveil-sprint-operator` that routes
 Sprint audit, kickoff, continuation, correction, review, closeout,
 retrospective, and next-pull work through the existing governance and queue.
 Its phase reference uses `project_queue.py` for transitions, preserves Initial
-SP and evidence classes, applies HCI-09 and every other HCI boundary, and
+SP and evidence classes, applies the remaining HCI boundaries (HCI-09 retired by ADR-0104), and
 returns one stable receipt. The PM role is bound to invoke it at phase
 boundaries. The skill validator, four PM/role boundary tests, 23 queue tests,
 record checker, diff check, and live queue audit passed. PR #53 merged as
@@ -804,20 +836,13 @@ authority commit is an integration-pending candidate, not a completed task.
 T-0110 and ADR-0051 now make continuous execution the repository default after
 an owner authorizes a bounded task. Progress reports, local edits and commits,
 tests, bounded corrections, and the next accepted slice do not create approval
-checkpoints. Nine exhaustive Human-confirmation incident classes retain human
-authority over scope or gate expansion, first claim-bearing experiment
-collection, destructive or remote action, unresolved evidence ambiguity,
-user-work overlap, external cost/credentials/legal risk, repeated recovery or
-resource overrun, material design forks, and the weekly Codex usage cost guard.
-ADR-0060 and T-0119 require a current 10,080-minute weekly reading, compute
-remaining as 100 minus used percentage, and stop new costly work below five
-percent. Exactly five percent may continue cautiously. Missing or unverifiable
-weekly telemetry fails closed for new costly work, and reset-credit use,
-capacity purchases, service-plan changes, or bypass require separate owner
-authority. The PM role and an executable
-agent-boundary regression carry the same rule. No implementation P0,
-experiment, evidence, performance claim, or remote-publication authority
-changes.
+checkpoints. The remaining Human-confirmation incident classes retain human
+authority over scope/gate expansion, first claim-bearing collection, destructive
+or remote actions, evidence ambiguity, user-work overlap, external cost,
+credentials/legal risk, repeated recovery and material design forks.
+ADR-0104 supersedes the historical ADR-0060/T-0119 weekly quota stop by explicit
+owner instruction. Historical readings remain provenance; no quota reading is
+required for continuation. Other paid-resource and platform limits remain.
 ADR-0056 and T-0116 add a repository-linked, private GitHub Project weekly
 sprint workflow with a stable-T-ID Kanban board, retained initial and revised
 Fibonacci estimates, seven-day Iterations, WIP limit two, executable review
@@ -825,7 +850,7 @@ demo, and retrospective. ADR-0059 and T-0118 supersede only the assumption that
 eight SP is the full weekly capacity. Eight SP remains an under-utilization
 lower-bound check, 13 SP is the provisional committed capacity, and 13--21 SP
 is the warm stretch range. These are planning bands, not stop conditions; the
-ADR-0060 weekly usage guard is an independent service-cost stop.
+former ADR-0060 weekly usage guard was retired by ADR-0104.
 Execution uses one serial high-reasoning PM integration lane. ADR-0061 now
 permits up to two independently acceptable low-reasoning mutation lanes only
 with disjoint tasks, files, artifacts, tests, and evidence; one low-reasoning

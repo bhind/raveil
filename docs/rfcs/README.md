@@ -1,5 +1,9 @@
 # Requests for Comment
 
+[RFC-0007](RFC-0007-immutable-function-work-reduction.md) proposes the
+immutable-function workload, strong-control and complete-cost comparison
+boundary under ADR-0103. No model, new mechanism or performance EXP is frozen.
+
 RFCs are substantial proposals that may require multiple experiments and ADRs.
 They do not have implementation authority until the relevant decisions are
 accepted.

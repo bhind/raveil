@@ -1,0 +1,3331 @@
+{
+  "schema": "raveil.atomic-claim-review/v1-draft",
+  "status": "non-authoritative literature review",
+  "date": "2026-09-20",
+  "task": "T-0057 supplementary audit",
+  "base_commit": "7c38a36a7ca5e9f19fc930cb1a6dc80c09e432f6",
+  "scope": "current checkout plus documented carry-in; other branches excluded",
+  "legend": {
+    "E": "atomic mechanism prior example at stated abstraction; not whole-system equivalence",
+    "P": "partial analogy, missing qualifiers explicitly stated",
+    "D": "documented difference in this source/model only",
+    "U": "unestablished in inspected corpus; not absence or novelty"
+  },
+  "sources": {
+    "G1": {
+      "title": "Abts et al., Think Fast: A Tensor Streaming Processor (TSP) for Accelerating Deep Learning Workloads",
+      "url": "https://www.researchgate.net/publication/342914141_Think_Fast_A_Tensor_Streaming_Processor_TSP_for_Accelerating_Deep_Learning_Workloads",
+      "version": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24",
+      "locators": {
+        "model": "§I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams",
+        "schedule": "§II Architecture Overview, printed p.147; §II.C staggered instruction execution",
+        "memory": "§II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "Max Bakerのauthor-upload本文を確認。公式旧PDFは404/502、別ミラーはTLS/取得失敗。2026年製品記事の仕様を2020年TSPへ遡及しない。"
+    },
+    "S1": {
+      "title": "Prabhakar and Jairath, SambaNova SN10 RDU: Accelerating Software 2.0 with Dataflow",
+      "url": "https://hc33.hotchips.org/assets/program/conference/day2/SambaNova%20HotChips%202021%20Aug%2023%20v1.pdf",
+      "version": "Hot Chips 33, 2021-08-24",
+      "locators": {
+        "mapping": "slides 5–6: SambaFlow / spatial compilation",
+        "fabric": "slides 11–16: tile, PCU, PMU, address generation, switch",
+        "host": "slides 4, 11: host and RDU connectivity"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "公式学会のベンダー発表。SN10のみ。Plasticineの詳細をSambaNova製品に自動転記しない。"
+    },
+    "I1": {
+      "title": "Graphcore, IPU Programmer’s Guide: IPU hardware overview",
+      "url": "https://docs.graphcore.ai/projects/ipu-programmers-guide/en/3.3.0/about_ipu.html",
+      "version": "SDK guide 3.3.0",
+      "locators": {
+        "memory": "§2.1 Memory architecture",
+        "execution": "§2.2 Execution",
+        "tile": "§2.3 Tile architecture"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "命令を実行するtileとBSP。名称Graphから命令粒度dataflow firingを推定しない。"
+    },
+    "I2": {
+      "title": "Graphcore, IPU Programmer’s Guide: Programming model",
+      "url": "https://docs.graphcore.ai/projects/ipu-programmers-guide/en/3.3.0/programming_model.html",
+      "version": "SDK guide 3.3.0",
+      "locators": {
+        "graph": "§3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets",
+        "control": "§3.2.3 Control flow: sequences, conditionals and loops",
+        "allocation": "§3.5.1 Variable liveness"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "固定された変数アクセス集合とtile mappingを、Raveil capability証明と混同しない。"
+    },
+    "C1": {
+      "title": "Cerebras, A Conceptual View",
+      "url": "https://cerebras-sdk-docs-140.netlify.app/computing-with-cerebras",
+      "version": "Cerebras SDK documentation 1.4.0",
+      "locators": {
+        "pe": "A processing element (PE); The programming model",
+        "tasks": "Programs and Tasks; Task IDs and Types of Tasks; Communication",
+        "route": "Communication and examples of @bind_data_task"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "公式SDKの版別サイト。WSE-2のcolorとWSE-3のinput queueの相違を保持。各PEにはPCとcodeがある。"
+    },
+    "T1": {
+      "title": "Tenstorrent, TT-Metalium Eltwise binary example",
+      "url": "https://docs.tenstorrent.com/tt-metal/v0.59.0/tt-metalium/tt_metal/examples/eltwise_binary.html",
+      "version": "TT-Metalium v0.59.0",
+      "locators": {
+        "buffers": "Circular buffers",
+        "kernels": "Data movement and compute kernels",
+        "launch": "Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "reader/compute/writerとreserve/wait/push/popを確認。文書中のCB数とc_16例の不整合があるため個数は採用しない。"
+    },
+    "P1": {
+      "title": "Prabhakar et al., Plasticine: A Reconfigurable Architecture for Parallel Patterns",
+      "url": "https://csl.stanford.edu/~christos/publications/2017.plasticine.isca.pdf",
+      "version": "ISCA 2017; DOI 10.1145/3079856.3080256",
+      "locators": {
+        "patterns": "§2 Parallel Patterns, PDF pp.2–3",
+        "units": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+        "network": "§3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6",
+        "control": "§3.5 Control Flow, PDF pp.6–7"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "大学著者PDF。評価はsimulation/synthesis由来でありRaveil実測へ転用しない。"
+    },
+    "R1": {
+      "title": "Gebhart et al., An Evaluation of the TRIPS Computer System",
+      "url": "https://www.cs.utexas.edu/~mckinley/papers/trips-eval-asplos-2009.pdf",
+      "version": "ASPLOS 2009, author PDF",
+      "locators": {
+        "isa": "§2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs",
+        "micro": "§2, PDF p.3: TRIPS Microarchitecture",
+        "compiler": "§2, PDF pp.3–4: TRIPS Compiler"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "TRIPSは具体的実装。128命令block、reservation station、複数block speculationとcommitを保持。"
+    },
+    "E1": {
+      "title": "Burger et al., Scaling to the End of Silicon with EDGE Architectures",
+      "url": "https://www.cs.utexas.edu/~cart/trips/publications/computer04.pdf",
+      "version": "IEEE Computer, July 2004, pp.44–55",
+      "locators": {
+        "taxonomy": "Architecture Comparisons, printed p.45 / PDF p.2",
+        "edges": "EDGE ISA discussion, printed p.46 / PDF p.3",
+        "memory": "TRIPS architecture discussion, printed p.47 / PDF p.4"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "EDGEはISAの系統。TRIPSとの重複は独立発明の件数に数えない。"
+    },
+    "A1": {
+      "title": "Mei et al., Design Methodology for a Tightly Coupled VLIW/Reconfigurable Matrix Architecture: A Case Study",
+      "url": "https://cecs.uci.edu/~papers/date08/PAPERS/2004/DATE04/PDFFILES/09G_2.PDF",
+      "version": "DATE 2004, 6-page conference paper",
+      "locators": {
+        "architecture": "§2 ADRES Architecture Overview, PDF pp.1–2",
+        "compiler": "§3 C-Based Design Flow, PDF pp.2–3"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "CGRA代表をADRESに固定。2003原論文のimec公開口はrequest-a-copyだったため本文判定はこの2004一次論文。"
+    },
+    "D1": {
+      "title": "Gurd, Kirkham and Watson, The Manchester Prototype Dataflow Computer",
+      "url": "https://cartheur.com/Files/manchester-data-flow.pdf",
+      "version": "CACM 28(1), January 1985, pp.34–52",
+      "locators": {
+        "model": "printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow",
+        "tags": "printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "原論文の第三者ホストscan。書誌と本文を確認したが配布権・ファイルhashは未確認。"
+    },
+    "D2": {
+      "title": "Swanson et al., WaveScalar",
+      "url": "https://homes.cs.washington.edu/~oskin/wavescalar.pdf",
+      "version": "MICRO-36 2003, 12-page author PDF",
+      "locators": {
+        "resident": "§1 Introduction, PDF pp.1–2: resident instructions in WaveCache",
+        "ordering": "§3, wave-ordered memory",
+        "execution": "§4 WaveCache architecture"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "classic dataflowの全系統を代表するものではない。Manchesterと別のmemory/placement方式として比較。"
+    },
+    "X1": {
+      "title": "Necula, Translation Validation for an Optimizing Compiler",
+      "url": "https://people.eecs.berkeley.edu/~necula/Papers/tv_pldi00.pdf",
+      "version": "PLDI 2000, 12-page author PDF",
+      "locators": {
+        "validation": "Abstract and §1 Introduction, PDF p.1; §2, PDF pp.2–3"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "変換結果を別途検証する先行例。Raveilの有限入力checksum検査は一般的意味等価証明より弱い。"
+    },
+    "X2": {
+      "title": "Zheng et al., Ansor: Generating High-Performance Tensor Programs for Deep Learning",
+      "url": "https://www.usenix.org/system/files/osdi20-zheng.pdf",
+      "version": "OSDI 2020, proceedings pp.863–879",
+      "locators": {
+        "loop": "§3 Design Overview; §5 Performance Tuning",
+        "budget": "§6 Task Scheduler; §7.4 Search Time",
+        "failure": "§7.5 Cost Model Evaluation: invalid or timed-out programs"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "学習cost model、実測feedback、探索時間配分の先行例。数値改善率は転記しない。"
+    },
+    "X3": {
+      "title": "Gibson and Cano, Transfer-Tuning: Reusing Auto-Schedules for Efficient Tensor Program Code Generation",
+      "url": "https://arxiv.org/pdf/2201.05587",
+      "version": "arXiv:2201.05587, retrieved 12-page PDF; exact revision/hash unpinned",
+      "locators": {
+        "reuse": "§4.1–4.3, PDF pp.4–6: kernel classes, schedule reuse and invalid transfers",
+        "selection": "§4.3 Applying transfer-tuning, PDF pp.6–7"
+      },
+      "accessed": "2026-09-20",
+      "access": "full-text inspected",
+      "rights": "unreviewed; no third-party full text stored in repository",
+      "patent_status": "unreviewed",
+      "note": "同種kernel間schedule再利用の先行例。ハードウェア構成を跨ぐRaveil transferの実証ではない。"
+    }
+  },
+  "systems": {
+    "Groq": [
+      "G1"
+    ],
+    "SambaNova": [
+      "S1"
+    ],
+    "Graphcore": [
+      "I1",
+      "I2"
+    ],
+    "Cerebras": [
+      "C1"
+    ],
+    "Tenstorrent": [
+      "T1"
+    ],
+    "Plasticine": [
+      "P1"
+    ],
+    "TRIPS": [
+      "R1"
+    ],
+    "EDGE": [
+      "E1"
+    ],
+    "CGRA": [
+      "A1"
+    ],
+    "dataflow machine": [
+      "D1",
+      "D2"
+    ]
+  },
+  "claims": [
+    {
+      "id": "C01",
+      "claim": "演算間のproducer–consumer依存を実行表現に明示する",
+      "raveil_state": "部分実装",
+      "local_evidence": "raveil/static_region.py:compile_static_stencil_descriptor; RFC-0001 §Proposal",
+      "disposition": "既知",
+      "next_evidence": "明示グラフ自体は撤回対象。残るのはeffects/authorityを含む契約の検証可能性。"
+    },
+    {
+      "id": "C02",
+      "claim": "メモリアクセスにobject単位のREAD/WRITE effectを付ける",
+      "raveil_state": "限定実装",
+      "local_evidence": "raveil/static_region.py:compile_static_stencil_descriptor; RFC-0001 §Proposal",
+      "disposition": "部分重複",
+      "next_evidence": "read/write命令やmemory orderとcapability付きobject effectは別。型付きeffect/領域解析との追加比較が必要。"
+    },
+    {
+      "id": "C03",
+      "claim": "alias不明の領域を実行前admissionで拒否する",
+      "raveil_state": "限定実装",
+      "local_evidence": "raveil/static_region.py:validate_static_stencil_descriptor; RFC-0005 §Alias and memory contract",
+      "disposition": "部分重複",
+      "next_evidence": "現行は固定A/B記述の独立性検査。一般alias証明器の実装・独自性を主張しない。"
+    },
+    {
+      "id": "C04",
+      "claim": "実行前admissionで使用資源の上限を検証する",
+      "raveil_state": "限定実装",
+      "local_evidence": "raveil/static_region.py:validate_static_stencil_descriptor; RFC-0005 §Construction and admission",
+      "disposition": "部分重複",
+      "next_evidence": "配置時の資源制約は既知。敵対的proposalへの独立検査・証明書形式の差分は未評価。"
+    },
+    {
+      "id": "C05",
+      "claim": "コンパイラが固定した演算scheduleで限定kernelを実行する",
+      "raveil_state": "契約＋限定実装",
+      "local_evidence": "raveil/static_region.py:compile_static_stencil_descriptor; hardware/chisel/StaticStencilRegion.scala; RFC-0005 §Candidate boundary",
+      "disposition": "既知",
+      "next_evidence": "Groq/ADRESが直接先行。Raveil現在のowned-memory接続にはrequest/response待ちがあり、全系固定latencyとは別。"
+    },
+    {
+      "id": "C06",
+      "claim": "演算を空間的な機能資源へ配置する",
+      "raveil_state": "構想＋固定候補",
+      "local_evidence": "RFC-0001 §Proposal; docs/ARCHITECTURE.md §RISC-V and Graph Execution Subsystem",
+      "disposition": "既知",
+      "next_evidence": "自動汎用mapperは未実装。配置・routing単体は差別化しない。"
+    },
+    {
+      "id": "C07",
+      "claim": "実行構成を保存して新しい入力で再利用する",
+      "raveil_state": "限定契約/実装",
+      "local_evidence": "raveil/static_region.py:configuration_id; RFC-0005 §Identity and invalidation",
+      "disposition": "既知",
+      "next_evidence": "WaveCacheに新入力での再利用先行例。ADRES context RAMは部分対応。結果memoizationと構成再利用は区別する。"
+    },
+    {
+      "id": "C08",
+      "claim": "software管理の局所memoryを演算器の近傍に置く",
+      "raveil_state": "限定simulation",
+      "local_evidence": "hardware/chisel/StaticStencilRegion.scala; RFC-0005 §Alias and memory contract",
+      "disposition": "既知",
+      "next_evidence": "容量・port・latency・controllerを含む同一資源比較が必要。scratchpadという名前では差がない。"
+    },
+    {
+      "id": "C09",
+      "claim": "データ移動を実行計画として明示する",
+      "raveil_state": "構想＋限定実装",
+      "local_evidence": "RFC-0001 §Proposal; raveil/graph_mvp.py:MemoryPlan; raveil/static_region.py",
+      "disposition": "既知",
+      "next_evidence": "descriptorのMemoryPlanは一般的な移動強制機構ではない。移動/同期/host境界費用を比較する。"
+    },
+    {
+      "id": "C10",
+      "claim": "可変遅延に対して実行時readiness/backpressureを残す",
+      "raveil_state": "構想；command/memory handshakeのみ限定実装",
+      "local_evidence": "RFC-0001 §Proposal; hardware/chisel/StaticStencilRegion.scala",
+      "disposition": "既知",
+      "next_evidence": "Plasticine/Manchester等に先行例。RFC-0005にはruntime token schedulerがないためelastic Graph実装済みとはしない。"
+    },
+    {
+      "id": "C11",
+      "claim": "graphに適さない処理を汎用processor側に残す",
+      "raveil_state": "受容済み方針＋限定baseline",
+      "local_evidence": "docs/decisions/ADR-0003-risc-v-control-and-daphnis-execution.md; RFC-0001 §Dynamic islands",
+      "disposition": "既知",
+      "next_evidence": "ADRESのkernel/non-kernel分割が直接比較。hostの存在だけで自動fallback一致とはしない。"
+    },
+    {
+      "id": "C12",
+      "claim": "限定Graph実行部で汎用OoO依存探索機構を省く",
+      "raveil_state": "限定simulation",
+      "local_evidence": "hardware/chisel/StaticStencilRegion.scala; RFC-0005 §Candidate boundary",
+      "disposition": "既知",
+      "next_evidence": "Groqが直接先行、ADRESはcompiler scheduleの部分対応。CPU fallback、通信、検証状態を含む総コスト減は別claim C27。"
+    },
+    {
+      "id": "C13",
+      "claim": "Program/Graph/Data/Experienceの書込み権限を分離する",
+      "raveil_state": "Sonatine限定実装",
+      "local_evidence": "sonatine/include/plane_authority.h; sonatine/src/job_authority.c; ADR-0030",
+      "disposition": "未確立",
+      "next_evidence": "10系統の本文ではこの4分類を未確認。capability OS、Harvard、typed IRとの比較なしに新規としない。"
+    },
+    {
+      "id": "C14",
+      "claim": "variantをprogram/contract/target等のidentityに束縛する",
+      "raveil_state": "host限定実装",
+      "local_evidence": "raveil/graph_mvp.py:GraphVariant,OptimizationProposal,MiroirsStructuralValidator; raveil/static_region.py:configuration_id",
+      "disposition": "未確立",
+      "next_evidence": "hashと来歴束縛だけでは新規性なし。content-addressed build、artifact signing、cache invalidationとの比較が必要。"
+    },
+    {
+      "id": "C15",
+      "claim": "最適化結果を独立した意味検査で検証する",
+      "raveil_state": "有限入力で実装",
+      "local_evidence": "raveil/graph_mvp.py:PavaneSemanticOracle; raveil/static_region.py:static_stencil_oracle",
+      "disposition": "部分重複",
+      "next_evidence": "X1が直接の検証思想先行。checksum一致は全入力意味等価証明ではない。"
+    },
+    {
+      "id": "C16",
+      "claim": "検証承認まで出力をprivateに保ち可視化を遅延する",
+      "raveil_state": "Sonatine byte shadow実装；Graph全lifecycle未完",
+      "local_evidence": "sonatine/src/job_authority.c; ADR-0031; RFC-0005 §Completion, interruption, and publication",
+      "disposition": "部分重複",
+      "next_evidence": "TRIPS block commitと可視化延期が類似。Raveil job/object publicationはCPU architectural commitと同一ではない。"
+    },
+    {
+      "id": "C17",
+      "claim": "cancel時に未公開出力を無効化する",
+      "raveil_state": "限定simulation/host",
+      "local_evidence": "hardware/chisel/StaticStencilRegion.scala; tests/test_simulation_adapter.py; RFC-0005 §Completion, interruption, and publication",
+      "disposition": "部分重複",
+      "next_evidence": "speculative state discardやtransaction rollbackとの比較が必要。全CPU post-A rollbackは未完。"
+    },
+    {
+      "id": "C18",
+      "claim": "admitするgraphの大きさを制限する",
+      "raveil_state": "限定実装",
+      "local_evidence": "raveil/static_region.py:validate_static_stencil_descriptor; RFC-0005 §Candidate boundary",
+      "disposition": "既知",
+      "next_evidence": "TRIPS等のbounded blockが先行。64 nodes/128 edgesという定数自体は研究貢献ではない。"
+    },
+    {
+      "id": "C19",
+      "claim": "学習器の提案に実行承認権限を与えない",
+      "raveil_state": "host/方針で実装",
+      "local_evidence": "raveil/graph_mvp.py:GraphExecutor; docs/decisions/ADR-0002-experience-advises-measurement-governs.md",
+      "disposition": "部分重複",
+      "next_evidence": "X1/X2は提案と検査/実測を分ける部分先行。全capability境界の一致は未確認。LLM未導入。"
+    },
+    {
+      "id": "C20",
+      "claim": "trusted baselineの実測後にcandidateを選択する",
+      "raveil_state": "host/measurement実装",
+      "local_evidence": "raveil/policy.py:Tuner.tune; raveil/graph_mvp.py:GraphExecutor.execute",
+      "disposition": "部分重複",
+      "next_evidence": "X2の実測選択と類似。各trialでbaseline-firstを強制する細則の利点はablationで示す必要。"
+    },
+    {
+      "id": "C21",
+      "claim": "最適化の生の観測履歴をappend-onlyに保存する",
+      "raveil_state": "Python実装",
+      "local_evidence": "raveil/experience.py:ExperienceStore.append; tests/test_minimum.py",
+      "disposition": "未確立",
+      "next_evidence": "10系統のhardware資料には記載未確認。ログ/実験DBの既知性と本schemaの差分を別調査する。"
+    },
+    {
+      "id": "C22",
+      "claim": "onlineで使うExperience集合の大きさを制限する",
+      "raveil_state": "Python実装",
+      "local_evidence": "raveil/experience.py:ExperienceStore._consolidate; tests/test_minimum.py",
+      "disposition": "未確立",
+      "next_evidence": "記録上の上限は確認。coreset/continual learning/replay buffer先行例との厳密比較は残る。"
+    },
+    {
+      "id": "C23",
+      "claim": "似たworkload/contextの過去結果でcandidateを順位付けする",
+      "raveil_state": "Python実装；実機便益未立証",
+      "local_evidence": "raveil/experience.py:ExperienceStore.nearest; raveil/policy.py:NearestExperiencePolicy.rank",
+      "disposition": "部分重複",
+      "next_evidence": "X3のkernel-class transferが先行。NN距離、shape、hardware差を含むtransfer利得は未立証。"
+    },
+    {
+      "id": "C24",
+      "claim": "過去の失敗を近傍candidateの評価へ反映する",
+      "raveil_state": "Python実装",
+      "local_evidence": "raveil/policy.py:NearestExperiencePolicy.rank; tests/test_minimum.py:test_low_memory_experience_avoids_known_invalid_keep_candidate",
+      "disposition": "部分重複",
+      "next_evidence": "X2はinvalid/timeoutを観測。Raveilの距離減衰penalty/尾部保持との一致は未確認、既知negative-transfer研究を追加比較。"
+    },
+    {
+      "id": "C25",
+      "claim": "将来の再利用回数を含む総費用で最適化投資を判断する",
+      "raveil_state": "研究仮説；T-0058 open",
+      "local_evidence": "docs/VISION.md §Economic objective; docs/EXPERIENCE.md; TODO.md T-0058",
+      "disposition": "部分重複",
+      "next_evidence": "X2/X3は探索費用の償却・再利用が先行。検証/rollback/storage込みの純便益を測る必要。"
+    },
+    {
+      "id": "C26",
+      "claim": "等予算下でbounded Experienceがcoldよりlatency/energyを各5%以上改善する",
+      "raveil_state": "事前登録仮説は否定済み",
+      "local_evidence": "docs/experiments/EXP-0003-gate1-bounded-experience.md §Final pinned TVM result and disposition; docs/STATUS.md",
+      "disposition": "否定済み",
+      "next_evidence": "EXP-0003の固定Cとpinned TVMの対象条件に限定。両中央値改善0。Experience一般やGraph hardwareの反証にはしない。"
+    },
+    {
+      "id": "C27",
+      "claim": "Graphがmatched CPUより全lifecycle費用で有利になる",
+      "raveil_state": "未検証仮説",
+      "local_evidence": "RFC-0005 §Matched controls and accounting; TODO.md T-0044; docs/STATUS.md",
+      "disposition": "未検証",
+      "next_evidence": "相手の性能表は証拠にならない。同一演算/資源/メモリとcold/warm反復、area/timing、検証・fallback費用が必要。"
+    },
+    {
+      "id": "C28",
+      "claim": "契約・検証・Experienceの統合自体が既存方式にない",
+      "raveil_state": "調査対象の推論；既存記録は未主張",
+      "local_evidence": "docs/research/reviews/2026-08-09-RFC-0001-industry-prior-art.md §Adoptable research framing",
+      "disposition": "未確立",
+      "next_evidence": "部品が既知でも統合新規とも非新規とも即断しない。単一先行systemの全要素対応とcontrolled ablationが必要。"
+    }
+  ],
+  "cells": [
+    {
+      "claim_id": "C01",
+      "system": "Groq",
+      "status": "P",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams",
+      "rationale": "producer-consumer streamsは明示的。Raveilの任意DAG/object契約と同一ではない。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "SambaNova",
+      "status": "E",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 5–6: SambaFlow / spatial compilation",
+      "rationale": "SambaFlowがdataflow graphをspatial mappingへ変換。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets",
+      "rationale": "compute-set/vertexのgraph。命令粒度のconsumer encodingと異なる。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "Cerebras",
+      "status": "P",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Communication and examples of @bind_data_task",
+      "rationale": "colorでcommunicationとtaskを結ぶ。任意命令DAGの全依存表現とは異なる。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Circular buffers",
+      "rationale": "kernel間依存はCBで明示。命令DAGと同一でない。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "Plasticine",
+      "status": "E",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§2 Parallel Patterns, PDF pp.2–3",
+      "rationale": "parallel patternsから依存を持つ実行構造を構成。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "TRIPS",
+      "status": "E",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs",
+      "rationale": "producer命令がconsumer targetをencode。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "EDGE",
+      "status": "E",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "EDGE ISA discussion, printed p.46 / PDF p.3",
+      "rationale": "ISAがproducerからconsumerへの直接依存を伝える。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "dataflow-like kernelのmodulo scheduling。実行表現の明示producer-consumer edgeはこの論文では未確認。"
+    },
+    {
+      "claim_id": "C01",
+      "system": "dataflow machine",
+      "status": "E",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow",
+      "rationale": "graph arcで値と依存を明示。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "Groq",
+      "status": "P",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams",
+      "rationale": "MEM Read/Writeを明示するがcapability付きobject effectsは未確認。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "PMU/AGがmemory動作を明示。object権限契約は未確認。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets",
+      "rationale": "compute setの変数アクセス集合は固定。capability effect契約ではない。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「メモリアクセスにobject単位のREAD/WRITE effectを付ける」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Data movement and compute kernels",
+      "rationale": "reader/writerがmemory操作を明示。versioned object effectは未確認。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§2 Parallel Patterns, PDF pp.2–3",
+      "rationale": "入力collectionと出力を区別。version/capability契約とは異なる。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "TRIPS",
+      "status": "P",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs",
+      "rationale": "load/storeとblock outputsを表すがversioned object effectsではない。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "Architecture Comparisons, printed p.45 / PDF p.2",
+      "rationale": "従来memory semanticsを扱う。object capabilityを表す根拠ではない。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "memoryアクセスを持つFU。versioned effectsは未確認。"
+    },
+    {
+      "claim_id": "C02",
+      "system": "dataflow machine",
+      "status": "P",
+      "source_ids": [
+        "D2"
+      ],
+      "locator": "§3, wave-ordered memory",
+      "rationale": "wave-ordered memoryでeffectsを順序づける。object capabilityとは異なる。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「alias不明の領域を実行前admissionで拒否する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「alias不明の領域を実行前admissionで拒否する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.5.1 Variable liveness",
+      "rationale": "変数liveness/配置を扱う。未知aliasをadmission拒否する同じ規則は未確認。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「alias不明の領域を実行前admissionで拒否する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「alias不明の領域を実行前admissionで拒否する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§2 Parallel Patterns, PDF pp.2–3",
+      "rationale": "Mapのiteration independence等を利用。未知aliasの独立admission規則は未確認。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "TRIPS",
+      "status": "D",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "cache-backedのspeculative memory機構を保持。全aliasを開始前証明する候補ではない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「alias不明の領域を実行前admissionで拒否する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「alias不明の領域を実行前admissionで拒否する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C03",
+      "system": "dataflow machine",
+      "status": "D",
+      "source_ids": [
+        "D2"
+      ],
+      "locator": "§3, wave-ordered memory",
+      "rationale": "動的memory orderingを扱う。全aliasを事前拒否する静的候補とは異なる。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "Groq",
+      "status": "P",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II Architecture Overview, printed p.147; §II.C staggered instruction execution",
+      "rationale": "compilerはhardware stateとinstruction queueを管理。独立admission証明器は未確認。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 5–6: SambaFlow / spatial compilation",
+      "rationale": "資源へのspatial mapping。独立resource admissionは未確認。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets",
+      "rationale": "tile mappingと固定変数をcompile。独立resource certificate検査は未確認。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "Cerebras",
+      "status": "P",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "A processing element (PE); The programming model",
+      "rationale": "PE layoutとlocal memoryの構成。独立resource証明は未確認。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Circular buffers",
+      "rationale": "CBサイズ等を設定。独立admission検証は未確認。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "PCU/PMUへのresource mapping。proof-carrying admissionは未確認。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "TRIPS",
+      "status": "P",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "compilerがblock資源制約に適合。Raveilの独立authority検査とは別。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "bounded blockへの分割。独立resource admissionとは別。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "XMLでtopology/resource/timingを記述。独立admission authorityではない。"
+    },
+    {
+      "claim_id": "C04",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「実行前admissionで使用資源の上限を検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "Groq",
+      "status": "E",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II Architecture Overview, printed p.147; §II.C staggered instruction execution",
+      "rationale": "時間と資源をcompilerが事前scheduleする。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "reconfigurable pipeline/controlを持つ。全系cycle固定とは記載されない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I1"
+      ],
+      "locator": "§2.2 Execution",
+      "rationale": "BSPのcompute/sync/exchange順序。全tileのcycle固定issueではない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "Cerebras",
+      "status": "D",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Programs and Tasks; Task IDs and Types of Tasks; Communication",
+      "rationale": "task pickerがactivated/unblocked taskを選択。全系static issueではない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Data movement and compute kernels",
+      "rationale": "各kernelの命令列をcompileするがCB/NoC完了待ちがある。全系cycle固定ではない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "PCU内部のstatic pipeline。unit間credit/tokenのため全系固定latencyではない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "TRIPS",
+      "status": "D",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "static placementだがreservation stationのdynamic data-ready issue。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "Architecture Comparisons, printed p.45 / PDF p.2",
+      "rationale": "static/dynamic issueの区別を明示。EDGE系統を単一schedule方式にしない。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "CGRA",
+      "status": "E",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "compilerのmodulo schedule。"
+    },
+    {
+      "claim_id": "C05",
+      "system": "dataflow machine",
+      "status": "D",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store",
+      "rationale": "dynamic tagged-token型はoperand matchingで発火。固定時間scheduleではない。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "Groq",
+      "status": "E",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams",
+      "rationale": "functionごとのsliceへ演算を配置する。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "SambaNova",
+      "status": "E",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 5–6: SambaFlow / spatial compilation",
+      "rationale": "graphの空間配置。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "Graphcore",
+      "status": "E",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets",
+      "rationale": "変数とvertexをtileへmapping。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "Cerebras",
+      "status": "E",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "A processing element (PE); The programming model",
+      "rationale": "programをPEへ配置。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "Tenstorrent",
+      "status": "E",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "kernelとbufferをcoreへ割り当てる。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "Plasticine",
+      "status": "E",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "PCU/PMUへのspatial mapping。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "TRIPS",
+      "status": "E",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "compilerがexecution tile slotへ配置。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "Architecture Comparisons, printed p.45 / PDF p.2",
+      "rationale": "TRIPS instanceはstatic placement。全EDGEに一般化しない。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "CGRA",
+      "status": "E",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "資源へのmappingとschedule。"
+    },
+    {
+      "claim_id": "C06",
+      "system": "dataflow machine",
+      "status": "P",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store",
+      "rationale": "instruction store/matching/processingの構成。compile-time spatial placementと同一ではない。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "Groq",
+      "status": "P",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "保存されたinstruction streamを実行する。Raveilのinstalled-descriptor lifecycle一致は未確認。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "configurationでPCU/PMUを設定。host契約の再利用/invalidationは未確認。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.2.3 Control flow: sequences, conditionals and loops",
+      "rationale": "compute setをloopで再実行。installed config identity protocolは未確認。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "Cerebras",
+      "status": "P",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "A processing element (PE); The programming model",
+      "rationale": "local codeをhostから起動。Raveil descriptor再利用と同一protocolではない。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "hostがprogram/kernelを作成し起動。versioned configの再利用契約は未確認。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "再構成pipeline/configの利用。host lifetime契約の一致は未確認。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "TRIPS",
+      "status": "P",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "instruction cache/block fetchあり。installed schedule再利用と同一ではない。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「実行構成を保存して新しい入力で再利用する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "local configuration RAMにcontextsを保持。新入力を跨ぐreuseの具体的protocolはこの論文では未確認。"
+    },
+    {
+      "claim_id": "C07",
+      "system": "dataflow machine",
+      "status": "E",
+      "source_ids": [
+        "D2"
+      ],
+      "locator": "§1 Introduction, PDF pp.1–2: resident instructions in WaveCache",
+      "rationale": "resident instructionsを多数のinvocationで再利用。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "Groq",
+      "status": "P",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "compiler-visibleだがglobally shared SRAM。Raveilの局所scratchpad管理と同一とは確認できない。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "SambaNova",
+      "status": "E",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "distributed scratchpadsとPMU。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "Graphcore",
+      "status": "E",
+      "source_ids": [
+        "I1"
+      ],
+      "locator": "§2.1 Memory architecture",
+      "rationale": "tileのlocal SRAMと明示copy。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "Cerebras",
+      "status": "E",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "A processing element (PE); The programming model",
+      "rationale": "PE専用local memory。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "Tenstorrent",
+      "status": "E",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Data movement and compute kernels",
+      "rationale": "L1を介してUnpack/Math/Packを連携。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "Plasticine",
+      "status": "E",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "PMUのbanked scratchpad。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "TRIPS",
+      "status": "D",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "data cache/LSQのmemory path。Raveilのdisjoint scratchpad限定とは異なる。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「software管理の局所memoryを演算器の近傍に置く」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "local RF/config RAMはあるがdataはcache hierarchy。Raveil scratchpadと同一ではない。"
+    },
+    {
+      "claim_id": "C08",
+      "system": "dataflow machine",
+      "status": "P",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store",
+      "rationale": "token/matching storeはあるがsoftware scratchpadと異なる。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "Groq",
+      "status": "E",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams",
+      "rationale": "stream registerでoperand移動を明示する。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "SambaNova",
+      "status": "E",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "AGとprogrammed switchによる移動。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "Graphcore",
+      "status": "E",
+      "source_ids": [
+        "I1"
+      ],
+      "locator": "§2.1 Memory architecture",
+      "rationale": "exchange fabricへの明示data movement。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "Cerebras",
+      "status": "E",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Communication and examples of @bind_data_task",
+      "rationale": "color/routeとwavelet移動を明示。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "Tenstorrent",
+      "status": "E",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Data movement and compute kernels",
+      "rationale": "専用data movement kernelとNoC命令。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "Plasticine",
+      "status": "E",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6",
+      "rationale": "static networkとaddress-generation/DRAM移動。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "TRIPS",
+      "status": "E",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs",
+      "rationale": "register fileを経ないdirect operand network。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "EDGE",
+      "status": "E",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "EDGE ISA discussion, printed p.46 / PDF p.3",
+      "rationale": "直接instruction communication。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "CGRA",
+      "status": "E",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "mux/routeをconfigurationで指定。"
+    },
+    {
+      "claim_id": "C09",
+      "system": "dataflow machine",
+      "status": "E",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow",
+      "rationale": "tokenがgraph edgeを伝播。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "Groq",
+      "status": "D",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II Architecture Overview, printed p.147; §II.C staggered instruction execution",
+      "rationale": "対象TSPはdeterministic scheduleでreactive arbitrationを省く。一般token-ready方式とは異なる。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "configuration/pipeline controlとdata alignmentは記載。ready/credit詳細は本スライドから確定しない。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I1"
+      ],
+      "locator": "§2.2 Execution",
+      "rationale": "sync完了待ちを残す。個別graph nodeのtoken matchingとは異なる。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "Cerebras",
+      "status": "E",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Programs and Tasks; Task IDs and Types of Tasks; Communication",
+      "rationale": "wavelet到着でtaskをactivate、unblocked runnable taskを選択。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "Tenstorrent",
+      "status": "E",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Circular buffers",
+      "rationale": "space/dataのreserve/waitとpush/popで動的同期。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "Plasticine",
+      "status": "E",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.5 Control Flow, PDF pp.6–7",
+      "rationale": "tokenとcredit、downstream backpressureでchildをenable。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "TRIPS",
+      "status": "E",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "入力到着によるdataflow issue。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "EDGE",
+      "status": "E",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "EDGE ISA discussion, printed p.46 / PDF p.3",
+      "rationale": "operand availabilityでfiringする実行説明。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「可変遅延に対して実行時readiness/backpressureを残す」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C10",
+      "system": "dataflow machine",
+      "status": "E",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store",
+      "rationale": "入力token matchingでreadyを決める。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「graphに適さない処理を汎用processor側に残す」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 4, 11: host and RDU connectivity",
+      "rationale": "host接続はあるがunsupported-region自動fallbackは未確認。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I1"
+      ],
+      "locator": "§2.1 Memory architecture",
+      "rationale": "host offload構成。unsupported-region fallbackは未確認。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "Cerebras",
+      "status": "P",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "A processing element (PE); The programming model",
+      "rationale": "host Pythonとdevice CSLの分担。汎用fallback自動選択は未確認。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "host/RISC-V/compute分担はある。RISC-V搭載は自動fallback証拠でない。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「graphに適さない処理を汎用processor側に残す」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "TRIPS",
+      "status": "D",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs",
+      "rationale": "対象TRIPSはEDGE processor全体。別の汎用ISA fallback offload構成ではない。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "control processor interfaceはある。同一意味のfallbackとは未確認。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "CGRA",
+      "status": "E",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "regular kernelをmatrix、non-kernel codeをVLIWへ分担。"
+    },
+    {
+      "claim_id": "C11",
+      "system": "dataflow machine",
+      "status": "D",
+      "source_ids": [
+        "D2"
+      ],
+      "locator": "§1 Introduction, PDF pp.1–2: resident instructions in WaveCache",
+      "rationale": "WaveCacheが全processorを担う提案。汎用processorへoffloadする候補ではない。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "Groq",
+      "status": "E",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II Architecture Overview, printed p.147; §II.C staggered instruction execution",
+      "rationale": "dynamic instruction schedulingをcompilerへ移す限定実行方式。全fetch/decode廃止ではない。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "SambaNova",
+      "status": "P",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "slides 11–16: tile, PCU, PMU, address generation, switch",
+      "rationale": "reconfigurable SIMD pipelineだが全OoO関連機構の不在までは未確認。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I1"
+      ],
+      "locator": "§2.3 Tile architecture",
+      "rationale": "round-robin thread実行。Raveilと同一の除去構造一覧は未確認。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "Cerebras",
+      "status": "P",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "A processing element (PE); The programming model",
+      "rationale": "dataflow controlでもPEはPC/命令を保持。汎用OoO全構造の不在はこの資料では確定しない。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「限定Graph実行部で汎用OoO依存探索機構を省く」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "specialized pipeline。汎用processor全体からOoOを除去する主張ではない。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "TRIPS",
+      "status": "P",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "命令依存は明示するがreservation stations、block speculation/commitを保持。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "EDGE ISA discussion, printed p.46 / PDF p.3",
+      "rationale": "再依存探索削減が研究動機。dynamic issueやmemory管理の全廃とは違う。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "kernel側はcompiler scheduling。OoO依存探索構造の不在をこの論文だけでは確認できない。"
+    },
+    {
+      "claim_id": "C12",
+      "system": "dataflow machine",
+      "status": "P",
+      "source_ids": [
+        "D1"
+      ],
+      "locator": "printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store",
+      "rationale": "古典OoOとは異なるがtoken matching/queueに動的コストがある。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C13",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「Program/Graph/Data/Experienceの書込み権限を分離する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C14",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「variantをprogram/contract/target等のidentityに束縛する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C15",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「最適化結果を独立した意味検査で検証する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "Tenstorrent",
+      "status": "P",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "Data movement and compute kernels",
+      "rationale": "read barrier後CBへpushするが、意味検査承認後のobject publicationとは異なる。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "TRIPS",
+      "status": "P",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "speculative block stateのcommitで可視化。Raveil oracle承認のjob publicationとは異なる。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "distributed commitの先行例。ただしjob publicationの同一性はない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C16",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「検証承認まで出力をprivateに保ち可視化を遅延する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "TRIPS",
+      "status": "P",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2, PDF p.3: TRIPS Microarchitecture",
+      "rationale": "speculative block state管理が類似。Raveil cancel API/invalid output protocolと同一ではない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C17",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「cancel時に未公開出力を無効化する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "Groq",
+      "status": "P",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "§II Architecture Overview, printed p.147; §II.C staggered instruction execution",
+      "rationale": "有限stream/queue資源。admitted graph node上限と同一ではない。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「admitするgraphの大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "Graphcore",
+      "status": "P",
+      "source_ids": [
+        "I2"
+      ],
+      "locator": "§3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets",
+      "rationale": "コンパイル時に対象tile/変数集合を固定。Raveilのnode上限契約とは違う。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「admitするgraphの大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「admitするgraphの大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "Plasticine",
+      "status": "P",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "§3.1 PCU / §3.2 PMU, PDF pp.4–5",
+      "rationale": "有限PCU/PMUへmapping。graph上限によるadmission規則は未確認。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "TRIPS",
+      "status": "E",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "§2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs",
+      "rationale": "128命令等のbounded block制約。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "EDGE",
+      "status": "P",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "bounded blockはTRIPS instantiationの例。EDGE全体の定数ではない。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§2 ADRES Architecture Overview, PDF pp.1–2",
+      "rationale": "有限FU/context資源。Raveilの独立graph-size検証とは異なる。"
+    },
+    {
+      "claim_id": "C18",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「admitするgraphの大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C19",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「学習器の提案に実行承認権限を与えない」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C20",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「trusted baselineの実測後にcandidateを選択する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C21",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「最適化の生の観測履歴をappend-onlyに保存する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C22",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「onlineで使うExperience集合の大きさを制限する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C23",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「似たworkload/contextの過去結果でcandidateを順位付けする」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "確認したCGRA資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C24",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「過去の失敗を近傍candidateの評価へ反映する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "確認したGroq資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "確認したSambaNova資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "確認したGraphcore資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "確認したCerebras資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "確認したTenstorrent資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "確認したPlasticine資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "確認したTRIPS資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "確認したEDGE資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "CGRA",
+      "status": "P",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "§3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "時間を占めるkernel選択とconfiguration overheadを考慮。全lifetime ROIではない。"
+    },
+    {
+      "claim_id": "C25",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "確認したdataflow machine資料では「将来の再利用回数を含む総費用で最適化投資を判断する」を判定する記載を確認できない。機能の不存在・独自性を意味しない。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C26",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C27",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "Groq",
+      "status": "U",
+      "source_ids": [
+        "G1"
+      ],
+      "locator": "ISCA 2020; DOI 10.1109/ISCA45697.2020.00023; author upload 2022-01-24: §I.A–B, printed pp.146–147: functional slicing / parallel lanes and streams; §II Architecture Overview, printed p.147; §II.C staggered instruction execution; §II, printed p.147 and §II.B memory bandwidth; §III.A instruction fetching",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "SambaNova",
+      "status": "U",
+      "source_ids": [
+        "S1"
+      ],
+      "locator": "Hot Chips 33, 2021-08-24: slides 5–6: SambaFlow / spatial compilation; slides 11–16: tile, PCU, PMU, address generation, switch; slides 4, 11: host and RDU connectivity",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "Graphcore",
+      "status": "U",
+      "source_ids": [
+        "I1",
+        "I2"
+      ],
+      "locator": "SDK guide 3.3.0: §2.1 Memory architecture; §2.2 Execution; §2.3 Tile architecture; SDK guide 3.3.0: §3.2.1 Data variables; §3.2.2 Copying data and executing compute sets; §3.2.4 Compute sets; §3.2.3 Control flow: sequences, conditionals and loops; §3.5.1 Variable liveness",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "Cerebras",
+      "status": "U",
+      "source_ids": [
+        "C1"
+      ],
+      "locator": "Cerebras SDK documentation 1.4.0: A processing element (PE); The programming model; Programs and Tasks; Task IDs and Types of Tasks; Communication; Communication and examples of @bind_data_task",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "Tenstorrent",
+      "status": "U",
+      "source_ids": [
+        "T1"
+      ],
+      "locator": "TT-Metalium v0.59.0: Circular buffers; Data movement and compute kernels; Host code / CreateKernel / EnqueueWriteBuffer; reader and compute kernel listings",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "Plasticine",
+      "status": "U",
+      "source_ids": [
+        "P1"
+      ],
+      "locator": "ISCA 2017; DOI 10.1145/3079856.3080256: §2 Parallel Patterns, PDF pp.2–3; §3.1 PCU / §3.2 PMU, PDF pp.4–5; §3.3 Interconnect / §3.4 Off-chip Memory Access, PDF p.6; §3.5 Control Flow, PDF pp.6–7",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "TRIPS",
+      "status": "U",
+      "source_ids": [
+        "R1"
+      ],
+      "locator": "ASPLOS 2009, author PDF: §2 TRIPS System Overview, PDF pp.2–3: EDGE ISA and block outputs; §2, PDF p.3: TRIPS Microarchitecture; §2, PDF pp.3–4: TRIPS Compiler",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "EDGE",
+      "status": "U",
+      "source_ids": [
+        "E1"
+      ],
+      "locator": "IEEE Computer, July 2004, pp.44–55: Architecture Comparisons, printed p.45 / PDF p.2; EDGE ISA discussion, printed p.46 / PDF p.3; TRIPS architecture discussion, printed p.47 / PDF p.4",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "CGRA",
+      "status": "U",
+      "source_ids": [
+        "A1"
+      ],
+      "locator": "DATE 2004, 6-page conference paper: §2 ADRES Architecture Overview, PDF pp.1–2; §3 C-Based Design Flow, PDF pp.2–3",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    },
+    {
+      "claim_id": "C28",
+      "system": "dataflow machine",
+      "status": "U",
+      "source_ids": [
+        "D1",
+        "D2"
+      ],
+      "locator": "CACM 28(1), January 1985, pp.34–52: printed pp.34–39 / PDF pp.1–6: graphs, firing rules, static versus dynamic dataflow; printed p.39 / PDF p.6: matching unit, tags, token queue, instruction store; MICRO-36 2003, 12-page author PDF: §1 Introduction, PDF pp.1–2: resident instructions in WaveCache; §3, wave-ordered memory; §4 WaveCache architecture",
+      "rationale": "このRaveil固有の比較/新規性命題は相手の機構説明では決着しない。claim個別判定と必要実験を参照。"
+    }
+  ]
+}

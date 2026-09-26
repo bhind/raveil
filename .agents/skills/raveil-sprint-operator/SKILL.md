@@ -1,6 +1,6 @@
 ---
 name: raveil-sprint-operator
-description: Operate Raveil's weekly Sprint lifecycle and rolling P0 horizon by auditing the live GitHub Project, replenishing a bounded successor before delivery becomes idle, enforcing authority, usage, WIP, and evidence boundaries, and routing kickoff, continuation, correction, review, closeout, or next-pull work through the canonical queue. Use for Sprint planning, Sprint status, backlog replenishment, task pull, mid-Sprint correction, executable review, retrospective, and Sprint handoff. Do not use it to accept research claims or override repository records.
+description: Operate Raveil's weekly Sprint lifecycle and rolling P0 horizon by auditing the live GitHub Project, replenishing a bounded successor before delivery becomes idle, enforcing authority, resource permissions, WIP, and evidence boundaries, and routing kickoff, continuation, correction, review, closeout, or next-pull work through the canonical queue. Use for Sprint planning, Sprint status, backlog replenishment, task pull, mid-Sprint correction, executable review, retrospective, and Sprint handoff. Do not use it to accept research claims or override repository records.
 ---
 
 # Raveil Sprint Operator
@@ -27,7 +27,7 @@ GitHub Project mutation implementation.
 Run `python3 scripts/project_daily.py` daily at 19:00 Asia/Tokyo through the
 installed local scheduler, and inspect the retained receipt. `--apply` is
 limited to factual GitHub event metadata and the marked Project daily README
-section after a fresh weekly usage check. The report separates actual
+section within existing owner authority and resource permissions. The report separates actual
 Issue/PR dates from Sprint assignment and technical acceptance; lifecycle
 anomalies require the canonical queue. Daily maintenance never substitutes
 for immediate accepted-task closeout or explicit owner ceremony approval.
@@ -37,7 +37,7 @@ for immediate accepted-task closeout or explicit owner ceremony approval.
 - **Audit/status:** read the live Project, run the queue audit, and report the
   Sprint goal, active WIP, blocked work, evidence gaps, and one next pull. Do
   not mutate Project or repository state.
-- **Kickoff/planning:** verify the weekly usage guard, Definition of Ready,
+- **Kickoff/planning:** verify Definition of Ready,
   Sprint Iteration, capacity, dependency order, and two-item mutation WIP.
   Require a real `work-item` Issue and a complete independence packet before
   starting tracked mutation.
@@ -66,7 +66,7 @@ for immediate accepted-task closeout or explicit owner ceremony approval.
   to the owner, route durable feedback, and obtain the explicit ceremony
   disposition. This is the ADR-0069 owner-visible boundary.
 - **Retrospective/next pull:** record one `Keep`, one observed `Problem`, and at
-  most one bounded `Try`. Recheck usage, WIP, dependencies, readiness, and the
+  most one bounded `Try`. Recheck authority, WIP, dependencies, readiness, and the
   prepared successor before pulling the next item.
 
 For phase-specific commands, receipts, and stop rules, read
@@ -80,9 +80,8 @@ tracked mutation. For a read-only status request, its audit section is enough.
   ad hoc GraphQL.
 - Only the primary Project Manager may perform Project transitions or use
   `--apply`. Other roles validate their named packet and report evidence.
-- Run the current 10,080-minute HCI-09 usage check before a new task, subagent,
-  or long-running job and at the next-task boundary. Missing or stale telemetry
-  fails closed; below five percent remaining starts no new costly work.
+- ADR-0104 removes weekly quota gating. Do not require quota readings or stop
+  on missing/low telemetry. Paid-resource and platform permission limits remain.
 - GitHub remains coordination metadata. Executable code/tests, STATUS, accepted
   ADRs, TODO/ROADMAP, and EXP records retain their documented authority order.
 - A Sprint demo, points total, Project status, agent report, or retrospective
@@ -101,7 +100,7 @@ tracked mutation. For a read-only status request, its audit section is enough.
   credentialed, gate-changing, or materially forked work.
 - Do not return an idle, waiting, finished, or no-next-work receipt merely
   because P0 and Ready are empty. Run bounded replenishment first. A stop is
-  valid only for the weekly usage guard, an HCI, an exact external dependency,
+  valid only for an HCI, an exact external dependency,
   or a genuine strategic fork that the current authority cannot decide.
 
 ## Required handoff
@@ -109,7 +108,7 @@ tracked mutation. For a read-only status request, its audit section is enough.
 Return a compact phase receipt containing:
 
 - Sprint title and dates, authority commit, branch, and T-ID;
-- weekly usage reading and timestamp, without account identifiers;
+- actual resource use; no weekly quota reading required (ADR-0104);
 - live Project audit result and active WIP;
 - commands run, exit status, environment, and evidence class;
 - accepted, carried, blocked, dropped, and unverified scope;

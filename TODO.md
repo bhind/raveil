@@ -1,6 +1,44 @@
 # Raveil TODO
 
-Last updated: 2026-09-19
+## Current focus — owner-directed research restart (2026-09-26)
+
+[ADR-0103](docs/decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
+selects work reduction from immutable function information as a hypothesis,
+with known compiler optimizations as mandatory controls. Existing completed
+work and product functionality remain intact.
+
+- [x] **T-0199** Technically verified for PR integration: integrate the research direction, backlog and known algebraic
+  control; [Issue #268](https://github.com/bhind/raveil/issues/268), S-0005,
+  3 SP, Project Manager owns all tracked mutation. Scope approval is resolved; code/config/tests now remove quota gating.
+  142 scoped tests and the independent daily-sync check pass.
+  Technical result is verified; remote Done follows only the PR merge/readback. The local probe passes
+  91 input cases; 15-to-11 instructions does not reduce its 128-byte install
+  payload or 1,536 logical memory bytes. Latest main includes T-0183. PR integration and final Project readback remain the delivery boundary.
+- [ ] **T-0200** [Issue #269](https://github.com/bhind/raveil/issues/269),
+  Backlog until T-0199 integration: pin one immutable-parameter workload and strong baseline under
+  [RFC-0007](docs/rfcs/RFC-0007-immutable-function-work-reduction.md).
+  Exit: source/revision/license and hashes, immutable/mutable split, numerical
+  contract, independent oracle, development/holdout split, full cost ledger,
+  and closest applicable standard/published control. Select a bounded real
+  workload before choosing a transform; no contrived post-hoc weights. This
+  packet does not authorize a novel optimizer, quantization, EXP collection or
+  new hardware. Successor to T-0199; PM owns the contract.
+
+**Ordering:** T-0199 integration → T-0200 workload/baseline → only then a
+mechanism-specific comparison. T-0183 planning is complete. Its T-0197 / #266
+multi-result implementation stays Backlog/P2; T-0186 remains queued. An import
+must be justified by the workload. T-0044 physical gates and T-0106's triggers
+are unchanged. Other proposed pivots and Experience expansion remain deferred.
+
+**Identity:** the September 23 local T-0197/T-0198 reservations were never live
+Issues. The former collided with #266; T-0199/T-0200 replace those research IDs.
+Original local receipts retain their filenames and historical identity.
+
+**Continuation:** GitHub access and origin freshness were restored September 26.
+The owner removed weekly quota gating; ADR-0104 supersedes that stop only.
+Ordinary permission, paid-resource, evidence and review boundaries still apply.
+
+Last updated: 2026-09-26
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -370,8 +408,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0195 advisory preflight hints; T-0184 is integrated. |
-| **P1 — next** | Start only after its named dependencies pass. | Owner explicitly authorized T-0187 and accelerated generalization. Prepare T-0196 bounded compiled-build reuse after the decision review; then T-0183 multi-output decision and T-0186 one standard-IR workload. Physical gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0199 / #268 is active; scope blocker resolved, verification/PR integration in progress. T-0195/0196 are integrated at the cached base. |
+| **P1 — next** | Start only after its named dependencies pass. | T-0200 immutable-workload/baseline packet after T-0199. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
@@ -1596,7 +1634,8 @@ preserve the earlier allocation/authentication observation.
   treating agent lanes as additive FTE. This changes no implementation P0,
   evidence class, EXP conclusion, or research/hardware gate.
 
-- [x] **T-0119** Enforce a strict weekly Codex usage cost guard independently
+- [x] **T-0119** Historical completed guard, superseded by ADR-0104 on
+  2026-09-26. Original delivered scope: enforce a weekly usage guard independently
   of Sprint SP. Accept only current telemetry for the 10,080-minute weekly
   window, calculate remaining as 100 minus used percentage, permit exactly
   five percent cautiously, and pause new tasks, subagents, long jobs, remote
@@ -2650,7 +2689,10 @@ preregistered 5% hypothesis is falsified and Gate 1 is closed negative.
 - [ ] **T-0055** ANN/near-memory profile before FPGA acceleration.
 - [ ] **T-0056** FPGA Experience retrieval/filter prototype only after access
   patterns and schemas stabilize.
-- [x] **T-0057** Define and test the RFC-0001 native operation/dependency/effect/
+- [x] **T-0057** Bounded contract work remains complete. The broader September 20
+  claim audit is preserved under T-0199; no broad novelty follows. Further
+  mechanism-specific source review belongs to T-0200/RFC-0007 before treatment
+  selection. Original scope: define and test the RFC-0001 native operation/dependency/effect/
   object graph schema before further tool-level optimization work. Phase A now
   records the direct-prior-art matrix for OoO/EPIC/TRIPS/WaveScalar/DySER/CGRA
   and preliminary patent/IP triage in

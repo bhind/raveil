@@ -1,7 +1,25 @@
 # Raveil vision
 
+## Current research question — 2026-09-23
+
+Retain the original thesis below: preserve verified execution knowledge over
+computation's lifetime. The next test is whether immutable semantic information
+can remove execution work, beyond strong existing compiler optimizations,
+before choosing a new execution mechanism. This is a hypothesis under
+[ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
+not a claim that partial evaluation, explicit graphs, reuse or their combination
+is new. [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md) defines
+what must be pinned before a mechanism-specific experiment.
+
+Groq's established scheduling, resident memory, reusable kernels and partitioning
+are controls. The separate region/buffer and five-execution-principle proposals
+are deferred. A software-only benefit remains a valid outcome and is not a
+justification for custom hardware. Experience advises search; it cannot certify
+semantics or manufacture an advantage. EXP-0003's preregistered 5% hypothesis
+was falsified under its tested conditions; this direction does not reverse it.
+
 Status: research thesis
-Last updated: 2026-08-08
+Last updated: 2026-09-23
 
 ## Thesis
 
@@ -64,7 +82,8 @@ These are research directions, not implemented features of
 
 ## Success conditions
 
-- Under the same target measurement budget, bounded Experience improves
+- A future, separately justified Experience study would need to show that,
+  under the same target measurement budget, bounded Experience improves
   Headroom Capture Rate over a cold policy on honest holdouts.
 - Negative transfer, tail failure, retrieval cost, and storage remain
   controlled as cold evidence grows.
