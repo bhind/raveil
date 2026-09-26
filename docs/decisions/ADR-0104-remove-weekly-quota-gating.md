@@ -28,7 +28,9 @@ Update AGENTS, WORKFLOW, SPRINTS and active Sprint-operator instructions in
 the same change. Historical ADRs/logs remain unchanged. The current owner
 instruction applies immediately while this record is integrated by PR.
 
-Current implementation boundary: prose follows this decision, but removal of
-the existing daily-sync executable gate, PM agent config and corresponding
-tests awaits the explicit scope confirmation requested after automatic
-approval rejection. The September 26 log preserves the exact pending patch.
+Implementation resolution (2026-09-26): after automatic review requested
+additional scope approval, the owner explicitly approved the prepared daily
+sync / PM config / test patch. The daily reporter no longer spawns a Codex
+quota reader or gates apply on its output. The PM config and existing tests
+follow this decision. Other GitHub inventory, readback and lifecycle checks
+are unchanged. The dated log preserves the earlier rejection and resolution.

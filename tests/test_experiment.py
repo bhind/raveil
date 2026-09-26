@@ -1190,7 +1190,7 @@ class AgentBoundaryTests(unittest.TestCase):
         self.assertTrue(sprint_skill.startswith("---\nname: raveil-sprint-operator\n"))
         self.assertIn("scripts/project_queue.py", sprint_skill)
         self.assertIn("sole queue-transition implementation", sprint_skill)
-        self.assertIn("10,080-minute HCI-09", sprint_skill)
+        self.assertIn("ADR-0104 removes weekly quota gating", sprint_skill)
         self.assertIn("references/sprint-cycle.md", sprint_skill)
         self.assertIn("Never change `Initial SP`", sprint_reference)
         self.assertIn("python3 scripts/project_queue.py review", sprint_reference)
@@ -1306,28 +1306,19 @@ class AgentBoundaryTests(unittest.TestCase):
         ):
             self.assertEqual(reasoning_effort[name], "high")
 
-    def test_weekly_usage_guard_is_exact_and_fail_closed(self) -> None:
+    def test_weekly_quota_guard_is_superseded_without_paid_authority(self) -> None:
         workflow = (ROOT / "docs/WORKFLOW.md").read_text(encoding="utf-8")
         repository_rules = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-        project_manager = tomllib.loads(
-            (ROOT / ".codex/agents/raveil-project-manager.toml").read_text(
-                encoding="utf-8"
-            )
+        manager = tomllib.loads(
+            (ROOT / ".codex/agents/raveil-project-manager.toml").read_text(encoding="utf-8")
         )["developer_instructions"]
-        adr = (
-            ROOT
-            / "docs/decisions/ADR-0060-weekly-codex-usage-has-a-hard-cost-stop.md"
-        ).read_text(encoding="utf-8")
-        for text in (workflow, repository_rules, adr):
-            self.assertIn("remaining = 100 - usedPercent", text)
-            self.assertIn("below five percent", text)
-            self.assertIn("Exactly five percent", text)
-            self.assertIn("10,080", text)
-            self.assertIn("reset credits", text)
-        self.assertIn("remaining below five percent", project_manager)
-        self.assertIn("telemetry is unavailable or unverifiable", project_manager)
-        self.assertIn("fail closed", workflow)
-        self.assertIn("stale, malformed", workflow)
+        for text in (workflow, repository_rules, manager):
+            self.assertIn("ADR-0104", text)
+            self.assertNotIn("remaining = 100 - usedPercent", text)
+        adr = (ROOT / "docs/decisions/ADR-0104-remove-weekly-quota-gating.md").read_text(encoding="utf-8")
+        self.assertIn("Supersedes: ADR-0060", adr)
+        self.assertIn("paid reset credits", adr)
+        self.assertIn("All other HCI and permission boundaries remain", adr)
 
 
 if __name__ == "__main__":

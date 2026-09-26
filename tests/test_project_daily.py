@@ -4,11 +4,10 @@ import argparse
 from datetime import datetime, timezone
 import io
 import json
-import subprocess
-import sys
 import unittest
+from unittest.mock import patch
 
-from scripts.project_daily import DailyError, END, Gh, START, daily_block, jst, replace_events, render_readme, run_daily, telemetry, validate_usage
+from scripts.project_daily import DailyError, END, Gh, START, daily_block, jst, replace_events, render_readme, run_daily
 
 
 README = "Intro\n<!-- raveil-daily:start -->\nold\n<!-- raveil-daily:end -->\nTail\n"
@@ -33,7 +32,6 @@ class FakeGh(Gh):
 
 
 def args(apply=False): return argparse.Namespace(apply=apply, owner="bhind", repo="bhind/raveil", project=1)
-def usage(_): return {"windowMinutes": 10080, "usedPercent": 52, "remainingPercent": 48, "observedAt": datetime.now(timezone.utc).isoformat()}
 
 
 class ProjectDailyTest(unittest.TestCase):
@@ -41,27 +39,27 @@ class ProjectDailyTest(unittest.TestCase):
         self.assertEqual(jst("2026-09-04T15:30:00Z"), "2026-09-05T00:30:00+09:00")
 
     def test_dry_run_has_no_remote_writes_and_preserves_text(self):
-        gh = FakeGh(); receipt = run_daily(args(), gh, datetime(2026, 9, 4, 15, 30, tzinfo=timezone.utc), usage)
+        gh = FakeGh(); receipt = run_daily(args(), gh, datetime(2026, 9, 4, 15, 30, tzinfo=timezone.utc))
         self.assertTrue(receipt["success"]); self.assertNotIn("write_text", gh.calls); self.assertNotIn("write_readme", gh.calls)
         self.assertEqual(gh._project["items"][0]["observed Cycle"], "human note")
 
     def test_apply_is_idempotent_and_keeps_prior_observation(self):
-        gh = FakeGh(); first = run_daily(args(True), gh, datetime.now(timezone.utc), usage); self.assertTrue(first["success"])
+        gh = FakeGh(); first = run_daily(args(True), gh, datetime.now(timezone.utc)); self.assertTrue(first["success"])
         self.assertIn("human note", gh._project["items"][0]["observed Cycle"])
-        writes = gh.calls.count("write_text"); second = run_daily(args(True), gh, datetime.now(timezone.utc), usage)
+        writes = gh.calls.count("write_text"); second = run_daily(args(True), gh, datetime.now(timezone.utc))
         self.assertTrue(second["success"]); self.assertEqual(writes, gh.calls.count("write_text"))
 
     def test_duplicate_or_truncated_inventory_fails_before_writes(self):
-        gh = FakeGh(total=2); receipt = run_daily(args(True), gh, datetime.now(timezone.utc), usage)
+        gh = FakeGh(total=2); receipt = run_daily(args(True), gh, datetime.now(timezone.utc))
         self.assertFalse(receipt["success"]); self.assertNotIn("write_text", gh.calls)
         with self.assertRaisesRegex(DailyError, "exactly one"):
             daily_block("<!-- raveil-daily:start --><!-- raveil-daily:start --><!-- raveil-daily:end -->", "x")
 
-    def test_usage_stop_and_unclosed_issue_do_not_count_completion(self):
-        gh = FakeGh(); stopped = run_daily(args(True), gh, datetime.now(timezone.utc), lambda _: {"windowMinutes": 10080, "usedPercent": 96, "remainingPercent": 4, "observedAt": "x"})
-        self.assertFalse(stopped["success"]); self.assertNotIn("project", gh.calls)
-        open_gh = FakeGh(closed=False); receipt = run_daily(args(), open_gh, datetime.now(timezone.utc), usage)
-        self.assertTrue(receipt["success"]); self.assertEqual(receipt["planned_event_updates"], 0)
+    def test_unclosed_issue_does_not_count_completion(self):
+        gh = FakeGh(closed=False)
+        receipt = run_daily(args(), gh, datetime.now(timezone.utc))
+        self.assertTrue(receipt["success"])
+        self.assertEqual(receipt["planned_event_updates"], 0)
 
     def test_existing_event_block_is_replaced(self):
         observed = "note\n<!-- raveil-github-events:start -->\nold\n<!-- raveil-github-events:end -->"
@@ -70,7 +68,7 @@ class ProjectDailyTest(unittest.TestCase):
     def test_no_room_preserves_evidence_and_status(self):
         gh = FakeGh()
         gh._project["items"][0]["observed Cycle"] = "x" * 1020
-        receipt = run_daily(args(True), gh, datetime.now(timezone.utc), usage)
+        receipt = run_daily(args(True), gh, datetime.now(timezone.utc))
         self.assertTrue(receipt["success"])
         self.assertNotIn("write_text", gh.calls)
         self.assertEqual(gh._project["items"][0]["status"], "Review")
@@ -84,34 +82,28 @@ class ProjectDailyTest(unittest.TestCase):
 
     def test_missing_markers_append_and_lowercase_payload_preserves_prose(self):
         self.assertIn(START, daily_block("outside text", "facts"))
-        gh = FakeGh(); run_daily(args(True), gh, datetime.now(timezone.utc), usage)
+        gh = FakeGh(); run_daily(args(True), gh, datetime.now(timezone.utc))
         self.assertIn("human note", gh._project["items"][0]["observed Cycle"])
         self.assertNotIn("Observed Cycle", gh._project["items"][0])
 
     def test_done_evidence_and_open_done_are_findings(self):
         gh = FakeGh(closed=False); gh._project["items"][0]["status"] = "Done"
-        receipt = run_daily(args(), gh, datetime.now(timezone.utc), usage)
+        receipt = run_daily(args(), gh, datetime.now(timezone.utc))
         self.assertTrue(any("open while" in value for value in receipt["findings"]))
         self.assertTrue(any("Review Outcome" in value for value in receipt["findings"]))
 
-    def test_rate_limit_protocol_reads_weekly_window_only(self):
-        payload = json.dumps({"jsonrpc":"2.0", "id":2, "result":{"rateLimits":{"primary":{"windowDurationMins":10080, "usedPercent":52}}}})
-        script = f"import os; os.write(1, b'{{\"jsonrpc\":\"2.0\",\"id\":1}}\\n' + {payload!r}.encode() + b'\\n')"
-        result = telemetry(lambda *_: "", now=lambda: datetime(2026, 9, 5, tzinfo=timezone.utc), popen=lambda *_args, **_kwargs: subprocess.Popen([sys.executable, "-c", script], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False, bufsize=0))
-        self.assertEqual(result["remainingPercent"], 48.0)
-
-    def test_usage_validation_rejects_malformed_stale_future_and_nonfinite_values(self):
-        now = datetime(2026, 9, 5, 0, 0, tzinfo=timezone.utc)
-        valid = {"windowMinutes":10080, "usedPercent":52, "remainingPercent":48, "observedAt":"2026-09-05T00:00:00Z"}
-        for key, value in (("observedAt", "not-a-date"), ("observedAt", "2026-09-05T00:00:00"), ("observedAt", "2026-09-04T23:54:59Z"), ("observedAt", "2026-09-05T00:01:01Z"), ("usedPercent", float("nan")), ("usedPercent", True), ("remainingPercent", 47)):
-            reading = dict(valid); reading[key] = value
-            with self.assertRaises(DailyError): validate_usage(reading, now)
-
-    def test_bad_usage_stops_run_before_project_or_remote_writes(self):
+    def test_apply_needs_no_codex_process_or_quota_reading(self):
         gh = FakeGh()
-        receipt = run_daily(args(True), gh, datetime.now(timezone.utc), lambda _: {"windowMinutes":10080, "usedPercent":52, "remainingPercent":48, "observedAt":"not-a-date"})
-        self.assertFalse(receipt["success"])
-        self.assertEqual(gh.calls, [])
+        with patch("scripts.project_daily.subprocess.Popen",
+                   side_effect=AssertionError("unexpected quota subprocess")) as process:
+            receipt = run_daily(args(True), gh, datetime.now(timezone.utc))
+        self.assertTrue(receipt["success"])
+        process.assert_not_called()
+        self.assertNotIn("usage", receipt)
+        self.assertIn("write_text", gh.calls)
+        self.assertIn("write_readme", gh.calls)
+        self.assertEqual(gh._project["items"][0]["status"], "Review")
+        self.assertIn("human note", gh._project["items"][0]["observed Cycle"])
 
     def test_narrow_graphql_inventory_normalizes_payload_without_item_list(self):
         calls = []
@@ -130,7 +122,7 @@ class ProjectDailyTest(unittest.TestCase):
             Gh("bhind", "bhind/raveil", 1, lambda *_: json.dumps(payload)).project_items()
 
     def test_apply_uses_item_preflight_then_one_batch_readback(self):
-        gh = FakeGh(); receipt = run_daily(args(True), gh, datetime.now(timezone.utc), usage)
+        gh = FakeGh(); receipt = run_daily(args(True), gh, datetime.now(timezone.utc))
         self.assertTrue(receipt["success"])
         self.assertEqual(gh.calls.count("project"), 2)
         self.assertEqual(gh.calls.count("item_cycle"), 1)

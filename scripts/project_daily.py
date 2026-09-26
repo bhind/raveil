@@ -10,15 +10,11 @@ import argparse
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 import hashlib
-import math
-import os
 import json
 from pathlib import Path
 import re
-import select
 import subprocess
 import sys
-import time
 import uuid
 from typing import Any, Callable, Sequence
 from zoneinfo import ZoneInfo
@@ -207,67 +203,6 @@ class Gh:
         self.json(("api", "graphql", "-f", f"query={query}"))
 
 
-def telemetry(_: Callable[[Sequence[str], str | None], str], *, now: Callable[[], datetime] = lambda: datetime.now(timezone.utc), popen=subprocess.Popen) -> dict[str, Any]:
-    """Read only the weekly rate-limit percentage through the app-server protocol."""
-    proc = popen(("codex", "app-server"), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False, bufsize=0)
-    assert proc.stdin is not None and proc.stdout is not None
-    messages = (
-        {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"clientInfo":{"name":"raveil-project-daily","version":"1"}}},
-        {"jsonrpc":"2.0","method":"initialized","params":{}},
-        {"jsonrpc":"2.0","id":2,"method":"account/rateLimits/read","params":{}},
-    )
-    for message in messages: proc.stdin.write((json.dumps(message) + "\n").encode())
-    proc.stdin.flush(); deadline = time.monotonic() + 20; pending = b""; max_bytes = 1024 * 1024
-    try:
-        while time.monotonic() < deadline:
-            while b"\n" in pending:
-                line, pending = pending.split(b"\n", 1)
-                response = json.loads(line.decode())
-                if response.get("id") != 2: continue
-                limits = response.get("result", {}).get("rateLimits", {})
-                candidates = [limits.get(name) for name in ("primary", "secondary") if isinstance(limits.get(name), dict)]
-                weekly = [entry for entry in candidates if entry.get("windowDurationMins") == 10080]
-                if len(weekly) != 1: raise DailyError("usage telemetry lacks exactly one weekly window")
-                used = weekly[0].get("usedPercent")
-                if isinstance(used, bool) or not isinstance(used, (int, float)) or not math.isfinite(used) or not 0 <= used <= 100:
-                    raise DailyError("usage telemetry has invalid used percentage")
-                observed = now()
-                if observed.tzinfo is None: raise DailyError("telemetry clock is naive")
-                return {"windowMinutes":10080, "usedPercent":float(used), "remainingPercent":100-float(used), "observedAt":observed.astimezone(timezone.utc).isoformat()}
-            ready, _, _ = select.select([proc.stdout.fileno()], [], [], max(0.0, deadline - time.monotonic()))
-            if not ready: break
-            chunk = os.read(proc.stdout.fileno(), 65536)
-            if not chunk: break
-            pending += chunk
-            if len(pending) > max_bytes: raise DailyError("usage telemetry exceeded bounded response size")
-        raise DailyError("usage telemetry EOF or deadline before rate-limit response")
-    except json.JSONDecodeError as error: raise DailyError("usage telemetry is malformed") from error
-    finally:
-        proc.terminate()
-        try: proc.wait(timeout=1)
-        except subprocess.TimeoutExpired:
-            proc.kill(); proc.wait(timeout=1)
-        for stream in (proc.stdin, proc.stdout, proc.stderr):
-            if stream is not None: stream.close()
-
-
-def validate_usage(reading: Any, now: datetime) -> dict[str, Any]:
-    if not isinstance(reading, dict): raise DailyError("usage telemetry is malformed")
-    window, used, remaining, observed = (reading.get(k) for k in ("windowMinutes", "usedPercent", "remainingPercent", "observedAt"))
-    if isinstance(window, bool) or not isinstance(window, (int, float)) or window != 10080: raise DailyError("usage telemetry has invalid weekly window")
-    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or not 0 <= v <= 100 for v in (used, remaining)):
-        raise DailyError("usage telemetry has invalid percentages")
-    if abs(remaining - (100 - used)) > 1e-9 or remaining < 5: raise DailyError("usage telemetry is inconsistent or below the five-percent stop")
-    if not isinstance(observed, str): raise DailyError("usage telemetry has invalid observation timestamp")
-    try:
-        stamp = datetime.fromisoformat(observed.replace("Z", "+00:00"))
-        if stamp.tzinfo is None: raise ValueError("naive")
-    except ValueError as error: raise DailyError("usage telemetry has invalid observation timestamp") from error
-    age = (now.astimezone(timezone.utc) - stamp.astimezone(timezone.utc)).total_seconds()
-    if age > 300 or age < -60: raise DailyError("usage telemetry observation is stale or implausibly future")
-    return {"windowMinutes":10080, "usedPercent":float(used), "remainingPercent":float(remaining), "observedAt":stamp.astimezone(timezone.utc).isoformat()}
-
-
 def cell(value: object) -> str:
     return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
 
@@ -293,11 +228,9 @@ def render_readme(now: datetime, entries: list[dict[str, Any]], notes: list[str]
     return "\n".join(rows)
 
 
-def run_daily(args: argparse.Namespace, gh: Gh, now: datetime, usage=telemetry) -> dict[str, Any]:
+def run_daily(args: argparse.Namespace, gh: Gh, now: datetime) -> dict[str, Any]:
     receipt: dict[str, Any] = {"dry_run": not args.apply, "success": False, "findings": [], "actions": [], "partial_edits": [], "observedAt": now.astimezone(timezone.utc).isoformat(), "owner": args.owner, "repo": args.repo, "project": args.project}
     try:
-        if args.apply:
-            receipt["usage"] = validate_usage(usage(gh.runner), now)
         project = gh.project_items()
         if not isinstance(project.get("items"), list) or not isinstance(project.get("totalCount"), int) or project["totalCount"] > MAX_ITEMS or len(project["items"]) != project["totalCount"]:
             raise DailyError("Project inventory is truncated or lacks a reliable totalCount")
