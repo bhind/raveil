@@ -21,7 +21,8 @@ The September 20 audit was of `7c38a36`; it does not invalidate or replace later
 mainline functionality and EXP evidence. EXP-0003 remains closed negative.
 
 Integration update (2026-09-26): latest main `bdfac7f` includes T-0183 / PR #267.
-T-0199 / Issue #268 is active; T-0200 / Issue #269 is its Backlog successor. Prior local
+T-0199 / Issue #268 is Blocked on automatic-review-required code/config/test
+scope approval; T-0200 / Issue #269 is its Backlog successor. Prior local
 T-0197/T-0198 reservations are historical only; live T-0197 / #266 remains the
 separate multi-result implementation. Network access is restored and the owner
 removed weekly quota gating (ADR-0104). Verification and exact integration

@@ -9,7 +9,9 @@ work and product functionality remain intact.
 
 - [ ] **T-0199** Integrate the research direction, backlog and known algebraic
   control; [Issue #268](https://github.com/bhind/raveil/issues/268), S-0005,
-  3 SP, Project Manager owns all tracked mutation. The local probe passes
+  3 SP, Project Manager owns all tracked mutation. Currently Blocked only on
+  automatic-review-required code/config/test scope approval; local candidate
+  is preserved. The local probe passes
   91 input cases; 15-to-11 instructions does not reduce its 128-byte install
   payload or 1,536 logical memory bytes. Latest main includes T-0183. Completion
   requires scoped checks, candidate review, PR integration and Project readback.
@@ -407,7 +409,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0199 research integration is active as Issue #268; PR/acceptance pending. T-0195/0196 are integrated at the cached base. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0199 / #268 is Blocked on the recorded code/config/test approval; candidate preserved. T-0195/0196 are integrated at the cached base. |
 | **P1 — next** | Start only after its named dependencies pass. | T-0200 immutable-workload/baseline packet after T-0199. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
