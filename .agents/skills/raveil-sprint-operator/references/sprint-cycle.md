@@ -259,7 +259,7 @@ conditions, and links in `Review Outcome` before moving status last.
    has not begun.
 
 If there is no pullable item, enter rolling horizon replenishment. Return to the
-owner only for a material strategic fork, an HCI, the verified usage stop, or an
+owner only for a material strategic fork, an HCI, an
 exact external dependency after bounded candidate discovery. Never convert an
 empty queue into a generic idle or finished handoff. A closed Sprint may still
 be unsuccessful; truthful failure remains a valid review outcome.

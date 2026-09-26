@@ -1,6 +1,6 @@
 ---
 name: raveil-sprint-operator
-description: Operate Raveil's weekly Sprint lifecycle and rolling P0 horizon by auditing the live GitHub Project, replenishing a bounded successor before delivery becomes idle, enforcing authority, usage, WIP, and evidence boundaries, and routing kickoff, continuation, correction, review, closeout, or next-pull work through the canonical queue. Use for Sprint planning, Sprint status, backlog replenishment, task pull, mid-Sprint correction, executable review, retrospective, and Sprint handoff. Do not use it to accept research claims or override repository records.
+description: Operate Raveil's weekly Sprint lifecycle and rolling P0 horizon by auditing the live GitHub Project, replenishing a bounded successor before delivery becomes idle, enforcing authority, resource permissions, WIP, and evidence boundaries, and routing kickoff, continuation, correction, review, closeout, or next-pull work through the canonical queue. Use for Sprint planning, Sprint status, backlog replenishment, task pull, mid-Sprint correction, executable review, retrospective, and Sprint handoff. Do not use it to accept research claims or override repository records.
 ---
 
 # Raveil Sprint Operator

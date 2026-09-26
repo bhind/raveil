@@ -21,7 +21,8 @@ The September 20 audit was of `7c38a36`; it does not invalidate or replace later
 mainline functionality and EXP evidence. EXP-0003 remains closed negative.
 
 Integration update (2026-09-26): latest main `bdfac7f` includes T-0183 / PR #267.
-T-0199 / Issue #268 is active after explicit code/config/test scope approval;
+T-0199 / Issue #268 is technically verified for integration after explicit
+code/config/test scope approval; 142 scoped tests pass.
 T-0200 / Issue #269 is its Backlog successor. Daily Project synchronization
 no longer starts a Codex quota process or requires usage telemetry. Other
 inventory, lifecycle, existing-prose preservation and readback checks remain. Prior local

@@ -7,13 +7,13 @@ selects work reduction from immutable function information as a hypothesis,
 with known compiler optimizations as mandatory controls. Existing completed
 work and product functionality remain intact.
 
-- [ ] **T-0199** Integrate the research direction, backlog and known algebraic
+- [x] **T-0199** Technically verified for PR integration: integrate the research direction, backlog and known algebraic
   control; [Issue #268](https://github.com/bhind/raveil/issues/268), S-0005,
   3 SP, Project Manager owns all tracked mutation. Scope approval is resolved; code/config/tests now remove quota gating.
-  Verification and PR integration are in progress. The local probe passes
+  142 scoped tests and the independent daily-sync check pass.
+  Technical result is verified; remote Done follows only the PR merge/readback. The local probe passes
   91 input cases; 15-to-11 instructions does not reduce its 128-byte install
-  payload or 1,536 logical memory bytes. Latest main includes T-0183. Completion
-  requires scoped checks, candidate review, PR integration and Project readback.
+  payload or 1,536 logical memory bytes. Latest main includes T-0183. PR integration and final Project readback remain the delivery boundary.
 - [ ] **T-0200** [Issue #269](https://github.com/bhind/raveil/issues/269),
   Backlog until T-0199 integration: pin one immutable-parameter workload and strong baseline under
   [RFC-0007](docs/rfcs/RFC-0007-immutable-function-work-reduction.md).
