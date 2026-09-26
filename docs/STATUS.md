@@ -18,8 +18,8 @@ operator: pinned Pythia-14M layer-0 input projection, unchanged F16 W512x128
 and b512 widened to F32. Its exact integer oracle checks a predeclared rational
 roundoff envelope. Eight synthetic vectors pass serial F32, actual optimized
 Accelerate SGEMV and a fresh-bias repeat: 12,288 output-component checks.
-All 63,488 finite binary16 encodings, twelve boundary cases and three invalid
-outputs pass the oracle self-test. See the [workload packet](research/reviews/T-0200-immutable-affine-workload.md)
+The oracle self-test validates all 63,488 finite binary16 encodings and twelve
+boundary cases, and rejects three deliberately invalid outputs. See the [workload packet](research/reviews/T-0200-immutable-affine-workload.md)
 and [receipt](research/receipts/T-0200-workload.json).
 
 Extract hashes are locally verified; the complete upstream model hash is not.
