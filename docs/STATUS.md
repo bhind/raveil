@@ -43,7 +43,10 @@ kernels. fma4 text size differs (412 vs136 bytes including the rounding helper)
 because unrolling/SIMD differs, not because coefficient work disappeared.
 These are analytical compiler observations, not measured execution cost.
 See [T-0201](research/reviews/T-0201-fixed-parameter-controls.md) and its receipt.
-T-0201 is technically verified pending normal PR integration. This finite
+T-0201 is merged/Done through PR273 at `827aa83`.
+T-0202 / Issue274 is now owner-approved and active: the prospective screen
+fixes seven candidates and their falsification conditions before new structural
+analysis. No candidate has yet been selected. This finite
 portfolio does not exhaust compiler/layout search or published controls.
 The owner postponed the S-0005 weekly Sprint Review, with no replacement date
 or ceremony acceptance. Ordinary task delivery continues separately.

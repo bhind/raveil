@@ -24,8 +24,7 @@ work and product functionality remain intact.
   T-0201 supplies the separately approved compiler-control continuation.
 
 - [x] **T-0201** [Issue #272](https://github.com/bhind/raveil/issues/272),
-  S-0005, 3 SP: technically verified conventional compiler controls; PR integration
-  remains the remote completion boundary. Explicit September 27 approval resolves
+  S-0005, 3 SP: integrated through PR273 (`827aa83`), Issue closed/Project Done. Explicit September 27 approval resolves
   the earlier successor-registration refusal. Four matched runtime/fixed ×
   serial/fma4 controls pass 32,768 C and 4,096 Accelerate component checks against
   the unchanged exact oracle. Readonly constants retain 264,192 bytes; different
@@ -33,11 +32,12 @@ work and product functionality remain intact.
   See [analysis and limits](docs/research/reviews/T-0201-fixed-parameter-controls.md).
   No timing, RTL, quantization, holdout or new mechanism.
 
-**Next question (uncommissioned):** specify a residual exact-real transformation
-and the closest applicable published control before any further mechanism or
-performance scope. T-0201 commissions a finite ordinary compiler portfolio,
-not the strongest possible compiler search. No successor implementation or
-performance experiment is implicitly started by its acceptance.
+- [ ] **T-0202** [Issue #274](https://github.com/bhind/raveil/issues/274),
+  S-0005, 5SP: owner-approved combined closest-prior-art and candidate screen.
+  Seven prospective candidates/discriminators are fixed in
+  [the screen plan](docs/research/reviews/T-0202-screen-plan.md). Select a
+  defensible residual mechanism or reject the proposals without forcing a winner.
+  Existing layer0 only; no timing, changed weights, holdouts or new hardware.
 
 **Ordering:** integrated T-0199 → T-0200 workload/reference packet → known
 fixed-parameter controls → only then a mechanism-specific comparison.
