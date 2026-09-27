@@ -2,7 +2,7 @@
 
 ## Board execution and recovery — T-0189/S02, 2026-09-27
 
-One real-core board-bridge model now runs the existing three-Graph catalogue
+[PR281](https://github.com/bhind/raveil/pull/281) supplies one real-core board-bridge model that runs the existing three-Graph catalogue
 matrix (four completions and one cancellation), then an external reset during
 BUSY and a fifth completed recovery run. All five256-word outputs and encoded
 C++ fallbacks match regenerated independent oracles; all1,280 AXI output-read

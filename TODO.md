@@ -29,7 +29,7 @@ incremental spend is zero. Existing prior-art and negative results remain.
   three actual-core Verilator base configurations pass; invalid base rejected.
   Candidate OOC Tcl has mock control-flow evidence only. No vendor/board result.
 - [x] **T-0189/S02** [Issue #279](https://github.com/bhind/raveil/issues/279),
-  S-0005,3SP: full execution/recovery simulation verified. One model executes
+  S-0005,3SP: full execution/recovery simulation verified in [PR281](https://github.com/bhind/raveil/pull/281). One model executes
   the existing three-Graph matrix plus external-reset recovery; five256-word
   outputs/fallbacks and1,280 AXI reads match independent oracles.23 host tests
   and final prepare/run/verify pass. No vendor/FPGA/performance evidence.
