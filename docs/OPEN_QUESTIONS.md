@@ -2,29 +2,30 @@
 
 ## Owner-directed research restart — 2026-09-27
 
-- T-0200 pins Pythia-14M layer-0 W512x128+b512 and an isolated F16-input /
-  F32-output affine contract. What behavior remains after ordinary fixed-
-  parameter compiler controls? T-0201 now commissions four matched controls
-  after explicit owner approval;
-  their retained coefficient work does not prove that broader specialization
-  or layout search cannot remove work. What residual identity is worth testing
-  after closest-published-control screening? No such mechanism is selected.
+- T-0202 selects no new mechanism from seven concrete proposals. Known
+  same-column CSE saves1,877 products but adds index/representation costs in
+  the analyzed format. What specifically new search/transform algorithm, if
+  any, justifies reopening? Family membership neither proves all algorithms
+  known nor provides a difference by itself.
+- Broader pair/scaled-form CSE, sparse full-rank factorizations and alternative
+  bases remain unsearched. These are limitations of the bounded screen, not
+  implicit next tasks or evidence of novelty. An exact workload/contract change
+  requires its own rationale; no approximation inherits the current contract.
 - How will a later evaluation acquire representative activation provenance and
   validate full-model quality? Current eight inputs are synthetic, parameter
   and input holdouts remain untouched, and finite tests are not universal proof.
 - Before timing, how will library/build/threading/dispatch, warm/cold costs,
   specialization code/data and replacement costs be sealed under a new EXP?
-- Which optimization survives ordinary constant specialization and the closest
-  applicable da4ml/Mirage/constant-matrix baseline? No residual treatment is
-  defined yet; known threshold/max interchange is only a control.
+- No residual treatment survived the current novelty screen. Published
+  implementations were source-reviewed, not executed or defeated; stronger
+  known-method performance comparisons remain absent.
 - Do reduced operations also reduce complete execution cost after parameter,
   configuration, storage, physical movement and lifecycle overhead? The T-0199
   probe reduces neither its installation payload nor logical memory traffic.
 - Does any benefit remain when the same transformed function is run on a strong
   conventional/Groq-like backend? If not, do not infer a hardware contribution.
-- Integration: T-0199 / #268 and T-0200 / #269 are merged/Done;
-  T-0201 owns compiler-control
-  verification and PR completion. Weekly quota telemetry is no longer required.
+- Integration: T-0199/T-0200/T-0201 are merged/Done; T-0202 owns
+  candidate-screen PR completion. Weekly quota telemetry is no longer required.
   S-0005 ceremony date/disposition remains open after owner-directed deferral;
   task integration must not invent ceremony acceptance.
 
