@@ -1,6 +1,23 @@
 # Raveil gated roadmap
 
-## Current owner-directed priority — 2026-09-27
+## Current owner-directed priority — affordable hardware, 2026-09-27
+
+[ADR-0105](decisions/ADR-0105-budgeted-fpga-demonstrator.md) supersedes the
+novelty-before-FPGA ordering for one budgeted demonstrator. Sequence: T-0203
+verified source/export packet → T-0188 staged host readiness → T-0189 exact
+board design and real functional/recovery checks → separately frozen CPU/FPGA
+measurement. Spend zero initially; one board and existing PCs are the intended
+resource scale. No full LLM, ASIC or fleet is a prerequisite.
+
+Success is a reproducible implementation with known costs and limitations,
+including negative performance. Source/identity, correctness, fair comparison
+and measurement-class boundaries remain. Historical T-0044/EXP results are
+unchanged; the demonstrator does not declare their superiority gates passed.
+T-0188 host inventory and T-0189 offline design preparation can precede board
+ownership. Final purchase/programming need an exact reviewed affordable target.
+
+## Earlier immutable-function priority — superseded entry ordering
+
 
 [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
 reorders the next research work: T-0199 policy/known-control preflight,
@@ -19,11 +36,11 @@ or speed claim. T-0202 now completes a seven-proposal source/structure screen: n
 new mechanism is selected. Known same-column CSE provides a product-count
 reduction but not new mechanism evidence or a total-cost advantage. The specific
 dense low-rank and Hadamard candidates are rejected with exact evidence; other
-optimizer families are not exhausted. Do not advance to new hardware or timing
-from these pitches. A later proposal must state an actual beyond-known algorithm
-or explicitly justify a changed workload/contract. Existing gates remain intact.
-No residual mechanism, performance collection or new hardware is authorized
-by this functional packet. The owner postponed S-0005 weekly Review without
+optimizer families are not exhausted. The T-0202 packet itself authorized no
+new hardware or timing from those pitches. ADR-0105 subsequently authorizes the
+separate budgeted demonstrator without a novelty prerequisite; any renewed
+novelty claim still needs a concrete algorithmic difference. Historical gates
+remain intact. The owner postponed S-0005 weekly Review without
 changing ordinary task delivery or accepting the ceremony. T-0183 planning is complete; T-0197 / #266 and T-0186 remain deferred
 product work. The latter may support the selected workload when justified.
 Other pivot suggestions are preserved alternatives, not parallel priorities.

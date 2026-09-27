@@ -1,8 +1,19 @@
 # Intended Raveil architecture
 
-## Research-priority boundary — ADR-0103
+## Current implementation direction — ADR-0105
 
-The next research question is whether declared immutable function information
+A budgeted single-board FPGA demonstrator reuses the owned bounded Graph/AXI
+executor and Linux UIO path. CPU fallback, independent oracle, admission and
+publication remain authoritative. No new execution mechanism is selected.
+Novelty and comparative advantage are no longer prerequisites to this bounded
+prototype; real functional and measurement evidence remain prerequisites to
+claims. The initial sealed device subset is narrower than editable simulation.
+See [ADR-0105](decisions/ADR-0105-budgeted-fpga-demonstrator.md).
+
+
+## Immutable-specialization boundary — ADR-0103, retained
+
+The retained research question is whether declared immutable function information
 can reduce required work beyond known optimization controls. This does not
 select a new Daphnis microarchitecture or change the four-plane architecture.
 See [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
