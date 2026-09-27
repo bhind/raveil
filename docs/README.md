@@ -2,7 +2,9 @@
 
 Current priority: [budgeted FPGA implementation](decisions/ADR-0105-budgeted-fpga-demonstrator.md)
 and [T-0203 executable prerequisite/cost packet](research/reviews/T-0203-budgeted-fpga-path.md).
-T-0188/#194 staged host readiness precedes T-0189/#195 board implementation.
+T-0188/#194 staged host readiness precedes vendor/device work under T-0189/#195.
+The [offline board bundle](guides/FPGA-BOARD-BUNDLE.md) supplies S01's tested
+address/reset wrapper; S02/#279 owns full-execution simulation next.
 
 Retained earlier research context: [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
 [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md), and the

@@ -9,6 +9,12 @@ Novelty and comparative advantage are no longer prerequisites to this bounded
 prototype; real functional and measurement evidence remain prerequisites to
 claims. The initial sealed device subset is narrower than editable simulation.
 See [ADR-0105](decisions/ADR-0105-budgeted-fpga-demonstrator.md).
+[ADR-0106](decisions/ADR-0106-board-address-and-reset-boundary.md) adds the
+single-clock board boundary: full32-bit window validation before relative
+address translation, asynchronous reset assertion and two-flop release with
+all handshakes gated. PROT carries no authority; the core and ABI are unchanged.
+The offline bundle is source-bound, while actual board wiring/implementation
+and matching UIO mapping remain unverified.
 
 
 ## Immutable-specialization boundary — ADR-0103, retained

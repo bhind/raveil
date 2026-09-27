@@ -8,7 +8,7 @@ within an individual budget; novelty is no longer an entry condition. Initial
 incremental spend is zero. Existing prior-art and negative results remain.
 
 - [x] **T-0203** [Issue #276](https://github.com/bhind/raveil/issues/276),
-  S-0005,3SP: decision/prerequisite packet verified, normal PR integration next.
+  S-0005,3SP: integrated through PR277 (`595c66b`), Issue closed/Project Done.
   [Budgeted FPGA path](docs/research/reviews/T-0203-budgeted-fpga-path.md):
   sixteen host tests pass and fresh offline RTL export/repeat/verification pass.
   No board, Vivado synthesis or FPGA measurement exists. KV260 is provisional;
@@ -22,6 +22,17 @@ incremental spend is zero. Existing prior-art and negative results remain.
   source-bound board wrapper/design and functional bring-up after supported
   tools are known. Design preparation need not wait for a physical board;
   programming and target checks do. Preserve exact identities and recovery.
+
+- [x] **T-0189/S01** [Issue #278](https://github.com/bhind/raveil/issues/278),
+  S-0005,5SP: offline absolute-address/reset bridge and source-bound board
+  bundle verified in [PR280](https://github.com/bhind/raveil/pull/280). ADR-0106;14 host tests and
+  three actual-core Verilator base configurations pass; invalid base rejected.
+  Candidate OOC Tcl has mock control-flow evidence only. No vendor/board result.
+- [ ] **T-0189/S02** [Issue #279](https://github.com/bhind/raveil/issues/279),
+  S-0005,3SP: next offline slice after S01 integration. Execute existing admitted
+  workloads through the absolute-address bridge, compare all output words with
+  independent oracle/fallback, and verify reset/cancel/restart. Reuse cached tools;
+  no purchases or actual Windows/board dependency for this simulation slice.
 
 ## Completed immutable-function screen — retained evidence
 

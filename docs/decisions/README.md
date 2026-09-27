@@ -127,3 +127,4 @@ rewrite it.
 | [ADR-0098](ADR-0098-recipe-fork-uses-recipe-last-publication.md) | Accepted | Recipe forks publish the recipe last under a documented single-writer operating constraint |
 
 | [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) | Accepted | Affordable FPGA demonstrator and honest measurement without a novelty prerequisite |
+| [ADR-0106](ADR-0106-board-address-and-reset-boundary.md) | Accepted | Absolute AXI window and synchronized reset release around the existing relative core |
