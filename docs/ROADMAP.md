@@ -1,6 +1,6 @@
 # Raveil gated roadmap
 
-## Current owner-directed priority — 2026-09-26
+## Current owner-directed priority — 2026-09-27
 
 [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
 reorders the next research work: T-0199 policy/known-control preflight,
@@ -12,8 +12,11 @@ of novelty. No existing Gate or EXP threshold is weakened or closed.
 
 T-0199 / #268 is integrated through PR #270. T-0200 verifies the pinned
 trained affine operator with an exact oracle and ordinary optimized BLAS.
-Known fixed-parameter compiler controls remain the next uncommissioned
-candidate; automatic review requires owner approval before its Issue creation.
+Owner approval on September 27 cleared T-0201 registration. Four ordinary
+runtime/fixed compiler controls now pass the unchanged oracle; all coefficient
+products remain. This is a bounded compiler portfolio, not a strongest-control
+or speed claim. Residual mechanism selection and closest published-control
+coverage remain uncommissioned research questions.
 No residual mechanism, performance collection or new hardware is authorized
 by this functional packet. The owner postponed S-0005 weekly Review without
 changing ordinary task delivery or accepting the ceremony. T-0183 planning is complete; T-0197 / #266 and T-0186 remain deferred

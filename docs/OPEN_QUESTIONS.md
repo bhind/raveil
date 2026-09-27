@@ -1,11 +1,14 @@
 # Open questions
 
-## Owner-directed research restart — 2026-09-26
+## Owner-directed research restart — 2026-09-27
 
 - T-0200 pins Pythia-14M layer-0 W512x128+b512 and an isolated F16-input /
   F32-output affine contract. What behavior remains after ordinary fixed-
-  parameter compiler controls? Those controls are unimplemented and their
-  successor registration awaits owner approval after automatic review rejection.
+  parameter compiler controls? T-0201 now commissions four matched controls
+  after explicit owner approval;
+  their retained coefficient work does not prove that broader specialization
+  or layout search cannot remove work. What residual identity is worth testing
+  after closest-published-control screening? No such mechanism is selected.
 - How will a later evaluation acquire representative activation provenance and
   validate full-model quality? Current eight inputs are synthetic, parameter
   and input holdouts remain untouched, and finite tests are not universal proof.
@@ -19,8 +22,9 @@
   probe reduces neither its installation payload nor logical memory traffic.
 - Does any benefit remain when the same transformed function is run on a strong
   conventional/Groq-like backend? If not, do not infer a hardware contribution.
-- Integration: T-0199 / #268 is merged/Done; T-0200 owns the workload packet
-  and its PR completion. Weekly quota telemetry is no longer required.
+- Integration: T-0199 / #268 and T-0200 / #269 are merged/Done;
+  T-0201 owns compiler-control
+  verification and PR completion. Weekly quota telemetry is no longer required.
   S-0005 ceremony date/disposition remains open after owner-directed deferral;
   task integration must not invent ceremony acceptance.
 

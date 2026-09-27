@@ -1,6 +1,6 @@
 # Current status
 
-## Research restart — verified workload packet, 2026-09-26
+## Research restart — conventional compiler controls, 2026-09-27
 
 T-0199 applies the owner's research-priority reset through ADR-0103/RFC-0007,
 without changing production compiler, admission, oracle, schemas or RTL.
@@ -27,15 +27,24 @@ Only 140,592 bytes of exact HTTP ranges were acquired. No raw weights are in
 Git. Source W+b is 132,096 bytes and widened resident W+b is 264,192 bytes;
 these are logical counts, not physical transfer measurements. Inputs remain
 synthetic; the original full-model numerical behavior and representative
-activation corpus are unverified. Fixed-parameter compiler controls remain
-unimplemented. There is no new optimization or speed/energy/area result.
+activation corpus are unverified. T-0201 adds the bounded fixed-parameter
+compiler controls described below. There is no new optimization or
+speed/energy/area result.
 The production uint32 Graph interface and RTL are unchanged.
 
-Integration: T-0199 / #268 is closed/Done after PR #270, merge `3d804e8`;
-142 scoped checks passed. T-0200 / #269 is technically verified, with normal
-PR integration and canonical completion still required. A next compiler-control
-Issue was not created: automatic approval review rejected registration as scope
-expansion. Its proposal remains uncommissioned pending owner approval.
+Integration: T-0199 / #268 and T-0200 / #269 are merged/Done (PR270/271).
+T-0201 / #272 was explicitly approved on September 27, clearing the earlier
+registration refusal. It implements a matched runtime/fixed × serial/fma4 C
+portfolio under the unchanged numerical contract. All 32,768 C and 4,096
+Accelerate output-component checks pass; fixed/runtime pairs match bitwise on
+eight commissioning inputs. Compiler readonly tables still contain 264,192
+bytes; 65,536 coefficient multiplications/FMA lanes remain in all four emitted
+kernels. fma4 text size differs (412 vs136 bytes including the rounding helper)
+because unrolling/SIMD differs, not because coefficient work disappeared.
+These are analytical compiler observations, not measured execution cost.
+See [T-0201](research/reviews/T-0201-fixed-parameter-controls.md) and its receipt.
+T-0201 is technically verified pending normal PR integration. This finite
+portfolio does not exhaust compiler/layout search or published controls.
 The owner postponed the S-0005 weekly Sprint Review, with no replacement date
 or ceremony acceptance. Ordinary task delivery continues separately.
 
@@ -44,9 +53,10 @@ remain unestablished. EXP-0003 remains closed negative. The September 20 audit
 was of `7c38a36` and does not replace later mainline/EXP evidence. Historical
 T-0197/T-0198 reservations do not change live T-0197 / #266. ADR-0104 removes
 weekly quota gating; other permissions and evidence boundaries remain. See
-[the September 26 log](log/2026-09-26.md) for commands and review provenance.
+[the September 26 log](log/2026-09-26.md) and
+[September 27 continuation](log/2026-09-27.md) for commands/review provenance.
 
-Last updated: 2026-09-26
+Last updated: 2026-09-27
 
 T-0183 / Issue #182 is technically accepted after T-0196, S-0005, 3 SP. Planning
 selects bounded host composition for raw/biased sensor results rather than
