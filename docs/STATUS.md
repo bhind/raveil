@@ -1,6 +1,6 @@
 # Current status
 
-## Research restart — conventional compiler controls, 2026-09-27
+## Research restart — no new mechanism selected, 2026-09-27
 
 T-0199 applies the owner's research-priority reset through ADR-0103/RFC-0007,
 without changing production compiler, admission, oracle, schemas or RTL.
@@ -28,7 +28,7 @@ Git. Source W+b is 132,096 bytes and widened resident W+b is 264,192 bytes;
 these are logical counts, not physical transfer measurements. Inputs remain
 synthetic; the original full-model numerical behavior and representative
 activation corpus are unverified. T-0201 adds the bounded fixed-parameter
-compiler controls described below. There is no new optimization or
+compiler controls described below. There is no new mechanism or
 speed/energy/area result.
 The production uint32 Graph interface and RTL are unchanged.
 
@@ -44,10 +44,18 @@ because unrolling/SIMD differs, not because coefficient work disappeared.
 These are analytical compiler observations, not measured execution cost.
 See [T-0201](research/reviews/T-0201-fixed-parameter-controls.md) and its receipt.
 T-0201 is merged/Done through PR273 at `827aa83`.
-T-0202 / Issue274 is now owner-approved and active: the prospective screen
-fixes seven candidates and their falsification conditions before new structural
-analysis. No candidate has yet been selected. This finite
-portfolio does not exhaust compiler/layout search or published controls.
+T-0202 / Issue274 completes the source-backed screen at the technical level,
+with PR integration still required. Seven proposals yield no qualifying new
+mechanism. An owned known-CSE witness reduces products from65,536 to63,659,
+keeping65,536 additions; its explicit hypothetical packed format is388,272B
+versus264,192B widened dense W+b. This does not measure speed or traffic.
+The unchanged eight inputs pass12,288 exact-oracle component checks and match
+serial bitwise. Six tests and independent receipt/rank/Hadamard checks pass.
+Full column rank128 rejects exact dense low-rank; the one preselected Hadamard
+basis produces no zeros and54 coefficients not exactly representable as F32.
+See [candidate matrix](research/reviews/T-0202-candidate-matrix.md) for the nine
+primary-source locators and bounded rejection/inconclusive dispositions.
+No claim that all CSE, DA, basis or sparse-factor searches are exhausted.
 The owner postponed the S-0005 weekly Sprint Review, with no replacement date
 or ceremony acceptance. Ordinary task delivery continues separately.
 

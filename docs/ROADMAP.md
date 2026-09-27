@@ -15,8 +15,13 @@ trained affine operator with an exact oracle and ordinary optimized BLAS.
 Owner approval on September 27 cleared T-0201 registration. Four ordinary
 runtime/fixed compiler controls now pass the unchanged oracle; all coefficient
 products remain. This is a bounded compiler portfolio, not a strongest-control
-or speed claim. Residual mechanism selection and closest published-control
-coverage remain uncommissioned research questions.
+or speed claim. T-0202 now completes a seven-proposal source/structure screen: no qualifying
+new mechanism is selected. Known same-column CSE provides a product-count
+reduction but not new mechanism evidence or a total-cost advantage. The specific
+dense low-rank and Hadamard candidates are rejected with exact evidence; other
+optimizer families are not exhausted. Do not advance to new hardware or timing
+from these pitches. A later proposal must state an actual beyond-known algorithm
+or explicitly justify a changed workload/contract. Existing gates remain intact.
 No residual mechanism, performance collection or new hardware is authorized
 by this functional packet. The owner postponed S-0005 weekly Review without
 changing ordinary task delivery or accepting the ceremony. T-0183 planning is complete; T-0197 / #266 and T-0186 remain deferred

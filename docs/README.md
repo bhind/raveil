@@ -6,7 +6,9 @@ Current research priority: [ADR-0103](decisions/ADR-0103-work-reduction-precedes
 The [T-0200 pinned workload and exact-oracle packet](research/reviews/T-0200-immutable-affine-workload.md)
 records the pinned host-functional entry result.
 [T-0201 compiler controls](research/reviews/T-0201-fixed-parameter-controls.md)
-adds the matched ordinary runtime/fixed portfolio and its remaining research gaps.
+adds the matched ordinary runtime/fixed portfolio.
+[T-0202 candidate matrix](research/reviews/T-0202-candidate-matrix.md) records
+seven source-backed dispositions: no new mechanism selected, known CSE retained.
 The [28-claim audit](research/reviews/2026-09-20-T-0057-atomic-claim-matrix.md)
 is retained with its original checkout scope; the September 23 review explains
 which proposals are deferred. TODO's current focus governs the next pull.
