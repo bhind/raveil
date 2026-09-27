@@ -1,6 +1,10 @@
 # Raveil project records
 
-Current research priority: [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
+Current priority: [budgeted FPGA implementation](decisions/ADR-0105-budgeted-fpga-demonstrator.md)
+and [T-0203 executable prerequisite/cost packet](research/reviews/T-0203-budgeted-fpga-path.md).
+T-0188/#194 staged host readiness precedes T-0189/#195 board implementation.
+
+Retained earlier research context: [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
 [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md), and the
 [T-0199 restart review (historical filename)](research/reviews/2026-09-23-T-0197-research-restart.md).
 The [T-0200 pinned workload and exact-oracle packet](research/reviews/T-0200-immutable-affine-workload.md)

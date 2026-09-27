@@ -1,6 +1,22 @@
 # Open questions
 
-## Owner-directed research restart — 2026-09-27
+## Budgeted FPGA path — current priority, ADR-0105
+
+- What Windows version/architecture, RAM, disk and installed tools are actually
+  available? T-0188/#194 owns staged inventory; no FPGA is currently owned.
+- What all-in acquisition can fit the owner's remaining monthly resources after
+  existing Codex expense? Spend zero until a concrete quote/choice exists.
+- Can the freshly reproduced RTL close in the selected free-tier tool on one
+  affordable board? T-0189/#195 owns exact clock/reset/address/design closure.
+- Which currently sealed graphs commission the first board, and what concrete
+  parity gap prevents the third meaningful workload? Simulator features are not
+  automatically UIO-authorized features.
+- Where is end-to-end CPU/FPGA break-even after staging, installation, execution,
+  validation and recovery? Pin representative inputs and a new measurement plan
+  after functional closure; no novelty prerequisite applies to this prototype.
+
+
+## Immutable-function questions — retained, no longer the entry gate
 
 - T-0202 selects no new mechanism from seven concrete proposals. Known
   same-column CSE saves1,877 products but adds index/representation costs in
@@ -24,8 +40,7 @@
   probe reduces neither its installation payload nor logical memory traffic.
 - Does any benefit remain when the same transformed function is run on a strong
   conventional/Groq-like backend? If not, do not infer a hardware contribution.
-- Integration: T-0199/T-0200/T-0201 are merged/Done; T-0202 owns
-  candidate-screen PR completion. Weekly quota telemetry is no longer required.
+- Integration: T-0199/T-0200/T-0201 are merged/Done; T-0202 is merged/Done through PR275. Weekly quota telemetry is no longer required.
   S-0005 ceremony date/disposition remains open after owner-directed deferral;
   task integration must not invent ceremony acceptance.
 

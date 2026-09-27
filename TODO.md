@@ -1,6 +1,30 @@
 # Raveil TODO
 
-## Current focus — candidate screen concluded (2026-09-27)
+## Current focus — affordable FPGA implementation (2026-09-27)
+
+[ADR-0105](docs/decisions/ADR-0105-budgeted-fpga-demonstrator.md) applies the
+owner's explicit goal change: build and measure a single-board demonstrator
+within an individual budget; novelty is no longer an entry condition. Initial
+incremental spend is zero. Existing prior-art and negative results remain.
+
+- [x] **T-0203** [Issue #276](https://github.com/bhind/raveil/issues/276),
+  S-0005,3SP: decision/prerequisite packet verified, normal PR integration next.
+  [Budgeted FPGA path](docs/research/reviews/T-0203-budgeted-fpga-path.md):
+  sixteen host tests pass and fresh offline RTL export/repeat/verification pass.
+  No board, Vivado synthesis or FPGA measurement exists. KV260 is provisional;
+  the owner has MacBook/Windows only and monthly budget is a few tens of thousands
+  of yen with existing USD100/month Codex expense. Purchase is not authorized.
+- [ ] **T-0188** [Issue #194](https://github.com/bhind/raveil/issues/194): staged
+  host/budget readiness first; board-specific boot/UIO observations later.
+  Immediate next action: run the no-install Windows inventory in the T-0203
+  packet. Exact OS/resources and remaining hardware budget are still unknown.
+- [ ] **T-0189** [Issue #195](https://github.com/bhind/raveil/issues/195): one
+  source-bound board wrapper/design and functional bring-up after supported
+  tools are known. Design preparation need not wait for a physical board;
+  programming and target checks do. Preserve exact identities and recovery.
+
+## Completed immutable-function screen — retained evidence
+
 
 [ADR-0103](docs/decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
 selects work reduction from immutable function information as a hypothesis,
@@ -33,8 +57,7 @@ work and product functionality remain intact.
   No timing, RTL, quantization, holdout or new mechanism.
 
 - [x] **T-0202** [Issue #274](https://github.com/bhind/raveil/issues/274),
-  S-0005, 5SP: technically verified seven-candidate screen; pending normal PR
-  integration. [Source-backed outcomes](docs/research/reviews/T-0202-candidate-matrix.md):
+  S-0005, 5SP: merged through PR275 (`1c8e24d`), Issue closed/Project Done. [Source-backed outcomes](docs/research/reviews/T-0202-candidate-matrix.md):
   no qualifying new mechanism selected. Same-column CSE is directly prior art
   and is retained as a known functional control: 65,536→63,659 products, unchanged
   65,536 additions; the defined packed format grows264,192→388,272bytes. Exact
@@ -43,13 +66,13 @@ work and product functionality remain intact.
   algorithm and remain inconclusive as general optimization spaces. Six tests,
   independent replay/rank/basis checks pass. No timing, holdout or hardware claim.
 
-**Decision after this screen:** do not promote these seven pitches to a novel
+**Decision of that screen (hardware entry policy superseded by ADR-0105):** do not promote these seven pitches to a novel
 Raveil mechanism or open a hardware/performance task from them. Reopening needs
 an explicit beyond-known algorithmic difference or a justified workload/contract
 change. Integrating known methods is a separate product option; no unbounded
 follow-up search or forced Ready card is started by this negative selection.
 
-**Ordering:** integrated T-0199 → T-0200 workload/reference packet → known
+**Prior research ordering:** integrated T-0199 → T-0200 workload/reference packet → known
 fixed-parameter controls → only then a mechanism-specific comparison.
 T-0183 planning is complete. T-0197 / #266 multi-result implementation stays
 Backlog/P2; T-0186 remains queued. T-0044 physical gates and T-0106 triggers are
@@ -437,8 +460,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0202 / #274 owns candidate-screen integration; T-0199/T-0200/T-0201 are merged/Done. T-0195/0196 are integrated at the cached base. |
-| **P1 — next** | Start only after its named dependencies pass. | Seven proposals yielded no qualified residual mechanism; reopening needs a specific difference or a justified scope change. Timing still requires a pre-data EXP. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0203 / #276 owns the budgeted FPGA decision/prerequisite refresh; T-0202 is merged/Done; T-0199/T-0200/T-0201 are merged/Done. T-0195/0196 are integrated at the cached base. |
+| **P1 — next** | Start only after its named dependencies pass. | ADR-0105 selects T-0188 staged host readiness then T-0189 exact design/functional bring-up. Novelty is not required for this demonstrator. Timing still requires a pre-data EXP. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |

@@ -1,6 +1,17 @@
 # Raveil vision
 
-## Current research question — 2026-09-23
+## Current objective — affordable implementation and measurement
+
+The owner's September27 direction prioritizes a reproducible single-board FPGA
+demonstrator within an individual budget. Novelty versus Groq may remain modest.
+Implement the existing contracts, measure useful work and total lifecycle cost,
+and publish honest limitations. A losing CPU comparison is still informative.
+[ADR-0105](decisions/ADR-0105-budgeted-fpga-demonstrator.md) replaces the earlier
+novelty-first prototype gate; the long-term thesis and prior negative evidence
+remain. One board and existing PCs bound the near-term resource scale.
+
+
+## Earlier research question — retained for later work
 
 Retain the original thesis below: preserve verified execution knowledge over
 computation's lifetime. The next test is whether immutable semantic information

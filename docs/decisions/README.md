@@ -1,5 +1,10 @@
 # Architecture Decision Records
 
+[ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) adopts the owner's budgeted
+single-board implementation/measurement objective. It supersedes novelty as
+a prerequisite for that prototype, without passing any historical claim gate.
+
+
 [ADR-0104](ADR-0104-remove-weekly-quota-gating.md) retires weekly quota gating
 under the explicit September 26 owner instruction; all other permissions remain.
 
@@ -120,3 +125,5 @@ rewrite it.
 | [ADR-0089](ADR-0089-graph-multiplication-is-versioned-u32.md) | Accepted | Versioned unsigned multiplication with explicit modulo arithmetic and independent execution checks |
 | [ADR-0092](ADR-0092-private-project-burndown-uses-a-dedicated-token.md) | Accepted | A least-privilege daily Action updates aggregate ideal/actual lines only inside the private Project |
 | [ADR-0098](ADR-0098-recipe-fork-uses-recipe-last-publication.md) | Accepted | Recipe forks publish the recipe last under a documented single-writer operating constraint |
+
+| [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) | Accepted | Affordable FPGA demonstrator and honest measurement without a novelty prerequisite |

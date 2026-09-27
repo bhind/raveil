@@ -1,5 +1,20 @@
 # Current status
 
+## Budgeted FPGA demonstrator — 2026-09-27
+
+ADR-0105 / T-0203 applies the owner's new objective: build and measure an
+affordable single-board prototype without requiring a novel mechanism first.
+Initial incremental spend is zero. MacBook and Windows PC are owned; no FPGA
+is owned. Exact Windows resources and hardware remainder are unknown.
+Sixteen existing host tests pass; fresh offline RTL generation twice yields
+identical manifests, and a separate bundle verification succeeds. This is an
+RTL-export prerequisite, not vendor synthesis, fit, FPGA execution or speed.
+See [the source-bound packet](research/reviews/T-0203-budgeted-fpga-path.md).
+T-0188/#194 stages host readiness before board acquisition; T-0189/#195 owns
+the still-missing board wrapper/tool/deployment/functional path. No production
+RTL, numerical contract or previously frozen experiment changed.
+
+
 ## Research restart — no new mechanism selected, 2026-09-27
 
 T-0199 applies the owner's research-priority reset through ADR-0103/RFC-0007,
@@ -44,8 +59,7 @@ because unrolling/SIMD differs, not because coefficient work disappeared.
 These are analytical compiler observations, not measured execution cost.
 See [T-0201](research/reviews/T-0201-fixed-parameter-controls.md) and its receipt.
 T-0201 is merged/Done through PR273 at `827aa83`.
-T-0202 / Issue274 completes the source-backed screen at the technical level,
-with PR integration still required. Seven proposals yield no qualifying new
+T-0202 / Issue274 is merged/Done through PR275 (`1c8e24d`). Seven proposals yield no qualifying new
 mechanism. An owned known-CSE witness reduces products from65,536 to63,659,
 keeping65,536 additions; its explicit hypothetical packed format is388,272B
 versus264,192B widened dense W+b. This does not measure speed or traffic.
