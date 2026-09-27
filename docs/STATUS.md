@@ -1,5 +1,19 @@
 # Current status
 
+## Offline board boundary — T-0189/S01, 2026-09-27
+
+ADR-0106 adds a thin absolute-address/reset wrapper around the unchanged
+relative core. It checks the full aligned16-KiB window before translation and
+blocks handshakes during two-flop reset release. A source-bound bundle packages
+the verified core, wrapper, candidate Vivado2025.1 OOC recipe and target clock.
+Fourteen host tests pass, including packaging negatives and mocked Tcl control
+flow. Actual-core Verilator runs pass at bases0,a0000000,ffffc000; base4 fails
+elaboration as required. This is control-plane RTL simulation, not workload
+execution through the wrapper, vendor synthesis, fit/timing, UIO or FPGA evidence.
+See [reproduction/limits](guides/FPGA-BOARD-BUNDLE.md). Parent T-0189/#195 stays
+open. T-0189/S02/#279 is the bounded offline full-execution successor;
+T-0188 still needs actual Windows host facts before the vendor tool stage.
+
 ## Budgeted FPGA demonstrator — 2026-09-27
 
 ADR-0105 / T-0203 applies the owner's new objective: build and measure an
@@ -11,7 +25,7 @@ identical manifests, and a separate bundle verification succeeds. This is an
 RTL-export prerequisite, not vendor synthesis, fit, FPGA execution or speed.
 See [the source-bound packet](research/reviews/T-0203-budgeted-fpga-path.md).
 T-0188/#194 stages host readiness before board acquisition; T-0189/#195 owns
-the still-missing board wrapper/tool/deployment/functional path. No production
+the board tool/deployment/functional path; S01 above supplies the offline wrapper. No production
 RTL, numerical contract or previously frozen experiment changed.
 
 

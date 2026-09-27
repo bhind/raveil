@@ -14,7 +14,10 @@ including negative performance. Source/identity, correctness, fair comparison
 and measurement-class boundaries remain. Historical T-0044/EXP results are
 unchanged; the demonstrator does not declare their superiority gates passed.
 T-0188 host inventory and T-0189 offline design preparation can precede board
-ownership. Final purchase/programming need an exact reviewed affordable target.
+ownership. T-0189/S01 supplies the range-checked address/reset bridge and
+source-bound offline bundle (ADR-0106), with control-plane RTL evidence only.
+S02/#279 next validates full workload execution/recovery through that bridge.
+Vendor synthesis still waits for qualified host/tools; final purchase/programming need an exact reviewed affordable target.
 
 ## Earlier immutable-function priority — superseded entry ordering
 

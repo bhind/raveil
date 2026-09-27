@@ -7,7 +7,9 @@
 - What all-in acquisition can fit the owner's remaining monthly resources after
   existing Codex expense? Spend zero until a concrete quote/choice exists.
 - Can the freshly reproduced RTL close in the selected free-tier tool on one
-  affordable board? T-0189/#195 owns exact clock/reset/address/design closure.
+  affordable board? T-0189/#195 owns physical clock/reset/address/design closure.
+  S01/ADR-0106 resolves the offline wrapper contract only; S02/#279 still must
+  execute full workloads through it. The candidate OOC Tcl is not Vivado-verified.
 - Which currently sealed graphs commission the first board, and what concrete
   parity gap prevents the third meaningful workload? Simulator features are not
   automatically UIO-authorized features.
