@@ -25,7 +25,7 @@ incremental spend is zero. Existing prior-art and negative results remain.
 
 - [x] **T-0189/S01** [Issue #278](https://github.com/bhind/raveil/issues/278),
   S-0005,5SP: offline absolute-address/reset bridge and source-bound board
-  bundle verified; normal PR integration required. ADR-0106;14 host tests and
+  bundle verified in [PR280](https://github.com/bhind/raveil/pull/280). ADR-0106;14 host tests and
   three actual-core Verilator base configurations pass; invalid base rejected.
   Candidate OOC Tcl has mock control-flow evidence only. No vendor/board result.
 - [ ] **T-0189/S02** [Issue #279](https://github.com/bhind/raveil/issues/279),

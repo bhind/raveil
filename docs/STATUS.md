@@ -2,7 +2,7 @@
 
 ## Offline board boundary — T-0189/S01, 2026-09-27
 
-ADR-0106 adds a thin absolute-address/reset wrapper around the unchanged
+[PR280](https://github.com/bhind/raveil/pull/280) / ADR-0106 adds a thin absolute-address/reset wrapper around the unchanged
 relative core. It checks the full aligned16-KiB window before translation and
 blocks handshakes during two-flop reset release. A source-bound bundle packages
 the verified core, wrapper, candidate Vivado2025.1 OOC recipe and target clock.
