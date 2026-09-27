@@ -4,7 +4,9 @@ Current research priority: [ADR-0103](decisions/ADR-0103-work-reduction-precedes
 [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md), and the
 [T-0199 restart review (historical filename)](research/reviews/2026-09-23-T-0197-research-restart.md).
 The [T-0200 pinned workload and exact-oracle packet](research/reviews/T-0200-immutable-affine-workload.md)
-records the next verified host-functional result and its missing compiler controls.
+records the pinned host-functional entry result.
+[T-0201 compiler controls](research/reviews/T-0201-fixed-parameter-controls.md)
+adds the matched ordinary runtime/fixed portfolio and its remaining research gaps.
 The [28-claim audit](research/reviews/2026-09-20-T-0057-atomic-claim-matrix.md)
 is retained with its original checkout scope; the September 23 review explains
 which proposals are deferred. TODO's current focus governs the next pull.

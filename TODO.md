@@ -1,6 +1,6 @@
 # Raveil TODO
 
-## Current focus — owner-directed research restart (2026-09-26)
+## Current focus — conventional compiler controls (2026-09-27)
 
 [ADR-0103](docs/decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
 selects work reduction from immutable function information as a hypothesis,
@@ -13,7 +13,7 @@ work and product functionality remain intact.
   control reduces 15 to 11 instructions, but neither its 128-byte installation
   nor 1,536 logical memory bytes. No novel mechanism or hardware advantage.
 - [x] **T-0200** [Issue #269](https://github.com/bhind/raveil/issues/269), S-0005,
-  3 SP: technically verified workload/reference packet, pending PR integration.
+  3 SP: integrated through PR #271 (`2d75317`), Issue closed/Project Done.
   [Pinned trained affine operator](docs/research/reviews/T-0200-immutable-affine-workload.md):
   Pythia-14M layer-0 W512x128+b512, unchanged F16 parameters, F32 result under
   a predeclared rational error bound. Eight synthetic commissioning vectors
@@ -21,14 +21,23 @@ work and product functionality remain intact.
   repeat (12,288 component checks). Source hashes, license, numerical contract,
   untouched holdout intent and logical-byte ledger are recorded. No activation
   corpus, fixed-parameter compiler control, timing or new mechanism is supplied.
-  Task Done follows only verified merge and canonical completion.
+  T-0201 supplies the separately approved compiler-control continuation.
 
-**Next candidate (not commissioned):** ordinary fixed-parameter compiler
-controls under the same numerical contract. This is required before selecting
-any residual mechanism. Automatic approval review rejected creating the new
-successor Issue as scope expansion on September 26; no Issue or stable task ID
-was allocated, and no successor implementation began. Owner approval is needed
-for that registration. This does not block T-0200 technical integration.
+- [x] **T-0201** [Issue #272](https://github.com/bhind/raveil/issues/272),
+  S-0005, 3 SP: technically verified conventional compiler controls; PR integration
+  remains the remote completion boundary. Explicit September 27 approval resolves
+  the earlier successor-registration refusal. Four matched runtime/fixed ×
+  serial/fma4 controls pass 32,768 C and 4,096 Accelerate component checks against
+  the unchanged exact oracle. Readonly constants retain 264,192 bytes; different
+  SIMD/unrolling does not eliminate the 65,536 coefficient products/FMA lanes.
+  See [analysis and limits](docs/research/reviews/T-0201-fixed-parameter-controls.md).
+  No timing, RTL, quantization, holdout or new mechanism.
+
+**Next question (uncommissioned):** specify a residual exact-real transformation
+and the closest applicable published control before any further mechanism or
+performance scope. T-0201 commissions a finite ordinary compiler portfolio,
+not the strongest possible compiler search. No successor implementation or
+performance experiment is implicitly started by its acceptance.
 
 **Ordering:** integrated T-0199 → T-0200 workload/reference packet → known
 fixed-parameter controls → only then a mechanism-specific comparison.
@@ -48,7 +57,7 @@ Original local receipts retain their filenames and historical identity.
 The owner removed weekly quota gating; ADR-0104 supersedes that stop only.
 Ordinary permission, paid-resource, evidence and review boundaries still apply.
 
-Last updated: 2026-09-26
+Last updated: 2026-09-27
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -418,8 +427,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0200 / #269 owns workload/reference verification and PR integration; T-0199 is merged/Done. T-0195/0196 are integrated at the cached base. |
-| **P1 — next** | Start only after its named dependencies pass. | Next candidate is conventional fixed-parameter controls; successor registration requires owner approval after automatic review rejection. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0201 / #272 owns conventional compiler-control integration; T-0199/T-0200 are merged/Done. T-0195/0196 are integrated at the cached base. |
+| **P1 — next** | Start only after its named dependencies pass. | Residual mechanism and closest published-control scope remain uncommissioned; timing requires a separate pre-data EXP. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
