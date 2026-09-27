@@ -16,7 +16,9 @@ unchanged; the demonstrator does not declare their superiority gates passed.
 T-0188 host inventory and T-0189 offline design preparation can precede board
 ownership. T-0189/S01 supplies the range-checked address/reset bridge and
 source-bound offline bundle (ADR-0106), with control-plane RTL evidence only.
-S02/#279 next validates full workload execution/recovery through that bridge.
+S02/#279 validates five full completions, cancellation and external-reset
+recovery through that bridge on one simulated model with exact oracle/fallback
+and bus-read equality. This closes only offline functional preparation.
 Vendor synthesis still waits for qualified host/tools; final purchase/programming need an exact reviewed affordable target.
 
 ## Earlier immutable-function priority — superseded entry ordering
