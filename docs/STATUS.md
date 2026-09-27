@@ -1,5 +1,19 @@
 # Current status
 
+## Board execution and recovery — T-0189/S02, 2026-09-27
+
+One real-core board-bridge model now runs the existing three-Graph catalogue
+matrix (four completions and one cancellation), then an external reset during
+BUSY and a fifth completed recovery run. All five256-word outputs and encoded
+C++ fallbacks match regenerated independent oracles; all1,280 AXI output-read
+values also match. Cancelled output is absent, and stale output reads are
+rejected immediately after external reset. The source-bound runner/verifier
+passes23 host regressions and fresh prepare/run/separate-verify in the pinned
+cached environment. [Reproduction and limits](guides/FPGA-BOARD-BUNDLE.md).
+This is RTL Simulation only, not Vivado, physical fit/timing, UIO or FPGA data.
+Production core/ABI/admission remain unchanged. Parent T-0189 stays open; the
+next vendor-stage prerequisite is T-0188's actual Windows/tool inventory.
+
 ## Offline board boundary — T-0189/S01, 2026-09-27
 
 [PR280](https://github.com/bhind/raveil/pull/280) / ADR-0106 adds a thin absolute-address/reset wrapper around the unchanged
@@ -11,7 +25,7 @@ flow. Actual-core Verilator runs pass at bases0,a0000000,ffffc000; base4 fails
 elaboration as required. This is control-plane RTL simulation, not workload
 execution through the wrapper, vendor synthesis, fit/timing, UIO or FPGA evidence.
 See [reproduction/limits](guides/FPGA-BOARD-BUNDLE.md). Parent T-0189/#195 stays
-open. T-0189/S02/#279 is the bounded offline full-execution successor;
+open. T-0189/S02/#279 above adds full-execution simulation;
 T-0188 still needs actual Windows host facts before the vendor tool stage.
 
 ## Budgeted FPGA demonstrator — 2026-09-27

@@ -28,11 +28,13 @@ incremental spend is zero. Existing prior-art and negative results remain.
   bundle verified in [PR280](https://github.com/bhind/raveil/pull/280). ADR-0106;14 host tests and
   three actual-core Verilator base configurations pass; invalid base rejected.
   Candidate OOC Tcl has mock control-flow evidence only. No vendor/board result.
-- [ ] **T-0189/S02** [Issue #279](https://github.com/bhind/raveil/issues/279),
-  S-0005,3SP: next offline slice after S01 integration. Execute existing admitted
-  workloads through the absolute-address bridge, compare all output words with
-  independent oracle/fallback, and verify reset/cancel/restart. Reuse cached tools;
-  no purchases or actual Windows/board dependency for this simulation slice.
+- [x] **T-0189/S02** [Issue #279](https://github.com/bhind/raveil/issues/279),
+  S-0005,3SP: full execution/recovery simulation verified. One model executes
+  the existing three-Graph matrix plus external-reset recovery; five256-word
+  outputs/fallbacks and1,280 AXI reads match independent oracles.23 host tests
+  and final prepare/run/verify pass. No vendor/FPGA/performance evidence.
+  Next: T-0188 actual Windows/tool inventory before T-0189 vendor synthesis;
+  do not create a duplicate Ready card or infer installed tools from a PC's existence.
 
 ## Completed immutable-function screen — retained evidence
 
