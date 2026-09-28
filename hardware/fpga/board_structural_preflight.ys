@@ -1,0 +1,12 @@
+# Generic structural elaboration only. No cell mapping, PDK, area or timing.
+read_verilog -sv /bundle/core/generated-src/*.sv /bundle/graph_device_board_bridge.sv
+chparam -set BASE_ADDR @BASE@ GraphDeviceBoardBridge
+hierarchy -check -top GraphDeviceBoardBridge
+flatten
+proc
+memory_collect
+opt_clean
+check -assert
+select -assert-none t:$dlatch t:$adlatch t:$dlatchsr
+scc -expect 0
+write_json /out/structural.json

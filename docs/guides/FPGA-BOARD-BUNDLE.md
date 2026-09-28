@@ -1,4 +1,4 @@
-# Offline FPGA boundary bundle — T-0189/S01
+# Offline FPGA boundary bundle — T-0189/S01–S03
 
 This prepares the existing Graph device for later board integration. It is not
 a board image. The wrapper expects absolute32-bit AXI4-Lite addresses, one
@@ -12,11 +12,12 @@ its existing source/repeat/ABI checks. Output must be new, below `artifacts/`.
 The following base and100MHz constraint are commissioning examples only:
 
 ```sh
+hardware/chisel/export-graph-device-axi4lite-rtl.sh artifacts/research/T-0189-S03/axi-rtl
 python3 -m raveil.graph_device_board_bundle create \
-  artifacts/research/T-0203/axi-rtl artifacts/research/T-0189-S01/board-bundle-v2 \
+  artifacts/research/T-0189-S03/axi-rtl artifacts/research/T-0189-S03/board-bundle \
   --base 0xa0000000 --clock-mhz 100
 python3 -m raveil.graph_device_board_bundle verify \
-  artifacts/research/T-0189-S01/board-bundle-v2
+  artifacts/research/T-0189-S03/board-bundle
 python3 -m unittest tests.test_graph_device_board_bundle tests.test_graph_device_axi4lite_export -v
 ```
 
@@ -35,11 +36,11 @@ script tests all three bases independently (0,a0000000,ffffc000), regardless of
 the bundle's candidate synthesis base; it also requires base4 to fail elaboration.
 
 ```sh
-mkdir -p artifacts/research/T-0189-S01/rtl-run-reviewed
+mkdir -p artifacts/research/T-0189-S03/control
 docker run --rm --pull=never --network none --platform linux/amd64 \
-  --mount type=bind,src="$PWD/artifacts/research/T-0189-S01/board-bundle-v2",dst=/bundle,readonly \
+  --mount type=bind,src="$PWD/artifacts/research/T-0189-S03/board-bundle",dst=/bundle,readonly \
   --mount type=bind,src="$PWD/hardware/fpga",dst=/src,readonly \
-  --mount type=bind,src="$PWD/artifacts/research/T-0189-S01/rtl-run-reviewed",dst=/out \
+  --mount type=bind,src="$PWD/artifacts/research/T-0189-S03/control",dst=/out \
   sha256:2efc059cf07eb054d93fc1fa32decd7a13c2cdb97069dac29138275b22e5c57c \
   bash /src/test-board-bridge-in-container.sh
 ```
@@ -106,9 +107,9 @@ new UIO admission. Three graphs are not evidence of application speedup.
 
 ```sh
 python3 -m raveil.graph_device_board_execute prepare \
-  artifacts/research/T-0189-S01/board-bundle-v2 artifacts/research/T-0189-S02/run-final
-python3 -m raveil.graph_device_board_execute run artifacts/research/T-0189-S02/run-final
-python3 -m raveil.graph_device_board_execute verify artifacts/research/T-0189-S02/run-final
+  artifacts/research/T-0189-S03/board-bundle artifacts/research/T-0189-S03/execution
+python3 -m raveil.graph_device_board_execute run artifacts/research/T-0189-S03/execution
+python3 -m raveil.graph_device_board_execute verify artifacts/research/T-0189-S03/execution
 python3 -m unittest tests.test_graph_device_board_execute tests.test_graph_device_board_bundle tests.test_graph_device_axi4lite_export -v
 ```
 
@@ -131,3 +132,38 @@ assertions. These are functional trace counts, not a timing measurement. See the
 dated log for exact hashes and environment. No Vivado synthesis or board access
 occurred. T-0188 still needs actual Windows/tool facts before vendor work;
 T-0189 still owns physical integration and real execution/recovery.
+
+
+## Generic structural preflight — T-0189/S03
+
+The original export failed the cached Yosys frontend on an automatic local
+variable. The emitter now uses CIRCT's documented
+`disallowLocalVariables,disallowPackedArrays` lowering options; generated RTL
+is never patched by hand. See [CIRCT Verilog generation](https://circt.llvm.org/docs/VerilogGeneration/).
+Core logic, ABI and admission are unchanged. This is an output-format change,
+not a universal equivalence proof; fresh S01/S02 regressions cover the existing
+control and workload matrix.
+
+```sh
+python3 -m raveil.graph_device_board_preflight run \
+  artifacts/research/T-0189-S03/board-bundle artifacts/research/T-0189-S03/structural-final
+python3 -m raveil.graph_device_board_preflight verify artifacts/research/T-0189-S03/structural-final
+python3 -m unittest tests.test_graph_device_board_preflight -v
+```
+
+Use a new output directory. The runner uses only the pinned cached Yosys image,
+without pull/network, validates the source-bound bundle before launch, and
+retains exact command, exit diagnostics and tool/netlist hashes. The script
+checks hierarchy, lowers processes, collects memories, rejects structural
+errors and latches, and requires zero combinational SCCs. Receipt verification
+also checks the flattened top, base parameter and every port width/direction.
+Failures retain diagnostics without a success receipt. These are cooperative
+local evidence checks, not signed attestations or hostile-writer protection.
+
+September28: fresh export/repeat, structural run/separate verify, three-base
+control tests and full execution/recovery run/separate verify all pass. All30
+host tests pass, plus the final seven-test verifier rerun. No cell mapping,
+PDK/Liberty, vendor synthesis, resource estimate or physical timing was run.
+See [exact commands and hashes](../log/2026-09-28.md). Old September27 bundles
+require their old checkout; source identity intentionally rejects them after
+the emitter changes. Preserve those receipts rather than relabeling them.

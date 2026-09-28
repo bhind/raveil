@@ -9,7 +9,9 @@
 - Can the freshly reproduced RTL close in the selected free-tier tool on one
   affordable board? T-0189/#195 owns physical clock/reset/address/design closure.
   S01/ADR-0106 resolves the offline wrapper contract and S02/#279 now verifies
-  full workload execution/recovery in simulation. The OOC Tcl remains unverified
+  full workload execution/recovery in simulation. S03/#282 resolves generic
+  Yosys parsing/structural closure, with fresh functional regressions; FPGA
+  mapping, resource fit and timing remain unknown. The OOC Tcl remains unverified
   by Vivado; qualified Windows/tool observations are the next external dependency.
 - Which currently sealed graphs commission the first board, and what concrete
   parity gap prevents the third meaningful workload? Simulator features are not

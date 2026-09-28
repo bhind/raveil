@@ -5,7 +5,9 @@ and [T-0203 executable prerequisite/cost packet](research/reviews/T-0203-budgete
 T-0188/#194 staged host readiness precedes vendor/device work under T-0189/#195.
 The [offline board bundle](guides/FPGA-BOARD-BUNDLE.md) supplies S01's tested
 address/reset wrapper and S02/#279 verifies full-execution/recovery simulation.
-Actual Windows/tool inventory under T-0188 is next before vendor synthesis.
+S03/#282 adds [portable RTL and generic structural checks](log/2026-09-28.md),
+with fresh S01/S02 regressions. Actual Windows/tool inventory under T-0188
+is next before vendor synthesis.
 
 Retained earlier research context: [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
 [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md), and the
