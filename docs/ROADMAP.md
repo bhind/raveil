@@ -22,6 +22,9 @@ and bus-read equality. This closes only offline functional preparation.
 S03/#282 additionally resolves the observed Yosys frontend incompatibility and
 passes generic structural closure plus fresh S01/S02 regression tests. This is
 not a mapped FPGA design or a resource/timing result.
+S04/#284 identifies retained register-array storage and the exact reset/mask/
+response obligations for any later RAM backend. Inspect mapped memory/resource
+reports before prioritizing that rewrite; generic counts do not establish fit.
 Vendor synthesis still waits for qualified host/tools; final purchase/programming need an exact reviewed affordable target.
 
 ## Earlier immutable-function priority — superseded entry ordering

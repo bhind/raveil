@@ -13,6 +13,10 @@
   Yosys parsing/structural closure, with fresh functional regressions; FPGA
   mapping, resource fit and timing remain unknown. The OOC Tcl remains unverified
   by Vivado; qualified Windows/tool observations are the next external dependency.
+- Does the resettable register-array scratchpad cause actual mapped resource
+  pressure? [S04 diagnosis](research/reviews/T-0189-memory-feasibility.md) locates
+  the storage and compatibility obligations, but no RAM inference/fit or rewrite
+  has been established. Vendor reports, not generic counts, decide priority.
 - Which currently sealed graphs commission the first board, and what concrete
   parity gap prevents the third meaningful workload? Simulator features are not
   automatically UIO-authorized features.

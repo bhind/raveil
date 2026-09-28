@@ -1,5 +1,15 @@
 # Current status
 
+## Memory feasibility diagnosis — T-0189/S04, 2026-09-28
+
+[Source/netlist analysis](research/reviews/T-0189-memory-feasibility.md) confirms
+the 1024×32-bit scratchpad remains a resettable register array after generic
+Yosys optimization. Unique storage bits were matched to sequential drivers;
+this is not a mapped FPGA FF count or a fit/timing result. The record identifies
+reset-zero, byte-mask and response/backpressure obligations for any future RAM
+backend. No RTL rewrite is accepted or implemented. Vendor synthesis after
+T-0188 host/tool inventory must determine whether a rewrite is justified.
+
 ## Portable RTL and structural closure — T-0189/S03, 2026-09-28
 
 [Issue282](https://github.com/bhind/raveil/issues/282) corrects an observed Yosys
