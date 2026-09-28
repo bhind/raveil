@@ -206,5 +206,9 @@ class GraphDeviceAxi4LiteTop extends RawModule {
 
 object EmitGraphDeviceAxi4LiteTop extends App {
   val target = args.dropWhile(_ != "--target-dir").drop(1).headOption.getOrElse("generated_axi4lite")
-  ChiselStage.emitSystemVerilogFile(new GraphDeviceAxi4LiteTop, args = Array("--target-dir", target), firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info"))
+  // Standard compiler lowering keeps this same circuit readable by Yosys.
+  ChiselStage.emitSystemVerilogFile(new GraphDeviceAxi4LiteTop,
+    args = Array("--target-dir", target),
+    firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info",
+      "--lowering-options=disallowLocalVariables,disallowPackedArrays"))
 }

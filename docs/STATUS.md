@@ -1,5 +1,19 @@
 # Current status
 
+## Portable RTL and structural closure — T-0189/S03, 2026-09-28
+
+[Issue282](https://github.com/bhind/raveil/issues/282) corrects an observed Yosys
+frontend failure using CIRCT output-lowering options only. Fresh repeatable RTL
+passes generic hierarchy/process/memory checks, with zero structural problems,
+zero combinational SCCs and no inferred latches. A source-bound runner verifies
+the exact tool, script, netlist interface and receipt. All 30 scoped host tests
+pass; the final verifier correction also passes its seven tests. Fresh S01
+three-base control tests and S02 full execution/reset/oracle tests pass.
+See [reproduction](guides/FPGA-BOARD-BUNDLE.md) and [evidence](log/2026-09-28.md).
+This is generic structural checking and RTL simulation, not FPGA mapping,
+resource fit or timing. Core logic/ABI and ADR-0105/0106 remain unchanged.
+T-0188 actual Windows/tool inventory is still next; parent T-0189 remains open.
+
 ## Board execution and recovery — T-0189/S02, 2026-09-27
 
 [PR281](https://github.com/bhind/raveil/pull/281) supplies one real-core board-bridge model that runs the existing three-Graph catalogue

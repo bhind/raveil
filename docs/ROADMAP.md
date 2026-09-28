@@ -19,6 +19,9 @@ source-bound offline bundle (ADR-0106), with control-plane RTL evidence only.
 S02/#279 validates five full completions, cancellation and external-reset
 recovery through that bridge on one simulated model with exact oracle/fallback
 and bus-read equality. This closes only offline functional preparation.
+S03/#282 additionally resolves the observed Yosys frontend incompatibility and
+passes generic structural closure plus fresh S01/S02 regression tests. This is
+not a mapped FPGA design or a resource/timing result.
 Vendor synthesis still waits for qualified host/tools; final purchase/programming need an exact reviewed affordable target.
 
 ## Earlier immutable-function priority — superseded entry ordering

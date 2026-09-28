@@ -1,6 +1,6 @@
 # Raveil TODO
 
-## Current focus — affordable FPGA implementation (2026-09-27)
+## Current focus — affordable FPGA implementation (2026-09-28)
 
 [ADR-0105](docs/decisions/ADR-0105-budgeted-fpga-demonstrator.md) applies the
 owner's explicit goal change: build and measure a single-board demonstrator
@@ -35,6 +35,13 @@ incremental spend is zero. Existing prior-art and negative results remain.
   and final prepare/run/verify pass. No vendor/FPGA/performance evidence.
   Next: T-0188 actual Windows/tool inventory before T-0189 vendor synthesis;
   do not create a duplicate Ready card or infer installed tools from a PC's existence.
+
+- [x] **T-0189/S03** [Issue #282](https://github.com/bhind/raveil/issues/282),
+  S-0006,5SP: portable CIRCT emission and source-bound generic structural
+  preflight verified locally; 30 host tests, final seven-test verifier rerun,
+  fresh three-base control and full execution/recovery regressions pass.
+  [Evidence](docs/log/2026-09-28.md). No FPGA mapping, fit or timing result.
+  Next remains T-0188 actual Windows/tool inventory; S-0005 Review stays postponed.
 
 ## Completed immutable-function screen — retained evidence
 
