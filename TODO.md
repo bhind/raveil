@@ -38,10 +38,18 @@ incremental spend is zero. Existing prior-art and negative results remain.
 
 - [x] **T-0189/S03** [Issue #282](https://github.com/bhind/raveil/issues/282),
   S-0006,5SP: portable CIRCT emission and source-bound generic structural
-  preflight verified locally; 30 host tests, final seven-test verifier rerun,
+  preflight integrated via [PR283](https://github.com/bhind/raveil/pull/283),
+  merge `9a51cc9`, Issue closed/Project Done; 30 host tests and final seven-test verifier rerun,
   fresh three-base control and full execution/recovery regressions pass.
   [Evidence](docs/log/2026-09-28.md). No FPGA mapping, fit or timing result.
   Next remains T-0188 actual Windows/tool inventory; S-0005 Review stays postponed.
+
+- [x] **T-0189/S04** [Issue #284](https://github.com/bhind/raveil/issues/284),
+  S-0006,2SP: [memory feasibility diagnosis](docs/research/reviews/T-0189-memory-feasibility.md)
+  verifies retained register storage after generic optimization and specifies
+  compatibility checks for a possible RAM backend. No fit estimate or RTL change.
+  Next: T-0188 actual Windows/tool inventory, then vendor resource inspection
+  before deciding whether a RAM rewrite is needed.
 
 ## Completed immutable-function screen — retained evidence
 
