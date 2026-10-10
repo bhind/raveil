@@ -1,5 +1,14 @@
 # Raveil gated roadmap
 
+## Approved general-grid continuation, 2026-10-10
+
+The owner requested generality beyond T-0207. T-0208/#296 addresses1..64
+rectangular sizes, user-defined bounded kernels, three global boundary modes
+and partial tiles with a reusable edit/check/run/inspect/compare workflow.
+Host validation and426-cell generalized actual RTL acceptance pass. The owner
+subsequently approved the concrete scope and integration; accepted ADR-0112
+records it. Remote completion follows verified PR merge. Hardware remains deferred.
+
 ## Current owner-directed priority — simulation maturity, 2026-10-10
 
 [ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) governs:

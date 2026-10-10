@@ -1,5 +1,28 @@
 # Current status
 
+## General rectangular grids — T-0208, 2026-10-10
+
+The owner requested broader generality after PR295. T-0208/#296
+implements variable1..64 rectangular grids, editable bounded kernels and
+zero/clamp/wrap boundaries over existing16x16 RTL. Partial edge outputs are
+cropped only after full child validation; full-grid interpretation checks the
+assembly. Admission preview and saved comparison run without execution/writes.
+Versioned v2 records freeze input/kernel/boundary; v1 behavior remains supported.
+
+90 focused host tests pass, including full64x64/16-child assembly, degenerate
+and asymmetric shapes, all opcodes, limits, edits, faults/tamper and legacy
+regressions. Three retained actual v1 parents reread successfully. Generalized
+actual RTL acceptance now passes426 independently computed cells across17x19,
+3x17 and1x1, all three boundaries, both kernels and an edited kernel. Ten actual
+children share unchanged RTL/simulator/source identities; saved comparison, old
+snapshot preservation and between-child cancellation pass. Primary rereads all
+five parents and120 raw receipt bindings. Maximum64x64 coverage is host-only.
+
+The owner explicitly approved this exact scope and Issue/PR/main integration
+on October10. Issue296 tracks delivery; ADR-0112 is accepted. The original
+local evidence and publication refusal remain in the dated log.
+No new tool, purchase, RTL/ABI change or performance claim.
+
 ## Bounded32x32 grid execution — T-0207, 2026-10-10
 
 [ADR-0111](decisions/ADR-0111-bounded-spatial-tiling.md) adds fixed five-point

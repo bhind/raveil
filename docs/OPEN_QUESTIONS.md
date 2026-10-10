@@ -1,5 +1,16 @@
 # Open questions
 
+## General grid contract and remaining limits
+
+Owner-approved T-0208/#296 / ADR-0112 implements the dimension/kernel/boundary
+contract. Each dimension is1..64;
+existing bounded per-cell operations and one-pass uint32 semantics are explicit;
+floating point, arbitrary-radius neighborhoods, multi-input/output, global
+reductions, loops and QEMU coupling remain outside this candidate. Actual
+generalized RTL acceptance passes three shapes/all boundary modes and edits;
+host-only maximum-size coverage must not be promoted to physical performance
+or all-size RTL evidence.
+
 ## Simulation maturity — current priority, ADR-0107
 
 - T-0197 / ADR-0108 now specifies/version-controls the parent plan/result,

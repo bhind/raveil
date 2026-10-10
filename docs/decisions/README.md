@@ -1,5 +1,8 @@
 # Architecture Decision Records
 
+[ADR-0112](ADR-0112-general-bounded-grid-kernels.md) accepts the owner-approved
+rectangular grid/kernel/boundary interface under T-0208/#296.
+
 [ADR-0107](ADR-0107-simulation-maturity-before-hardware.md) makes implementation
 maturity in Chisel/Verilator and QEMU precede hardware acquisition. It supersedes
 ADR-0105 delivery ordering only. [ADR-0108](ADR-0108-bounded-project-result-composition.md)
