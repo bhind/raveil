@@ -4,10 +4,10 @@
 
 - T-0197 / ADR-0108 now specifies/version-controls the parent plan/result,
   frozen input/child descriptors and all-or-incomplete publication. Its actual
-  execution acceptance is recorded in the October10 log. T-0205/#288 will address
-  the remaining named-parent edit/compare workflow gap; ordinary single-run
+  execution acceptance is recorded in the October10 log. T-0205/#288 / ADR-0109 implements
+  named-parent edit/compare workflow; ordinary single-run
   diff cannot compare child runs held in different private parent projects.
-- Which maturity criteria still lack evidence after T-0197? Audit the complete
+- T-0206/#290: which maturity criteria still lack evidence after T-0205? Audit the complete
   edit/run/inspect/retry workflow before hardware readiness review; do not mark
   the review passed from this policy change.
 - QEMU and RTL are separate current backends. Any necessary integration needs

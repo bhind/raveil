@@ -4,6 +4,8 @@
 maturity in Chisel/Verilator and QEMU precede hardware acquisition. It supersedes
 ADR-0105 delivery ordering only. [ADR-0108](ADR-0108-bounded-project-result-composition.md)
 specifies T-0197 named-result publication and cancellation boundaries.
+[ADR-0109](ADR-0109-verified-named-result-comparison.md) defines read-only
+comparison of compatible complete named parents.
 
 [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) adopts the owner's budgeted
 single-board implementation/measurement objective. It supersedes novelty as
@@ -134,3 +136,4 @@ rewrite it.
 | [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) | Accepted | Affordable FPGA demonstrator and honest measurement without a novelty prerequisite |
 | [ADR-0106](ADR-0106-board-address-and-reset-boundary.md) | Accepted | Absolute AXI window and synchronized reset release around the existing relative core |
 | [ADR-0108](ADR-0108-bounded-project-result-composition.md) | Accepted | Frozen input and one/two private Graph results; publish parent only after all children pass |
+| [ADR-0109](ADR-0109-verified-named-result-comparison.md) | Accepted | Verified read-only named result comparison after input/computation edits |

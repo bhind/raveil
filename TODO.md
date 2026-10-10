@@ -147,12 +147,22 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   pass; between-child cancellation keeps parent incomplete. See October10 log.
   Project Done requires normal merge/Issue closure and canonical completion.
 
-- [ ] **T-0205** [Issue #288](https://github.com/bhind/raveil/issues/288),
-  S-0007,3SP planned: read-only named-parent comparison after T-0197 integration.
+- [x] **T-0205** [Issue #288](https://github.com/bhind/raveil/issues/288),
+  S-0007,3SP: [PR291](https://github.com/bhind/raveil/pull/291), ADR-0109.
+  Technically accepted:56 host tests, actual edited/reordered RTL pairs, all
+  1,024 scalar word checks, named changes and immutable old snapshots pass.
+  Normal merge and canonical completion govern Project Done.
   Validate both complete parents, pair labels/layouts/build identities, report
   bounded verified output changes; demonstrate edit/run/compare with old
   snapshots preserved. No backend/RTL changes. Then review combined ADR-0107
   maturity evidence; no automatic hardware purchase.
+
+- [ ] **T-0206** [Issue #290](https://github.com/bhind/raveil/issues/290),
+  S-0007,2SP: after T-0205, assess the five ADR-0107 maturity criteria from
+  executable/source-bound evidence. Revalidate composition/editing and retained
+  reset/backpressure/structural receipts; run the supported small QEMU project
+  with existing tools or record its exact gap. No new architecture, install,
+  hardware purchase or performance claim; one bounded correction only if needed.
 
 - [x] **T-0187** Select a bounded simulator reuse path, Issue #187, S-0005,
   original3SP preserved. Owner explicitly authorized continuation and the
@@ -511,7 +521,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197 named results are technically accepted. T-0205 is its bounded prepared successor under the completed T-0204 correction. No hardware mutation is active. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197 named results are integrated via PR289. T-0205 implements saved comparison under the completed T-0204 correction. No hardware mutation is active. |
 | **P1 — next** | Start only after its named dependencies pass. | ADR-0107 selects T-0197 / #266, followed by T-0205 / #288 named-parent comparison and the combined maturity review. T-0183 and T-0196 are complete. T-0186 is later; T-0188/T-0189 physical work waits for simulation maturity. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |

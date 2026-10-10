@@ -722,7 +722,7 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
-    if action in {"compose", "composition", "compositions"}:
+    if action in {"compose", "composition", "compositions", "composition-diff"}:
         from . import project_composition
         if action == "compose":
             outputs = [value.split("=", 1) for value in args.output]
@@ -732,7 +732,9 @@ def command_project(args: argparse.Namespace) -> int:
             if record["error"]:
                 print(record["error"])
             return 0 if record["status"] == "succeeded" else 2
-        if action == "composition":
+        if action == "composition-diff":
+            print(project_composition.diff(project, args.first, args.second), end="")
+        elif action == "composition":
             print(project_composition.inspect(project, args.composition_id), end="")
         else:
             print(project_composition.history(project))
@@ -813,7 +815,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -831,6 +833,9 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--output", action="append", required=True, help="NAME=RECIPE; repeat once for two outputs")
         if action == "composition":
             command.add_argument("composition_id", help="saved parent result set; verifies without rerunning")
+        if action == "composition-diff":
+            command.add_argument("first", help="older complete composition ID")
+            command.add_argument("second", help="newer complete composition ID")
         if action == "fork":
             command.add_argument("source", help="admitted source recipe name")
             command.add_argument("destination", help="new confined recipe name")

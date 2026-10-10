@@ -252,6 +252,55 @@ def inspect(project, identity):
     return "\n".join(lines) + "\n"
 
 
+def diff(project, first, second):
+    """Compare complete saved parents by name; validate again before returning."""
+    captured = [load(project, identity) for identity in (first, second)]
+    records = [item[0] for item in captured]
+    if any(record["status"] != "succeeded" for record in records):
+        raise ValueError("composition diff requires two complete parents")
+    plans = [_plan(project.root / "compositions" / identity) for identity in (first, second)]
+    by_name = [{entry["name"]: (slot, entry) for slot, entry in enumerate(record["children"])}
+               for record in records]
+    if by_name[0].keys() != by_name[1].keys():
+        raise ValueError("composition output names differ")
+    build_keys = ("simulator_sha256", "rtl_manifest_sha256", "source_manifest_sha256")
+    builds = [record["children"][0] for record in records]
+    if any(builds[0][key] != builds[1][key] for key in build_keys):
+        raise ValueError("composition build identities differ")
+    lines = [f"composition {first} -> {second}",
+             "comparison=host-functional saved_evidence=rtl-simulation-functional execution=none"]
+    def identity(key, left, right):
+        return f"{key}: " + (f"same {left}" if left == right else f"{left} -> {right}")
+    lines.append(identity("input_sha256", plans[0][0]["input_sha256"], plans[1][0]["input_sha256"]))
+    lines.extend(project_graph.describe_input_changes(plans[0][2], plans[1][2]))
+    lines.extend(f"{key}: same {builds[0][key]}" for key in build_keys)
+    for label in sorted(by_name[0]):
+        slots, entries = zip(*(mapping[label] for mapping in by_name))
+        shapes = [project_graph.compile_graph(_json(plan[3][slot]))["affine"]
+                  for plan, slot in zip(plans, slots)]
+        layout = ("rows", "columns", "output_stride")
+        if any(shapes[0][key] != shapes[1][key] for key in layout):
+            raise ValueError(f"composition output layout differs for {label}")
+        # load() checked these captured strings against oracle-validated output.bin.
+        values = [[int(word) for word in item[1][slot].split()]
+                  for item, slot in zip(captured, slots)]
+        count = shapes[0]["rows"] * shapes[0]["columns"]
+        if any(len(words) != count for words in values):
+            raise ValueError("verified output text size differs")
+        changed = [index for index in range(count) if values[0][index] != values[1][index]]
+        lines.append(f"output={label} layout={shapes[0]['rows']}x{shapes[0]['columns']}")
+        lines.extend(identity(key, entries[0][key], entries[1][key])
+                     for key in ("descriptor_sha256", "output_sha256"))
+        lines.append(f"output: {len(changed)}/{count} active cells changed")
+        if changed:
+            index = changed[0]
+            row, column = divmod(index, shapes[0]["columns"])
+            lines.append(f"first changed cell ({row}, {column}): {values[0][index]} -> {values[1][index]}")
+    if any(load(project, identity) != old for identity, old in zip((first, second), captured)):
+        raise ValueError("composition changed during comparison")
+    return "\n".join(lines) + "\n"
+
+
 def history(project):
     if "compositions" not in project.workspace.ls("/"):
         return "No composition attempts."
