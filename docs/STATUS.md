@@ -1,5 +1,16 @@
 # Current status
 
+## Named result comparison — T-0205, 2026-10-10
+
+ADR-0109 adds `project composition-diff OLD NEW`: validate complete saved
+parents, pair outputs by name, require compatible layouts/builds, and report
+bounded input/descriptor/output changes without execution or writes. It
+revalidates before returning and rejects incomplete, unsealed, tampered or
+incompatible records. Existing single-run diff is unchanged. Final actual
+edit/run/compare/preserve evidence is recorded in the October10 log.
+T-0206/#290 owns the combined ADR-0107 maturity evidence review; it remains
+separate and unpassed. Hardware is deferred.
+
 ## Named Graph results — T-0197, 2026-10-10
 
 ADR-0108 adds one/two named results from an explicit frozen input, with private

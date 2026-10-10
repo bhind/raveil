@@ -233,6 +233,99 @@ class CompositionTests(unittest.TestCase):
             self.assertEqual(main(["project", "composition", identity, "--project", str(self.root)]), 0)
             self.assertEqual(main(["project", "compositions", "--project", str(self.root)]), 0)
 
+    def test_diff_is_read_only_and_identical_outputs_are_unchanged(self):
+        from raveil.project import tree
+        left, right = self.run_pair(), self.run_pair()
+        before = tree(self.root)
+        with patch.object(Project, "run", side_effect=AssertionError("no execution")), patch("raveil.project_graph.run_snapshot", side_effect=AssertionError("no simulator")):
+            text = c.diff(self.project, left["composition_id"], right["composition_id"])
+            self.assertEqual(text.count("0/64 active cells changed"), 2)
+            self.assertIn("execution=none", text)
+            self.assertIn("input_sha256: same", text)
+        self.assertEqual(tree(self.root), before)
+
+    def test_diff_pairs_by_name_after_reordering_and_reports_edits(self):
+        descriptor = json.loads((self.root / "inputs/bias-grid.json").read_text())
+        descriptor["nodes"][1]["immediate"] = 9
+        (self.root / "inputs/other.json").write_bytes(encoded(descriptor))
+        recipe = self.project.recipe("bias-grid"); recipe["descriptor"] = "other.json"
+        (self.root / "recipes/other.json").write_bytes(encoded(recipe))
+        self.outputs = [("raw", "bias-grid"), ("biased", "other")]
+        left = self.run_pair()
+        self.outputs.reverse()
+        reordered = self.run_pair()
+        text = c.diff(self.project, left["composition_id"], reordered["composition_id"])
+        self.assertEqual(text.count("0/64 active cells changed"), 2)
+        source = self.root / "inputs/bias-grid-data.json"
+        data = json.loads(source.read_text()); data["words"][11] += 1
+        source.write_bytes(encoded(data))
+        descriptor["nodes"][1]["immediate"] = 10
+        (self.root / "inputs/other.json").write_bytes(encoded(descriptor))
+        right = self.run_pair()
+        text = c.diff(self.project, left["composition_id"], right["composition_id"])
+        self.assertIn("1/64 active cells changed", text)
+        self.assertIn("64/64 active cells changed", text)
+        self.assertIn("first changed cell (0, 0)", text)
+        self.assertEqual(c.load(self.project, left["composition_id"])[0], left)
+
+    def test_diff_rejects_incomplete_unsealed_and_tampered(self):
+        left = self.run_pair()
+        incomplete = self.run_pair(cancelled=lambda: True)
+        with self.assertRaisesRegex(ValueError, "complete parents"):
+            c.diff(self.project, left["composition_id"], incomplete["composition_id"])
+        root = self.root / "compositions" / incomplete["composition_id"]
+        (root / "record.json").unlink()
+        with self.assertRaises((ValueError, OSError)):
+            c.diff(self.project, left["composition_id"], incomplete["composition_id"])
+        root = self.root / "compositions" / left["composition_id"]
+        (root / "input.json").write_text("{}")
+        with self.assertRaises(ValueError):
+            c.diff(self.project, left["composition_id"], left["composition_id"])
+
+    def test_diff_rejects_name_layout_and_build_mismatch(self):
+        left = self.run_pair()
+        self.outputs = [("renamed", "bias-grid"), ("biased", "bias-grid")]
+        right = self.run_pair()
+        with self.assertRaisesRegex(ValueError, "names differ"):
+            c.diff(self.project, left["composition_id"], right["composition_id"])
+        self.outputs = [("raw", "bias-grid"), ("biased", "bias-grid")]
+        def changed_build(*args, **kw):
+            result = host_fixture_runner(*args, **kw)
+            result["receipt"]["simulator_sha256"] = "d" * 64
+            return result
+        right = self.run_pair(changed_build)
+        with self.assertRaisesRegex(ValueError, "build identities"):
+            c.diff(self.project, left["composition_id"], right["composition_id"])
+        path = self.root / "inputs/bias-grid.json"
+        descriptor = json.loads(path.read_text())
+        descriptor["affine"] = {"rows": 16, "columns": 16, "input_stride": 18, "output_stride": 16}
+        path.write_bytes(encoded(descriptor))
+        right = self.run_pair()
+        self.assertEqual(right["status"], "succeeded")
+        with self.assertRaisesRegex(ValueError, "layout differs"):
+            c.diff(self.project, left["composition_id"], right["composition_id"])
+
+    def test_diff_revalidates_before_returning_report(self):
+        left, right = self.run_pair(), self.run_pair()
+        original = c.load
+        calls = 0
+        def drifting(project, identity):
+            nonlocal calls
+            calls += 1
+            if calls == 3:
+                (project.root / "compositions" / identity / "input.json").write_text("{}")
+            return original(project, identity)
+        with patch.object(c, "load", side_effect=drifting), self.assertRaises(ValueError):
+            c.diff(self.project, left["composition_id"], right["composition_id"])
+
+    def test_diff_cli(self):
+        record = self.run_pair()
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(main(["project", "composition-diff", record["composition_id"], record["composition_id"], "--project", str(self.root)]), 0)
+        self.assertIn("output=raw", out.getvalue())
+        self.assertIn("output=biased", out.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

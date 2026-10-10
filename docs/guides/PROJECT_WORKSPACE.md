@@ -46,6 +46,34 @@ cancellation boundary, not device cancellation during execution. Toolchain and
 image prerequisites match the existing RTL backend; no QEMU/RTL co-simulation,
 shared arithmetic, hardware measurement or speedup is implied. See ADR-0108.
 
+### Compare edited named results
+
+After editing source input or descriptors and creating a new composition:
+
+```sh
+python3 -m raveil project composition-diff OLD_ID NEW_ID --project WORK
+```
+
+The command verifies both complete saved parents and pairs their outputs by
+name, even if child order changed. It shows input/descriptor/output hashes,
+common build identities, changed input words and changed active output cells
+with the first changed coordinate/value. Nothing is executed or rewritten.
+Incomplete/unsealed/tampered records, differing name sets, incompatible output
+layouts or different simulator/RTL/source builds are rejected. Use ordinary
+single-run `project diff` for ordinary runs. Comparison is Host Functional over
+retained RTL evidence; it supplies no timing comparison or authenticity claim.
+
+For the actual editable workflow demonstration, choose a new output directory:
+
+```sh
+python3 scripts/demo_project_composition_diff.py --output artifacts/research/T-0205/my-demo
+```
+
+It creates a complete pair, edits one input value and the bias17→23, reverses
+child order, executes a second pair, checks all1,024 words against independent
+scalar formulas, compares by name and verifies the old saved pair is unchanged.
+Expected changes are one raw cell and all64 biased cells. See ADR-0109.
+
 ## When a Graph is rejected
 
 `project check RECIPE --backend rtl-sim --project WORK` keeps the original
