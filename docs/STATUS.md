@@ -7,7 +7,7 @@ child projects, retained descriptors/hashes and all-or-incomplete publication.
 Separate compose/inspection/history commands preserve ordinary single-run
 behavior. Both `x*x` and `x*x+17` modulo2^32 pass actual RTL, independent oracle
 and C++ fallback validation; all512 saved words match scalar expectations.
-Host-boundary cancellation between actual children retains the first child
+All74 scoped host tests pass. Host-boundary cancellation between actual children retains the first child
 without publishing a complete parent. Final validation and source identities
 are recorded in the [October10 log](log/2026-10-10.md).
 

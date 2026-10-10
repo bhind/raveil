@@ -11,7 +11,7 @@ separate. Windows/Vivado inventory does not gate current development.
   S-0007,2SP: simulation-maturity policy and implementation exit criteria;
   current record/queue correction. No new runtime or physical result.
 
-Current implementation is **T-0197/#266**, defined below: two named results
+Technically accepted implementation is **T-0197/#266**, defined below: two named results
 from one frozen input, with complete-parent publication only after all children
 pass. The bounded successor is **T-0205/#288**, saved named-parent comparison
 after editing input/computation. T-0186 follows later scope review. T-0188/T-0189 physical
@@ -139,11 +139,13 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   S-0005, 3 SP. Selects host composition of one/two existing single-output
   children; no hardware STORE extension. Six planning vectors and 37 existing
   regressions pass; independent GO. Technically accepted for integration.
-- [ ] **T-0197** Compose two named Graph results from one frozen input,
+- [x] **T-0197** Compose two named Graph results from one frozen input,
   [Issue #266](https://github.com/bhind/raveil/issues/266), S-0007,5SP unchanged,
-  active after T-0204, T-0183 and T-0196. ADR-0108 adds private snapshots,
-  parent publication, inspect/history and incomplete retention. Final actual
-  RTL acceptance and integration are recorded in the October10 log.
+  technically accepted in [PR289](https://github.com/bhind/raveil/pull/289).
+  ADR-0108 adds private snapshots, parent publication, inspect/history and
+  incomplete retention.74 host tests and final actual512-word RTL/scalar checks
+  pass; between-child cancellation keeps parent incomplete. See October10 log.
+  Project Done requires normal merge/Issue closure and canonical completion.
 
 - [ ] **T-0205** [Issue #288](https://github.com/bhind/raveil/issues/288),
   S-0007,3SP planned: read-only named-parent comparison after T-0197 integration.
@@ -509,7 +511,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197 implements named results under the completed T-0204 correction. T-0205 is its bounded prepared successor. No hardware mutation is active. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197 named results are technically accepted. T-0205 is its bounded prepared successor under the completed T-0204 correction. No hardware mutation is active. |
 | **P1 — next** | Start only after its named dependencies pass. | ADR-0107 selects T-0197 / #266, followed by T-0205 / #288 named-parent comparison and the combined maturity review. T-0183 and T-0196 are complete. T-0186 is later; T-0188/T-0189 physical work waits for simulation maturity. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
