@@ -147,9 +147,11 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   pass; between-child cancellation keeps parent incomplete. See October10 log.
   Project Done requires normal merge/Issue closure and canonical completion.
 
-- [ ] **T-0205** [Issue #288](https://github.com/bhind/raveil/issues/288),
-  S-0007,3SP active after T-0197 integration at `a52d248`. ADR-0109: read-only
-  named-parent comparison after source edits.
+- [x] **T-0205** [Issue #288](https://github.com/bhind/raveil/issues/288),
+  S-0007,3SP: [PR291](https://github.com/bhind/raveil/pull/291), ADR-0109.
+  Technically accepted:56 host tests, actual edited/reordered RTL pairs, all
+  1,024 scalar word checks, named changes and immutable old snapshots pass.
+  Normal merge and canonical completion govern Project Done.
   Validate both complete parents, pair labels/layouts/build identities, report
   bounded verified output changes; demonstrate edit/run/compare with old
   snapshots preserved. No backend/RTL changes. Then review combined ADR-0107

@@ -6,8 +6,9 @@ ADR-0109 adds `project composition-diff OLD NEW`: validate complete saved
 parents, pair outputs by name, require compatible layouts/builds, and report
 bounded input/descriptor/output changes without execution or writes. It
 revalidates before returning and rejects incomplete, unsealed, tampered or
-incompatible records. Existing single-run diff is unchanged. Final actual
-edit/run/compare/preserve evidence is recorded in the October10 log.
+incompatible records. Existing single-run diff is unchanged.56 host tests pass; actual edited/reordered RTL pairs pass
+all1,024 scalar word checks, with raw1/64 and biased64/64 cells changed and
+old snapshots preserved. Final source identities are in the October10 log.
 T-0206/#290 owns the combined ADR-0107 maturity evidence review; it remains
 separate and unpassed. Hardware is deferred.
 
