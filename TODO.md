@@ -1,11 +1,22 @@
 # Raveil TODO
 
-## Current focus — affordable FPGA implementation (2026-09-28)
+## Current focus — simulation maturity before hardware (2026-10-10)
 
-[ADR-0105](docs/decisions/ADR-0105-budgeted-fpga-demonstrator.md) applies the
-owner's explicit goal change: build and measure a single-board demonstrator
-within an individual budget; novelty is no longer an entry condition. Initial
-incremental spend is zero. Existing prior-art and negative results remain.
+[ADR-0107](docs/decisions/ADR-0107-simulation-maturity-before-hardware.md)
+implements the owner-approved order: finish the usable Chisel/Verilator and
+QEMU implementation before introducing hardware. The backends are currently
+separate. Windows/Vivado inventory does not gate current development.
+
+- [x] **T-0204** [Issue #286](https://github.com/bhind/raveil/issues/286),
+  S-0007,2SP: simulation-maturity policy and implementation exit criteria;
+  current record/queue correction. No new runtime or physical result.
+
+Next implementation is existing **T-0197/#266**, defined below: two named
+results from one frozen input, with complete-parent publication only after
+all children pass. T-0186 follows later scope review. T-0188/T-0189 physical
+work is deferred until the maturity review, not a current missing-PC blocker.
+
+## Retained affordable-hardware preparation
 
 - [x] **T-0203** [Issue #276](https://github.com/bhind/raveil/issues/276),
   S-0005,3SP: integrated through PR277 (`595c66b`), Issue closed/Project Done.
@@ -16,12 +27,13 @@ incremental spend is zero. Existing prior-art and negative results remain.
   of yen with existing USD100/month Codex expense. Purchase is not authorized.
 - [ ] **T-0188** [Issue #194](https://github.com/bhind/raveil/issues/194): staged
   host/budget readiness first; board-specific boot/UIO observations later.
-  Immediate next action: run the no-install Windows inventory in the T-0203
-  packet. Exact OS/resources and remaining hardware budget are still unknown.
+  Deferred under ADR-0107 until simulation maturity. Then run the no-install
+  Windows inventory; actual resources and hardware budget remain unknown.
 - [ ] **T-0189** [Issue #195](https://github.com/bhind/raveil/issues/195): one
   source-bound board wrapper/design and functional bring-up after supported
   tools are known. Design preparation need not wait for a physical board;
-  programming and target checks do. Preserve exact identities and recovery.
+  programming and target checks do. Remaining physical work is deferred under
+  ADR-0107; retain S01–S04 and exact identities/recovery evidence.
 
 - [x] **T-0189/S01** [Issue #278](https://github.com/bhind/raveil/issues/278),
   S-0005,5SP: offline absolute-address/reset bridge and source-bound board
@@ -33,7 +45,7 @@ incremental spend is zero. Existing prior-art and negative results remain.
   the existing three-Graph matrix plus external-reset recovery; five256-word
   outputs/fallbacks and1,280 AXI reads match independent oracles.23 host tests
   and final prepare/run/verify pass. No vendor/FPGA/performance evidence.
-  Next: T-0188 actual Windows/tool inventory before T-0189 vendor synthesis;
+  Later hardware dependency: T-0188 inventory before T-0189 vendor synthesis;
   do not create a duplicate Ready card or infer installed tools from a PC's existence.
 
 - [x] **T-0189/S03** [Issue #282](https://github.com/bhind/raveil/issues/282),
@@ -42,13 +54,13 @@ incremental spend is zero. Existing prior-art and negative results remain.
   merge `9a51cc9`, Issue closed/Project Done; 30 host tests and final seven-test verifier rerun,
   fresh three-base control and full execution/recovery regressions pass.
   [Evidence](docs/log/2026-09-28.md). No FPGA mapping, fit or timing result.
-  Next remains T-0188 actual Windows/tool inventory; S-0005 Review stays postponed.
+  Hardware stage is deferred under ADR-0107; S-0005 Review stays postponed.
 
 - [x] **T-0189/S04** [Issue #284](https://github.com/bhind/raveil/issues/284),
   S-0006,2SP: [memory feasibility diagnosis](docs/research/reviews/T-0189-memory-feasibility.md)
   verifies retained register storage after generic optimization and specifies
   compatibility checks for a possible RAM backend. No fit estimate or RTL change.
-  Next: T-0188 actual Windows/tool inventory, then vendor resource inspection
+  Later: T-0188 actual Windows/tool inventory, then vendor resource inspection
   before deciding whether a RAM rewrite is needed.
 
 ## Completed immutable-function screen — retained evidence
@@ -102,8 +114,8 @@ follow-up search or forced Ready card is started by this negative selection.
 
 **Prior research ordering:** integrated T-0199 → T-0200 workload/reference packet → known
 fixed-parameter controls → only then a mechanism-specific comparison.
-T-0183 planning is complete. T-0197 / #266 multi-result implementation stays
-Backlog/P2; T-0186 remains queued. T-0044 physical gates and T-0106 triggers are
+T-0183 planning is complete. ADR-0107 restores T-0197 / #266 as the next
+implementation; T-0186 remains queued. T-0044 physical gates and T-0106 triggers are
 unchanged. Other pivots and Experience expansion remain deferred.
 
 **Sprint Review:** owner postponed S-0005 weekly Review on September 26.
@@ -118,7 +130,7 @@ Original local receipts retain their filenames and historical identity.
 The owner removed weekly quota gating; ADR-0104 supersedes that stop only.
 Ordinary permission, paid-resource, evidence and review boundaries still apply.
 
-Last updated: 2026-09-27
+Last updated: 2026-10-10
 
 Checkboxes are execution state, not priority. Every material task has a stable ID.
 
@@ -127,7 +139,8 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   children; no hardware STORE extension. Six planning vectors and 37 existing
   regressions pass; independent GO. Technically accepted for integration.
 - [ ] **T-0197** Compose two named Graph results from one frozen input,
-  Issue #266, proposed 5 SP, following T-0183 and T-0196. New parent record
+  [Issue #266](https://github.com/bhind/raveil/issues/266), S-0007,5SP unchanged,
+  restored as P1/Ready after T-0204, T-0183 and T-0196. New parent record
   and implementation ADR; retain child evidence on failure but publish a
   complete result set only after both pass. No runtime implementation yet.
 
@@ -488,8 +501,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0203 / #276 owns the budgeted FPGA decision/prerequisite refresh; T-0202 is merged/Done; T-0199/T-0200/T-0201 are merged/Done. T-0195/0196 are integrated at the cached base. |
-| **P1 — next** | Start only after its named dependencies pass. | ADR-0105 selects T-0188 staged host readiness then T-0189 exact design/functional bring-up. Novelty is not required for this demonstrator. Timing still requires a pre-data EXP. T-0183 is complete; T-0197 / #266 and T-0186 are deferred product work. Physical gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0204 records the simulation-first correction; T-0203 and T-0189/S01–S04 are complete. No hardware mutation is active. |
+| **P1 — next** | Start only after its named dependencies pass. | ADR-0107 selects T-0197 / #266 implementation after T-0204. T-0183 and T-0196 are complete. T-0186 is later; T-0188/T-0189 physical work waits for simulation maturity. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |

@@ -1,14 +1,17 @@
 # Raveil project records
 
-Current priority: [budgeted FPGA implementation](decisions/ADR-0105-budgeted-fpga-demonstrator.md)
-and [T-0203 executable prerequisite/cost packet](research/reviews/T-0203-budgeted-fpga-path.md).
-T-0188/#194 staged host readiness precedes vendor/device work under T-0189/#195.
-The [offline board bundle](guides/FPGA-BOARD-BUNDLE.md) supplies S01's tested
-address/reset wrapper and S02/#279 verifies full-execution/recovery simulation.
-S03/#282 adds [portable RTL and generic structural checks](log/2026-09-28.md),
-with fresh S01/S02 regressions. Actual Windows/tool inventory under T-0188
-is next before vendor synthesis. [S04 memory diagnosis](research/reviews/T-0189-memory-feasibility.md)
-identifies the storage/reset boundary to inspect in that synthesis.
+Current priority: [simulation maturity before hardware](decisions/ADR-0107-simulation-maturity-before-hardware.md).
+T-0204/#286 records the owner-approved correction; existing T-0197/#266 is the
+next implementation: two named results from one frozen input, with all-or-
+incomplete parent publication. [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
+provides the planning baseline. Chisel/Verilator checks RTL; QEMU checks supported
+Sonatine software. Their current project backends are separate.
+T-0188/#194 and unfinished T-0189/#195 hardware work are deferred until the
+maturity review. Windows/Vivado facts do not block this implementation phase.
+Retain the [offline board bundle](guides/FPGA-BOARD-BUNDLE.md), S01–S04 results
+and [memory diagnosis](research/reviews/T-0189-memory-feasibility.md) for later
+physical work. The [budgeted FPGA packet](research/reviews/T-0203-budgeted-fpga-path.md)
+is historical planning, not the current next pull.
 
 Retained earlier research context: [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md),
 [RFC-0007](rfcs/RFC-0007-immutable-function-work-reduction.md), and the

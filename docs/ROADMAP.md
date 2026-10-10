@@ -1,6 +1,18 @@
 # Raveil gated roadmap
 
-## Current owner-directed priority — affordable hardware, 2026-09-27
+## Current owner-directed priority — simulation maturity, 2026-10-10
+
+[ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) governs:
+T-0204 policy/queue correction → T-0197 named-result composition → review the
+editable workflow, same-RTL multi-Graph correctness, failure/reset recovery and
+reproducibility evidence → only then T-0188 host/budget and T-0189 hardware.
+Existing functionality counts as evidence, but the combined maturity review is
+not passed. No Windows, Vivado or board requirement blocks this software/RTL
+phase. QEMU and RTL functional results stay distinct from each other and from
+physical measurements. T-0186 is later; no speculative RAM rewrite is selected.
+Hardware spending remains deferred. Historical claims/gates remain unchanged.
+
+## Earlier affordable hardware ordering — superseded by ADR-0107
 
 [ADR-0105](decisions/ADR-0105-budgeted-fpga-demonstrator.md) supersedes the
 novelty-before-FPGA ordering for one budgeted demonstrator. Sequence: T-0203
@@ -52,13 +64,13 @@ new hardware or timing from those pitches. ADR-0105 subsequently authorizes the
 separate budgeted demonstrator without a novelty prerequisite; any renewed
 novelty claim still needs a concrete algorithmic difference. Historical gates
 remain intact. The owner postponed S-0005 weekly Review without
-changing ordinary task delivery or accepting the ceremony. T-0183 planning is complete; T-0197 / #266 and T-0186 remain deferred
-product work. The latter may support the selected workload when justified.
+changing ordinary task delivery or accepting the ceremony. T-0183 planning is complete; T-0197 / #266 was deferred at that point; ADR-0107 now restores it as next.
+T-0186 remains later product work. The latter may support the selected workload when justified.
 Other pivot suggestions are preserved alternatives, not parallel priorities.
 T-0044 physical blockers remain separate. ADR-0104 removes quota gating only.
 
 The September 19 acceleration sequence below is preserved as prior ordering;
-this section governs the next pull. Do not restart already integrated T-0196.
+the October10 section above governs the next pull. Do not restart already integrated T-0196.
 
 T-0183's concrete next capability is two named results via bounded host
 composition, registered as T-0197 / Issue #266. Complete its planning review,
