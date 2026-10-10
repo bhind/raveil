@@ -27,8 +27,12 @@ _PINNED_DISTRIBUTIONS = {
     "linux-x86_64": "ac3505591b6b134784eae7bcdf806fc66a2d120a82134b98bd4fbe488fdf84c5",
     "macos-universal2": "2e9fc888b9044662a14eeba01b6302d75a6118f68874699dcf8f9c7e991a4ee2",
 }
-_PINNED_SOURCE_SHA256 = "72e4409598aeacb0967fdb0e8ae1e7d42d716f973c2e469426ac6b2eb4eae7ce"
-_PINNED_SOURCE_SIZE = 1009
+# Each family is bound to independently reviewed exact source bytes. Compiler
+# acceptance alone must never choose the owned program's semantics.
+_PINNED_SOURCES = {
+    "gemm": ("72e4409598aeacb0967fdb0e8ae1e7d42d716f973c2e469426ac6b2eb4eae7ce", 1009),
+    "gemm_bias_relu": ("4b25cbae7427244eb9bdaee0ae8e06a2f85641f5569eff06857e5cd147f983bd", 1621),
+}
 _PINNED_TOOL_VERSION = "3.11.0rc20260316"
 _PINNED_TOOL_REVISION = "e4a3b0405d7d23554da26403658d0e8c3c5ecf25"
 
@@ -185,8 +189,9 @@ class PinnedIreeImporter:
                     "tool_revision", "target", "license"):
             if type(manifest[key]) is not str or not manifest[key]:
                 raise ValueError(f"invalid IREE import manifest field: {key}")
-        if manifest["family"] != "gemm" or manifest["entry_point"] != "main":
+        if manifest["family"] not in _PINNED_SOURCES or manifest["entry_point"] != "main":
             raise ValueError("IREE import is outside the admitted canonical module")
+        source_digest, pinned_size = _PINNED_SOURCES[manifest["family"]]
         dimensions = tuple(manifest[key] for key in ("m", "n", "k"))
         if dimensions != (8, 8, 8) or any(type(value) is not int for value in dimensions):
             raise ValueError("IREE import dimensions are outside the admitted fixture")
@@ -203,9 +208,9 @@ class PinnedIreeImporter:
         if type(manifest["source_size"]) is not int or manifest["source_size"] != len(source_bytes):
             raise ValueError("IREE source size does not match its manifest")
         if (
-            manifest["source_sha256"] != _PINNED_SOURCE_SHA256
-            or manifest["source_size"] != _PINNED_SOURCE_SIZE
-            or _sha256(source_bytes) != _PINNED_SOURCE_SHA256
+            manifest["source_sha256"] != source_digest
+            or manifest["source_size"] != pinned_size
+            or _sha256(source_bytes) != source_digest
         ):
             raise ValueError("IREE source digest does not match its manifest")
         if manifest["license"] != "Apache-2.0":
@@ -275,9 +280,9 @@ class PinnedIreeImporter:
             except ValueError as error:
                 raise RuntimeError(str(error)) from error
 
-        program = GraphProgram.create("gemm", 8, 8, 8)
+        program = GraphProgram.create(manifest["family"], 8, 8, 8)
         record = ImportRecord(
-            "raveil.iree-importer", "1", _sha256(manifest_bytes), "text/x-mlir",
+            "raveil.iree-importer", "2", _sha256(manifest_bytes), "text/x-mlir",
             str(manifest["license"]), _sha256(source_bytes), len(source_bytes),
             str(manifest["tool_name"]), str(manifest["tool_version"]),
             str(manifest["tool_revision"]), "Apache-2.0 WITH LLVM-exception",

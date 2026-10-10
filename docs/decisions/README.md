@@ -6,6 +6,8 @@ ADR-0105 delivery ordering only. [ADR-0108](ADR-0108-bounded-project-result-comp
 specifies T-0197 named-result publication and cancellation boundaries.
 [ADR-0109](ADR-0109-verified-named-result-comparison.md) defines read-only
 comparison of compatible complete named parents.
+[ADR-0110](ADR-0110-second-pinned-mlir-workload.md) extends the pinned import
+allowlist to an existing GEMM+bias+ReLU family, preserving owned lineage.
 
 [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) adopts the owner's budgeted
 single-board implementation/measurement objective. It supersedes novelty as

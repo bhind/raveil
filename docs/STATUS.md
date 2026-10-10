@@ -1,5 +1,21 @@
 # Current status
 
+## Second standard-IR workload — T-0186, 2026-10-10
+
+[ADR-0110](decisions/ADR-0110-second-pinned-mlir-workload.md) adds one exact
+owned MLIR fixture for8x8x8 signed GEMM, column bias and ReLU. The importer
+binds family, source size/hash and unchanged compiler pins before returning
+the existing gemm_bias_relu GraphProgram. This is fixed-fixture admission,
+not general MLIR parsing or RTL lowering. The original GEMM remains supported.
+
+38 importer/Graph tests pass. Both fixtures compile with the real pinned IREE
+and pass the unchanged native baseline/Pavane check with policy abstention.
+Four additional vectors pass512 materialized/fused C-versus-Python cell checks,
+including signed widening and ReLU boundaries; every i64 intermediate fits.
+VMFB runtime equivalence and performance remain unverified. See the
+[run guide](guides/STANDARD_IR_IMPORT.md) and October10 evidence log. Existing
+local tools were reused without installs or purchases.
+
 ## Bounded simulation maturity — T-0206, 2026-10-10
 
 The [five-criterion review](research/reviews/T-0206-simulation-maturity.md)

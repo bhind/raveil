@@ -12,6 +12,7 @@ from unittest import mock
 
 from raveil.iree_import import ImportRecord, PinnedIreeImporter
 from raveil.cli import main
+from raveil.graph_mvp import GraphProgram
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -142,6 +143,71 @@ class IreeImportTests(unittest.TestCase):
         malformed["external_type"] = "mlir.Operation"
         with self.assertRaisesRegex(ValueError, "fields do not match"):
             ImportRecord.from_dict(malformed)
+
+
+class SecondIreeWorkloadTests(unittest.TestCase):
+    manifest = ROOT / "benchmarks/iree/gemm-bias-relu-8x8x8-i32-i64.import.json"
+    compiler = Path(__file__).resolve()
+
+    def test_second_family_retains_exact_owned_graph_and_lineage(self):
+        runner = FakeIree()
+        imported = PinnedIreeImporter(self.compiler, runner=runner).import_program(self.manifest)
+        expected = GraphProgram.create("gemm_bias_relu", 8, 8, 8)
+        self.assertEqual(imported.program, expected)
+        self.assertEqual(imported.record.graph_sha256, expected.identity)
+        self.assertEqual(imported.record.importer_version, "2")
+        self.assertEqual(len(runner.calls), 2)
+        old = PinnedIreeImporter(self.compiler, runner=FakeIree()).import_program(MANIFEST)
+        self.assertNotEqual(imported.record.source_sha256, old.record.source_sha256)
+        self.assertNotEqual(imported.record.graph_sha256, old.record.graph_sha256)
+        self.assertEqual(imported.record.schema, old.record.schema)
+
+    def rejection(self, source_manifest, change, source_change=None):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = json.loads(source_manifest.read_text())
+            source = (source_manifest.parent / manifest["source"]).read_text()
+            if source_change:
+                source = source_change(source)
+            source_path = root / "fixture.mlir"
+            source_path.write_text(source)
+            manifest.update(source=source_path.name,
+                            source_size=source_path.stat().st_size,
+                            source_sha256=hashlib.sha256(source_path.read_bytes()).hexdigest())
+            change(manifest)
+            path = root / "manifest.json"
+            path.write_text(json.dumps(manifest))
+            runner = FakeIree()
+            with self.assertRaises(ValueError):
+                PinnedIreeImporter(self.compiler, runner=runner).import_program(path)
+            self.assertEqual(runner.calls, [])
+
+    def test_cross_family_source_substitution_is_rejected(self):
+        self.rejection(self.manifest, lambda m: m.update(family="gemm"))
+        self.rejection(MANIFEST, lambda m: m.update(family="gemm_bias_relu"))
+
+    def test_edited_source_cannot_self_authorize_its_hash(self):
+        for before, after in (("tensor<8xi64>", "tensor<8xi32>"),
+                              ("arith.maxsi", "arith.minsi"),
+                              ("(m, n) -> (n)", "(m, n) -> (m)")):
+            with self.subTest(edit=after):
+                self.rejection(self.manifest, lambda m: None,
+                               lambda s: s.replace(before, after))
+
+    def test_family_shape_entry_and_tool_rejections_precede_compilation(self):
+        for key, value in (("family", "unknown"), ("family", []),
+                           ("m", 4), ("n", True), ("entry_point", "other"),
+                           ("tool_revision", "0" * 40), ("tool_version", "future")):
+            with self.subTest(key=key, value=value):
+                self.rejection(self.manifest, lambda m: m.update({key: value}))
+
+    def test_source_pin_includes_size_and_digest(self):
+        self.rejection(self.manifest, lambda m: m.update(source_size=1009))
+        self.rejection(self.manifest, lambda m: m.update(source_sha256="0" * 64))
+
+    def test_new_workload_does_not_bypass_compiler_failure(self):
+        with self.assertRaisesRegex(RuntimeError, "rejected"):
+            PinnedIreeImporter(self.compiler, runner=FakeIree(compile_code=1)).import_program(self.manifest)
 
 
 if __name__ == "__main__":

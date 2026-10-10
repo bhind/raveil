@@ -13,7 +13,11 @@ for the bounded documented workflow, including fresh QEMU baseline execution.
 This clears the simulation-evidence prerequisite only; T-0188 still lacks actual
 Windows/budget facts and T-0189 lacks a reviewed physical target/tools. No Windows, Vivado or board requirement blocks this software/RTL
 phase. QEMU and RTL functional results stay distinct from each other and from
-physical measurements. T-0186 is later; no speculative RAM rewrite is selected.
+physical measurements. The subsequent owner-directed continuation selects existing
+T-0186: a second exact owned MLIR fixture using existing gemm_bias_relu CPU
+semantics (ADR-0110). Actual pinned compilation and native differential checks
+pass; this is not general import or RTL lowering. No speculative RAM rewrite
+is selected.
 Hardware spending remains deferred. Historical claims/gates remain unchanged.
 
 ## Earlier affordable hardware ordering — superseded by ADR-0107
