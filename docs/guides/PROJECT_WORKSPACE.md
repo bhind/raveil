@@ -524,3 +524,63 @@ The commands use the same grammar on Python 3.11+ GNU/Linux. Tool identities
 and therefore Command Graph IDs may differ from macOS because the resolved
 allowlisted binaries differ. Semantic output, not a cross-host binary identity
 or timing comparison, is the compatibility requirement.
+
+## Run a32x32 grid through four RTL tiles
+
+T-0207 / ADR-0111 adds a fixed five-point uint32 sum on a32x32 grid. The existing
+RTL still runs16x16 at a time. Each tile receives the neighboring input cells;
+only positions outside the full32x32 grid are zero. Arithmetic wraps modulo2^32.
+
+From the repository, initialize a new project and one explicit input:
+
+```sh
+python3 -m raveil project init /tmp/raveil-grid32
+python3 - <<'PY'
+import json
+from pathlib import Path
+words = [0] * 1024
+words[15 * 32 + 16] = 17
+with Path('/tmp/raveil-grid32/inputs/grid32.json').open('x') as out:
+    json.dump({'schema': 'raveil.grid-input/v1', 'rows': 32,
+               'columns': 32, 'words': words}, out)
+PY
+RAVEIL_SIMULATOR_REUSE=1 python3 -m raveil project tile-run \
+  --project /tmp/raveil-grid32 --input grid32.json
+```
+
+Use the reported TILING_ID to inspect saved output without another execution:
+
+```sh
+python3 -m raveil project tile TILING_ID --project /tmp/raveil-grid32
+python3 -m raveil project tiles --project /tmp/raveil-grid32
+```
+
+Edit `inputs/grid32.json` (word index=row*32+column) and invoke `tile-run` again.
+Each attempt captures a fresh input and gets a new ID; previous attempts remain
+unchanged. Exactly1024 integer words in[0,4294967295] are required; booleans,
+other shapes and extra fields fail. The fixed operation is center+north+south+
+west+east; this entry point does not accept a custom expression or grid size.
+
+A complete attempt contains four private child runs, frozen full input, all
+four18x18 halo snapshots and the fixed descriptor. All children must validate,
+use the same RTL build, and agree with a separate full-grid reference. Only
+then does the atomic final `record.json` publish `output.words` (1024 words)
+and its packed SHA-256. There is no separately published assembled output file.
+An incomplete record has `output:null`; interruption during sealing can leave
+an unsealed attempt which history labels `incomplete/unverified`. Completed
+child evidence remains available for diagnosis. Retry is a fresh attempt.
+
+The normal offline Docker/Chisel/Verilator prerequisites apply. Optional simulator
+reuse skips rebuilding an unchanged binary, never skips execution. This is RTL
+functional simulation; it does not establish hardware performance, QEMU coupling,
+fsync/crash durability, or hostile concurrent-writer isolation.
+
+Actual acceptance can be reproduced into a fresh repository artifact directory:
+
+```sh
+python3 scripts/demo_project_tiling.py --output artifacts/research/T-0207/my-new-run
+```
+
+The demo runs original and edited grids, checks all2048 cells with an independent
+scalar formula, checks the five affected output cells, preserves the first
+snapshot, and cancels a third attempt between actual child invocations.

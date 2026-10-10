@@ -9,7 +9,9 @@ T-0205/#288 / ADR-0109 adds saved named-parent comparison after input/computatio
 edits. [T-0206/#290](research/reviews/T-0206-simulation-maturity.md) verifies the
 five bounded maturity criteria. The subsequent owner-directed software continuation
 delivers [T-0186 pinned MLIR import](guides/STANDARD_IR_IMPORT.md) for GEMM+bias+ReLU
-on the owned CPU path. T-0188 no-install host/budget inventory separately needs
+on the owned CPU path. The owner then explicitly approved T-0207/#294:
+[bounded32x32 tiling](guides/PROJECT_WORKSPACE.md#run-a32x32-grid-through-four-rtl-tiles)
+through unchanged16x16 RTL requests (ADR-0111). T-0188 no-install host/budget inventory separately needs
 actual Windows facts, with no purchase/tool install. The [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
 remains its planning provenance. Chisel/Verilator checks RTL; QEMU checks supported
 Sonatine software. Their current project backends are separate.

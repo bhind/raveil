@@ -722,6 +722,20 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
+    if action in {"tile-run", "tile", "tiles"}:
+        from . import project_tiling
+        if action == "tile-run":
+            record = project_tiling.run(project, args.input)
+            print(f"tiling={record['tiling_id']} status={record['status']}")
+            print(f"Inspect: raveil project tile {record['tiling_id']} --project {shlex.quote(str(project.root))}")
+            if record["error"]:
+                print(record["error"])
+            return 0 if record["status"] == "succeeded" else 2
+        if action == "tile":
+            print(project_tiling.inspect(project, args.tiling_id), end="")
+        else:
+            print(project_tiling.history(project))
+        return 0
     if action in {"compose", "composition", "compositions", "composition-diff"}:
         from . import project_composition
         if action == "compose":
@@ -815,7 +829,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile", "tiles"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -828,6 +842,10 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
         if action in {"show", "check", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
+        if action == "tile-run":
+            command.add_argument("--input", required=True, help="inputs/ JSON: fixed32x32 uint32 grid for five-point sum")
+        if action == "tile":
+            command.add_argument("tiling_id", help="saved tiled grid; verifies without rerunning")
         if action == "compose":
             command.add_argument("--input", required=True, help="one inputs/ JSON snapshot shared by all children")
             command.add_argument("--output", action="append", required=True, help="NAME=RECIPE; repeat once for two outputs")
