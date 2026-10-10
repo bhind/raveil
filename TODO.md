@@ -22,7 +22,8 @@ through the owned CPU graph. Windows facts do not block that implementation.
 The owner explicitly approved the32x32 host-tiling proposal after that initial
 registration rejection. T-0207/#294 now implements four unchanged16x16 RTL
 requests with global halos, zero outer padding and all-or-incomplete assembly.
-Actual RTL acceptance is tracked separately from host tests below.
+Both original and edited grids pass actual RTL/scalar acceptance; host fault
+fixtures remain a separate evidence class. The exact receipt is recorded below.
 
 ## Retained affordable-hardware preparation
 
@@ -172,12 +173,16 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   GEMM8x8x8 trusted baseline pass. No architecture/install/hardware/performance
   change. Technical acceptance; Project Done follows normal PR integration.
 
-- [ ] **T-0207** [Issue #294](https://github.com/bhind/raveil/issues/294),
+- [x] **T-0207** [Issue #294](https://github.com/bhind/raveil/issues/294),
   S-0007,5SP: explicitly approved32x32 fixed five-point sum, four16x16 private
   RTL children with original-input halos and zero global exterior. ADR-0111;
   separate tiling plan/result, atomic assembled result only after all children
-  and full-grid reference pass.70 focused host tests pass; actual RTL demo
-  pending. No RTL/ABI expansion, performance or hardware claim.
+  and full-grid reference pass. 70 focused host tests and 2,048 actual RTL/scalar
+  cell checks pass; seam edit changes exactly five cells, old snapshot retained,
+  ninth actual child then cancellation publishes no assembled output.
+  [PR295](https://github.com/bhind/raveil/pull/295); technical acceptance verified,
+  Project Done follows normal integration. No RTL/ABI expansion, performance or
+  hardware claim.
 
 - [x] **T-0186** [Issue #185](https://github.com/bhind/raveil/issues/185),
   S-0007, original5SP retained: second pinned standard-IR workload under

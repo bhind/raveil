@@ -12,7 +12,12 @@ inspection/history revalidate without execution.
 
 70 focused host tests pass, including existing Graph/composition regressions,
 seams, modular wrap, cancellation/publication, tamper and fresh retry. Actual
-RTL acceptance remains pending; host injection is not device evidence.
+RTL acceptance passes all 2,048 scalar cell comparisons across original and
+edited grids. Exactly five cells change after the seam edit; the old snapshot
+remains unchanged. A ninth actual child followed by host-boundary cancellation
+retains evidence with no assembled output. All nine children use identical
+source/RTL/simulator identities, independently revalidated from saved evidence.
+See the [October 10 log](log/2026-10-10.md) for receipt and commands.
 No RTL/core/ABI change, arbitrary tiler, performance or physical result.
 
 ## Second standard-IR workload — T-0186, 2026-10-10

@@ -22,6 +22,8 @@ The subsequent explicit owner approval selects T-0207/#294 for one32x32
 five-point workload via four16x16 RTL children with defined halo/outer-boundary
 and atomic assembly semantics (ADR-0111). This is a bounded implementation of
 the prior spatial-tiling candidate, not larger RTL capacity or a general tiler.
+Original/edited grids now pass 2,048 actual RTL/scalar cell comparisons, with
+source-bound snapshot and incomplete-publication checks (October 10 log).
 Hardware spending remains deferred. Historical claims/gates remain unchanged.
 
 ## Earlier affordable hardware ordering — superseded by ADR-0107
