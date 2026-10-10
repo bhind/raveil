@@ -1,5 +1,22 @@
 # Current status
 
+## Bounded simulation maturity — T-0206, 2026-10-10
+
+The [five-criterion review](research/reviews/T-0206-simulation-maturity.md)
+verifies the documented bounded edit/run/inspect/compare workflow, same-build
+Graph correctness, parent failure/cancel integrity, backend recovery and
+reproducibility. T-0197/PR289 and T-0205/PR291 are integrated. Retained RTL
+execution/reset/backpressure and structural receipts pass current verification.
+A fresh native Sonatine build, full QEMU smoke and GEMM8x8x8 project run pass;
+the policy abstains and the trusted baseline checksum matches its reference.
+This is separate QEMU emulation, not QEMU-to-RTL integration or optimization.
+
+The bounded simulation prerequisite is met; this is not arbitrary-program or
+production maturity. Existing instruction/register/shape limits remain. No
+board selection, purchase, vendor install, FPGA fit/timing, speed or energy
+claim follows. Next is existing T-0188 no-install host/budget inventory; actual
+Windows facts are still external to this Mac session. Physical work stays deferred.
+
 ## Named result comparison — T-0205, 2026-10-10
 
 ADR-0109 adds `project composition-diff OLD NEW`: validate complete saved
@@ -9,8 +26,8 @@ revalidates before returning and rejects incomplete, unsealed, tampered or
 incompatible records. Existing single-run diff is unchanged.56 host tests pass; actual edited/reordered RTL pairs pass
 all1,024 scalar word checks, with raw1/64 and biased64/64 cells changed and
 old snapshots preserved. Final source identities are in the October10 log.
-T-0206/#290 owns the combined ADR-0107 maturity evidence review; it remains
-separate and unpassed. Hardware is deferred.
+T-0206/#290 above records the combined bounded evidence review. Hardware
+acquisition and physical work remain separate.
 
 ## Named Graph results — T-0197, 2026-10-10
 
@@ -28,9 +45,8 @@ after S03 RTL lowering. Two low-phase evaluations repair the dynamic harness;
 RTL/core/ABI remain unchanged. Failed evidence is retained. No FPGA, timing,
 shared arithmetic or integrated QEMU/RTL result is claimed.
 
-Next bounded increment is T-0205/#288: compare saved named parents after input
-and computation edits, then assess the combined ADR-0107 maturity evidence.
-Hardware work remains deferred and the combined review is not yet passed.
+T-0205/#288 above adds saved named-parent comparison; T-0206 records the
+combined bounded evidence review. Hardware work remains a separate stage.
 
 ## Simulation maturity first — T-0204, 2026-10-10
 

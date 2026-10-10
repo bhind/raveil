@@ -7,9 +7,9 @@
   execution acceptance is recorded in the October10 log. T-0205/#288 / ADR-0109 implements
   named-parent edit/compare workflow; ordinary single-run
   diff cannot compare child runs held in different private parent projects.
-- T-0206/#290: which maturity criteria still lack evidence after T-0205? Audit the complete
-  edit/run/inspect/retry workflow before hardware readiness review; do not mark
-  the review passed from this policy change.
+- T-0206/#290 verifies the five bounded criteria with actual and revalidated
+  evidence, not the policy change alone. Wider instruction/shape support, a
+  QEMU/RTL device interface and physical performance remain separate questions.
 - QEMU and RTL are separate current backends. Any necessary integration needs
   a bounded interface task, not an assumption that co-simulation exists.
 - Windows/tool and board facts remain unknown but no longer block current

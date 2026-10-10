@@ -2,7 +2,7 @@
 
 Status: Completed
 Evidence class: QEMU emulation and host-tool inspection
-Last updated: 2026-08-08
+Last updated: 2026-10-10
 
 ## Objective
 
@@ -268,3 +268,15 @@ None for Gate 0.
 
 QEMU success is emulation evidence only; it does not establish U-mode
 isolation, preemptive scheduling, FPGA timing, or silicon behavior.
+
+## 2026-10-10 — T-0206 native continuation (separate evidence)
+
+The current implementation clone at `e74fbe0` freshly built Sonatine with existing
+GCC16.1.0, passed the current full QEMU11.0.3 smoke and ran the supported project
+GEMM8x8x8 baseline with equal checksum/reference `c102cc36c72f8e5c`. Policy
+abstained; no optimized-variant or timing claim. Kernel hash, exact commands,
+source manifest, complete console and log hashes are in
+[T-0206](../research/reviews/T-0206-simulation-maturity.md) and the October10 log.
+This is native QEMU emulation, not FPGA or silicon. No new Docker reproduction,
+debug/GDB or IDE attachment was tested. Historical Gate0 evidence and task
+completion remain unchanged; this continuation does not re-certify those surfaces.
