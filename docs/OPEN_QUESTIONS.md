@@ -668,7 +668,9 @@ resolves it.
   descriptor-relative resolution, a mount-namespace sandbox, an OCI/VM worker,
   or a packaged macOS App Sandbox helper? Application-level containment alone
   is not an answer for hostile-input isolation.
-- ADR-0032 fixes only one static linalg fixture and pinned IREE compiler. Which
+- ADR-0110 extends ADR-0032 to two exact static linalg fixtures: GEMM and
+  GEMM+bias+ReLU. T-0186 verifies real compiler admission and owned native
+  correctness, not VMFB runtime equivalence or general lowering. Which
   additional dialects, tensor signatures, import-record evolution, and
   sandboxed compiler distributions are justified before a general frontend?
 - What immutable environment receipt, base-image digest, and OS resource

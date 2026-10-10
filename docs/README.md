@@ -7,8 +7,10 @@ under [ADR-0108](decisions/ADR-0108-bounded-project-result-composition.md).
 See [the workspace guide](guides/PROJECT_WORKSPACE.md) and [current evidence](STATUS.md).
 T-0205/#288 / ADR-0109 adds saved named-parent comparison after input/computation
 edits. [T-0206/#290](research/reviews/T-0206-simulation-maturity.md) verifies the
-five bounded maturity criteria. Next is existing T-0188 no-install host/budget
-inventory; actual Windows facts remain pending, with no purchase/tool install. The [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
+five bounded maturity criteria. The subsequent owner-directed software continuation
+delivers [T-0186 pinned MLIR import](guides/STANDARD_IR_IMPORT.md) for GEMM+bias+ReLU
+on the owned CPU path. T-0188 no-install host/budget inventory separately needs
+actual Windows facts, with no purchase/tool install. The [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
 remains its planning provenance. Chisel/Verilator checks RTL; QEMU checks supported
 Sonatine software. Their current project backends are separate.
 T-0188/#194 host facts are now the next planning dependency; unfinished

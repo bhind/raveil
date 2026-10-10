@@ -16,7 +16,12 @@ comparison after source edits. T-0206/#290 verifies the five bounded simulation
 criteria, including a fresh supported QEMU run. Next is existing T-0188's
 no-install host/budget inventory; actual Windows facts remain missing. This
 clears only the simulation-evidence prerequisite, not purchase/vendor/device
-permission or historical performance gates. T-0186 remains later software work.
+permission or historical performance gates. The owner then requested further
+software progress: existing T-0186 now adds a second pinned MLIR workload
+through the owned CPU graph. Windows facts do not block that implementation.
+A32x32 host-tiling successor was scoped locally, but automatic approval review
+rejected new Issue registration pending explicit owner approval; it is not
+Ready or active. See the October10 log for the exact proposed boundary.
 
 ## Retained affordable-hardware preparation
 
@@ -118,7 +123,7 @@ follow-up search or forced Ready card is started by this negative selection.
 **Prior research ordering:** integrated T-0199 → T-0200 workload/reference packet → known
 fixed-parameter controls → only then a mechanism-specific comparison.
 T-0183 planning is complete. ADR-0107 restores T-0197 / #266 as the next
-implementation; T-0186 remains queued. T-0044 physical gates and T-0106 triggers are
+implementation; T-0186 is delivered below after the subsequent continuation. T-0044 physical gates and T-0106 triggers are
 unchanged. Other pivots and Experience expansion remain deferred.
 
 **Sprint Review:** owner postponed S-0005 weekly Review on September 26.
@@ -165,6 +170,14 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   source-bound RTL receipts revalidate; fresh native build/QEMU smoke and
   GEMM8x8x8 trusted baseline pass. No architecture/install/hardware/performance
   change. Technical acceptance; Project Done follows normal PR integration.
+
+- [x] **T-0186** [Issue #185](https://github.com/bhind/raveil/issues/185),
+  S-0007, original5SP retained: second pinned standard-IR workload under
+  ADR-0110. Actual IREE compilation for original GEMM and added GEMM+bias+ReLU;
+  unchanged native/Pavane baselines pass, plus512 per-cell differential checks
+  and38 focused tests. Exact-source mapping only; VMFB execution/general
+  lowering/RTL are not established. Technical acceptance, normal PR integration
+  and canonical completion govern Done. [Guide](docs/guides/STANDARD_IR_IMPORT.md).
 
 - [x] **T-0187** Select a bounded simulator reuse path, Issue #187, S-0005,
   original3SP preserved. Owner explicitly authorized continuation and the
@@ -523,8 +536,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197/PR289 and T-0205/PR291 are integrated; T-0206 verifies bounded maturity. T-0188 needs actual owner-side Windows facts. No hardware mutation is active. |
-| **P1 — next** | Start only after its named dependencies pass. | T-0206 verifies ADR-0107 bounded simulation criteria. Existing T-0188 no-install host/budget inventory is next, with actual Windows facts pending; no fabricated Ready card. T-0186 is later. T-0189 physical work still needs qualified host/tools and reviewed target. Physical/EXP gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197/PR289 and T-0205/PR291 are integrated; T-0206 verifies bounded maturity. T-0186 adds the second pinned MLIR workload. T-0188 needs actual owner-side Windows facts. No hardware mutation is active. |
+| **P1 — next** | Start only after its named dependencies pass. | T-0206 verifies ADR-0107 bounded simulation criteria. Existing T-0188 no-install host/budget inventory is next, with actual Windows facts pending; no fabricated Ready card. T-0186 now supplies a bounded owned CPU import increment. T-0189 physical work still needs qualified host/tools and reviewed target. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |
