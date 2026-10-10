@@ -8,8 +8,10 @@ saved named-parent comparison after input/computation edits (ADR-0109) → T-020
 combined review of the
 editable workflow, same-RTL multi-Graph correctness, failure/reset recovery and
 reproducibility evidence → only then T-0188 host/budget and T-0189 hardware.
-Existing functionality counts as evidence, but the combined maturity review is
-not passed. No Windows, Vivado or board requirement blocks this software/RTL
+T-0197/PR289 and T-0205/PR291 are integrated. T-0206 verifies the five criteria
+for the bounded documented workflow, including fresh QEMU baseline execution.
+This clears the simulation-evidence prerequisite only; T-0188 still lacks actual
+Windows/budget facts and T-0189 lacks a reviewed physical target/tools. No Windows, Vivado or board requirement blocks this software/RTL
 phase. QEMU and RTL functional results stay distinct from each other and from
 physical measurements. T-0186 is later; no speculative RAM rewrite is selected.
 Hardware spending remains deferred. Historical claims/gates remain unchanged.

@@ -11,11 +11,12 @@ separate. Windows/Vivado inventory does not gate current development.
   S-0007,2SP: simulation-maturity policy and implementation exit criteria;
   current record/queue correction. No new runtime or physical result.
 
-Technically accepted implementation is **T-0197/#266**, defined below: two named results
-from one frozen input, with complete-parent publication only after all children
-pass. The bounded successor is **T-0205/#288**, saved named-parent comparison
-after editing input/computation. T-0186 follows later scope review. T-0188/T-0189 physical
-work is deferred until the maturity review, not a current missing-PC blocker.
+T-0197/#266 and T-0205/#288 are integrated: frozen named results and saved
+comparison after source edits. T-0206/#290 verifies the five bounded simulation
+criteria, including a fresh supported QEMU run. Next is existing T-0188's
+no-install host/budget inventory; actual Windows facts remain missing. This
+clears only the simulation-evidence prerequisite, not purchase/vendor/device
+permission or historical performance gates. T-0186 remains later software work.
 
 ## Retained affordable-hardware preparation
 
@@ -28,8 +29,9 @@ work is deferred until the maturity review, not a current missing-PC blocker.
   of yen with existing USD100/month Codex expense. Purchase is not authorized.
 - [ ] **T-0188** [Issue #194](https://github.com/bhind/raveil/issues/194): staged
   host/budget readiness first; board-specific boot/UIO observations later.
-  Deferred under ADR-0107 until simulation maturity. Then run the no-install
-  Windows inventory; actual resources and hardware budget remain unknown.
+  T-0206 clears the bounded simulation-evidence prerequisite. Collect actual
+  Windows OS/CPU/RAM/free-disk facts without installs; owner information is
+  pending. Hardware budget/target remain unknown; no purchase is authorized.
 - [ ] **T-0189** [Issue #195](https://github.com/bhind/raveil/issues/195): one
   source-bound board wrapper/design and functional bring-up after supported
   tools are known. Design preparation need not wait for a physical board;
@@ -157,12 +159,12 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   snapshots preserved. No backend/RTL changes. Then review combined ADR-0107
   maturity evidence; no automatic hardware purchase.
 
-- [ ] **T-0206** [Issue #290](https://github.com/bhind/raveil/issues/290),
-  S-0007,2SP: after T-0205, assess the five ADR-0107 maturity criteria from
-  executable/source-bound evidence. Revalidate composition/editing and retained
-  reset/backpressure/structural receipts; run the supported small QEMU project
-  with existing tools or record its exact gap. No new architecture, install,
-  hardware purchase or performance claim; one bounded correction only if needed.
+- [x] **T-0206** [Issue #290](https://github.com/bhind/raveil/issues/290),
+  S-0007,2SP: five bounded ADR-0107 criteria verified in the
+  [evidence review](docs/research/reviews/T-0206-simulation-maturity.md). Retained
+  source-bound RTL receipts revalidate; fresh native build/QEMU smoke and
+  GEMM8x8x8 trusted baseline pass. No architecture/install/hardware/performance
+  change. Technical acceptance; Project Done follows normal PR integration.
 
 - [x] **T-0187** Select a bounded simulator reuse path, Issue #187, S-0005,
   original3SP preserved. Owner explicitly authorized continuation and the
@@ -521,8 +523,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197 named results are integrated via PR289. T-0205 implements saved comparison under the completed T-0204 correction. No hardware mutation is active. |
-| **P1 — next** | Start only after its named dependencies pass. | ADR-0107 selects T-0197 / #266, followed by T-0205 / #288 named-parent comparison and the combined maturity review. T-0183 and T-0196 are complete. T-0186 is later; T-0188/T-0189 physical work waits for simulation maturity. Physical/EXP gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197/PR289 and T-0205/PR291 are integrated; T-0206 verifies bounded maturity. T-0188 needs actual owner-side Windows facts. No hardware mutation is active. |
+| **P1 — next** | Start only after its named dependencies pass. | T-0206 verifies ADR-0107 bounded simulation criteria. Existing T-0188 no-install host/budget inventory is next, with actual Windows facts pending; no fabricated Ready card. T-0186 is later. T-0189 physical work still needs qualified host/tools and reviewed target. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |

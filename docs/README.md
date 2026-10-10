@@ -6,12 +6,14 @@ named results from one frozen input, with all-or-incomplete parent publication
 under [ADR-0108](decisions/ADR-0108-bounded-project-result-composition.md).
 See [the workspace guide](guides/PROJECT_WORKSPACE.md) and [current evidence](STATUS.md).
 T-0205/#288 / ADR-0109 adds saved named-parent comparison after input/computation
-edits. Next is T-0206/#290, the combined ADR-0107 maturity evidence review; see
-TODO for its bounded packet. The [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
+edits. [T-0206/#290](research/reviews/T-0206-simulation-maturity.md) verifies the
+five bounded maturity criteria. Next is existing T-0188 no-install host/budget
+inventory; actual Windows facts remain pending, with no purchase/tool install. The [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
 remains its planning provenance. Chisel/Verilator checks RTL; QEMU checks supported
 Sonatine software. Their current project backends are separate.
-T-0188/#194 and unfinished T-0189/#195 hardware work are deferred until the
-maturity review. Windows/Vivado facts do not block this implementation phase.
+T-0188/#194 host facts are now the next planning dependency; unfinished
+T-0189/#195 physical work still requires qualified tools and a reviewed target.
+Windows/Vivado facts do not block independent software development.
 Retain the [offline board bundle](guides/FPGA-BOARD-BUNDLE.md), S01–S04 results
 and [memory diagnosis](research/reviews/T-0189-memory-feasibility.md) for later
 physical work. The [budgeted FPGA packet](research/reviews/T-0203-budgeted-fpga-path.md)
