@@ -1,5 +1,17 @@
 # Raveil TODO
 
+## General rectangular grids — approved delivery
+
+- [x] **T-0208** [Issue #296](https://github.com/bhind/raveil/issues/296),
+  S-0007,8SP: implement and verify
+  rectangular1..64 grids, editable existing-opcode kernels, zero/clamp/wrap
+  boundaries, partial tiles, admission preview and saved comparison. Local
+  implementation and90 host tests pass; actual RTL acceptance passes426 cells
+  across three shapes/all boundaries, kernel edit and cancellation (ten children).
+  Exact scope and integration approved by the owner; accepted ADR-0112.
+  This PR delivers the tested implementation; remote closure follows merge.
+  See the October10 evidence log. No hardware need.
+
 ## Current focus — simulation maturity before hardware (2026-10-10)
 
 [ADR-0107](docs/decisions/ADR-0107-simulation-maturity-before-hardware.md)

@@ -1,5 +1,14 @@
 # Intended Raveil architecture
 
+## General rectangular grids — ADR-0112
+
+Accepted ADR-0112 separates global rectangular shape and boundary policy from
+an editable per-cell kernel. A v5 Graph with fixed16x16 affine layout uses the
+unchanged compiler/RTL; the host freezes inputs and kernel, fills global halos,
+validates every complete child and crops only at assembly. An untiled dependency
+interpreter checks all valid cells. Separate v2 records preserve v1 semantics.
+The owner approved the exact tested scope for integration as T-0208/#296.
+
 ## Current implementation direction — ADR-0107
 
 [ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) makes the

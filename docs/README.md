@@ -1,5 +1,11 @@
 # Raveil project records
 
+## General rectangular grids
+
+T-0208/#296 implements the owner-approved rectangular grid interface.
+See [status](STATUS.md), [ADR-0112](decisions/ADR-0112-general-bounded-grid-kernels.md)
+and the [guide](guides/PROJECT_WORKSPACE.md#rectangular-grids-and-editable-kernels).
+
 Current priority: [simulation maturity before hardware](decisions/ADR-0107-simulation-maturity-before-hardware.md).
 T-0204/#286 records the owner-approved correction. T-0197/#266 implements two
 named results from one frozen input, with all-or-incomplete parent publication

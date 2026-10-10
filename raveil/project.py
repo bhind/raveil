@@ -722,10 +722,16 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
-    if action in {"tile-run", "tile", "tiles"}:
+    if action in {"tile-run", "tile-check", "tile-diff", "tile", "tiles"}:
         from . import project_tiling
+        if action == "tile-check":
+            print(encoded(project_tiling.check(project, args.input, kernel_file=args.kernel, boundary=args.boundary)).decode(), end="")
+            return 0
+        if action == "tile-diff":
+            print(encoded(project_tiling.compare(project, args.first, args.second)).decode(), end="")
+            return 0
         if action == "tile-run":
-            record = project_tiling.run(project, args.input)
+            record = project_tiling.run(project, args.input, kernel_file=args.kernel, boundary=args.boundary)
             print(f"tiling={record['tiling_id']} status={record['status']}")
             print(f"Inspect: raveil project tile {record['tiling_id']} --project {shlex.quote(str(project.root))}")
             if record["error"]:
@@ -829,7 +835,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile", "tiles"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile-check", "tile-diff", "tile", "tiles"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -842,8 +848,13 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
         if action in {"show", "check", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
-        if action == "tile-run":
-            command.add_argument("--input", required=True, help="inputs/ JSON: fixed32x32 uint32 grid for five-point sum")
+        if action in {"tile-run", "tile-check"}:
+            command.add_argument("--input", required=True, help="inputs/ grid JSON; v2 for editable kernels, v1 for legacy fixed grid")
+            command.add_argument("--kernel", help="inputs/ grid-kernel/v1 JSON; enables rectangular1..64 grids")
+            command.add_argument("--boundary", choices=("zero", "clamp", "wrap"), default="zero", help="global exterior: zero, nearest edge or periodic")
+        if action == "tile-diff":
+            command.add_argument("first", help="older complete grid ID")
+            command.add_argument("second", help="newer complete grid ID")
         if action == "tile":
             command.add_argument("tiling_id", help="saved tiled grid; verifies without rerunning")
         if action == "compose":

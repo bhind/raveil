@@ -584,3 +584,106 @@ python3 scripts/demo_project_tiling.py --output artifacts/research/T-0207/my-new
 The demo runs original and edited grids, checks all2048 cells with an independent
 scalar formula, checks the five affected output cells, preserves the first
 snapshot, and cancels a third attempt between actual child invocations.
+
+## Rectangular grids and editable kernels
+
+T-0208/#296 provides this owner-approved interface alongside the legacy fixed
+T-0207 interface. Run these commands from the repository checkout.
+
+A grid can have any integer row/column count from1 through64, including
+nonmultiples of16. A kernel is an editable per-cell DAG over that grid; size and
+boundary behavior are separate from the computation. Try a17x19 neighborhood
+maximum plus a bias:
+
+```sh
+python3 -m raveil project init /tmp/raveil-general-grid
+python3 - <<'PY'
+import json
+from pathlib import Path
+root = Path('/tmp/raveil-general-grid/inputs')
+grid = {'schema':'raveil.grid-input/v2', 'rows':17, 'columns':19,
+        'words':[r*19+c for r in range(17) for c in range(19)]}
+kernel = {'schema':'raveil.grid-kernel/v1', 'graph_id':'neighbor-bias',
+          'nodes':[
+    {'id':'c','op':'LOAD_U32','address':{'row_delta':0,'column_delta':0}},
+    {'id':'n','op':'LOAD_U32','address':{'row_delta':-1,'column_delta':1}},
+    {'id':'m','op':'MAX_U32','inputs':['c','n']},
+    {'id':'b','op':'ADD_IMM_U32','input':'m','immediate':5},
+    {'id':'out','op':'STORE_U32','input':'b'}]}
+for name, value in [('grid.json',grid), ('kernel.json',kernel)]:
+    with (root/name).open('x') as out:
+        json.dump(value,out,indent=2)
+PY
+python3 -m raveil project tile-check --project /tmp/raveil-general-grid \
+  --input grid.json --kernel kernel.json --boundary wrap
+RAVEIL_SIMULATOR_REUSE=1 python3 -m raveil project tile-run \
+  --project /tmp/raveil-general-grid --input grid.json \
+  --kernel kernel.json --boundary wrap
+```
+
+`tile-check` reports dimensions, tile count, admitted instruction count and
+boundary. It creates no attempt and runs no simulator. The17x19 example needs
+four16x16 children; their valid output rectangles are16x16,16x3,1x16 and1x3.
+Full child outputs are checked, then cropped to exactly323 grid cells.
+
+Boundary behavior applies only to coordinates outside the **full** input grid:
+
+| Option | Out-of-grid coordinate |
+|---|---|
+| `zero` (default) | Read0 |
+| `clamp` | Read the nearest edge cell |
+| `wrap` | Read the periodic row/column modulo the global dimensions |
+
+Internal tile seams always read the corresponding original full-grid cell.
+Each run is one pass over a frozen input, with at most16 children. The kernel
+and boundary are frozen too; modifying live files cannot alter a saved run.
+
+Supported node forms (all arithmetic is unsigned32-bit, wrapping after each
+arithmetic operation):
+
+| Operation | Fields besides `id`/`op` | Meaning |
+|---|---|---|
+| `LOAD_U32` | `address:{row_delta,column_delta}` | Both offsets are integers in[-1,1], including diagonals |
+| `ADD_U32` | `inputs:[a,b]` | a+b modulo2^32 |
+| `MUL_U32` | `inputs:[a,b]` | a*b modulo2^32 |
+| `MAX_U32` | `inputs:[a,b]` | Unsigned maximum |
+| `ADD_IMM_U32` | `input:a, immediate:N` | a+N modulo2^32 |
+| `GE_IMM_U32` | `input:a, immediate:N` | Integer1 when a>=N, otherwise0 |
+| `STORE_U32` | `input:a` | One final store, defining the grid output |
+
+Immediates are integers0..4194303. References may name later-listed nodes;
+dependencies must be acyclic. The final listed node must be the only store.
+Undefined/duplicate IDs, extra keys, booleans as numbers, invalid offsets and
+kernels exceeding the existing16-instruction/eight-register limits are rejected
+before an attempt starts. Input JSON is bounded to128KiB, kernel JSON to16KiB.
+Input must contain exactly rows*columns integers0..4294967295.
+
+After the first run, edit the kernel's bias from5 to7, or replace `MAX_U32`
+with `ADD_U32`, then run again with the same command. Compare the reported IDs:
+
+```sh
+python3 -m raveil project tile OLD_ID --project /tmp/raveil-general-grid
+python3 -m raveil project tile-diff OLD_ID NEW_ID --project /tmp/raveil-general-grid
+python3 -m raveil project tiles --project /tmp/raveil-general-grid
+```
+
+Comparison reports input changes, whether the compiled descriptor changed,
+boundary before/after, changed output count and zero-based coordinates. Both
+parents must be complete, untampered, same shape and same RTL build. Saved
+inspection/comparison executes nothing and writes nothing. Failure/cancellation
+retains private evidence and never publishes a complete grid. Retry is a new ID.
+The v1 fixed32x32 command without `--kernel` and its saved results remain valid;
+nonzero boundary modes require the explicit new kernel/v2 route.
+
+The candidate acceptance demo uses actual RTL for multiple shapes, kernels and
+all three boundary modes, plus kernel edit/cancellation; host tests separately
+exercise the full64x64 bound. Run into a new local artifact directory:
+
+```sh
+python3 scripts/demo_project_grid.py --output artifacts/research/T-0208/my-new-run
+```
+
+The executable scope is a bounded one-input/one-output uint32 stencil/map DAG.
+There is no floating-point, division, arbitrary radius, global reduction,
+multi-pass loop or QEMU/RTL coupling. Simulation verifies functionality; no
+hardware speed, energy or capacity result follows.
