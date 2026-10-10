@@ -10,6 +10,9 @@
 - T-0206/#290 verifies the five bounded criteria with actual and revalidated
   evidence, not the policy change alone. Wider instruction/shape support, a
   QEMU/RTL device interface and physical performance remain separate questions.
+- T-0207 / ADR-0111 fixes one32x32 five-point spatial tiling contract.
+  Arbitrary dimensions/expressions, multi-pass grids, throughput and physical
+  fit remain separate; the four-child parent does not widen named composition.
 - QEMU and RTL are separate current backends. Any necessary integration needs
   a bounded interface task, not an assumption that co-simulation exists.
 - Windows/tool and board facts remain unknown but no longer block current

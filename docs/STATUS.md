@@ -1,5 +1,20 @@
 # Current status
 
+## Bounded32x32 grid execution — T-0207, 2026-10-10
+
+[ADR-0111](decisions/ADR-0111-bounded-spatial-tiling.md) adds fixed five-point
+uint32 sum through four unchanged16x16 RTL children. Global input is frozen;
+internal halos read original neighboring cells and only full-grid exterior is
+zero. The separate tiling parent publishes all1024 output words atomically in
+its final record only after child/build validation and independent full-grid
+reference checks. Incomplete attempts expose no assembled output. Saved
+inspection/history revalidate without execution.
+
+70 focused host tests pass, including existing Graph/composition regressions,
+seams, modular wrap, cancellation/publication, tamper and fresh retry. Actual
+RTL acceptance remains pending; host injection is not device evidence.
+No RTL/core/ABI change, arbitrary tiler, performance or physical result.
+
 ## Second standard-IR workload — T-0186, 2026-10-10
 
 [ADR-0110](decisions/ADR-0110-second-pinned-mlir-workload.md) adds one exact

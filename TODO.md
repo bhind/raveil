@@ -19,9 +19,10 @@ clears only the simulation-evidence prerequisite, not purchase/vendor/device
 permission or historical performance gates. The owner then requested further
 software progress: existing T-0186 now adds a second pinned MLIR workload
 through the owned CPU graph. Windows facts do not block that implementation.
-A32x32 host-tiling successor was scoped locally, but automatic approval review
-rejected new Issue registration pending explicit owner approval; it is not
-Ready or active. See the October10 log for the exact proposed boundary.
+The owner explicitly approved the32x32 host-tiling proposal after that initial
+registration rejection. T-0207/#294 now implements four unchanged16x16 RTL
+requests with global halos, zero outer padding and all-or-incomplete assembly.
+Actual RTL acceptance is tracked separately from host tests below.
 
 ## Retained affordable-hardware preparation
 
@@ -170,6 +171,13 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   source-bound RTL receipts revalidate; fresh native build/QEMU smoke and
   GEMM8x8x8 trusted baseline pass. No architecture/install/hardware/performance
   change. Technical acceptance; Project Done follows normal PR integration.
+
+- [ ] **T-0207** [Issue #294](https://github.com/bhind/raveil/issues/294),
+  S-0007,5SP: explicitly approved32x32 fixed five-point sum, four16x16 private
+  RTL children with original-input halos and zero global exterior. ADR-0111;
+  separate tiling plan/result, atomic assembled result only after all children
+  and full-grid reference pass.70 focused host tests pass; actual RTL demo
+  pending. No RTL/ABI expansion, performance or hardware claim.
 
 - [x] **T-0186** [Issue #185](https://github.com/bhind/raveil/issues/185),
   S-0007, original5SP retained: second pinned standard-IR workload under
@@ -536,7 +544,7 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197/PR289 and T-0205/PR291 are integrated; T-0206 verifies bounded maturity. T-0186 adds the second pinned MLIR workload. T-0188 needs actual owner-side Windows facts. No hardware mutation is active. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197/PR289 and T-0205/PR291 are integrated; T-0206 verifies bounded maturity. T-0186 is integrated via PR293; T-0207 implements bounded32x32 tiling. T-0188 needs actual owner-side Windows facts. No hardware mutation is active. |
 | **P1 — next** | Start only after its named dependencies pass. | T-0206 verifies ADR-0107 bounded simulation criteria. Existing T-0188 no-install host/budget inventory is next, with actual Windows facts pending; no fabricated Ready card. T-0186 now supplies a bounded owned CPU import increment. T-0189 physical work still needs qualified host/tools and reviewed target. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |

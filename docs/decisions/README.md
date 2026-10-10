@@ -8,6 +8,8 @@ specifies T-0197 named-result publication and cancellation boundaries.
 comparison of compatible complete named parents.
 [ADR-0110](ADR-0110-second-pinned-mlir-workload.md) extends the pinned import
 allowlist to an existing GEMM+bias+ReLU family, preserving owned lineage.
+[ADR-0111](ADR-0111-bounded-spatial-tiling.md) specifies fixed32x32 tiling
+through four unchanged16x16 RTL requests with atomic full-grid publication.
 
 [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) adopts the owner's budgeted
 single-board implementation/measurement objective. It supersedes novelty as
