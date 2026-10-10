@@ -1,5 +1,18 @@
 # Current status
 
+## Simulation maturity first — T-0204, 2026-10-10
+
+[ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) records the
+owner-approved sequencing correction: develop with Chisel/Verilator and QEMU
+until the reproducible editable workflow and correctness/recovery boundaries
+are complete; defer hardware acquisition and vendor setup. T-0197/#266 is the
+next implementation, still unimplemented: two named Graph results from one
+frozen input. Current QEMU and RTL project backends are separate. Existing
+S03 structural/execution receipts reverify successfully; no new runtime, QEMU
+run, RTL rebuild or hardware result is claimed by this planning change.
+Windows/Vivado inventory is a later prerequisite, not the current blocker.
+The dated September sections below retain evidence; ADR-0107 controls priority.
+
 ## Memory feasibility diagnosis — T-0189/S04, 2026-09-28
 
 [Source/netlist analysis](research/reviews/T-0189-memory-feasibility.md) confirms
@@ -22,7 +35,7 @@ three-base control tests and S02 full execution/reset/oracle tests pass.
 See [reproduction](guides/FPGA-BOARD-BUNDLE.md) and [evidence](log/2026-09-28.md).
 This is generic structural checking and RTL simulation, not FPGA mapping,
 resource fit or timing. Core logic/ABI and ADR-0105/0106 remain unchanged.
-T-0188 actual Windows/tool inventory is still next; parent T-0189 remains open.
+T-0188 inventory is now deferred under ADR-0107; parent T-0189 remains open.
 
 ## Board execution and recovery — T-0189/S02, 2026-09-27
 

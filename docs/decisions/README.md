@@ -1,5 +1,9 @@
 # Architecture Decision Records
 
+[ADR-0107](ADR-0107-simulation-maturity-before-hardware.md) makes implementation
+maturity in Chisel/Verilator and QEMU precede hardware acquisition. It supersedes
+ADR-0105 delivery ordering only; T-0197 is the next implementation.
+
 [ADR-0105](ADR-0105-budgeted-fpga-demonstrator.md) adopts the owner's budgeted
 single-board implementation/measurement objective. It supersedes novelty as
 a prerequisite for that prototype, without passing any historical claim gate.

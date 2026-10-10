@@ -1,6 +1,16 @@
 # Intended Raveil architecture
 
-## Current implementation direction — ADR-0105
+## Current implementation direction — ADR-0107
+
+[ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) makes the
+usable simulation implementation precede hardware acquisition. Reuse owned
+Chisel/Verilator RTL and separate supported Sonatine/QEMU software paths; no
+QEMU-to-RTL integration is assumed. T-0197 will add bounded host composition
+under its own implementation ADR, preserving one final STORE per child and
+all existing admission/oracle/fallback boundaries. It is not implemented yet.
+Windows/Vivado and board identity are deferred-stage prerequisites.
+
+## Retained eventual hardware direction — ADR-0105
 
 A budgeted single-board FPGA demonstrator reuses the owned bounded Graph/AXI
 executor and Linux UIO path. CPU fallback, independent oracle, admission and

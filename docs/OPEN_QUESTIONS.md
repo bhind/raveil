@@ -1,6 +1,19 @@
 # Open questions
 
-## Budgeted FPGA path — current priority, ADR-0105
+## Simulation maturity — current priority, ADR-0107
+
+- T-0197 must specify/version the parent plan/result, snapshot both child
+  descriptors and one input, preserve evidence on failure/cancel, and demonstrate
+  real RTL execution. Its implementation ADR remains outstanding.
+- Which maturity criteria still lack evidence after T-0197? Audit the complete
+  edit/run/inspect/retry workflow before hardware readiness review; do not mark
+  the review passed from this policy change.
+- QEMU and RTL are separate current backends. Any necessary integration needs
+  a bounded interface task, not an assumption that co-simulation exists.
+- Windows/tool and board facts remain unknown but no longer block current
+  implementation. Resource-fit and RAM-backend decisions remain later.
+
+## Budgeted FPGA path — deferred until simulation maturity
 
 - What Windows version/architecture, RAM, disk and installed tools are actually
   available? T-0188/#194 owns staged inventory; no FPGA is currently owned.
@@ -12,7 +25,7 @@
   full workload execution/recovery in simulation. S03/#282 resolves generic
   Yosys parsing/structural closure, with fresh functional regressions; FPGA
   mapping, resource fit and timing remain unknown. The OOC Tcl remains unverified
-  by Vivado; qualified Windows/tool observations are the next external dependency.
+  by Vivado; qualified Windows/tool observations are a later hardware-stage dependency.
 - Does the resettable register-array scratchpad cause actual mapped resource
   pressure? [S04 diagnosis](research/reviews/T-0189-memory-feasibility.md) locates
   the storage and compatibility obligations, but no RAM inference/fit or rewrite
@@ -54,7 +67,7 @@
   task integration must not invent ceremony acceptance.
 
 [ADR-0103](decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md)
-sets the research order. T-0183 is complete; T-0197 / #266 and T-0186 remain deferred product work; old next-pull
+sets the research order. T-0183 is complete; ADR-0107 restores T-0197 / #266 as next; T-0186 remains later product work; old next-pull
 references below are preserved context, not competing active priorities.
 
 T-0183 proposes obtaining two named results by composing existing single-output
