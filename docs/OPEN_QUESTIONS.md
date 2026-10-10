@@ -2,9 +2,11 @@
 
 ## Simulation maturity — current priority, ADR-0107
 
-- T-0197 must specify/version the parent plan/result, snapshot both child
-  descriptors and one input, preserve evidence on failure/cancel, and demonstrate
-  real RTL execution. Its implementation ADR remains outstanding.
+- T-0197 / ADR-0108 now specifies/version-controls the parent plan/result,
+  frozen input/child descriptors and all-or-incomplete publication. Its actual
+  execution acceptance is recorded in the October10 log. T-0205/#288 will address
+  the remaining named-parent edit/compare workflow gap; ordinary single-run
+  diff cannot compare child runs held in different private parent projects.
 - Which maturity criteria still lack evidence after T-0197? Audit the complete
   edit/run/inspect/retry workflow before hardware readiness review; do not mark
   the review passed from this policy change.
@@ -73,7 +75,7 @@ references below are preserved context, not competing active priorities.
 T-0183 proposes obtaining two named results by composing existing single-output
 Graphs with one frozen input and all-or-incomplete parent publication. This
 does not share child arithmetic or widen STORE authority. T-0197 owns the new
-runtime/record contract after review; hardware multi-STORE remains deferred.
+runtime/record contract in ADR-0108; hardware multi-STORE remains deferred.
 
 T-0196 resolves whether a compiled simulator can serve changed Graphs without
 rebuilding: the actual cold/warm functional check passes. Wall-clock benefit

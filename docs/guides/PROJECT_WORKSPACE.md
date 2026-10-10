@@ -1,5 +1,51 @@
 # Raveil project workspace
 
+## Compose named Graph results
+
+Use one explicit input snapshot with one or two existing Graph recipes:
+
+```sh
+python3 -m raveil project compose --project WORK --input shared.json --output raw=raw --output biased=biased
+python3 -m raveil project compositions --project WORK
+python3 -m raveil project composition COMPOSITION_ID --project WORK
+```
+
+Here `inputs/shared.json` contains the existing324-word uint32 input format;
+`recipes/raw.json` and `recipes/biased.json` are ordinary Graph recipes pointing
+to their descriptors. The explicit input overrides both recipes' seed/input
+choices for this attempt. Names are unique lowercase ASCII labels, up to31
+characters, starting with a letter and then letters/digits/underscore/hyphen.
+They are display values, not output paths. Both descriptors and the input are
+captured before execution; later edits cannot change a running attempt.
+
+The commands save separate parent history under `compositions/ID`, with numeric
+private child projects. Existing single-run history and Garden stay unchanged.
+Each child uses the normal oracle, C++ fallback and RTL validation. A complete
+parent requires every child to pass and saved artifacts to revalidate. Inspect
+shows both named outputs only for a complete parent; incomplete attempts retain
+diagnostic evidence without displaying a complete result set. Reads do not run
+the simulator again. A retry is another `compose` invocation and a fresh ID.
+
+Ctrl-C before publication leaves the parent incomplete; an abrupt interruption
+can leave an unsealed directory shown as `incomplete/unverified`. Already
+published results are not revoked by a later interrupt. Inspection checks local
+integrity, not authenticated provenance or hostile concurrent-writer isolation.
+Input/descriptor capture is capped at4MiB and the saved tree at16MiB. Do not edit
+retained composition evidence; edit the source recipes/inputs and run anew.
+
+From the repository root, the actual cached-tool demonstration creates raw
+`x*x` and biased `x*x+17`, modulo2^32, and checks all512 output words:
+
+```sh
+python3 scripts/demo_project_composition.py --output artifacts/research/T-0197/my-demo
+```
+
+Choose a new output path. The demo also cancels a second parent between actual
+RTL child invocations and verifies it remains incomplete. This is a host
+cancellation boundary, not device cancellation during execution. Toolchain and
+image prerequisites match the existing RTL backend; no QEMU/RTL co-simulation,
+shared arithmetic, hardware measurement or speedup is implied. See ADR-0108.
+
 ## When a Graph is rejected
 
 `project check RECIPE --backend rtl-sim --project WORK` keeps the original

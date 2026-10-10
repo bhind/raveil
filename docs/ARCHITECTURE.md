@@ -5,9 +5,13 @@
 [ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) makes the
 usable simulation implementation precede hardware acquisition. Reuse owned
 Chisel/Verilator RTL and separate supported Sonatine/QEMU software paths; no
-QEMU-to-RTL integration is assumed. T-0197 will add bounded host composition
-under its own implementation ADR, preserving one final STORE per child and
-all existing admission/oracle/fallback boundaries. It is not implemented yet.
+QEMU-to-RTL integration is assumed. T-0197 / ADR-0108 adds bounded host
+composition, preserving one final STORE per child and all existing
+admission/oracle/fallback boundaries. It captures one explicit input and both
+descriptors before invoking private child projects. Versioned parent plan/result
+records bind child identities; only a fully validated set is atomically published
+as success. Incomplete/unsealed attempts retain diagnostics and retries use new
+IDs. Composition inspection is separate from single-run history/Garden.
 Windows/Vivado and board identity are deferred-stage prerequisites.
 
 ## Retained eventual hardware direction — ADR-0105
