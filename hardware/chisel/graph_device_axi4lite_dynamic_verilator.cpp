@@ -86,6 +86,8 @@ private:
         for (unsigned n = 0; n != 256; ++n) {
             top_.aclk = 0; top_.eval(); if (top_.bvalid) {
                 const auto response = static_cast<std::uint32_t>(top_.bresp); top_.bready = 1;
+                // Settle changed inputs at clock low before sampling the edge.
+                top_.eval();
                 top_.aclk = 1; top_.eval(); top_.bready = 0; trace_write(address, data, response);
                 return response == kOkay;
             } top_.aclk = 1; top_.eval();
@@ -104,6 +106,7 @@ private:
             top_.aclk = 0; top_.eval(); if (top_.rvalid) {
                 const auto response = static_cast<std::uint32_t>(top_.rresp);
                 const auto data = static_cast<std::uint32_t>(top_.rdata); top_.rready = 1;
+                top_.eval();
                 top_.aclk = 1; top_.eval(); top_.rready = 0; trace_read(address, data, response);
                 return {response == kOkay, data};
             } top_.aclk = 1; top_.eval();

@@ -1,13 +1,32 @@
 # Current status
 
+## Named Graph results — T-0197, 2026-10-10
+
+ADR-0108 adds one/two named results from an explicit frozen input, with private
+child projects, retained descriptors/hashes and all-or-incomplete publication.
+Separate compose/inspection/history commands preserve ordinary single-run
+behavior. Both `x*x` and `x*x+17` modulo2^32 pass actual RTL, independent oracle
+and C++ fallback validation; all512 saved words match scalar expectations.
+Host-boundary cancellation between actual children retains the first child
+without publishing a complete parent. Final validation and source identities
+are recorded in the [October10 log](log/2026-10-10.md).
+
+Acceptance exposed an existing simulation-driver READY/clock settling defect
+after S03 RTL lowering. Two low-phase evaluations repair the dynamic harness;
+RTL/core/ABI remain unchanged. Failed evidence is retained. No FPGA, timing,
+shared arithmetic or integrated QEMU/RTL result is claimed.
+
+Next bounded increment is T-0205/#288: compare saved named parents after input
+and computation edits, then assess the combined ADR-0107 maturity evidence.
+Hardware work remains deferred and the combined review is not yet passed.
+
 ## Simulation maturity first — T-0204, 2026-10-10
 
 [ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) records the
 owner-approved sequencing correction: develop with Chisel/Verilator and QEMU
 until the reproducible editable workflow and correctness/recovery boundaries
-are complete; defer hardware acquisition and vendor setup. T-0197/#266 is the
-next implementation, still unimplemented: two named Graph results from one
-frozen input. Current QEMU and RTL project backends are separate. Existing
+are complete; defer hardware acquisition and vendor setup. That planning packet
+selected T-0197/#266; its implementation and validation are recorded above. Current QEMU and RTL project backends are separate. Existing
 S03 structural/execution receipts reverify successfully; no new runtime, QEMU
 run, RTL rebuild or hardware result is claimed by this planning change.
 Windows/Vivado inventory is a later prerequisite, not the current blocker.

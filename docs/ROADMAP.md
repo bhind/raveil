@@ -3,7 +3,8 @@
 ## Current owner-directed priority — simulation maturity, 2026-10-10
 
 [ADR-0107](decisions/ADR-0107-simulation-maturity-before-hardware.md) governs:
-T-0204 policy/queue correction → T-0197 named-result composition → review the
+T-0204 policy/queue correction → T-0197 named-result composition → T-0205
+saved named-parent comparison after input/computation edits → review the
 editable workflow, same-RTL multi-Graph correctness, failure/reset recovery and
 reproducibility evidence → only then T-0188 host/budget and T-0189 hardware.
 Existing functionality counts as evidence, but the combined maturity review is

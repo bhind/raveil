@@ -11,9 +11,10 @@ separate. Windows/Vivado inventory does not gate current development.
   S-0007,2SP: simulation-maturity policy and implementation exit criteria;
   current record/queue correction. No new runtime or physical result.
 
-Next implementation is existing **T-0197/#266**, defined below: two named
-results from one frozen input, with complete-parent publication only after
-all children pass. T-0186 follows later scope review. T-0188/T-0189 physical
+Current implementation is **T-0197/#266**, defined below: two named results
+from one frozen input, with complete-parent publication only after all children
+pass. The bounded successor is **T-0205/#288**, saved named-parent comparison
+after editing input/computation. T-0186 follows later scope review. T-0188/T-0189 physical
 work is deferred until the maturity review, not a current missing-PC blocker.
 
 ## Retained affordable-hardware preparation
@@ -140,9 +141,16 @@ Checkboxes are execution state, not priority. Every material task has a stable I
   regressions pass; independent GO. Technically accepted for integration.
 - [ ] **T-0197** Compose two named Graph results from one frozen input,
   [Issue #266](https://github.com/bhind/raveil/issues/266), S-0007,5SP unchanged,
-  restored as P1/Ready after T-0204, T-0183 and T-0196. New parent record
-  and implementation ADR; retain child evidence on failure but publish a
-  complete result set only after both pass. No runtime implementation yet.
+  active after T-0204, T-0183 and T-0196. ADR-0108 adds private snapshots,
+  parent publication, inspect/history and incomplete retention. Final actual
+  RTL acceptance and integration are recorded in the October10 log.
+
+- [ ] **T-0205** [Issue #288](https://github.com/bhind/raveil/issues/288),
+  S-0007,3SP planned: read-only named-parent comparison after T-0197 integration.
+  Validate both complete parents, pair labels/layouts/build identities, report
+  bounded verified output changes; demonstrate edit/run/compare with old
+  snapshots preserved. No backend/RTL changes. Then review combined ADR-0107
+  maturity evidence; no automatic hardware purchase.
 
 - [x] **T-0187** Select a bounded simulator reuse path, Issue #187, S-0005,
   original3SP preserved. Owner explicitly authorized continuation and the
@@ -501,8 +509,8 @@ does not promote a task. See `docs/guides/TASK-START-PHASES.md`.
 
 | Phase | Meaning and start rule | Unfinished tasks |
 |---|---|---|
-| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0204 records the simulation-first correction; T-0203 and T-0189/S01–S04 are complete. No hardware mutation is active. |
-| **P1 — next** | Start only after its named dependencies pass. | ADR-0107 selects T-0197 / #266 implementation after T-0204. T-0183 and T-0196 are complete. T-0186 is later; T-0188/T-0189 physical work waits for simulation maturity. Physical/EXP gates remain separate. |
+| **P0 — immediate** | At most two explicitly independent delivery lanes may run under ADR-0061, ADR-0065, and ADR-0066. | T-0197 implements named results under the completed T-0204 correction. T-0205 is its bounded prepared successor. No hardware mutation is active. |
+| **P1 — next** | Start only after its named dependencies pass. | ADR-0107 selects T-0197 / #266, followed by T-0205 / #288 named-parent comparison and the combined maturity review. T-0183 and T-0196 are complete. T-0186 is later; T-0188/T-0189 physical work waits for simulation maturity. Physical/EXP gates remain separate. |
 | **P2 — result-conditioned** | Start only if the named research result survives or a separately accepted product requirement triggers it. | T-0106 |
 | **P3 — future planned** | Retained planned work, but not scheduled. The Project Manager must select and promote one after P1 rather than running these in parallel by default. | T-0104, T-0100, T-0091, T-0018 |
 | **P4 — optional/triggered** | No default start date. Start only when the task's explicit operational, research, security, scale, contributor, or equipment trigger occurs. | T-0063, T-0068, T-0069, T-0071, T-0073, T-0025, T-0050, T-0051, T-0052, T-0053, T-0054, T-0055, T-0056, T-0058, T-0059 |

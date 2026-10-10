@@ -1,10 +1,13 @@
 # Raveil project records
 
 Current priority: [simulation maturity before hardware](decisions/ADR-0107-simulation-maturity-before-hardware.md).
-T-0204/#286 records the owner-approved correction; existing T-0197/#266 is the
-next implementation: two named results from one frozen input, with all-or-
-incomplete parent publication. [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
-provides the planning baseline. Chisel/Verilator checks RTL; QEMU checks supported
+T-0204/#286 records the owner-approved correction. T-0197/#266 implements two
+named results from one frozen input, with all-or-incomplete parent publication
+under [ADR-0108](decisions/ADR-0108-bounded-project-result-composition.md).
+See [the workspace guide](guides/PROJECT_WORKSPACE.md) and [current evidence](STATUS.md).
+Next is T-0205/#288 saved named-parent comparison after input/computation edits,
+then the combined maturity review. The [T-0183 contract](research/reviews/graph-multiple-output-contract.md)
+remains its planning provenance. Chisel/Verilator checks RTL; QEMU checks supported
 Sonatine software. Their current project backends are separate.
 T-0188/#194 and unfinished T-0189/#195 hardware work are deferred until the
 maturity review. Windows/Vivado facts do not block this implementation phase.

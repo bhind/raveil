@@ -722,6 +722,21 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
+    if action in {"compose", "composition", "compositions"}:
+        from . import project_composition
+        if action == "compose":
+            outputs = [value.split("=", 1) for value in args.output]
+            record = project_composition.compose(project, args.input, outputs)
+            print(f"composition={record['composition_id']} status={record['status']}")
+            print(f"Inspect: raveil project composition {record['composition_id']} --project {shlex.quote(str(project.root))}")
+            if record["error"]:
+                print(record["error"])
+            return 0 if record["status"] == "succeeded" else 2
+        if action == "composition":
+            print(project_composition.inspect(project, args.composition_id), end="")
+        else:
+            print(project_composition.history(project))
+        return 0
     if action in {"export-preview", "export"}:
         from .project_export import preview, export_selected
         if action == "export-preview":
@@ -798,7 +813,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -811,6 +826,11 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
         if action in {"show", "check", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
+        if action == "compose":
+            command.add_argument("--input", required=True, help="one inputs/ JSON snapshot shared by all children")
+            command.add_argument("--output", action="append", required=True, help="NAME=RECIPE; repeat once for two outputs")
+        if action == "composition":
+            command.add_argument("composition_id", help="saved parent result set; verifies without rerunning")
         if action == "fork":
             command.add_argument("source", help="admitted source recipe name")
             command.add_argument("destination", help="new confined recipe name")
