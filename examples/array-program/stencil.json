@@ -1,0 +1,72 @@
+{
+  "schema": "raveil.array-program/v1",
+  "stages": [
+    {
+      "name": "answer",
+      "source": {
+        "inputs": [
+          {
+            "schema": "raveil.grid-input/v2",
+            "rows": 3,
+            "columns": 4,
+            "words": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
+            ]
+          }
+        ],
+        "shape": [
+          3,
+          4
+        ],
+        "boundary": "clamp",
+        "kernel": {
+          "extent": 3,
+          "fold": "sum",
+          "views": {
+            "v": {
+              "input": 0,
+              "offset": [
+                0,
+                -1
+              ],
+              "row": [
+                1,
+                0
+              ],
+              "column": [
+                0,
+                1
+              ],
+              "step": [
+                0,
+                1
+              ]
+            }
+          },
+          "nodes": [
+            {
+              "id": "x",
+              "op": "load",
+              "view": "v"
+            }
+          ],
+          "result": "x"
+        }
+      }
+    }
+  ],
+  "outputs": [
+    "answer"
+  ]
+}

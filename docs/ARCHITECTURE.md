@@ -1,5 +1,194 @@
 # Intended Raveil architecture
 
+## Common-source execution boundary verified — T-0236
+
+No architecture/ISA/resource contract changed in this continuation. The existing
+ADR-0132 materialization path now has actual CLI→QEMU→RTL→saved-parent verification
+across the declared source operations and representative/admission-boundary shapes.
+Runtime-option changes during an injected real cancellation are rejected and leave
+an unsealed parent; no cancellation protocol was silently added. Existing child
+admission and proof authority remain final. See the completion guide and EXP-0002
+for the functional evidence class.
+
+## Proposed common array frontend and automatic materialization — T-0235
+
+ADR-0132 defines a new bounded array-program/v1 above unchanged grid/v5 and MF01.
+A deterministic structural compiler emits one full-plane backend pass per SSA
+node, streaming fold iterations and backend accumulation, then post maps. Host
+coordinate gathering is explicit; no host arithmetic implements production results.
+Last-use release keeps only required planes and pinned output producers. All
+expanded passes undergo existing backend admission before an attempt, plus parent
+session/work/logical-plane limits. Original source, pass plan and executables are
+captured. Every predecessor is reloaded and exactly bound before dispatch; saved
+inspection reconstructs all bindings and compares the whole-source scalar oracle.
+Failures stop the prefix and suppress all outputs. This is a correctness-first
+local implementation, not a throughput, memory-RSS or novelty claim. Old source
+versions and accepted ADRs are not silently changed.
+
+## Proposed versioned signed representation sharing — T-0234
+
+Proposed ADR-0131 adds an explicit v5 compiler path with the existing v4 numerical
+contract. Cache T(x)=x+2^31 modulo2^32 per SSA identity within one map, preserve each
+original public result, and retain original representations for ordinary arithmetic.
+The selected biased result already equals T(public result) and can serve later
+signed consumers. Kernel/post caches are separate and depend only on source shape.
+V1–v4 compilation and saved-proof binding remain unchanged. Existing physical
+admission is final; no extra job or relaxed authority is introduced. This proposal now passes host and actual v5 execution checks; public adoption
+remains pending. No architectural contract changed during resumed validation.
+
+## Explicit signed ordering on the existing backend — T-0229 resumed
+
+Proposed ADR-0130 defines v4 max_i32/relu_i32 over stored uint32 bit patterns. The
+source compiler reserves original SSA names, emits a shared2^31 constant per map,
+transforms signed order into unsigned order and restores the selected bit pattern.
+It validates the expanded map with the existing15-node/8-register admission before
+execution. A v4 post map still adds exactly one existing dependent job per tile.
+The source oracle interprets signed values independently of transformed operations.
+Saved reconstruction binds original numerical meaning to the captured child proof.
+Existing source versions, guest/RTL/ISA and authority boundaries are unchanged.
+Local owner-authorized verification is complete; canonical adoption remains pending.
+
+## Existing flow execution verified — local T-0233
+
+Fresh QEMU/RTL evidence exercises the existing frozen-parent, verified-child and
+all-output-publication contract. Retrying creates a new parent and recomputes every
+stage while preserving the failed attempt; it does not resume guest state or reuse
+completed children. This is verification of the existing design, not a new decision.
+
+T-0232 rechecks this unchanged local architecture from a clean canonical archive
+plus the T-0231 cumulative patch. Its host/saved-proof evidence is in STATUS and
+the October11 log; it introduces no accepted design or authority change.
+
+## Strict existing proof representation — local T-0231
+
+All MF01 source/receipt JSON entry points in the standalone, bridge and existing
+session family use the shared strict parser; reconstructed receipt values use
+recursive type-sensitive equality. Object key order remains irrelevant. Float,
+non-finite and duplicate-field JSON is outside the existing integer contract.
+Incomplete plans still require well-formed build identity without demanding a
+snapshot before build. All session-family readers check processed<=declared jobs
+before indexing. This implements existing contracts; no ISA, state-authority,
+resource-bound or numerical-semantics decision changes.
+
+## Existing admission diagnostics — local T-0230
+
+Typed source guards precede unsafe container/hash/regex operations. Saved DAG and
+session verification bounds processed rows by the validated declared job count
+before indexing per-job state. These restore existing rejection contracts; no new
+ADR, guest/RTL, numerical semantics or authority boundary is introduced.
+
+## Local flow tile advice — Proposed ADR-0129
+
+T-0228 applies existing finite grid advice after structural dependency validation.
+Only tile fields enter the new linked source; shaped-zero probes never become
+execution inputs. Existing flow admission remains mandatory. See
+[ADR-0129](decisions/ADR-0129-separable-flow-partition-advice.md).
+
+## Local composed MF01 grid source — Proposed ADR-0128
+
+T-0227 resolves named whole-grid links through existing committed grid captures.
+Host shape propagation and deterministic scheduling do not add guest capabilities.
+Every child is revalidated and bound to producer values and common executable
+identities before downstream execution. See [ADR-0128](decisions/ADR-0128-dependent-grid-source-flows.md).
+
+Local T-0225 / Proposed [ADR-0127](decisions/ADR-0127-post-reduction-map-source.md)
+adds a versioned fold-then-map source. The compiler emits reduce -> result within
+each admitted DAG; the second job reads the first job's committed whole result
+through existing capability snapshots. Only the second result is designated.
+Source-bound saved reconstruction and batch completeness remain unchanged.
+
+Local T-0224 / Proposed [ADR-0126](decisions/ADR-0126-admitted-uniform-tile-advice.md)
+adds finite tile advice before the unchanged source compiler. All 256 legal
+nominal shapes are fully admitted or rejected by existing code; deterministic
+static counts rank admitted choices. Preview creates no execution, and optional
+saving writes a new explicit source that grid-run must admit again. No executor,
+source schema, authority or guest/RTL boundary changes.
+
+Local T-0222 / Proposed [ADR-0125](decisions/ADR-0125-affine-grid-coordinate-maps.md)
+generalizes the source-to-MF01 coordinate map. Independent output and input shapes,
+per-view tile origins and nonnegative row/column/fold vectors determine conservative
+input rectangles and flattened strides. V1 remains compatible. Source capture,
+batch execution, authority admission, proof validation and publication are unchanged.
+
+Local T-0221 / Proposed [ADR-0124](decisions/ADR-0124-source-preserving-mf01-grids.md)
+adds a source compiler above independent DAG batches. Per-input rectangle unions
+pack global-boundary samples into existing MF01 inputs; each tile retains the
+same guest admission and authority path. Saved parents recompile frozen source,
+verify exact lowering and placement, validate the child batch, then assemble and
+compare an untiled coordinate oracle. This layer carries source provenance and
+whole-grid completeness, not cross-session memory or a new RTL executor.
+
+Local T-0220 / Proposed [ADR-0123](decisions/ADR-0123-independent-dag-batches.md)
+composes independent existing coupled DAG sessions. A single source and common
+executables precede every child; exact-prefix saved verification and parent-last
+publication expose outputs only if every child completes. This is host orchestration,
+with no cross-guest object dependency or authority expansion.
+
+Local T-0219 / Proposed [ADR-0122](decisions/ADR-0122-fold-dag-subranges.md)
+adds explicit DAG v2 producer intervals. Admission unions touched chunks while
+retaining whole-producer lifetime/version semantics. The guest declares full-slot
+READ references and copies only the requested segments through bound submission
+snapshots. Existing authority ABI, v1 semantics and RTL are unchanged.
+
+Local T-0217 / Proposed [ADR-0121](decisions/ADR-0121-dag-workspace-capture.md)
+wraps the existing DAG executor with project capture/history/comparison. One
+frozen DAG input, kernel and runtime precede execution; the parent binds and
+revalidates all nested proof before no-overwrite publication. It adds no execution
+or authority mechanism. Canonical adoption remains pending.
+
+Local T-0216 / Proposed [ADR-0120](decisions/ADR-0120-fold-dag-lifetimes.md)
+adds whole-plan liveness and reference admission to the functional UART path.
+Eight fixed512-byte objects are reused only after the prior owner's last read;
+one designated output is pinned. One/two-chunk results carry per-object versions.
+This supersedes the local one-producer limit only within the new DAG envelope;
+existing chain/session protocols remain supported. Canonical adoption is pending.
+
+Local T-0215 / Proposed [ADR-0119](decisions/ADR-0119-fold-result-snapshots.md)
+adds exact producer links through two READ object snapshots and two destination
+WRITEs. Per-bank versions are independent; linked arrays may alias the same
+producer without duplicate object references. Failed/stale sources halt before
+submission. This is a local candidate, not an accepted general DAG architecture.
+
+Local T-0214 / Proposed [ADR-0118](decisions/ADR-0118-bounded-fold-sessions.md)
+extends the UART candidate to predeclared1..8-job sessions. Authority resets
+once after boot diagnostics, then remains live across all jobs. Full1,024-byte
+zero-padded replacement is explicit; successful atomic publication increments
+both output versions, rejected frames preserve all old bytes. This candidate
+remains unpublished and does not supersede accepted architecture.
+
+Local T-0213 / Proposed [ADR-0117](decisions/ADR-0117-host-mediated-fold-coupling.md)
+adds a host UART broker for guest-issued execution and guest validation before
+publication. It remains a one-request-per-boot candidate, not a canonical MMIO
+device architecture. The older separate-execution candidate below is preserved.
+
+## Local candidate boundary, October11
+
+Proposed [ADR-0116](decisions/ADR-0116-sonatine-affine-fold-emulation.md) describes
+T-0212 full MF01 software execution in Sonatine/QEMU, with unchanged multi-object
+publication authority. This is not accepted canonical architecture. The RTL
+and QEMU backends run separately and meet only in a host differential check.
+
+## Proposed affine-fold workspace adapter — local T-0211
+
+Proposed ADR-0115 adds a runtime-file transport to the standalone simulator and
+fold operations to Project. Immutable region/input/request and a private build
+copy precede execution. One named network-disabled container writes private
+artifacts; the adapter reconstructs exact memory requests and reference outputs
+before atomic record publication. Cleanup uncertainty leaves the run unsealed.
+Saved inspection performs the same semantic verification without execution.
+The underlying MF01 RTL is unchanged; no new processor/device ABI is claimed.
+
+## Proposed standalone affine map/fold region — local only
+
+Proposed ADR-0114 / T-0210 adds a separate MF01 configuration and
+AffineFoldRegion, leaving the accepted stencil ABI unchanged. Two readonly
+inputs and nonnegative affine views feed a short uint32 map and sum/max fold.
+The core latches configuration, admits it before effects, executes with one
+outstanding request, and exposes success only after the final write response.
+Cancel/error drains offered work and withholds success. Memory ownership and
+immutability are obligations of the future integration layer. This is not yet
+wired into project, board or QEMU execution and is not an accepted replacement.
+
 ## General rectangular grids — ADR-0112
 
 Accepted ADR-0112 separates global rectangular shape and boundary policy from

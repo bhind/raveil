@@ -5,6 +5,10 @@
 #include "demo_shell.h"
 #include "ipc.h"
 #include "graph_backend.h"
+#include "fold_backend.h"
+#include "fold_session.h"
+#include "fold_chain.h"
+#include "fold_dag.h"
 #include "job_authority.h"
 #include "memory.h"
 #include "platform.h"
@@ -221,6 +225,19 @@ void kmain(void) {
   boot_ok("Daphnis byte shadow / atomic publish + rollback");
   boot_ok("four-plane authority / registry + capability write firewall");
 
+  if(fold_dag_run_if_present(init_task,program_authority_cap,
+      graph_authority_cap,data_authority_cap,experience_authority_cap))
+    boot_fail("fold dag returned");
+  if(fold_chain_run_if_present(init_task,program_authority_cap,
+                               graph_authority_cap,data_authority_cap,
+                               experience_authority_cap))
+    boot_fail("fold chain returned");
+  if(fold_session_run_if_present(init_task,program_authority_cap,
+      graph_authority_cap,data_authority_cap,experience_authority_cap))
+    boot_fail("fold session returned");
+  if(fold_backend_run_if_present(init_task,program_authority_cap,
+      graph_authority_cap,data_authority_cap,experience_authority_cap))
+    boot_fail("fold backend returned");
   if(graph_backend_run_if_present(init_task,program_authority_cap,
                                   graph_authority_cap,data_authority_cap,
                                   experience_authority_cap))

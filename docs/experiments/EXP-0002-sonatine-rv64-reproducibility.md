@@ -1,8 +1,31 @@
 # EXP-0002: Sonatine Microkernel RV64 reproducibility
 
+## T-0236 common-source functional execution — 2026-10-12
+
+Fresh real QEMU/RTL acceptance verifies27 sealed array parents:24 successful,
+3 intended incomplete,4562 published words.177 distinct sealed DAG receipts record
+177 processed jobs,174 approvals and3 injected rejections. A separately preserved
+unsealed attempt contains one verified real RTL cancellation, followed by coupled
+option-binding rejection. Do not count it as a sealed/approved DAG session or as
+a supported public cancellation command.
+
+Coverage includes long24-node maps,9 live values, all source operators, two GEMM
+shapes,3 boundaries, wrapped fold then post,17x19 tiling,64x64 broadcast,8 inputs,
+8 stages/outputs and fanout/join. Frozen source edits compare correctly. All sealed
+parents revalidate without execution. Full failed-tree preservation including seals
+is established by the supplementary failure/retry; the main campaign establishes
+captured-content inventory preservation and valid failed-parent reinspection.
+
+Existing kernel SHA256 `35db85f0018595fe4c68d425f5071c39072b9eb35095477b8d4cdec1ebee49f9`
+and runtime identity `bdb6eefe93fe768fa2aa656b9354dcf5c7a4c28107b7dd979c49902b322a18ab`
+are reused with current-source verification. Evidence is functional QEMU emulation
+plus RTL simulation, never FPGA/silicon timing, energy or Groq comparison. This
+entry adds functional evidence without changing scientific fields or gate/EXP
+conclusions. Exact commands and receipts: local T-0236 packet and October12 log.
+
 Status: Completed
-Evidence class: QEMU emulation and host-tool inspection
-Last updated: 2026-10-10
+Evidence class: QEMU functional emulation, RTL functional simulation, and host-tool inspection
+Last updated: 2026-10-12
 
 ## Objective
 
@@ -280,3 +303,187 @@ source manifest, complete console and log hashes are in
 This is native QEMU emulation, not FPGA or silicon. No new Docker reproduction,
 debug/GDB or IDE attachment was tested. Historical Gate0 evidence and task
 completion remain unchanged; this continuation does not re-certify those surfaces.
+
+## 2026-10-11: T-0212 local native regression evidence
+
+The local candidate over canonical a58e5a5 adds an MF01 software interpreter.
+Existing native RV64 build, Sonatine shell smoke and graph-smoke all pass using
+riscv64-elf-gcc16.1.0 and QEMU11.0.3 on macOS arm64. The retained command and
+raw-log inventory is in artifacts/research/T-0212 inside the candidate. Commands:
+
+```sh
+make -C sonatine CROSS_COMPILE=/opt/homebrew/bin/riscv64-elf-
+make -C sonatine smoke graph-smoke
+python3 scripts/sonatine_fold_acceptance.py --kernel sonatine/build/sonatine.elf --output artifacts/research/T-0212/acceptance-01
+```
+
+All exited0.34 functional emulation successes checked2,174 words;29 invalid
+requests were rejected. These are local QEMU correctness results, not Gate0
+reopening or performance measurements. No new debug-symbol, GDB, IDE, Docker
+Sonatine reproduction or clean-clone claim is made. The separate RTL comparison
+is recorded in the October11 log, not attributed to QEMU hardware.
+
+## 2026-10-11: T-0213 local regression and coupling boundary
+
+After adding guest UART dispatch/response handling, native `make -C sonatine`
+and `make -C sonatine smoke graph-smoke` again exited0. Tool versions remain
+GCC16.1.0/QEMU11.0.3 on macOS26.6.2 arm64. Candidate raw build and smoke logs,
+source identities and kernel SHA are under artifacts/research/T-0213. Gate0
+and earlier debug/IDE claims do not change. The42 coupled runs have their own
+class, host-mediated-QEMU-RTL-functional-coupling, described in Proposed
+ADR-0117 and the dated log; they are not silicon or timing measurements.
+
+## 2026-10-11: T-0214 local native session regression
+
+Existing GCC16.1.0/QEMU11.0.3 build and `make -C sonatine smoke graph-smoke`
+exit0 after adding bounded sessions. Complete logs and kernel/source hashes are
+under candidate artifacts/research/T-0214. This is native functional regression
+only; Gate0, debug/GDB/IDE and earlier emulation evidence remain unchanged.
+Coupled session results have their own functional class in ADR-0118 and the log.
+
+## 2026-10-11: T-0215 local native dependency regression
+
+Native RV64 build and shell/GEMM smoke again pass with existing GCC16.1.0/QEMU11.0.3.
+The new chain has independent functional evidence in ADR-0119 and the dated log.
+No Gate0/debug/IDE, physical performance or hardware claim changes. Raw command
+logs/source/kernel identities are retained under local artifacts/research/T-0215.
+
+## 2026-10-11: T-0216 local native DAG regression
+
+Existing GCC16.1.0 native build and QEMU11.0.3 shell/GEMM smoke pass after adding
+whole-DAG admission. Main coupled evidence is separately classified in ADR-0120
+and the dated log. Initial build-01 failed on misleading C indentation; build-02
+passes after explicit line separation. Both logs are retained. Gate0 and prior
+debug/IDE/hardware/performance conclusions remain unchanged.
+
+## 2026-10-11: T-0219 local subrange native regression
+
+Existing GCC16.1.0/QEMU11.0.3 on macOS26.6.2 arm64 builds the v1/v2 DAG decoder
+and segmented submission-snapshot reader. Final build-02 and smoke-02 logs pass
+native shell/GEMM regression after the zero-length linked-input correction.
+Exact commands/hashes are in the dated log. Fresh coupled range cases are
+separately classified as functional host-mediated QEMU/RTL evidence. Gate0,
+Docker clean-clone, debug/IDE, physical and performance conclusions are unchanged.
+
+## T-0223 local clean-archive supplement — 2026-10-11
+
+Canonical a58e5a5 plus the retained T-0222 cumulative patch reproduces all 112
+candidate file hashes. A fresh native release build with Homebrew GCC 16.1.0
+is byte-identical to T-0219; shell smoke and legacy QEMU/native GEMM comparison
+pass under QEMU 11.0.3 on macOS 26.6.2 arm64. The 131 selected host tests pass.
+Commands, exact paths, environment and raw-log hashes are in the dated log.
+
+Offline Chisel/runtime rebuilding also passes using the existing image/cache.
+All 14 source/emitted-RTL/simulator/toolchain files match the retained runtime;
+no build-log/manifest identity is inferred. Eight coupled grid cases reproduce
+40 sessions/806 words, and a maximum-input case using both rebuilt executables
+checks 36 more words and saved revalidation. These are functional QEMU/RTL
+and host-tool facts, not physical performance or an experiment/gate transition.
+
+This is a fresh archive plus patch, not a fresh remote clone or new Docker image
+rebuild. No new debug-symbol, GDB or IDE evidence was collected; historical Gate 0
+task statuses and conclusions remain unchanged.
+
+## T-0233: fresh unsigned flow continuation, October 11
+
+Current host source is a clean canonical archive plus the T-0232 cumulative patch;
+all144 inherited file hashes match before and after execution. Existing T-0223
+Sonatine ELF SHA256 `35db85f0018595fe4c68d425f5071c39072b9eb35095477b8d4cdec1ebee49f9`
+and RTL runtime digest `bdb6eefe93fe768fa2aa656b9354dcf5c7a4c28107b7dd979c49902b322a18ab`
+are reused. QEMU11.0.3 and the existing amd64 Docker image
+`sha256:2efc059cf07eb054d93fc1fa32decd7a13c2cdb97069dac29138275b22e5c57c`
+run on Darwin25.6.0 arm64; Docker client/server29.7.2, Python3.14.6.
+
+Eight new flow parents execute61 QEMU/RTL sessions and76 jobs:75 accepted and one
+intentionally wrong transport word rejected. Seven complete parents publish201
+final words; the incomplete parent publishes none. Fresh eight-stage retry produces
+64, preserves the full failed tree and matches the earlier successful output.
+Selected diamond uses four sessions and agrees with the freshly executed16-session
+baseline. The copied baseline in the planner workspace is excluded from counts.
+Receipt-derived counting and saved validation pass with process creation disabled.
+
+Exact commands, complete raw logs and hashes are in the October11 T-0233 log and
+local evidence manifest. This is functional host-mediated QEMU/RTL coupling.
+No new RV64/RTL build, clean Docker build, debug-symbol or IDE/GDB verification was
+performed. Existing Gate0 task states are unchanged. No latency, power, physical
+hardware or Groq advantage is established; T-0229 signed semantics are excluded.
+
+## T-0229 resumed: signed source ordering, October 11
+
+Explicit owner approval permits the local signed32 max/ReLU continuation. The
+current host candidate combines T-0233 fixes with Proposed ADR-0130 and reuses the
+same T-0223 kernel/runtime and immutable Docker image recorded above. No new RV64
+or RTL build, debug/GDB or hardware acquisition was performed.
+
+Nine new parents execute14 coupled sessions/17 jobs. Sixteen jobs are accepted;
+one deliberate wrong-word response in the post job is rejected and suppresses the
+parent output. Eight complete parents publish240 expected words. Both partition
+choices, signed boundaries, repeated comparisons at the map-node limit, wrapped
+reduction, small GEMM+bias+ReLU and full-range wrapped GEMM+bias+ReLU pass. All saved
+parents revalidate without execution. These are functional emulation/RTL simulation
+results and do not establish latency, power, silicon performance or Groq advantage.
+Exact commands and hashes: October11 T-0229 resumed log and its evidence manifest.
+
+## T-0229 generated signed interaction evidence (2026-10-11)
+
+The generated-coordinate harness now accepts `--numeric signed32`, using the
+existing v4 source contract. With seed 229, 1,000 generated sources exercise
+zero/clamp/wrap, unsigned sum/max folds, optional post maps and one/two inputs.
+989 sources have an admitted tested partition; 11 have none. All
+2729 admitted partitions match 51,094 independently computed words.
+Rejected partitions remain explicit and are never counted as successful execution.
+
+Actual QEMU/RTL verification passes 24 representative parents, 24 distinct
+sessions and 36 approved jobs, producing 850 correct words. Each selected
+case differs from a signed-to-unsigned counterfactual, samples outside input bounds,
+and changes when any declared input is zeroed. The counterfactual changes
+541 final cells across the suite. Kernel signed max, kernel ReLU and
+post ReLU each have observable cases across the suite; not every placement is
+observable in every category. Outside sampling does not prove changing boundary
+mode changes the output. All actual parents revalidate without execution.
+
+24 selected host tests pass, including six new harness tests; together with the
+previous 203 distinct tests, the retained successful inventory contains 209 unique
+test IDs. This continuation does not rerun all 209. The original unsigned fixture
+bytes are unchanged. Production compiler/runtime/RTL and numeric limits are unchanged.
+Local functional validation continues under ADR-0107 and Proposed ADR-0130;
+public adoption and physical/performance conclusions remain separate.
+Latest packet: `artifacts/research/T-0229/generated-01/`.
+
+
+## T-0234 prepared acceptance, not executed (2026-10-11)
+
+The proposed v5 signed-transform sharing has host checks and retained old-version
+proof revalidation. A new coupled acceptance command binds the existing T-0223
+kernel/runtime, but automatic approval review rejected launch pending explicit
+owner scope approval. At that initial closeout there was no new QEMU/RTL result for T-0234. Gate0 and previous
+functional results are unchanged. See STATUS/ADR-0131 and the dated log.
+
+## T-0234 resumed functional evidence (2026-10-11)
+
+The owner replied “続けて” directly to the concrete T-0234/V5 local implementation
+and QEMU/RTL validation question. The resumed candidate reproduces all157 prior
+file hashes; source/test code is unchanged. The earlier local execution hold is
+resolved. Public/canonical adoption remains separate and ADR-0131 stays Proposed.
+
+Fresh functional execution passes eight parents through12 coupled sessions and14
+processed jobs (13 accepted and one injected post rejection). Seven complete
+parents publish267 correct final words; the failed parent publishes no output.
+Coverage includes the17-to14-node signed chain, the meaningful16-to15-node modular
+branch, post-map sharing after wrapped reduction, linked GEMM composition and
+partition equivalence. An additional new v4/v5 pair produces49 identical words
+per version while reducing15 to13 map nodes. These are static source counts and
+functional QEMU/RTL results, not measured speed, energy or physical performance.
+
+All new parents revalidate with process creation prohibited; nested DAG receipts
+independently establish counts without duplicate sessions. A copied actual v4
+parent is changed to v5 with source/lowering/plan/inventory/hash coherently updated.
+Its unchanged child is rejected specifically for captured-batch/source mismatch,
+even though mathematical output is identical. Original parent record bytes remain
+unchanged and both original versions revalidate; no whole-tree identity is claimed.
+
+The previous46 host tests, 1,000-source/2,729-partition/51,094-word comparison and33
+retained-parent checks remain valid for the unchanged candidate; they are retained
+evidence, not rerun here. Ordinary15-node/8-register admission and old-version
+lowering remain unchanged. Local implementation and runtime validation are complete.
+Latest packet: `artifacts/research/T-0234/resumed-01/`.

@@ -1,5 +1,35 @@
 # Raveil project workspace
 
+## Run named result DAGs through Sonatine and RTL (local T-0217)
+
+Place an admitted `raveil.fold-dag.v1` JSON in `WORK/inputs/dag.json`.
+[The diamond example](../../examples/fold-dag-diamond.json) produces34.
+
+```sh
+python3 -m raveil project dag-check --project WORK --input dag.json
+python3 -m raveil project dag-run --project WORK --input dag.json --kernel KERNEL_ELF --build EXISTING_RUNTIME
+python3 -m raveil project dags --project WORK
+python3 -m raveil project dag SAVED_ID --project WORK
+python3 -m raveil project dag-diff OLD_ID NEW_ID --project WORK
+```
+
+Preview checks the full graph's reference/lifetime limits without executing or
+writing. Run freezes the source JSON, kernel and runtime before execution. Edit
+the source and run again for a fresh ID; saved inspect/diff never execute it again.
+Changing the example root literal3 to4 produces38. Then changing the merge from
+add to max produces27. The old34 and38 records remain independently inspectable.
+
+Each record separately reports execution status and designated `output.available`.
+A pinned output may remain available if unrelated later work fails. Diff requires
+two available outputs with the same kernel/runtime, name and shape, and shows both
+statuses. Interrupts/uncertain cleanup remain `unsealed`; retry as a new run.
+The input bound is1MiB; evidence remains bounded to16MiB/1024 entries. No timing
+or hardware result is implied. Actual offline demonstration:
+
+```sh
+python3 scripts/demo_project_dag.py --kernel KERNEL_ELF --build EXISTING_RUNTIME --output NEW_DEMO_DIRECTORY
+```
+
 ## Compose named Graph results
 
 Use one explicit input snapshot with one or two existing Graph recipes:
@@ -687,3 +717,349 @@ The executable scope is a bounded one-input/one-output uint32 stencil/map DAG.
 There is no floating-point, division, arbitrary radius, global reduction,
 multi-pass loop or QEMU/RTL coupling. Simulation verifies functionality; no
 hardware speed, energy or capacity result follows.
+
+## DAG input ranges (local T-0219)
+
+DAG v2 adds `{"from":"name","offset":128,"length":128}` producer intervals
+inside either input buffer. `dag-check` previews intervals and touched-object
+references; run/inspect/history/diff preserve the same frozen workspace contract.
+See [bounded producer subranges](SONATINE_AFFINE_FOLD.md#bounded-producer-subranges-local-t-0219)
+for grammar, limits and an actual editable demonstration command.
+
+## Independent DAG batches (local T-0220)
+
+`raveil.dag-batch.v1` contains `items`, an array of1..16
+`{"name":"unique-name","dag":<existing DAG v1 or v2>}` entries. Each DAG has
+its own input/dependencies and designated result. Cross-item links are unsupported.
+
+```sh
+python3 -m raveil project batch-check --project WORK --input batch.json
+python3 -m raveil project batch-run --project WORK --input batch.json --kernel ELF --build EXISTING_RUNTIME
+python3 -m raveil project batch BATCH_ID --project WORK
+python3 -m raveil project batches --project WORK
+python3 -m raveil project batch-diff OLD_ID NEW_ID --project WORK
+```
+
+Input JSON and common executables are captured before all execution. Named outputs
+publish together after every child completes. First incomplete child stops the
+batch and yields `outputs:null`; an interrupt or unexpected execution error leaves
+an unsealed attempt. History and comparison verify saved proof without executing.
+The original per-guest limits remain unchanged. Source4MiB, parent inventory128MiB
+and16,384 entries are bounded separately; ordinary snapshots keep their defaults.
+
+`scripts/demo_project_dag_batch.py --kernel ELF --build EXISTING_RUNTIME --output NEW_DIR`
+executes nine8x8 tiles of an owned24x24 box sum, checks every cell against a separate
+full-grid formula, edits the source and checks saved history/comparison.
+
+## Source-preserving MF01 grids (local T-0221)
+
+This candidate accepts one or two equal-shaped grid-input/v2 sources, a tile
+shape, global zero/clamp/wrap boundaries and a bounded MF01 map/fold kernel.
+See [ADR-0124](../decisions/ADR-0124-source-preserving-mf01-grids.md) for the schema
+and explicit limits. Generate editable examples from `scripts.mf01_grid_cases`:
+
+```sh
+python3 -m raveil project init WORK
+python3 -c 'from pathlib import Path; from raveil.project import encoded; from scripts.mf01_grid_cases import cases; Path("WORK/inputs/grid.json").write_bytes(encoded(dict(cases())["box-sum"]))'
+python3 -m raveil project grid-check --project WORK --input grid.json
+python3 -m raveil project grid-run --project WORK --input grid.json --kernel KERNEL --build BUILD
+python3 -m raveil project grids --project WORK
+python3 -m raveil project grid GRID_ID --project WORK
+python3 -m raveil project grid-diff FIRST_ID SECOND_ID --project WORK
+```
+
+Use the existing compatible Sonatine kernel and offline runtime build; no new
+guest/RTL build is needed for this layer. The captured parent freezes original
+source and derived batch, verifies every independent child, assembles all cells
+and checks an untiled original-coordinate oracle. Editing the workspace input
+does not alter old captures. An incomplete child yields no whole-grid output.
+Unexpected execution/cleanup errors remain unsealed. Saved reads revalidate
+the source/lowering/proofs without execution. Diff requires successful grids of
+the same shape and kernel/runtime but permits source/program/tile changes.
+
+`scripts/demo_project_mf01_grid.py` exercises actual CLI source/program edits;
+`scripts/mf01_grid_acceptance.py` covers max, two-input map/fold, all three
+boundary modes, one-row edges, the 324-word input ceiling and a failed tile.
+`scripts/mf01_grid_saved_audit.py` revalidates saved runs with process creation
+disabled and rejects altered copies. All are QEMU/RTL functional evidence;
+no physical throughput, energy, novelty or vendor advantage follows.
+
+## Affine-coordinate MF01 grids (local T-0222)
+
+The same grid-check/run/inspect/history/diff commands accept
+`raveil.mf01-grid/v2`. V2 adds an explicit output `shape` and allows independently
+shaped input grids. A view maps output row r, column c and fold iteration k as
+`offset + r*row + c*column + k*step`, where all four values are coordinate pairs.
+Row/column/step components are nonnegative integers 0..63; offsets are -63..63.
+All previous packed-input, tile-count and MF01 operation/resource limits remain.
+
+Generate a rectangular matrix-product input in an initialized WORK directory:
+
+```sh
+python3 -c 'from pathlib import Path; from raveil.project import encoded; from scripts.mf01_grid_affine_cases import matmul; value,expected=matmul(17,19,9); Path("WORK/inputs/grid.json").write_bytes(encoded(value))'
+python3 -m raveil project grid-check --project WORK --input grid.json
+```
+
+That example multiplies 17x9 by 9x19 into 17x19, with nine partial/full 8x8 tiles.
+The owned cases also include transpose, broadcast, strided boundaries and a
+324-word-per-input matrix tile. Every coordinate is interpreted relative to its
+selected input's dimensions. V1 inputs and their captured results remain valid.
+See [ADR-0125](../decisions/ADR-0125-affine-grid-coordinate-maps.md) for exact
+versioned fields and limits. This is still a bounded affine uint32 source;
+dynamic control flow, signed strides and dependent tiles are not implemented.
+
+## Admitted tile planning (local T-0224)
+
+`grid-plan` searches every 1..16 by 1..16 uniform tile through existing admission.
+It ranks admitted choices by coupled-session count, total packed input words,
+then deterministic nominal-size ties. Preview is read-only. Saving explicitly
+creates a new ordinary source file; existing files are never overwritten.
+
+```sh
+python3 -m raveil project grid-plan --project WORK --input grid.json
+python3 -m raveil project grid-plan --project WORK --input grid.json --output selected.json
+python3 -m raveil project grid-check --project WORK --input selected.json
+python3 -m raveil project grid-run --project WORK --input selected.json --kernel KERNEL --build BUILD
+```
+
+For 17x64 by 64x19, requested 8x8 tiles exceed packed-input capacity; 5x5 is
+the only admitted uniform partition (16 sessions). For the owned 24x24 box sum,
+the selected 12x12 tiles use four sessions. These are static counts, not measured
+speed. Planning a source without an admitted partition fails without an output
+file or execution attempt. Source JSON, operation and resource validation remain
+mandatory on the selected source when it runs. The advisory JSON itself is never
+consumed as execution authority. See [ADR-0126](../decisions/ADR-0126-admitted-uniform-tile-advice.md).
+
+## Post-reduction maps (local T-0225)
+
+`raveil.mf01-grid/v3` adds a mandatory `post` object with `nodes` and `result`
+to v2. Its only readable view is `reduced`, the committed reduction result for
+that output cell. Existing uint32 operations apply after the complete fold,
+with modulo-2^32 arithmetic after every operation. This can express a matrix
+product followed by a scalar bias and threshold. Applying a bias to every
+fold term would produce a different result.
+
+```sh
+python3 -c 'from pathlib import Path; from raveil.project import encoded; from scripts.mf01_grid_affine_cases import matmul; from scripts.mf01_grid_post_cases import with_post; value,_=matmul(17,19,9); Path("WORK/inputs/post.json").write_bytes(encoded(with_post(value)))'
+python3 -m raveil project grid-plan --project WORK --input post.json
+python3 -m raveil project grid-check --project WORK --input post.json
+python3 -m raveil project grid-run --project WORK --input post.json --kernel KERNEL --build BUILD
+```
+
+Each tile uses two existing jobs in one coupled session. The second reads the
+verified committed first result, and only the second result can become a grid
+output. Failure at either stage suppresses the whole grid. Saved inspection
+binds both stages to the original source. V1/v2 are unchanged. Tile planning
+counts initial source packing; its cost excludes intermediate traffic.
+
+Post nodes cannot access original grids, neighboring cells or another tile.
+External tensor bias, additional reductions and arbitrary pipelines remain
+outside this source contract. See [ADR-0127](../decisions/ADR-0127-post-reduction-map-source.md).
+
+## Generated coordinate checks (local T-0226)
+
+Run deterministic, source-coordinate formula checks across explicit partitions:
+
+```sh
+python3 scripts/mf01_grid_generated.py --seed 226 --count 1000 --output OUT
+python3 scripts/mf01_grid_generated.py --seed 226 --count 1000 --output COUPLED --kernel KERNEL --build BUILD
+python3 -m unittest tests.test_mf01_grid_generated -v
+```
+
+Output directories must be new. Every source, expected output and partition
+result is retained in cases.json. Only the two declared capacity rejections
+(rectangle size and tile count) count as rejected partitions; unexpected errors,
+all-rejected runs and missing categories fail. Rejected partitions are never
+counted as successful comparisons. For at least24 generated sources the harness
+requires all24 boundary/fold/post/input-count combinations to have admission.
+
+Coupled mode selects one admitted nonconstant-output source per category, then
+prefers fewer sessions and more distinct output values. It fails if that coverage
+cannot be met; a larger count can supply more candidates. Both declared inputs
+are referenced in two-input sources. Actual execution and saved revalidation
+must agree with the independently generated expected result. Static selection
+scores make no claim about runtime speed or physical performance.
+
+This tests shapes up to8x8, fold extent up to4, two views and short uint32
+programs. It supplements the separate128/130/256-output and324-input boundary
+fixtures; it does not replace them or prove arbitrary program correctness.
+
+## Dependent grid-source flows (local T-0227)
+
+A `raveil.mf01-flow/v1` source contains `stages` and `outputs`. Each stage has a
+unique `name` and an ordinary grid `source`; replace an inline input grid with
+`{"from":"producer-name"}` to read that stage's complete committed output. Both
+inputs may be linked, and multiple stages may read one producer. Sources retain
+existing coordinate, uint32 and resource semantics. Names resolve independently
+of stage authoring order; cycles and unknown producers reject.
+
+```sh
+python3 -c 'from pathlib import Path; from raveil.project import encoded; from scripts.mf01_flow_cases import diamond; value,_=diamond(); Path("WORK/inputs/flow.json").write_bytes(encoded(value))'
+python3 -m raveil project flow-check --project WORK --input flow.json
+python3 -m raveil project flow-run --project WORK --input flow.json --kernel KERNEL --build BUILD
+python3 -m raveil project flows --project WORK
+python3 -m raveil project flow --project WORK FLOW_ID
+python3 -m raveil project flow-diff --project WORK FIRST_ID SECOND_ID
+```
+
+The example computes a5x6 matrix product, branches to transpose and square, then
+joins both results with another product. It returns both `product` and `join`.
+There are4 stages and16 sessions with its explicit tiles. Other owned cases use
+two successive products and an8-stage chain. No new guest/RTL build is needed.
+
+Every stage passes admission before the first execution.1..8 stages may use at
+most16 total sessions (at most32 jobs with current grid sources). All declared
+stages execute, even when their outputs are not selected. The first incomplete
+stage stops the entire schedule. Successful child receipts remain diagnostic;
+parent outputs appear only when the entire schedule succeeds. Unexpected errors
+leave an unsealed parent. Existing128MiB/16,384-entry capture limits still apply.
+
+Saved loading re-derives each linked source from verified predecessors and checks
+common executable hashes. Input/program edits create fresh attempts; old captures
+remain unchanged. Comparison requires the same named output shapes and executables.
+This is serial host orchestration with complete intermediate grids; streaming,
+overlap and physical performance are not established. The ordinary source always contains explicit tiles; T-0228 supplies optional
+advice that saves another ordinary source with only its tile fields changed.
+
+## Flow partition advice (local T-0228)
+
+`flow-plan` selects uniform tiles for each existing stage while retaining the
+flow's links, inline values, programs and named outputs. Preview does not execute
+or modify the project. Optional output creates a new source file and refuses to
+overwrite any existing file. The normal runner admits the selected source again.
+
+```sh
+python3 -m raveil project flow-plan --project WORK --input flow.json
+python3 -m raveil project flow-plan --project WORK --input flow.json --output selected-flow.json
+python3 -m raveil project flow-check --project WORK --input selected-flow.json
+python3 -m raveil project flow-run --project WORK --input selected-flow.json --kernel KERNEL --build BUILD
+```
+
+The owned branch/join example uses4 selected sessions instead of16 explicit ones,
+with identical outputs against the retained actual execution. A3x8 by8x50 product
+followed by3x50 by50x9 rejects1x1 requested tiles, but selects3x13 then3x5 tiles
+and runs in6 sessions. Both follow the same admission/resource rules.
+
+The finite objective is total sessions, then total per-stage initial packed input
+words. Linked inputs are counted as packed inputs; post-stage accesses, repeated
+loads within folds, intermediate writes/copies and storage are excluded. These
+counts do not establish elapsed time or physical speed. If the minimum total
+exceeds16 sessions, planning rejects without saving a selected file or creating
+an execution attempt. Input shapes must remain independent of selected tiles;
+streaming/shape-dependent planning is outside this proof.
+
+## Malformed MF01 source diagnostics (local T-0230)
+
+Malformed DAG/batch JSON types are rejected with the existing CLI exit2/error
+message before an attempt directory or execution is created. Source admission
+checks node, view, result, buffer and name types explicitly. Saved session/DAG
+inspection rejects a processed count larger than the declared program even when
+its transcript files and hash inventory have been rewritten consistently.
+Valid source meaning, limits and saved format are unchanged. Verification details
+and retained rejected examples are in the October11 log.
+
+## Strict saved-proof readers (local T-0231)
+
+MF01 standalone/bridge inspection and compiler source loading now use the same
+strict integer JSON representation as session/chain/DAG inspection. Duplicate
+fields and type substitutions reject even if modified files have updated hashes.
+Valid JSON field reordering remains supported. Incomplete plans require a valid
+64-character lowercase hexadecimal build digest, including before any build exists.
+Chain processed counts are bounded before job indexing. No command or ISA changes.
+
+The retained-proof audits below never launch QEMU/RTL. Each requires existing
+captured artifacts and creates new mutation copies under a fresh output directory:
+`mf01_bridge_saved_audit.py`, `mf01_standalone_saved_audit.py` and
+`mf01_rejection_saved_audit.py`. The last accepts optional paired `--chain-root`
+and `--expected-chain`; existing session/DAG invocations remain valid. Exact
+invocations, initial failures and final receipts are in the October11 log.
+
+## Cumulative host reproduction (local T-0232)
+
+The T-0232 evidence directory contains `reconstruction.json`, the27-module
+`test-modules.json`, `run-host-regression.py` and `revalidate-parents.py`.
+Reconstruct canonical a58e5a5 with the T-0231 cumulative patch and verify its144
+manifest hashes before running. The dated log lists additional canonical host
+checks for shared consumers omitted by changed-test discovery. Saved parent checks
+need the named retained workspaces and do not execute guest/RTL processes.
+
+This reproduction is local compatibility evidence. It neither applies the held
+signed-numeric proposal nor publishes any candidate to canonical main.
+
+## Fresh flow retry verification (local T-0233)
+
+A failed flow remains an inspectable incomplete parent with no published outputs.
+Rerunning the same source creates a fresh parent and executes from the beginning.
+T-0233 exercises this with the existing eight-stage uint32 example, checks the full
+failed tree is unchanged and compares the retry output with a successful baseline.
+
+The local evidence scripts `recover-flow.py` and `verify-fresh.py` live under
+`artifacts/research/T-0233/`. The latter reads saved nested receipts, compares actual
+session/job counts with the planner report and excludes the copied comparison
+baseline. Both exact commands and immutable executable identities are in the log.
+
+## Explicit signed ordering (local T-0229)
+
+Use `raveil.mf01-grid/v4` with v2 coordinate fields and an optional v3-style `post`.
+Both the kernel map and post map accept:
+
+```json
+{"id":"larger","op":"max_i32","args":["a","b"]}
+{"id":"activated","op":"relu_i32","args":["larger"]}
+```
+
+These are individual node examples. Inputs and saved outputs remain uint32 bit
+patterns: -1 is encoded as4294967295, INT32_MIN as2147483648. Negative JSON words
+are rejected. Only these two operations decode signed ordering; existing `max`,
+`ge_imm` and max reduction remain unsigned. Add, multiply and sum wrap modulo2^32
+before the next operation interprets the bits. Thus this is not widened GEMM,
+saturating arithmetic or a signed reduction. V1/v2/v3 retain their exact meaning.
+
+Existing `grid-check`, `grid-plan`, `grid-run` and flow commands handle v4. Signed
+operators expand into ordinary operations before admission, so a short source
+can exceed15 map nodes or8 registers after expansion and reject before dispatch.
+No silent spilling, node omission or extra jobs occurs. An explicit post map adds
+the same single dependency job per tile as v3. Frozen original sources remain in
+saved evidence; changing signed operations to unsigned operations cannot reuse
+an old child execution even if the parent hashes/output are recomputed.
+
+Owned cases: `scripts/mf01_numeric_cases.py` and `scripts/mf01_numeric_extra_cases.py`.
+Actual commands, prior failures and exact runtime identity are in the October11 log.
+
+## Generated signed coordinate checks
+
+The existing test harness can generate signed v4 sources without changing its
+unsigned default:
+
+```sh
+python3 -B scripts/mf01_grid_generated.py --numeric signed32 --seed 229 --count 1000 --output NEW_OUTPUT
+```
+
+Add `--kernel KERNEL --build BUILD` to execute 24 selected cases through the
+existing coupled backend. Use a fresh output directory. Full inputs, expected
+words, rejected partitions and counterfactual diagnostics are retained. Selection
+requires observable signed semantics, out-of-bounds samples and sensitivity to
+each input; insufficient coverage fails before execution. Nonconstant output alone
+is insufficient. These checks are functional evidence, not performance estimates.
+
+## Proposed shared signed transforms
+
+The local T-0234 candidate recognizes `raveil.mf01-grid/v5`. Its fields and numeric
+meaning match v4; the explicit version selects sharing of biased SSA values within
+each map. To try host admission, save a new copy of an existing source with only
+its schema changed, then use `grid-check` or `grid-plan`. Preserve the original.
+Ordinary 15-node/8-register checks still apply. Inputs never select the lowering.
+
+The prepared `scripts/mf01_numeric_shared_acceptance.py` covers chains, a modular
+branch, post maps and linked flow using the existing backend. Its runtime acceptance
+now passes after owner-directed continuation, including an injected post rejection
+and a separate v4/v5 equality check. V4 records use their old exact lowering.
+The resumed evidence is in `artifacts/research/T-0234/resumed-01/`; public adoption
+remains separate.
+
+## Automatically partitioned array programs (local T-0235)
+
+Use [the common array input guide](ARRAY_PROGRAM.md) for long expressions and
+linked integer-array stages with automatic partitioning. `array-check`, `array-run`,
+`array`, `arrays` and `array-diff` share this source format. UT and actual QEMU/RTL
+integration are separate evidence classes; existing grid/flow sources retain meaning.

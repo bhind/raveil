@@ -1,0 +1,250 @@
+{
+  "schema": "raveil.array-program/v1",
+  "stages": [
+    {
+      "name": "answer",
+      "source": {
+        "inputs": [
+          {
+            "schema": "raveil.grid-input/v2",
+            "rows": 2,
+            "columns": 3,
+            "words": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          }
+        ],
+        "shape": [
+          2,
+          3
+        ],
+        "boundary": "zero",
+        "kernel": {
+          "extent": 1,
+          "fold": "sum",
+          "views": {
+            "v": {
+              "input": 0,
+              "offset": [
+                0,
+                0
+              ],
+              "row": [
+                1,
+                0
+              ],
+              "column": [
+                0,
+                1
+              ],
+              "step": [
+                0,
+                0
+              ]
+            }
+          },
+          "nodes": [
+            {
+              "id": "n0",
+              "op": "load",
+              "view": "v"
+            },
+            {
+              "id": "n1",
+              "op": "add_imm",
+              "args": [
+                "n0"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n2",
+              "op": "add_imm",
+              "args": [
+                "n1"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n3",
+              "op": "add_imm",
+              "args": [
+                "n2"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n4",
+              "op": "add_imm",
+              "args": [
+                "n3"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n5",
+              "op": "add_imm",
+              "args": [
+                "n4"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n6",
+              "op": "add_imm",
+              "args": [
+                "n5"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n7",
+              "op": "add_imm",
+              "args": [
+                "n6"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n8",
+              "op": "add_imm",
+              "args": [
+                "n7"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n9",
+              "op": "add_imm",
+              "args": [
+                "n8"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n10",
+              "op": "add_imm",
+              "args": [
+                "n9"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n11",
+              "op": "add_imm",
+              "args": [
+                "n10"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n12",
+              "op": "add_imm",
+              "args": [
+                "n11"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n13",
+              "op": "add_imm",
+              "args": [
+                "n12"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n14",
+              "op": "add_imm",
+              "args": [
+                "n13"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n15",
+              "op": "add_imm",
+              "args": [
+                "n14"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n16",
+              "op": "add_imm",
+              "args": [
+                "n15"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n17",
+              "op": "add_imm",
+              "args": [
+                "n16"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n18",
+              "op": "add_imm",
+              "args": [
+                "n17"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n19",
+              "op": "add_imm",
+              "args": [
+                "n18"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n20",
+              "op": "add_imm",
+              "args": [
+                "n19"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n21",
+              "op": "add_imm",
+              "args": [
+                "n20"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n22",
+              "op": "add_imm",
+              "args": [
+                "n21"
+              ],
+              "imm": 1
+            },
+            {
+              "id": "n23",
+              "op": "add_imm",
+              "args": [
+                "n22"
+              ],
+              "imm": 1
+            }
+          ],
+          "result": "n23"
+        }
+      }
+    }
+  ],
+  "outputs": [
+    "answer"
+  ]
+}
