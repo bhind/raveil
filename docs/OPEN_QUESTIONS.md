@@ -1,5 +1,302 @@
 # Open questions
 
+## Common-source QEMU/RTL question resolved — T-0236
+
+The question of whether ADR-0132's generated pass compositions work through actual
+QEMU/RTL is resolved for the declared contract and recorded acceptance corpus.
+No implementation question remains for this supported common-source functional
+workflow. Future floating point, dynamic control, model/IR import, optimized
+execution and product hardening are separate roadmap work rather than an excuse
+to leave the current path unverified. Issue #298 carries cumulative integration;
+older public-adoption questions below describe the pre-integration state; neither simulation nor publication establishes physical performance.
+
+## Phase-one implementation decisions resolved locally — T-0235
+
+ADR-0132 fixes source grammar, numerical semantics, coordinate/fold/post order,
+partitioning, lifetimes, static resource admission, capture limits, failure/retry,
+compatibility and UT acceptance. No further user choice is needed to finish the
+local implementation and UT. Future questions (outside that endpoint) are whether
+what measured costs justify fusion/persistent execution and which later numeric/import/control
+features serve real workloads. Capture reservation cannot guarantee arbitrary
+future log sizes; hard inventory rejection remains explicit. Public adoption is
+an integration dependency, not an unresolved algorithmic decision.
+
+## T-0234 runtime scope resolved locally
+
+The owner directed continuation immediately after the exact T-0234/V5 approval
+question. New functional QEMU/RTL checks and source-version proof binding now pass;
+local runtime approval is resolved. Public/canonical adoption remains separate.
+
+Sharing may lengthen register lifetimes; ordinary admission can reject v5.
+No universal v4-to-v5 admission guarantee, runtime benefit or physical result is
+claimed. The five-node demonstration contains a redundant second maximum; the
+separate modular branch covers meaningful original/translated-value reuse. The
+new evidence is bounded functional validation rather than arbitrary-program proof.
+
+## Signed coordinate coverage — T-0229 continuation
+
+The unsigned-only generated harness gap is resolved locally by opt-in signed32
+sources. All 24 boundary/fold/post/input-count categories have actual representatives
+whose result depends on signed semantics and every declared input. The sampled
+corpus is bounded to shapes up to 8x8 and fold extent 4; it does not establish
+arbitrary-program correctness. Operation-placement observability holds across the
+suite, not every category. Outside coordinates alone do not prove boundary-mode
+sensitivity. Production scope and public adoption remain unchanged.
+
+## Signed numerical validation resolved locally — T-0229 resumed
+
+Explicit owner approval resolved the earlier automatic-review hold. V4 signed
+max/ReLU now pass203 selected host tests,14 actual coupled sessions, semantic-rewrite
+rejection and legacy saved compatibility. Public/canonical adoption remains open.
+Negative JSON literals, signed reduction, saturation, floating point and widened
+accumulation are not supported by this contract. Existing machine words and modular
+arithmetic remain explicit; finite tests do not prove all programs or performance.
+
+## Fresh execution after validation fixes — local T-0233
+
+Resolved locally: current strict readers accept newly generated coupled evidence,
+and a failed eight-stage flow can be retried from the beginning without altering
+the failed capture. Receipt-derived counts confirm planner-selected execution.
+Resuming partial guest state, new numerical semantics, physical performance and
+public adoption are not established. The earlier T-0229 approval dependency has since been resolved and its local
+validation completed in the resumed packet.
+
+## Reproduction coverage — local T-0232
+
+Resolved for the selected existing unsigned candidate: its144-file patch reproduces
+from canonical and291 existing host checks pass. Changed-test discovery alone
+missed Sonatine C authority/syntax and legacy project helper consumers; those checks
+are now explicitly included in the reproduction record. Thirty-six saved parent
+paths revalidate, but include one copied baseline. Full-repository testing,
+new RV64/RTL rebuild and numerical T-0229 validation are not claimed by this task.
+Public adoption remains pending; this is compatibility evidence, not novelty proof.
+
+## Saved-proof review — local T-0231
+
+Resolved in the local candidate: legacy JSON duplicate/type coercion, malformed
+incomplete build identity and chain processed-count diagnostics. Existing valid
+retained receipts pass. The reproduced mutations concern representation and
+metadata; they do not establish acceptance of numerically wrong UART results.
+Public adoption remains open; T-0229 local approval and validation are resolved.
+These results neither prove all proof readers correct nor expand numeric support.
+
+## Rejection-path review — local T-0230
+
+Malformed DAG types and impossible saved processed counts previously escaped as
+Python TypeError/AttributeError/IndexError. Typed admission and declared-count
+checks now turn these into normal rejection. No successful false publication was
+found. This finite correction does not prove every arbitrary corrupted proof has
+a bounded diagnostic; it preserves the existing cooperative-files threat model.
+T-0229 signed-ordering validation subsequently completed under explicit owner approval.
+
+## Whole-flow partition advice limits — local T-0228
+
+The separable objective covers total sessions then initial packed input words.
+Linked inputs count in per-stage packing. The objective excludes intermediate
+writes/copies, repeated fold/post accesses, artifacts, execution time and memory lifetime
+across a streaming implementation. Output shapes are fixed independently of tiles;
+future shape-dependent programs or overlapping stages would invalidate this proof
+and require a new decision. Existing storage failures may remain after admission.
+
+## Dependent grid-source flow limits — local T-0227
+
+The candidate supports1..8 whole-grid stages with at most16 total coupled sessions;
+all successful stage grids are assembled before a dependent stage begins. There is
+no inter-tile streaming, overlapping execution, dynamic control flow or float/signed
+arithmetic. Fixed compute admission does not guarantee evidence fits the unchanged
+128MiB/16,384-entry capture limit: excess capture remains unsealed. Current sources
+use at most2 jobs/session (32 total), not the underlying128-job batch envelope.
+
+## Generated-combination coverage — local T-0226
+
+Do affine packing, tile assembly and post-reduction semantics remain consistent
+when coordinates and uint32 edge values vary together? Deterministic generated
+checks pass for1,000 sources (989 with an admitted partition) and24 coupled
+representatives. Initial false-green handling and weak selection were found and
+corrected. Generated shapes are at most8x8 and fold extent4; existing resource
+boundary fixtures remain separate. Passing finite generated cases cannot prove all admitted
+programs correct, nor establish support beyond the declared source/resource limits.
+
+## After post-reduction mapping — T-0225
+
+The local v3 source composes one fold with one pointwise map over each tile's
+committed result. It cannot read neighboring tiles or add independently shaped
+global inputs to the post stage. Multiple dependent tiled stages, arbitrary source
+DAG partitioning and dynamic control flow remain separate questions. Static tile
+selection measures original packed-input words, not all intermediate traffic or
+hardware latency. No broad tensor-language or vendor-advantage claim follows.
+
+## Tile choice after T-0224
+
+Finite host planning now searches all 1..16 uniform tile shapes locally. It can
+recover an existing legal partition but cannot make an infeasible source fit.
+The ranking counts sessions and packed words; actual latency, energy and optimum
+hardware scheduling remain unmeasured. Sparse packing, nonuniform partitions,
+signed strides, dependent tiles and dynamic control flow remain separate questions.
+The planner emits ordinary explicit source and never authorizes execution.
+
+## Cumulative integration boundary — T-0223
+
+Source reconstruction from canonical archive plus the cumulative patch reproduces
+all candidate hashes and selected changed tests. Native rebuild is byte-identical.
+Offline RTL reproduces 14 source/emitted/binary/toolchain files byte-for-byte;
+nine coupled parents pass. This local
+acceptance does not imply public Issue/Project/PR adoption; the prior explicit
+public-action approval hold remains separate. No new architecture is selected by
+a reproducibility check.
+
+## Affine input coordinates — T-0222
+
+V2 removes T-0221's equal-input-shape and unit-output-grid-stride restrictions
+locally: every view specifies its own row/column/fold map, and each input keeps
+its own boundary dimensions. Signed coordinate strides remain unsupported, while
+signed offsets and zero vectors allow shifted sampling and broadcasting.
+Conservative rectangle packing can still reject sparse maps whose actual samples
+would fit. Automatic tile selection, dependent multi-stage tiles and dynamic
+control flow remain separate workload-driven questions. No general tensor language
+or formal proof of arbitrary source semantics is claimed.
+
+## After source-preserving grid lowering — T-0221
+
+T-0221 locally resolves the T-0220 source-provenance gap: the complete original
+grids/program, deterministic placements/lowering, nested coupled evidence and an
+untiled coordinate oracle are bound and rechecked. Remaining constraints are
+equal-sized inputs, unit output-grid stride, nonnegative fold steps, rectangular
+halo packing up to 324 words per input, at most 16 independent tiles and existing
+integer MF01 operations. Dependent tiled stages, automatic tile selection, sparse
+packing and dynamic dimensions are not implemented. These require a concrete
+blocked workload rather than a blanket claim of generality. First consolidate
+the cumulative candidate and its compatibility evidence; public adoption is still
+separate from local functional acceptance.
+
+## After independent DAG composition — T-0220
+
+Host batches support1..16 independent sessions and128 jobs in total; each guest
+still has the existing limits. This does not move live objects between sessions
+or partition a dependent graph. The image script proves an owned box-sum workload;
+a general source compiler should preserve original grids/program, deterministic
+layout/lowering, nested evidence, and an independent full-grid oracle. Fixed
+sample scripts alone do not provide that source-level workflow.
+
+## After bounded subrange links — T-0219
+
+Explicit intervals now avoid unnecessary READ references locally. Whole producer
+objects remain live/version-checked until the last consumer, so subrange support
+does not solve live-capacity exhaustion. Graphs remain1..8 predeclared jobs with
+one pinned final output. An extension to graph size, partial reclamation or spill
+needs an actual blocked workload and independent failure/ownership evidence.
+The full512-byte READ capability for each touched chunk is intentionally broader
+than its materialized segment. No asynchronous device transport or physical
+cost measurement has been added. Prior-art novelty claims remain unsupported.
+
+## After T-0218 proof correction
+
+Numeric-type and duplicate-key ambiguity in standalone session/chain/DAG proofs
+is locally corrected. Wider schema/path/authenticity audits remain outside this
+bounded repair. T-0219 resolves the bounded-subrange question locally: only touched chunks count
+as READ references, while full-producer liveness remains conservative. Remaining
+workload/live-capacity questions are recorded above; cross-chunk reads and resource
+admission now agree in host planning, C decoding and guest snapshot materialization.
+
+## Remaining boundary after T-0217 workspace integration
+
+The separate DAG CLI is now connected to the existing project workflow locally,
+including frozen input/kernel/runtime capture and saved comparison. Interrupts
+or cleanup uncertainty stay unsealed; live device cancellation is not inferred.
+Canonical/public adoption of the reviewed local candidate chain remains pending.
+No unbounded graph, dynamic control-flow/loop support, spilling, asynchronous
+transport reset, physical implementation or Groq performance comparison has run.
+Future mechanisms need a concrete workload/measurement question; adding another
+executor is not justified by the completed workspace integration itself.
+
+## Remaining boundary after T-0216 DAG admission
+
+Distinct-producer joins now work when unique READ chunks plus WRITE chunks fit
+four references and all live results fit eight512-byte slots. Exact four-reference
+layouts and pre-dispatch capacity rejection are locally verified. The designated
+output remains pinned, while expired intermediate object identities become
+historical receipts. All nodes must be predeclared in topological order, maximum8.
+
+Next usability work is workspace integration of this existing executor and saved
+records. Larger graphs, spilling/tiling to satisfy reference pressure, arbitrary
+control flow, interactive streams, independent reset/cancellation and physical
+cost remain separate questions. Static dependencies, liveness allocation and
+bounded admission are established methods, not standalone novelty claims.
+
+## Fan-in and intermediate lifetimes after T-0215
+
+One distinct producer per job is locally implemented, including two logical input
+arrays referencing the same producer. Full256-word read plus full256-word write
+uses all four references. Two full-sized producers plus any destination cannot
+fit that ABI. Smaller results may permit distinct producers by referencing only
+needed512-byte chunks, but their allocation/lifetime/alias policy must be admitted
+before execution. A bounded deterministic planner is the next candidate; widening
+limits or silently overwriting live results is not accepted. Literal inputs remain
+boot data and physical cost/transport/reset remain separate questions.
+
+## Result dependencies after sequential sessions — T-0214
+
+Bounded persistent-authority sessions are locally implemented and tested; earlier
+one-job limits below describe T-0213. Session inputs are still independent frozen
+boot data. A useful next candidate must make a named producer's committed output
+a capability-declared snapshot input, reject failed/stale producers without
+falling back to last success, and preserve four-reference/512-byte-object limits.
+Two output banks appear feasible from source inspection; this is a design proposal,
+not executed dependency evidence. Interactive sessions, concurrent work, a
+persistent RTL process and independent reset/cancellation remain unimplemented.
+
+## UART coupling boundary — T-0213
+
+Guest-issued RTL execution and guest comparison before publication are now
+locally demonstrated through a paced host UART broker.42 captured runs verify
+protocol order and final completion binding. Actual replay across separate boots
+and host deadline cleanup are tested. Remaining: persistent job sessions,
+independent reset/late memory responses, live cancellation and a real MMIO/memory
+interface. The one-boot prototype must not be treated as those mechanisms.
+
+## Local MF01 emulation boundary — T-0212
+
+The earlier provisional128-word QEMU subset is unnecessary: existing authority
+already supports two512-byte outputs in one atomic finalize. T-0212 verifies
+full256-word cases and partial second objects. This resolves the capacity question
+without changing object limits. Inputs remain boot-time kernel data. A future
+QEMU/RTL device must specify ownership, reset/drain, stale responses, private
+memory and approval timing; separate agreeing executions establish none of these.
+The current host oracle runs after guest commit. Resource placeholders do not
+meter interpreter time or kernel scratch. Public adoption remains pending.
+
+## Local adapter evidence and remaining boundary
+
+T-0211 now connects admitted MF01 regions to project snapshots, private outputs,
+read-only inspection and same-build comparison.37 retained runtime executions
+pass their expected success/incomplete dispositions. A separate CLI check follows
+the same path. Six coordinated synchronous core/responder reset-and-retry cases now pass.
+Remaining: independently reset/stale-response transport behavior, QEMU/AXI
+coupling, floating point/standard IR and physical cost evaluation. Cleanup uncertainty
+leaves an unsealed run; it must never be treated as a completed result. Local
+file hashes are not hostile-host authenticity. Public adoption remains pending.
+
+Read-only next-step audit: current Sonatine/QEMU uses a128-byte GEMM-only v1
+request and returns checksums; it neither accepts MF01/external arrays nor
+connects to RTL. `SONATINE_OBJECT_MAX_BYTES` is512, versus a maximum MF01
+output of1024bytes. A distinct request/output framing and an explicit object
+capacity/chunking decision are prerequisites. A <=128-word guest software
+interpreter would be a bounded semantic differential, not a full-capacity
+replacement or co-simulation. No such implementation or capacity choice is
+accepted here. Preserve GEMM v1 and existing authority/finalization boundaries.
+
+## Local affine map/fold candidate boundary
+
+T-0210 demonstrates direct two-input affine maps and bounded reductions in
+standalone RTL. Integration into project snapshots/private output publication,
+QEMU/AXI transport and standard IR lowering is still open. Floating point,
+negative/data-dependent indexing, arbitrary loops and multiple outputs remain
+unsupported. Coordinated mid-transaction reset has not been tested. Liveness
+requires eventual memory acceptance/response; finite seeded stalls do not prove
+all possible interleavings. Area/timing and full-cost comparisons are unknown.
+Groq novelty/advantage is unresolved, not implied by increased Raveil coverage.
+The exact candidate remains Proposed and unpublished; no historical gate passed.
+
 ## General grid contract and remaining limits
 
 Owner-approved T-0208/#296 / ADR-0112 implements the dimension/kernel/boundary

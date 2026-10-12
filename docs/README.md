@@ -1,5 +1,150 @@
 # Raveil project records
 
+## Completed common-source execution path — local T-0236
+
+Use [the common array guide](guides/ARRAY_PROGRAM.md) and
+[completion/replay checklist](guides/GENERALIZATION_COMPLETION.md). The same source
+now passes actual QEMU/RTL through automatic partitioning, failure/retry and saved
+inspection. [STATUS](STATUS.md) and [October12 log](log/2026-10-12.md) separate
+functional facts from publication state and future product work.
+
+## Automatically partitioned array programs — local T-0235
+
+Phase-one scope and all implementation decisions are fixed in
+[ADR-0132](decisions/ADR-0132-materialized-array-program.md).
+The [common-input guide](guides/ARRAY_PROGRAM.md) describes the editable source,
+automatic materialization, CLI and failure/capture boundaries. See [status](STATUS.md)
+for verified UT completion and [TODO](../TODO.md) for the separate next integration
+phase. This is local work under ADR-0107; public adoption remains separate.
+
+## Shared signed transform proposal
+
+T-0234 proposes v5 sharing under unchanged numerical/backend limits. See
+[ADR-0131](decisions/ADR-0131-versioned-shared-signed-transforms.md), [status](STATUS.md)
+and [the prepared local usage](guides/PROJECT_WORKSPACE.md#proposed-shared-signed-transforms).
+Host and actual v5 execution verification are complete after owner-directed
+continuation. See `artifacts/research/T-0234/resumed-01/`; public adoption is separate.
+
+## Generated signed interaction checks
+
+T-0229 continues with optional signed32 generated workloads on the existing backend.
+See [status](STATUS.md), [the generated-check command](guides/PROJECT_WORKSPACE.md#generated-signed-coordinate-checks)
+and the local `artifacts/research/T-0229/generated-01/` packet.
+
+## Signed ordering continuation — T-0229 resumed
+
+[Status](STATUS.md), [numeric contract](decisions/ADR-0130-source-signed-ordering-legalization.md),
+[workspace guide](guides/PROJECT_WORKSPACE.md#explicit-signed-ordering-local-t-0229)
+and [evidence log](log/2026-10-11.md) cover the explicitly approved local continuation.
+Former validation hold is resolved; public adoption remains separate.
+
+## Fresh coupled verification — T-0233
+
+[Status](STATUS.md), [remaining adoption](../TODO.md) and
+[October11 commands/evidence](log/2026-10-11.md) record eight new existing-unsigned
+flows through QEMU/RTL, including failure, fresh retry and tile-plan equivalence.
+See [EXP-0002](experiments/EXP-0002-sonatine-rv64-reproducibility.md) for reused
+runtime identity and the functional evidence boundary.
+
+## Local cumulative reproduction — T-0232
+
+[Status](STATUS.md), [verification commands](log/2026-10-11.md) and
+[remaining adoption](../TODO.md) record291 host tests from a clean canonical archive
+plus the T-0231 patch, and recursive verification of36 saved grid/flow parent paths.
+Production source and architecture are unchanged; held T-0229 is excluded.
+
+## Local strict proof-reader correction — T-0231
+
+[Status](STATUS.md), [remaining adoption](../TODO.md),
+[workspace guide](guides/PROJECT_WORKSPACE.md#strict-saved-proof-readers-local-t-0231)
+and [October11 evidence](log/2026-10-11.md) cover host-only corrections and129 retained
+proof rereads. This follows T-0230 without incorporating held T-0229 semantics.
+
+## Local rejection-path correction
+
+T-0230 repairs malformed-source and impossible saved-count diagnostics in the
+existing MF01 path. See [status](STATUS.md), [remaining adoption](../TODO.md) and
+[the October11 evidence log](log/2026-10-11.md). Its T-0228 base is independent of
+the separately held T-0229 numerical proposal.
+
+## Latest local candidate: whole-flow partition advice — T-0228
+
+[Current state](STATUS.md), [advice contract](decisions/ADR-0129-separable-flow-partition-advice.md)
+and [workspace planning](guides/PROJECT_WORKSPACE.md#flow-partition-advice-local-t-0228)
+cover link-preserving finite planning through existing admission.
+
+## Latest local candidate: dependent grid-source flows — T-0227
+
+[Current state](STATUS.md), [flow contract](decisions/ADR-0128-dependent-grid-source-flows.md)
+and [workspace commands](guides/PROJECT_WORKSPACE.md#dependent-grid-source-flows-local-t-0227)
+describe source-level composition through existing grid execution.
+
+## Latest local validation: generated coordinate combinations — T-0226
+
+[Current state](STATUS.md) and [replay commands](guides/PROJECT_WORKSPACE.md#generated-coordinate-checks-local-t-0226)
+cover generated formula comparisons and selected coupled execution.
+
+## Latest local candidate: fold then pointwise map — T-0225
+
+[Current state](STATUS.md), [source contract](decisions/ADR-0127-post-reduction-map-source.md)
+and [workspace guide](guides/PROJECT_WORKSPACE.md#post-reduction-maps-local-t-0225)
+describe v3 composition through existing DAG jobs. Public adoption remains separate.
+
+## Latest local candidate: admitted uniform tiles — T-0224
+
+[Current state](STATUS.md), [selection contract](decisions/ADR-0126-admitted-uniform-tile-advice.md)
+and [workspace planning](guides/PROJECT_WORKSPACE.md#admitted-tile-planning-local-t-0224)
+cover finite tile advice over the existing compiler. Public adoption remains separate.
+
+## Latest local verification: cumulative reproduction — T-0223
+
+[Current state](STATUS.md) and [native evidence](experiments/EXP-0002-sonatine-rv64-reproducibility.md)
+record clean-archive cumulative-patch verification. Functional contracts remain
+the T-0222/T-0221 proposals; canonical/public adoption is separate.
+
+## Latest local candidate: affine grid coordinates — T-0222
+
+[State](STATUS.md) and [coordinate contract](decisions/ADR-0125-affine-grid-coordinate-maps.md)
+cover explicit output shapes and independently shaped affine inputs over the
+existing MF01 executor. This is a local candidate, with public adoption separate.
+
+## Latest local candidate: source-preserving MF01 grids — T-0221
+
+[Current state](STATUS.md), [source contract](decisions/ADR-0124-source-preserving-mf01-grids.md)
+and [workspace workflow](guides/PROJECT_WORKSPACE.md#source-preserving-mf01-grids-local-t-0221)
+describe the bounded grid compiler and captured coupled execution. Local evidence
+and canonical/public adoption remain separate.
+
+## Latest local candidate: independent DAG composition — T-0220
+
+[Current state](STATUS.md), [batch contract](decisions/ADR-0123-independent-dag-batches.md)
+and [workspace commands](guides/PROJECT_WORKSPACE.md#independent-dag-batches-local-t-0220)
+cover the latest local prototype. Public/canonical adoption remains separate.
+
+## Latest local candidate: bounded result subranges — T-0219
+
+See [current implementation](STATUS.md),
+[range contract](decisions/ADR-0122-fold-dag-subranges.md) and
+[the executable workflow](guides/SONATINE_AFFINE_FOLD.md#bounded-producer-subranges-local-t-0219).
+This local candidate includes T-0218 strict saved-proof correction and T-0217
+workspace capture. These unpublished candidates are separate from canonical main.
+
+## Local affine-fold workspace candidate — T-0211
+
+The [workspace guide](guides/AFFINE_FOLD_WORKSPACE.md) describes check/run/saved
+inspection/diff over a reusable MF01 executable. Proposed
+[ADR-0115](decisions/ADR-0115-affine-fold-workspace-candidate.md) binds snapshots,
+transaction validation and container cleanup. This local candidate depends on
+T-0210 and is not canonical main or an accepted/public delivery item.
+
+## Local affine map/fold candidate — not integrated
+
+T-0210 / Proposed [ADR-0114](decisions/ADR-0114-bounded-affine-map-fold-candidate.md)
+widens the standalone RTL region to two inputs, affine views and reductions.
+See the [guide](guides/AFFINE_FOLD_CANDIDATE.md) and
+[Groq comparison boundaries](research/reviews/T-0210-generality-and-groq.md).
+This archived review checkout is not the canonical main implementation.
+
 ## General rectangular grids
 
 T-0208/#296 implements the owner-approved rectangular grid interface.
@@ -137,3 +282,5 @@ by policy.
 an initial reconciliation and remaining evidence/scope gaps. Live coordination
 stays in [GitHub Project #1](https://github.com/users/bhind/projects/1), with
 mandatory session updates under ADR-0086 and WORKFLOW.
+
+Local candidate workflow: [Sonatine affine fold](guides/SONATINE_AFFINE_FOLD.md) (T-0212, Proposed ADR-0116; emulation and separate RTL comparison).

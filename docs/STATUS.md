@@ -1,5 +1,587 @@
 # Current status
 
+## Common-source generalization verified end to end — T-0236
+
+The owner directed completing the common execution path rather than stopping at
+T-0235 UT. The unchanged array-program/v1 compiler/coordinator now passes actual
+common-CLI QEMU/RTL execution across18 distinct workload/boundary families: long
+maps, nine-live values, shape changes, GEMM, boundary stencils, signed/modular/post
+semantics, unsigned max, transpose, fanout/join,64x64 broadcast,8 inputs and8 stages
+with8 outputs. No workload-specific RTL or manual partition is added.
+
+Across smoke, main and supplementary campaigns, primary verified27 sealed parents:
+24 successes publishing4562 words and3 intended incomplete parents publishing no
+outputs. There are177 distinct verified sealed DAG sessions/jobs,174 approved and
+3 intended rejections. One additional actual cancelled device execution remains an
+unsealed parent and is counted separately. It proves option-binding rejection after
+device cancellation, not a supported public array-cancellation API.
+
+Every sealed parent revalidates with process creation prohibited. Fresh retries
+succeed; the main campaign preserves failed captured-content inventory and the
+supplement compares the full failed tree including seals. Original kernel and
+runtime identities remain unchanged. The complete supported source→partition→
+execution→inspection/diff workflow is locally verified; this is not a commercial
+product, a new numeric/import/control language or a performance/novelty result.
+
+See [completion and replay](guides/GENERALIZATION_COMPLETION.md), [ADR-0132](decisions/ADR-0132-materialized-array-program.md)
+and [October12 evidence](log/2026-10-12.md). All289 host tests pass (36 for the new path/acceptance plus253 legacy), zero
+failures/errors/skips; record checks pass. The verified cumulative implementation is technically accepted for integration
+under [Issue #298](https://github.com/bhind/raveil/issues/298), branch
+`feat/t-0236-array-generalization`, S-0007 carryover (8 SP). This change integrates
+T-0210–T-0235 along with the T-0236 end-to-end acceptance path; remote task closure
+follows PR merge. Earlier sections retain point-in-time local-candidate history;
+their publication-pending statements are superseded by this integration entry.
+Raw runtime/evidence artifacts remain local. Proposed research ADRs, scientific
+gates, and the postponed weekly ceremony are not accepted by this code integration.
+
+## Phase-one array implementation and UT — local T-0235
+
+The owner explicitly authorized deciding all phase-one implementation questions
+and completing implementation plus UT without further clarification. ADR-0132 fixes
+that scope. Starting from a clean canonical archive plus T-0234/resumed-01, all157
+prior candidate hashes reproduced. Primary owns all local edits; the read-only
+reviewer has no fact/adoption authority. Latest packet: `artifacts/research/T-0235/`.
+
+The common array-program/v1 source now compiles named static integer-array stages,
+affine views, folds and post maps into automatically materialized grid/v5 passes.
+No authored tiles/jobs or workload-specific lowering are required. Long SSA maps
+and high source-level live counts split across existing backend admissions. Host
+gathering packs coordinates; backend passes compute arithmetic. A separate scalar
+whole-source oracle verifies results. Source/expanded-work/plane budgets reject
+before an attempt. Last-use release, verified predecessor binding, immutable
+captures, exact-prefix failure stop, output suppression, fresh retry and saved
+inspection are implemented. Four editable examples use one CLI entry point.
+
+Local implementation and scoped UT are complete:33 new tests plus253 affected
+legacy tests (33 legacy modules),286 distinct passing test IDs, zero failures,
+errors or skips. The32-test final run and one subsequently added entry-budget UT
+cover every test currently defined in both new modules. Raw logs, commands,
+environment, test-ID inventory and source hashes are retained in
+`artifacts/research/T-0235/ut-verification.json` inside the candidate.
+The independent source review found omitted per-session runtime copies in capture
+preflight. Primary verified the real child path and corrected bytes/entry counts;
+a regression test covers rejection before attempt creation. Capture reservations
+do not guarantee future log sizes; overflow stays unsealed. No QEMU/RTL execution
+or physical/performance claim belongs to these host tests. Legacy schemas and
+backend source are unchanged. Canonical/public adoption remains separate.
+
+## Shared signed transforms verified locally — T-0234 resumed
+
+The owner replied “続けて” directly to the concrete T-0234/V5 local implementation
+and QEMU/RTL validation question. The resumed candidate reproduces all157 prior
+file hashes; source/test code is unchanged. The earlier local execution hold is
+resolved. Public/canonical adoption remains separate and ADR-0131 stays Proposed.
+
+Fresh functional execution passes eight parents through12 coupled sessions and14
+processed jobs (13 accepted and one injected post rejection). Seven complete
+parents publish267 correct final words; the failed parent publishes no output.
+Coverage includes the17-to14-node signed chain, the meaningful16-to15-node modular
+branch, post-map sharing after wrapped reduction, linked GEMM composition and
+partition equivalence. An additional new v4/v5 pair produces49 identical words
+per version while reducing15 to13 map nodes. These are static source counts and
+functional QEMU/RTL results, not measured speed, energy or physical performance.
+
+All new parents revalidate with process creation prohibited; nested DAG receipts
+independently establish counts without duplicate sessions. A copied actual v4
+parent is changed to v5 with source/lowering/plan/inventory/hash coherently updated.
+Its unchanged child is rejected specifically for captured-batch/source mismatch,
+even though mathematical output is identical. Original parent record bytes remain
+unchanged and both original versions revalidate; no whole-tree identity is claimed.
+
+The previous46 host tests, 1,000-source/2,729-partition/51,094-word comparison and33
+retained-parent checks remain valid for the unchanged candidate; they are retained
+evidence, not rerun here. Ordinary15-node/8-register admission and old-version
+lowering remain unchanged. Local implementation and runtime validation are complete.
+Latest packet: `artifacts/research/T-0234/resumed-01/`.
+
+## Signed coordinate interactions — T-0229 continued locally
+
+The generated-coordinate harness now accepts `--numeric signed32`, using the
+existing v4 source contract. With seed 229, 1,000 generated sources exercise
+zero/clamp/wrap, unsigned sum/max folds, optional post maps and one/two inputs.
+989 sources have an admitted tested partition; 11 have none. All
+2729 admitted partitions match 51,094 independently computed words.
+Rejected partitions remain explicit and are never counted as successful execution.
+
+Actual QEMU/RTL verification passes 24 representative parents, 24 distinct
+sessions and 36 approved jobs, producing 850 correct words. Each selected
+case differs from a signed-to-unsigned counterfactual, samples outside input bounds,
+and changes when any declared input is zeroed. The counterfactual changes
+541 final cells across the suite. Kernel signed max, kernel ReLU and
+post ReLU each have observable cases across the suite; not every placement is
+observable in every category. Outside sampling does not prove changing boundary
+mode changes the output. All actual parents revalidate without execution.
+
+24 selected host tests pass, including six new harness tests; together with the
+previous 203 distinct tests, the retained successful inventory contains 209 unique
+test IDs. This continuation does not rerun all 209. The original unsigned fixture
+bytes are unchanged. Production compiler/runtime/RTL and numeric limits are unchanged.
+Local functional validation continues under ADR-0107 and Proposed ADR-0130;
+public adoption and physical/performance conclusions remain separate.
+Latest packet: `artifacts/research/T-0229/generated-01/`.
+
+## Owner-authorized signed ordering — T-0229 resumed, October 11
+
+The owner explicitly approved correction and local QEMU/RTL verification after
+the earlier approval-review hold. The resumed candidate includes all T-0233
+corrections plus v4 max_i32/relu_i32 source operations. Deterministic legalization
+uses existing uint32 operations; ISA, guest, RTL and all capacity bounds remain
+unchanged. Input/output words remain0..2^32-1 bit patterns. Only explicit signed
+ordering operations interpret them as two's complement; add/mul/sum wrap modulo
+2^32, and existing max/ge_imm/max-reduction remain unsigned. Proposed ADR-0130 applies.
+
+203 distinct selected host tests pass. Nine new QEMU/RTL parents execute14 sessions
+and17 jobs (16 accepted,one injected post rejection); eight complete parents publish
+240 correct final words. Coverage includes all signed boundary pairs, partitions,
+shared sign-constant/original-operand lifetime at15 map nodes, wrapped reduction,
+and both small and full-range wrapped GEMM+bias+ReLU. Four coherently resealed parent
+semantic changes reject against unchanged captured children. All new parents and
+36 legacy grid/flow parent paths revalidate without execution. The legacy inventory
+contains35 unique record payloads because one baseline is copied.
+
+Local T-0229 validation is complete; its former approval hold is resolved. Prior
+failed tests/denied execution remain in the original packet. Canonical/public
+adoption remains pending separately; no performance or novelty claim is made.
+
+## Fresh coupled flow verification — T-0233, October 11
+
+The unchanged T-0232 unsigned candidate now passes fresh QEMU/RTL execution with
+retained T-0223 executables: eight new flow parents,61 coupled sessions,76 processed
+jobs (75 approved,one intentionally rejected),201 published final words. Seven
+parents complete; one injected wrong-word response stops the third session and
+suppresses parent output. A fresh eight-stage retry runs all stages, returns64,
+preserves the complete failed capture and matches the earlier successful output.
+This is restart from the beginning, not checkpoint resume.
+
+The selected diamond executes four sessions and matches the newly executed
+16-session baseline. An originally inadmissible partition is repaired and executes
+six sessions; infeasible planning creates no output or attempt. Actual nested
+receipts confirm counts independently of planner proposals. One copied comparison
+baseline is excluded from new execution counts. All new parents revalidate without
+execution. These are functional emulation/RTL-simulation results, not latency,
+energy, silicon or vendor-superiority evidence. Production source is unchanged;
+public adoption remained pending. The T-0229 numerical hold at that time is now
+resolved by the owner-authorized verification above.
+
+## Local cumulative host reproduction — T-0232, October 11
+
+Canonical a58e5a5 plus the T-0231 cumulative patch reconstructs all144 candidate
+file hashes without copying the working candidate. All144 hashes still match after
+verification. 291 distinct existing host tests pass without skips:190 MF01 tests,
+48 legacy project/preflight tests,51 shared composition/tiling and Sonatine C checks,
+and two Makefile contract checks. Production source is unchanged by this task.
+
+Current readers recursively verify36 retained grid/flow parent paths:32 successful,
+four incomplete and4039 published final words counted by path. These contain35
+unique record payloads; one T-0228 comparison baseline copies T-0227 evidence.
+This is retained functional-proof validation, not36 new or independent executions.
+No new QEMU/RTL execution or physical-performance claim. At that time numerical T-0229 validation
+and public adoption were held separately. Local numerical validation is now complete
+as recorded above; public adoption remains pending. No gate transition.
+
+## Local strict saved-proof representation — T-0231, October 11
+
+Legacy standalone and bridge MF01 readers now share the strict JSON parser and
+recursive type-sensitive comparison already used by session/chain/DAG readers.
+Duplicate fields, float/integer/boolean substitutions and malformed receipt
+containers reject cleanly. Incomplete RTL records require a syntactically valid
+build digest; precancel still requires no build snapshot. The affine compiler CLI
+uses the same parser. Chain verification now bounds processed rows by declared
+jobs, completing the session/DAG correction in T-0230.
+
+109 distinct selected host tests pass. Read-only revalidation passes129 retained
+receipts:36 standalone,42 bridge,11 session,14 chain and26 DAG. Eighteen copied
+representation/metadata mutants accepted by previous code now reject; three
+separate over-count mutants change IndexError to deliberate ValueError rejection.
+These are record-validation defects, not demonstrated acceptance of wrong UART
+numerical results. New QEMU/RTL executions=0. This local candidate inherits T-0230,
+excludes held T-0229 numerical semantics, and awaits separate public adoption.
+
+## Local malformed-input rejection correction — T-0230, October 11
+
+Typed guards turn malformed MF01 regions, nodes, operands and names into normal
+ValueError rejection before dispatch. Both session and DAG saved verifiers reject
+processed counts exceeding declared jobs before indexing state. Existing numerical,
+resource, authority and publication semantics are unchanged. This candidate starts
+from T-0228 and does not include pending T-0229 signed-ordering semantics.
+
+All113 selected host tests pass:38 core/admission and75 workspace checks. Retained actual proof rereading passes26 DAG receipts (including16 imported
+baseline receipts) and11 session receipts. Two fully rehashed over-count mutants
+reproduce previous IndexError and now reject with a clear ValueError. No new
+QEMU/RTL execution occurs. Audit discovery also uses strict JSON and expected
+inventory counts so duplicate schema fields or missing receipts cannot silently
+reduce its coverage. Public/canonical adoption remains pending separately.
+
+## Local flow partition advice — T-0228, October 11
+
+A finite advisory planner chooses each whole-grid stage's uniform tiles while
+preserving named links and source programs. Shape and static packing costs are
+independent of values and predecessor tiles, so local session minima sum to the
+global minimum over these bounded choices. Structural validation is separate from
+requested-partition admission, allowing invalid original partitions to be repaired.
+The resulting ordinary flow passes full existing admission. 57 selected host
+tests pass, including independent geometry enumeration and v1 linked shapes.
+Two actual selected parents use10 sessions/jobs and match93 final words. The
+4-session diamond exactly matches the imported16-session saved baseline; the
+6-session case rescues rejected1x1 tiles. Aggregate infeasibility creates no output
+or attempt. No executor, guest/RTL, performance claim or public adoption changes.
+
+## Local dependent grid-source flow — T-0227, October 11
+
+A common flow source composes1..8 existing MF01 grid programs with named whole-grid
+links, fan-out/fan-in and named outputs. Topological order is independent of author
+order. All stages pass shape/program/resource admission before execution; aggregate
+sessions stay at16, with at most32 jobs for current sources. Frozen executables and
+verified captured producer outputs bind every child before the next stage starts.
+Incomplete stages suppress parent outputs; uncertain failures leave it unsealed.
+66 selected host tests pass. Five actual parents use43 sessions/51 processed jobs
+(one injected rejection); four complete parents expose107 final words. Saved
+revalidation passes for all five, and four rehashed proof changes reject. Proposed
+ADR-0128 remains local; no native/RTL change or public adoption.
+
+## Local generated-coordinate falsification — T-0226, October 11
+
+A deterministic source generator combines independently shaped inputs, affine
+row/column/fold coordinates, all three boundary modes, sum/max folds and optional
+post maps. Expected values come from direct source-coordinate formulas without
+using the packer, lowering or grid oracle. Multiple explicit partitions must
+produce the same values. Rejections are retained separately from successful
+comparisons. Corrected harness:1,000 sources,2,955 partitions;2,723 admitted comparisons
+match49,998 words.232 rejected partitions are separately counted;989 sources
+have admission,11 have none. All24 boundary/fold/post/input-count categories
+execute through QEMU/RTL:24 parents/sessions,36 jobs,731 final words, with saved
+revalidation and nonconstant outputs. Five harness fault/coverage tests pass.
+An initial fail-open rejection handler and weak case selection were corrected;
+the earlier evidence and harness remain retained. No runtime/architecture change.
+
+## Local post-reduction map source — T-0225, October 11
+
+V3 source expresses a pointwise map after the original reduction. Each tile becomes
+two existing DAG jobs: reduce commits its result; result reads that exact producer
+through existing snapshots and becomes the sole designated output. At 256 words
+the post job uses two READ plus two WRITE references. Guest, RTL, authority and
+source-input/tiling bounds are unchanged. V1/v2 retain their prior semantics.
+
+61 selected host tests pass. Seven complete actual grid parents check 970 final
+words across 21 sessions/42 jobs; failed reduction and failed post cases each stop
+the batch with no grid output. Combined: nine parents, 23 sessions, 45 processed
+jobs (43 successes, two injected rejections), 1,946 successful job words including
+intermediates. All 19 prior v1/v2 parents revalidate without execution; five prior
+proof modifications reject. All nine v3 saved parents also revalidate without execution; four coordinated
+source/result modifications reject. Local verification is complete; public
+adoption remains pending.
+
+ADR-0107 and Proposed ADR-0127 apply. This is functional QEMU/RTL evidence for one
+pointwise post stage over each committed tile, not general pipeline partitioning,
+physical performance or public adoption. Planner packed-input cost still counts
+original source input packing, excluding intermediate traffic.
+
+## Local admitted tile selection — T-0224, October 11
+
+A read-only grid-plan command enumerates all 256 nominal 1..16 tile shapes and
+calls the existing grid compiler/admission for each. It selects the fewest coupled
+sessions, then the fewest total packed input words, then smaller nominal tile area
+and row/column dimensions. An optional output filename saves only a new explicit
+source; original input is preserved and existing grid-run admission remains mandatory.
+
+The concrete 17x64 by 64x19 workload rejects the default 8x8 tile; 5x5 is the
+only admitted uniform partition and uses 16 sessions. 78 host tests pass,
+including independent exhaustive matrix geometry, infeasible shapes, source
+immutability, no-execution preview, confined paths and no-overwrite saving.
+Actual CLI execution passes two parents/20 coupled sessions/jobs/899 words, with
+source preservation, saved revalidation and no-output infeasibility checks.
+
+This is bounded host advice under ADR-0107 and Proposed ADR-0126. Static counts
+do not measure latency or hardware superiority. Compiler, source schema, guest,
+RTL and all resource/authority bounds are unchanged. Public adoption remains pending.
+
+## Local cumulative reproduction — T-0223, October 11
+
+A fresh archive of canonical a58e5a5 plus the T-0222 cumulative patch reproduces
+all 112 candidate file hashes. No overlay from the working candidate was used.
+All 131 tests in the cumulative changed-test manifest pass. Sonatine builds from
+this source and is byte-identical to the T-0219 kernel; shell and legacy GEMM
+QEMU/native smokes pass. Offline RTL rebuild succeeds; all 14 source, emitted-RTL,
+simulator and toolchain files match the retained runtime byte-for-byte. Eight
+workloads reproduce 806 words across 40 coupled sessions; one additional maximum
+input case using both rebuilt executables checks 36 words and saved revalidation.
+Combined reproduction: nine parents, 41 sessions/jobs, 842 words.
+
+This is local clean-archive reproduction under ADR-0107/EXP-0002, not a new
+architecture decision, gate transition or public adoption. The dirty historical
+donor and canonical main remain unchanged.
+
+## Local affine input-coordinate grids — T-0222, October 11
+
+The v2 grid source now declares output shape independently from input dimensions.
+Each view maps output row, column and fold iteration through explicit nonnegative
+two-coordinate vectors plus a signed offset. The existing rectangle packer lowers
+these maps into the same MF01 strides. This expresses rectangular matrix products,
+transpose, broadcast and strided sampling without changing guest, RTL or authority.
+V1 retains its original equal-grid and identity-coordinate rules.
+
+52 selected host tests pass, including 50 rectangular matrix products against
+direct formulas, exact v1/v2 identity-lowering equivalence, retiled saved comparison
+and coordinated source/lowering-rebinding rejection. Eight actual parents execute
+40 coupled sessions/jobs and match 806 output words. All 11 prior v1 parents
+revalidate without execution; five old-proof modifications reject. All eight v2
+parents revalidate, and eight modified proofs reject, including three coordinated
+source/plan/lowering rewrites retaining an incompatible prior execution.
+ADR-0107 and Proposed ADR-0125 apply; no performance EXP or gate changes.
+Canonical/public adoption remains pending.
+
+## Local source-preserving MF01 grids — T-0221, October 11
+
+A bounded grid source now compiles two equal-shaped inputs, named affine views,
+existing integer map operations and sum/max folds into independent coupled tiles.
+Global zero/clamp/wrap boundaries and partial edge tiles are resolved before
+execution. Original source, deterministic lowering and placement are frozen;
+saved inspection recompiles them, checks the nested batch proof, assembles every
+cell and compares an independent untiled coordinate oracle. Incomplete children
+suppress the entire grid output.
+
+112 selected host regressions plus 144 compatibility tests pass, including 100
+generated coordinate cases. All 11 saved parents revalidate without execution;
+five rehashed source/lowering/layout/type/child-ID modifications reject.
+Actual CLI source/program edits and seven additional programs plus a fault case
+produce 11 grid parents, 51 guest sessions/jobs, 50 successes and one injected
+rejection. 2,003 successful words are checked (including six words from the
+incomplete parent, which exposes no grid output). The three 24x24 CLI runs retain
+old snapshots and report exactly nine and 576 changed cells.
+
+This is local host-tiled QEMU/RTL functional evidence under ADR-0107 and Proposed
+ADR-0124. Source bounds: one or two grids of 1..64 rows/columns, at most 16 tiles
+of 1..16 rows/columns, fold extent 1..64, nonnegative fold steps, and at most 324
+packed words per input/tile. No guest/RTL change, cross-tile dependence, physical
+performance or Groq advantage is established. Public adoption remains pending.
+
+## Local independent DAG batches — T-0220, October11
+
+One captured source/kernel/runtime now drives1..16 independent named DAGs through
+batch-check/run/inspect/history/diff. Every DAG is admitted before execution.
+Saved children must be the exact ordered prefix; first incomplete child stops
+remaining execution and suppresses ALL parent outputs, including pinned results.
+Unexpected errors/interrupts/uncertain cleanup leave an unsealed parent. Parent
+inventories use a separate128MiB/16,384-entry cap with seal-safe accounting;
+ordinary snapshot defaults and guest/RTL/authority limits remain unchanged.
+
+149 broad host tests plus one added assembly-coordinate regression pass (150
+unique tests). Two actual nine-tile24x24 image runs agree on1,152 full-grid words;
+an input edit changes exactly nine cells and preserves earlier snapshots. An
+actual incomplete pinned-output child stops the third child and exposes no parent
+output. Maximum16x8 execution passes128 jobs and all16 named outputs. Overall:
+4 batch parents,36 guest sessions,149 processed jobs,148 successes/1 injected
+rejection,1,282 checked successful words. All4 parents revalidate with process creation
+disabled; six modified parent/proof/prefix variants reject. No new guest/RTL
+source was needed.
+
+Proposed ADR-0123 describes this local candidate. It is bounded host composition,
+not a larger guest session, cross-session dependency or hardware/performance
+result. Canonical main/public adoption remain unchanged.
+
+## Local bounded producer subranges — T-0219, October11
+
+DAG v2 links can select an explicit word interval from an older result, with a
+nonnegative offset and positive length. Host and C admission count only touched chunks, deduplicate shared
+READs, and retain whole-producer lifetime/version checks. Guest materialization
+reads requested segments through existing submission snapshots. Full512-byte
+READ capabilities and four-reference/eight-object limits are unchanged. V1 input,
+encoding, saved preview and execution remain compatible.
+
+143 selected host tests pass, including200 generated range plans compared with C,
+legacy cases, maximum23,368-byte admission and workspace capture. Actual11 coupled
+sessions process35 jobs:33 successes/2 injected rejections,6,403 checked words.
+Eight malformed/resource-excess bundles reject in QEMU before dispatch. Two more
+actual workspace runs change offset128->64: all128 output words change, both
+saved results remain independent (6 more successful jobs/1,280 checked words).
+All58 retained old/new receipts (260 jobs) revalidate without execution;35
+type/duplicate-key probes and6 range/preview modifications reject.
+Native shell/GEMM smoke passes. Independent review caught a zero-length linked
+input underflow; explicit pre-arithmetic rejection and raw-wire tests correct it.
+
+Proposed ADR-0122 describes this unpublished local extension. No runtime authority
+ABI or RTL change, partial reclamation, physical performance or Groq advantage
+is claimed. Main and public delivery state remain unchanged.
+
+## Local saved-proof correction — T-0218, October11
+
+Standalone session, chain and DAG readers now share integer-only JSON parsing
+and type-sensitive structural comparison. Duplicate fields, noninteger numbers,
+bool/int substitutions and malformed receipt containers fail closed. Actual
+pre-fix DAG evidence accepted five representation mutations; the failure is
+retained. All45 saved executions (219 processed jobs) revalidate after correction;
+35 actual-evidence mutation probes reject with process creation disabled.
+136 distinct selected host regressions pass, including strict audit discovery.
+This is a local bug fix to existing proof invariants, not a new execution model.
+Public adoption remains pending. Guest/RTL sources and performance claims do not
+change. Exact regression commands and results are in the dated log.
+
+## Local DAG workspace integration — T-0217, October11
+
+The existing admitted DAG executor is now available through project dag-check /
+dag-run / dag / dags / dag-diff. One bounded source JSON, kernel bytes and runtime
+build are frozen before execution. Saved inspection/history/comparison revalidate
+nested guest/RTL evidence without execution. Publication uses a no-overwrite
+atomic link; interrupts and uncertain cleanup remain explicitly unsealed.
+Execution completeness and availability of a pinned designated output are separate.
+
+97 distinct selected host regressions pass (96-test run plus final14 adapter tests
+containing one additional test). Real CLI input/program edits give34->38->27 across
+three unchanged-kernel/runtime executions,12 processed jobs; all three histories
+and comparisons preserve old snapshots. Two additional actual coupled fault probes
+verify incomplete-but-available pinned output and failed-producer halt with no
+output. All5 saved parents revalidate with process execution disabled;9 modified
+proof variants reject. Independent review found a numeric-type substitution gap;
+strict output types/canonical structured comparisons now reject it and its tests
+pass. Guest and RTL sources/executables are unchanged from the prior candidates.
+
+Local packet only; canonical main/public task state remains unchanged. No new
+transport, arbitrary control flow, physical performance or Groq advantage claim.
+
+## Local resource-admitted result DAGs — T-0216, October11
+
+T-0216 / Proposed ADR-0120 replaces the one-producer restriction with named
+fan-in/fan-out admitted against the unchanged four-reference/eight-object ABI.
+Each result needs one or two512-byte chunks. Whole-plan lifetime allocation
+preserves every future consumer and pins one designated output; unsupported
+reference counts or live-memory pressure reject before dispatch. Per-object
+versions can differ within one result. Linked input bytes come from guest
+submission snapshots, and guest semantic checks precede atomic publication.
+
+Main13 actual sessions process65/68 planned jobs:61 successes/4 rejections,
+6,134 checked words. Cases include diamond merge, delayed fanout, both exact
+four-reference combinations, unequal destination versions and failed producers.
+Five-reference and eight-live-slot pressure reject before any DAG dispatch in
+actual QEMU. Two additional real CLI sessions produce34 then38 after an input
+edit; the saved34 remains valid. All15 saved sessions (73 processed/69 successful,
+6,142 words) revalidate;10 modified proof variants reject.89 distinct host tests
+pass, including200 generated C/host allocation comparisons and finite UART limits.
+Native shell/GEMM smoke passes. An earlier unsealed UART line-limit probe and
+initial compiler warning failure are retained and excluded from acceptance.
+
+This is bounded predeclared sequential uint32 functional coupling, not arbitrary
+control flow, concurrent execution, MMIO/DMA, measured hardware or Groq superiority.
+Literal inputs remain boot data. Canonical main and public state remain unchanged;
+local candidate adoption is still pending.
+
+## Local committed-result dependencies — T-0215, October11
+
+T-0215 / Proposed ADR-0119 now consumes named earlier results through existing
+capability-declared READ snapshots, then writes the other two-object bank.
+Either/both logical inputs may name the same producer. The guest materializes
+inputs after submission take; the host checks that request before executing RTL.
+Failed or overwritten producers halt before submission, never substituting a
+last success. Source/destination bytes and independent bank versions are checked.
+
+Main13 sessions process62 jobs:57 successes/5 rejections,7,688 checked words;
+3 remaining jobs are not dispatched after dependency/framing halt. Supplemental
+8x256-word chain gives14 sessions/70 processed/65 successful/9,736 words overall.
+All14 saved receipts revalidate and8 deliberately altered proof variants reject.
+Eight malformed bundles reject in actual QEMU before dispatch.80 distinct host
+regression tests and native shell/GEMM smoke pass. Evidence remains functional
+host-mediated QEMU/RTL coupling; main/public state remains unchanged.
+
+Two distinct producer inputs are not yet supported by this candidate. Literal
+inputs remain boot data; only linked inputs use capability snapshots. No timing,
+hardware or Groq superiority claim follows. Local work continues toward resource-
+admitted fan-in and result lifetimes rather than widening authority limits.
+
+## Local sequential guest sessions — T-0214, October11
+
+T-0214 / Proposed ADR-0118 admits1..8 frozen jobs before one guest session,
+keeps output objects and authority across jobs, and advances both output versions
+only on successful guest semantic approval. Fully received rejected responses
+roll back and permit the next job; lost framing rolls back and halts the remainder.
+The main9-session acceptance processed48 jobs:41 successes/7 rejections,
+3,460 checked words and3 intentionally unexecuted jobs. Supplemental5-job recovery
+and maximum23,168-byte/8-job admission pass. All11 saved sessions (61 processed,
+52 successful,3,981 words) revalidate;7 deliberately changed saved transcripts or
+receipt fields are rejected. Four malformed bundles reject before any dispatch.
+72 host tests and native shell/GEMM smoke pass.
+
+These are bounded host-mediated QEMU/RTL functional sessions with independent
+frozen inputs, not result-dependent graphs, an interactive stream or persistent
+RTL process. No timing/hardware/Groq claim or canonical adoption follows.
+
+## Local guest-issued RTL coupling — T-0213, October11
+
+T-0213 / Proposed ADR-0117 advances beyond T-0212's separate comparison. After
+Sonatine issues a job, a host UART broker runs the unchanged captured-request RTL
+simulator and returns all words. Guest C comparison now happens BEFORE output
+staging/approval/publication.34 coupled cases agree across2,174 words;8 explicit
+fault cases are rejected with old zero/version1 objects and no pending authority
+slots. Actual previous-boot response replay is rejected on a fresh request, and
+an actual host deadline terminates/reaps QEMU without a receipt. Saved42 receipts
+pass strengthened final-binding and phase-order validation. Current test totals
+and exact commands are in the dated log. Native shell/GEMM paths still pass.
+
+This is host-mediated QEMU/RTL functional coupling, one job per boot. It is not
+a QEMU MMIO device, asynchronous reset/multi-job cancellation or hardware/timing
+evidence. Public adoption remains pending; canonical main is unchanged.
+
+## Local full-output QEMU candidate — T-0212, October11
+
+Local T-0212 / Proposed ADR-0116 runs the full MF01 contract in a freestanding
+RV64 C interpreter, with external frozen inputs/configuration and1..256 complete
+output words. Existing Sonatine authority commits one or two512-byte output
+objects together; object bounds are unchanged.34 retained QEMU successes match
+2,174 SSA-reference words;29 malformed requests are rejected with no published
+UART output.34 fresh, separately executed RTL runs match those same2,174 words.
+Saved receipts bind request/kernel/command/version/logs; metadata relabeling and
+changed fixed command arguments are rejected. Native shell/GEMM regressions and
+existing second-output-conflict atomicity tests pass. See EXP-0002 regression
+addendum and October11 log for exact evidence commands and current test totals.
+
+The guest trusts its C interpreter when approving output. Independent SSA
+agreement is checked on the host after guest commit. Inputs are kernel-owned,
+not capability-admitted input objects. No QEMU/RTL device connection, measured
+hardware, performance, novelty or Groq advantage is established. Canonical main
+and public task state remain unchanged; this is an unpublished local candidate.
+
+## Local workspace connection — T-0211, 2026-10-11
+
+T-0211 connects the standalone MF01 engine to project fold-check/fold-run/fold/
+folds/fold-diff. The simulator reads arbitrary admitted configuration/input
+files at runtime; no fixture table is compiled in. One bound executable handles
+32 normal families/configurations plus edits, snapshot preservation, cancellation,
+error and retry:37 actual invocations,35 successful and2 incomplete,2041 checked
+output words. Primary reread all37 records with the strengthened affine request
+sequence verifier and execution disabled. Emitted RTL matches T-0210 byte for
+byte. The new build wrapper also completed using existing offline tools. Two real CLI
+invocations additionally verify70→37 after an input/program edit and preserve
+the old70 snapshot (total39 RTL invocations,2043 successful output words).
+
+130 focused/regression host tests pass, including18 adapter tests. Review found
+cleanup uncertainty and saved-trace validation gaps; fixes use a dedicated
+unsealed cleanup state and exact captured-computation request/error checks.
+Atomic publication, typed non-null results, input/build tamper and interrupt
+boundaries are tested. Host fixtures remain separate from actual RTL evidence.
+A separate six-case coordinated core/responder reset-and-retry probe also passes
+using the identical emitted RTL and preserving private partial outputs.
+The candidate is local/unpublished. No QEMU/AXI transport, floating point,
+physical fit/performance or Groq advantage is established. See October11 log.
+
+## Local affine map/fold candidate — T-0210, 2026-10-10
+
+This section describes the local review candidate only. Canonical main remains
+T-0208. The standalone Chisel engine directly handles two input buffers, affine
+index views, programmable uint32 maps and sum/max folds. One simulator executes
+joins, broadcasts, transpose, row reductions, dot products and matrix products
+across runtime shapes. It captures configuration before admission and tolerates
+bounded test memory stalls; cancellation drains an offered transaction before
+finishing without success. It does not replace the workspace/board backend.
+
+112 focused/regression host tests pass. Retained run-03 passes213 RTL-functional executions and6,117 cell comparisons,
+including combined maximum work, all scalar operations, input-B endpoint647,
+invalid configurations, mid-compute/validation cancellation, simultaneous error
+and cancellation, and busy configuration mutation. Primary saved-trace reread
+verifies780,348 request/response pairs. These are functional simulation facts,
+not physical or performance evidence. Initial run-01 index-width failure remains
+preserved; run-02 passed162 cases after its fix. Proposed ADR-0114 and the dated
+log record bounds, commands and source identities. T-0209 remains independent.
+Public registration/integration is pending; no Issue, PR, Project item or accepted
+ADR is claimed. No Groq advantage or novelty is established.
+
 ## General rectangular grids — T-0208, 2026-10-10
 
 The owner requested broader generality after PR295. T-0208/#296

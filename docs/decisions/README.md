@@ -1,5 +1,18 @@
 # Architecture Decision Records
 
+[ADR-0130](ADR-0130-source-signed-ordering-legalization.md) proposes explicit signed
+source ordering legalized into unchanged MF01 instructions. The owner authorized
+local correction/validation;203 host tests and14 QEMU/RTL sessions pass. Canonical
+adoption remains pending, so the ADR remains Proposed.
+
+[ADR-0115](ADR-0115-affine-fold-workspace-candidate.md) is the Proposed T-0211
+local workspace adapter. It depends on Proposed ADR-0114 and has no accepted or
+public integration status.
+
+[ADR-0114](ADR-0114-bounded-affine-map-fold-candidate.md) is a Proposed local
+T-0210 candidate, not accepted. ADR-0113 is reserved by the separate T-0209
+local packet and is intentionally absent from this independent base snapshot.
+
 [ADR-0112](ADR-0112-general-bounded-grid-kernels.md) accepts the owner-approved
 rectangular grid/kernel/boundary interface under T-0208/#296.
 
@@ -144,3 +157,21 @@ rewrite it.
 | [ADR-0106](ADR-0106-board-address-and-reset-boundary.md) | Accepted | Absolute AXI window and synchronized reset release around the existing relative core |
 | [ADR-0108](ADR-0108-bounded-project-result-composition.md) | Accepted | Frozen input and one/two private Graph results; publish parent only after all children pass |
 | [ADR-0109](ADR-0109-verified-named-result-comparison.md) | Accepted | Verified read-only named result comparison after input/computation edits |
+
+| [ADR-0122](ADR-0122-fold-dag-subranges.md) | Proposed | Local bounded producer intervals with touched-chunk admission and retained whole-result lifetimes |
+
+| [ADR-0123](ADR-0123-independent-dag-batches.md) | Proposed | Bounded independent coupled sessions, exact prefixes and all-or-incomplete named results |
+
+| [ADR-0124](ADR-0124-source-preserving-mf01-grids.md) | Proposed | Original grids and map/fold source bound to deterministic tiles and nested coupled proof |
+
+| [ADR-0125](ADR-0125-affine-grid-coordinate-maps.md) | Proposed | Independent input/output shapes with affine row/column/fold coordinate maps |
+
+| [ADR-0126](ADR-0126-admitted-uniform-tile-advice.md) | Proposed | Finite uniform tile advice through unchanged compiler and admission |
+
+| [ADR-0127](ADR-0127-post-reduction-map-source.md) | Proposed | One pointwise map after reduction lowers to two existing committed DAG jobs per tile |
+
+| [ADR-0128](ADR-0128-dependent-grid-source-flows.md) | Proposed | Bounded grid-source DAGs through verified whole-grid producer captures |
+
+| [ADR-0129](ADR-0129-separable-flow-partition-advice.md) | Proposed | Separable finite tile advice preserves source links and ordinary flow admission |
+
+- [ADR-0131: Versioned shared signed transforms](ADR-0131-versioned-shared-signed-transforms.md) — Proposed; local host/runtime verification complete, public adoption pending.

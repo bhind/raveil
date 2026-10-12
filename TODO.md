@@ -1,5 +1,313 @@
 # Raveil TODO
 
+## Common-source generalization — verified integration T-0236
+
+- [x] **T-0236** [Issue #298](https://github.com/bhind/raveil/issues/298),
+  S-0007 carryover, 8 SP: owner-directed continuation after T-0235 UT: verify and correct
+  common source → automatic partition → actual QEMU/RTL → saved output/diff,
+  multiple shapes/operations/stages, failure and fresh retry. Primary owns local
+  edits; read-only reviewer supplies advice. ADR-0107/0132 and EXP-0002 functional
+  context; no new architecture/performance gate. Local implementation and actual
+  functional validation complete:27 sealed parents,177 verified sessions,4562 words;
+  one cancelled unsealed attempt reported separately;289 host tests and record
+  checks pass. Technically accepted for the cumulative integration PR; remote
+  closure follows merge and the canonical completion command. No algorithmic or
+  functional-verification decision is pending.
+
+## Cumulative adoption disposition
+
+This change integrates the verified T-0210–T-0235 implementation and its tests
+through T-0236 / Issue #298. The earlier entries below preserve their original
+local evidence, rejected attempts and point-in-time publication status. Their
+implementation/publication follow-ups are covered by this cumulative PR, not
+27 separate active work items. T-0235's previously pending QEMU/RTL phase is
+completed by the T-0236 results above. Research decision/gate acceptance and
+future hardware, numeric/import/control or optimization work are not implied.
+
+## Phase-one generalization through UT — owner-directed local T-0235
+
+- [x] **T-0235** common array-program/v1 frontend, automatic scalar-node partition,
+  intermediate lifetimes, verified pass coordinator, strict saved reader, CLI and
+  full scoped UT under ADR-0107 and Proposed ADR-0132. Primary is sole mutation
+  owner. Source decisions and acceptance are fixed; no user decision remains for
+  local implementation/UT. Local implementation/UT complete:33 new plus253 legacy
+  host tests pass (286 distinct, no failures/skips). Next phase is actual
+  QEMU/RTL integration/system validation under EXP-0002, after UT completion.
+  Public/canonical adoption remains a separate integration dependency; this entry
+  must not be marked globally Done from local fixture tests.
+
+## Local versioned signed transform sharing
+
+- [x] **T-0234** versioned shared signed representations, Proposed ADR-0131
+  under ADR-0107/0130. Local implementation and runtime validation complete after
+  the owner directed continuation of the exact approval packet. Prior46 host tests,
+  1,000-source/2,729-partition comparison and33 retained parents remain verified.
+  Fresh8 parents/12 coupled sessions/14 jobs/267 words pass, including one intended
+  post rejection and a v4/v5 equality pair. Rehashed parent version cannot reuse
+  incompatible captured child evidence. Earlier hold is resolved; original denial
+  packet is preserved. Latest packet: `artifacts/research/T-0234/resumed-01/`.
+  Public adoption remains the integration dependency; no hardware/performance gate.
+
+## T-0229 local continuation completed — October 11
+
+The numerical-validation hold is resolved by the owner's explicit approval.
+T-0229's task entry below records verified local completion and the remaining
+separate public-adoption step. Historical T-0230 through T-0233 packets remain
+unchanged; the resumed packet combines their fixes with the signed source work.
+
+## Fresh coupled execution and retry — October 11
+
+- [x] **T-0233** existing unsigned-flow functional verification under ADR-0107,
+  Proposed ADR-0128/0129 and EXP-0002. Primary owns local records. Verify actual
+  multistage execution, failure stop, fresh retry preserving failed evidence and
+  selected-partition equivalence. Local verification complete:8 new parents,
+  61 sessions,76 jobs (one injected rejection),201 final words. One copied baseline
+  excluded; all counts checked from nested receipts. No production/ISA change,
+  hardware purchase or performance claim. Public adoption remains pending.
+
+## Cumulative host reproduction — October 11
+
+- [x] **T-0232** validation-only local candidate under ADR-0107 and the existing
+  MF01 proposals through ADR-0129; follows T-0223/T-0231. Reconstruct from canonical
+  archive and cumulative patch, verify file hashes and run cumulative plus affected
+  legacy host checks. Local verification complete:291 distinct tests,144 hashes,
+  36 retained parent paths with35 unique record payloads. Primary alone owns
+  records. No new code, simulation, EXP/ADR or scope adoption. Public integration
+  remains pending; this earlier reproduction excluded T-0229.
+
+## Local strict proof readers — October 11
+
+- [x] **T-0231** existing-contract correction under ADR-0107 and Proposed
+  ADR-0114/0115/0116/0117/0118/0119, following T-0218/T-0230 strict validation.
+  Primary owns the local candidate. Align legacy standalone/bridge/source readers,
+  reject malformed incomplete build identity, and bound chain processed rows.
+  Local verification complete:109 distinct host tests,129 retained receipts,
+  18 previous-accepted representation mutants and three over-count diagnostics.
+  No new simulation, numerical semantics, ADR/EXP or gate transition. Public
+  adoption remains pending; T-0229 local approval is now resolved below.
+
+## Local malformed-input correction — October 11
+
+- [x] **T-0230** bounded existing-behavior correction under ADR-0107 and Proposed
+  ADR-0114/0118/0120/0121/0123. Reject malformed JSON types and impossible saved
+  processed counts cleanly; preserve accepted computations, resource bounds and
+  publication. Primary alone owns this candidate, independently based on T-0228.
+  113 selected host tests,37 retained proof rereads and two rehashed
+  over-count probes pass; evidence is recorded in the log. No new simulation or EXP/ADR.
+  Local correction verification is complete; public adoption is pending.
+- [x] **T-0229** owner-authorized signed32 max/ReLU source legalization, Proposed
+  ADR-0130. Resumed from T-0233 under explicit local-scope approval; prior denied
+  launch and helper failure remain preserved. Local implementation/verification
+  complete:203 distinct host tests,9 new parents/14 sessions/17 jobs/240 final
+  words,4 resealed semantic-rewrite rejections and36 legacy proof paths. Numeric
+  semantics and capacity checks are documented; ISA/guest/RTL unchanged. Public
+  adoption remains pending, not local validation approval. Latest packet:
+  `artifacts/research/T-0229/resumed-01/`. Follow-up generated interaction checks
+  complete locally: 1,000 sources, 2729 admitted partitions, 24 coupled
+  parents/24 sessions/36 jobs/850 words and six new harness tests.
+  The latest packet is `artifacts/research/T-0229/generated-01/`; public adoption
+  remains the integration dependency. No new task or numerical scope is allocated.
+
+## Local flow partition advice — October 11
+
+- [x] **T-0228** candidate / Proposed ADR-0129 under ADR-0107: propose admitted
+  uniform partitions for a linked grid-source DAG. Preserve original sources and
+  links, reject aggregate infeasibility, keep preview read-only and save only a
+  new explicitly selected source. Compare selected execution against direct
+  formulas and the retained16-session diamond. 57 host tests, two actual selected
+  parents/10 sessions/jobs/93 final words and saved baseline comparison pass.
+  Local verification is complete; public adoption remains pending.
+  No new performance EXP or public task-state transition applies.
+
+## Local dependent grid-source flow — October 11
+
+- [x] **T-0227** candidate / Proposed ADR-0128 under ADR-0107: replace per-operation
+  chaining conventions with one bounded grid-source DAG. Implement shape propagation,
+  whole-plan admission, deterministic dependencies, frozen producer/child binding,
+  CLI saved inspection/comparison and failed-stage stop. Primary owns all local
+  candidate edits. 66 host tests and five actual parents/43 sessions/51 jobs pass;107 final words
+  agree. Five saved parents revalidate and four modified proofs reject. Local
+  verification is complete. Public
+  adoption remains separate; no new performance EXP or physical gate applies.
+
+## Local generated-coordinate falsification — October 11
+
+- [x] **T-0226** local verification under ADR-0107 and Proposed ADR-0125/0127:
+  try to falsify interacting coordinate, tiling, reduction and post-map contracts
+  with deterministic generated sources, independent formulas and retained
+  rejection counts. Select admitted combinations for actual coupled execution.
+  Primary owns all candidate edits. No new ADR/EXP, performance claim or public
+  task-state transition applies. Corrected1,000-source sweep passes2,723
+  admitted partitions/49,998 words;232 partitions reject under known limits.
+  All24 actual categories pass36 jobs/731 final words and saved checks. Five
+  harness tests prevent false-green reports. Local verification is complete;
+  public adoption remains pending.
+
+## Local post-reduction map — October 11
+
+- [x] **T-0225** candidate / Proposed ADR-0127: express one post-reduction map
+  as two existing DAG jobs per tile with committed producer reads and final-output
+  pinning. 61 host tests, nine actual parents/23 sessions/45 jobs and 19 legacy
+  saved parents pass. Both failure stages suppress the grid output. Actual v3
+  saved proofs revalidate (nine parents); four modified proofs reject.
+  Local verification is complete; public adoption remains pending. No native/RTL/authority expansion,
+  new performance EXP or public task-state change.
+
+## Local admitted tile selection — October 11
+
+- [x] **T-0224** candidate / Proposed ADR-0126: choose an admitted uniform
+  partition through the existing compiler, expose read-only grid-plan and save
+  selected explicit source only under a new filename. Trigger: 17x64 by 64x19
+  fails with 8x8 but fits 5x5 under unchanged resource limits. 78 host tests
+  and two actual parents/20 sessions/899 words pass; saved sources and proofs
+  revalidate. Local candidate is ready; public adoption remains pending.
+  Roadmap context ADR-0107; no new performance EXP or native/RTL change.
+
+## Local cumulative reproduction — October 11
+
+- [x] **T-0223** local verification: reconstruct T-0222 from canonical archive
+  plus cumulative patch, verify exact source hashes, run the changed test family,
+  rebuild native/RTL executables with existing offline tools and rerun owned
+  coupled workloads. 112 file hashes and 131 tests pass; native kernel is
+  byte-identical and legacy smokes pass. Rebuilt RTL/runtime matches 14 files
+  byte-for-byte; nine parents/41 coupled sessions/842 words pass. Local
+  reproduction is complete; cumulative public adoption remains pending.
+  No new ADR or performance EXP applies; native evidence supplements EXP-0002.
+
+## Local affine input-coordinate continuation — October 11
+
+- [x] **T-0222** candidate / Proposed ADR-0125: expose existing MF01 matrix
+  products, transpose, broadcast and strided sampling with explicit output shape
+  and per-view row/column/fold coordinate vectors. Source implementation,
+  52 selected host tests, eight actual parents/40 sessions/806 words and all 11
+  prior v1 saved parents pass. All eight v2 parents and eight actual-proof
+  mutation rejections pass. Local evidence is sealed for cumulative review.
+  No public task state is changed.
+
+## Local source-preserving grid continuation — October 11
+
+- [x] **T-0221** candidate / Proposed ADR-0124: general bounded MF01 grid source,
+  deterministic halo lowering, frozen source/proof/placement, independent untiled
+  oracle and saved CLI editing/history/diff are locally implemented. 112 selected
+  host tests, 144 compatibility tests and 11 actual grid parents pass, including
+  failed-tile suppression and 11 saved revalidations/five tamper rejections.
+  Canonical/public adoption remains pending. Compatibility is verified. Next local
+  slice T-0222: expose existing MF01 rectangular matmul/transpose through explicit
+  output shape and affine input-coordinate maps; retain all resource boundaries.
+
+## Local independent DAG composition — October11
+
+- [x] **T-0220** candidate / Proposed ADR-0123: freeze1..16 independent named
+  DAGs and common executables, admit all before execution, verify exact child
+  prefixes and publish all outputs together. CLI preview/run/history/diff and
+  bounded seal-safe inventories are implemented locally. Actual nine-tile image
+  workflow, incomplete-child stop and16x8 maximum-count execution pass;150
+  selected host tests pass. T-0221 now provides general tiled MF01 source lowering with frozen
+  source provenance and an independent untiled oracle. Canonical/public adoption remains pending.
+
+## Local bounded-subrange continuation — October11
+
+- [x] **T-0219** candidate / Proposed ADR-0122: explicit producer intervals,
+  touched-chunk reference admission, segmented guest snapshot reads and v1
+  compatibility. Local143 host tests,11 actual coupled sessions plus2 editable
+  workspace sessions,8 actual admission rejections and native regressions pass.
+  Public adoption remains pending. Next local design work should select a real
+  workload blocked by remaining eight-job/full-producer-liveness constraints;
+  do not widen authority limits or claim speed from functional simulation.
+
+## Local proof correction and next generality step — October11
+
+- [x] **T-0218** candidate: eliminate bool/int/float and duplicate-key ambiguity
+  across session/chain/DAG saved proof verification. Local45 retained executions
+  (219 jobs) and35 mutation probes pass; shared parser/protocol regressions are
+  recorded in the dated log. Public adoption remains pending.
+  Continuation: T-0219 implements bounded producer subranges locally, preserving
+  four-reference/eight-object limits and whole-producer lifetime retention.
+
+## Local usable-workspace continuation — October11
+
+- [x] **T-0217** candidate / Proposed ADR-0121: integrate the existing admitted
+  DAG executor with workspace preview/run/inspect/history/diff, frozen inputs and
+  executables, typed nested proof verification and no-overwrite publication.
+  Local97 distinct selected host tests and5 actual coupled parents pass; saved
+  revalidation and9 proof-tamper cases pass. Public adoption remains pending.
+  Next delivery action is reconcile these concrete local packets with approved
+  Issue/Project/branch integration; no canonical Done or public item is invented.
+  Further architecture/transport scope remains explicit in OPEN_QUESTIONS.
+
+## Local DAG continuation — October11
+
+- [x] **T-0216** candidate / Proposed ADR-0120: whole-plan reference/lifetime
+  admission, distinct-producer joins, final-output pinning, per-object versions,
+  read-only CLI preview and captured execution/verification. Local89 host tests,
+  13 main actual sessions plus2 CLI sessions,2 actual resource rejections and
+  10 saved-proof tamper variants pass. Candidate packet ready for review; public
+  delivery remains pending. Next integration should expose this same admitted
+  DAG through the existing workspace with frozen named inputs/results, rather
+  than introducing another executor or widening authority limits.
+
+## Local dependency continuation — October11
+
+- [x] **T-0215** candidate / Proposed ADR-0119: explicit producer links,
+  snapshot reads, two output banks, stale/failed-source halt before dispatch.
+  Local80 host tests,13 main sessions plus8-stage supplement,8 malformed requests
+  and8 saved-proof tamper variants pass. Public delivery remains pending.
+  Next: bound fan-in and intermediate lifetimes under the existing four-reference,
+  eight-object limits before implementing distinct-producer DAGs.
+
+## Local persistent-authority continuation — October11
+
+- [x] **T-0214** candidate / Proposed ADR-0118:1..8 sequential MF01 jobs in
+  one boot, persistent output versions, fault rollback/recovery and framing-loss
+  halt. Local implementation,72 host tests,9 main sessions plus2 supplements,
+ 4 malformed-bundle probes and saved-evidence tamper checks pass. Public delivery
+  remains pending; this is not canonical Done. Next useful boundary is exact
+  producer-result dependencies through existing capability/snapshot admission,
+  with explicit failed/stale producer behavior and unchanged resource bounds.
+
+## Local guest-issued RTL continuation — October11
+
+- [x] **T-0213** candidate / Proposed ADR-0117: guest dispatch, paced UART
+  response, guest semantic comparison before two-object publication, and saved
+  protocol/RTL evidence. Local34 positives/8 negatives plus real reboot-replay
+  and host-deadline probes pass. Preserve pre-fix failed probes as provenance.
+  Review packet/public adoption remain separate from canonical Done state.
+  Continuation: T-0214 implements bounded sequential sessions locally. A real device/memory
+  interface only after identifying its required ownership/reset/cancellation
+  contract; UART functional agreement does not establish those properties.
+
+## Local full-output emulation continuation — October11
+
+- [x] **T-0212** candidate / Proposed ADR-0116: full MF01 Sonatine/QEMU request,
+  admitted C interpreter, two-object atomic output, captured receipt and QEMU/RTL
+  differential verification. Local34 successes/29 rejections and34 matching RTL
+  cases pass. Preserve independent evidence classes and post-commit host oracle
+  limitation. Publication/adoption is pending; no Issue/Sprint/Done state claimed.
+  Continuation: packet preserved; T-0213 now implements and tests a bounded
+  UART broker. A real MMIO/memory device remains a separate future boundary.
+
+## Local workspace adapter candidate — continuation, October11
+
+- [x] **T-0211** candidate / Proposed ADR-0115: reusable external-request RTL
+  runtime plus project check/run/inspect/history/diff. Local implementation,
+  130 host tests and37 actual invocations pass; frozen evidence rereads pass.
+  Public registration/integration remains pending. Depends on T-0210, not
+  T-0209. No public Issue/Sprint/Done state is invented. Six supplemental coordinated core/responder reset-and-retry cases also pass.
+  Continuation: T-0212 implements a separate QEMU software interpreter and
+  compares full outputs; T-0213 adds local UART QEMU/RTL coupling; AXI remains unimplemented.
+
+## Local continuation candidate — no public work item yet
+
+- [x] **T-0210** candidate, Proposed ADR-0114: standalone bounded affine
+  map/fold compiler, reference and Chisel engine. Local213-case RTL acceptance
+  and saved780,348-transaction reread pass;112 host tests pass. Acceptance
+  records and the candidate review packet are complete; adoption requires exact scope/publication
+  approval and the real Issue/Project/dedicated-branch workflow. No Sprint,
+  story points or Done state is invented. T-0209's existing reviewed packet and
+  publication refusal remain unchanged. Next concrete adoption would connect
+  this tested region to the existing private-output workspace admission path;
+  T-0211 implements that adapter locally; adoption remains pending.
+
 ## General rectangular grids — approved delivery
 
 - [x] **T-0208** [Issue #296](https://github.com/bhind/raveil/issues/296),
@@ -16,8 +324,8 @@
 
 [ADR-0107](docs/decisions/ADR-0107-simulation-maturity-before-hardware.md)
 implements the owner-approved order: finish the usable Chisel/Verilator and
-QEMU implementation before introducing hardware. The backends are currently
-separate. Windows/Vivado inventory does not gate current development.
+QEMU implementation before introducing hardware. The original backends were separate; T-0236 now integrates the bounded
+host-mediated QEMU/RTL path described above. Windows/Vivado inventory does not gate current development.
 
 - [x] **T-0204** [Issue #286](https://github.com/bhind/raveil/issues/286),
   S-0007,2SP: simulation-maturity policy and implementation exit criteria;

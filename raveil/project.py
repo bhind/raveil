@@ -93,13 +93,22 @@ def read_json(workspace: NativeWorkspace, path: str) -> dict[str, Any]:
 
 
 def name(value: str) -> str:
-    if not NAME.fullmatch(value):
+    if type(value) is not str or not NAME.fullmatch(value):
         raise ValueError("name must contain only letters, digits, '-' or '_' (1..80 characters)")
     return value
 
 
-def tree(root: Path, destination: Path | None = None) -> dict[str, str]:
+def tree(root: Path, destination: Path | None = None, *,
+         max_bytes: int = MAX_BYTES, max_entries: int = MAX_ENTRIES,
+         exclude_root_files: frozenset[str] = frozenset()) -> dict[str, str]:
     """Bounded regular-file snapshot; manifest includes empty directories."""
+    if (type(max_bytes) is not int or not 1 <= max_bytes <= 128*1024*1024 or
+            type(max_entries) is not int or not 1 <= max_entries <= 16384):
+        raise ValueError("snapshot limits exceed bounded positive integer range")
+    if (type(exclude_root_files) is not frozenset or
+            not exclude_root_files <= {"record.json", "record.sha256", ".record.pending"} or
+            (exclude_root_files and destination is not None)):
+        raise ValueError("only parent seal files may be excluded from inspection")
     workspace = NativeWorkspace(root)
     manifest: dict[str, str] = {}
     total = 0
@@ -111,8 +120,12 @@ def tree(root: Path, destination: Path | None = None) -> dict[str, str]:
         for entry in workspace.ls(relative or "/"):
             child = f"{relative}/{entry}"
             info = workspace.stat(child)
-            if len(manifest) >= MAX_ENTRIES:
-                raise ValueError("project snapshot exceeds 1024 entries")
+            if not relative and entry in exclude_root_files:
+                if info.kind != "file" or info.size > MAX_BYTES:
+                    raise ValueError("invalid parent seal file")
+                continue
+            if len(manifest) >= max_entries:
+                raise ValueError(f"project snapshot exceeds {max_entries} entries")
             source = root / child.lstrip("/")
             target = destination / child.lstrip("/") if destination else None
             if info.kind == "directory":
@@ -121,12 +134,12 @@ def tree(root: Path, destination: Path | None = None) -> dict[str, str]:
                     target.mkdir(mode=0o700)
                 visit(child)
             else:
-                if info.size > MAX_BYTES - total:
-                    raise ValueError("project snapshot exceeds 16 MiB")
+                if info.size > max_bytes - total:
+                    raise ValueError(f"project snapshot exceeds {max_bytes} bytes")
                 data = source.read_bytes()
                 total += len(data)
-                if total > MAX_BYTES:
-                    raise ValueError("project snapshot exceeds 16 MiB")
+                if total > max_bytes:
+                    raise ValueError(f"project snapshot exceeds {max_bytes} bytes")
                 manifest[child] = digest(data)
                 if target:
                     write_new(target, data)
@@ -722,6 +735,98 @@ def command_project(args: argparse.Namespace) -> int:
         except KeyboardInterrupt:
             return 130
     project = Project(Path(args.project))
+    if action in {"array-check", "array-run", "array", "arrays", "array-diff"}:
+        from . import project_array as array
+        if action == "array-check":
+            result = array.check(project, args.input)
+        elif action == "array-run":
+            result = array.run(project, args.input, Path(args.kernel), Path(args.build))
+        elif action == "array":
+            result = array.load(project, args.array_id)
+        elif action == "arrays":
+            result = array.history(project)
+        else:
+            result = array.compare(project, args.first, args.second)
+        print(encoded(result).decode(), end="")
+        return 2 if action == "array-run" and result["status"] != "succeeded" else 0
+    if action == "flow-plan":
+        from .mf01_flow_plan import propose
+        print(encoded(propose(project, args.input, args.output)).decode(), end="")
+        return 0
+    if action in {"flow-check", "flow-run", "flow", "flows", "flow-diff"}:
+        from . import project_mf01_flow as flow
+        if action == "flow-check":
+            result = flow.check(project, args.input)
+        elif action == "flow-run":
+            result = flow.run(project, args.input, Path(args.kernel), Path(args.build))
+        elif action == "flow":
+            result = flow.load(project, args.flow_id)
+        elif action == "flows":
+            result = flow.history(project)
+        else:
+            result = flow.compare(project, args.first, args.second)
+        print(encoded(result).decode(), end="")
+        return 2 if action == "flow-run" and result["status"] != "succeeded" else 0
+    if action == "grid-plan":
+        from .mf01_grid_plan import propose
+        print(encoded(propose(project, args.input, args.output)).decode(), end="")
+        return 0
+    if action in {"grid-check", "grid-run", "grid", "grids", "grid-diff"}:
+        from . import project_mf01_grid as batch
+        if action == "grid-check":
+            result = batch.check(project, args.input)
+        elif action == "grid-run":
+            result = batch.run(project, args.input, Path(args.kernel), Path(args.build))
+        elif action == "grid":
+            result = batch.load(project, args.grid_id)
+        elif action == "grids":
+            result = batch.history(project)
+        else:
+            result = batch.compare(project, args.first, args.second)
+        print(encoded(result).decode(), end="")
+        return 2 if action == "grid-run" and result["status"] != "succeeded" else 0
+    if action in {"batch-check", "batch-run", "batch", "batches", "batch-diff"}:
+        from . import project_dag_batch as batch
+        if action == "batch-check":
+            result = batch.check(project, args.input)
+        elif action == "batch-run":
+            result = batch.run(project, args.input, Path(args.kernel), Path(args.build))
+        elif action == "batch":
+            result = batch.load(project, args.batch_id)
+        elif action == "batches":
+            result = batch.history(project)
+        else:
+            result = batch.compare(project, args.first, args.second)
+        print(encoded(result).decode(), end="")
+        return 2 if action == "batch-run" and result["status"] != "succeeded" else 0
+    if action in {"dag-check", "dag-run", "dag", "dags", "dag-diff"}:
+        from . import project_dag
+        if action == "dag-check":
+            result = project_dag.check(project, args.input)
+        elif action == "dag-run":
+            result = project_dag.run(project, args.input, Path(args.kernel), Path(args.build))
+        elif action == "dag":
+            result = project_dag.load(project, args.dag_id)
+        elif action == "dags":
+            result = project_dag.history(project)
+        else:
+            result = project_dag.compare(project, args.first, args.second)
+        print(encoded(result).decode(), end="")
+        return 2 if action == "dag-run" and result["status"] != "succeeded" else 0
+    if action in {"fold-check", "fold-run", "fold", "folds", "fold-diff"}:
+        from . import project_fold
+        if action == "fold-check":
+            result = project_fold.check(project, args.region, args.input)
+        elif action == "fold-run":
+            result = project_fold.run(project, args.region, args.input, Path(args.build), seed=args.seed)
+        elif action == "fold":
+            result = project_fold.load(project, args.fold_id)
+        elif action == "folds":
+            result = project_fold.history(project)
+        else:
+            result = project_fold.compare(project, args.first, args.second)
+        print(encoded(result).decode(), end="")
+        return 2 if action == "fold-run" and result["status"] != "succeeded" else 0
     if action in {"tile-run", "tile-check", "tile-diff", "tile", "tiles"}:
         from . import project_tiling
         if action == "tile-check":
@@ -835,7 +940,7 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile-check", "tile-diff", "tile", "tiles"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile-check", "tile-diff", "tile", "tiles", "fold-check", "fold-run", "fold", "folds", "fold-diff", "dag-check", "dag-run", "dag", "dags", "dag-diff", "batch-check", "batch-run", "batch", "batches", "batch-diff", "grid-plan", "grid-check", "grid-run", "grid", "grids", "grid-diff", "flow-check", "flow-run", "flow", "flows", "flow-diff", "flow-plan", "array-check", "array-run", "array", "arrays", "array-diff"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
         if action == "init":
@@ -848,6 +953,71 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
         if action in {"show", "check", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
+        if action in {"array-check", "array-run"}:
+            command.add_argument("--input", required=True, help="inputs/ array-program/v1 JSON")
+        if action == "array-run":
+            command.add_argument("--kernel", required=True)
+            command.add_argument("--build", required=True)
+        if action == "array":
+            command.add_argument("array_id")
+        if action == "array-diff":
+            command.add_argument("first")
+            command.add_argument("second")
+        if action in {"flow-check", "flow-run", "flow-plan"}:
+            command.add_argument("--input", required=True, help="inputs/ dependent grid-source flow JSON")
+        if action == "flow-plan":
+            command.add_argument("--output", help="save selected linked flow as a new inputs/ JSON file")
+        if action == "flow-run":
+            command.add_argument("--kernel", required=True)
+            command.add_argument("--build", required=True)
+        if action == "flow":
+            command.add_argument("flow_id")
+        if action == "flow-diff":
+            command.add_argument("first")
+            command.add_argument("second")
+        if action in {"grid-plan", "grid-check", "grid-run"}:
+            command.add_argument("--input", required=True, help="inputs/ MF01 grid source JSON")
+        if action == "grid-plan":
+            command.add_argument("--output", help="save selected source as a new inputs/ JSON file")
+        if action == "grid-run":
+            command.add_argument("--kernel", required=True)
+            command.add_argument("--build", required=True)
+        if action == "grid":
+            command.add_argument("grid_id")
+        if action == "grid-diff":
+            command.add_argument("first")
+            command.add_argument("second")
+        if action in {"batch-check", "batch-run"}:
+            command.add_argument("--input", required=True, help="inputs/ independent named DAG batch JSON")
+        if action == "batch-run":
+            command.add_argument("--kernel", required=True)
+            command.add_argument("--build", required=True)
+        if action == "batch":
+            command.add_argument("batch_id")
+        if action == "batch-diff":
+            command.add_argument("first")
+            command.add_argument("second")
+        if action in {"dag-check", "dag-run"}:
+            command.add_argument("--input", required=True, help="inputs/ DAG JSON with named output")
+        if action == "dag-run":
+            command.add_argument("--kernel", required=True)
+            command.add_argument("--build", required=True)
+        if action == "dag":
+            command.add_argument("dag_id")
+        if action == "dag-diff":
+            command.add_argument("first")
+            command.add_argument("second")
+        if action in {"fold-check", "fold-run"}:
+            command.add_argument("--region", required=True)
+            command.add_argument("--input", required=True)
+        if action == "fold-run":
+            command.add_argument("--build", required=True)
+            command.add_argument("--seed", type=int, default=1)
+        if action == "fold":
+            command.add_argument("fold_id")
+        if action == "fold-diff":
+            command.add_argument("first")
+            command.add_argument("second")
         if action in {"tile-run", "tile-check"}:
             command.add_argument("--input", required=True, help="inputs/ grid JSON; v2 for editable kernels, v1 for legacy fixed grid")
             command.add_argument("--kernel", help="inputs/ grid-kernel/v1 JSON; enables rectangular1..64 grids")

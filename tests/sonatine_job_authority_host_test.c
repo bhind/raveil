@@ -53,7 +53,40 @@ static struct sonatine_job_binding binding(const struct sonatine_submission *sub
   value.execution_sequence=submission->execution_sequence;
   memcpy(value.completion_cookie,submission->completion_cookie,16u); return value;
 }
+static void full_bank_snapshot_boundaries(void) {
+  job_authority_init(215u);
+  for(unsigned i=1;i<=4;++i) {
+    struct raveil_object_manifest_v1 m=manifest(i,1u,1u,512u,
+      RAVEIL_OBJECT_READ|RAVEIL_OBJECT_WRITE,RAVEIL_OBJECT_BACKING_VOLATILE);
+    assert(job_object_register(&m));
+  }
+  struct raveil_job_descriptor_v1 d=job(215u);d.object_count=4u;
+  d.resources=(struct raveil_resource_bounds_v1){1u,1024u,1024u,1u};
+  for(unsigned i=0;i<4;++i)d.objects[i]=(struct raveil_object_ref_v1){i+1u,1u,1u,
+    0u,512u,i<2?RAVEIL_OBJECT_READ:RAVEIL_OBJECT_WRITE,0u};
+  struct sonatine_job_binding b;struct sonatine_submission issued,forged;
+  assert(job_submit_bound(&d,&b));assert(job_submission_take(&issued));
+  uint8_t bytes[512];
+  assert(job_submission_read(&issued,1u,0u,bytes,sizeof(bytes)));
+  assert(job_submission_read(&issued,2u,0u,bytes,sizeof(bytes)));
+  assert(!job_submission_read(&issued,3u,0u,bytes,sizeof(bytes)));
+  assert(!job_submission_read(&issued,5u,0u,bytes,sizeof(bytes)));
+  assert(!job_submission_read(&issued,1u,1u,bytes,sizeof(bytes)));
+  assert(!job_submission_read(&issued,1u,UINT64_MAX,bytes,1u));
+  forged=issued;forged.completion_cookie[0]^=1u;
+  assert(!job_submission_read(&forged,1u,0u,bytes,sizeof(bytes)));
+  struct raveil_completion_record_v1 done=completion(&issued),taken;
+  done.status=RAVEIL_COMPLETION_FAULT;done.detail=RAVEIL_DETAIL_EXECUTION_FAULT;
+  done.output_count=0u;memset(done.outputs,0,sizeof(done.outputs));
+  assert(job_completion_post(&done));
+  assert(!job_submission_read(&issued,1u,0u,bytes,sizeof(bytes)));
+  assert(job_completion_take(&taken));
+  assert(job_shadow_finalize(&b,false)==SONATINE_FINALIZE_ROLLED_BACK);
+  d.job_id++;assert(job_submit_bound(&d,&b));assert(job_submission_take(&issued));
+  assert(job_cancel(&b));assert(!job_submission_read(&issued,1u,0u,bytes,sizeof(bytes)));
+}
 int main(void) {
+  full_bank_snapshot_boundaries();
   struct raveil_object_manifest_v1 input=manifest(
       1u,2u,3u,16u,RAVEIL_OBJECT_READ,RAVEIL_OBJECT_BACKING_IMMUTABLE);
   struct raveil_object_manifest_v1 output=manifest(

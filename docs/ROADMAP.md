@@ -1,5 +1,225 @@
 # Raveil gated roadmap
 
+## Common-source functional completion — T-0236
+
+The owner-directed continuation closes the supported integer-array workflow through
+actual QEMU/RTL, not only compiler/host UT. Long maps, all declared operators,
+multiple shapes and linked stages execute on unchanged backends; failure/retry and
+saved inspection are verified. This completes the local common-source functional
+milestone under ADR-0107/0132. Issue #298 integrates the cumulative verified
+implementation; prior local-only publication notes below are historical. It does not conclude a historical research gate,
+authorize hardware acquisition or establish commercial readiness/performance.
+
+## Fixed phase-one generalization endpoint — T-0235
+
+The owner fixes the current milestone to common bounded integer-array authoring,
+automatic partitioning/materialization, verified orchestration and scoped UT.
+ADR-0132 enumerates the decisions and exclusions. All33 new and253 affected legacy host tests pass, completing this local
+implementation/UT phase; T-0236 has now completed the subsequent actual
+QEMU/RTL integration/system testing under EXP-0002. Public adoption, performance/novelty gates and hardware acquisition
+are separate. No conversation count or open-ended operator expansion is a milestone.
+
+## Versioned transform sharing verified locally — T-0234
+
+The owner-directed local continuation now passes actual QEMU/RTL chain, branch,
+post-map, linked-flow, fault and old/new-version comparison checks. It preserves
+ordinary numeric/resource/authority boundaries under ADR-0107. The local runtime
+approval dependency is resolved; public adoption and physical/performance gates
+remain separate. Static instruction counts are not measured speedups.
+
+## Signed interaction verification — T-0229 continuation
+
+The existing simulation path now has generated signed-coordinate/fold/post
+interaction checks with independently sensitive representatives through QEMU/RTL.
+This is additional functional evidence under ADR-0107, with unchanged numerical,
+resource and hardware boundaries. No performance gate or public adoption changes.
+
+## Signed source ordering verified locally — T-0229 resumed
+
+V4 max_i32 and relu_i32 lower into the existing bounded MF01 backend and pass host,
+actual coupled and legacy-proof checks. This expands source-level numeric meaning
+without expanding execution authority or physical resources. The owner-approved
+local validation dependency is complete. Public adoption remains separate; hardware
+acquisition, performance and prior-art/novelty gates do not change.
+
+## Fresh functional continuation — local T-0233
+
+Current unsigned host code works through fresh QEMU/RTL multistage runs, including
+failure stop and a complete new retry preserving the failed capture. Selected
+uniform tiles reproduce the larger-partition baseline. This extends functional
+verification of the existing simulation workflow; resource limits and gates are
+unchanged. Session-count differences are not measured performance improvements.
+
+## Cumulative host compatibility — local T-0232
+
+Clean-archive reproduction now includes the later flow planner and strict-proof
+corrections, with291 host tests and recursive retained grid/flow validation.
+This supports the existing simulation workflow. It adds no guest/RTL execution,
+hardware milestone, performance evidence or gate transition; public adoption and
+numerical adoption remain independent decisions.
+
+## Saved-proof consistency — local T-0231
+
+Existing simulation-workflow verification now applies strict representation rules
+across legacy standalone, bridge, session, chain and DAG readers. Host tests and
+retained proof rereads establish local compatibility; no physical-performance or
+new execution milestone is claimed. T-0229 local validation has since completed; public adoption remains pending. No gate changes.
+
+## Existing rejection-path correction — local T-0230
+
+Cleanly rejecting malformed sources and internally inconsistent saved counts is
+part of the existing simulation workflow under ADR-0107. T-0230 changes no
+numerical language, execution capability, resource limit or gate. It proceeds
+independently from T-0229, which has since resumed with explicit owner approval.
+
+## Local whole-flow source usability — T-0228
+
+Uniform partition advice composes existing per-grid admission without changing
+runtime authority. Selecting fewer required sessions is a static source property;
+no latency, physical performance, novelty or hardware gate conclusion follows.
+
+## Local dependent source composition — T-0227
+
+Compose existing admitted grid programs through verified whole-grid outputs rather
+than adding a special source feature per operation pair. This extends ADR-0107
+simulation usability. The host coordinator preserves session/authority boundaries;
+no physical hardware, performance or novelty gate transition follows.
+
+## Local verification T-0226
+
+Generated coordinate/formula comparisons and a coupled QEMU/RTL subset exercise
+interactions of the ADR-0107 simulation path. They do not relax source/resource
+bounds or advance any performance/physical hardware gate. Corrected host checks
+and all24 coupled categories pass. This does not prove arbitrary source programs.
+
+## Local post-reduction composition — T-0225
+
+The source workflow can now express reduction followed by pointwise arithmetic or
+thresholding using the existing two-job dependency path. This advances ADR-0107
+simulation usability without a new executor, authority boundary, performance
+experiment, physical hardware decision or gate transition.
+
+## Local admission-guided source usability — T-0224
+
+Users can ask for a valid uniform tile shape rather than infer resource bounds
+by trial and error. Every candidate passes the existing compiler; source execution
+still re-admits it. This advances ADR-0107 software usability without changing
+the hardware plan, authority boundary, performance experiments or roadmap gates.
+
+## Local candidate reproducibility — T-0223
+
+The cumulative simulation candidate has been reproduced from a clean canonical
+archive plus its retained patch, including native and offline RTL builds. This
+tests delivery completeness under ADR-0107; no gate, physical-hardware decision
+or performance conclusion changes.
+
+## Local affine-coordinate generality — T-0222
+
+One bounded source mapping now targets existing MF01 matrix, layout and neighborhood
+computations through the same captured coupled workflow. This is functional
+simulation usability under ADR-0107, with unchanged tile/input/authority bounds;
+no gate, performance experiment, hardware decision or vendor claim changes.
+
+## Local source-level grid workflow — T-0221
+
+Original grids and map/fold programs now pass through deterministic bounded tiling,
+existing coupled execution and source-bound full-grid reconstruction. This extends
+ADR-0107 simulation usability without a gate, authority ABI, physical hardware,
+performance experiment or procurement change. Proposed ADR-0124 records limits.
+
+## Local independent composition — T-0220
+
+A whole image workload now spans independent coupled sessions with all-or-incomplete
+named-result publication. This advances the simulation-first usable workflow under
+ADR-0107; no gate, performance experiment, hardware decision or guest ABI changes.
+General source lowering can build on this verified execution layer.
+
+## Local subrange generality — T-0219
+
+Two large producers can now supply only their needed chunks to an admitted join;
+exact four-reference and cross-chunk cases run through the existing RTL. This
+advances functional simulation usability under ADR-0107 without expanding the
+job/object ABI. No gate, hardware budget or performance experiment changes.
+Proposed ADR-0122 and the dated log retain the bounds and evidence.
+
+## Local evidence correction — T-0218
+
+Shared strict MF01 proof parsing closes a demonstrated representation-validation
+hole under ADR-0107 simulation maturity. Existing accepted invariants, gates and
+performance experiments are unchanged. Saved functional evidence is revalidated;
+this does not establish hardware performance or a new architecture.
+
+## Local DAG workspace usability — T-0217, October11
+
+The existing dependency/lifetime-admitted executor now serves normal workspace
+editing, static preview, named saved outputs and comparison. Real input/program
+edits and fault dispositions are retained as functional coupling evidence. This
+advances simulation usability under ADR-0107; no gate transition, performance
+EXP, hardware acquisition or accepted architecture change follows. Local adoption
+into canonical delivery remains separate from verified prototype behavior.
+
+## Local resource-admitted DAG continuation — T-0216, October11
+
+Sequential named fan-in/fan-out now uses a deterministic whole-plan lifetime
+allocator under existing authority bounds. Main functional acceptance checks
+6,134 words; CLI editing and saved-history checks also pass. This is a concrete
+simulation-maturity extension under ADR-0107. It establishes no new performance
+EXP, gate transition, accepted architecture, physical budget or vendor advantage.
+
+## Local result-dependency continuation — T-0215, October11
+
+Named committed outputs now feed later MF01 requests through the existing
+Sonatine snapshot authority. The13-session main acceptance includes heterogeneous
+transpose/map/matrix-product/reduction, one/both linked inputs, rollback and
+failed/stale dependencies. This advances functional simulation under ADR-0107;
+no gate, accepted architecture, performance EXP or hardware decision changes.
+
+## Local sequential-session continuation — T-0214, October11
+
+Bounded1..8-job sessions now retain authority/output state through successes
+and rejected replies. Main functional acceptance checks3,460 output words across
+9 sessions. Admission rejects invalid later jobs before the first dispatch;
+framing loss halts the remaining plan. This is simulation maturity under ADR-0107,
+not a new gate, performance experiment or hardware acquisition. Proposed ADR-0118
+keeps the next result-dependency and physical-transport boundaries explicit.
+
+## Local coupling continuation — T-0213, October11
+
+The local UART broker executes an actual guest-issued request on existing RTL,
+then guest C comparison precedes approval.34 successful cases and8 negatives
+exercise the complete existing MF01 capacity. This progresses the simulation
+workflow while retaining one-request-per-boot limits; no gate/performance claim,
+hardware purchase or accepted architecture change is made. Proposed ADR-0117
+specifies the distinct functional coupling evidence class.
+
+## Local emulation continuation — T-0212, October11
+
+Full MF01 external inputs and complete outputs now run through a local Sonatine
+software interpreter candidate. One or two existing output objects preserve the
+256-word contract.34 separately executed QEMU/RTL pairs agree with SSA across
+2,174 words. This advances functional simulation usability only; no gate,
+performance EXP, hardware acquisition or accepted architecture change follows.
+The backend boundary remains explicit: host comparison is not a QEMU RTL device.
+
+## Local workspace continuation, October11
+
+T-0211 / Proposed ADR-0115 connects T-0210's unchanged RTL to captured runtime
+requests and persistent project records. Actual functional acceptance and saved
+semantic revalidation pass. This extends usable simulation workflow without
+hardware acquisition, a gate decision or a new performance EXP. Six additional coordinated memory/core reset-and-retry cases pass. The next
+transport boundary must be scoped from existing code; no transport, standard-IR
+or hardware task is implicitly accepted.
+
+## Local region-generality candidate, 2026-10-10
+
+T-0210 / Proposed ADR-0114 directly expresses binary input joins and reductions
+in a standalone RTL core. This is local functional development within the
+simulation-first direction, not an accepted gate change.213 retained RTL cases
+pass; no performance EXP or Groq comparison has run. Before any superiority
+claim, select matched semantics and count configuration/admission/traffic costs
+against an owned specialized implementation. Physical fit and single-board
+measurement remain later; no purchase or new tool was introduced.
+
 ## Approved general-grid continuation, 2026-10-10
 
 The owner requested generality beyond T-0207. T-0208/#296 addresses1..64

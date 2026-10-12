@@ -38,7 +38,7 @@ endif
 TARGET := $(BUILD)/sonatine.elf
 C_SOURCES := $(wildcard src/*.c)
 CONTRACT_SOURCES := ../contracts/src/job_contract.c ../contracts/src/object_manifest.c \
-                    ../contracts/src/graph_transport.c
+                    ../contracts/src/graph_transport.c ../contracts/src/affine_fold.c
 S_SOURCES := $(wildcard src/*.S)
 OBJECTS := $(patsubst src/%.c,$(BUILD)/%.o,$(C_SOURCES)) \
            $(patsubst ../contracts/src/%.c,$(BUILD)/contract_%.o,$(CONTRACT_SOURCES)) \

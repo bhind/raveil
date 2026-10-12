@@ -1,0 +1,250 @@
+{
+  "schema": "raveil.fold-dag.v1",
+  "jobs": [
+    {
+      "name": "root",
+      "region": {
+        "schema": "raveil.affine-fold.v1",
+        "shape": [
+          1,
+          1
+        ],
+        "extent": 1,
+        "lengths": [
+          1,
+          1
+        ],
+        "views": {
+          "a": [
+            0,
+            0,
+            1,
+            1,
+            0
+          ],
+          "b": [
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        },
+        "nodes": [
+          {
+            "id": "a",
+            "op": "load",
+            "view": "a"
+          },
+          {
+            "id": "b",
+            "op": "load",
+            "view": "b"
+          },
+          {
+            "id": "x",
+            "op": "add",
+            "args": [
+              "a",
+              "b"
+            ]
+          }
+        ],
+        "result": "x",
+        "fold": "sum"
+      },
+      "inputs": [
+        [
+          3
+        ],
+        [
+          5
+        ]
+      ]
+    },
+    {
+      "name": "left",
+      "region": {
+        "schema": "raveil.affine-fold.v1",
+        "shape": [
+          1,
+          1
+        ],
+        "extent": 1,
+        "lengths": [
+          1,
+          1
+        ],
+        "views": {
+          "a": [
+            0,
+            0,
+            1,
+            1,
+            0
+          ],
+          "b": [
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        },
+        "nodes": [
+          {
+            "id": "a",
+            "op": "load",
+            "view": "a"
+          },
+          {
+            "id": "b",
+            "op": "load",
+            "view": "b"
+          },
+          {
+            "id": "x",
+            "op": "add",
+            "args": [
+              "a",
+              "b"
+            ]
+          }
+        ],
+        "result": "x",
+        "fold": "sum"
+      },
+      "inputs": [
+        {
+          "from": "root"
+        },
+        [
+          2
+        ]
+      ]
+    },
+    {
+      "name": "right",
+      "region": {
+        "schema": "raveil.affine-fold.v1",
+        "shape": [
+          1,
+          1
+        ],
+        "extent": 1,
+        "lengths": [
+          1,
+          1
+        ],
+        "views": {
+          "a": [
+            0,
+            0,
+            1,
+            1,
+            0
+          ],
+          "b": [
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        },
+        "nodes": [
+          {
+            "id": "a",
+            "op": "load",
+            "view": "a"
+          },
+          {
+            "id": "b",
+            "op": "load",
+            "view": "b"
+          },
+          {
+            "id": "x",
+            "op": "mul",
+            "args": [
+              "a",
+              "b"
+            ]
+          }
+        ],
+        "result": "x",
+        "fold": "sum"
+      },
+      "inputs": [
+        {
+          "from": "root"
+        },
+        [
+          3
+        ]
+      ]
+    },
+    {
+      "name": "merge",
+      "region": {
+        "schema": "raveil.affine-fold.v1",
+        "shape": [
+          1,
+          1
+        ],
+        "extent": 1,
+        "lengths": [
+          1,
+          1
+        ],
+        "views": {
+          "a": [
+            0,
+            0,
+            1,
+            1,
+            0
+          ],
+          "b": [
+            1,
+            0,
+            1,
+            1,
+            0
+          ]
+        },
+        "nodes": [
+          {
+            "id": "a",
+            "op": "load",
+            "view": "a"
+          },
+          {
+            "id": "b",
+            "op": "load",
+            "view": "b"
+          },
+          {
+            "id": "x",
+            "op": "add",
+            "args": [
+              "a",
+              "b"
+            ]
+          }
+        ],
+        "result": "x",
+        "fold": "sum"
+      },
+      "inputs": [
+        {
+          "from": "left"
+        },
+        {
+          "from": "right"
+        }
+      ]
+    }
+  ],
+  "output": "merge"
+}
