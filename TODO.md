@@ -2,7 +2,12 @@
 
 ## Common-source generalization — verified integration T-0236
 
-- [x] **T-0236** [Issue #298](https://github.com/bhind/raveil/issues/298),
+For T-0210–T-0236 below, `[x]` records verified **technical acceptance** of the
+implementation and its stated evidence. Remote delivery is tracked by Issue #298;
+its Project status becomes Done only after PR merge and canonical completion.
+The dated local-only paragraphs are historical, not outstanding duplicate tasks.
+
+- [x] **T-0236** — technical acceptance; [Issue #298](https://github.com/bhind/raveil/issues/298),
   S-0007 carryover, 8 SP: owner-directed continuation after T-0235 UT: verify and correct
   common source → automatic partition → actual QEMU/RTL → saved output/diff,
   multiple shapes/operations/stages, failure and fresh retry. Primary owns local

@@ -24,8 +24,8 @@ entry adds functional evidence without changing scientific fields or gate/EXP
 conclusions. Exact commands and receipts: local T-0236 packet and October12 log.
 
 Status: Completed
-Evidence class: QEMU emulation and host-tool inspection
-Last updated: 2026-10-11
+Evidence class: QEMU functional emulation, RTL functional simulation, and host-tool inspection
+Last updated: 2026-10-12
 
 ## Objective
 
