@@ -14,8 +14,8 @@ Independent non-image acceptance passes: matrix product, transpose and fanout/jo
 on one fresh kernel/runtime,3 parents,6 sessions/jobs,33 output words.12 affected
 UT pass; saved validation creates no processes; no owned QEMU/container remains.
 Fresh kernel/runtime identities reproduce the prior validated artifacts exactly.
-Ready generic app: OUTER/artifacts/raveil-generic-20261018. Exact-head PR integration
-is the remaining step. This does not make
+Ready generic app: OUTER/artifacts/raveil-generic-20261018. Technical acceptance
+is complete; Issue304 tracks remote PR integration and canonical completion. This does not make
 arbitrary CPU programs importable or establish acceleration.
 
 

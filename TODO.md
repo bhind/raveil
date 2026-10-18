@@ -2,13 +2,14 @@
 
 ## Generic offline first use — T-0244
 
-- [ ] **T-0244** / [Issue #304](https://github.com/bhind/raveil/issues/304):
+- [x] **T-0244** / [Issue #304](https://github.com/bhind/raveil/issues/304):
   In Progress, S-0008, primary sole mutator,3 SP. Add read-only build/run tool
   diagnosis and clean-checkout instructions; verify matrix product, transpose
   and fanout/join on one freshly built kernel/runtime. Existing source/ISA/RTL
   unchanged.12 affected UT, fresh offline builds and3 non-image parents/6 jobs/33
   words pass; independent saved validation and resource absence verified.
-  Remaining: exact-head PR integration and canonical completion. No image
+  Technical acceptance complete; remote integration/completion is tracked by
+  Issue304 through the canonical queue. No image
   specialization, installation, performance or physical claim.
 
 
