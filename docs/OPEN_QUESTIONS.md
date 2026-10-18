@@ -1,5 +1,76 @@
 # Open questions
 
+## Image command decisions — T-0243
+
+Use explicit existing kernel/runtime paths and a fresh output directory. Reuse the
+foreground execution/cleanup path and verify saved results before rendering. No
+new architectural decision is required for this packaging successor; prior ADR
+statuses and EXP conclusions remain unchanged.
+
+
+## Host inventory decisions — T-0242
+
+Proposed ADR-0137 fixes descriptor-relative traversal without caching or skipped
+semantic validation. The implementation and ordinary failure handling require no
+new user choice. OS descriptor availability limits unusually deep trees; hostile
+concurrent-host isolation remains out of scope. EXP-0014 determines the bounded
+operating-cost result; it now passes the frozen retention criteria on all inputs.
+No local design decision remains. Project scope recovered on October18 through
+the owner-completed device flow, and Issue300 is admitted in S-0008. Only routine
+verified integration remains; no new device or physical-performance decision is implied.
+
+## T-0241 bounded decision resolved
+
+The owner-authorized image demonstration/comparison is complete. Both frozen
+per-input engineering criteria pass under the declared simulation policy. Retain
+fusion for this bounded workflow and close EXP-0013; no additional owner decision
+is needed for its local acceptance. Generality expansion is frozen. Practical CPU
+replacement, generality across memory policies, physical feasibility and novelty
+remain unestablished; they are not automatically converted into follow-on tasks.
+
+## Data preparation decisions — T-0240
+
+Proposed ADR-0136 fixes headerless decimal CSV, explicit u32/i32 input conversion,
+literal-only target selection, fixed computation shape and new-file publication.
+Local UT and actual import/edit/run/diff acceptance pass. No user clarification
+is pending for this implementation. Automatic computation
+reshape, arbitrary model import and new arithmetic types remain separate work.
+
+## Foreground stop semantics — T-0239
+
+Proposed ADR-0135 fixes this implementation's stop and commit race decisions; no
+additional owner decision is needed; local UT/runtime acceptance now passes. Guest-clock
+and host-monotonic deadlines remain distinct. Hard real-time cancellation, crash
+recovery and native Windows remain outside this cooperative foreground change.
+
+## Operational delivery — T-0238
+
+Prepared backend snapshots, prerequisite diagnostics and JSON/CSV extraction have
+explicit decisions in Proposed ADR-0134. No further user choice is needed for
+implementation/UT/relocated functional acceptance. GitHub auth remains the external
+publication dependency, not a local execution blocker. Kernel hashes alone do not
+prove ABI compatibility; the relocated actual example has now passed, including
+input editing, two-output diff and saved-only JSON/CSV. No operational question
+remains for this bounded prepared-workspace contract; broader numeric/application
+requirements and physical/performance work remain separate.
+
+
+## Practical scope and fusion — T-0237
+
+The scalar-materialization bottleneck is addressed by explicit v2 whole-stage
+and single-output block compilation, not by raising backend instruction/register
+limits. Source-level evaluation accounting and generated output-word accounting
+are separate. Host gathering and repeated captured child execution still exist.
+
+Application-level useful-size, latency, memory and numerical requirements remain
+to be established for a chosen use; completing this compiler change will not by
+itself settle them. Floating point, general importer/control support and device-
+resident execution remain future scope. Current concrete external dependency:
+GitHub CLI reports invalid authentication, so Issue/Project/PR synchronization
+requires reauthentication. Local implementation and the stated fusion acceptance
+are complete: 307 UT and 17 sealed QEMU/RTL parents. Broader application requirements
+remain open; this closes the fusion implementation question only.
+
 ## Common-source QEMU/RTL question resolved — T-0236
 
 The question of whether ADR-0132's generated pass compositions work through actual

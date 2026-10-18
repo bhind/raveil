@@ -15,7 +15,7 @@ future numerical type, dynamic control construct or model importer.
 | All declared operators and composition | add, mul, unsigned max, add_imm, ge_imm, signed max, ReLU; sum/max folds; post after wrapped fold; fanout/join. |
 | Cardinality boundaries | Eight inputs/views and eight stages/requested outputs; other static ceilings and rejection paths in UT. |
 | Failure and fresh retry | Actual wrong-word and RTL-fault failures stop at the selected middle pass and publish no parent outputs; fresh successful attempts preserve failed evidence. |
-| Cancellation boundary | Real device cancellation leaves the coupled parent unsealed because changed execution options are rejected; this is not a public array-cancellation protocol. |
+| Cancellation boundary | Real device cancellation leaves the coupled parent unsealed because changed execution options are rejected; that original test was not a public array-cancellation protocol. T-0239 adds a separately verified foreground host-stop/deadline path; see ARRAY_WORKSPACE.md. |
 | Independent result checking | Owned hand-derived formulas, separate whole-source scalar interpreter and actual nested RTL/guest proofs. |
 | Saved inspection | All complete/incomplete parents revalidate without process creation; the unsealed cancellation remains visible as unsealed. |
 | Repeatability | Exact commands, source/kernel/runtime identities, raw logs and nested receipts retained; no hardware purchase or new environment dependency. |

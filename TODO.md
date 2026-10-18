@@ -1,5 +1,106 @@
 # Raveil TODO
 
+## Verified host inventory delivery — T-0242
+
+- [ ] **T-0242** / [Issue #300](https://github.com/bhind/raveil/issues/300): local implementation and acceptance complete under ADR-0107,
+  Proposed ADR-0137 and EXP-0014. Primary sole mutator.597 distinct UT;18 fresh
+  parents/114 jobs/16,416 words;18 paired saved reads; all traces/outputs unchanged;
+  frozen improvement criteria pass. Ready improved image app/report delivered
+  locally. Cumulative adoption covers the verified T-0237–T-0241 candidates below.
+  Issue #300 is now linked and In Progress in Project #1, S-0008 (October12–18),
+  initial/current8 SP, Project Manager owner. The device-link scope recovery is
+  verified; no authentication blocker remains. Cumulative patch hashes reproduce
+  in the clean dedicated worktree. Integration rerun:597 UT pass in256.277s and37 saved parents revalidate
+  without processes. Remaining action: dedicated-branch PR review/merge and
+  canonical completion. Historical pending
+  notes below are covered by this single cumulative item, not six active lanes.
+
+## Bounded normal-use image command — T-0243
+
+- [ ] **T-0243** / [Issue #301](https://github.com/bhind/raveil/issues/301):
+  dependency-backed Backlog until Issue300 merges. Primary owner; proposed3 SP.
+  Add one command to prepare the existing portable app, run an explicit existing
+  kernel/runtime, and render only a verified successful result. Package image
+  helpers/guide; verify malformed inputs, fresh destinations, stops and relocation.
+  Existing operators/bounds and runtime remain unchanged. Host UT plus QEMU/RTL
+  functional evidence, no new timing campaign, install, device or performance gate.
+
+For T-0237–T-0241 below, `[x]` means verified technical acceptance; cumulative
+remote delivery is tracked solely by Issue300/T-0242 above. Historical authentication
+and registration paragraphs are superseded by its current integration state.
+
+## Bounded image demonstration locally complete — T-0241
+
+- [x] **T-0241** owner-authorized image demo/comparison under ADR-0107 and EXP-0013.
+  Local acceptance complete:64 affected UT plus12-test final collector rerun;
+  18 successful frozen-order parents,267 sessions/jobs,16,416 words; independent
+  C correctness and15 CPU timing records; trace/aggregate/hash audit; local image
+  report and standalone viewer/preparer. Both per-image engineering thresholds
+  pass. Retain existing fusion, freeze further generality expansion and close the
+  experiment; no new hardware/performance gate. Primary sole mutator; read-only
+  reviewer corroborated evidence. Remaining action: after authentication, dedupe
+  provisional IDs/register real work items and integrate cumulative patch through
+  the dedicated branch/PR, then synchronize Project. No new implementation queue
+  is created to postpone the completed experiment's decision.
+
+## Practical data input locally verified — T-0240
+
+- [x] **T-0240** CSV/Python matrix preparation under Proposed ADR-0136 and ADR-0107.
+  Primary sole mutator. Local implementation/functional acceptance complete:
+  367 final cumulative UT (62 affected including18 new), actual imported/edited/signed GEMM, four parents,
+  six verified sessions/jobs and24 words, saved two-cell diff, immutable prior
+  inputs/proofs, no-process inspection and strict resource absence. Ready app:
+  outer artifacts/raveil-local-20261017-input/app. EXP-0002 functional context.
+  Separate original-checkout-read-denied execution also passes; combined five
+  parents/seven sessions/28 words. Local archive extraction verifies all956 files.
+  Remaining remote deduplication/registration, cumulative branch/PR integration
+  and Project sync await authentication; all stated local acceptance is complete.
+
+## Foreground execution locally complete — T-0239
+
+- [x] **T-0239** foreground array progress, overall deadline, cooperative stop and
+  immutable fresh retry under Proposed ADR-0135 / ADR-0107. Primary sole mutator;
+  local implementation/delivery accepted:349 distinct UT, actual live130/143/124
+  stops,38 successful-parent sessions and4,120 words, immutable failed trees,
+  saved no-process inspection and strict resource absence. Fresh offline runtime
+  build reproduces the prior identity. EXP-0002 functional scope only. Ready app:
+  outer artifacts/raveil-local-20261017-control04/app. Remaining work is remote
+  deduplication/registration, cumulative branch/PR integration and Project sync
+  after authentication; no local implementation or acceptance step remains.
+
+## Usable local workspace — T-0238
+
+- [x] **T-0238** prepared local array application under ADR-0107 and Proposed
+  ADR-0134: local implementation/delivery acceptance complete. Prepare, doctor,
+  default backend resolution, verified JSON/CSV, launcher and relocation pass
+  324 distinct UT plus actual edited-input execution (two parents, six sessions,
+  24 words, two changed cells). Fresh kernel/runtime builds reproduce prior hashes.
+  Ready app: outer artifacts/raveil-local-20261017/app. Primary sole mutator;
+  T-0237 is the verified predecessor. Remaining delivery action after GitHub
+  reauthentication: deduplicate/register the live work item and integrate the
+  cumulative verified branch/PR patch, then synchronize Project acceptance. No
+  Issue/Project change or global practical-readiness conclusion is inferred.
+
+## Continue practical implementation — T-0237
+
+- [x] **T-0237** versioned generic array fusion; proposed ADR-0133, ADR-0107 and
+  EXP-0002 functional context. Primary sole mutator. Local implementation and
+  functional acceptance complete: whole-stage/block selection, v1 compatibility,
+  exact resource/capture rejection, 307 UT, 13 actual QEMU/RTL workload cases,
+  two injected post-job failures and two successful retries. All 17 parents
+  revalidate without execution; failed trees are preserved. Records reconciled.
+  Remote registration/integration remains blocked by invalid GitHub authentication;
+  no Issue allocation or Project transition is claimed. Next action after
+  reauthentication: deduplicate/register the real work item, synchronize the
+  queue, and integrate the verified patch through the existing branch/PR workflow.
+  Technical acceptance is verified; remote integration is tracked by T-0242.
+  Broader practical readiness is not its completion claim.
+
+The T-0236 implementation was merged in PR299 (a85f21f); its Issue298 and Project
+card were closed/Done on October12. Earlier entries preserve historical acceptance
+snapshots. The continuing objective is useful workloads with measured operating
+costs, not accumulating operator counts and declaring all generalization complete.
+
 ## Common-source generalization — verified integration T-0236
 
 For T-0210–T-0236 below, `[x]` records verified **technical acceptance** of the

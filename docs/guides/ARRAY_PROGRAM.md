@@ -99,3 +99,5 @@ output can be published on capacity failure.
 Floating point, dynamic branches, general MLIR/model import, optimized pass fusion,
 hardware purchase and claims of advantage over Groq are outside this UT milestone.
 See [ADR-0132](../decisions/ADR-0132-materialized-array-program.md).
+
+Versioned v2 fusion is described in [ARRAY_FUSION.md](ARRAY_FUSION.md). V1 keeps the exact materialization and saved-proof interpretation above.

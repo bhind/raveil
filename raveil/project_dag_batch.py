@@ -10,6 +10,7 @@ from uuid import uuid4
 from . import project as p, project_fold as f, fold_dag as d, project_dag as a
 from .fold_evidence import loads, same
 from .workspace import NativeWorkspace
+from . import run_control as control
 
 INPUT='raveil.dag-batch.v1'
 SCHEMA='raveil.project-dag-batch/v1'
@@ -128,6 +129,7 @@ def run(project,input_file,kernel,build):
     p.write_new(root/'plan.json',p.encoded(plan));(root/'children').mkdir(mode=0o700)
     children=[];outputs=[];complete=True
     for i,item in enumerate(batch['items']):
+        control.event('session', index=i+1, total=len(batch['items']))
         child_root=root/'children'/f'{i:02d}'
         # Exceptions, interrupts and uncertain cleanup leave the parent unsealed.
         d.run(item['dag'],root/'kernel.elf',root/'runtime',child_root)

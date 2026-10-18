@@ -7,6 +7,7 @@ import copy
 from . import project as p, grid_kernel as g, mf01_grid as grid
 
 SCHEMA = 'raveil.array-program/v1'
+SCHEMA_V2 = 'raveil.array-program/v2'
 MAX_NODES = 128
 MAX_PASSES = 128
 MAX_SESSIONS = 128
@@ -56,7 +57,7 @@ def _nodes(nodes, result, views):
 
 def structure(value):
     _fields(value, {'schema', 'stages', 'outputs'}, 'invalid array program fields')
-    if (value['schema'] != SCHEMA or type(value['stages']) is not list or
+    if (value['schema'] not in (SCHEMA, SCHEMA_V2) or type(value['stages']) is not list or
             not 1 <= len(value['stages']) <= 8 or type(value['outputs']) is not list or
             not 1 <= len(value['outputs']) <= 8):
         raise ValueError('array program requires 1..8 stages and outputs')
@@ -130,6 +131,9 @@ def structure(value):
 
 def bind(value, step, planes):
     """Bind an admitted plan pass to exact input words; no arithmetic evaluation."""
+    if step.get('op') in ('fused', 'block'):
+        from .array_fusion import bind as bind_fused
+        return bind_fused(value, step, planes)
     rows, columns = step['shape']
     if 'gather' in step:
         recipe = step['gather']; s = next(x['source'] for x in value['stages'] if x['name'] == recipe['stage'])
@@ -160,6 +164,9 @@ def bind(value, step, planes):
 
 
 def compile(value):
+    if type(value) is dict and value.get('schema') == SCHEMA_V2:
+        from .array_fusion import compile as compile_fused
+        return compile_fused(value)
     stages, order, total, literal_words = structure(value)
     steps = []; results = {}; sessions = work = 0
 

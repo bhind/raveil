@@ -1,5 +1,72 @@
 # Raveil gated roadmap
 
+## Normal-use image packaging — T-0243
+
+Issue301 follows verified Issue300 integration. Collapse the existing prepare/run/view
+steps into one command and include relocatable helpers. Explicit existing runtime
+prerequisites remain. No operator, hardware, experiment or gate expansion.
+
+
+## Bounded host-cost correction — T-0242
+
+Continue the existing image workflow under ADR-0107 by reducing inventory
+traversal overhead. EXP-0014 compares unchanged fused images with frozen old/new
+engines. All18 fresh and18 saved runs pass; retain the change under the frozen
+criteria, with597 distinct UT and unchanged traces. Retain all correctness/capture/publication checks. This is a simulation
+usability correction, not a generality expansion or physical gate advance.
+October18 integration continues under Issue300/S-0008 after verified device-link
+auth recovery; old Sprint identities and postponed ceremony state are preserved.
+
+## One visible workload and decision delivered — T-0241
+
+EXP-0013 is locally complete within the bounded image scope: exact outputs match,
+all18 runs succeed, and existing fusion clears the20% cycle/transaction reduction
+threshold on every input. Local median CLI time also decreases. Preserve this
+working demo and fusion; stop open-ended generality expansion. These results do
+not justify a hardware purchase or a CPU/Groq performance claim. Physical gates
+remain unchanged. Remote integration is a delivery dependency, not more research.
+
+## Practical input preparation — T-0240
+
+Continue ADR-0107 after verified foreground control with CSV/Python matrix binding.
+Admitted immutable input, actual execution/edit/diff and preserved prior proofs
+now pass367 cumulative UT (62 affected) and four actual parents/six sessions.
+Separate original-checkout-denied execution adds one parent/session; combined
+five parents/seven sessions/28 words. Local acceptance
+is verified; remote integration remains pending. No physical/performance gate change.
+
+## Simulation usability continuation — T-0239
+
+Under ADR-0107, add observable progress and bounded foreground cancellation before
+reconsidering hardware. Proposed ADR-0135 preserves atomic parent publication and
+fresh retry. Actual stop/timeout/cleanup acceptance passes with349 distinct UT and a fresh
+identity-matching runtime build. No hardware or historical performance gate is
+advanced; continue practical input preparation under the same simulation-first scope.
+
+## Usable local delivery — T-0238
+
+Finish preparation, diagnosis, implicit backend selection and verified result
+extraction, then prove actual edit/run/diff after relocation without original
+artifact paths. This local delivery now passes 324 UT, fresh reproducible builds
+and two relocated actual QEMU/RTL executions. Remote integration awaits
+reauthentication; the ready app is usable now. This is bounded simulation delivery under ADR-0107;
+physical hardware and application performance remain separate work.
+
+
+## Practical-use continuation — T-0237
+
+The bounded common-array milestone is complete, but general practical readiness
+was not defined or established by that completion. T-0237 removes unnecessary
+per-operation dispatch/materialization through versioned admitted fusion. The
+concrete functional regression envelope includes32x32/extent8 and17x19/extent64
+matrix products,64x64/24-node maps and linked mixed-mode stages. Test these through
+unchanged QEMU/RTL, preserving failure and saved-proof behavior. This functional
+envelope now passes revision02 acceptance and 307 UT; remote integration awaits
+GitHub reauthentication. Structural counts
+are not speedups. Remaining work includes operating-cost measurements for stated
+workloads, required numeric/import/control support and eventual physical work
+under ADR-0107; none is silently marked complete or authorized for purchase.
+
 ## Common-source functional completion — T-0236
 
 The owner-directed continuation closes the supported integer-array workflow through

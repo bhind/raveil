@@ -1,5 +1,225 @@
 # Current status
 
+## Host inventory improvement verified locally — T-0242
+
+Descriptor-relative traversal retains all nested inventory, semantic, oracle,
+trace and publication checks while removing repeated ancestor-path walks. It
+also bounds reads and rejects observed replacement/growth. Proposed ADR-0137
+records the cooperative-host model and one-descriptor-per-depth OS limit.
+
+597 distinct UT pass across the broad593-test regression and targeted final
+reruns. All18 prior image captures revalidate without processes. EXP-0014 completes
+18 fresh old/new fused-image runs and18 saved reads:114 jobs,16,416 words, exact
+ordered trace/output/executable/count agreement. Fresh CLI median time reductions
+are3.98% /44.52% /20.07%; saved-read reductions37.05% /37.96% /29.61% for blocks16,
+diagonal24 and texture16x24. Frozen per-image thresholds pass. Measurements are
+three uncontrolled local paired repeats, not physical performance or significance.
+Raw traces, aggregates, sources and resource absence were independently rechecked.
+
+Ready improved app/report: OUTER/artifacts/raveil-image-fast-20261017. Full old/new
+raw evidence: OUTER/artifacts/raveil-host-20261017. Prior deliveries are preserved.
+A separately relocated edited-PGM run passes three jobs/576 words and changes
+four expected cells; its nine prior parents and engine remain unchanged. Saved
+viewer/preparer run from an unrelated directory; all nine report panels and embedded
+summary reconcile. No owned QEMU/container remains after this delivery smoke.
+No additional operators, hardware, installations or runtime changes.
+
+Project authentication recovered through the owner-completed device-link flow on
+October18. [Issue #300](https://github.com/bhind/raveil/issues/300) is linked to
+Project #1 and admitted In Progress through canonical prepare/start commands.
+S-0008 is October12–18; all seven historical Sprint IDs/dates are preserved. The
+postponed weekly review remains separate and unaccepted. The64-file cumulative
+candidate is hash-identical after applying to the clean dedicated worktree at
+base a85f21f. All597 UT pass again in256.277s in that checkout; all37 saved
+parents revalidate with process creation forbidden. Main/PR closure follows
+verified exact-head integration. The bounded successor is T-0243 / Issue301: one
+normal-use image prepare/run/view command using the existing explicit runtime. Older outage/local-only notes below are historical
+and are superseded by this current entry. The dirty outer donor remains preserved.
+
+## Image demonstration and comparison complete locally — T-0241
+
+One existing-integer pipeline now has a visible, reproducible demonstration:
+clamped horizontal difference → signed ReLU →2x2 maximum pooling. No operator,
+ISA or runtime changes. Three images run as identical v1/v2 sources except the
+schema selecting scalar materialization or fusion. All18 frozen-order attempts
+succeed:267 distinct QEMU sessions/RTL jobs,16,416 published words; every output
+matches independent coordinate arithmetic. Independent C -O3 matches all outputs
+in15 timed native invocations. Related64 UT pass, followed by a12-test rerun after
+reusing the tested timeout/log wrapper for CPU measurements.
+
+Under the fixed seed-213 cycle-driven synthetic-memory policy, fusion reduces
+aggregate post-start RTL active cycles by59.68–59.84% and port transactions by
+64.20% on each image. Host CLI medians (scalar→fused):16x16 51.093→6.621s,
+24x24 124.061→30.193s,16x24 86.449→16.087s. These are uncontrolled local-session
+observations. Native C compute-only medians are287.46/449.46/299.10ns respectively,
+with different measurement boundaries; no CPU-vs-hardware speedup is inferred.
+
+Both preregistered engineering criteria pass. Retain fusion for this simulation
+workflow and close this bounded experiment. Do not extend generality or justify
+new hardware from this result. The current image path remains impractical as a
+routine CPU replacement; the demo is an executable educational/engineering result,
+not evidence of novelty, Groq advantage or physical performance.
+
+Delivery: OUTER/artifacts/raveil-image-20261017/report.html, image-panel.png and
+START_HERE.md, with app, editable inputs, source preparation and verified saved
+image viewer. HTML's nine panels/embedded metrics are checked; the numerical PNG
+is visually inspected. Native browser UI preview was unavailable due OS permission
+wait after collection; it did not affect measurements. All105 frozen source hashes
+matched at collection end;267 trace hashes/counts and all paired aggregates were
+independently rechecked. No owned QEMU/container remains. See EXP-0013 and the log.
+Local acceptance complete; remote Issue/Project/PR integration remains pending
+the invalid GitHub token. Canonical main and dirty donor remain preserved.
+
+## CSV/Python input implemented and verified locally — T-0240
+
+The ready app now imports headerless integer CSV into one existing literal slot,
+fully admits the resulting program and publishes a new JSON exclusively. The pure
+Python helper performs the same matrix encoding and full replacement admission.
+Explicit u32/i32 conversion, fixed computation shape and producer-link rejection
+are documented in Proposed ADR-0136 and the input guide. Existing inputs are
+preserved; no compiler, numeric runtime or saved-proof schema was changed.
+
+The affected regression passes62 UT, including18 new parser, numerical, admission,
+publication-race, interruption and relocated-launcher tests. Final same-version
+cumulative verification passes367 UT with frozen product/test/script hashes
+unchanged. Exact commands, test IDs and raw logs are retained. Actual QEMU/RTL
+acceptance imports both GEMM operands, edits and reruns after moving the app,
+checks exactly two changed cells, and executes explicit signed input conversion.
+Four parents contain six sessions/jobs/approvals and24 published words. Bad CSV,
+producer-linked replacement and overwrite attempts leave the workspace unchanged.
+Prior inputs/captures and engine inventory remain unchanged; saved verification
+creates no processes and a strict final audit finds no owned QEMU/container.
+The verified existing kernel and freshly verified T-0239 runtime are reused.
+A separate copy also passes actual GEMM and saved output with OS-level reads of
+its original checkout denied (positive denial control included). Its955 prior
+files remain unchanged. This adds one parent/session/job and four words; combined
+T-0240 actual evidence is five parents/seven sessions/28 words. Installed external
+prerequisites remain required.
+
+Ready app: OUTER/artifacts/raveil-local-20261017-input/app, where OUTER is the
+original workspace. See its README and engine/docs/guides/ARRAY_INPUT.md. This is
+functional emulation/RTL evidence, not physical performance or general product
+completion. Local registration/PR/Project integration is pending invalid GitHub
+authentication; it does not block this usable app or further local verification.
+
+## Foreground control verified and delivered locally — T-0239
+
+The foreground array CLI now supports optional whole-run timeout and stderr
+progress. Ctrl+C/SIGTERM unwind owned execution, preserve unsealed attempts and
+report their IDs with130/143; timeout reports124. Before atomic publication no
+outputs escape. Already committed records remain authoritative. Cleanup uncertainty
+reports2 and denies success; no automatic retry, fallback or partial reuse occurs.
+
+Final frozen product source passes344 cumulative UT, with five additional resource
+observer UT (349 distinct). Actual revision04 verifies live QEMU/RTL interruption,
+termination and timeout, then64x64/24-node retry and restored original input. Three
+successful parents contain38 verified sessions/jobs,38 approvals and4,120 words.
+Three stopped parents remain unsealed. All stopped trees and the baseline capture
+are unchanged after retries. Saved proof revalidation creates no processes. A
+strict final Docker/process audit finds no owned resources and preserves raw queries.
+The changed container manager also rebuilds the offline RTL runtime to the same
+identity as T-0238; the unchanged prior native kernel is explicitly reused.
+
+The ready application is outer artifacts/raveil-local-20261017-control04/app.
+Its launcher enables progress; use `./raveil array-run --timeout-seconds 300`.
+The prior application and every rejected/preliminary acceptance revision remain
+preserved. Revision01 corrected a harness case-sensitivity assumption; revision03
+safely rejected insufficient removal acknowledgement. A private unmounted Docker
+CID acknowledgement now distinguishes completed creation from a pending request.
+The host budget is cooperative; bounded cleanup may finish after it. Guest-clock
+limits remain separate. No hardware or application-performance claim follows.
+
+See Proposed ADR-0135, the prepared workspace guide, EXP-0002 and October17 log.
+Local implementation/delivery acceptance is complete. Canonical main and the dirty
+outer donor remain unchanged; GitHub registration/Project/PR integration remains
+pending authentication. CSV/Python matrix input binding is locally verified in T-0240 above. This does not declare all future numeric,
+model import, dynamic control or product hardening work complete.
+
+## Usable local array app delivered — T-0238
+
+The owner directed continuing to a working local implementation. A ready application
+is installed locally at `artifacts/raveil-local-20261017/app` in the outer workspace.
+Its `./raveil` launcher supports doctor/check/run/output/history/diff without old
+research artifact paths or per-run kernel/build arguments. Edit its
+workspace/inputs/program.json. Output can be verified JSON or long-form CSV.
+The prepared app includes its own Python engine, copied kernel/runtime and source
+identity files; existing QEMU/Docker and the pinned local image remain prerequisites.
+
+Primary verified 324 distinct UT (71 current-path +253 legacy); a final 34-test
+subset rerun verifies the summary display/default runtime and legacy explicit flags.
+Fresh native kernel and offline RTL builds both succeed and reproduce the preceding
+kernel/runtime identities exactly. No installation, image pull, paid resource or
+hardware acquisition occurred. The scope remains the admitted integer-array path.
+
+Actual acceptance prepares from disposable artifact copies, executes a 24-node map
+plus transpose, moves the app to a path with spaces, removes those supplied copies,
+edits an input and executes again. The two parents publish 24 independently expected
+words through six distinct verified QEMU/RTL sessions/jobs, all approved. Exactly
+two output cells change. JSON/CSV/named extraction, saved diff, invalid-source and
+missing-prepared-runtime rejection pass. Failed preflight creates no attempt.
+After a second move, saved validation succeeds with subprocess creation prohibited;
+all imported Raveil modules resolve inside the delivered engine. The first complete
+captured tree and the packaged engine inventory remain unchanged. The original
+checkout was not removed; isolation by making that whole checkout unavailable is
+not claimed. The supplied original artifact paths were removed before the second run.
+
+Host verification corrected bytecode writes into the packaged engine and partial
+app-marker publication. The launcher now disables bytecode; app.json is published
+from a complete pending file by atomic no-overwrite link and malformed markers are
+rejected. A manifest records local provenance, not a signature or runtime authority.
+Doctor establishes prerequisites, not kernel ABI compatibility; actual execution
+supplies the latter evidence for the delivered examples.
+
+See the prepared-workspace guide, Proposed ADR-0134, EXP-0002 and October17 log.
+Exact commands, test IDs, hashes and build logs are in the local T-0238 packet;
+raw application acceptance and the usable app are under artifacts/raveil-local-20261017.
+Local implementation and delivery acceptance are complete. Final GitHub auth check
+still exits1 with an invalid token, so canonical main, Issues/Project and remote
+publication remain unchanged. T-0238 stays pending remote registration/integration;
+this dependency does not prevent using the delivered local app. Native Windows,
+floating point, arbitrary model import, physical performance and Groq superiority
+are not established by this delivery.
+
+## Automatic fusion verified locally — T-0237
+
+T-0236 was integrated in PR299 (a85f21f); it completed the bounded integer-array
+workflow, not all generalization or product work. The owner directed continued
+implementation toward useful workloads. T-0237 adds explicit array-program/v2
+whole-stage fusion and contiguous single-output blocks through existing grid/v5
+admission. V1 source grammar, plans and saved interpretation remain compatible.
+
+The corrected candidate passes 307 distinct UT: 54 new-path/current coordinator
+checks and 253 affected legacy checks. Fresh revision02 actual QEMU/RTL verifies
+13 workload cases plus two successful retries and two intended post-job failures.
+The 17 sealed parents contain 75 distinct DAG sessions, 80 processed jobs and 78
+approvals. Successful parents publish 5,856 words; failed parents publish none.
+Every parent revalidates with process creation prohibited. Both complete failed
+trees, including seals, remain unchanged after fresh retries.
+
+Static plans reduce the 24-node expression from 24 sessions to 2 and the 32x8 by
+8x32 matrix product from 124 to 4. The 17x64 by 64x19 product and a 64x64/24-node
+map now fit existing bounds where v1 rejects. These are structural counts, not
+measured speedups. No native/RTL, numeric or hardware contract changed. No novelty,
+Groq advantage or general practical-readiness claim follows.
+
+Primary confirmed two review findings and added regression coverage: logical peak
+storage includes the separately assembled output plane, and capture byte/entry
+reservations count runtime copies per job while kernel copies remain per session.
+V1 keeps its prior accounting. Revision01 evidence remains separate and immutable;
+revision02 binds the corrected code. Before that budget-only correction, 18 v1
+plans and all bound passes matched canonical main and 27 prior sealed parents
+revalidated without execution; final UT also verifies unchanged v1 budgeting.
+
+See ADR-0133, the fusion guide and EXP-0002. Exact commands, frozen sources, logs
+and raw evidence are under the candidate's artifacts/research/T-0237. Local
+implementation and functional acceptance are complete; remote delivery is pending.
+Approved-network GitHub queries returned 401/403 and the final authentication
+check still reports an invalid active token. No Issue/Project transition, push
+or merge is claimed. feat/t-0237-array-fusion is reserved locally; the reviewed
+candidate and integration patch await reauthentication. Canonical main and the
+dirty outer donor remain untouched. Floating point, model import, dynamic control,
+device-resident execution and application-specific operating targets remain open.
+
 ## Common-source generalization verified end to end — T-0236
 
 The owner directed completing the common execution path rather than stopping at

@@ -1,5 +1,61 @@
 # Intended Raveil architecture
 
+## Descriptor-relative inventories — T-0242 local candidate
+
+Proposed [ADR-0137](decisions/ADR-0137-descriptor-relative-inventory.md) replaces
+repeated ancestor-path walks with no-follow descriptor-relative traversal inside
+project.tree. All nested inventories, semantic/oracle/trace checks and publication
+boundaries remain. No verification cache or evidence schema change is introduced.
+Observed file/namespace changes reject the traversal; this remains cooperative
+local verification, not an atomic snapshot. One descriptor per active depth is
+required; descriptor exhaustion fails closed.
+
+## Bounded image demonstration — T-0241
+
+The filter/activation/pooling demonstration is an existing array-program client.
+It changes no compiler, ISA, RTL or authority contract. EXP-0013's collector reads
+fully validated bound jobs and separately reports simulated active cycles/port
+transactions, host CLI time and native CPU compute-only context. Results are
+advice for this bounded workflow; they do not authorize a new hardware direction.
+
+## Explicit literal data preparation — T-0240 locally verified candidate
+
+Proposed [ADR-0136](decisions/ADR-0136-explicit-array-data-input.md) adds CSV/Python
+matrix binding before existing source admission. It changes one literal in a copy,
+never producer links or computation. CLI publication creates a new complete JSON
+exclusively. No compiler, ISA, numeric execution or saved-proof schema changes.
+
+## Foreground execution control — T-0239 candidate
+
+Proposed [ADR-0135](decisions/ADR-0135-foreground-array-run-control.md) adds a scoped
+host controller around array-run. It carries sticky stop/deadline state through
+nested execution and inventories, while saved schemas and recursive proof checks
+remain unchanged. Stops unwind owned writers and leave unsealed parent evidence;
+only the existing atomic parent link commits results. This is local functional
+usability, not a new device, ISA or performance claim.
+
+## Prepared array execution — T-0238
+
+A fresh workspace stores fixed relative kernel/runtime locations and publishes its
+environment manifest last after source/identity checks. Ordinary array-run may use
+these verified copies; it still enters the unchanged array coordinator and child
+proof checks. Doctor is prerequisite inspection only. JSON/CSV output requires a
+fully verified successful parent. The relocatable app carries its Python engine
+and runtime source-identity files; an atomic completion marker prevents partial
+preparation from appearing ready. No manifest grants runtime or research authority.
+
+
+## Versioned generic fusion candidate — T-0237
+
+Array-program/v2 selects whole-stage grid/v5 admission first, otherwise combines
+contiguous scalar operations with one externally live result. Stage boundaries,
+all declared arithmetic and existing physical admission are preserved. Numeric
+meaning and backend execution are unchanged. Structural zero inputs select a plan;
+actual producer words are bound only from verified captures. V1 remains the exact
+legacy compiler/reader path. See ADR-0133 for separate source-evaluation, generated
+output-word, lifetime and capture accounting. This is a local implementation
+candidate, not accepted physical architecture or practical-readiness conclusion.
+
 ## Common-source execution boundary verified — T-0236
 
 No architecture/ISA/resource contract changed in this continuation. The existing

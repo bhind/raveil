@@ -12,6 +12,7 @@ import subprocess
 import time
 import zlib
 from .fold_evidence import loads, same
+from . import run_control as control
 from . import project as p,project_fold as f,fold_bridge as bridge
 from .fold_session import rtl_values,reply,options,files_for,BASE_FILES,JOB_FILES,BROKEN_FRAME
 from .affine_fold import compile_region,reference
@@ -166,7 +167,23 @@ def files_for(processed):
     return BASE_FILES|{f"jobs/{i:02d}/{name}" for i in range(processed) for name in JOB_FILES}
 
 
+def _cleanup(proc,reader):
+    try:
+        if proc is not None and proc.poll() is None:
+            proc.terminate()
+            try:proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:proc.kill();proc.wait(timeout=2)
+    except BaseException as error:
+        raise f.CleanupUncertain("QEMU cleanup could not be verified") from error
+    finally:
+        if proc is not None:
+            if proc.stdin:proc.stdin.close()
+            if proc.stdout:proc.stdout.close()
+        if reader is not None:reader.close()
+
+
 def run(session,kernel,build,destination,*,injections=None,timeout=90):
+    control.checkpoint()
     validate(session);injections=options(session,injections)
     identity=f.verify_build(Path(build),current=True)
     epoch=secrets.randbits(64) or 1;ids=[]
@@ -182,13 +199,14 @@ def run(session,kernel,build,destination,*,injections=None,timeout=90):
     qemu=shutil.which("qemu-system-riscv64")
     if not qemu or "," in str(root):raise ValueError("invalid QEMU/path")
     command=command_for(qemu,root);(root/"command.json").write_bytes(p.encoded(command))
-    (root/"qemu-version.txt").write_text(subprocess.check_output([qemu,"--version"],text=True))
+    (root/"qemu-version.txt").write_text(control.version([qemu,"--version"]))
     project=p.Project(p.init_project(root/"project"))
     rows=[];state_model=State(session);old_reply=None;halted=0
     proc=None;reader=None
     with (root/"stdout.log").open("wb") as out,(root/"stderr.log").open("wb") as err:
         try:
-            proc=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=err,bufsize=0)
+            control.checkpoint()
+            proc=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=err,bufsize=0,start_new_session=control.current() is not None)
             reader=bridge.Reader(proc,out,time.monotonic()+timeout,line_limit=16384)
             boot=0
             while True:
@@ -199,6 +217,7 @@ def run(session,kernel,build,destination,*,injections=None,timeout=90):
                         raise ValueError("session not admitted")
                     break
             for index,(job,injection,request,rid) in enumerate(zip(session["jobs"],injections,requests,ids)):
+                control.event("job", index=index+1, total=len(session["jobs"]))
                 reader.deadline=time.monotonic()+timeout
                 line=reader.line();resolved=state_model.resolve(index)
                 if resolved is None:
@@ -214,8 +233,9 @@ def run(session,kernel,build,destination,*,injections=None,timeout=90):
                 (project.root/"inputs"/"region.json").write_bytes(p.encoded(job["region"]))
                 (project.root/"inputs"/"input.json").write_bytes(p.encoded(
                     {"schema":"raveil.fold-input/v1","buffers":job["inputs"]}))
-                record=f.run(project,"region.json","input.json",build,seed=213,
-                             fault_at=int(injection=="rtl-fault"))
+                with control.coupled_deadline(reader.deadline):
+                    record=f.run(project,"region.json","input.json",build,seed=213,
+                                 fault_at=int(injection=="rtl-fault"))
                 record=f.load(project,record["id"])
                 values=rtl_values(project,record,job,injection,identity)
                 response,wire=reply(binding,values,injection,old_reply)
@@ -238,16 +258,9 @@ def run(session,kernel,build,destination,*,injections=None,timeout=90):
             if end!=f"RAVEIL-FOLD-DAG-END-V1 epoch={epoch:016x} processed={len(rows)} total={len(ids)} halted={halted} versions={state_model.version_text()}":
                 raise ValueError("session final state mismatch")
             reader.drain()
-            if proc.wait(timeout=2):raise ValueError("QEMU session failed")
+            if control.wait(proc, 2):raise ValueError("QEMU session failed")
         finally:
-            if proc is not None:
-                if proc.poll() is None:
-                    proc.terminate()
-                    try:proc.wait(timeout=2)
-                    except subprocess.TimeoutExpired:proc.kill();proc.wait(timeout=2)
-                if proc.stdin:proc.stdin.close()
-                if proc.stdout:proc.stdout.close()
-            if reader is not None:reader.close()
+            _cleanup(proc,reader)
     receipt=dict(schema="raveil.fold-dag-run.v1",evidence_class=CLASS,epoch=epoch,
                  processed=len(rows),planned=len(ids),halted=halted,versions=state_model.versions,output=state_model.final(),jobs=rows,
                  files={name:digest(root/name) for name in sorted(files_for(len(rows)))})
