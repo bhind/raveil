@@ -1,5 +1,13 @@
 # Raveil gated roadmap
 
+## Common implementation direction — T-0244
+
+Preserve the general structured-computation objective across replaceable backends.
+Images are validation clients, not a hardware specialization or primary roadmap.
+Offline first-use diagnosis and fresh-build generic functional acceptance now
+pass for matrix product, transpose and fanout/join; remaining work is integration. Existing hardware/novelty/performance gates remain.
+
+
 ## Image command delivery checkpoint
 
 T-0242 is integrated through PR302/51cb51d and Project Done. T-0243 is admitted

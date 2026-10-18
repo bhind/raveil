@@ -1,5 +1,15 @@
 # Open questions
 
+## Direction clarification and first use
+
+The owner explicitly reaffirmed the general CPU-workload efficiency objective and
+required work to continue. This corrects task selection, not the common execution
+architecture. Image helpers remain optional. T-0244 closes the existing offline
+setup gap; its implementation, fresh builds and non-image acceptance now pass.
+No new user decision is needed for routine exact-head integration.
+Arbitrary program import and CPU speed advantage remain unestablished.
+
+
 ## Current integration state
 
 PR302/51cb51d and Project Done resolve T-0242 publication. T-0243 implements the
