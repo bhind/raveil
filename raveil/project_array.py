@@ -6,6 +6,7 @@ from uuid import uuid4
 from . import project as p,project_fold as f,project_dag_batch as b,project_mf01_grid as a,array_program as array
 from .fold_evidence import loads,same
 from .workspace import NativeWorkspace
+from . import run_control as control
 
 SCHEMA='raveil.project-array-program/v1'
 PLAN='raveil.project-array-program-plan/v1'
@@ -26,10 +27,11 @@ def _capture_budget(raw,compiled,kernel_bytes,build):
     """Known duplicated captures plus reservation, not a future-log guarantee."""
     manifest=p.tree(build);workspace=NativeWorkspace(build)
     runtime=sum(workspace.stat(path).size for path,kind in manifest.items() if kind!='directory')
-    passes=len(compiled['passes']);sessions=compiled['sessions']
-    known=len(raw)+(1+passes+sessions)*runtime+(1+passes+sessions)*len(kernel_bytes)
-    reservation=65536*passes+131072*sessions
-    if known+reservation>b.MAX_BYTES or (1+passes+sessions)*len(manifest)+64*passes+32*sessions>b.MAX_ENTRIES:
+    passes=len(compiled['passes']);sessions=compiled['sessions'];jobs=compiled.get('jobs',sessions)
+    # Each job captures a runtime; a fused post job shares only the session kernel.
+    known=len(raw)+(1+passes+jobs)*runtime+(1+passes+sessions)*len(kernel_bytes)
+    reservation=65536*passes+131072*jobs
+    if known+reservation>b.MAX_BYTES or (1+passes+jobs)*len(manifest)+64*passes+32*jobs>b.MAX_ENTRIES:
         raise ValueError('array capture reservation exceeds inventory budget')
     return dict(known_bytes=known,reserved_bytes=reservation)
 
@@ -94,15 +96,19 @@ def run(project,input_file,kernel,build):
     kernel=Path(kernel).absolute();kernel_bytes=f._bytes(kernel.parent,kernel.name)
     build=Path(build).absolute();build_sha=f.verify_build(build,current=True)
     _capture_budget(raw,compiled,kernel_bytes,build)
+    control.checkpoint()
     identity=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ-')+uuid4().hex[:12]
     if 'arrays' not in project.workspace.ls('/'):project.workspace.mkdir('arrays',mode=0o700)
     project.workspace.mkdir('arrays/'+identity,mode=0o700);root=project.root/'arrays'/identity
+    if control.current() is not None: control.current().attempt=identity
+    control.event('snapshot', passes=len(compiled['passes']), sessions=compiled['sessions'])
     p.write_new(root/'source.json',raw);p.write_new(root/'kernel.elf',kernel_bytes);p.tree(build,root/'runtime')
     (root/'runtime/simulator.bin').chmod(0o700)
     if f.verify_build(root/'runtime',current=True)!=build_sha:raise ValueError('array runtime changed during capture')
     p.write_new(root/'plan.json',p.encoded(_plan(identity,input_file,raw,compiled,p.digest(kernel_bytes),build_sha)))
     (root/'children').mkdir(mode=0o700);planes={};children=[];complete=True
     for i,step in enumerate(compiled['passes']):
+        control.event('pass', index=i+1, total=len(compiled['passes']))
         child_project=p.Project(p.init_project(root/'children'/f'{i:03d}'))
         source=array.bind(value,step,planes)
         p.write_new(child_project.root/'inputs/array-pass.json',p.encoded(source))
@@ -115,10 +121,14 @@ def run(project,input_file,kernel,build):
         array.commit(planes,step,child['output'])
     record=dict(schema=SCHEMA,id=identity,evidence_class=CLASS,status='succeeded' if complete else 'incomplete',children=children,
                 outputs=array.publish(compiled,planes) if complete else None,files=b._inventory(root))
+    control.event('verify')
     _inspect(root,record);payload=p.encoded(record)
     try:
         p.write_new(root/'.record.pending',payload);p.write_new(root/'record.sha256',(p.digest(payload)+'\n').encode())
-        os.link(root/'.record.pending',root/'record.json');(root/'.record.pending').unlink()
+        control.checkpoint()
+        os.link(root/'.record.pending',root/'record.json')
+        if control.current() is not None: control.current().committed=True
+        (root/'.record.pending').unlink()
     except KeyboardInterrupt:
         if not (root/'record.json').exists():raise
     return load(project,identity)

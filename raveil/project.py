@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -24,8 +25,8 @@ from .command_graph import CommandComparison, CommandGraphCompiler, ToolRegistry
 from .graph_mvp import GraphProgram, run_graph_mvp
 from .native_backend import NativeCBackend
 from .sonatine_backend import SonatineQEMUBackend
-from .workspace import NativeWorkspace
-from . import project_graph
+from .workspace import NativeWorkspace, WorkspaceError, MAX_DIRECTORY_ENTRIES
+from . import project_graph, run_control
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 CONFIG = {"schema": "raveil.project/v1", "recipes": "recipes", "inputs": "inputs", "runs": "runs"}
@@ -110,41 +111,94 @@ def tree(root: Path, destination: Path | None = None, *,
             (exclude_root_files and destination is not None)):
         raise ValueError("only parent seal files may be excluded from inspection")
     workspace = NativeWorkspace(root)
+    if not all(hasattr(os, key) for key in ("O_DIRECTORY", "O_NOFOLLOW", "O_NONBLOCK")):
+        raise OSError("project snapshots require no-follow directory descriptors")
     manifest: dict[str, str] = {}
     total = 0
     if destination is not None:
         destination.mkdir(mode=0o700)
 
-    def visit(relative: str) -> None:
+    def signature(info):
+        # Access times can change on reads. Content and namespace metadata cannot.
+        return (info.st_dev, info.st_ino, info.st_mode, info.st_size,
+                info.st_mtime_ns, info.st_ctime_ns)
+
+    def unchanged(before, after):
+        if signature(before) != signature(after):
+            raise WorkspaceError("project snapshot changed during inspection")
+
+    def visit(descriptor: int, relative: str) -> None:
         nonlocal total
-        for entry in workspace.ls(relative or "/"):
+        before = os.fstat(descriptor)
+        names = []
+        with os.scandir(descriptor) as entries:
+            for entry in entries:
+                names.append(entry.name)
+                if len(names) > MAX_DIRECTORY_ENTRIES:
+                    raise WorkspaceError(f"directory exceeds {MAX_DIRECTORY_ENTRIES} entries")
+        for entry in sorted(names):
+            run_control.checkpoint()
+            workspace._check_root()
             child = f"{relative}/{entry}"
-            info = workspace.stat(child)
+            workspace._check_text_path(child)
+            info = os.stat(entry, dir_fd=descriptor, follow_symlinks=False)
+            if stat.S_ISLNK(info.st_mode):
+                raise WorkspaceError("symlinks are not allowed in workspace paths")
+            is_directory = stat.S_ISDIR(info.st_mode)
+            if not is_directory and not stat.S_ISREG(info.st_mode):
+                raise WorkspaceError("stat accepts regular files and directories only")
             if not relative and entry in exclude_root_files:
-                if info.kind != "file" or info.size > MAX_BYTES:
+                if is_directory or info.st_size > MAX_BYTES:
                     raise ValueError("invalid parent seal file")
                 continue
             if len(manifest) >= max_entries:
                 raise ValueError(f"project snapshot exceeds {max_entries} entries")
-            source = root / child.lstrip("/")
             target = destination / child.lstrip("/") if destination else None
-            if info.kind == "directory":
-                manifest[child] = "directory"
-                if target:
-                    target.mkdir(mode=0o700)
-                visit(child)
-            else:
-                if info.size > max_bytes - total:
-                    raise ValueError(f"project snapshot exceeds {max_bytes} bytes")
-                data = source.read_bytes()
-                total += len(data)
-                if total > max_bytes:
-                    raise ValueError(f"project snapshot exceeds {max_bytes} bytes")
-                manifest[child] = digest(data)
-                if target:
-                    write_new(target, data)
+            flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
+            if is_directory:
+                flags |= os.O_DIRECTORY
+            elif info.st_size > max_bytes - total:
+                raise ValueError(f"project snapshot exceeds {max_bytes} bytes")
+            opened = os.open(entry, flags, dir_fd=descriptor)
+            try:
+                unchanged(info, os.fstat(opened))
+                if is_directory:
+                    manifest[child] = "directory"
+                    if target:
+                        target.mkdir(mode=0o700)
+                    visit(opened, child)
+                else:
+                    chunks = []
+                    remaining = max_bytes - total + 1
+                    while remaining:
+                        run_control.checkpoint()
+                        data = os.read(opened, min(remaining, 64 * 1024))
+                        if not data:
+                            break
+                        chunks.append(data)
+                        remaining -= len(data)
+                    data = b"".join(chunks)
+                    total += len(data)
+                    if total > max_bytes:
+                        raise ValueError(f"project snapshot exceeds {max_bytes} bytes")
+                    unchanged(info, os.fstat(opened))
+                    manifest[child] = digest(data)
+                    if target:
+                        write_new(target, data)
+                unchanged(info, os.stat(entry, dir_fd=descriptor, follow_symlinks=False))
+            finally:
+                os.close(opened)
+        unchanged(before, os.fstat(descriptor))
 
-    visit("")
+    descriptor = os.open(workspace.root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        workspace._check_root()
+        if not os.path.samestat(os.fstat(descriptor), workspace.root.lstat()):
+            raise WorkspaceError("workspace root was replaced")
+        visit(descriptor, "")
+        workspace._check_root()
+    finally:
+        os.close(descriptor)
     return manifest
 
 
@@ -734,20 +788,56 @@ def command_project(args: argparse.Namespace) -> int:
                                     "-smp", "1", "-bios", "none", "-nographic", "-kernel", str(kernel)])
         except KeyboardInterrupt:
             return 130
+    if action == "array-prepare":
+        from .project_array_workspace import prepare
+        print(encoded(prepare(Path(args.directory), args.kernel, args.build, args.source)).decode(), end="")
+        return 0
     project = Project(Path(args.project))
+    if action == "array-import":
+        from .array_input import import_csv
+        try:
+            result = import_csv(project, args.input, args.output, args.stage, args.slot, args.csv, args.dtype)
+        except KeyboardInterrupt:
+            print("Input import interrupted; source unchanged. A published output file, if present, is complete.", file=sys.stderr)
+            return 130
+        print(encoded(result).decode(), end="")
+        return 0
+    if action == "array-doctor":
+        from .project_array_workspace import doctor
+        result = doctor(project)
+        print(encoded(result).decode(), end="")
+        return 0 if result["ready"] else 2
+    if action == "array-output":
+        from .project_array_workspace import output
+        print(output(project, args.array_id, args.name, args.format), end="")
+        return 0
     if action in {"array-check", "array-run", "array", "arrays", "array-diff"}:
         from . import project_array as array
         if action == "array-check":
             result = array.check(project, args.input)
         elif action == "array-run":
-            result = array.run(project, args.input, Path(args.kernel), Path(args.build))
+            from .project_array_workspace import resolve
+            control = run_control.Control(args.timeout_seconds, sys.stderr if args.progress else None)
+            try:
+                with control.active(signals=True):
+                    kernel, build = resolve(project, args.kernel, args.build)
+                    result = array.run(project, args.input, kernel, build)
+            except run_control.Stopped as error:
+                print(json.dumps(control.diagnostic(error), sort_keys=True), file=sys.stderr)
+                return error.code
+            except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+                print(json.dumps(control.diagnostic(error), sort_keys=True), file=sys.stderr)
+                return 2
         elif action == "array":
             result = array.load(project, args.array_id)
         elif action == "arrays":
             result = array.history(project)
         else:
             result = array.compare(project, args.first, args.second)
-        print(encoded(result).decode(), end="")
+        display = result
+        if action == "array-run" and args.summary:
+            display = {key: result[key] for key in ("id", "status", "evidence_class", "outputs")}
+        print(encoded(display).decode(), end="")
         return 2 if action == "array-run" and result["status"] != "succeeded" else 0
     if action == "flow-plan":
         from .mf01_flow_plan import propose
@@ -940,10 +1030,10 @@ def command_project(args: argparse.Namespace) -> int:
 def add_project_parser(subparsers: Any) -> None:
     parser = subparsers.add_parser("project", help="edit recipes, inspect graphs and keep repeatable runs")
     commands = parser.add_subparsers(dest="project_action", required=True)
-    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile-check", "tile-diff", "tile", "tiles", "fold-check", "fold-run", "fold", "folds", "fold-diff", "dag-check", "dag-run", "dag", "dags", "dag-diff", "batch-check", "batch-run", "batch", "batches", "batch-diff", "grid-plan", "grid-check", "grid-run", "grid", "grids", "grid-diff", "flow-check", "flow-run", "flow", "flows", "flow-diff", "flow-plan", "array-check", "array-run", "array", "arrays", "array-diff"):
+    for action in ("init", "recipes", "show", "fork", "check", "run", "runs", "output", "diff", "console", "garden", "export-preview", "export", "inspect-export", "compose", "composition", "compositions", "composition-diff", "tile-run", "tile-check", "tile-diff", "tile", "tiles", "fold-check", "fold-run", "fold", "folds", "fold-diff", "dag-check", "dag-run", "dag", "dags", "dag-diff", "batch-check", "batch-run", "batch", "batches", "batch-diff", "grid-plan", "grid-check", "grid-run", "grid", "grids", "grid-diff", "flow-check", "flow-run", "flow", "flows", "flow-diff", "flow-plan", "array-check", "array-run", "array", "arrays", "array-diff", "array-prepare", "array-doctor", "array-output", "array-import"):
         command = commands.add_parser(action)
         command.set_defaults(handler=command_project)
-        if action == "init":
+        if action in {"init", "array-prepare"}:
             command.add_argument("directory")
         elif action == "inspect-export":
             command.add_argument("bundle", help="selected-file derivative JSON; inspect only, never extract")
@@ -953,11 +1043,27 @@ def add_project_parser(subparsers: Any) -> None:
             command.add_argument("--project", default=".", help="project directory (default: current directory)")
         if action in {"show", "check", "run"}:
             command.add_argument("recipe", help="name in recipes/, without .json")
-        if action in {"array-check", "array-run"}:
-            command.add_argument("--input", required=True, help="inputs/ array-program/v1 JSON")
+        if action in {"array-check", "array-run", "array-import"}:
+            command.add_argument("--input", default="program.json", help="inputs/ array-program/v1 or v2 JSON (default: program.json)")
+        if action in {"array-run", "array-prepare"}:
+            command.add_argument("--kernel", required=action == "array-prepare")
+            command.add_argument("--build", required=action == "array-prepare")
+        if action == "array-import":
+            command.add_argument("--output", required=True, help="new JSON filename in inputs/; never overwritten")
+            command.add_argument("--stage", required=True, help="stage owning the literal input")
+            command.add_argument("--slot", type=int, required=True, help="zero-based literal input slot")
+            command.add_argument("--csv", required=True, help="headerless rectangular integer CSV")
+            command.add_argument("--dtype", choices=("u32", "i32"), default="u32", help="explicit input integer encoding")
+        if action == "array-prepare":
+            command.add_argument("--source", help="initial array source JSON; default: fused-stages example")
         if action == "array-run":
-            command.add_argument("--kernel", required=True)
-            command.add_argument("--build", required=True)
+            command.add_argument("--timeout-seconds", type=float, help="overall execution budget (0.01..86400 seconds); cleanup may take longer")
+            command.add_argument("--progress", action="store_true", help="write execution progress to stderr")
+            command.add_argument("--summary", action="store_true", help="print verified results without the captured-file inventory")
+        if action == "array-output":
+            command.add_argument("array_id", nargs="?", help="saved attempt ID; default: latest attempt")
+            command.add_argument("--name", help="select one named output")
+            command.add_argument("--format", choices=("json", "csv"), default="json")
         if action == "array":
             command.add_argument("array_id")
         if action == "array-diff":

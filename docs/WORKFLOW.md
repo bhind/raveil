@@ -755,5 +755,17 @@ An outage receipt states the target, failed operation, error/needed permission,
 unapplied delta and recovery action. Recheck authorized network access before
 calling a sandbox-only authentication result an expired token. Do not bypass
 the queue, fabricate success, discard local work or stop unrelated safe work.
+For GitHub Project authentication recovery, distinguish repository access from
+Project scope. Once the owner authorizes the needed scope, initiate
+`gh auth refresh -h github.com -s project` and relay its official device URL and
+fresh one-time code so the owner can finish in the browser. Do not require the
+owner to reconstruct a terminal workflow already performed in this project.
+Do not store tokens or device codes in repository records. Recheck auth scopes
+and an actual Project read before calling recovery complete; a lost local process
+handle alone does not mean authentication failed. An automatic approval rejection
+must be disclosed and resolved through explicit authority, never bypassed.
+Continue independent authorized implementation, verification and packaging during
+an authentication wait; only dependent remote operations wait.
+
 The [2026-09-05 inventory](guides/PROJECT-INVENTORY-2026-09-05.md) records the
 initial correction; T-0151 Issue #115 owns the separate daily automation.

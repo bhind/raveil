@@ -1,5 +1,15 @@
 # Architecture Decision Records
 
+## Data preparation continuation
+
+- [ADR-0136: Explicit data preparation for existing array literals](ADR-0136-explicit-array-data-input.md)
+  — Proposed; T-0240, CSV/Python input conversion and exclusive file publication.
+
+## Current local continuation
+
+- [ADR-0135: Foreground array execution control](ADR-0135-foreground-array-run-control.md)
+  — Proposed; T-0239, stop/deadline/atomic publication and fresh-retry boundaries.
+
 [ADR-0130](ADR-0130-source-signed-ordering-legalization.md) proposes explicit signed
 source ordering legalized into unchanged MF01 instructions. The owner authorized
 local correction/validation;203 host tests and14 QEMU/RTL sessions pass. Canonical
@@ -175,3 +185,7 @@ rewrite it.
 | [ADR-0129](ADR-0129-separable-flow-partition-advice.md) | Proposed | Separable finite tile advice preserves source links and ordinary flow admission |
 
 - [ADR-0131: Versioned shared signed transforms](ADR-0131-versioned-shared-signed-transforms.md) — Proposed; local host/runtime verification complete, public adoption pending.
+
+- [ADR-0133: Versioned admitted array fusion](ADR-0133-admitted-array-fusion.md) — Proposed; local T-0237 implementation and functional validation.
+
+- [ADR-0134: Prepared local array workspace](ADR-0134-prepared-array-workspace.md) — Proposed, T-0238.

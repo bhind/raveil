@@ -103,6 +103,9 @@ def verify_rtl_fault(saved,descriptor,inputs):
         raise ValueError("no verified injected RTL fault")
 
 
+from . import run_control as control
+
+
 class Reader:
     def __init__(self,proc,log,deadline,*,line_limit=8192):
         if type(line_limit) is not int or not 8192<=line_limit<=16384:raise ValueError("invalid UART line bound")
@@ -110,12 +113,18 @@ class Reader:
         self.proc=proc;self.log=log;self.deadline=deadline;self.buffer=bytearray()
         self.selector=selectors.DefaultSelector();self.selector.register(proc.stdout,selectors.EVENT_READ)
     def chunk(self):
-        remaining=self.deadline-time.monotonic()
-        if remaining<=0 or not self.selector.select(remaining):raise TimeoutError("UART deadline")
+        while True:
+            control.checkpoint()
+            remaining=self.deadline-time.monotonic()
+            if remaining<=0:
+                if control.current() is not None:raise control.Stopped("UART timeout",124)
+                raise TimeoutError("UART deadline")
+            if self.selector.select(min(remaining, .1) if control.current() is not None else remaining):break
         chunk=os.read(self.proc.stdout.fileno(),8192)
         if chunk:self.log.write(chunk);self.log.flush();self.buffer.extend(chunk)
         return bool(chunk)
     def line(self):
+        control.checkpoint()
         while b"\n" not in self.buffer:
             if len(self.buffer)>self.line_limit:raise ValueError("oversized UART line")
             if not self.chunk():raise ValueError("guest exited before dispatch")
@@ -123,6 +132,7 @@ class Reader:
         if len(line)>self.line_limit:raise ValueError("oversized UART line")
         return line.rstrip(b"\r").decode("ascii")
     def credit(self):
+        control.checkpoint()
         while not self.buffer:
             if not self.chunk():raise ValueError("guest exited during response")
         if self.buffer.pop(0)!=ord(">"):raise ValueError("missing UART credit")

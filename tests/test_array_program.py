@@ -206,7 +206,8 @@ class ArrayCompilerTests(unittest.TestCase):
         import json
         from pathlib import Path
         paths=sorted((Path(__file__).resolve().parents[1]/'examples/array-program').glob('*.json'))
-        self.assertEqual(len(paths),4)
+        self.assertEqual({p.name for p in paths}, {'pointwise.json', 'gemm.json', 'stencil.json',
+            'long-expression.json', 'fused-gemm.json', 'fused-long-map.json', 'fused-stages.json', 'import-gemm.json'})
         for path in paths:
             with self.subTest(example=path.name):self.assert_program(json.loads(path.read_text()))
 

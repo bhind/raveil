@@ -1,5 +1,49 @@
 # Raveil project records
 
+## Host inventory continuation — T-0242
+
+The owner-directed continuation addresses measured host overhead in the existing
+image workflow. See [ADR-0137](decisions/ADR-0137-descriptor-relative-inventory.md),
+[EXP-0014](experiments/EXP-0014-host-inventory.md), STATUS and TODO. Generality and
+hardware expansion remain frozen. October18 Project admission is restored under
+[Issue300](https://github.com/bhind/raveil/issues/300); STATUS records integration.
+
+## Image demonstration and comparison — T-0241
+
+Use [the image demo](guides/IMAGE_DEMO.md),
+[EXP-0013](experiments/EXP-0013-image-fusion-comparison.md), STATUS and TODO. The visible workload and frozen comparison are locally complete.
+Further generality expansion remains frozen; delivery and evidence are in STATUS.
+
+
+## Practical input continuation — T-0240
+
+[Matrix input preparation](guides/ARRAY_INPUT.md) and
+[ADR-0136](decisions/ADR-0136-explicit-array-data-input.md) describe the CSV/Python
+literal binding candidate, now locally verified through UT and actual QEMU/RTL.
+STATUS/TODO distinguish local acceptance from pending remote integration.
+
+## Foreground execution continuation — T-0239
+
+[ADR-0135](decisions/ADR-0135-foreground-array-run-control.md) fixes the foreground
+stop/deadline/publication boundary. STATUS/TODO track implementation and acceptance.
+The T-0238 ready application and its evidence remain preserved.
+
+## Prepared local use — T-0238
+
+Start with [prepared workspace and app](guides/ARRAY_WORKSPACE.md).
+[ADR-0134](decisions/ADR-0134-prepared-array-workspace.md) fixes snapshot, diagnosis,
+output and relocation behavior. STATUS/TODO distinguish verification from remote
+integration. This continues T-0237 without a hardware purchase.
+
+
+## Current implementation continuation — T-0237
+
+Use [versioned fusion](guides/ARRAY_FUSION.md),
+[ADR-0133](decisions/ADR-0133-admitted-array-fusion.md), STATUS and TODO.
+The T-0236 cumulative implementation is integrated through PR299; older local-only
+routing notes below are provenance. T-0237 is a new local candidate while GitHub
+reauthentication is pending. Broader practical readiness remains unfinished.
+
 ## Completed common-source execution path — local T-0236
 
 Use [the common array guide](guides/ARRAY_PROGRAM.md) and

@@ -10,9 +10,10 @@ import re
 from pathlib import Path
 import struct
 import subprocess
+import tempfile
 from uuid import uuid4
 
-from . import project as p
+from . import project as p, run_control as control
 from .affine_fold import compile_region, reference
 from .fold_evidence import loads
 from .workspace import NativeWorkspace
@@ -27,22 +28,35 @@ class CleanupUncertain(RuntimeError):
 
 
 def _container(cmd,*,stdout,stderr,timeout=240):
+    control.checkpoint()
     container="raveil-fold-"+uuid4().hex
-    process=subprocess.Popen([*cmd[:3],"--name",container,*cmd[3:]],
-                             stdout=stdout,stderr=stderr,start_new_session=True)
-    try:
-        return process.wait(timeout=timeout)
-    finally:
+    # CID is an acknowledgement of completed creation, outside every container
+    # mount. After reaping the client it cannot still be writing this private file.
+    with tempfile.TemporaryDirectory(prefix="raveil-fold-control-") as scratch:
+        cidfile=Path(scratch)/"container.id"
+        process=subprocess.Popen([*cmd[:3],"--name",container,"--cidfile",str(cidfile),*cmd[3:]],
+                                 stdout=stdout,stderr=stderr,start_new_session=True)
         try:
+            return control.wait(process, timeout)
+        finally:
             try:
-                if process.poll() is None:
-                    process.kill();process.wait(timeout=30)
-            finally:
-                cleanup=subprocess.run(["docker","rm","-f",container],capture_output=True,timeout=30)
-                if cleanup.returncode and b"No such container" not in cleanup.stderr:
-                    raise CleanupUncertain("container removal failed")
-        except BaseException as exc:
-            raise CleanupUncertain(f"container cleanup could not be verified: {container}") from exc
+                completed = process.poll() == 0
+                try:
+                    if process.poll() is None:
+                        process.kill();process.wait(timeout=30)
+                finally:
+                    acknowledged = False
+                    if cidfile.exists() and not cidfile.is_symlink() and cidfile.stat().st_size<=65:
+                        acknowledged = re.fullmatch(r"[0-9a-f]{64}\n?",cidfile.read_text()) is not None
+                    cleanup=subprocess.run(["docker","rm","-f",container],capture_output=True,timeout=30,start_new_session=True)
+                    if cleanup.returncode and b"no such container" not in cleanup.stderr.lower():
+                        raise CleanupUncertain("container removal failed")
+                    # Without creation acknowledgement, absence can precede a
+                    # delayed daemon creation. Require positive removal instead.
+                    if not (completed or acknowledged) and (cleanup.returncode or cleanup.stdout.strip()!=container.encode()):
+                        raise CleanupUncertain("unfinished Docker client without creation/removal acknowledgement")
+            except BaseException as exc:
+                raise CleanupUncertain(f"container cleanup could not be verified: {container}") from exc
 
 
 def _json(raw):

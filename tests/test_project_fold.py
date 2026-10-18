@@ -165,7 +165,7 @@ class FoldProjectTests(unittest.TestCase):
 
     def test_timeout_removes_container_before_return(self):
         process=Mock();process.wait.side_effect=[subprocess.TimeoutExpired("docker",240),0];process.poll.return_value=None
-        with patch.object(f.subprocess,"Popen",return_value=process),patch.object(f.subprocess,"run",return_value=Mock(returncode=0)) as cleanup:
+        with patch.object(f.subprocess,"Popen",return_value=process),patch.object(f.subprocess,"run",side_effect=lambda cmd,**kw: Mock(returncode=0,stdout=cmd[3].encode(),stderr=b"")) as cleanup:
             with self.assertRaises(subprocess.TimeoutExpired):
                 f._container(["docker","run","--rm","image"],stdout=None,stderr=None)
         process.kill.assert_called_once();self.assertEqual(cleanup.call_args.args[0][:3],["docker","rm","-f"])

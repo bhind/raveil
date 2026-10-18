@@ -1,5 +1,56 @@
 # EXP-0002: Sonatine Microkernel RV64 reproducibility
 
+## T-0238 fresh builds and relocated local application — 2026-10-17
+
+Primary performs a fresh native RV64 release build and fresh offline Chisel/Verilator
+runtime build with the existing tools/image/cache. Both exit0 and reproduce the
+preceding kernel SHA25635db85f0018595fe4c68d425f5071c39072b9eb35095477b8d4cdec1ebee49f9
+and runtime identitybdb6eefe93fe768fa2aa656b9354dcf5c7a4c28107b7dd979c49902b322a18ab.
+Exact flags, tool versions, paths and raw logs are in T-0238/build-verification.json
+and environment.json inside the candidate evidence packet. This is an additional
+native/offline-build reproduction, not a rerun of every Gate0 smoke, GDB or IDE test.
+
+Actual application acceptance creates a prepared app, executes map+transpose,
+relocates it to a path with spaces, removes the disposable supplied artifacts,
+edits the first input0→10 and runs again. The two sealed parents contain six
+unique verified DAG sessions/jobs, all approved, and publish 24 independent expected
+words. Exactly two named-output cells change. JSON/CSV/named output and diff pass.
+Invalid source or absent prepared runtime creates no attempt. Saved inspection after
+another relocation works without process creation, with all Raveil imports inside
+the packaged engine. The first captured tree and engine inventory remain identical.
+The original checkout remains available; stronger filesystem isolation is not claimed.
+
+Evidence is actual QEMU emulation plus RTL functional simulation, not FPGA/silicon,
+latency, energy or vendor comparison. 324 distinct host UT and the final affected
+34-test rerun pass. The ready app/raw acceptance is retained under the outer workspace
+artifacts/raveil-local-20261017; source freeze, logs and receipt counts are in T-0238.
+No scientific field, gate conclusion or hardware-purchase boundary is changed.
+
+
+## T-0237 versioned fusion functional execution — 2026-10-14
+
+Fresh corrected revision02 verifies 13 workload cases plus two successful retries
+and two intended post-job failures. The 17 sealed array parents contain 75 distinct
+DAG sessions, 80 processed jobs and 78 approvals. Successful parents publish 5,856
+words; failures publish no outputs. Every parent revalidates without subprocess
+creation. Complete failed trees including seals remain unchanged across retries.
+
+Coverage adds 17x64 by 64x19 and 32x8 by 8x32 matrix products, a 64x64/24-node map,
+and linked block/transpose execution to boundary, signed/modular and fanout cases.
+The wrong-word and RTL-fault injections target the second job inside a genuine
+two-job fused post session. This uses unchanged Sonatine kernel/RTL executables
+and source admission; it does not substitute host arithmetic for production jobs.
+
+Frozen `acceptance-plan-02.json`, `sources-02/`, `actual-02/summary.json` and raw
+nested receipts bind this result. Revision01 captures remain separate provenance
+before the job-aware runtime-copy reservation correction and are not added to
+these counts. Both campaigns exit0. The static comparison in the T-0237 packet
+reports plan counts only, never measured speedups or physical performance.
+307 distinct UT pass; exact argv/log hashes and environment are retained locally.
+No scientific field, physical/performance claim or Gate 0 conclusion changes.
+Remote publication remains pending invalid GitHub authentication.
+
+
 ## T-0236 common-source functional execution — 2026-10-12
 
 Fresh real QEMU/RTL acceptance verifies27 sealed array parents:24 successful,
@@ -25,7 +76,7 @@ conclusions. Exact commands and receipts: local T-0236 packet and October12 log.
 
 Status: Completed
 Evidence class: QEMU functional emulation, RTL functional simulation, and host-tool inspection
-Last updated: 2026-10-12
+Last updated: 2026-10-17
 
 ## Objective
 
@@ -487,3 +538,96 @@ retained-parent checks remain valid for the unchanged candidate; they are retain
 evidence, not rerun here. Ordinary15-node/8-register admission and old-version
 lowering remain unchanged. Local implementation and runtime validation are complete.
 Latest packet: `artifacts/research/T-0234/resumed-01/`.
+
+## T-0239 foreground control continuation (October17)
+
+Final349 distinct UT pass (344 cumulative plus5 resource-observer tests).
+Functional evidence only. Revision04 prepares a fresh application from the T-0238
+verified kernel/runtime, completes a baseline, sends real repeated SIGINT and
+SIGTERM while observing live owned QEMU/RTL, observes live execution before an
+eight-second whole-run timeout, then retries64x64/24-node input and restores the
+original input. Stop exits are130/143/124 with empty stdout and unsealed parents.
+Three successful parents contain38 verified DAG sessions/jobs,38 approvals and
+4,120 published words. Primary revalidates all successful parents with process
+creation prohibited. All three complete stopped trees and the first successful
+tree remain unchanged through retries. No hardware/performance gate is changed.
+
+Post-stop checks inspect actual captured container IDs and QEMU PIDs. A final
+strict audit saves raw Docker/process queries and fails on daemon/transport errors;
+no owned resource remains. Five observer UT cover the distinction between absence
+and failed inspection. That fail-closed observer correction follows the frozen
+revision04 harness; production sources are unchanged. Failed revision01/03 and
+preliminary revision02 remain separate, not final-acceptance counts.
+
+The altered container manager also completes a fresh offline RTL build using the
+already-local pinned image/cache. The resulting build identity matches T-0238
+exactly: bdb6eefe93fe768fa2aa656b9354dcf5c7a4c28107b7dd979c49902b322a18ab.
+Kernel/RTL numeric and wire contracts are unchanged; no new native kernel build
+is claimed. Exact source freezes, argv, stdout/stderr, resource audit and receipt
+paths are in local artifacts/research/T-0239; the delivered acceptance is outer
+artifacts/raveil-local-20261017-control04. Timing fields are diagnostic host elapsed
+time, not throughput comparisons, benchmark statistics or physical measurements.
+
+## T-0240 CSV/Python input functional acceptance — 2026-10-17
+
+Evidence class: host tests plus actual QEMU emulation and RTL simulation. The
+existing T-0238 kernel and identity-matching T-0239 runtime are reused explicitly;
+this input-only change does not claim another build, hardware result or speedup.
+
+`python3 -B -m unittest -v tests.test_array_input tests.test_array_program
+ tests.test_array_fusion tests.test_project_array_workspace
+ tests.test_prepare_array_app` passes62 tests in19.111 seconds,18 new. The initial
+16-test run had four fixture expectations that omitted existing generated example
+files; corrected tests compare the baseline inventory. Its failing log is retained.
+The implementation was not changed to accommodate those incorrect expectations.
+
+`scripts/array_input_acceptance.py --output OUTER/artifacts/raveil-local-20261017-input
+ --kernel KERNEL --build RUNTIME` runs under `python3 -B`; exact argv, cwd,
+source SHA256, environment and raw logs are in T-0240/acceptance-plan.json and
+verification.json inside the ignored candidate evidence directory. Accepted
+host: macOS26.6.2 arm64, Python3.14.6; existing QEMU11.0.3/Docker29.7.2/pinned image.
+All13 commands pass: original default run; two CSV operand imports; GEMM
+[58,64,139,154]; relocation; edited A yielding[65,72,139,154]; saved two-cell diff;
+explicit i32 A yielding[44,48,139,154]; malformed CSV, linked-slot and overwrite
+rejection. Four successful parents contain six distinct sessions/jobs/approvals
+and24 published words. Primary rechecks all saved records without process creation.
+Every original input, baseline/first capture and engine inventory is preserved;
+rejected imports leave the entire workspace unchanged. Raw Docker/ps queries
+establish no owned resources. Eight frozen implementation/test/harness files
+remain unchanged after actual acceptance. The ready app is the output's app folder.
+
+### Original-checkout-denied delivery acceptance
+
+A separate copy outside the outer repository runs under a macOS sandbox that
+denies all file-read operations beneath the original outer repository. A positive
+control confirms reading its AGENTS.md raises PermissionError. Under that same
+policy, packaged array-check, actual imported GEMM and saved output all pass with
+[58,64,139,154]. This adds one parent/session/job/approval and four words, separate
+from the four-parent CSV acceptance (combined five parents/seven sessions/28 words).
+All955 pre-existing copied app files remain byte-identical. Saved revalidation
+spawns no processes, imported Raveil modules resolve inside the copied engine,
+and strict Docker/process audit finds no owned resources. The frozen app was
+copied, not rebuilt or modified. The original donor and canonical checkout were
+never moved. Sandbox startup requires execution outside the tool's outer sandbox;
+the initial nested-sandbox probe failed before executing the app and is not a
+product failure. Exact policy, commands, logs and full copied app are preserved in
+T-0240/isolated-app-acceptance; the reproduction harness is isolated-app-check.py.
+This establishes absence of original-checkout reads for the tested execution;
+external installed Python/QEMU/Docker and the pinned local image remain required.
+
+A local macOS delivery archive contains the ready app and Japanese START_HERE.md.
+All956 file hashes and the executable launcher mode match after extraction into
+a separate temporary folder. Archive SHA256 and inventory are in delivery.json;
+this archive verification does not add an execution or performance measurement.
+
+### Final same-version cumulative verification
+
+The41-module T-0239 final command plus tests.test_array_control_acceptance and
+ tests.test_array_input passes367 tests in251.798 seconds, exit0. Exact43-module
+argv, cwd and all product/test/script hashes are in cumulative-command.json;
+all hashes remain unchanged after execution. Distinct test IDs, raw-log SHA256
+and exit are recorded in verification.json and cumulative-exit.json. This final
+suite consolidates the prior349 tests and18 input tests on the same T-0240 source;
+the earlier62-test affected subset is not added again to the total. The read-only
+review finds no source/record mismatch; primary verifies its counts and hashes.
+No physical hardware, performance or broad product completion claim follows.
