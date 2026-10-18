@@ -2,26 +2,28 @@
 
 ## Verified host inventory delivery — T-0242
 
-- [ ] **T-0242** / [Issue #300](https://github.com/bhind/raveil/issues/300): local implementation and acceptance complete under ADR-0107,
+- [x] **T-0242** / [Issue #300](https://github.com/bhind/raveil/issues/300): local implementation and acceptance complete under ADR-0107,
   Proposed ADR-0137 and EXP-0014. Primary sole mutator.597 distinct UT;18 fresh
   parents/114 jobs/16,416 words;18 paired saved reads; all traces/outputs unchanged;
   frozen improvement criteria pass. Ready improved image app/report delivered
   locally. Cumulative adoption covers the verified T-0237–T-0241 candidates below.
-  Issue #300 is now linked and In Progress in Project #1, S-0008 (October12–18),
-  initial/current8 SP, Project Manager owner. The device-link scope recovery is
-  verified; no authentication blocker remains. Cumulative patch hashes reproduce
-  in the clean dedicated worktree. Integration rerun:597 UT pass in256.277s and37 saved parents revalidate
-  without processes. Remaining action: dedicated-branch PR review/merge and
-  canonical completion. Historical pending
-  notes below are covered by this single cumulative item, not six active lanes.
+  Integrated October18 through PR302, merge51cb51d. Issue300 is closed and the
+  canonical complete command verified Project Done in S-0008 (8 SP). Applied
+  checkout597 UT pass in256.277s;37 saved parents revalidate without processes.
+  Authentication and publication are resolved; historical waiting notes are
+  superseded. Weekly ceremony remains unaccepted.
+
 
 ## Bounded normal-use image command — T-0243
 
 - [ ] **T-0243** / [Issue #301](https://github.com/bhind/raveil/issues/301):
-  dependency-backed Backlog until Issue300 merges. Primary owner; proposed3 SP.
+  In Progress in S-0008, primary sole mutator, initial/current3 SP; Issue300 dependency merged.
   Add one command to prepare the existing portable app, run an explicit existing
   kernel/runtime, and render only a verified successful result. Package image
-  helpers/guide; verify malformed inputs, fresh destinations, stops and relocation.
+  helpers/guide. Acceptance passes49 distinct UT, two actual final-source parents,
+ 6 sessions/jobs and36 words, moved edited-image execution with checkout reads
+  denied, saved no-process views and resource absence. Remaining: exact-head PR
+  review, merge and canonical completion.
   Existing operators/bounds and runtime remain unchanged. Host UT plus QEMU/RTL
   functional evidence, no new timing campaign, install, device or performance gate.
 

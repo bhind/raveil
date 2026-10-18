@@ -1,5 +1,25 @@
 # Current status
 
+## Normal-use image command — T-0243
+
+T-0242 merged in PR302 at51cb51d on October18. Issue300 is closed and canonical
+Project completion is Done; prior integration/authentication waits below are
+historical. T-0243/Issue301 is In Progress, S-0008, primary owner,3 SP.
+
+The image CLI now has a run command that packages the existing app/helpers,
+executes with explicit verified artifacts, reloads the saved proof and independent
+image oracle, and atomically publishes HTML. Existing execution/control/compiler
+are unchanged. A presentation failure retains the committed array and explicit ID
+for view retry.49 distinct affected UT pass (48-test regression plus13 final
+wrapper tests with12 overlapping). Final-source actual acceptance passes two
+parents,6 sessions/jobs and36 words. The relocated edited-image run succeeds with
+original-checkout reads denied from/tmp; saved views launch no processes, original
+engine/parent hashes remain unchanged, and resource queries find no owned QEMU
+or container. Ready folders: OUTER/artifacts/raveil-image-command-20261018 and
+OUTER/artifacts/raveil-image-command-retry-20261018. Exact-head PR integration
+remains; no performance or physical claim.
+
+
 ## Host inventory improvement verified locally — T-0242
 
 Descriptor-relative traversal retains all nested inventory, semantic, oracle,

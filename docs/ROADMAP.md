@@ -1,5 +1,13 @@
 # Raveil gated roadmap
 
+## Image command delivery checkpoint
+
+T-0242 is integrated through PR302/51cb51d and Project Done. T-0243 is admitted
+in S-0008 for the bounded normal-use packaging successor; no gate change. Its
+host tests and relocated edited-image functional retry now pass. Remaining
+work is routine PR integration, not another hardware or research gate.
+
+
 ## Normal-use image packaging — T-0243
 
 Issue301 follows verified Issue300 integration. Collapse the existing prepare/run/view
