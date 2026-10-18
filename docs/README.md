@@ -1,5 +1,13 @@
 # Raveil project records
 
+## Common offline first use — T-0244
+
+Start with [generic array setup](guides/ARRAY_WORKSPACE.md). It diagnoses existing
+tools, builds fresh artifacts and runs non-image computations on the same engine.
+The image demonstration is an optional client. STATUS/TODO are current; earlier
+local-only/integration-pending notes below are historical after PR302 and PR303.
+
+
 ## One-command image use — T-0243
 
 See [the image guide](guides/IMAGE_DEMO.md) for the new run command and explicit

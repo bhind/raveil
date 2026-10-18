@@ -1,9 +1,16 @@
 # Raveil
 
-Research direction (2026-09-23): establish work reduction beyond known compiler
-controls before selecting new execution hardware. See [the current backlog](TODO.md)
-and [ADR-0103](docs/decisions/ADR-0103-work-reduction-precedes-new-execution-hardware.md).
-This is a research hypothesis, not a Groq performance or novelty claim.
+Current work (2026-10-18): make the common integer Graph/array implementation
+usable and reproducible with existing offline tools. The objective remains
+improving general structured computation across replaceable execution backends;
+image processing is a validation client, not a new hardware specialization.
+Hardware acquisition remains deferred under ADR-0107. CPU/Groq superiority and
+arbitrary-program translation are not established.
+
+Start with [generic array setup and execution](docs/guides/ARRAY_WORKSPACE.md):
+inspect tools, build fresh artifacts, prepare an editable app, run matrix
+multiplication and linked arithmetic/transpose, then inspect saved results.
+See [STATUS](docs/STATUS.md) for implemented bounds and [TODO](TODO.md) for work.
 
 > Experience-guided, authority-bounded Graph execution across replaceable
 > software and hardware backends.
@@ -29,6 +36,8 @@ Raveil is research software, not a production compiler, operating system, or
 accelerator. The latest immutable pre-release is `v0.0000000000007`; current
 development is unreleased.
 
+- A common bounded integer-array compiler executes different programs on the same
+  QEMU/RTL runtime, with automatic partitioning/fusion and verified saved outputs.
 - A bounded Native userspace Graph loop runs on GNU/Linux and macOS.
 - A separate Command Graph CLI runs allowlisted host tools inside a bounded
   workspace and checks direct/Graph result agreement.
@@ -42,7 +51,8 @@ development is unreleased.
 - The preregistered fixed-C Experience hypothesis closed negative: it did not
   improve median latency or estimated energy by the required 5%. This does not
   prove that Experience is universally ineffective.
-- There is no general Graph compiler, production CGRA backend, FPGA/silicon
+- Arbitrary existing-program/standard-IR translation is not implemented. There
+  is no production CGRA backend or FPGA/silicon
   result, or established general performance, energy, area, security, or
   commercial advantage.
 

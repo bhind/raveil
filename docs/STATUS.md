@@ -1,5 +1,24 @@
 # Current status
 
+## Generic first use — T-0244
+
+The owner clarified that general CPU-workload efficiency remains the objective;
+image processing is one validation client. No image-specific ISA/RTL was added.
+T-0243 merged through PR303/0989595, Issue301 closed and Project Done. Current
+T-0244/Issue304 is the common offline setup path, S-0008,3 SP, primary sole owner.
+
+Read-only prerequisite diagnosis now separates build tools from runtime-only
+tools. Fresh Sonatine and RTL builds pass using existing tools and no network.
+The generic guide starts from these builds, not historical research artifacts.
+Independent non-image acceptance passes: matrix product, transpose and fanout/join
+on one fresh kernel/runtime,3 parents,6 sessions/jobs,33 output words.12 affected
+UT pass; saved validation creates no processes; no owned QEMU/container remains.
+Fresh kernel/runtime identities reproduce the prior validated artifacts exactly.
+Ready generic app: OUTER/artifacts/raveil-generic-20261018. Exact-head PR integration
+is the remaining step. This does not make
+arbitrary CPU programs importable or establish acceleration.
+
+
 ## Normal-use image command — T-0243
 
 T-0242 merged in PR302 at51cb51d on October18. Issue300 is closed and canonical

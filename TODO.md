@@ -1,5 +1,17 @@
 # Raveil TODO
 
+## Generic offline first use — T-0244
+
+- [ ] **T-0244** / [Issue #304](https://github.com/bhind/raveil/issues/304):
+  In Progress, S-0008, primary sole mutator,3 SP. Add read-only build/run tool
+  diagnosis and clean-checkout instructions; verify matrix product, transpose
+  and fanout/join on one freshly built kernel/runtime. Existing source/ISA/RTL
+  unchanged.12 affected UT, fresh offline builds and3 non-image parents/6 jobs/33
+  words pass; independent saved validation and resource absence verified.
+  Remaining: exact-head PR integration and canonical completion. No image
+  specialization, installation, performance or physical claim.
+
+
 ## Verified host inventory delivery — T-0242
 
 - [x] **T-0242** / [Issue #300](https://github.com/bhind/raveil/issues/300): local implementation and acceptance complete under ADR-0107,
@@ -16,14 +28,15 @@
 
 ## Bounded normal-use image command — T-0243
 
-- [ ] **T-0243** / [Issue #301](https://github.com/bhind/raveil/issues/301):
-  In Progress in S-0008, primary sole mutator, initial/current3 SP; Issue300 dependency merged.
+- [x] **T-0243** / [Issue #301](https://github.com/bhind/raveil/issues/301):
+  Integrated in PR303 at0989595; Issue301 closed and canonical Project Done,
+  S-0008,3 SP.
   Add one command to prepare the existing portable app, run an explicit existing
   kernel/runtime, and render only a verified successful result. Package image
   helpers/guide. Acceptance passes49 distinct UT, two actual final-source parents,
- 6 sessions/jobs and36 words, moved edited-image execution with checkout reads
-  denied, saved no-process views and resource absence. Remaining: exact-head PR
-  review, merge and canonical completion.
+  6 sessions/jobs and36 words, moved edited-image execution with checkout reads
+  denied, saved no-process views and resource absence. This remains an optional
+  client of the common engine, not an image-specific architecture direction.
   Existing operators/bounds and runtime remain unchanged. Host UT plus QEMU/RTL
   functional evidence, no new timing campaign, install, device or performance gate.
 

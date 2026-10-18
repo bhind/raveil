@@ -631,3 +631,24 @@ suite consolidates the prior349 tests and18 input tests on the same T-0240 sourc
 the earlier62-test affected subset is not added again to the total. The read-only
 review finds no source/record mismatch; primary verifies its counts and hashes.
 No physical hardware, performance or broad product completion claim follows.
+
+### T-0244 clean-checkout common-array first use — October18
+
+Functional scope under ADR-0107. From clean base0989595 (not the dirty outer
+donor), existing native RISC-V GCC builds Sonatine and existing pinned Docker
+image/read-only Scala cache build the generic RTL runtime with network none and
+pull never. No new ISA, arithmetic, backend, tool installation or image pipeline.
+Same new app/runtime executes independent matrix product3x5x3, transpose and
+fanout/join sources:3 successful parents,6 sessions/jobs,33 words. Each output
+matches independent workload formulas. Saved full-proof validation forbids
+process creation; runtime/kernel identities agree across all parents, and strict
+resource queries succeed with no owned QEMU/container. This is QEMU/RTL functional
+acceptance, not CPU acceleration, physical measurement, debug/GDB or IDE evidence.
+
+Fresh kernel SHA256:35db85f0018595fe4c68d425f5071c39072b9eb35095477b8d4cdec1ebee49f9.
+Fresh runtime identity:bdb6eefe93fe768fa2aa656b9354dcf5c7a4c28107b7dd979c49902b322a18ab.
+Both reproduce prior artifacts; explicit DEBUG=0 with fresh BUILD_ROOT also
+reproduces the kernel. Final12 affected UT pass in6.974s (8 tool-diagnosis tests,
+4 existing app-packaging tests). Complete logs, tool paths/versions, argv and
+saved-result hashes: canonical artifacts/research/T-0244/acceptance; UT log at
+T-0244/final-ut.log. Ready app: OUTER/artifacts/raveil-generic-20261018.
