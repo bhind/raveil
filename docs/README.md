@@ -1,5 +1,13 @@
 # Raveil project records
 
+## One-command image use — T-0243
+
+See [the image guide](guides/IMAGE_DEMO.md) for the new run command and explicit
+existing-runtime prerequisites. STATUS/TODO record its current acceptance state.
+T-0242's cumulative candidate is integrated through PR302/51cb51d; older pending
+authentication/adoption notes below are historical.
+
+
 ## Host inventory continuation — T-0242
 
 The owner-directed continuation addresses measured host overhead in the existing

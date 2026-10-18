@@ -1,5 +1,13 @@
 # Open questions
 
+## Current integration state
+
+PR302/51cb51d and Project Done resolve T-0242 publication. T-0243 implements the
+already chosen packaging route without a new runtime or architectural boundary.
+Functional acceptance now passes; only routine PR integration remains. Array commit
+and report publication remain separate, with saved-view recovery for the latter.
+
+
 ## Image command decisions — T-0243
 
 Use explicit existing kernel/runtime paths and a fresh output directory. Reuse the
